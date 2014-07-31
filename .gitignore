@@ -1,0 +1,6 @@
+# File formats
+*.pyc
+
+# IDE projects
+.idea/
+
