@@ -1,6 +1,4 @@
-import errno
 import os.path
-import shutil
 
 import luigi
 from shellout import shellout_no_stdout
@@ -27,14 +25,15 @@ class VariantsAccessioning(luigi.Task):
     # TODO Possibly implement a FileParameter or PathParameter class?
     file = luigi.Parameter(description='Input VCF file to process and load')
     vcf_dir = luigi.Parameter(description='Folder for storage of EVA VCF files')
+    study_prefix = luigi.Parameter(description='Prefix identifying the study in variant accession IDs')
     last_accession = luigi.Parameter(default=None)
-    study_prefix = luigi.Parameter()
 
     def run(self):
         # Simplest command-line
-        command = '/home/cyenyxe/appl/opencga/opencga create-accessions -i {input} -p ess -s {prefix} -o /tmp/'
+        command = '/home/cyenyxe/appl/opencga/opencga create-accessions -i {input} -p ess -s {prefix} -o {outdir}'
         kwargs = {'input': self.file,
-                  'prefix': self.study_prefix}
+                  'prefix': self.study_prefix,
+                  'outdir': self.vcf_dir}
 
         # Fill optional arguments
         if self.last_accession is not None and len(self.last_accession) > 0:
@@ -44,21 +43,10 @@ class VariantsAccessioning(luigi.Task):
         # Launch tool
         shellout_no_stdout(command, **kwargs)
 
-        # Atomically move file
-        try:
-            luigi.File(path=self.temporary_output()).move(self.output().fn)
-        except os.error, e:
-            if e.errno == errno.EXDEV:
-                # Fallback to copy
-                shutil.copyfile(self.temporary_output(), self.output().fn)
-
-    def temporary_output(self):
-        print 'Temporary output = ' + luigi.LocalTarget('/tmp/' + os.path.basename(self.file) + '.out').fn
-        return '/tmp/' + os.path.basename(self.file) + '.out'
-
     def output(self):
-        print 'Final destination = ' + luigi.LocalTarget(self.vcf_dir + os.path.basename(self.file)).fn
-        return luigi.LocalTarget(self.vcf_dir + os.path.basename(self.file))
+        (filename, extension) = os.path.splitext(os.path.basename(self.file))
+        print 'Path to accessioned file = ' + luigi.LocalTarget(self.vcf_dir + filename + '_accessioned' + extension).fn
+        return luigi.LocalTarget(self.vcf_dir + filename + '_accessioned' + extension)
 
 
 if __name__ == '__main__':
