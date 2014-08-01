@@ -1,7 +1,7 @@
 import luigi
 import os
 
-from accessioning import VariantsAccessioning
+from accessioning import SaveLastAccession
 from shellout import shellout_no_stdout
 
 __author__ = 'Cristina Yenyxe Gonzalez Garcia'
@@ -105,7 +105,7 @@ class VariantsTransformation(luigi.Task):
     aggregated = luigi.BooleanParameter(default=False)
 
     def requires(self):
-        return VariantsAccessioning(self.file, self.vcf_dir, self.study_prefix)
+        return SaveLastAccession(self.file, self.vcf_dir, self.study_prefix)
 
     def run(self):
         # TODO --include-effect when VEP is ready
