@@ -45,7 +45,7 @@ class VariantsLoading(luigi.Task):
 
     def run(self):
         # Get input files root name (remove .gz, then .json, then .file)
-        (root_name, extension) = os.path.splitext(os.path.splitext(os.path.splitext(self.input().fn)[0])[0])
+        (root_name, extension) = os.path.splitext(os.path.splitext(os.path.splitext(self.input()[0].fn)[0])[0])
         print 'Root name = ' + root_name
 
         # TODO --include-effect when VEP is ready
@@ -128,7 +128,8 @@ class VariantsTransformation(luigi.Task):
 
     def output(self):
         print 'Path to data model file = ' + luigi.LocalTarget(self.json_dir + os.path.basename(self.file) + '.file.json.gz').fn
-        return luigi.LocalTarget(self.json_dir + os.path.basename(self.file) + '.file.json.gz')
+        return [luigi.LocalTarget(self.json_dir + os.path.basename(self.file) + '.file.json.gz'),
+                luigi.LocalTarget(self.json_dir + os.path.basename(self.file) + '.variants.json.gz')]
 
 
 if __name__ == '__main__':
