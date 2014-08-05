@@ -58,11 +58,11 @@ class VariantsLoading(luigi.Task):
 
         print "Variants loaded"
 
-    # def output(self):
-    #     # new_path = '/tmp/new_file%d.txt' % random.randint(0, 999999999)
-    #     # luigi.LocalTarget(self.input().fn).copy(new_path, True)
-    #     # return luigi.LocalTarget(new_path)
-    #     return self.input()
+    def complete(self):
+        # TODO Checking whether the loading run properly or not must be implemented
+        # Intuitively, the elements in the 'variants' collection with the specified study and file ID must be equals
+        # or greater than the number of lines in the JSON file. There must be an entry in the 'files' collection too.
+        pass
 
 
 class VariantsTransformation(luigi.Task):

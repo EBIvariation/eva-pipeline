@@ -102,11 +102,19 @@ class SaveLastAccession(luigi.Task):
         return VariantsAccessioning(self.file, self.vcf_dir, self.study_prefix)
 
     def run(self):
-        # TODO
+        # TODO Get accession IDs from the last lines in self.input()
+
+        # TODO Retrieve the 'maximum' accession by lexicographical order
+
+        # TODO Store into PostgreSQL
+
         return []
 
     def output(self):
         return self.input()
+
+    def on_success(self):
+        pass
 
 if __name__ == '__main__':
     luigi.run()
