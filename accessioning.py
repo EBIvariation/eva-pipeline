@@ -3,6 +3,8 @@ import os.path
 import luigi
 from shellout import shellout_no_stdout
 
+import evapro_adaptor
+
 __author__ = 'Cristina Yenyxe Gonzalez Garcia'
 
 
@@ -10,16 +12,36 @@ class LoadLastAccession(luigi.Task):
     """
     Given a study prefix, return the last accession generated for that study (stored in EVAPRO).
     """
+    table = 'project_var_accession'
+    column = 'last_used_accession'
+
+    study_prefix = luigi.Parameter(description='Prefix identifying the study in variant accession IDs')
+    last_accession = 'not_valid_accession'
+    path = '/tmp/' + last_accession
 
     def requires(self):
         return []
 
     def run(self):
-        # TODO
-        return []
+        conn = evapro_adaptor.connect()
+        cursor = conn.cursor()
+
+        cursor.execute('SELECT {column} FROM {table} where project_prefix=\'{prefix}\''
+                       .format(column=self.column, table=self.table, prefix=self.study_prefix))
+
+        self.last_accession = '0000000'
+        rows = tuple(cursor)
+        if rows and rows[0]:
+            self.last_accession = rows[0][0]
+
+        print "The last accession created in study '" + self.study_prefix + "' was " + self.last_accession
+
+        evapro_adaptor.disconnect(conn)
+        self.path = '/tmp/' + self.last_accession
+        open(self.path, 'a').close()
 
     def output(self):
-        return self.input()
+        return luigi.LocalTarget(self.path)
 
 
 class VariantsAccessioning(luigi.Task):
@@ -45,7 +67,7 @@ class VariantsAccessioning(luigi.Task):
     # last_accession = luigi.Parameter(default=None)
 
     def requires(self):
-        return LoadLastAccession()
+        return LoadLastAccession(study_prefix=self.study_prefix)
 
     def run(self):
         # Simplest command-line
@@ -55,10 +77,11 @@ class VariantsAccessioning(luigi.Task):
                   'outdir': self.vcf_dir}
 
         # Fill optional arguments
-        # TODO Use last_accession read from EVAPRO
-        if self.last_accession is not None and len(self.last_accession) > 0:
+        # Use last_accession read from EVAPRO
+        if self.input().fn:
             command += ' -r {resume}'
-            kwargs['resume'] = self.last_accession
+            last_accession = os.path.basename(self.input().fn)
+            kwargs['resume'] = last_accession
 
         # Launch tool
         shellout_no_stdout(command, **kwargs)
