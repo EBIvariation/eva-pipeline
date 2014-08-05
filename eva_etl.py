@@ -45,7 +45,7 @@ class VariantsLoading(luigi.Task):
 
     def run(self):
         # Get input files root name (remove .gz, then .json, then .file)
-        (root_name, extension) = os.path.splitext(os.path.splitext(os.path.splitext(self.input().fn)[0])[0])
+        (root_name, extension) = os.path.splitext(os.path.splitext(os.path.splitext(self.input()[0].fn)[0])[0])
         print 'Root name = ' + root_name
 
         # TODO --include-effect when VEP is ready
@@ -112,11 +112,11 @@ class VariantsTransformation(luigi.Task):
         command = '/home/cyenyxe/appl/opencga/opencga transform-variants -i {input} -o {outdir} ' \
                   '-a "{file-alias}" -s "{study}" --study-alias "{study-alias}" ' \
                   '--include-samples --include-stats'
-        kwargs = {'input': self.file,
+        kwargs = {'input': self.input().fn,
                   'outdir': self.json_dir,
-                  'file-alias': self.file,
+                  'file-alias': self.file_alias,
                   'study': self.study_name,
-                  'study-alias':self.study_alias}
+                  'study-alias': self.study_alias}
 
         # Fill optional arguments
         if self.aggregated:
@@ -127,8 +127,10 @@ class VariantsTransformation(luigi.Task):
         shellout_no_stdout(command, **kwargs)
 
     def output(self):
-        print 'Path to data model file = ' + luigi.LocalTarget(self.json_dir + os.path.basename(self.file) + '.file.json.gz').fn
-        return luigi.LocalTarget(self.json_dir + os.path.basename(self.file) + '.file.json.gz')
+        input_filename = self.input().fn
+        print 'Path to data model file = ' + luigi.LocalTarget(self.json_dir + os.path.basename(input_filename) + '.file.json.gz').fn
+        return [luigi.LocalTarget(self.json_dir + os.path.basename(input_filename) + '.file.json.gz'),
+                luigi.LocalTarget(self.json_dir + os.path.basename(input_filename) + '.variants.json.gz')]
 
 
 if __name__ == '__main__':
