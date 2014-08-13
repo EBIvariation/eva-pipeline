@@ -58,11 +58,11 @@ class VariantsLoading(luigi.Task):
 
         print "Variants loaded"
 
-    def complete(self):
-        # TODO Checking whether the loading run properly or not must be implemented
-        # Intuitively, the elements in the 'variants' collection with the specified study and file ID must be equals
-        # or greater than the number of lines in the JSON file. There must be an entry in the 'files' collection too.
-        pass
+    # def complete(self):
+    #     # TODO Checking whether the loading run properly or not must be implemented
+    #     # Intuitively, the elements in the 'variants' collection with the specified study and file ID must be equals
+    #     # or greater than the number of lines in the JSON file. There must be an entry in the 'files' collection too.
+    #     pass
 
 
 class VariantsTransformation(luigi.Task):

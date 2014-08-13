@@ -1,7 +1,7 @@
 import os.path
 
 import luigi
-from shellout import shellout_no_stdout
+import shellout
 
 import evapro_adaptor
 
@@ -84,7 +84,7 @@ class VariantsAccessioning(luigi.Task):
             kwargs['resume'] = last_accession
 
         # Launch tool
-        shellout_no_stdout(command, **kwargs)
+        shellout.shellout_no_stdout(command, **kwargs)
 
     def output(self):
         (filename, extension) = os.path.splitext(os.path.basename(self.file))
@@ -102,11 +102,27 @@ class SaveLastAccession(luigi.Task):
         return VariantsAccessioning(self.file, self.vcf_dir, self.study_prefix)
 
     def run(self):
-        # TODO Get accession IDs from the last lines in self.input()
+        # Get the last lines in self.input()
+        last_lines_file = shellout.shellout('tail -n 10 < {input} > {output}', input=self.input().fn)
 
-        # TODO Retrieve the 'maximum' accession by lexicographical order
+        # Retrieve the last accession by lexicographical order
+        max_accession = '00000000'
+        with last_lines_file.open('r') as last_file:
+            last_text = last_file.read()
+
+        for line in last_text.split('\n'):
+            if line:
+                for field in line.split('\t')[7].split(';'):
+                    if field.startswith('ACC='):
+                        curr_accession = field.split('=')[1]
+                        for acc in curr_accession.split(','):
+                            if acc[-7:] > max_accession:
+                                max_accession = acc[-7:]
+                                print max_accession
 
         # TODO Store into PostgreSQL
+        # conn = evapro_adaptor.connect()
+        # evapro_adaptor.disconnect(conn)
 
         return []
 
@@ -114,6 +130,7 @@ class SaveLastAccession(luigi.Task):
         return self.input()
 
     def on_success(self):
+        # TODO Delete file in /tmp with previous last accession
         pass
 
 if __name__ == '__main__':

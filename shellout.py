@@ -30,7 +30,7 @@ def shellout(template, **kwargs):
     preserve_spaces = kwargs.get('preserve_spaces', False)
     stopover = luigi.File(is_tmp=True)  # Should return a random path string, e.g. /tmp/as3as8d90a8s9f8d
     if not 'output' in kwargs:
-        kwargs.update({'output': stopover})
+        kwargs.update({'output': stopover.fn})
     command = template.format(**kwargs)
     if not preserve_spaces:
         command = re.sub(' +', ' ', command)
@@ -38,7 +38,8 @@ def shellout(template, **kwargs):
     code = subprocess.call([command], shell=True)
     if not code == 0:
         raise RuntimeError('%s exitcode: %s' % (command, code))
-    return kwargs.get('output')
+    # return kwargs.get('output')
+    return stopover if stopover else luigi.File(kwargs.get('output'))
 
 
 def shellout_no_stdout(template, **kwargs):
