@@ -12,9 +12,6 @@ class LoadLastAccession(luigi.Task):
     """
     Given a study prefix, return the last accession generated for that study (stored in EVAPRO).
     """
-    table = 'project_var_accession'
-    column = 'last_used_accession'
-
     study_prefix = luigi.Parameter(description='Prefix identifying the study in variant accession IDs')
     last_accession = 'not_valid_accession'
     path = '/tmp/' + last_accession
@@ -26,8 +23,8 @@ class LoadLastAccession(luigi.Task):
         conn = evapro_adaptor.connect()
         cursor = conn.cursor()
 
-        cursor.execute('SELECT {column} FROM {table} where project_prefix=\'{prefix}\''
-                       .format(column=self.column, table=self.table, prefix=self.study_prefix))
+        cursor.execute('SELECT last_used_accession FROM project_var_accession where project_prefix=\'{prefix}\''
+                       .format(prefix=self.study_prefix))
 
         self.last_accession = '0000000'
         rows = tuple(cursor)
@@ -91,6 +88,12 @@ class VariantsAccessioning(luigi.Task):
         print 'Path to accessioned file = ' + luigi.LocalTarget(self.vcf_dir + filename + '_accessioned' + extension).fn
         return luigi.LocalTarget(self.vcf_dir + filename + '_accessioned' + extension)
 
+    def on_success(self):
+        # Delete file that contains the previous last accession
+        input_name = self.input().fn
+        self.input().remove()
+        print 'Temporary file containing last accession removed (' + input_name + ')'
+
 
 class SaveLastAccession(luigi.Task):
 
@@ -120,18 +123,20 @@ class SaveLastAccession(luigi.Task):
                                 max_accession = acc[-7:]
                                 print max_accession
 
-        # TODO Store into PostgreSQL
-        # conn = evapro_adaptor.connect()
-        # evapro_adaptor.disconnect(conn)
+        # Store the new last accession into PostgreSQL
+        conn = evapro_adaptor.connect()
+        cursor = conn.cursor()
+        cursor.execute('UPDATE project_var_accession SET last_used_accession=\'{accession}\' '
+                       'where project_prefix=\'{prefix}\''
+                       .format(accession=max_accession, prefix=self.study_prefix))
+        conn.commit()
+        evapro_adaptor.disconnect(conn)
 
         return []
 
     def output(self):
         return self.input()
 
-    def on_success(self):
-        # TODO Delete file in /tmp with previous last accession
-        pass
 
 if __name__ == '__main__':
     luigi.run()
