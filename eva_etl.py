@@ -3,6 +3,7 @@ import os
 
 from accessioning import SaveLastAccession
 from shellout import shellout_no_stdout
+import evapro_adaptor
 
 __author__ = 'Cristina Yenyxe Gonzalez Garcia'
 
@@ -33,15 +34,11 @@ class VariantsLoading(luigi.Task):
     vcf_dir = luigi.Parameter(description='Folder for storage of EVA VCF files')
     json_dir = luigi.Parameter(description='Folder for storage of EVA JSON files')
 
-    file_alias = luigi.Parameter(description='Unique ID that identifies the input file')
-    study_alias = luigi.Parameter(description='Unique ID that identifies the study of this input file')
     study_name = luigi.Parameter(description='Full name of the study of this input file')
-    study_prefix = luigi.Parameter(description='Prefix identifying the study in variant accession IDs')
     aggregated = luigi.BooleanParameter(default=False)
 
     def requires(self):
-        return VariantsTransformation(self.file, self.vcf_dir, self.json_dir, self.file_alias, self.study_alias,
-                                      self.study_name, self.study_prefix, self.aggregated)
+        return VariantsTransformation(self.file, self.vcf_dir, self.json_dir, self.study_name, self.aggregated)
 
     def run(self):
         # Get input files root name (remove .gz, then .json, then .file)
@@ -98,25 +95,29 @@ class VariantsTransformation(luigi.Task):
     vcf_dir = luigi.Parameter(description='Folder for storage of EVA VCF files')
     json_dir = luigi.Parameter(description='Folder for storage of EVA JSON files')
 
-    file_alias = luigi.Parameter(description='Unique ID that identifies the input file')
-    study_alias = luigi.Parameter(description='Unique ID that identifies the study of this input file')
     study_name = luigi.Parameter(description='Full name of the study of this input file')
-    study_prefix = luigi.Parameter(description='Prefix identifying the study in variant accession IDs')
     aggregated = luigi.BooleanParameter(default=False)
 
     def requires(self):
-        return SaveLastAccession(self.file, self.vcf_dir, self.study_prefix)
+        # return SaveLastAccession(self.file, self.vcf_dir, self.study_prefix)
+        return SaveLastAccession(self.file, self.vcf_dir)
 
     def run(self):
+        # Get study and file ID
+        info = evapro_adaptor.get_study_and_file_id(self.file)
+        if not info:
+            raise evapro_adaptor.EvaproError('Filename not found in EVAPRO')
+        (study_alias, file_alias) = info
+
         # TODO --include-effect when VEP is ready
         command = '/home/cyenyxe/appl/opencga/opencga transform-variants -i {input} -o {outdir} ' \
                   '-a "{file-alias}" -s "{study}" --study-alias "{study-alias}" ' \
                   '--include-samples --include-stats'
         kwargs = {'input': self.input().fn,
                   'outdir': self.json_dir,
-                  'file-alias': self.file_alias,
                   'study': self.study_name,
-                  'study-alias': self.study_alias}
+                  'file-alias': file_alias,
+                  'study-alias': study_alias}
 
         # Fill optional arguments
         if self.aggregated:
@@ -128,7 +129,9 @@ class VariantsTransformation(luigi.Task):
 
     def output(self):
         input_filename = self.input().fn
-        print 'Path to data model file = ' + luigi.LocalTarget(self.json_dir + os.path.basename(input_filename) + '.file.json.gz').fn
+        print 'Path to data model file = ' \
+              + luigi.LocalTarget(self.json_dir + os.path.basename(input_filename) + '.file.json.gz').fn
+
         return [luigi.LocalTarget(self.json_dir + os.path.basename(input_filename) + '.file.json.gz'),
                 luigi.LocalTarget(self.json_dir + os.path.basename(input_filename) + '.variants.json.gz')]
 
