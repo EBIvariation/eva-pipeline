@@ -33,12 +33,10 @@ class VariantsAccessioning(luigi.Task):
 
     def run(self):
         # Get study prefix and its last accession
-        info = evapro_adaptor.get_variant_accessioning_info(self.file)
+        info = evapro_adaptor.get_variant_accessioning_info(os.path.basename(self.file))
         if not info:
             raise evapro_adaptor.EvaproError('Filename not found in EVAPRO')
         (study_id, study_prefix, last_accession) = info
-
-        print 'Creating variant accession IDs for study ' + study_id + ' (starting in ' + last_accession + ')'
 
         # Simplest command-line
         command = '/home/cyenyxe/appl/opencga/opencga create-accessions -i {input} -p ess -s {prefix} -o {outdir}'
@@ -53,6 +51,9 @@ class VariantsAccessioning(luigi.Task):
             kwargs['resume'] = last_accession
 
         # Launch tool
+        print 'Creating variant accession IDs for study ' + study_id 
+        if last_accession:
+            print 'Last created variant accession ID was ' + last_accession
         shellout.shellout_no_stdout(command, **kwargs)
 
     def output(self):
@@ -101,7 +102,7 @@ class SaveLastAccession(luigi.Task):
 
         print 'Last accession ID generated = ' + max_accession
 
-        evapro_adaptor.save_last_accession(self.file, max_accession)
+        evapro_adaptor.save_last_accession(os.path.basename(self.file), max_accession)
 
     def output(self):
         return self.input()
@@ -109,3 +110,4 @@ class SaveLastAccession(luigi.Task):
 
 if __name__ == '__main__':
     luigi.run()
+

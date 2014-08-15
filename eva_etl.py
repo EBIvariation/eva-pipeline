@@ -59,6 +59,7 @@ class VariantsLoading(luigi.Task):
     #     # TODO Checking whether the loading run properly or not must be implemented
     #     # Intuitively, the elements in the 'variants' collection with the specified study and file ID must be equals
     #     # or greater than the number of lines in the JSON file. There must be an entry in the 'files' collection too.
+    #
     #     pass
 
 
@@ -99,12 +100,11 @@ class VariantsTransformation(luigi.Task):
     aggregated = luigi.BooleanParameter(default=False)
 
     def requires(self):
-        # return SaveLastAccession(self.file, self.vcf_dir, self.study_prefix)
         return SaveLastAccession(self.file, self.vcf_dir)
 
     def run(self):
         # Get study and file ID
-        info = evapro_adaptor.get_study_and_file_id(self.file)
+        info = evapro_adaptor.get_study_and_file_id(os.path.basename(self.file))
         if not info:
             raise evapro_adaptor.EvaproError('Filename not found in EVAPRO')
         (study_alias, file_alias) = info
