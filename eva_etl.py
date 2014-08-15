@@ -3,6 +3,7 @@ import os
 
 from accessioning import SaveLastAccession
 from shellout import shellout_no_stdout
+import configuration
 import evapro_adaptor
 
 __author__ = 'Cristina Yenyxe Gonzalez Garcia'
@@ -46,9 +47,11 @@ class VariantsLoading(luigi.Task):
         print 'Root name = ' + root_name
 
         # TODO --include-effect when VEP is ready
-        command = '/home/cyenyxe/appl/opencga/opencga load-variants -i {input} -b mongo ' \
+        config = configuration.get_opencga_config('pipeline_config.conf')
+        command = '{opencga-root}/bin/opencga.sh load-variants -i {input} -b mongo ' \
                   '-c /home/cyenyxe/appl/opencga/mongo.properties --include-samples --include-stats'
-        kwargs = {'input': root_name}
+        kwargs = {'opencga-root': config['root_folder'],
+                  'input': root_name}
 
         # Launch tool
         shellout_no_stdout(command, **kwargs)
@@ -110,10 +113,12 @@ class VariantsTransformation(luigi.Task):
         (study_alias, file_alias) = info
 
         # TODO --include-effect when VEP is ready
-        command = '/home/cyenyxe/appl/opencga/opencga transform-variants -i {input} -o {outdir} ' \
+        config = configuration.get_opencga_config('pipeline_config.conf')
+        command = '{opencga-root}/bin/opencga.sh transform-variants -i {input} -o {outdir} ' \
                   '-a "{file-alias}" -s "{study}" --study-alias "{study-alias}" ' \
                   '--include-samples --include-stats'
-        kwargs = {'input': self.input().fn,
+        kwargs = {'opencga-root': config['root_folder'],
+                  'input': self.input().fn,
                   'outdir': self.json_dir,
                   'study': self.study_name,
                   'file-alias': file_alias,

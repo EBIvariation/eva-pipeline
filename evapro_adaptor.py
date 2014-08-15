@@ -1,5 +1,6 @@
-import ConfigParser
 import psycopg2
+
+import configuration
 
 __author__ = 'Cristina Yenyxe Gonzalez Garcia'
 
@@ -8,20 +9,9 @@ def connect():
     """
     Get a psycopg2 connection object to the database where the table is
     """
-    config = ConfigParser.SafeConfigParser()
-    config.read('pipeline_config.conf')
-
-    host = config.get('evapro', 'host')
-    port = config.getint('evapro', 'port')
-    database = config.get('evapro', 'database')
-    user = config.get('evapro', 'user')
-    password = config.get('evapro', 'password')
-
-    if not host or not port or not database or not user or not password:
-        raise EvaproError('Connection to EVAPRO database not properly configured, please check your pipeline_config.conf file')
-
-    connection = psycopg2.connect(host=host, port=port, database=database,
-                                  user=user, password=password)
+    config = configuration.get_evapro_config('pipeline_config.conf')
+    connection = psycopg2.connect(host=config['host'], port=config['port'], database=config['database'],
+                                  user=config['user'], password=config['password'])
     connection.set_client_encoding('utf-8')
     return connection
 

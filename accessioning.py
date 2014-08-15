@@ -4,6 +4,7 @@ import luigi
 import shellout
 
 import evapro_adaptor
+import configuration
 
 __author__ = 'Cristina Yenyxe Gonzalez Garcia'
 
@@ -39,8 +40,10 @@ class VariantsAccessioning(luigi.Task):
         (study_id, study_prefix, last_accession) = info
 
         # Simplest command-line
-        command = '/home/cyenyxe/appl/opencga/opencga create-accessions -i {input} -p ess -s {prefix} -o {outdir}'
-        kwargs = {'input': self.file,
+        config = configuration.get_opencga_config('pipeline_config.conf')
+        command = '{opencga-root}/bin/opencga.sh create-accessions -i {input} -p ess -s {prefix} -o {outdir}'
+        kwargs = {'opencga-root': config['root_folder'],
+                  'input': self.file,
                   'prefix': study_prefix,
                   'outdir': self.vcf_dir}
 
