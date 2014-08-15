@@ -1,3 +1,4 @@
+import ConfigParser
 import psycopg2
 
 __author__ = 'Cristina Yenyxe Gonzalez Garcia'
@@ -7,8 +8,20 @@ def connect():
     """
     Get a psycopg2 connection object to the database where the table is
     """
-    connection = psycopg2.connect(host='ega2.ebi.ac.uk', port=5432, database='evapro',
-                                  user='evapro', password='evapro')
+    config = ConfigParser.SafeConfigParser()
+    config.read('pipeline_config.conf')
+
+    host = config.get('evapro', 'host')
+    port = config.getint('evapro', 'port')
+    database = config.get('evapro', 'database')
+    user = config.get('evapro', 'user')
+    password = config.get('evapro', 'password')
+
+    if not host or not port or not database or not user or not password:
+        raise EvaproError('Connection to EVAPRO database not properly configured, please check your pipeline_config.conf file')
+
+    connection = psycopg2.connect(host=host, port=port, database=database,
+                                  user=user, password=password)
     connection.set_client_encoding('utf-8')
     return connection
 
@@ -54,6 +67,7 @@ def get_variant_accessioning_info(filename):
     cursor.execute('SELECT project.project_accession, project_var_accession.project_prefix, '
                    'project_var_accession.last_used_accession '
                    'FROM project_var_accession, project, project_analysis, analysis_file, file '
+#                   'WHERE project_var_accession.project_accession_code = project.project_accession_code '
                    'WHERE project_var_accession.project_accession_code = project.project_accession '
                    'AND project.project_accession = project_analysis.project_accession '
                    'AND project_analysis.analysis_accession = analysis_file.analysis_accession '
@@ -92,3 +106,4 @@ class EvaproError(Exception):
 
     def __str__(self):
         return repr(self.msg)
+
