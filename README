@@ -1,0 +1,13 @@
+If you want to make the best use of the cluster, the pipeline must be launched 
+in 3 steps.
+
+1) Accessioning: A study must be run sequentially, so the file with chromosome 
+1 is always processed before chromosome 2, and so on. But all chromosome 1 for 
+different studies can be processed at the same time.
+
+2) Transformation: This can be run in parallel without any conflicts, so feel 
+free to launch as many files as possible simultaneously.
+
+3) Loading: If a study is composed of a single file or split in chromosomes, 
+then all its files can be processed in parallel.
+
