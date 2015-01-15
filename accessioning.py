@@ -27,6 +27,7 @@ class VariantsAccessioning(luigi.Task):
 
     # TODO Possibly implement a FileParameter or PathParameter class?
     file = luigi.Parameter(description='Input VCF file to process and load')
+    version = luigi.Parameter(description='EVA version where the file is released')
     vcf_dir = luigi.Parameter(description='Folder for storage of EVA VCF files')
 
     def requires(self):
@@ -34,7 +35,7 @@ class VariantsAccessioning(luigi.Task):
 
     def run(self):
         # Get study prefix and its last accession
-        info = evapro_adaptor.get_variant_accessioning_info(os.path.basename(self.file))
+        info = evapro_adaptor.get_variant_accessioning_info(os.path.basename(self.file), self.version)
         if not info:
             raise evapro_adaptor.EvaproError('Filename not found in EVAPRO')
         (study_id, study_prefix, last_accession) = info
@@ -79,10 +80,11 @@ class SaveLastAccession(luigi.Task):
     """
 
     file = luigi.Parameter(description='Input VCF file to process and load')
+    version = luigi.Parameter(description='EVA version where the file is released')
     vcf_dir = luigi.Parameter(description='Folder for storage of EVA VCF files')
 
     def requires(self):
-        return VariantsAccessioning(self.file, self.vcf_dir)
+        return VariantsAccessioning(self.file, self.version, self.vcf_dir)
 
     def run(self):
         # Get the last lines in self.input()
@@ -105,7 +107,7 @@ class SaveLastAccession(luigi.Task):
 
         print 'Last accession ID generated = ' + max_accession
 
-        evapro_adaptor.save_last_accession(os.path.basename(self.file), max_accession)
+        evapro_adaptor.save_last_accession(os.path.basename(self.file), self.version, max_accession)
 
     def output(self):
         return self.input()

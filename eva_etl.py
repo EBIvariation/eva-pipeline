@@ -33,13 +33,13 @@ class VariantsLoading(luigi.Task):
     # TODO Possible FileParameter or PathParameter class?
     file = luigi.Parameter(description='Input VCF file to process and load')
     vcf_dir = luigi.Parameter(description='Folder for storage of EVA VCF files')
+    version = luigi.Parameter(description='EVA version where the file is released')
     json_dir = luigi.Parameter(description='Folder for storage of EVA JSON files')
 
-    study_name = luigi.Parameter(description='Full name of the study of this input file')
     aggregated = luigi.BooleanParameter(default=False)
 
     def requires(self):
-        return VariantsTransformation(self.file, self.vcf_dir, self.json_dir, self.study_name, self.aggregated)
+        return VariantsTransformation(self.file, self.version, self.vcf_dir, self.json_dir, self.aggregated)
 
     def run(self):
         # Get input files root name (remove .gz, then .json, then .file)
@@ -96,21 +96,21 @@ class VariantsTransformation(luigi.Task):
     """
 
     file = luigi.Parameter(description='Input VCF file to process and load')
+    version = luigi.Parameter(description='EVA version where the file is released')
     vcf_dir = luigi.Parameter(description='Folder for storage of EVA VCF files')
     json_dir = luigi.Parameter(description='Folder for storage of EVA JSON files')
 
-    study_name = luigi.Parameter(description='Full name of the study of this input file')
     aggregated = luigi.BooleanParameter(default=False)
 
     def requires(self):
-        return SaveLastAccession(self.file, self.vcf_dir)
+        return SaveLastAccession(self.file, self.version, self.vcf_dir)
 
     def run(self):
         # Get study and file ID
-        info = evapro_adaptor.get_study_and_file_id(os.path.basename(self.file))
+        info = evapro_adaptor.get_study_and_file_id(os.path.basename(self.file), self.version)
         if not info:
             raise evapro_adaptor.EvaproError('Filename not found in EVAPRO')
-        (study_alias, file_alias) = info
+        (study_alias, study_name, file_alias) = info
 
         # TODO --include-effect when VEP is ready
         config = configuration.get_opencga_config('pipeline_config.conf')
@@ -120,7 +120,7 @@ class VariantsTransformation(luigi.Task):
         kwargs = {'opencga-root': config['root_folder'],
                   'input': self.input().fn,
                   'outdir': self.json_dir,
-                  'study': self.study_name,
+                  'study': study_name,
                   'file-alias': file_alias,
                   'study-alias': study_alias}
 
