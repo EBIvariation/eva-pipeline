@@ -7,7 +7,7 @@ import configuration
 
 class CreateProject(luigi.Task):
   """
-  Creates a project metadata in OpenCGA catalog, and returns its ID as output
+  Creates a project metadata in OpenCGA catalog, and checks its ID for completion
   """
   
   alias = luigi.Parameter()
@@ -47,17 +47,17 @@ class CreateProject(luigi.Task):
   
 class CreateStudy(luigi.Task):
   """
-  Creates a study metadata in OpenCGA catalog
+  Creates a study metadata in OpenCGA catalog, and checks its ID for completion
   """
+  
+  name = luigi.Parameter()
+  description = luigi.Parameter()
+  alias = luigi.Parameter()
   
   project_alias = luigi.Parameter()
   project_name = luigi.Parameter(default="")
   project_description = luigi.Parameter(default="")
   project_organization = luigi.Parameter(default="")
-  
-  name = luigi.Parameter()
-  description = luigi.Parameter()
-  alias = luigi.Parameter()
   
   
   def depends(self):
