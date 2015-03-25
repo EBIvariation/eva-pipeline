@@ -38,8 +38,8 @@ def shellout(template, **kwargs):
     code = subprocess.call([command], shell=True)
     if not code == 0:
         raise RuntimeError('%s exitcode: %s' % (command, code))
-    # return kwargs.get('output')
-    return stopover if stopover else luigi.File(kwargs.get('output'))
+    return kwargs.get('output')
+    #return stopover if stopover else luigi.File(kwargs.get('output'))
 
 
 def shellout_no_stdout(template, **kwargs):
