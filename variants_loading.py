@@ -1,13 +1,14 @@
 import os
 import luigi
 
+from project_initialization import CreateStudy
 from shellout import shellout_no_stdout, shellout
 import configuration
 
 
 class CreateVariantsFile(luigi.Task):
   """
-  Creates a file metadata in OpenCGA catalog, and checks its ID for completion
+  Creates a variants file metadata in OpenCGA catalog, and checks its ID for completion
   """
   
   path = luigi.Parameter()
@@ -22,15 +23,15 @@ class CreateVariantsFile(luigi.Task):
   project_organization = luigi.Parameter(default="")
   
   
-  def depends(self):
-    return CreateStudy(alias=study_alias, name=study_name, description=study_description, 
-                       project_alias=project_alias, project_name=project_name, 
-                       project_description=project_description, project_organization=project_organization)
+  def requires(self):
+    return CreateStudy(alias=self.study_alias, name=self.study_name, description=self.study_description, 
+                       project_alias=self.project_alias, project_name=self.project_name, 
+                       project_description=self.project_description, project_organization=self.project_organization)
   
   def run(self):
     config = configuration.get_opencga_config('pipeline_config.conf')
     command = '{opencga-root}/bin/opencga.sh files create --user {user} --password {password} ' \
-              '-i "{path}" --study-id "{user}@{project-alias}/{study-alias}" --bioformat VARIANT --output-format IDS'
+              '-i "{path}" --study-id "{user}@{project-alias}/{study-alias}" --bioformat VARIANT --checksum --output-format IDS'
     kwargs = {'opencga-root'    : config['root_folder'],
               'user'            : config['catalog_user'],
               'password'        : config['catalog_pass'],
@@ -53,12 +54,18 @@ class CreateVariantsFile(luigi.Task):
               'output'          : self.project_alias}
     
     # If the file was found, the output file will have some contents
-    output_path = shellout(command, **kwargs)
+    try:
+      output_path = shellout(command, **kwargs)
+    except RuntimeError:
+      return False
     return os.path.getsize(output_path) > 0
   
   
   
 class TransformFile(luigi.Task):
+  """
+  Transforms a VCF file to an intermediate data model JSON file
+  """
   pass
 
 

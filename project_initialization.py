@@ -15,6 +15,7 @@ class CreateProject(luigi.Task):
   description = luigi.Parameter()
   organization = luigi.Parameter()
   
+
   def run(self):
     config = configuration.get_opencga_config('pipeline_config.conf')
     command = '{opencga-root}/bin/opencga.sh projects create --user {user} --password {password} ' \
@@ -40,9 +41,12 @@ class CreateProject(luigi.Task):
               'output'		: self.alias}
     
     # If the project was found, the output file will have some contents
-    output_path = shellout(command, **kwargs)
+    try:
+      output_path = shellout(command, **kwargs)
+    except RuntimeError:
+      return False
     return os.path.getsize(output_path) > 0
-  
+
   
   
 class CreateStudy(luigi.Task):
@@ -60,8 +64,8 @@ class CreateStudy(luigi.Task):
   project_organization = luigi.Parameter(default="")
   
   
-  def depends(self):
-    return CreateProject(name=project_name, description=project_description, alias=project_alias, organization=project_organization)
+  def requires(self):
+    return CreateProject(self.project_alias, self.project_name, self.project_description, self.project_organization)
   
   
   def run(self):
@@ -92,10 +96,13 @@ class CreateStudy(luigi.Task):
               'output'		: self.alias}
     
     # If the study was found, the output file will have some contents
-    output_path = shellout(command, **kwargs)
+    try:
+      output_path = shellout(command, **kwargs)
+    except RuntimeError:
+      return False
     return os.path.getsize(output_path) > 0
-  
 
+  
 
 if __name__ == '__main__':
     luigi.run()
