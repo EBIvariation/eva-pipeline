@@ -52,7 +52,7 @@ class CreatePedigreeFile(luigi.Task):
               'study-alias'     : self.study_alias,
               'alias'           : self.project_alias,
               'filename'        : os.path.basename(self.path),
-              'output'          : self.project_alias}
+              'output'          : os.path.basename(self.path) + ".step1"}
     
     # If the file was found, the output file will have some contents
     try:
@@ -66,8 +66,6 @@ class CreatePedigreeFile(luigi.Task):
 class LoadSamples(luigi.Task):
   """
   Loads samples metadata from a pedigree file
-  
-  $OPENCGA_HOME/bin/opencga.sh  samples load --session-id $SESSION_ID --log-level $LOG_LEVEL  --study-id $STUDY_ID --pedigree-id $PED_FILE_ID --output-format NAME_ID_MAP
   """
   
   path = luigi.Parameter()
@@ -91,7 +89,7 @@ class LoadSamples(luigi.Task):
   def run(self):
     config = configuration.get_opencga_config('pipeline_config.conf')
     command = '{opencga-root}/bin/opencga.sh samples load --user {user} --password {password} ' \
-              '--pedigree-id "{user}@{project-alias}/{study-alias}/{filename}" --study-id "{user}@{project-alias}/{study-alias}" --output-format NAME_ID_MAP'
+              '--pedigree-id "{user}@{project-alias}/{study-alias}/{filename}" --study-id "{user}@{project-alias}/{study-alias}" --output-format IDS'
     kwargs = {'opencga-root'    : config['root_folder'],
               'user'            : config['catalog_user'],
               'password'        : config['catalog_pass'],
@@ -103,7 +101,26 @@ class LoadSamples(luigi.Task):
     
   
   def complete(self):
-    return False
+    config = configuration.get_opencga_config('pipeline_config.conf')
+    command = '{opencga-root}/bin/opencga.sh samples search --user {user} --password {password} ' \
+              '--study-id "{user}@{project-alias}/{study-alias}" > {output}'
+    kwargs = {'opencga-root'    : config['root_folder'],
+              'user'            : config['catalog_user'],
+              'password'        : config['catalog_pass'],
+              'project-alias'   : self.project_alias,
+              'study-alias'     : self.study_alias,
+              'alias'           : self.project_alias,
+              'filename'        : os.path.basename(self.path),
+              'output'          : os.path.basename(self.path) + ".step2"}
+    
+    # If the samples were found, the output file will have some contents
+    try:
+      output_path = shellout(command, **kwargs)
+    except RuntimeError:
+      return False
+    
+    # This tool writes a breakline at the end of the file
+    return os.path.getsize(output_path) > 1
   
   
 

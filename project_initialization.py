@@ -72,15 +72,14 @@ class CreateStudy(luigi.Task):
     config = configuration.get_opencga_config('pipeline_config.conf')
     command = '{opencga-root}/bin/opencga.sh studies create --user {user} --password {password} ' \
               '--name "{name}" -d "{description}" -a "{alias}" --type CONTROL_SET ' \
-              '--project-id "{user}@{project-alias}" --output-format IDS > {output}'
+              '--project-id "{user}@{project-alias}" --output-format IDS'
     kwargs = {'opencga-root'	: config['root_folder'],
               'user'		: config['catalog_user'],
               'password'	: config['catalog_pass'],
               'name'		: self.name,
               'description'	: self.description,
               'alias'		: self.alias,
-              'project-alias'	: self.project_alias,
-              'output'		: self.alias }
+              'project-alias'	: self.project_alias}
     shellout_no_stdout(command, **kwargs)
   
   
