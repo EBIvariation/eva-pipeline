@@ -44,13 +44,13 @@ class CreateVariantsFile(luigi.Task):
   def complete(self):
     config = configuration.get_opencga_config('pipeline_config.conf')
     command = '{opencga-root}/bin/opencga.sh files info --user {user} --password {password} ' \
-              '-id "{user}@{project-alias}/{study-alias}/{alias}" --output-format IDS > {output}'
+              '-id "{user}@{project-alias}/{study-alias}/{filename}" --output-format IDS > {output}'
     kwargs = {'opencga-root'    : config['root_folder'],
               'user'            : config['catalog_user'],
               'password'        : config['catalog_pass'],
               'project-alias'   : self.project_alias,
               'study-alias'     : self.study_alias,
-              'alias'           : self.project_alias,
+              'filename'        : os.path.basename(self.path),
               'output'          : self.project_alias}
     
     # If the file was found, the output file will have some contents
@@ -66,7 +66,81 @@ class TransformFile(luigi.Task):
   """
   Transforms a VCF file to an intermediate data model JSON file
   """
-  pass
+  
+  path = luigi.Parameter()
+  
+  study_alias = luigi.Parameter()
+  study_name = luigi.Parameter(default="")
+  study_description = luigi.Parameter(default="")
+  
+  project_alias = luigi.Parameter()
+  project_name = luigi.Parameter(default="")
+  project_description = luigi.Parameter(default="")
+  project_organization = luigi.Parameter(default="")
+  
+  def requires(self):
+    return CreateVariantsFile(self.path, self.study_alias, self.study_name, self.study_description,
+                              self.project_alias, self.project_name, self.project_description, self.project_organization)
+  
+  
+  def run(self):
+    config = configuration.get_opencga_config('pipeline_config.conf')
+    command = '{opencga-root}/bin/opencga.sh files index --user {user} --password {password} ' \
+              '--file-id "{user}@{project-alias}/{study-alias}/{filename}" --output-format IDS ' \
+              '-Dannotate=false -- --transform'
+    kwargs = {'opencga-root'    : config['root_folder'],
+              'user'            : config['catalog_user'],
+              'password'        : config['catalog_pass'],
+              'project-alias'   : self.project_alias,
+              'study-alias'     : self.study_alias,
+              'filename'        : os.path.basename(self.path)}
+    shellout_no_stdout(command, **kwargs)
+  
+  
+  def output(self):
+    """
+    To check completion, the project ID and study must be retrieved, and the json.snappy files searched in the corresponding opencga files folder
+    """
+    
+    project_id = -1
+    study_id = -1
+    config = configuration.get_opencga_config('pipeline_config.conf')
+    
+    # Get project numerical ID
+    command = '{opencga-root}/bin/opencga.sh projects info --user {user} --password {password} ' \
+              '-id "{user}@{project-alias}" --output-format IDS > {output}'
+    kwargs = {'opencga-root'    : config['root_folder'],
+              'user'            : config['catalog_user'],
+              'password'        : config['catalog_pass'],
+              'project-alias'   : self.project_alias,
+              'output'          : os.path.basename(self.path) + ".project"}
+    
+    project_output = shellout(command, **kwargs)
+    if os.path.getsize(project_output) > 0:
+      with open(project_output, 'r') as file:
+        project_id = int(file.read())
+    
+    # Get study numerical ID
+    command = '{opencga-root}/bin/opencga.sh studies info --user {user} --password {password} ' \
+              '-id "{user}@{project-alias}/{study-alias}" --output-format IDS > {output}'
+    kwargs = {'opencga-root'    : config['root_folder'],
+              'user'            : config['catalog_user'],
+              'password'        : config['catalog_pass'],
+              'project-alias'   : self.project_alias,
+              'study-alias'     : self.study_alias,
+              'output'          : os.path.basename(self.path) + ".study"}  
+    
+    study_output = shellout(command, **kwargs)
+    if os.path.getsize(study_output) > 0:
+      with open(study_output, 'r') as file:
+        study_id = int(file.read())
+
+    # Get root name for the JSON files, which depends on the user name, project ID, study ID and input file
+    files_root = "{catalog_folder}/users/{user}/projects/{pid}/{sid}/{filename}".format(
+                    catalog_folder=config['catalog_folder'], user=config['catalog_user'], pid=project_id, sid=study_id, filename=os.path.basename(self.path))
+    
+    return [luigi.LocalTarget(files_root + '.file.json.snappy'), 
+            luigi.LocalTarget(files_root + '.variants.json.snappy')]
 
 
 
