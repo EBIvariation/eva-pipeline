@@ -97,9 +97,66 @@ class TransformFile(luigi.Task):
     shellout_no_stdout(command, **kwargs)
   
   
-  def output(self):
+  def complete(self):
     """
     To check completion, the project ID and study must be retrieved, and the json.snappy files searched in the corresponding opencga files folder
+    """
+    
+    project_id = -1
+    study_id = -1
+    config = configuration.get_opencga_config('pipeline_config.conf')
+    
+    # Get project numerical ID
+    command = '{opencga-root}/bin/opencga.sh projects info --user {user} --password {password} ' \
+              '-id "{user}@{project-alias}" --output-format IDS > {output}'
+    kwargs = {'opencga-root'    : config['root_folder'],
+              'user'            : config['catalog_user'],
+              'password'        : config['catalog_pass'],
+              'project-alias'   : self.project_alias,
+              'output'          : os.path.basename(self.path) + ".project"}
+    
+    try:
+      project_output = shellout(command, **kwargs)
+    except RuntimeError:
+      return False
+    
+    if os.path.getsize(project_output) > 0:
+      with open(project_output, 'r') as file:
+        project_id = int(file.read())
+    
+    # Get study numerical ID
+    command = '{opencga-root}/bin/opencga.sh studies info --user {user} --password {password} ' \
+              '-id "{user}@{project-alias}/{study-alias}" --output-format IDS > {output}'
+    kwargs = {'opencga-root'    : config['root_folder'],
+              'user'            : config['catalog_user'],
+              'password'        : config['catalog_pass'],
+              'project-alias'   : self.project_alias,
+              'study-alias'     : self.study_alias,
+              'output'          : os.path.basename(self.path) + ".study"}  
+    
+    try:
+      study_output = shellout(command, **kwargs)
+    except RuntimeError:
+      return False
+    
+    if os.path.getsize(study_output) > 0:
+      with open(study_output, 'r') as file:
+        study_id = int(file.read())
+        
+    # The project and study ID must be at least zero, and the output files must exist
+    files_root = "{catalog_folder}/users/{user}/projects/{pid}/{sid}/{filename}".format(
+                  catalog_folder=config['catalog_folder'], user=config['catalog_user'], pid=project_id, sid=study_id, filename=os.path.basename(self.path))
+    
+    return project_id > -1 and \
+           study_id > -1 and \
+           os.path.isfile(files_root + '.file.json.snappy') and \
+           os.path.isfile(files_root + '.variants.json.snappy')
+    
+    
+  
+  def output(self):
+    """
+    The output files are json.snappy tranformed from VCF, and searched in the corresponding opencga files folder (nested by project and study)
     """
     
     project_id = -1
@@ -139,13 +196,53 @@ class TransformFile(luigi.Task):
     files_root = "{catalog_folder}/users/{user}/projects/{pid}/{sid}/{filename}".format(
                     catalog_folder=config['catalog_folder'], user=config['catalog_user'], pid=project_id, sid=study_id, filename=os.path.basename(self.path))
     
-    return [luigi.LocalTarget(files_root + '.file.json.snappy'), 
-            luigi.LocalTarget(files_root + '.variants.json.snappy')]
+    return { 'variants' : luigi.LocalTarget(files_root + '.variants.json.snappy'),
+             'file'     : luigi.LocalTarget(files_root + '.file.json.snappy') }
 
 
 
 class LoadFile(luigi.Task):
-  pass
+  """
+  Load transformed files into Mongo
+  """
+  
+  path = luigi.Parameter()
+  database = luigi.Parameter()
+  
+  study_alias = luigi.Parameter()
+  study_name = luigi.Parameter(default="")
+  study_description = luigi.Parameter(default="")
+  
+  project_alias = luigi.Parameter()
+  project_name = luigi.Parameter(default="")
+  project_description = luigi.Parameter(default="")
+  project_organization = luigi.Parameter(default="")
+  
+  
+  def requires(self):
+    return TransformFile(self.path, self.study_alias, self.study_name, self.study_description,
+                         self.project_alias, self.project_name, self.project_description, self.project_organization)
+  
+  
+  def run(self):
+    config = configuration.get_opencga_config('pipeline_config.conf')
+    command = '{opencga-root}/bin/opencga.sh files index --user {user} --password {password} ' \
+              '--database {database} --file-id "{user}@{project-alias}/{study-alias}/{variants-file}" ' \
+              '--indexed-file-id "{user}@{project-alias}/{study-alias}/{filename}.MONGODB" --output-format IDS ' \
+              '-Dannotate=false -- --load'
+    kwargs = {'opencga-root'    : config['root_folder'],
+              'user'            : config['catalog_user'],
+              'password'        : config['catalog_pass'],
+              'database'        : self.database,
+              'project-alias'   : self.project_alias,
+              'study-alias'     : self.study_alias,
+              'variants-file'   : os.path.basename(self.input()['variants'].fn),
+              'filename'        : os.path.basename(self.path)}
+    shellout_no_stdout(command, **kwargs)
+  
+
+# def complete(self):
+#     # TODO Checking whether the loading run properly must be implemented
 
 
 
