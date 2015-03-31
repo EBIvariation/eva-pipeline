@@ -68,6 +68,7 @@ class TransformFile(luigi.Task):
   """
   
   path = luigi.Parameter()
+  aggregation = luigi.Parameter(default=None)
   
   study_alias = luigi.Parameter()
   study_name = luigi.Parameter(default="")
@@ -77,6 +78,7 @@ class TransformFile(luigi.Task):
   project_name = luigi.Parameter(default="")
   project_description = luigi.Parameter(default="")
   project_organization = luigi.Parameter(default="")
+  
   
   def requires(self):
     return CreateVariantsFile(self.path, self.study_alias, self.study_name, self.study_description,
@@ -94,6 +96,11 @@ class TransformFile(luigi.Task):
               'project-alias'   : self.project_alias,
               'study-alias'     : self.study_alias,
               'filename'        : os.path.basename(self.path)}
+    
+    if self.aggregation:
+      command += ' --aggregated {aggregation}'
+      kwargs['aggregation'] = self.aggregation
+    
     shellout_no_stdout(command, **kwargs)
   
   
@@ -113,7 +120,7 @@ class TransformFile(luigi.Task):
               'user'            : config['catalog_user'],
               'password'        : config['catalog_pass'],
               'project-alias'   : self.project_alias,
-              'output'          : os.path.basename(self.path) + ".project"}
+              'output'          : "/tmp/" + os.path.basename(self.path) + ".project"}
     
     try:
       project_output = shellout(command, **kwargs)
@@ -132,7 +139,7 @@ class TransformFile(luigi.Task):
               'password'        : config['catalog_pass'],
               'project-alias'   : self.project_alias,
               'study-alias'     : self.study_alias,
-              'output'          : os.path.basename(self.path) + ".study"}  
+              'output'          : "/tmp/" + os.path.basename(self.path) + ".study"}  
     
     try:
       study_output = shellout(command, **kwargs)
@@ -152,8 +159,7 @@ class TransformFile(luigi.Task):
            os.path.isfile(files_root + '.file.json.snappy') and \
            os.path.isfile(files_root + '.variants.json.snappy')
     
-    
-  
+
   def output(self):
     """
     The output files are json.snappy tranformed from VCF, and searched in the corresponding opencga files folder (nested by project and study)
@@ -170,7 +176,7 @@ class TransformFile(luigi.Task):
               'user'            : config['catalog_user'],
               'password'        : config['catalog_pass'],
               'project-alias'   : self.project_alias,
-              'output'          : os.path.basename(self.path) + ".project"}
+              'output'          : "/tmp/" + os.path.basename(self.path) + ".project"}
     
     project_output = shellout(command, **kwargs)
     if os.path.getsize(project_output) > 0:
@@ -185,7 +191,7 @@ class TransformFile(luigi.Task):
               'password'        : config['catalog_pass'],
               'project-alias'   : self.project_alias,
               'study-alias'     : self.study_alias,
-              'output'          : os.path.basename(self.path) + ".study"}  
+              'output'          : "/tmp/" + os.path.basename(self.path) + ".study"}  
     
     study_output = shellout(command, **kwargs)
     if os.path.getsize(study_output) > 0:
@@ -207,6 +213,7 @@ class LoadFile(luigi.Task):
   """
   
   path = luigi.Parameter()
+  aggregation = luigi.Parameter(default=None)
   database = luigi.Parameter()
   
   study_alias = luigi.Parameter()
@@ -220,7 +227,7 @@ class LoadFile(luigi.Task):
   
   
   def requires(self):
-    return TransformFile(self.path, self.study_alias, self.study_name, self.study_description,
+    return TransformFile(self.path, self.aggregation, self.study_alias, self.study_name, self.study_description,
                          self.project_alias, self.project_name, self.project_description, self.project_organization)
   
   
