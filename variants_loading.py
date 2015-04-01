@@ -1,4 +1,5 @@
 import os
+import json
 import luigi
 
 from project_initialization import CreateStudy
@@ -16,6 +17,7 @@ class CreateVariantsFile(luigi.Task):
   study_alias = luigi.Parameter()
   study_name = luigi.Parameter(default="")
   study_description = luigi.Parameter(default="")
+  study_uri = luigi.Parameter(default="")
   
   project_alias = luigi.Parameter()
   project_name = luigi.Parameter(default="")
@@ -24,7 +26,7 @@ class CreateVariantsFile(luigi.Task):
   
   
   def requires(self):
-    return CreateStudy(alias=self.study_alias, name=self.study_name, description=self.study_description, 
+    return CreateStudy(alias=self.study_alias, name=self.study_name, description=self.study_description, uri=self.study_uri,
                        project_alias=self.project_alias, project_name=self.project_name, 
                        project_description=self.project_description, project_organization=self.project_organization)
   
@@ -51,7 +53,7 @@ class CreateVariantsFile(luigi.Task):
               'project-alias'   : self.project_alias,
               'study-alias'     : self.study_alias,
               'filename'        : os.path.basename(self.path),
-              'output'          : self.project_alias}
+              'output'          : "/tmp/" + os.path.basename(self.path) + ".step1"}
     
     # If the file was found, the output file will have some contents
     try:
@@ -73,6 +75,7 @@ class TransformFile(luigi.Task):
   study_alias = luigi.Parameter()
   study_name = luigi.Parameter(default="")
   study_description = luigi.Parameter(default="")
+  study_uri = luigi.Parameter(default="")
   
   project_alias = luigi.Parameter()
   project_name = luigi.Parameter(default="")
@@ -81,7 +84,7 @@ class TransformFile(luigi.Task):
   
   
   def requires(self):
-    return CreateVariantsFile(self.path, self.study_alias, self.study_name, self.study_description,
+    return CreateVariantsFile(self.path, self.study_alias, self.study_name, self.study_description, self.study_uri,
                               self.project_alias, self.project_name, self.project_description, self.project_organization)
   
   
@@ -106,7 +109,7 @@ class TransformFile(luigi.Task):
   
   def complete(self):
     """
-    To check completion, the project ID and study must be retrieved, and the json.snappy files searched in the corresponding opencga files folder
+    To check completion, the project ID and study must be retrieved, and the json.snappy files searched in the folder specified in OpenCGA Catalog
     """
     
     project_id = -1
@@ -131,9 +134,9 @@ class TransformFile(luigi.Task):
       with open(project_output, 'r') as file:
         project_id = int(file.read())
     
-    # Get study numerical ID
+    # Get study numerical ID and data folder
     command = '{opencga-root}/bin/opencga.sh studies info --user {user} --password {password} ' \
-              '-id "{user}@{project-alias}/{study-alias}" --output-format IDS > {output}'
+              '-id "{user}@{project-alias}/{study-alias}" > {output}'
     kwargs = {'opencga-root'    : config['root_folder'],
               'user'            : config['catalog_user'],
               'password'        : config['catalog_pass'],
@@ -148,21 +151,21 @@ class TransformFile(luigi.Task):
     
     if os.path.getsize(study_output) > 0:
       with open(study_output, 'r') as file:
-        study_id = int(file.read())
-        
-    # The project and study ID must be at least zero, and the output files must exist
-    files_root = "{catalog_folder}/users/{user}/projects/{pid}/{sid}/{filename}".format(
-                  catalog_folder=config['catalog_folder'], user=config['catalog_user'], pid=project_id, sid=study_id, filename=os.path.basename(self.path))
+        study_json = json.load(file)
+        study_id = study_json['id']
+        study_folder = study_json['uri'].split(':', 1)[1]  # Remove prefix "file:"
     
-    return project_id > -1 and \
-           study_id > -1 and \
+    files_root = "{folder}/{filename}".format(folder=study_folder, filename=os.path.basename(self.path))
+    
+    # The project and study ID must be at least zero, and the output files must exist
+    return project_id > -1 and study_id > -1 and \
            os.path.isfile(files_root + '.file.json.snappy') and \
            os.path.isfile(files_root + '.variants.json.snappy')
     
 
   def output(self):
     """
-    The output files are json.snappy tranformed from VCF, and searched in the corresponding opencga files folder (nested by project and study)
+    The output files are json.snappy tranformed from VCF, and searched in the folder specified in OpenCGA Catalog
     """
     
     project_id = -1
@@ -183,9 +186,9 @@ class TransformFile(luigi.Task):
       with open(project_output, 'r') as file:
         project_id = int(file.read())
     
-    # Get study numerical ID
+    # Get study numerical ID and data folder
     command = '{opencga-root}/bin/opencga.sh studies info --user {user} --password {password} ' \
-              '-id "{user}@{project-alias}/{study-alias}" --output-format IDS > {output}'
+              '-id "{user}@{project-alias}/{study-alias}" > {output}'
     kwargs = {'opencga-root'    : config['root_folder'],
               'user'            : config['catalog_user'],
               'password'        : config['catalog_pass'],
@@ -196,11 +199,11 @@ class TransformFile(luigi.Task):
     study_output = shellout(command, **kwargs)
     if os.path.getsize(study_output) > 0:
       with open(study_output, 'r') as file:
-        study_id = int(file.read())
-
-    # Get root name for the JSON files, which depends on the user name, project ID, study ID and input file
-    files_root = "{catalog_folder}/users/{user}/projects/{pid}/{sid}/{filename}".format(
-                    catalog_folder=config['catalog_folder'], user=config['catalog_user'], pid=project_id, sid=study_id, filename=os.path.basename(self.path))
+        study_json = json.load(file)
+        study_id = study_json['id']
+        study_folder = study_json['uri'].split(':', 1)[1]  # Remove prefix "file:"
+    
+    files_root = "{folder}/{filename}".format(folder=study_folder, filename=os.path.basename(self.path))
     
     return { 'variants' : luigi.LocalTarget(files_root + '.variants.json.snappy'),
              'file'     : luigi.LocalTarget(files_root + '.file.json.snappy') }
@@ -219,6 +222,7 @@ class LoadFile(luigi.Task):
   study_alias = luigi.Parameter()
   study_name = luigi.Parameter(default="")
   study_description = luigi.Parameter(default="")
+  study_uri = luigi.Parameter(default="")
   
   project_alias = luigi.Parameter()
   project_name = luigi.Parameter(default="")
@@ -227,7 +231,7 @@ class LoadFile(luigi.Task):
   
   
   def requires(self):
-    return TransformFile(self.path, self.aggregation, self.study_alias, self.study_name, self.study_description,
+    return TransformFile(self.path, self.aggregation, self.study_alias, self.study_name, self.study_description, self.study_uri,
                          self.project_alias, self.project_name, self.project_description, self.project_organization)
   
   

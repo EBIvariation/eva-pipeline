@@ -66,6 +66,7 @@ class CreateStudy(luigi.Task):
   alias = luigi.Parameter()
   name = luigi.Parameter(default="")
   description = luigi.Parameter(default="")
+  uri = luigi.Parameter(default="")
   
   project_alias = luigi.Parameter()
   project_name = luigi.Parameter(default="")
@@ -97,6 +98,11 @@ class CreateStudy(luigi.Task):
               'description'	: self.description,
               'alias'		: self.alias,
               'project-alias'	: self.project_alias}
+    
+    if self.uri:
+      command += ' --uri "file:{uri}"'
+      kwargs['uri'] = self.uri
+      
     shellout_no_stdout(command, **kwargs)
   
   

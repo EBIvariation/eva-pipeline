@@ -16,6 +16,7 @@ class CreatePedigreeFile(luigi.Task):
   study_alias = luigi.Parameter()
   study_name = luigi.Parameter(default="")
   study_description = luigi.Parameter(default="")
+  study_uri = luigi.Parameter(default="")
   
   project_alias = luigi.Parameter()
   project_name = luigi.Parameter(default="")
@@ -24,7 +25,7 @@ class CreatePedigreeFile(luigi.Task):
   
   
   def requires(self):
-    return CreateStudy(alias=self.study_alias, name=self.study_name, description=self.study_description, 
+    return CreateStudy(alias=self.study_alias, name=self.study_name, description=self.study_description, uri=self.study_uri,
                        project_alias=self.project_alias, project_name=self.project_name, 
                        project_description=self.project_description, project_organization=self.project_organization)
   
@@ -52,7 +53,7 @@ class CreatePedigreeFile(luigi.Task):
               'study-alias'     : self.study_alias,
               'alias'           : self.project_alias,
               'filename'        : os.path.basename(self.path),
-              'output'          : os.path.basename(self.path) + ".step1"}
+              'output'          : "/tmp/" + os.path.basename(self.path) + ".step1"}
     
     # If the file was found, the output file will have some contents
     try:
@@ -73,6 +74,7 @@ class LoadSamples(luigi.Task):
   study_alias = luigi.Parameter()
   study_name = luigi.Parameter(default="")
   study_description = luigi.Parameter(default="")
+  study_uri = luigi.Parameter(default="")
   
   project_alias = luigi.Parameter()
   project_name = luigi.Parameter(default="")
@@ -81,9 +83,8 @@ class LoadSamples(luigi.Task):
   
   
   def requires(self):
-    return CreatePedigreeFile(path=self.path, study_alias=self.study_alias, study_name=self.study_name, study_description=self.study_description, 
-                              project_alias=self.project_alias, project_name=self.project_name, 
-                              project_description=self.project_description, project_organization=self.project_organization)
+    return CreatePedigreeFile(self.path, self.study_alias, self.study_name, self.study_description, self.study_uri,
+                              self.project_alias, self.project_name, self.project_description, self.project_organization)
   
   
   def run(self):
@@ -111,7 +112,7 @@ class LoadSamples(luigi.Task):
               'study-alias'     : self.study_alias,
               'alias'           : self.project_alias,
               'filename'        : os.path.basename(self.path),
-              'output'          : os.path.basename(self.path) + ".step2"}
+              'output'          : "/tmp/" + os.path.basename(self.path) + ".step2"}
     
     # If the samples were found, the output file will have some contents
     try:
