@@ -20,6 +20,27 @@ def disconnect(connection):
     connection.close()
 
 
+def get_study_info(study_alias):
+    """
+    Given a study alias, returns its title, description and organization/center
+
+    :param study_alias: The unique ID of the study to search for
+    :return: ID, title, description and organization for the study
+    """
+    conn = connect()
+    cursor = conn.cursor()
+
+    cursor.execute('SELECT project_title, description, center '
+                   'FROM study_browser '
+                   'WHERE project_accession = \'{alias}\''
+                   .format(alias=study_alias))
+
+    rows = tuple(cursor)
+    info = rows[0] if rows and rows[0] else None
+    disconnect(conn)
+    return info
+
+
 def get_study_and_file_id(filename, eva_version):
     """
     Given a filename, returns the submission ID of the project where it is classified and the file submission ID in ENA.

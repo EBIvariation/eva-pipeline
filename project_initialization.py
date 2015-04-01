@@ -3,6 +3,7 @@ import luigi
 
 from shellout import shellout_no_stdout, shellout
 import configuration
+import evapro_adaptor
 
 
 class CreateProject(luigi.Task):
@@ -11,12 +12,20 @@ class CreateProject(luigi.Task):
   """
   
   alias = luigi.Parameter()
-  name = luigi.Parameter()
-  description = luigi.Parameter()
-  organization = luigi.Parameter()
+  name = luigi.Parameter(default="")
+  description = luigi.Parameter(default="")
+  organization = luigi.Parameter(default="")
   
 
   def run(self):
+    # If only an alias is provided, query the rest of arguments from EVAPRO
+    if not self.name or not self.description or not self.organization:
+      info = evapro_adaptor.get_study_info(self.alias)
+      if not info:
+          raise evapro_adaptor.EvaproError('Project not found in EVAPRO')
+      (self.name, self.description, self.organization) = info
+    
+    # Create the project in OpenCGA Catalog
     config = configuration.get_opencga_config('pipeline_config.conf')
     command = '{opencga-root}/bin/opencga.sh projects create --user {user} --password {password} ' \
               '-n "{name}" -o "{organization}" -d "{description}" -a "{alias}" --output-format IDS'
@@ -54,9 +63,9 @@ class CreateStudy(luigi.Task):
   Creates a study metadata in OpenCGA catalog, and checks its ID for completion
   """
   
-  name = luigi.Parameter()
-  description = luigi.Parameter()
   alias = luigi.Parameter()
+  name = luigi.Parameter(default="")
+  description = luigi.Parameter(default="")
   
   project_alias = luigi.Parameter()
   project_name = luigi.Parameter(default="")
@@ -69,6 +78,14 @@ class CreateStudy(luigi.Task):
   
   
   def run(self):
+    # If only an alias is provided, query the rest of arguments from EVAPRO
+    if not self.name or not self.description:
+      info = evapro_adaptor.get_study_info(self.alias)
+      if not info:
+          raise evapro_adaptor.EvaproError('Study not found in EVAPRO')
+      (self.name, self.description, organization) = info
+      
+    # Create the study in OpenCGA Catalog
     config = configuration.get_opencga_config('pipeline_config.conf')
     command = '{opencga-root}/bin/opencga.sh studies create --user {user} --password {password} ' \
               '--name "{name}" -d "{description}" -a "{alias}" --type CONTROL_SET ' \
