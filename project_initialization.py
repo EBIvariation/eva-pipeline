@@ -104,6 +104,26 @@ class CreateStudy(luigi.Task):
       kwargs['uri'] = self.uri
       
     shellout_no_stdout(command, **kwargs)
+    
+    # Create subfolders for all the steps in the workflow
+    for folder in [ "21_validation", "30_eva_valid", "40_transformed", "50_stats", "51_annotation", 
+                    "52_accessions", "60_eva_public", "70_external_submissions", "80_deprecated" ]:
+      self.create_subfolder(folder, config)
+    # TODO Create symbolic links to: {submission_folder}/10_submitted and {submission_folder}/20_scratch
+    # /home/cyenyxe/appl/opencga/opencga-app/build/bin/opencga.sh files create-folder -u biouser -p biopass -s biouser@PRJEB4019/PRJEB4019 --path 30_eva_valid
+    
+  
+  
+  def create_subfolder(self, name, config):
+    command = '{opencga-root}/bin/opencga.sh files create-folder -u {user} -p {password} ' \
+              '-s "{user}@{project-alias}/{alias}" --path {path} '                  
+    kwargs = {'opencga-root'   : config['root_folder'],
+              'user'            : config['catalog_user'],
+              'password'        : config['catalog_pass'],
+              'alias'           : self.alias,
+              'project-alias'   : self.project_alias,
+              'path'            : name}
+    shellout_no_stdout(command, **kwargs)
   
   
   def complete(self):
@@ -118,13 +138,14 @@ class CreateStudy(luigi.Task):
               'output'		: self.alias}
     
     # If the study was found, the output file will have some contents
+    # TODO How to deal with non-existing subfolders when the metadata has been successfully added to catalog?
     try:
       output_path = shellout(command, **kwargs)
     except RuntimeError:
       return False
     return os.path.getsize(output_path) > 0
 
-  
+
 
 if __name__ == '__main__':
     luigi.run()
