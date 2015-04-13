@@ -67,6 +67,7 @@ class CreateStudy(luigi.Task):
   name = luigi.Parameter(default="")
   description = luigi.Parameter(default="")
   uri = luigi.Parameter(default="")
+  ticket_uri = luigi.Parameter(default="")
   
   project_alias = luigi.Parameter()
   project_name = luigi.Parameter(default="")
@@ -79,6 +80,10 @@ class CreateStudy(luigi.Task):
   
   
   def run(self):
+    # If no ticket URI is provided, raise an error
+    if not self.ticket_uri:
+      raise RuntimeError('Please provide the path to the ELOAD ticket root folder')
+    
     # If only an alias is provided, query the rest of arguments from EVAPRO
     if not self.name or not self.description:
       info = evapro_adaptor.get_study_info(self.alias)
@@ -105,15 +110,19 @@ class CreateStudy(luigi.Task):
       
     shellout_no_stdout(command, **kwargs)
     
+    # Create symbolic links to: {ticket_uri}/10_submitted and {ticket_uri}/20_scratch
+    for link in [ "10_submitted", "20_scratch" ]:
+      self.create_symlink(link, config)
     # Create subfolders for all the steps in the workflow
     for folder in [ "21_validation", "30_eva_valid", "40_transformed", "50_stats", "51_annotation", 
                     "52_accessions", "60_eva_public", "70_external_submissions", "80_deprecated" ]:
       self.create_subfolder(folder, config)
-    # TODO Create symbolic links to: {submission_folder}/10_submitted and {submission_folder}/20_scratch
-    # /home/cyenyxe/appl/opencga/opencga-app/build/bin/opencga.sh files create-folder -u biouser -p biopass -s biouser@PRJEB4019/PRJEB4019 --path 30_eva_valid
     
   
+  def create_symlink(self, link, config):
+    os.symlink(self.ticket_uri + '/' + link, self.uri + '/' + link)
   
+
   def create_subfolder(self, name, config):
     command = '{opencga-root}/bin/opencga.sh files create-folder -u {user} -p {password} ' \
               '-s "{user}@{project-alias}/{alias}" --path {path} '                  
