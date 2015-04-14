@@ -144,7 +144,7 @@ class CreateStudy(luigi.Task):
               'password'	: config['catalog_pass'],
               'project-alias'	: self.project_alias,
               'alias'		: self.alias,
-              'output'		: self.alias}
+              'output'		: '/tmp/' + self.alias}
     
     # If the study was found, the output file will have some contents
     # TODO How to deal with non-existing subfolders when the metadata has been successfully added to catalog?
