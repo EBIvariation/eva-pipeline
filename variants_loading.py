@@ -220,6 +220,7 @@ class TransformGenotypesFile(luigi.Task, TransformFile):
 class TransformAggregatedFile(luigi.Task, TransformFile):
   
   aggregation = luigi.Parameter()
+  mapping_file = luigi.Parameter(default=None)
   
   def requires(self):
     return TransformFile.requires(self)
@@ -236,6 +237,11 @@ class TransformAggregatedFile(luigi.Task, TransformFile):
               'study-alias'     : self.study_alias,
               'filename'        : os.path.basename(self.path),
               'aggregation'     : self.aggregation}
+    
+    if self.mapping_file:
+       command += ' --aggregation-mapping-file {map-file}'
+       kwargs['map-file'] = self.mapping_file
+    
     shellout_no_stdout(command, **kwargs)
 
   def complete(self):
@@ -300,10 +306,11 @@ class LoadGenotypesFile(luigi.Task, LoadFile):
 class LoadAggregatedFile(luigi.Task, LoadFile):
   
   aggregation = luigi.Parameter(default=None)
+  mapping_file = luigi.Parameter(default=None)
   
   def requires(self):
-    return TransformAggregatedFile(self.path, self.aggregation, self.study_alias, self.study_name, self.study_description, self.study_uri, self.study_ticket_uri,
-                         self.project_alias, self.project_name, self.project_description, self.project_organization)
+    return TransformAggregatedFile(self.path, self.study_alias, self.study_name, self.study_description, self.study_uri, self.study_ticket_uri,
+                         self.project_alias, self.project_name, self.project_description, self.project_organization, self.aggregation, self.mapping_file)
   
   def run(self):
     LoadFile.run(self)
