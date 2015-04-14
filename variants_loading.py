@@ -18,6 +18,7 @@ class CreateVariantsFile(luigi.Task):
   study_name = luigi.Parameter(default="")
   study_description = luigi.Parameter(default="")
   study_uri = luigi.Parameter(default="")
+  study_ticket_uri = luigi.Parameter(default="")
   
   project_alias = luigi.Parameter()
   project_name = luigi.Parameter(default="")
@@ -26,7 +27,8 @@ class CreateVariantsFile(luigi.Task):
   
   
   def requires(self):
-    return CreateStudy(alias=self.study_alias, name=self.study_name, description=self.study_description, uri=self.study_uri,
+    return CreateStudy(alias=self.study_alias, name=self.study_name, description=self.study_description, 
+                       uri=self.study_uri, ticket_uri=self.study_ticket_uri,
                        project_alias=self.project_alias, project_name=self.project_name, 
                        project_description=self.project_description, project_organization=self.project_organization)
   
@@ -62,20 +64,20 @@ class CreateVariantsFile(luigi.Task):
       return False
     return os.path.getsize(output_path) > 0
   
-  
-  
-class TransformFile(luigi.Task):
+
+
+class TransformFile:
   """
   Transforms a VCF file to an intermediate data model JSON file
   """
   
   path = luigi.Parameter()
-  aggregation = luigi.Parameter(default=None)
   
   study_alias = luigi.Parameter()
   study_name = luigi.Parameter(default="")
   study_description = luigi.Parameter(default="")
   study_uri = luigi.Parameter(default="")
+  study_ticket_uri = luigi.Parameter(default="")
   
   project_alias = luigi.Parameter()
   project_name = luigi.Parameter(default="")
@@ -84,28 +86,8 @@ class TransformFile(luigi.Task):
   
   
   def requires(self):
-    return CreateVariantsFile(self.path, self.study_alias, self.study_name, self.study_description, self.study_uri,
+    return CreateVariantsFile(self.path, self.study_alias, self.study_name, self.study_description, self.study_uri, self.study_ticket_uri,
                               self.project_alias, self.project_name, self.project_description, self.project_organization)
-  
-  
-  def run(self):
-    config = configuration.get_opencga_config('pipeline_config.conf')
-    command = '{opencga-root}/bin/opencga.sh files index --user {user} --password {password} ' \
-              '--file-id "{user}@{project-alias}/{study-alias}/{filename}" --output-format IDS ' \
-              '-Dannotate=false -- --transform'
-    kwargs = {'opencga-root'    : config['root_folder'],
-              'user'            : config['catalog_user'],
-              'password'        : config['catalog_pass'],
-              'project-alias'   : self.project_alias,
-              'study-alias'     : self.study_alias,
-              'filename'        : os.path.basename(self.path)}
-    
-    if self.aggregation:
-      command += ' --aggregated {aggregation}'
-      kwargs['aggregation'] = self.aggregation
-    
-    shellout_no_stdout(command, **kwargs)
-  
   
   def complete(self):
     """
@@ -161,7 +143,6 @@ class TransformFile(luigi.Task):
     return project_id > -1 and study_id > -1 and \
            os.path.isfile(files_root + '.file.json.snappy') and \
            os.path.isfile(files_root + '.variants.json.snappy')
-    
 
   def output(self):
     """
@@ -210,30 +191,79 @@ class TransformFile(luigi.Task):
 
 
 
-class LoadFile(luigi.Task):
+class TransformGenotypesFile(luigi.Task, TransformFile):
+  
+  def requires(self):
+    return TransformFile.requires(self)
+    
+  def run(self):
+    config = configuration.get_opencga_config('pipeline_config.conf')
+    command = '{opencga-root}/bin/opencga.sh files index --user {user} --password {password} ' \
+              '--file-id "{user}@{project-alias}/{study-alias}/{filename}" --output-format IDS ' \
+              '-Dannotate=false -- --transform'
+    kwargs = {'opencga-root'    : config['root_folder'],
+              'user'            : config['catalog_user'],
+              'password'        : config['catalog_pass'],
+              'project-alias'   : self.project_alias,
+              'study-alias'     : self.study_alias,
+              'filename'        : os.path.basename(self.path)}
+    shellout_no_stdout(command, **kwargs)
+  
+  def complete(self):
+    return TransformFile.complete(self)
+  
+  def output(self):
+    return TransformFile.output(self)
+  
+  
+
+class TransformAggregatedFile(luigi.Task, TransformFile):
+  
+  aggregation = luigi.Parameter()
+  
+  def requires(self):
+    return TransformFile.requires(self)
+    
+  def run(self):
+    config = configuration.get_opencga_config('pipeline_config.conf')
+    command = '{opencga-root}/bin/opencga.sh files index --user {user} --password {password} ' \
+              '--file-id "{user}@{project-alias}/{study-alias}/{filename}" --output-format IDS ' \
+              '-Dannotate=false -- --transform --aggregated {aggregation} --include-stats'
+    kwargs = {'opencga-root'    : config['root_folder'],
+              'user'            : config['catalog_user'],
+              'password'        : config['catalog_pass'],
+              'project-alias'   : self.project_alias,
+              'study-alias'     : self.study_alias,
+              'filename'        : os.path.basename(self.path),
+              'aggregation'     : self.aggregation}
+    shellout_no_stdout(command, **kwargs)
+
+  def complete(self):
+    return TransformFile.complete(self)
+  
+  def output(self):
+    return TransformFile.output(self)
+  
+
+
+class LoadFile:
   """
   Load transformed files into Mongo
   """
   
   path = luigi.Parameter()
-  aggregation = luigi.Parameter(default=None)
   database = luigi.Parameter()
   
   study_alias = luigi.Parameter()
   study_name = luigi.Parameter(default="")
   study_description = luigi.Parameter(default="")
   study_uri = luigi.Parameter(default="")
+  study_ticket_uri = luigi.Parameter(default="")
   
   project_alias = luigi.Parameter()
   project_name = luigi.Parameter(default="")
   project_description = luigi.Parameter(default="")
   project_organization = luigi.Parameter(default="")
-  
-  
-  def requires(self):
-    return TransformFile(self.path, self.aggregation, self.study_alias, self.study_name, self.study_description, self.study_uri,
-                         self.project_alias, self.project_name, self.project_description, self.project_organization)
-  
   
   def run(self):
     config = configuration.get_opencga_config('pipeline_config.conf')
@@ -250,10 +280,33 @@ class LoadFile(luigi.Task):
               'variants-file'   : os.path.basename(self.input()['variants'].fn),
               'filename'        : os.path.basename(self.path)}
     shellout_no_stdout(command, **kwargs)
-  
 
 # def complete(self):
 #     # TODO Checking whether the loading run properly must be implemented
+
+
+
+class LoadGenotypesFile(luigi.Task, LoadFile):
+  
+  def requires(self):
+    return TransformGenotypesFile(self.path, self.study_alias, self.study_name, self.study_description, self.study_uri, self.study_ticket_uri,
+                         self.project_alias, self.project_name, self.project_description, self.project_organization)
+  
+  def run(self):
+    LoadFile.run(self)
+    
+
+
+class LoadAggregatedFile(luigi.Task, LoadFile):
+  
+  aggregation = luigi.Parameter(default=None)
+  
+  def requires(self):
+    return TransformAggregatedFile(self.path, self.aggregation, self.study_alias, self.study_name, self.study_description, self.study_uri, self.study_ticket_uri,
+                         self.project_alias, self.project_name, self.project_description, self.project_organization)
+  
+  def run(self):
+    LoadFile.run(self)
 
 
 
