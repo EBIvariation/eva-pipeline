@@ -1,5 +1,7 @@
-import os
 import json
+import logging
+import os
+
 import luigi
 
 from project_initialization import CreateStudy
@@ -54,7 +56,6 @@ class CreateSamplesFile(luigi.Task):
               'password'        : config['catalog_pass'],
               'project-alias'   : self.project_alias,
               'study-alias'     : self.study_alias,
-              'alias'           : self.project_alias,
               'filename'        : os.path.basename(self.path),
               'output'          : "/tmp/" + os.path.basename(self.path) + ".step1"}
     
@@ -87,7 +88,7 @@ class LoadSamplesFile(luigi.Task):
   
   
   def requires(self):
-    return CreatePedigreeFile(self.path, self.study_alias, self.study_name, self.study_description, self.study_uri, self.study_ticket_uri,
+    return CreateSamplesFile(self.path, self.study_alias, self.study_name, self.study_description, self.study_uri, self.study_ticket_uri,
                               self.project_alias, self.project_name, self.project_description, self.project_organization)
   
   
@@ -100,8 +101,8 @@ class LoadSamplesFile(luigi.Task):
               'password'        : config['catalog_pass'],
               'path'            : self.path,
               'project-alias'   : self.project_alias,
-              'filename'        : os.path.basename(self.path),
-              'study-alias'     : self.study_alias}
+              'study-alias'     : self.study_alias,
+              'filename'        : os.path.basename(self.path)}
     shellout_no_stdout(command, **kwargs)
     
   
@@ -114,7 +115,6 @@ class LoadSamplesFile(luigi.Task):
               'password'        : config['catalog_pass'],
               'project-alias'   : self.project_alias,
               'study-alias'     : self.study_alias,
-              'alias'           : self.project_alias,
               'filename'        : os.path.basename(self.path),
               'output'          : "/tmp/" + os.path.basename(self.path) + ".step2_1"}
     
@@ -134,8 +134,6 @@ class LoadSamplesFile(luigi.Task):
               'password'        : config['catalog_pass'],
               'project-alias'   : self.project_alias,
               'study-alias'     : self.study_alias,
-              'alias'           : self.project_alias,
-              'filename'        : os.path.basename(self.path),
               'output'          : "/tmp/" + os.path.basename(self.path) + ".step2_2"}
     
     # If the samples were found, the output file will have some contents
@@ -165,16 +163,16 @@ class LoadSamplesFile(luigi.Task):
   
 class CreateGlobalCohort(luigi.Task):
   """
-  ALL_SAMPLES=$(opencga.sh samples search --study-id <study_id> --output-format ID_CSV)
-  opencga.sh cohorts create --study-id <study_id> --sample-ids $ALL_SAMPLES
+  Create a cohort named 'all' which groups all the samples from a study
   """
   
-  path = luigi.Parameter()
+  #path = luigi.Parameter()
   
   study_alias = luigi.Parameter()
   study_name = luigi.Parameter(default="")
   study_description = luigi.Parameter(default="")
   study_uri = luigi.Parameter(default="")
+  study_ticket_uri = luigi.Parameter(default="")
   
   project_alias = luigi.Parameter()
   project_name = luigi.Parameter(default="")
@@ -183,30 +181,105 @@ class CreateGlobalCohort(luigi.Task):
   
   
   def requires(self):
-    return LoadSamplesFromPedigreeFile(self.path, self.study_alias, self.study_name, self.study_description, self.study_uri,
-                                       self.project_alias, self.project_name, self.project_description, self.project_organization)
+    return CreateStudy(alias=self.study_alias, name=self.study_name, description=self.study_description, 
+                       uri=self.study_uri, ticket_uri=self.study_ticket_uri,
+                       project_alias=self.project_alias, project_name=self.project_name, 
+                       project_description=self.project_description, project_organization=self.project_organization)
   
   def run(self):
     config = configuration.get_opencga_config('pipeline_config.conf')
-    #command = '{opencga-root}/bin/opencga.sh files info --user {user} --password {password} ' \
-              #'-id "{user}@{project-alias}/{study-alias}/{filename}" --output-format IDS > {output}'
-    #kwargs = {'opencga-root'    : config['root_folder'],
-              #'user'            : config['catalog_user'],
-              #'password'        : config['catalog_pass'],
-              #'project-alias'   : self.project_alias,
-              #'study-alias'     : self.study_alias,
-              #'alias'           : self.project_alias,
-              #'filename'        : os.path.basename(self.path),
-              #'output'          : "/tmp/" + os.path.basename(self.path) + ".step1"}
+    # Look up for all the samples associated to the study
+    command = '{opencga-root}/bin/opencga.sh samples search --user {user} --password {password} ' \
+              '--study-id "{user}@{project-alias}/{study-alias}" --output-format ID_CSV > {output}'
+    kwargs = {'opencga-root'    : config['root_folder'],
+              'user'            : config['catalog_user'],
+              'password'        : config['catalog_pass'],
+              'project-alias'   : self.project_alias,
+              'study-alias'     : self.study_alias,
+              'output'          : "/tmp/" + self.study_alias + ".samples"}
+    
+    output_path = shellout(command, **kwargs)
+    with open(output_path, 'r') as file:
+      samples = file.read()
+    
+    # Create a cohort using all the samples from the study
+    command = '{opencga-root}/bin/opencga.sh cohorts create --user {user} --password {password} ' \
+              '--study-id "{user}@{project-alias}/{study-alias}" --name all --sample-ids {samples}'
+    kwargs = {'opencga-root'    : config['root_folder'],
+              'user'            : config['catalog_user'],
+              'password'        : config['catalog_pass'],
+              'project-alias'   : self.project_alias,
+              'study-alias'     : self.study_alias,
+              'samples'         : samples}
+    
+    shellout_no_stdout(command, **kwargs)
     
     
   def complete(self):
-    return False
+    """
+    Check that all the study samples and those from the cohort are the same
+    """
+    
+    config = configuration.get_opencga_config('pipeline_config.conf')
+    # Look up for all the samples associated to the study
+    command = '{opencga-root}/bin/opencga.sh samples search --user {user} --password {password} ' \
+              '--study-id "{user}@{project-alias}/{study-alias}" --output-format ID_CSV > {output}'
+    kwargs = {'opencga-root'    : config['root_folder'],
+              'user'            : config['catalog_user'],
+              'password'        : config['catalog_pass'],
+              'project-alias'   : self.project_alias,
+              'study-alias'     : self.study_alias,
+              'output'          : "/tmp/" + self.study_alias + ".step3_1"}
+    
+    try:
+      output_path = shellout(command, **kwargs)
+    except RuntimeError:
+      return False
+    
+    with open(output_path, 'r') as file:
+      all_samples = file.read().strip().split(',')
+      
+    try:
+      all_samples = map(int, all_samples) # Store as integers
+    except ValueError:
+      # This means there are no samples to process
+      print('Study %s has no samples loaded' % self.study_alias)
+      return True
+    
+    # Retrieve the samples for the cohort named "all"
+    command = '{opencga-root}/bin/opencga.sh studies info --user {user} --password {password} ' \
+              '--study-id "{user}@{project-alias}/{study-alias}" > {output}'
+    kwargs = {'opencga-root'    : config['root_folder'],
+              'user'            : config['catalog_user'],
+              'password'        : config['catalog_pass'],
+              'project-alias'   : self.project_alias,
+              'study-alias'     : self.study_alias,
+              'output'          : "/tmp/" + self.study_alias + ".step3_2"}
+      
+    try:
+      output_path = shellout(command, **kwargs)
+    except RuntimeError:
+      return False
+    
+    cohort_samples = []
+    if os.path.getsize(output_path) > 0:
+      with open(output_path, 'r') as file:
+        study_json = json.load(file)
+        study_cohorts = study_json['cohorts']
+      for cohort in study_cohorts:
+        if cohort['name'] == 'all':
+          cohort_samples = cohort['samples']
+          break
+    
+    # Check the set of all the study samples and the cohort are equal
+    return sorted(all_samples) == sorted(cohort_samples)
+
 
 
 class CreateCohort(luigi.Task):
   pass
   
 
+
 if __name__ == '__main__':
-    luigi.run()
+  luigi.run()
