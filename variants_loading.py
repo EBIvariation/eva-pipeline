@@ -201,7 +201,7 @@ class TransformGenotypesFile(luigi.Task, TransformFile):
     config = configuration.get_opencga_config('pipeline_config.conf')
     command = '{opencga-root}/bin/opencga.sh files index --user {user} --password {password} ' \
               '--file-id "{user}@{project-alias}/{study-alias}/30_eva_valid/{filename}" ' \
-              '-o "{user}@{project-alias}/{study-alias}/40_transformed" ' \
+              '-o "{user}@{project-alias}/{study-alias}/40_transformed/" ' \
               '--output-format IDS -Dannotate=false -- --transform --include-genotypes'
     kwargs = {'opencga-root'    : config['root_folder'],
               'user'            : config['catalog_user'],
