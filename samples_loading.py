@@ -204,7 +204,7 @@ class CreateGlobalCohort(luigi.Task):
     
     # Create a cohort using all the samples from the study
     command = '{opencga-root}/bin/opencga.sh cohorts create --user {user} --password {password} ' \
-              '--study-id "{user}@{project-alias}/{study-alias}" --name all --sample-ids {samples}'
+              '--study-id "{user}@{project-alias}/{study-alias}" --name ALL --sample-ids {samples}'
     kwargs = {'opencga-root'    : config['root_folder'],
               'user'            : config['catalog_user'],
               'password'        : config['catalog_pass'],
