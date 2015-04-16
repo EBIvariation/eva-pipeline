@@ -200,7 +200,7 @@ class TransformGenotypesFile(luigi.Task, TransformFile):
     config = configuration.get_opencga_config('pipeline_config.conf')
     command = '{opencga-root}/bin/opencga.sh files index --user {user} --password {password} ' \
               '--file-id "{user}@{project-alias}/{study-alias}/{filename}" --output-format IDS ' \
-              '-Dannotate=false -- --transform'
+              '-Dannotate=false -- --transform --include-genotypes'
     kwargs = {'opencga-root'    : config['root_folder'],
               'user'            : config['catalog_user'],
               'password'        : config['catalog_pass'],
@@ -270,22 +270,6 @@ class LoadFile:
   project_name = luigi.Parameter(default="")
   project_description = luigi.Parameter(default="")
   project_organization = luigi.Parameter(default="")
-  
-  def run(self):
-    config = configuration.get_opencga_config('pipeline_config.conf')
-    command = '{opencga-root}/bin/opencga.sh files index --user {user} --password {password} ' \
-              '--database {database} --file-id "{user}@{project-alias}/{study-alias}/{variants-file}" ' \
-              '--indexed-file-id "{user}@{project-alias}/{study-alias}/{filename}.MONGODB" --output-format IDS ' \
-              '-Dannotate=false -- --load'
-    kwargs = {'opencga-root'    : config['root_folder'],
-              'user'            : config['catalog_user'],
-              'password'        : config['catalog_pass'],
-              'database'        : self.database,
-              'project-alias'   : self.project_alias,
-              'study-alias'     : self.study_alias,
-              'variants-file'   : os.path.basename(self.input()['variants'].fn),
-              'filename'        : os.path.basename(self.path)}
-    shellout_no_stdout(command, **kwargs)
 
 # def complete(self):
 #     # TODO Checking whether the loading run properly must be implemented
@@ -299,7 +283,20 @@ class LoadGenotypesFile(luigi.Task, LoadFile):
                          self.project_alias, self.project_name, self.project_description, self.project_organization)
   
   def run(self):
-    LoadFile.run(self)
+    config = configuration.get_opencga_config('pipeline_config.conf')
+    command = '{opencga-root}/bin/opencga.sh files index --user {user} --password {password} ' \
+              '--database {database} --file-id "{user}@{project-alias}/{study-alias}/{variants-file}" ' \
+              '--indexed-file-id "{user}@{project-alias}/{study-alias}/{filename}.MONGODB" --output-format IDS ' \
+              '-Dannotate=false -- --load --include-genotypes --compress-genotypes'
+    kwargs = {'opencga-root'    : config['root_folder'],
+              'user'            : config['catalog_user'],
+              'password'        : config['catalog_pass'],
+              'database'        : self.database,
+              'project-alias'   : self.project_alias,
+              'study-alias'     : self.study_alias,
+              'variants-file'   : os.path.basename(self.input()['variants'].fn),
+              'filename'        : os.path.basename(self.path)}
+    shellout_no_stdout(command, **kwargs)
     
 
 
@@ -313,7 +310,20 @@ class LoadAggregatedFile(luigi.Task, LoadFile):
                          self.project_alias, self.project_name, self.project_description, self.project_organization, self.aggregation, self.mapping_file)
   
   def run(self):
-    LoadFile.run(self)
+    config = configuration.get_opencga_config('pipeline_config.conf')
+    command = '{opencga-root}/bin/opencga.sh files index --user {user} --password {password} ' \
+              '--database {database} --file-id "{user}@{project-alias}/{study-alias}/{variants-file}" ' \
+              '--indexed-file-id "{user}@{project-alias}/{study-alias}/{filename}.MONGODB" --output-format IDS ' \
+              '-Dannotate=false -- --load --include-stats'
+    kwargs = {'opencga-root'    : config['root_folder'],
+              'user'            : config['catalog_user'],
+              'password'        : config['catalog_pass'],
+              'database'        : self.database,
+              'project-alias'   : self.project_alias,
+              'study-alias'     : self.study_alias,
+              'variants-file'   : os.path.basename(self.input()['variants'].fn),
+              'filename'        : os.path.basename(self.path)}
+    shellout_no_stdout(command, **kwargs)
 
 
 
