@@ -35,7 +35,8 @@ class CreateVariantsFile(luigi.Task):
   def run(self):
     config = configuration.get_opencga_config('pipeline_config.conf')
     command = '{opencga-root}/bin/opencga.sh files create --user {user} --password {password} ' \
-              '-i "{path}" --study-id "{user}@{project-alias}/{study-alias}" --bioformat VARIANT --checksum --output-format IDS'
+              '-i "{path}" --study-id "{user}@{project-alias}/{study-alias}" --path "30_eva_valid" ' \
+              '--bioformat VARIANT --checksum --output-format IDS'
     kwargs = {'opencga-root'    : config['root_folder'],
               'user'            : config['catalog_user'],
               'password'        : config['catalog_pass'],
@@ -48,7 +49,7 @@ class CreateVariantsFile(luigi.Task):
   def complete(self):
     config = configuration.get_opencga_config('pipeline_config.conf')
     command = '{opencga-root}/bin/opencga.sh files info --user {user} --password {password} ' \
-              '-id "{user}@{project-alias}/{study-alias}/{filename}" --output-format IDS > {output}'
+              '-id "{user}@{project-alias}/{study-alias}/30_eva_valid/{filename}" --output-format IDS > {output}'
     kwargs = {'opencga-root'    : config['root_folder'],
               'user'            : config['catalog_user'],
               'password'        : config['catalog_pass'],
@@ -137,7 +138,7 @@ class TransformFile:
         study_id = study_json['id']
         study_folder = study_json['uri'].split(':', 1)[1]  # Remove prefix "file:"
     
-    files_root = "{folder}/{filename}".format(folder=study_folder, filename=os.path.basename(self.path))
+    files_root = "{folder}/40_transformed/{filename}".format(folder=study_folder, filename=os.path.basename(self.path))
     
     # The project and study ID must be at least zero, and the output files must exist
     return project_id > -1 and study_id > -1 and \
@@ -184,7 +185,7 @@ class TransformFile:
         study_id = study_json['id']
         study_folder = study_json['uri'].split(':', 1)[1]  # Remove prefix "file:"
     
-    files_root = "{folder}/{filename}".format(folder=study_folder, filename=os.path.basename(self.path))
+    files_root = "{folder}/40_transformed/{filename}".format(folder=study_folder, filename=os.path.basename(self.path))
     
     return { 'variants' : luigi.LocalTarget(files_root + '.variants.json.snappy'),
              'file'     : luigi.LocalTarget(files_root + '.file.json.snappy') }
@@ -199,8 +200,9 @@ class TransformGenotypesFile(luigi.Task, TransformFile):
   def run(self):
     config = configuration.get_opencga_config('pipeline_config.conf')
     command = '{opencga-root}/bin/opencga.sh files index --user {user} --password {password} ' \
-              '--file-id "{user}@{project-alias}/{study-alias}/{filename}" --output-format IDS ' \
-              '-Dannotate=false -- --transform --include-genotypes'
+              '--file-id "{user}@{project-alias}/{study-alias}/30_eva_valid/{filename}" ' \
+              '-o "{user}@{project-alias}/{study-alias}/40_transformed" ' \
+              '--output-format IDS -Dannotate=false -- --transform --include-genotypes'
     kwargs = {'opencga-root'    : config['root_folder'],
               'user'            : config['catalog_user'],
               'password'        : config['catalog_pass'],
@@ -228,8 +230,9 @@ class TransformAggregatedFile(luigi.Task, TransformFile):
   def run(self):
     config = configuration.get_opencga_config('pipeline_config.conf')
     command = '{opencga-root}/bin/opencga.sh files index --user {user} --password {password} ' \
-              '--file-id "{user}@{project-alias}/{study-alias}/{filename}" --output-format IDS ' \
-              '-Dannotate=false -- --transform --aggregated {aggregation} --include-stats'
+              '--file-id "{user}@{project-alias}/{study-alias}/30_eva_valid/{filename}" ' \
+              '-o "{user}@{project-alias}/{study-alias}/40_transformed/" ' \
+              '--output-format IDS -Dannotate=false -- --transform --aggregated {aggregation} --include-stats'
     kwargs = {'opencga-root'    : config['root_folder'],
               'user'            : config['catalog_user'],
               'password'        : config['catalog_pass'],
@@ -285,8 +288,8 @@ class LoadGenotypesFile(luigi.Task, LoadFile):
   def run(self):
     config = configuration.get_opencga_config('pipeline_config.conf')
     command = '{opencga-root}/bin/opencga.sh files index --user {user} --password {password} ' \
-              '--database {database} --file-id "{user}@{project-alias}/{study-alias}/{variants-file}" ' \
-              '--indexed-file-id "{user}@{project-alias}/{study-alias}/{filename}.MONGODB" --output-format IDS ' \
+              '--database {database} --file-id "{user}@{project-alias}/{study-alias}/40_transformed/{variants-file}" ' \
+              '--indexed-file-id "{user}@{project-alias}/{study-alias}/40_transformed/{filename}.MONGODB" --output-format IDS ' \
               '-Dannotate=false -- --load --include-genotypes --compress-genotypes'
     kwargs = {'opencga-root'    : config['root_folder'],
               'user'            : config['catalog_user'],
@@ -312,8 +315,8 @@ class LoadAggregatedFile(luigi.Task, LoadFile):
   def run(self):
     config = configuration.get_opencga_config('pipeline_config.conf')
     command = '{opencga-root}/bin/opencga.sh files index --user {user} --password {password} ' \
-              '--database {database} --file-id "{user}@{project-alias}/{study-alias}/{variants-file}" ' \
-              '--indexed-file-id "{user}@{project-alias}/{study-alias}/{filename}.MONGODB" --output-format IDS ' \
+              '--database {database} --file-id "{user}@{project-alias}/{study-alias}/40_transformed/{variants-file}" ' \
+              '--indexed-file-id "{user}@{project-alias}/{study-alias}/40_transformed/{filename}.MONGODB" --output-format IDS ' \
               '-Dannotate=false -- --load --include-stats'
     kwargs = {'opencga-root'    : config['root_folder'],
               'user'            : config['catalog_user'],
