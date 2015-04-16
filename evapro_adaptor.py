@@ -30,8 +30,8 @@ def get_study_info(study_alias):
     conn = connect()
     cursor = conn.cursor()
 
-    cursor.execute('SELECT project_title, description, center '
-                   'FROM study_browser '
+    cursor.execute('SELECT title, description, center_name '
+                   'FROM project '
                    'WHERE project_accession = \'{alias}\''
                    .format(alias=study_alias))
 
