@@ -57,7 +57,7 @@ class CreateSamplesFile(luigi.Task):
               'project-alias'   : self.project_alias,
               'study-alias'     : self.study_alias,
               'filename'        : os.path.basename(self.path),
-              'output'          : "/tmp/" + os.path.basename(self.path) + ".step1"}
+              'output'          : "/tmp/" + os.path.basename(self.path) + ".samples1"}
     
     # If the file was found, the output file will have some contents
     try:
@@ -116,7 +116,7 @@ class LoadSamplesFile(luigi.Task):
               'project-alias'   : self.project_alias,
               'study-alias'     : self.study_alias,
               'filename'        : os.path.basename(self.path),
-              'output'          : "/tmp/" + os.path.basename(self.path) + ".step2_1"}
+              'output'          : "/tmp/" + os.path.basename(self.path) + ".samples2_1"}
     
     # If the file was found, the output file will have some contents
     try:
@@ -134,7 +134,7 @@ class LoadSamplesFile(luigi.Task):
               'password'        : config['catalog_pass'],
               'project-alias'   : self.project_alias,
               'study-alias'     : self.study_alias,
-              'output'          : "/tmp/" + os.path.basename(self.path) + ".step2_2"}
+              'output'          : "/tmp/" + os.path.basename(self.path) + ".samples2_2"}
     
     # If the samples were found, the output file will have some contents
     try:
@@ -151,7 +151,7 @@ class LoadSamplesFile(luigi.Task):
       #print(study_json)
     
       #samples_from_db = [ line.strip() for line in open(output_path, 'r') ]
-      #samples_from_file = [ line.split(None, 1)[0] for line in open(self.path, 'r') ]
+      #samples_from_file = [ line.split(None, 1)[1] for line in open(self.path, 'r') ]
     
       #print(samples_from_db)
       #print(samples_from_file)
@@ -229,7 +229,7 @@ class CreateGlobalCohort(luigi.Task):
               'password'        : config['catalog_pass'],
               'project-alias'   : self.project_alias,
               'study-alias'     : self.study_alias,
-              'output'          : "/tmp/" + self.study_alias + ".step3_1"}
+              'output'          : "/tmp/" + self.study_alias + ".samples3_1"}
     
     try:
       output_path = shellout(command, **kwargs)
@@ -254,7 +254,7 @@ class CreateGlobalCohort(luigi.Task):
               'password'        : config['catalog_pass'],
               'project-alias'   : self.project_alias,
               'study-alias'     : self.study_alias,
-              'output'          : "/tmp/" + self.study_alias + ".step3_2"}
+              'output'          : "/tmp/" + self.study_alias + ".samples3_2"}
       
     try:
       output_path = shellout(command, **kwargs)
@@ -267,7 +267,7 @@ class CreateGlobalCohort(luigi.Task):
         study_json = json.load(file)
         study_cohorts = study_json['cohorts']
       for cohort in study_cohorts:
-        if cohort['name'] == 'all':
+        if cohort['name'] == 'ALL':
           cohort_samples = cohort['samples']
           break
     
@@ -276,8 +276,84 @@ class CreateGlobalCohort(luigi.Task):
 
 
 
-class CreateCohort(luigi.Task):
-  pass
+class CreatePopulationCohorts(luigi.Task):
+  """
+  Create a set of cohorts grouping the samples by the 'Population' variable from the pedigree information
+  """
+  
+  #path = luigi.Parameter()
+  
+  study_alias = luigi.Parameter()
+  study_name = luigi.Parameter(default="")
+  study_description = luigi.Parameter(default="")
+  study_uri = luigi.Parameter(default="")
+  study_ticket_uri = luigi.Parameter(default="")
+  
+  project_alias = luigi.Parameter()
+  project_name = luigi.Parameter(default="")
+  project_description = luigi.Parameter(default="")
+  project_organization = luigi.Parameter(default="")
+  
+  
+  def requires(self):
+    return CreateStudy(alias=self.study_alias, name=self.study_name, description=self.study_description, 
+                       uri=self.study_uri, ticket_uri=self.study_ticket_uri,
+                       project_alias=self.project_alias, project_name=self.project_name, 
+                       project_description=self.project_description, project_organization=self.project_organization)
+  
+  def run(self):
+    config = configuration.get_opencga_config('pipeline_config.conf')
+    # Create a set of cohort grouping the samples by a variable
+    command = '{opencga-root}/bin/opencga.sh cohorts create --user {user} --password {password} ' \
+              '--study-id "{user}@{project-alias}/{study-alias}" --variable Population'
+    kwargs = {'opencga-root'    : config['root_folder'],
+              'user'            : config['catalog_user'],
+              'password'        : config['catalog_pass'],
+              'project-alias'   : self.project_alias,
+              'study-alias'     : self.study_alias}
+    
+    shellout_no_stdout(command, **kwargs)
+    
+    
+  def complete(self):
+    """
+    Check that all the study samples and those from the cohort are the same
+    """
+    
+    config = configuration.get_opencga_config('pipeline_config.conf')
+    
+    # TODO Retrieve the number of possible values for variable 'Population'
+    command = '{opencga-root}/bin/opencga.sh studies info --user {user} --password {password} ' \
+              '--study-id "{user}@{project-alias}/{study-alias}" > {output}'
+    kwargs = {'opencga-root'    : config['root_folder'],
+              'user'            : config['catalog_user'],
+              'password'        : config['catalog_pass'],
+              'project-alias'   : self.project_alias,
+              'study-alias'     : self.study_alias,
+              'output'          : "/tmp/" + self.study_alias + ".samples4_1"}
+      
+    try:
+      output_path = shellout(command, **kwargs)
+    except RuntimeError:
+      return False
+    
+    if os.path.getsize(output_path) > 0:
+      return False
+      
+    with open(output_path, 'r') as file:
+      study_json = json.load(file)
+      study_cohorts = study_json['cohorts']
+      study_variablesets = study_json['variableSets']
+      
+    # The number of created population cohorts must be greater or equal than the number of available populations
+    num_cohorts = len(study_cohorts)
+    for variableset in study_variablesets:
+      for variable in variableset['variables']:
+        if variable['id'] == 'Population':
+          num_variable_values = len(variable['allowedValues'])
+          if num_cohorts < num_variable_values:
+            return False
+    return True
   
 
 
