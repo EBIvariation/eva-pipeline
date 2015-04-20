@@ -337,7 +337,7 @@ class CreatePopulationCohorts(luigi.Task):
     except RuntimeError:
       return False
     
-    if os.path.getsize(output_path) > 0:
+    if os.path.getsize(output_path) == 0:
       return False
       
     with open(output_path, 'r') as file:
@@ -345,16 +345,22 @@ class CreatePopulationCohorts(luigi.Task):
       study_cohorts = study_json['cohorts']
       study_variablesets = study_json['variableSets']
       
-    # The number of created population cohorts must be greater or equal than the number of available populations
-    num_cohorts = len(study_cohorts)
+    # Get the names of all the cohorts created for the study
+    cohorts_names = []
+    for cohort in study_cohorts:
+      cohorts_names.append(cohort['name'])
+    cohorts_names = set(cohorts_names)
+    
+    # The population cohorts must be a subset of all the cohorts
     for variableset in study_variablesets:
       for variable in variableset['variables']:
         if variable['id'] == 'Population':
-          num_variable_values = len(variable['allowedValues'])
-          if num_cohorts < num_variable_values:
+          populations = variable['allowedValues']
+          if not set(populations).issubset(cohorts_names):
             return False
+            
     return True
-  
+
 
 
 if __name__ == '__main__':
