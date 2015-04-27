@@ -37,7 +37,8 @@ class CreateSamplesFile(luigi.Task):
   def run(self):
     config = configuration.get_opencga_config('pipeline_config.conf')
     command = '{opencga-root}/bin/opencga.sh files create --user {user} --password {password} ' \
-              '-i "{path}" --study-id "{user}@{project-alias}/{study-alias}" --bioformat PEDIGREE --checksum --output-format IDS'
+              '-i "{path}" --study-id "{user}@{project-alias}/{study-alias}" --path "30_eva_valid" ' \
+              '--bioformat PEDIGREE --checksum --output-format IDS'
     kwargs = {'opencga-root'    : config['root_folder'],
               'user'            : config['catalog_user'],
               'password'        : config['catalog_pass'],
@@ -50,7 +51,7 @@ class CreateSamplesFile(luigi.Task):
   def complete(self):
     config = configuration.get_opencga_config('pipeline_config.conf')
     command = '{opencga-root}/bin/opencga.sh files info --user {user} --password {password} ' \
-              '-id "{user}@{project-alias}/{study-alias}/{filename}" --output-format IDS > {output}'
+              '-id "{user}@{project-alias}/{study-alias}/30_eva_valid/{filename}" --output-format IDS > {output}'
     kwargs = {'opencga-root'    : config['root_folder'],
               'user'            : config['catalog_user'],
               'password'        : config['catalog_pass'],
@@ -95,7 +96,8 @@ class LoadSamplesFile(luigi.Task):
   def run(self):
     config = configuration.get_opencga_config('pipeline_config.conf')
     command = '{opencga-root}/bin/opencga.sh samples load --user {user} --password {password} ' \
-              '--pedigree-id "{user}@{project-alias}/{study-alias}/{filename}" --study-id "{user}@{project-alias}/{study-alias}" --output-format IDS'
+              '--pedigree-id "{user}@{project-alias}/{study-alias}/30_eva_valid/{filename}" ' \
+              '--study-id "{user}@{project-alias}/{study-alias}" --output-format IDS'
     kwargs = {'opencga-root'    : config['root_folder'],
               'user'            : config['catalog_user'],
               'password'        : config['catalog_pass'],
@@ -109,7 +111,7 @@ class LoadSamplesFile(luigi.Task):
   def complete(self):
     config = configuration.get_opencga_config('pipeline_config.conf')
     command = '{opencga-root}/bin/opencga.sh files info --user {user} --password {password} ' \
-              '-id "{user}@{project-alias}/{study-alias}/{filename}" --output-format IDS > {output}'
+              '-id "{user}@{project-alias}/{study-alias}/30_eva_valid/{filename}" --output-format IDS > {output}'
     kwargs = {'opencga-root'    : config['root_folder'],
               'user'            : config['catalog_user'],
               'password'        : config['catalog_pass'],
