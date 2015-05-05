@@ -92,7 +92,7 @@ class TransformFile:
   
   def complete(self):
     """
-    To check completion, the project ID and study must be retrieved, and the json.snappy files searched in the folder specified in OpenCGA Catalog
+    To check completion, the project ID and study must be retrieved, and the json.gzip files searched in the folder specified in OpenCGA Catalog
     """
     
     project_id = -1
@@ -142,12 +142,12 @@ class TransformFile:
     
     # The project and study ID must be at least zero, and the output files must exist
     return project_id > -1 and study_id > -1 and \
-           os.path.isfile(files_root + '.file.json.snappy') and \
-           os.path.isfile(files_root + '.variants.json.snappy')
+           os.path.isfile(files_root + '.file.json.gz') and \
+           os.path.isfile(files_root + '.variants.json.gz')
 
   def output(self):
     """
-    The output files are json.snappy tranformed from VCF, and searched in the folder specified in OpenCGA Catalog
+    The output files are json.gzip tranformed from VCF, and searched in the folder specified in OpenCGA Catalog
     """
     
     project_id = -1
@@ -187,8 +187,8 @@ class TransformFile:
     
     files_root = "{folder}/40_transformed/{filename}".format(folder=study_folder, filename=os.path.basename(self.path))
     
-    return { 'variants' : luigi.LocalTarget(files_root + '.variants.json.snappy'),
-             'file'     : luigi.LocalTarget(files_root + '.file.json.snappy') }
+    return { 'variants' : luigi.LocalTarget(files_root + '.variants.json.gz'),
+             'file'     : luigi.LocalTarget(files_root + '.file.json.gz') }
 
 
 
@@ -202,7 +202,7 @@ class TransformGenotypesFile(luigi.Task, TransformFile):
     command = '{opencga-root}/bin/opencga.sh files index --user {user} --password {password} ' \
               '--file-id "{user}@{project-alias}/{study-alias}/30_eva_valid/{filename}" ' \
               '-o "{user}@{project-alias}/{study-alias}/40_transformed/" ' \
-              '--output-format IDS -Dannotate=false -- --transform --include-genotypes'
+              '--output-format IDS -Dannotate=false -- --transform --include-genotypes -DcompressExtension=gz'
     kwargs = {'opencga-root'    : config['root_folder'],
               'user'            : config['catalog_user'],
               'password'        : config['catalog_pass'],
@@ -232,7 +232,7 @@ class TransformAggregatedFile(luigi.Task, TransformFile):
     command = '{opencga-root}/bin/opencga.sh files index --user {user} --password {password} ' \
               '--file-id "{user}@{project-alias}/{study-alias}/30_eva_valid/{filename}" ' \
               '-o "{user}@{project-alias}/{study-alias}/40_transformed/" ' \
-              '--output-format IDS -Dannotate=false -- --transform --aggregated {aggregation} --include-stats'
+              '--output-format IDS -Dannotate=false -- --transform --aggregated {aggregation} --include-stats -DcompressExtension=gz'
     kwargs = {'opencga-root'    : config['root_folder'],
               'user'            : config['catalog_user'],
               'password'        : config['catalog_pass'],
