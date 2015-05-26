@@ -8,11 +8,40 @@ from shellout import shellout_no_stdout, shellout
 import configuration
 
 
+def get_cohort_ids(project_alias, study_alias):
+  config = configuration.get_opencga_config('pipeline_config.conf')
+
+  command = '{opencga-root}/bin/opencga.sh studies info --user {user} --password {password} ' \
+            '--study-id "{user}@{project-alias}/{study-alias}" > {output}'
+  kwargs = {'opencga-root'    : config['root_folder'],
+            'user'            : config['catalog_user'],
+            'password'        : config['catalog_pass'],
+            'project-alias'   : project_alias,
+            'study-alias'     : study_alias,
+            'output'          : "/tmp/" + study_alias + ".study"}
+
+  try:
+    output_path = shellout(command, **kwargs)
+  except RuntimeError:
+    return []
+
+  if os.path.getsize(output_path) == 0:
+    return []
+
+  with open(output_path, 'r') as file:
+    study_json = json.load(file)
+    study_cohorts = study_json['cohorts']
+
+  # Get the ids of all the cohorts created for the study
+  cohorts_ids = [ str(cohort['id']) for cohort in study_cohorts ]
+  return cohorts_ids
+
+
+
 class CreateVariantsStatistics(luigi.Task):
   
   path = luigi.Parameter()
   database = luigi.Parameter()
-  #index_file_id = luigi.Parameter(default="")
   
   study_alias = luigi.Parameter()
   study_name = luigi.Parameter(default="")
@@ -27,39 +56,11 @@ class CreateVariantsStatistics(luigi.Task):
   
   def requires(self):
     return [
-          CreateGlobalCohort(self.study_alias, self.study_name, self.study_description, self.study_uri, self.study_ticket_uri,
-                           self.project_alias, self.project_name, self.project_description, self.project_organization),
-          CreatePopulationCohorts(self.study_alias, self.study_name, self.study_description, self.study_uri, self.study_ticket_uri,
-                           self.project_alias, self.project_name, self.project_description, self.project_organization)
+            CreateGlobalCohort(self.study_alias, self.study_name, self.study_description, self.study_uri, self.study_ticket_uri,
+                               self.project_alias, self.project_name, self.project_description, self.project_organization),
+            CreatePopulationCohorts(self.study_alias, self.study_name, self.study_description, self.study_uri, self.study_ticket_uri,
+                               self.project_alias, self.project_name, self.project_description, self.project_organization)
            ]
-
-  def get_cohort_ids(self):
-    config = configuration.get_opencga_config('pipeline_config.conf')
-
-    command = '{opencga-root}/bin/opencga.sh studies info --user {user} --password {password} ' \
-              '--study-id "{user}@{project-alias}/{study-alias}" > {output}'
-    kwargs = {'opencga-root'    : config['root_folder'],
-              'user'            : config['catalog_user'],
-              'password'        : config['catalog_pass'],
-              'project-alias'   : self.project_alias,
-              'study-alias'     : self.study_alias,
-              'output'          : "/tmp/" + self.study_alias + ".samples4_1"}
-
-    try:
-      output_path = shellout(command, **kwargs)
-    except RuntimeError:
-      return []
-
-    if os.path.getsize(output_path) == 0:
-      return []
-
-    with open(output_path, 'r') as file:
-      study_json = json.load(file)
-      study_cohorts = study_json['cohorts']
-
-    # Get the ids of all the cohorts created for the study
-    cohorts_ids = [ str(cohort['id']) for cohort in study_cohorts ]
-    return cohorts_ids
 
 
   def run(self):
@@ -72,14 +73,10 @@ class CreateVariantsStatistics(luigi.Task):
               'password'        : config['catalog_pass'],
               'project-alias'   : self.project_alias,
               'study-alias'     : self.study_alias,
-              'cohort-id'       : ",".join(self.get_cohort_ids()),
+              'cohort-id'       : ",".join(get_cohort_ids(self.project_alias, self.study_alias)),
               'filename'        : os.path.basename(self.path)}
     
     shellout_no_stdout(command, **kwargs)
-    
-
-  def complete(self):
-    return False
 
 
   def output(self):
@@ -125,11 +122,9 @@ class CreateVariantsStatistics(luigi.Task):
     #files_root = "{folder}/50_stats/{filename}".format(folder=study_folder, filename=os.path.basename(self.path))
     files_root = "{folder}/50_stats/stats_".format(folder=study_folder)
     
-    print "study folder: " + study_folder
     # TODO Retrieve a list of all the cohorts
-    
     cohort_names = []
-    cohort_ids = self.get_cohort_ids()
+    cohort_ids = get_cohort_ids(self.project_alias, self.study_alias)
     for cohort_id in cohort_ids:
       # Get cohort names from ids
       command = '{opencga-root}/bin/opencga.sh cohorts info --user {user} --password {password} ' \
@@ -137,8 +132,8 @@ class CreateVariantsStatistics(luigi.Task):
       kwargs = {'opencga-root'    : config['root_folder'],
                 'user'            : config['catalog_user'],
                 'password'        : config['catalog_pass'],
-                'cohort'       : cohort_id,
-                'output'          : "/tmp/" + os.path.basename(self.path) + ".study"}  
+                'cohort'          : cohort_id,
+                'output'          : "/tmp/" + os.path.basename(self.path) + ".cohorts"}  
       
       cohort_output = shellout(command, **kwargs)
       if os.path.getsize(cohort_output) > 0:
@@ -181,9 +176,7 @@ class CreateVariantsStatistics(luigi.Task):
         return { 'variants' : luigi.LocalTarget(newest[0]),
                  'file'     : luigi.LocalTarget(newest[1]) }
     
-    return {}
-    #return { 'variants' : luigi.LocalTarget(files_root + '.variants.stats.json.gz'),
-    #         'file'     : luigi.LocalTarget(files_root + '.source.stats.json.gz') }
+    raise RuntimeError('No statistics files found')
  
 
 
@@ -191,7 +184,6 @@ class LoadVariantsStatistics(luigi.Task):
 
   path = luigi.Parameter()
   database = luigi.Parameter()
-  #index_file_id = luigi.Parameter(default="")
 
   study_alias = luigi.Parameter()
   study_name = luigi.Parameter(default="")
@@ -205,37 +197,29 @@ class LoadVariantsStatistics(luigi.Task):
   project_organization = luigi.Parameter(default="")
 
   def requires(self):
-    return [
-      #CreateVariantsStatistics(self.study_alias, self.study_name, self.study_description, self.study_uri, self.study_ticket_uri,
-      #                     self.project_alias, self.project_name, self.project_description, self.project_organization)
-    ]
+    return CreateVariantsStatistics(self.path, self.database, self.study_alias, self.study_name, self.study_description, self.study_uri, self.study_ticket_uri, 
+                                    self.project_alias, self.project_name, self.project_description, self.project_organization)
+  
   
   def run(self):
-    create = CreateVariantsStatistics(self.path, self.database, self.study_alias, self.study_name, self.study_description, self.study_uri, self.study_ticket_uri,
-                           self.project_alias, self.project_name, self.project_description, self.project_organization)
-    files = create.output()
-
-    print files
-    print files['variants'].split(".")  # TODO luigi.LocalTarget is not a string, how to obtain the file name? 
-    print files['variants'].split(".")[0:1]
-    print "{stats_cohorts}.{date}".format(files['variants'].split(".")[0:1])
-    
-    
+    variants_file = self.input()['variants']
+    variants_file_parts = variants_file.fn.split('.')
     
     config = configuration.get_opencga_config('pipeline_config.conf')
-    command = 'echo {opencga-root}/bin/opencga.sh files stats-variants --user {user} --password {password} ' \
+    command = '{opencga-root}/bin/opencga.sh files stats-variants --user {user} --password {password} ' \
              '--cohort-id {cohort-id} --file-id "{user}@{project-alias}/{study-alias}/40_transformed/{filename}.MONGODB" ' \
              '--outdir-id "{user}@{project-alias}/{study-alias}/50_stats/" -- --load {stats_prefix} '
-    kwargs = {'opencga-root'    : config['root_folder'],
+    kwargs = {'opencga-root'   : config['root_folder'],
              'user'            : config['catalog_user'],
              'password'        : config['catalog_pass'],
              'project-alias'   : self.project_alias,
              'study-alias'     : self.study_alias,
-             'cohort-id'       : ",".join(create.get_cohort_ids()),
+             'cohort-id'       : ",".join(get_cohort_ids(self.project_alias, self.study_alias)),
              'filename'        : os.path.basename(self.path),
-             'stats_prefix'    : "{stats_cohorts}.{date}".format(files['variants'].split(".")[0:1])}
+             'stats_prefix'    : "{cohorts}.{date}".format(cohorts=variants_file_parts[0], date=variants_file_parts[1])}
     
     shellout_no_stdout(command, **kwargs)
+    
 
 
 if __name__ == '__main__':
