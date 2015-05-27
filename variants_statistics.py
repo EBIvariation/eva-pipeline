@@ -177,7 +177,14 @@ class CreateVariantsStatistics(luigi.Task):
                  'file'     : luigi.LocalTarget(newest[1]) }
     
     raise RuntimeError('No statistics files found')
- 
+
+  def complete(self):
+    try:
+      self.output()
+    except RuntimeError:
+      return False
+
+    return True
 
 
 class LoadVariantsStatistics(luigi.Task):
