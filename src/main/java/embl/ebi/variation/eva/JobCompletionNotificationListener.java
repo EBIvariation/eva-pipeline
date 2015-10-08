@@ -1,4 +1,4 @@
-package uk.ac.ebi.variation;
+package embl.ebi.variation.eva;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

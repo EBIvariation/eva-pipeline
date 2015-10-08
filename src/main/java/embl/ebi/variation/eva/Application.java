@@ -1,4 +1,4 @@
-package uk.ac.ebi.variation;
+package embl.ebi.variation.eva;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +24,5 @@ public class Application {
 
     public static void main(String[] args) throws Exception {
         SpringApplication.run(Application.class, args);
-
     }
 }

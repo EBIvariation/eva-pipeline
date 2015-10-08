@@ -1,4 +1,4 @@
-package uk.ac.ebi.variation;
+package embl.ebi.variation.eva;
 
 import org.opencb.biodata.models.variant.VariantSource;
 import org.opencb.biodata.models.variant.VariantStudy;
