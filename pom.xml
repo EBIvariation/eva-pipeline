@@ -10,12 +10,6 @@
         <version>0.1</version>
     </parent>
 
-    <!--<parent>-->
-    <!--<groupId>org.springframework.boot</groupId>-->
-    <!--<artifactId>spring-boot-starter-parent</artifactId>-->
-    <!--<version>1.2.5.RELEASE</version>-->
-    <!--</parent>-->
-
     <artifactId>eva-pipeline</artifactId>
     <dependencies>
         <dependency>
@@ -59,11 +53,6 @@
                     <artifactId>slf4j-simple</artifactId>
                 </exclusion>
             </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-            <version>${jackson.version}</version>
         </dependency>
     </dependencies>
 
