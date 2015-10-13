@@ -2,6 +2,7 @@ package embl.ebi.variation.eva;
 
 import org.opencb.biodata.models.variant.VariantSource;
 import org.opencb.biodata.models.variant.VariantStudy;
+import org.opencb.opencga.storage.core.variant.VariantStorageManager;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;

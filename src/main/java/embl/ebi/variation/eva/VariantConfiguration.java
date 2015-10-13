@@ -93,7 +93,8 @@ public class VariantConfiguration {
         SimpleJobBuilder simpleJobBuilder = jobBuilder.start(init(stepBuilderFactory))
                 .next(transform(stepBuilderFactory))
                 .next(load(stepBuilderFactory))
-                .next(stats(stepBuilderFactory))
+                .next(statsCreate(stepBuilderFactory))
+                .next(statsLoad(stepBuilderFactory))
 //                .next(annotation(stepBuilderFactory));
                 ;
         return simpleJobBuilder.build();
@@ -130,11 +131,10 @@ public class VariantConfiguration {
                         config.studyId, config.studyName, config.studyType, config.aggregated);
 
                 variantOptions = new ObjectMap();
-//                variantOptions.put(VariantStorageManager.STUDY_NAME.key(), "asdfasdfasdfasdf");
-//                variantOptions.put(VariantStorageManager.STUDY_ID.key(), "asdfasdfasdfasdf");
-//                variantOptions.put(VariantStorageManager.FILE_ID.key(), "asdfasdfasdfasdf");
 //                variantOptions.put(VariantStorageManager.SAMPLE_IDS, Arrays.asList(config.samples.split(",")));
-                variantOptions.put(VariantStorageManager.CALCULATE_STATS, false);
+                variantOptions.put(VariantStorageManager.CALCULATE_STATS, false);   // this is tested by hand
+                variantOptions.put(VariantStorageManager.OVERWRITE_STATS, config.overwriteStats);
+
                 variantOptions.put(VariantStorageManager.INCLUDE_STATS, false);
 //                variantOptions.put(VariantStorageManager.INCLUDE_GENOTYPES.key(), false);   // TODO rename samples to genotypes
                 variantOptions.put(VariantStorageManager.INCLUDE_SAMPLES, true);   // TODO rename samples to genotypes
@@ -163,13 +163,14 @@ public class VariantConfiguration {
                 transformedVariantsUri = outdirUri.resolve(outputVariantJsonFile.getFileName().toString());
 
                 // stats config
-                statsOutputUri = outdirUri.resolve(VariantStorageManager.buildFilename(source) + "." + TimeUtils.getTime());
+//                statsOutputUri = outdirUri.resolve(VariantStorageManager.buildFilename(source) + "." + TimeUtils.getTime());  // TODO why was the timestamp required?
+                statsOutputUri = outdirUri.resolve(VariantStorageManager.buildFilename(source));
                 return RepeatStatus.FINISHED;
             }
         });
 
 
-        // true: every job execution will do this step, even if this step is COMPLETED
+        // true: every job execution will do this step, even if this step is already COMPLETED
         // false: if the job was aborted and is relaunched, this step will NOT be done again
         tasklet.allowStartIfComplete(true);
 
@@ -197,7 +198,7 @@ public class VariantConfiguration {
             }
         });
 
-        // true: every job execution will do this step, even if this step is COMPLETED
+        // true: every job execution will do this step, even if this step is already COMPLETED
         // false: if the job was aborted and is relaunched, this step will NOT be done again
         tasklet.allowStartIfComplete(false);
 
@@ -222,56 +223,71 @@ public class VariantConfiguration {
         });
 
 
-        // true: every job execution will do this step, even if this step is COMPLETED
+        // true: every job execution will do this step, even if this step is already COMPLETED
         // false: if the job was aborted and is relaunched, this step will NOT be done again
         tasklet.allowStartIfComplete(false);
         return tasklet.build();
     }
 
-    public Step stats(StepBuilderFactory stepBuilderFactory) {
-        StepBuilder step1 = stepBuilderFactory.get("stats");
+    public Step statsCreate(StepBuilderFactory stepBuilderFactory) {
+        StepBuilder step1 = stepBuilderFactory.get("statsCreate");
         TaskletStepBuilder tasklet = step1.tasklet(new Tasklet() {
             @Override
             public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
                 samples = new HashMap<String, Set<String>>(); // TODO fill properly. if this is null overwrite will take on
                 samples.put("SOME", new HashSet<String>(Arrays.asList("HG00096", "HG00097")));
 
-                // getting properties
-                variantOptions.put(VariantStorageManager.CALCULATE_STATS, config.calculateStats);
-                variantOptions.put(VariantStorageManager.OVERWRITE_STATS, config.overwriteStats);
+                if(config.calculateStats) { // TODO maybe this `if` is skippable with job flows
+                    // obtaining resources. this should be minimum, in order to skip this step if it is completed
+                    VariantStatisticsManager variantStatisticsManager = new VariantStatisticsManager();
+                    QueryOptions statsOptions = new QueryOptions(variantOptions);
+                    VariantSource variantSource = variantOptions.get(VariantStorageManager.VARIANT_SOURCE, VariantSource.class);
+                    VariantDBAdaptor dbAdaptor = variantStorageManager.getDBAdaptor(config.dbName, variantOptions);
 
-                // obtaining resources. this should be minimum, in order to skip this step if it is completed
-                VariantStatisticsManager variantStatisticsManager = new VariantStatisticsManager();
-                QueryOptions statsOptions = new QueryOptions(variantOptions);
-                VariantSource variantSource = variantOptions.get(VariantStorageManager.VARIANT_SOURCE, VariantSource.class);
-                VariantDBAdaptor dbAdaptor = variantStorageManager.getDBAdaptor(config.dbName, variantOptions);
+                    // actual stats creation
+                    variantStatisticsManager.createStats(dbAdaptor, statsOutputUri, samples, statsOptions);
+                } else {
+                    logger.info("skipping stats creation");
+                }
 
-                // actual stats
-                variantStatisticsManager.createStats(dbAdaptor, statsOutputUri, samples, statsOptions);
-                variantStatisticsManager.loadStats(dbAdaptor, statsOutputUri, statsOptions);
-
-
-                variantOptions.put(VariantStorageManager.CALCULATE_STATS, false);
-
-//                Object annotate = variantOptions.get(VariantStorageManager.ANNOTATE);
-//                variantOptions.put(VariantStorageManager.ANNOTATE, false);
-//
-//                logger.info("-- PostLoad variants -- {}", nextFileUri);
-//                variantStorageManager.postLoad(transformedVariantsUri, outdirUri, variantOptions);
-//
-//                variantOptions.put(VariantStorageManager.ANNOTATE, annotate);
                 return RepeatStatus.FINISHED;
             }
         });
 
-
-
-        // true: every job execution will do this step, even if this step is COMPLETED
+        // true: every job execution will do this step, even if this step is already COMPLETED
         // false: if the job was aborted and is relaunched, this step will NOT be done again
         tasklet.allowStartIfComplete(false);
         return tasklet.build();
-
     }
+
+    public Step statsLoad(StepBuilderFactory stepBuilderFactory) {
+        StepBuilder step1 = stepBuilderFactory.get("statsLoad");
+        TaskletStepBuilder tasklet = step1.tasklet(new Tasklet() {
+            @Override
+            public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
+
+                if (config.calculateStats) {
+                    // obtaining resources. this should be minimum, in order to skip this step if it is completed
+                    VariantStatisticsManager variantStatisticsManager = new VariantStatisticsManager();
+                    QueryOptions statsOptions = new QueryOptions(variantOptions);
+                    VariantDBAdaptor dbAdaptor = variantStorageManager.getDBAdaptor(config.dbName, variantOptions);
+
+                    // actual stats load
+                    variantStatisticsManager.loadStats(dbAdaptor, statsOutputUri, statsOptions);
+                } else {
+                    logger.info("skipping stats loading");
+                }
+
+                return RepeatStatus.FINISHED;
+            }
+        });
+
+        // true: every job execution will do this step, even if this step is already COMPLETED
+        // false: if the job was aborted and is relaunched, this step will NOT be done again
+        tasklet.allowStartIfComplete(false);
+        return tasklet.build();
+    }
+
 
     public static URI createUri(String input) throws URISyntaxException {
         URI sourceUri = new URI(null, input, null);
