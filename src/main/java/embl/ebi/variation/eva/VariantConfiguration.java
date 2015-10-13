@@ -3,9 +3,14 @@ package embl.ebi.variation.eva;
 
 import org.opencb.biodata.models.variant.VariantSource;
 import org.opencb.datastore.core.ObjectMap;
+import org.opencb.datastore.core.QueryOptions;
 import org.opencb.opencga.lib.common.Config;
+import org.opencb.opencga.lib.common.TimeUtils;
 import org.opencb.opencga.storage.core.StorageManagerFactory;
 import org.opencb.opencga.storage.core.variant.VariantStorageManager;
+import org.opencb.opencga.storage.core.variant.adaptors.VariantDBAdaptor;
+import org.opencb.opencga.storage.core.variant.stats.VariantStatisticsManager;
+import org.opencb.opencga.storage.mongodb.variant.MongoDBVariantStorageManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.Job;
@@ -73,7 +78,9 @@ public class VariantConfiguration {
     private Path output;
     private Path outputVariantJsonFile;
     private URI transformedVariantsUri;
-//    private Path outputFileJsonFile;
+    private Map<String, Set<String>> samples;
+    private URI statsOutputUri;
+    //    private Path outputFileJsonFile;
 
     @Bean
     public Job variantJob(JobBuilderFactory jobs, JobExecutionListener listener, StepBuilderFactory stepBuilderFactory) {
@@ -86,7 +93,7 @@ public class VariantConfiguration {
         SimpleJobBuilder simpleJobBuilder = jobBuilder.start(init(stepBuilderFactory))
                 .next(transform(stepBuilderFactory))
                 .next(load(stepBuilderFactory))
-//                .next(stats(stepBuilderFactory))
+                .next(stats(stepBuilderFactory))
 //                .next(annotation(stepBuilderFactory));
                 ;
         return simpleJobBuilder.build();
@@ -104,6 +111,13 @@ public class VariantConfiguration {
             public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
 
                 // TODO validation checks for all the parameters
+
+                // TODO get samples
+//                System.out.println(config.samples);
+//                System.out.println(config.samples.size());
+//                if (config.samples.size() != -3) {
+//                    throw new Exception("aborting");
+//                }
 
                 Config.setOpenCGAHome(config.appHome);
 
@@ -123,11 +137,13 @@ public class VariantConfiguration {
                 variantOptions.put(VariantStorageManager.CALCULATE_STATS, false);
                 variantOptions.put(VariantStorageManager.INCLUDE_STATS, false);
 //                variantOptions.put(VariantStorageManager.INCLUDE_GENOTYPES.key(), false);   // TODO rename samples to genotypes
+                variantOptions.put(VariantStorageManager.INCLUDE_SAMPLES, true);   // TODO rename samples to genotypes
                 variantOptions.put(VariantStorageManager.INCLUDE_SRC, VariantStorageManager.IncludeSrc.parse(config.includeSrc));
                 variantOptions.put(VariantStorageManager.COMPRESS_GENOTYPES, config.compressGenotypes);
 //                variantOptions.put(VariantStorageManager.AGGREGATED_TYPE, VariantSource.Aggregation.NONE);
                 variantOptions.put(VariantStorageManager.DB_NAME, config.dbName);
                 variantOptions.put(VariantStorageManager.ANNOTATE, false);
+                variantOptions.put(MongoDBVariantStorageManager.LOAD_THREADS, config.loadThreads);
                 variantOptions.put(VariantStorageManager.VARIANT_SOURCE, source);
                 variantOptions.put("compressExtension", config.compressExtension);
 
@@ -146,6 +162,8 @@ public class VariantConfiguration {
 //                outputFileJsonFile = output.resolve(input.getFileName().toString() + ".file.json" + config.compressExtension);
                 transformedVariantsUri = outdirUri.resolve(outputVariantJsonFile.getFileName().toString());
 
+                // stats config
+                statsOutputUri = outdirUri.resolve(VariantStorageManager.buildFilename(source) + "." + TimeUtils.getTime());
                 return RepeatStatus.FINISHED;
             }
         });
@@ -197,8 +215,8 @@ public class VariantConfiguration {
                 variantStorageManager.preLoad(transformedVariantsUri, outdirUri, variantOptions);
                 logger.info("-- Load variants -- {}", nextFileUri);
                 variantStorageManager.load(transformedVariantsUri, variantOptions);
-                logger.info("-- PostLoad variants -- {}", nextFileUri);
-                variantStorageManager.postLoad(transformedVariantsUri, outdirUri, variantOptions);
+//                logger.info("-- PostLoad variants -- {}", nextFileUri);
+//                variantStorageManager.postLoad(transformedVariantsUri, outdirUri, variantOptions);
                 return RepeatStatus.FINISHED;
             }
         });
@@ -208,6 +226,51 @@ public class VariantConfiguration {
         // false: if the job was aborted and is relaunched, this step will NOT be done again
         tasklet.allowStartIfComplete(false);
         return tasklet.build();
+    }
+
+    public Step stats(StepBuilderFactory stepBuilderFactory) {
+        StepBuilder step1 = stepBuilderFactory.get("stats");
+        TaskletStepBuilder tasklet = step1.tasklet(new Tasklet() {
+            @Override
+            public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
+                samples = new HashMap<String, Set<String>>(); // TODO fill properly. if this is null overwrite will take on
+                samples.put("SOME", new HashSet<String>(Arrays.asList("HG00096", "HG00097")));
+
+                // getting properties
+                variantOptions.put(VariantStorageManager.CALCULATE_STATS, config.calculateStats);
+                variantOptions.put(VariantStorageManager.OVERWRITE_STATS, config.overwriteStats);
+
+                // obtaining resources. this should be minimum, in order to skip this step if it is completed
+                VariantStatisticsManager variantStatisticsManager = new VariantStatisticsManager();
+                QueryOptions statsOptions = new QueryOptions(variantOptions);
+                VariantSource variantSource = variantOptions.get(VariantStorageManager.VARIANT_SOURCE, VariantSource.class);
+                VariantDBAdaptor dbAdaptor = variantStorageManager.getDBAdaptor(config.dbName, variantOptions);
+
+                // actual stats
+                variantStatisticsManager.createStats(dbAdaptor, statsOutputUri, samples, statsOptions);
+                variantStatisticsManager.loadStats(dbAdaptor, statsOutputUri, statsOptions);
+
+
+                variantOptions.put(VariantStorageManager.CALCULATE_STATS, false);
+
+//                Object annotate = variantOptions.get(VariantStorageManager.ANNOTATE);
+//                variantOptions.put(VariantStorageManager.ANNOTATE, false);
+//
+//                logger.info("-- PostLoad variants -- {}", nextFileUri);
+//                variantStorageManager.postLoad(transformedVariantsUri, outdirUri, variantOptions);
+//
+//                variantOptions.put(VariantStorageManager.ANNOTATE, annotate);
+                return RepeatStatus.FINISHED;
+            }
+        });
+
+
+
+        // true: every job execution will do this step, even if this step is COMPLETED
+        // false: if the job was aborted and is relaunched, this step will NOT be done again
+        tasklet.allowStartIfComplete(false);
+        return tasklet.build();
+
     }
 
     public static URI createUri(String input) throws URISyntaxException {

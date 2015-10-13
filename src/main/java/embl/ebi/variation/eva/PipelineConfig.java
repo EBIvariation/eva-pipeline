@@ -6,6 +6,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 /**
  * Created by jmmut on 2015-09-30.
  *
@@ -17,13 +21,13 @@ import org.springframework.stereotype.Component;
 //@Component
 //@ConfigurationProperties
 public class PipelineConfig {
+    // common
     @Value("${input}")              public String input;
     @Value("${outputDir}")          public String outputDir;
     @Value("${pedigree}")           public String pedigree;
     @Value("${dbName}")             public String dbName;
-    @Value("${samples}")            public String samples;
     @Value("${storageEngine}")      public String storageEngine;
-    @Value("${compressGenotypes}")  public String compressGenotypes;
+    @Value("${compressGenotypes}")  public boolean compressGenotypes;
     @Value("${compressExtension}")  public String compressExtension;
     @Value("${includeSrc}")         public String includeSrc;
 //    @Value("${credentials}")        public String credentials;
@@ -34,6 +38,19 @@ public class PipelineConfig {
     @Value("${studyType}")          public VariantStudy.StudyType studyType;
     @Value("${studyName}")          public String studyName;
     @Value("${studyId}")            public String studyId;
+
+    // transform
+
+    // load
+    @Value("${loadThreads}")        public Integer loadThreads;
+    // Integer bulkSize, batchSize?
+
+    //stats
+    @Value("${calculateStats}")     public boolean calculateStats;
+    @Value("${overwriteStats}")     public boolean overwriteStats;
+
+    // annotation
+    @Value("${annotate}")           public boolean annotate;
 
     // job repository DB
     @Value("${jobRepositoryDriverClassName}")   public String jobRepositoryDriverClassName;
