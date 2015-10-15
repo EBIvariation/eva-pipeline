@@ -3,22 +3,27 @@ package embl.ebi.variation.eva;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-//import org.junit.runner.RunWith;
+import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-//import org.springframework.batch.core.Job;
-//import org.springframework.batch.core.ExitStatus;
-//import org.springframework.batch.core.JobExecution;
-//import org.springframework.batch.core.explore.JobExplorer;
-//import org.springframework.batch.core.launch.JobLauncher;
-//import org.springframework.batch.core.repository.JobRepository;
-//import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.boot.SpringApplication;
-//import org.springframework.batch.test.JobLauncherTestUtils;
-//import org.springframework.context.annotation.Bean;
-//import org.springframework.context.annotation.Configuration;
-//import org.springframework.test.context.ContextConfiguration;
-//import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.batch.core.Job;
+import org.springframework.batch.core.ExitStatus;
+import org.springframework.batch.core.JobExecution;
+import org.springframework.batch.core.explore.JobExplorer;
+import org.springframework.batch.core.launch.JobLauncher;
+import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
+import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
+import org.springframework.boot.SpringApplication;
+import org.springframework.batch.test.JobLauncherTestUtils;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.AbstractTransactionalJUnit4SpringContextTests;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.io.*;
 import java.net.URI;
@@ -30,12 +35,13 @@ import static org.junit.Assert.assertEquals;
 
 /**
  * Created by jmmut on 2015-10-14.
- *
+ * //TODO implement TestExecutionListener for database tear down
+ *      [at]TestExecutionListener({miImpl.class})
  * @author Jose Miguel Mut Lopez &lt;jmmut@ebi.ac.uk&gt;
  */
-//@RunWith(SpringJUnit4ClassRunner.class)
-//@ContextConfiguration(classes = {VariantConfiguration.class})
-public class VariantConfigurationTest {
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(classes = {VariantConfiguration.class})
+public class VariantConfigurationTest extends AbstractTransactionalJUnit4SpringContextTests {
 
     public static final String FILE_20 = "/small20.vcf.gz";
     public static final String FILE_22 = "/small22.vcf.gz";
@@ -47,14 +53,14 @@ public class VariantConfigurationTest {
     public ExpectedException thrown = ExpectedException.none();
 
 
-//    @Autowired
-//    VariantConfiguration variantConfiguration;
+    @Autowired
+    VariantConfiguration variantConfiguration;
 
 //    @Autowired
 //    JobLauncher jobLauncher;
 
-//    @Autowired
-//    private JobLauncherTestUtils jobLauncherTestUtils;
+    @Autowired
+    private JobLauncherTestUtils jobLauncherTestUtils;
 
 //    @Bean
 //    public JobLauncherTestUtils jobLauncherTestUtils(JobRepository jobRepository, JobLauncher jobLauncher, Job job) {
@@ -132,8 +138,8 @@ public class VariantConfigurationTest {
 
         ////////
 
-//        JobExecution jobExecution = jobLauncherTestUtils.launchJob();
-//        assertEquals("COMPLETED", jobExecution.getExitStatus().toString());
+        JobExecution jobExecution = jobLauncherTestUtils.launchJob();
+        assertEquals("COMPLETED", jobExecution.getExitStatus().toString());
     }
 
     @Test

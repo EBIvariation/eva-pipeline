@@ -35,10 +35,13 @@ import org.springframework.batch.core.step.builder.TaskletStepBuilder;
 import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
+import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
@@ -68,7 +71,7 @@ public class VariantConfiguration {
     JobRegistry jobRegistry;
 
     @Autowired
-    public PipelineConfig config;
+    PipelineConfig config;
 
     private VariantStorageManager variantStorageManager;
     private ObjectMap variantOptions;
@@ -321,6 +324,13 @@ public class VariantConfiguration {
         JobRegistryBeanPostProcessor jobRegistryBeanPostProcessor = new JobRegistryBeanPostProcessor();
         jobRegistryBeanPostProcessor.setJobRegistry(jobRegistry);
         return jobRegistryBeanPostProcessor;
+    }
+
+    @Bean
+    public BeanFactoryPostProcessor getPP() {
+        PropertyPlaceholderConfigurer configurer = new PropertyPlaceholderConfigurer();
+        configurer.setLocations(new ClassPathResource("/application.properties"));
+        return configurer;
     }
 
 }
