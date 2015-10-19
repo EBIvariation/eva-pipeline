@@ -41,6 +41,8 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
@@ -55,7 +57,7 @@ import java.util.*;
 
 @Configuration
 @EnableBatchProcessing
-@EnableConfigurationProperties(PipelineConfig.class)
+@PropertySource("classpath:application.properties")
 public class VariantConfiguration {
 
     private static final Logger logger = LoggerFactory.getLogger(VariantConfiguration.class);
@@ -69,6 +71,12 @@ public class VariantConfiguration {
     JobRepository jobRepository;
     @Autowired
     JobRegistry jobRegistry;
+
+    @Autowired
+    private JobBuilderFactory jobs;
+    @Autowired
+    private StepBuilderFactory stepBuilderFactory;
+
 
     @Autowired
     PipelineConfig config;
@@ -86,25 +94,27 @@ public class VariantConfiguration {
     //    private Path outputFileJsonFile;
 
     @Bean
-    public Job variantJob(JobBuilderFactory jobs, JobExecutionListener listener, StepBuilderFactory stepBuilderFactory) {
+//    public Job variantJob(JobBuilderFactory jobs, JobExecutionListener listener, StepBuilderFactory stepBuilderFactory) {
+    public Job variantJob() {
         JobBuilder jobBuilder = jobs.get(jobName)
                 .repository(jobRepository)
                 .incrementer(new RunIdIncrementer())
-                .listener(listener);
+//                .listener(listener)
+                ;
 
 
-        SimpleJobBuilder simpleJobBuilder = jobBuilder.start(init(stepBuilderFactory))
-                .next(transform(stepBuilderFactory))
-                .next(load(stepBuilderFactory))
-                .next(statsCreate(stepBuilderFactory))
-                .next(statsLoad(stepBuilderFactory))
+        SimpleJobBuilder simpleJobBuilder = jobBuilder.start(init())
+                .next(transform())
+                .next(load())
+                .next(statsCreate())
+                .next(statsLoad())
 //                .next(annotation(stepBuilderFactory));
                 ;
         return simpleJobBuilder.build();
     }
 
 
-    public Step init(StepBuilderFactory stepBuilderFactory) {
+    public Step init() {
         StepBuilder step1 = stepBuilderFactory.get("initVariantJob");
         if (config == null) {
             throw new MissingResourceException("PipelineConfig not loaded. Hint: is the `application.properties` available? aborting...", "PipelineConfig", "pipelineConfig");
@@ -159,6 +169,7 @@ public class VariantConfiguration {
 
 
                 logger.debug("Using as variantOptions: {}", variantOptions.entrySet().toString());
+                logger.debug("Using as input: {}", config.input);
                 Path input = Paths.get(nextFileUri.getPath());
                 output = Paths.get(outdirUri.getPath());
                 outputVariantJsonFile = output.resolve(input.getFileName().toString() + ".variants.json" + config.compressExtension);
@@ -181,7 +192,7 @@ public class VariantConfiguration {
     }
 
 
-    public Step transform(StepBuilderFactory stepBuilderFactory) {
+    public Step transform() {
         StepBuilder step1 = stepBuilderFactory.get("transform");
         TaskletStepBuilder tasklet = step1.tasklet(new Tasklet() {
             @Override
@@ -209,7 +220,7 @@ public class VariantConfiguration {
     }
 
 
-    public Step load(StepBuilderFactory stepBuilderFactory) {
+    public Step load() {
         StepBuilder step1 = stepBuilderFactory.get("load");
         TaskletStepBuilder tasklet = step1.tasklet(new Tasklet() {
             @Override
@@ -232,7 +243,7 @@ public class VariantConfiguration {
         return tasklet.build();
     }
 
-    public Step statsCreate(StepBuilderFactory stepBuilderFactory) {
+    public Step statsCreate() {
         StepBuilder step1 = stepBuilderFactory.get("statsCreate");
         TaskletStepBuilder tasklet = step1.tasklet(new Tasklet() {
             @Override
@@ -263,7 +274,7 @@ public class VariantConfiguration {
         return tasklet.build();
     }
 
-    public Step statsLoad(StepBuilderFactory stepBuilderFactory) {
+    public Step statsLoad() {
         StepBuilder step1 = stepBuilderFactory.get("statsLoad");
         TaskletStepBuilder tasklet = step1.tasklet(new Tasklet() {
             @Override
@@ -318,7 +329,7 @@ public class VariantConfiguration {
 
     }
 
-
+/*
     @Bean
     public JobRegistryBeanPostProcessor jobRegistryBeanPostProcessor(JobRegistry jobRegistry) {
         JobRegistryBeanPostProcessor jobRegistryBeanPostProcessor = new JobRegistryBeanPostProcessor();
@@ -332,5 +343,15 @@ public class VariantConfiguration {
         configurer.setLocations(new ClassPathResource("/application.properties"));
         return configurer;
     }
+*/
+    @Bean
+    public PipelineConfig pipelineConfig(){
+        return new PipelineConfig();
+    }
 
+    // To resolve ${} in @Value
+    @Bean
+    public static PropertySourcesPlaceholderConfigurer propertyConfigInDev() {
+        return new PropertySourcesPlaceholderConfigurer();
+    }
 }

@@ -27,13 +27,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-@Configuration
-@EnableBatchProcessing
+//@Configuration
+//@EnableBatchProcessing
 public class VariantAggregatedConfiguration {
 
     private static final Logger log = LoggerFactory.getLogger(VariantAggregatedConfiguration.class);
     public static final String jobName = "aggregatedVariantJob";
-
+/*
     @Autowired
     JobLauncher jobLauncher;
     @Autowired
@@ -76,5 +76,6 @@ public class VariantAggregatedConfiguration {
 
         return tasklet.build();
     }
+    */
 
 }
