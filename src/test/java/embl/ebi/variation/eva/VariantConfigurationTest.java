@@ -58,8 +58,11 @@ public class VariantConfigurationTest {
     private JobLauncher jobLauncher;
     @Autowired
     private JobExplorer jobExplorer;
+//    @Autowired
+//    private Environment environment;
+
     @Autowired
-    private Environment environment;
+    PipelineConfig pipelineConfig;
 
     /**
      * Launch a job with given parameters, but always forcing a new execution of the instance.
@@ -133,30 +136,35 @@ public class VariantConfigurationTest {
         String compressExtension = ".gz";
         String outputDir = "/tmp";
         String fileId = "10";
-
-        String[] args = {
-                "--spring.batch.job.names=none",
-                "--input=" + input,
+        String[] args = {};
+/*
+                "--spring.batch.job.names=" + VariantConfiguration.jobName,
+                "--input=" + "ignoredfile",
                 "--outputDir=" + outputDir,
                 "--dbName=" + dbName,
                 "--fileId=10",
                 "--calculateStats=false",
+                "--jobRepositoryDriverClassName=org.hsqldb.jdbcDriver",
+                "--jobRepositoryUrl=jdbc:hsqldb:hsql://localhost/test",
+                "--jobRepositoryUsername=test",
+                "--jobRepositoryPassword=test",
         };
 
-//        variantConfiguration.config.input = input;
-//        variantConfiguration.config.outputDir = outputDir;
-//        variantConfiguration.config.dbName = dbName;
-//        variantConfiguration.config.fileId = fileId;
-//        variantConfiguration.config.compressExtension = ".gz";
-//        variantConfiguration.config.calculateStats = false;
-//        variantConfiguration.config.annotate = false;
-
+*/
+        pipelineConfig.input = input;
+        pipelineConfig.outputDir = outputDir;
+        pipelineConfig.dbName = dbName;
+        pipelineConfig.fileId = fileId;
+        pipelineConfig.compressExtension = ".gz";
+        pipelineConfig.calculateStats = false;
+        pipelineConfig.annotate = false;
 //        Application.main(args);
-
-
+//
+//
         JobExecution execution = execute(job, args, jobExplorer, jobLauncher);
 
-        assertEquals(environment.getProperty("input", ""), input);
+//        assertEquals(environment.getProperty("input", ""), input);
+
         assertEquals(new ExitStatus("COMPLETED"), execution.getExitStatus());
 
 
@@ -192,7 +200,8 @@ public class VariantConfigurationTest {
         };
 
         JobExecution execution = execute(job, args, jobExplorer, jobLauncher);
-
+        // get lastinstance return status
+//        jobExplorer.
         assertEquals(new ExitStatus("FAILED"), execution.getExitStatus());
     }
 

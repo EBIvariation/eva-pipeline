@@ -38,10 +38,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.PropertySource;
+import org.springframework.context.annotation.*;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -57,7 +54,7 @@ import java.util.*;
 
 @Configuration
 @EnableBatchProcessing
-@PropertySource("classpath:application.properties")
+@PropertySources(value = {@PropertySource("classpath:application.properties"), @PropertySource("classpath:datasource.properties")})
 public class VariantConfiguration {
 
     private static final Logger logger = LoggerFactory.getLogger(VariantConfiguration.class);
@@ -317,6 +314,7 @@ public class VariantConfiguration {
         return jdbcTemplate;
     }
 
+
     @Bean
     public DataSource postgresDataSource(PipelineConfig pipelineConfig) throws SQLException {
         final DriverManagerDataSource dataSource = new DriverManagerDataSource();
@@ -328,6 +326,7 @@ public class VariantConfiguration {
         return dataSource;
 
     }
+
 
 /*
     @Bean
