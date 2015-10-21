@@ -1,23 +1,16 @@
 package embl.ebi.variation.eva;
 
 import embl.ebi.variation.eva.pipeline.configuration.StandaloneInfrastructureConfiguration;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.*;
-import org.springframework.batch.core.converter.DefaultJobParametersConverter;
 import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.core.launch.JobLauncher;
-import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
-import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
-import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.util.StringUtils;
 
 import java.io.*;
 import java.nio.file.Path;
@@ -28,6 +21,11 @@ import java.util.Map;
 import java.util.zip.GZIPInputStream;
 
 import static org.junit.Assert.assertEquals;
+import org.springframework.batch.core.converter.DefaultJobParametersConverter;
+import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
+import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
+import org.springframework.batch.core.repository.JobRestartException;
+import org.springframework.util.StringUtils;
 
 /**
  * Created by jmmut on 2015-10-14.
@@ -45,10 +43,6 @@ public class VariantConfigurationTest {
 
     private static final Logger logger = LoggerFactory.getLogger(VariantConfigurationTest.class);
 
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
-
-
     @Autowired
     VariantConfiguration variantConfiguration;
 
@@ -58,22 +52,10 @@ public class VariantConfigurationTest {
     private JobLauncher jobLauncher;
     @Autowired
     private JobExplorer jobExplorer;
-//    @Autowired
-//    private Environment environment;
 
     @Autowired
     PipelineConfig pipelineConfig;
 
-//    @Autowired
-//    private DataSource dataSource;
-//
-//    private JdbcTemplate jdbcTemplate;
-
-//    @Before
-//    public void setup(){
-//        jdbcTemplate = new JdbcTemplate(dataSource);
-//    }
-    
     /**
      * Launch a job with given parameters, but always forcing a new execution of the instance.
      * This is approximately how JobLauncherCommandLineRunner works. The main difference is that it only uses a new
@@ -141,45 +123,23 @@ public class VariantConfigurationTest {
     @Test
     public void validTransform() throws Exception {
         String input = VariantConfigurationTest.class.getResource(FILE_20).getFile();
-
-        String dbName = "validTransformTest";
-        String compressExtension = ".gz";
-        String outputDir = "/tmp";
-        String fileId = "10";
-        String[] args = {};
-/*
-                "--spring.batch.job.names=" + VariantConfiguration.jobName,
-                "--input=" + "ignoredfile",
-                "--outputDir=" + outputDir,
-                "--dbName=" + dbName,
-                "--fileId=10",
-                "--calculateStats=false",
-                "--jobRepositoryDriverClassName=org.hsqldb.jdbcDriver",
-                "--jobRepositoryUrl=jdbc:hsqldb:hsql://localhost/test",
-                "--jobRepositoryUsername=test",
-                "--jobRepositoryPassword=test",
-        };
-
-*/
+        
         pipelineConfig.input = input;
-        pipelineConfig.outputDir = outputDir;
-        pipelineConfig.dbName = dbName;
-        pipelineConfig.fileId = fileId;
+        pipelineConfig.outputDir = "/tmp";
+        pipelineConfig.dbName = "validTransformTest";
+        pipelineConfig.fileId = "10";
         pipelineConfig.compressExtension = ".gz";
         pipelineConfig.calculateStats = false;
         pipelineConfig.annotate = false;
-//        Application.main(args);
-//
-//
-        JobExecution execution = execute(job, args, jobExplorer, jobLauncher);
+        
+        JobExecution execution = execute(job, new String[]{}, jobExplorer, jobLauncher);
+//        JobExecution execution = jobLauncher.run(job, new JobParameters());
 
-//        assertEquals(environment.getProperty("input", ""), input);
-
-        assertEquals(new ExitStatus("COMPLETED"), execution.getExitStatus());
+        assertEquals("COMPLETED", execution.getExitStatus().getExitCode());
 
 
         ////////// check transformed file
-        String outputFilename = getTransformedOutputPath(Paths.get(FILE_20).getFileName(), compressExtension, outputDir);
+        String outputFilename = getTransformedOutputPath(Paths.get(FILE_20).getFileName(), pipelineConfig.compressExtension, pipelineConfig.outputDir);
         logger.info("reading transformed output from: " + outputFilename);
 
 
@@ -197,22 +157,17 @@ public class VariantConfigurationTest {
     public void invalidTransform() throws Exception {
         String input = VariantConfigurationTest.class.getResource(FILE_WITH_ERROR).getFile();
 
-        String dbName = "invalidTransformTest";
-        String compressExtension = ".gz";
-        String outputDir = "/tmp";
-
-        String[] args = {
-                "--input=" + input,
-                "--outputDir=" + outputDir,
-                "--dbName=" + dbName,
-                "--fileId=10",
-                "--calculateStats=false",
-        };
-
-        JobExecution execution = execute(job, args, jobExplorer, jobLauncher);
-        // get lastinstance return status
-//        jobExplorer.
-        assertEquals(new ExitStatus("FAILED"), execution.getExitStatus());
+        pipelineConfig.input = input;
+        pipelineConfig.outputDir = "/tmp";
+        pipelineConfig.dbName = "invalidTransformTest";
+        pipelineConfig.fileId = "10";
+        pipelineConfig.compressExtension = ".gz";
+        pipelineConfig.calculateStats = false;
+        pipelineConfig.annotate = false;
+        
+        JobExecution execution = execute(job, new String[]{}, jobExplorer, jobLauncher);
+        
+        assertEquals("FAILED", execution.getExitStatus().getExitCode());
     }
 
     @Test
