@@ -1,11 +1,10 @@
 package embl.ebi.variation.eva;
 
-
+import embl.ebi.variation.eva.pipeline.configuration.InfrastructureConfiguration;
 import org.opencb.biodata.models.variant.VariantSource;
 import org.opencb.datastore.core.ObjectMap;
 import org.opencb.datastore.core.QueryOptions;
 import org.opencb.opencga.lib.common.Config;
-import org.opencb.opencga.lib.common.TimeUtils;
 import org.opencb.opencga.storage.core.StorageManagerFactory;
 import org.opencb.opencga.storage.core.variant.VariantStorageManager;
 import org.opencb.opencga.storage.core.variant.adaptors.VariantDBAdaptor;
@@ -14,66 +13,40 @@ import org.opencb.opencga.storage.mongodb.variant.MongoDBVariantStorageManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.Job;
-import org.springframework.batch.core.JobExecutionListener;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.StepContribution;
-import org.springframework.batch.core.configuration.JobRegistry;
-import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
-import org.springframework.batch.core.configuration.support.JobRegistryBeanPostProcessor;
-import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.core.job.builder.JobBuilder;
-import org.springframework.batch.core.job.builder.JobFlowBuilder;
-import org.springframework.batch.core.job.builder.SimpleJobBuilder;
-import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
-import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.core.step.builder.TaskletStepBuilder;
 import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
-import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.*;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.datasource.DriverManagerDataSource;
-
-import javax.sql.DataSource;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.sql.SQLException;
 import java.util.*;
 
 @Configuration
-@EnableBatchProcessing
-@PropertySources(value = {@PropertySource("classpath:application.properties"), @PropertySource("classpath:datasource.properties")})
+@PropertySource("classpath:application.properties")
 public class VariantConfiguration {
 
     private static final Logger logger = LoggerFactory.getLogger(VariantConfiguration.class);
     public static final String jobName = "variantJob";
 
     @Autowired
-    JobLauncher jobLauncher;
-    @Autowired
-    JobExplorer jobExplorer;
-    @Autowired
-    JobRepository jobRepository;
-    @Autowired
-    JobRegistry jobRegistry;
+    private InfrastructureConfiguration infrastructureConfiguration;
 
     @Autowired
-    private JobBuilderFactory jobs;
+    private JobBuilderFactory jobBuilderFactory;
     @Autowired
     private StepBuilderFactory stepBuilderFactory;
-
 
     @Autowired
     PipelineConfig config;
@@ -91,25 +64,21 @@ public class VariantConfiguration {
     //    private Path outputFileJsonFile;
 
     @Bean
-//    public Job variantJob(JobBuilderFactory jobs, JobExecutionListener listener, StepBuilderFactory stepBuilderFactory) {
     public Job variantJob() {
-        JobBuilder jobBuilder = jobs.get(jobName)
-                .repository(jobRepository)
+        JobBuilder jobBuilder = jobBuilderFactory.get(jobName)
                 .incrementer(new RunIdIncrementer())
 //                .listener(listener)
                 ;
 
-
-        SimpleJobBuilder simpleJobBuilder = jobBuilder.start(init())
+        return jobBuilder
+                .start(init())
                 .next(transform())
                 .next(load())
                 .next(statsCreate())
                 .next(statsLoad())
 //                .next(annotation(stepBuilderFactory));
-                ;
-        return simpleJobBuilder.build();
+                .build();
     }
-
 
     public Step init() {
         StepBuilder step1 = stepBuilderFactory.get("initVariantJob");
@@ -122,14 +91,12 @@ public class VariantConfiguration {
             public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
 
                 // TODO validation checks for all the parameters
-
                 // TODO get samples
 //                System.out.println(config.samples);
 //                System.out.println(config.samples.size());
 //                if (config.samples.size() != -3) {
 //                    throw new Exception("aborting");
 //                }
-
                 Config.setOpenCGAHome(config.appHome);
 
                 // load configuration
@@ -163,8 +130,6 @@ public class VariantConfiguration {
 //                if (config.credentials != null && !config.credentials.isEmpty()) {
 //                    variantStorageManager.addConfigUri(new URI(null, config.credentials, null));
 //                }
-
-
                 logger.debug("Using as variantOptions: {}", variantOptions.entrySet().toString());
                 logger.debug("Using as input: {}", config.input);
                 Path input = Paths.get(nextFileUri.getPath());
@@ -180,14 +145,12 @@ public class VariantConfiguration {
             }
         });
 
-
         // true: every job execution will do this step, even if this step is already COMPLETED
         // false: if the job was aborted and is relaunched, this step will NOT be done again
         tasklet.allowStartIfComplete(true);
 
         return tasklet.build();
     }
-
 
     public Step transform() {
         StepBuilder step1 = stepBuilderFactory.get("transform");
@@ -216,7 +179,6 @@ public class VariantConfiguration {
         return tasklet.build();
     }
 
-
     public Step load() {
         StepBuilder step1 = stepBuilderFactory.get("load");
         TaskletStepBuilder tasklet = step1.tasklet(new Tasklet() {
@@ -233,7 +195,6 @@ public class VariantConfiguration {
             }
         });
 
-
         // true: every job execution will do this step, even if this step is already COMPLETED
         // false: if the job was aborted and is relaunched, this step will NOT be done again
         tasklet.allowStartIfComplete(false);
@@ -248,7 +209,7 @@ public class VariantConfiguration {
                 samples = new HashMap<String, Set<String>>(); // TODO fill properly. if this is null overwrite will take on
                 samples.put("SOME", new HashSet<String>(Arrays.asList("HG00096", "HG00097")));
 
-                if(config.calculateStats) { // TODO maybe this `if` is skippable with job flows
+                if (config.calculateStats) { // TODO maybe this `if` is skippable with job flows
                     // obtaining resources. this should be minimum, in order to skip this step if it is completed
                     VariantStatisticsManager variantStatisticsManager = new VariantStatisticsManager();
                     QueryOptions statsOptions = new QueryOptions(variantOptions);
@@ -299,7 +260,6 @@ public class VariantConfiguration {
         return tasklet.build();
     }
 
-
     public static URI createUri(String input) throws URISyntaxException {
         URI sourceUri = new URI(null, input, null);
         if (sourceUri.getScheme() == null || sourceUri.getScheme().isEmpty()) {
@@ -309,42 +269,7 @@ public class VariantConfiguration {
     }
 
     @Bean
-    public JdbcTemplate jdbcTemplate(DataSource dataSource) {
-        JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
-        return jdbcTemplate;
-    }
-
-
-    @Bean
-    public DataSource postgresDataSource(PipelineConfig pipelineConfig) throws SQLException {
-        final DriverManagerDataSource dataSource = new DriverManagerDataSource();
-        dataSource.setDriverClassName(pipelineConfig.jobRepositoryDriverClassName);
-        dataSource.setUrl(pipelineConfig.jobRepositoryUrl);
-        dataSource.setUsername(pipelineConfig.jobRepositoryUsername);
-        dataSource.setPassword(pipelineConfig.jobRepositoryPassword);
-        logger.info("using as repository url: " + pipelineConfig.jobRepositoryUrl);
-        return dataSource;
-
-    }
-
-
-/*
-    @Bean
-    public JobRegistryBeanPostProcessor jobRegistryBeanPostProcessor(JobRegistry jobRegistry) {
-        JobRegistryBeanPostProcessor jobRegistryBeanPostProcessor = new JobRegistryBeanPostProcessor();
-        jobRegistryBeanPostProcessor.setJobRegistry(jobRegistry);
-        return jobRegistryBeanPostProcessor;
-    }
-
-    @Bean
-    public BeanFactoryPostProcessor getPP() {
-        PropertyPlaceholderConfigurer configurer = new PropertyPlaceholderConfigurer();
-        configurer.setLocations(new ClassPathResource("/application.properties"));
-        return configurer;
-    }
-*/
-    @Bean
-    public PipelineConfig pipelineConfig(){
+    public PipelineConfig pipelineConfig() {
         return new PipelineConfig();
     }
 

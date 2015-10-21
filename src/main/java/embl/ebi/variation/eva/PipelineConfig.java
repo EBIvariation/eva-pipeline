@@ -53,9 +53,9 @@ public class PipelineConfig {
     // annotation
     @Value("${annotate}")           public boolean annotate;
 
-    // job repository DB
-    @Value("${jobRepositoryDriverClassName}")   public String jobRepositoryDriverClassName;
-    @Value("${jobRepositoryUrl}")               public String jobRepositoryUrl;
-    @Value("${jobRepositoryUsername}")          public String jobRepositoryUsername;
-    @Value("${jobRepositoryPassword}")          public String jobRepositoryPassword;
+//    // job repository DB
+//    @Value("${jobRepositoryDriverClassName}")   public String jobRepositoryDriverClassName;
+//    @Value("${jobRepositoryUrl}")               public String jobRepositoryUrl;
+//    @Value("${jobRepositoryUsername}")          public String jobRepositoryUsername;
+//    @Value("${jobRepositoryPassword}")          public String jobRepositoryPassword;
 }

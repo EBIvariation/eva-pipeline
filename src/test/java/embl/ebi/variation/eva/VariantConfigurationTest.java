@@ -1,5 +1,6 @@
 package embl.ebi.variation.eva;
 
+import embl.ebi.variation.eva.pipeline.configuration.StandaloneInfrastructureConfiguration;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -14,7 +15,6 @@ import org.springframework.batch.core.repository.JobExecutionAlreadyRunningExcep
 import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
 import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.env.Environment;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.util.StringUtils;
@@ -36,7 +36,7 @@ import static org.junit.Assert.assertEquals;
  * @author Jose Miguel Mut Lopez &lt;jmmut@ebi.ac.uk&gt;
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = {VariantConfiguration.class})
+@ContextConfiguration(classes = {VariantConfiguration.class, StandaloneInfrastructureConfiguration.class})
 public class VariantConfigurationTest {
 
     public static final String FILE_20 = "/small20.vcf.gz";
@@ -64,6 +64,16 @@ public class VariantConfigurationTest {
     @Autowired
     PipelineConfig pipelineConfig;
 
+//    @Autowired
+//    private DataSource dataSource;
+//
+//    private JdbcTemplate jdbcTemplate;
+
+//    @Before
+//    public void setup(){
+//        jdbcTemplate = new JdbcTemplate(dataSource);
+//    }
+    
     /**
      * Launch a job with given parameters, but always forcing a new execution of the instance.
      * This is approximately how JobLauncherCommandLineRunner works. The main difference is that it only uses a new
@@ -233,4 +243,5 @@ public class VariantConfigurationTest {
     public void invalidLoadStats() {
 
     }
+    
 }
