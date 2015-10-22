@@ -63,7 +63,8 @@ public class VariantConfigurationTest {
     @Test
     public void validTransform() throws Exception {
         String input = VariantConfigurationTest.class.getResource(FILE_20).getFile();
-
+        String opencgaHome = System.getenv("OPENCGA_HOME") != null ? System.getenv("OPENCGA_HOME") : "/opt/opencga";
+        
         JobParameters parameters = new JobParametersBuilder()
                 .addString("input", input)
                 .addString("outputDir", "/tmp")
@@ -74,9 +75,9 @@ public class VariantConfigurationTest {
                 .addString("aggregated", "NONE")
                 .addString("studyType", "COLLECTION")
                 .addString("studyName", "studyName")
-                .addString("studyId", "7")
-                .addString("fileId", "10")
-                .addString("opencga.app.home", "/opt/opencga")
+                .addString("studyId", "1")
+                .addString("fileId", "1")
+                .addString("opencga.app.home", opencgaHome)
                 .toJobParameters();
 
         JobExecution execution = jobLauncher.run(job, parameters);
@@ -102,6 +103,7 @@ public class VariantConfigurationTest {
     @Test
     public void invalidTransform() throws Exception {
         String input = VariantConfigurationTest.class.getResource(FILE_WITH_ERROR).getFile();
+        String opencgaHome = System.getenv("OPENCGA_HOME") != null ? System.getenv("OPENCGA_HOME") : "/opt/opencga";
 
         JobParameters parameters = new JobParametersBuilder()
                 .addString("input", input)
@@ -113,9 +115,9 @@ public class VariantConfigurationTest {
                 .addString("aggregated", "NONE")
                 .addString("studyType", "COLLECTION")
                 .addString("studyName", "studyName")
-                .addString("studyId", "7")
-                .addString("fileId", "10")
-                .addString("opencga.app.home", "/opt/opencga")
+                .addString("studyId", "2")
+                .addString("fileId", "2")
+                .addString("opencga.app.home", opencgaHome)
                 .toJobParameters();
 
         JobExecution execution = jobLauncher.run(job, parameters);
