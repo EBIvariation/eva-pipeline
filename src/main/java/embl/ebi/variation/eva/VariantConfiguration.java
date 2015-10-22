@@ -1,6 +1,5 @@
 package embl.ebi.variation.eva;
 
-import embl.ebi.variation.eva.pipeline.configuration.MyBatchConfigurer;
 import embl.ebi.variation.eva.pipeline.listeners.JobParametersListener;
 import org.opencb.opencga.storage.core.variant.VariantStorageManager;
 import org.slf4j.Logger;
@@ -29,7 +28,6 @@ import org.springframework.batch.core.launch.support.RunIdIncrementer;
 
 @Configuration
 @EnableBatchProcessing
-@ComponentScan(basePackageClasses = MyBatchConfigurer.class)
 public class VariantConfiguration {
 
     private static final Logger logger = LoggerFactory.getLogger(VariantConfiguration.class);

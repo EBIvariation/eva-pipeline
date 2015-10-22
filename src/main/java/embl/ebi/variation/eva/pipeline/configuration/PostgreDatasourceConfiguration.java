@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Cristina Yenyxe Gonzalez Garcia <cyenyxe@ebi.ac.uk>.
+ * Copyright 2015 EMBL - European Bioinformatics Institute
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,37 +20,29 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
-import org.springframework.context.annotation.PropertySource;
+import org.springframework.context.annotation.Profile;
 import org.springframework.core.env.Environment;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
-import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
-import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
 
+/**
+ * Configuration will be loaded from the file "application-production.properties".
+ */
 @Configuration
-@PropertySource("classpath:datasource.properties")
-public class BatchDatabaseConfig {
+@Profile("production")
+public class PostgreDatasourceConfiguration {
 
     @Autowired
     private Environment env;
 
     @Bean
     @Primary
-    public DataSource postgreDataSource() {        
+    public DataSource postgreDataSource() {
         DriverManagerDataSource dataSource = new DriverManagerDataSource();
-        dataSource.setDriverClassName(env.getProperty("jobRepositoryDriverClassName"));
-        dataSource.setUrl(env.getProperty("jobRepositoryUrl"));
-        dataSource.setUsername(env.getProperty("jobRepositoryUsername"));
-        dataSource.setPassword(env.getProperty("jobRepositoryPassword"));
+        dataSource.setDriverClassName(env.getProperty("job.repository.driverClassName"));
+        dataSource.setUrl(env.getProperty("job.repository.url"));
+        dataSource.setUsername(env.getProperty("job.repository.username"));
+        dataSource.setPassword(env.getProperty("job.repository.password"));
         return dataSource;
-    }
-    
-    @Bean
-    public DataSource dataSource() {
-        EmbeddedDatabaseBuilder embeddedDatabaseBuilder = new EmbeddedDatabaseBuilder();
-        return embeddedDatabaseBuilder.addScript("classpath:org/springframework/batch/core/schema-drop-hsqldb.sql")
-                .addScript("classpath:org/springframework/batch/core/schema-hsqldb.sql")
-                .setType(EmbeddedDatabaseType.HSQL)
-                .build();
     }
 
 }
