@@ -1,4 +1,4 @@
-package embl.ebi.variation.eva;
+package embl.ebi.variation.eva.pipeline.jobs;
 
 import embl.ebi.variation.eva.pipeline.listeners.JobParametersListener;
 import org.opencb.opencga.storage.core.variant.VariantStorageManager;

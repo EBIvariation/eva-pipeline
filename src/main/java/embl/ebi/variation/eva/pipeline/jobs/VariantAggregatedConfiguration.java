@@ -1,4 +1,4 @@
-package embl.ebi.variation.eva;
+package embl.ebi.variation.eva.pipeline.jobs;
 
 
 import org.slf4j.Logger;
