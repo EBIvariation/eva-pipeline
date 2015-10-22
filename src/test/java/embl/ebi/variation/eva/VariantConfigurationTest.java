@@ -1,6 +1,6 @@
 package embl.ebi.variation.eva;
 
-import embl.ebi.variation.eva.pipeline.configuration.StandaloneInfrastructureConfiguration;
+import embl.ebi.variation.eva.pipeline.configuration.BatchDatabaseConfig;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
@@ -27,7 +27,7 @@ import static org.junit.Assert.assertEquals;
  * @author Jose Miguel Mut Lopez &lt;jmmut@ebi.ac.uk&gt;
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = {VariantConfiguration.class, StandaloneInfrastructureConfiguration.class})
+@ContextConfiguration(classes = {VariantConfiguration.class, BatchDatabaseConfig.class})
 public class VariantConfigurationTest {
 
     public static final String FILE_20 = "/small20.vcf.gz";

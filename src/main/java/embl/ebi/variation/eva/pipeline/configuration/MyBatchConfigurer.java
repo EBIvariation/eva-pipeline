@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 EMBL - European Bioinformatics Institute
+ * Copyright 2015 Cristina Yenyxe Gonzalez Garcia <cyenyxe@ebi.ac.uk>.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,12 +15,9 @@
  */
 package embl.ebi.variation.eva.pipeline.configuration;
 
-import javax.sql.DataSource;
-import org.springframework.context.annotation.Bean;
+import org.springframework.batch.core.configuration.annotation.DefaultBatchConfigurer;
+import org.springframework.stereotype.Component;
 
-public interface InfrastructureConfiguration {
-
-    @Bean
-    public abstract DataSource dataSource();
-
+@Component
+public class MyBatchConfigurer extends DefaultBatchConfigurer {
 }

@@ -1,6 +1,6 @@
 package embl.ebi.variation.eva;
 
-import embl.ebi.variation.eva.pipeline.configuration.InfrastructureConfiguration;
+import embl.ebi.variation.eva.pipeline.configuration.MyBatchConfigurer;
 import embl.ebi.variation.eva.pipeline.listeners.JobParametersListener;
 import org.opencb.opencga.storage.core.variant.VariantStorageManager;
 import org.slf4j.Logger;
@@ -11,7 +11,6 @@ import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.job.builder.JobBuilder;
-import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.core.step.builder.TaskletStepBuilder;
@@ -25,16 +24,16 @@ import java.nio.file.Paths;
 import org.opencb.datastore.core.ObjectMap;
 import org.opencb.opencga.storage.core.StorageManagerFactory;
 import org.springframework.batch.core.JobParameters;
+import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
+import org.springframework.batch.core.launch.support.RunIdIncrementer;
 
 @Configuration
-//@PropertySource("classpath:application.properties")
+@EnableBatchProcessing
+@ComponentScan(basePackageClasses = MyBatchConfigurer.class)
 public class VariantConfiguration {
 
     private static final Logger logger = LoggerFactory.getLogger(VariantConfiguration.class);
     public static final String jobName = "variantJob";
-
-    @Autowired
-    private InfrastructureConfiguration infrastructureConfiguration;
 
     @Autowired
     private JobBuilderFactory jobBuilderFactory;
@@ -44,7 +43,7 @@ public class VariantConfiguration {
     private JobParametersListener listener;
     
     @Bean
-    public JobParametersListener parametersListener() {
+    public JobParametersListener jobParametersListener() {
             return new JobParametersListener();
     }
         
@@ -52,6 +51,7 @@ public class VariantConfiguration {
     public Job variantJob() {
         JobBuilder jobBuilder = jobBuilderFactory
                 .get(jobName)
+                .incrementer(new RunIdIncrementer())
                 .listener(listener);
 
         return jobBuilder
@@ -187,15 +187,4 @@ public class VariantConfiguration {
         return sourceUri;
     }
 
-//    @Bean
-//    public PipelineConfig pipelineConfig() {
-//        return new PipelineConfig();
-//    }
-//
-//    // To resolve ${} in @Value
-//    @Bean
-//    public static PropertySourcesPlaceholderConfigurer propertyConfigInDev() {
-//        return new PropertySourcesPlaceholderConfigurer();
-//    }
-    
 }
