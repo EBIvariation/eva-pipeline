@@ -16,31 +16,17 @@
 package embl.ebi.variation.eva.pipeline.jobs;
 
 import embl.ebi.variation.eva.pipeline.listeners.JobParametersListener;
-import org.opencb.biodata.models.variant.VariantSource;
-import org.opencb.datastore.core.QueryOptions;
 import org.opencb.opencga.storage.core.variant.VariantStorageManager;
-import org.opencb.opencga.storage.core.variant.adaptors.VariantDBAdaptor;
-import org.opencb.opencga.storage.core.variant.stats.VariantStatisticsManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.*;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
-import org.springframework.batch.core.configuration.annotation.JobScope;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
-import org.springframework.batch.core.job.builder.FlowBuilder;
-import org.springframework.batch.core.job.builder.FlowJobBuilder;
 import org.springframework.batch.core.job.builder.JobBuilder;
-import org.springframework.batch.core.job.builder.JobFlowBuilder;
-import org.springframework.batch.core.job.flow.Flow;
-import org.springframework.batch.core.job.flow.FlowExecutionStatus;
-import org.springframework.batch.core.job.flow.JobExecutionDecider;
-import org.springframework.batch.core.job.flow.support.StateTransition;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.scope.context.ChunkContext;
-import org.springframework.batch.core.step.AbstractStep;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.core.step.builder.TaskletStepBuilder;
-import org.springframework.batch.core.step.job.JobParametersExtractor;
 import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,17 +35,12 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
 
 import org.opencb.datastore.core.ObjectMap;
 import org.opencb.opencga.storage.core.StorageManagerFactory;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.core.env.Environment;
-import org.springframework.scheduling.concurrent.ConcurrentTaskExecutor;
 
 @Configuration
 @EnableBatchProcessing
@@ -98,54 +79,6 @@ public class VariantConfiguration {
 //                .next(statsLoad())
 //                .next(annotation(stepBuilderFactory));
                 .build();
-
-
-
-//        environment.getParameters
-
-//        logger.debug("calc stats or not? " + params.getString("calculateStats"));
-
-
-//                .next((jobExecution, stepExecution) -> new FlowExecutionStatus(
-//                                jobExecution.getJobParameters().getString("doLoad").equals("true")? "doLoad": "skipLoad")
-//                )
-
-//        FlowBuilder.UnterminatedFlowBuilder<FlowJobBuilder> next = jobBuilder
-// Flow subFlow = new FlowBuilder<Flow>("sub-1")
-//            .start(jobExecutionDecider())
-//            .on("doLoad")
-//            .to(load()).next(statsCreate())
-//            .from(jobExecutionDecider())
-//            .on("*").end()
-//            .end();
-//
-//        Step loadStep = new StepBuilder("loadFlow").flow(subFlow).build();
-//        return jobBuilder
-//                .start(transform())
-//                .next(loadStep)
-//                        .
-
-
-//        return jobBuilder
-//                .start(transform())
-//                .next(jobExecutionDecider())
-//                .on("doLoad").to(load()).next(statsCreate())
-//                .from(jobExecutionDecider())
-//                .on("*").to(statsCreate())
-//                .build()
-//                .build();
-    }
-
-    private JobExecutionDecider jobExecutionDecider() {
-        return new JobExecutionDecider() {
-            @Override
-            public FlowExecutionStatus decide(JobExecution jobExecution, StepExecution stepExecution) {
-                logger.debug("on decider: doLoad=" + jobExecution.getJobParameters().getString("doLoad"));
-                return new FlowExecutionStatus(
-                        jobExecution.getJobParameters().getString("doLoad").equals("false") ? "skipLoad" : "doLoad"
-                );
-            }
-        };
     }
 
     public Step transform() {
@@ -191,7 +124,9 @@ public class VariantConfiguration {
                 JobParameters parameters = chunkContext.getStepContext().getStepExecution().getJobParameters();
                 ObjectMap variantOptions = listener.getVariantOptions();
 
-                if (!"true".equals(parameters.getString("skipLoad"))) {
+                if (Boolean.parseBoolean(parameters.getString("skipLoad", "false"))) { 
+                    logger.info("skipping load step, requested skipLoad=" + parameters.getString("skipLoad"));
+                } else {
                     VariantStorageManager variantStorageManager = StorageManagerFactory.getVariantStorageManager();// TODO add mongo
                     URI outdirUri = createUri(parameters.getString("outputDir"));
                     URI nextFileUri = createUri(parameters.getString("input"));
@@ -209,9 +144,8 @@ public class VariantConfiguration {
                     variantStorageManager.load(transformedVariantsUri, variantOptions);
 //                logger.info("-- PostLoad variants -- {}", nextFileUri);
 //                variantStorageManager.postLoad(transformedVariantsUri, outdirUri, variantOptions);
-                } else {
-                    logger.info("skipping load step, requested skipLoad=" + parameters.getString("skipLoad"));
                 }
+                
                 return RepeatStatus.FINISHED;
             }
         });

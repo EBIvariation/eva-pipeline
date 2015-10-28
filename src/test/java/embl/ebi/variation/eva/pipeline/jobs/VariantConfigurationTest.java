@@ -21,6 +21,7 @@ import java.io.InputStreamReader;
 
 import com.mongodb.DB;
 import com.mongodb.MongoClient;
+import java.io.IOException;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -29,16 +30,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.*;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
-import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
-import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
-import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
-import org.springframework.batch.core.repository.JobRepository;
-import org.springframework.batch.core.repository.JobRestartException;
-import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
@@ -46,9 +40,7 @@ import java.net.UnknownHostException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.zip.GZIPInputStream;
 
 import static org.junit.Assert.assertEquals;
@@ -83,11 +75,6 @@ public class VariantConfigurationTest {
     private Job job;
     @Autowired
     private JobLauncher jobLauncher;
-
-    @Autowired
-    private JobRepository jobRepository;
-    @Autowired
-    private JobExplorer jobExplorer;
     @Autowired
     private JobBuilderFactory jobBuilderFactory;
     @Autowired
@@ -95,11 +82,11 @@ public class VariantConfigurationTest {
 
 
     @Test
-    public void validTransform() throws Exception {
+    public void validTransform() throws JobExecutionException, IOException {
         String input = VariantConfigurationTest.class.getResource(FILE_20).getFile();
         String opencgaHome = System.getenv("OPENCGA_HOME") != null ? System.getenv("OPENCGA_HOME") : "/opt/opencga";
-
         String dbName = VALID_TRANSFORM;
+        
         JobParameters parameters = new JobParametersBuilder()
                 .addString("input", input)
                 .addString("outputDir", "/tmp")
@@ -137,11 +124,11 @@ public class VariantConfigurationTest {
     }
 
     @Test
-    public void invalidTransform() throws Exception {
+    public void invalidTransform() throws JobExecutionException {
         String input = VariantConfigurationTest.class.getResource(FILE_WRONG_NO_ALT).getFile();
         String opencgaHome = System.getenv("OPENCGA_HOME") != null ? System.getenv("OPENCGA_HOME") : "/opt/opencga";
-
         String dbName = INVALID_TRANSFORM;
+        
         JobParameters parameters = new JobParametersBuilder()
                 .addString("input", input)
                 .addString("outputDir", "/tmp")
@@ -165,12 +152,11 @@ public class VariantConfigurationTest {
     }
 
     @Test
-    public void validLoad()
-            throws JobParametersInvalidException, JobExecutionAlreadyRunningException, JobRestartException, JobInstanceAlreadyCompleteException {
+    public void validLoad() throws JobExecutionException {
         String input = VariantConfigurationTest.class.getResource(FILE_20).getFile();
         String opencgaHome = System.getenv("OPENCGA_HOME") != null ? System.getenv("OPENCGA_HOME") : "/opt/opencga";
-
         String dbName = VALID_LOAD;
+        
         JobParameters parameters = new JobParametersBuilder()
                 .addString("input", input)
                 .addString("outputDir", "/tmp")
@@ -195,13 +181,12 @@ public class VariantConfigurationTest {
     }
 
     @Test
-    public void invalidLoad()
-            throws JobParametersInvalidException, JobExecutionAlreadyRunningException, JobRestartException, JobInstanceAlreadyCompleteException {
+    public void invalidLoad() throws JobExecutionException {
         String input = VariantConfigurationTest.class.getResource(FILE_20).getFile();
         String outdir = input;
+        String dbName = INVALID_LOAD;
 //        String opencgaHome = System.getenv("OPENCGA_HOME") != null ? System.getenv("OPENCGA_HOME") : "/opt/opencga";  // TODO make it fail better
 
-        String dbName = INVALID_LOAD;
         JobParameters parameters = new JobParametersBuilder()
                 .addString("input", input)
                 .addString("outputDir", outdir)
@@ -229,7 +214,6 @@ public class VariantConfigurationTest {
 
         assertEquals(input, execution.getJobParameters().getString("input"));
         assertEquals("FAILED", execution.getExitStatus().getExitCode());
-
     }
 
     @Test
@@ -266,7 +250,6 @@ public class VariantConfigurationTest {
     }
 
     private static void cleanDBs() throws UnknownHostException {
-
         // Delete Mongo collection
         MongoClient mongoClient = new MongoClient("localhost");
         List<String> dbs = Arrays.asList(VALID_TRANSFORM, INVALID_TRANSFORM, VALID_LOAD, INVALID_LOAD);
