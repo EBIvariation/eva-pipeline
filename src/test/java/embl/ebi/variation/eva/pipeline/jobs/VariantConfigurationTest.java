@@ -246,7 +246,7 @@ public class VariantConfigurationTest {
 
     @AfterClass
     public static void afterTests() throws UnknownHostException {
-//        cleanDBs();
+        cleanDBs();
     }
 
     private static void cleanDBs() throws UnknownHostException {
