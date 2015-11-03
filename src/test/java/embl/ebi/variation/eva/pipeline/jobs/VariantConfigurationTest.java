@@ -49,6 +49,7 @@ import java.util.List;
 import java.util.zip.GZIPInputStream;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 /**
  * Created by jmmut on 2015-10-14.
@@ -231,7 +232,9 @@ public class VariantConfigurationTest {
 
     @Test
     public void validCreateStats() throws JobParametersInvalidException, JobExecutionAlreadyRunningException,
-            JobRestartException, JobInstanceAlreadyCompleteException, IOException, InterruptedException, IllegalAccessException, ClassNotFoundException, InstantiationException, StorageManagerException {
+            JobRestartException, JobInstanceAlreadyCompleteException, IOException, InterruptedException,
+            IllegalAccessException, ClassNotFoundException, InstantiationException, StorageManagerException {
+
         String input = VariantConfigurationTest.class.getResource(FILE_20).getFile();
         String opencgaHome = System.getenv("OPENCGA_HOME") != null ? System.getenv("OPENCGA_HOME") : "/opt/opencga";
         String dbName = VALID_CREATE_STATS;
@@ -273,12 +276,96 @@ public class VariantConfigurationTest {
 
         assertEquals(variantRows, getLines(transformedInputStream));
 
+        // test with an isolated step, instead of the whole job
+
+        Job listenedJob = jobBuilderFactory
+                .get("listenedjob")
+                .incrementer(new RunIdIncrementer())
+                .listener(listener)
+                .start(variantConfiguration.statsCreate())
+                .build();
+
+        new File(input).delete();
+        assertFalse(new File(input).exists());  // ensure the stats file doesn't exist from previous executions
+        execution = jobLauncher.run(listenedJob, parameters);
+
+        assertEquals("COMPLETED", execution.getExitStatus().getExitCode());
+
+        // counting variants in the DB
+        variantStorageManager = StorageManagerFactory.getVariantStorageManager();
+        variantDBAdaptor = variantStorageManager.getDBAdaptor(dbName, null);
+        iterator = variantDBAdaptor.iterator();
+        variantRows = 0;
+        while(iterator.hasNext()) {
+            iterator.next();
+            variantRows++;
+        }
+
+        transformedInputStream = new GZIPInputStream(new FileInputStream(
+                getTransformedOutputPath(Paths.get(input).getFileName(), compressExtension, outputDir)));
+
+        assertEquals(variantRows, getLines(transformedInputStream));
     }
 
     @Test
-    public void invalidCreateStats() {
+    public void invalidCreateStats() throws JobParametersInvalidException, JobExecutionAlreadyRunningException,
+            JobRestartException, JobInstanceAlreadyCompleteException, IllegalAccessException, ClassNotFoundException,
+            InstantiationException, StorageManagerException, IOException {
 
+        /*
+        String input = VariantConfigurationTest.class.getResource(FILE_20).getFile();
+        String opencgaHome = System.getenv("OPENCGA_HOME") != null ? System.getenv("OPENCGA_HOME") : "/opt/opencga";
+        String dbName = VALID_CREATE_STATS;
+
+        String compressExtension = ".gz";
+        String outputDir = "/tmp";
+        JobParameters parameters = new JobParametersBuilder()
+                .addString("input", input)
+                .addString("outputDir", outputDir)
+                .addString("dbName", dbName)
+                .addString("compressExtension", compressExtension)
+                .addString("compressGenotypes", "true")
+                .addString("includeSrc", "FIRST_8_COLUMNS")
+                .addString("aggregated", "NONE")
+                .addString("studyType", "COLLECTION")
+                .addString("studyName", "studyName")
+                .addString("studyId", "1")
+                .addString("fileId", "1")
+                .addString("opencga.app.home", opencgaHome)
+                .toJobParameters();
+
+        Job listenedJob = jobBuilderFactory
+                .get("listenedjob")
+                .incrementer(new RunIdIncrementer())
+                .listener(listener)
+                .start(variantConfiguration.load())
+                .build();
+
+        new File(input).delete();
+        assertFalse(new File(input).exists());  // ensure the stats file doesn't exist from previous executions
+        JobExecution execution = jobLauncher.run(listenedJob, parameters);
+
+
+        assertEquals(input, execution.getJobParameters().getString("input"));
+        assertEquals("COMPLETED", execution.getExitStatus().getExitCode());
+
+        // counting variants in the DB
+        VariantStorageManager variantStorageManager = StorageManagerFactory.getVariantStorageManager();
+        VariantDBAdaptor variantDBAdaptor = variantStorageManager.getDBAdaptor(dbName, null);
+        VariantDBIterator iterator = variantDBAdaptor.iterator();
+        int variantRows = 0;
+        while(iterator.hasNext()) {
+            iterator.next();
+            variantRows++;
+        }
+
+        GZIPInputStream transformedInputStream = new GZIPInputStream(new FileInputStream(
+                getTransformedOutputPath(Paths.get(input).getFileName(), compressExtension, outputDir)));
+
+        assertEquals(variantRows, getLines(transformedInputStream));
+*/
     }
+
     @Test
     public void validLoadStats() {
 
