@@ -56,8 +56,9 @@ public class VariantConfiguration {
 
     private static final Logger logger = LoggerFactory.getLogger(VariantConfiguration.class);
     public static final String jobName = "variantJob";
-    public static final String SKIP_STATS_CREATE = "skipStatsCreate";
     public static final String SKIP_LOAD = "skipLoad";
+    public static final String SKIP_STATS_CREATE = "skipStatsCreate";
+    public static final String SKIP_STATS_LOAD = "skipStatsLoad";
 
     @Autowired
     private JobBuilderFactory jobBuilderFactory;
@@ -86,7 +87,7 @@ public class VariantConfiguration {
                 .start(transform())
                 .next(load())
                 .next(statsCreate())
-//                .next(statsLoad())
+                .next(statsLoad())
 //                .next(annotation(stepBuilderFactory));
                 .build();
     }
@@ -189,7 +190,7 @@ public class VariantConfiguration {
                     QueryOptions statsOptions = new QueryOptions(variantOptions);
 
                     // actual stats creation
-                    variantStatisticsManager.createStats(dbAdaptor, statsOutputUri, null, statsOptions);
+                    variantStatisticsManager.createStats(dbAdaptor, statsOutputUri, null, statsOptions);    // TODO allow subset of samples
                 }
 
                 return RepeatStatus.FINISHED;
@@ -202,33 +203,39 @@ public class VariantConfiguration {
         return tasklet.build();
     }
 
-//    public Step statsLoad() {
-//        StepBuilder step1 = stepBuilderFactory.get("statsLoad");
-//        TaskletStepBuilder tasklet = step1.tasklet(new Tasklet() {
-//            @Override
-//            public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
-//
-//                if (config.calculateStats) {
-//                    // obtaining resources. this should be minimum, in order to skip this step if it is completed
-//                    VariantStatisticsManager variantStatisticsManager = new VariantStatisticsManager();
-//                    QueryOptions statsOptions = new QueryOptions(variantOptions);
-//                    VariantDBAdaptor dbAdaptor = variantStorageManager.getDBAdaptor(config.dbName, variantOptions);
-//
-//                    // actual stats load
-//                    variantStatisticsManager.loadStats(dbAdaptor, statsOutputUri, statsOptions);
-//                } else {
-//                    logger.info("skipping stats loading");
-//                }
-//
-//                return RepeatStatus.FINISHED;
-//            }
-//        });
-//
-//        // true: every job execution will do this step, even if this step is already COMPLETED
-//        // false: if the job was aborted and is relaunched, this step will NOT be done again
-//        tasklet.allowStartIfComplete(false);
-//        return tasklet.build();
-//    }
+    public Step statsLoad() {
+        StepBuilder step1 = stepBuilderFactory.get("statsLoad");
+        TaskletStepBuilder tasklet = step1.tasklet(new Tasklet() {
+            @Override
+            public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
+
+                JobParameters parameters = chunkContext.getStepContext().getStepExecution().getJobParameters();
+
+                if (Boolean.parseBoolean(parameters.getString(SKIP_STATS_LOAD, "false"))) {
+                    logger.info("skipping stats loading");
+                } else {
+                    VariantStorageManager variantStorageManager = StorageManagerFactory.getVariantStorageManager();
+                    ObjectMap variantOptions = listener.getVariantOptions();
+                    QueryOptions statsOptions = new QueryOptions(variantOptions);
+                    VariantStatisticsManager variantStatisticsManager = new VariantStatisticsManager();
+                    VariantDBAdaptor dbAdaptor = variantStorageManager.getDBAdaptor(variantOptions.getString("dbName"), variantOptions);
+                    URI outdirUri = createUri(parameters.getString("outputDir"));
+                    VariantSource variantSource = variantOptions.get(VariantStorageManager.VARIANT_SOURCE, VariantSource.class);
+                    URI statsOutputUri = outdirUri.resolve(VariantStorageManager.buildFilename(variantSource));
+
+                    // actual stats load
+                    variantStatisticsManager.loadStats(dbAdaptor, statsOutputUri, statsOptions);
+                }
+
+                return RepeatStatus.FINISHED;
+            }
+        });
+
+        // true: every job execution will do this step, even if this step is already COMPLETED
+        // false: if the job was aborted and is relaunched, this step will NOT be done again
+        tasklet.allowStartIfComplete(false);
+        return tasklet.build();
+    }
 
     public static URI createUri(String input) throws URISyntaxException {
         URI sourceUri = new URI(null, input, null);
