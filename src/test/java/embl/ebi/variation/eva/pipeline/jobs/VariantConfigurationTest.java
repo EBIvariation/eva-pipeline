@@ -74,6 +74,7 @@ public class VariantConfigurationTest {
     private static final String VALID_LOAD = "validLoad";
     private static final String INVALID_LOAD = "invalidLoad";
     private static final String VALID_CREATE_STATS = "validCreateStats";
+    private static final String INVALID_CREATE_STATS = "invalidCreateStats";
 
 
     @Autowired
@@ -112,15 +113,19 @@ public class VariantConfigurationTest {
                 .addString(VariantConfiguration.SKIP_STATS_CREATE, "true")
                 .toJobParameters();
 
+        String outputFilename = getTransformedOutputPath(Paths.get(FILE_20).getFileName(),
+                parameters.getString("compressExtension"), parameters.getString("outputDir"));
+        logger.info("transformed output will be at: " + outputFilename);
+        File file = new File(outputFilename);
+        file.delete();
+        assertFalse(file.exists());
+
         JobExecution execution = jobLauncher.run(job, parameters);
 
         assertEquals(input, execution.getJobParameters().getString("input"));
         assertEquals("COMPLETED", execution.getExitStatus().getExitCode());
 
         ////////// check transformed file
-        String outputFilename = getTransformedOutputPath(Paths.get(FILE_20).getFileName(),
-                parameters.getString("compressExtension"), parameters.getString("outputDir"));
-        logger.info("reading transformed output from: " + outputFilename);
 
 
         long lines = getLines(new GZIPInputStream(new FileInputStream(outputFilename)));
@@ -140,6 +145,9 @@ public class VariantConfigurationTest {
         return lines;
     }
 
+    /**
+     * This test has to fail because the vcf FILE_WRONG_NO_ALT is malformed, in a variant has an empty alternate allele
+     */
     @Test
     public void invalidTransform() throws JobExecutionException {
         String input = VariantConfigurationTest.class.getResource(FILE_WRONG_NO_ALT).getFile();
@@ -196,6 +204,9 @@ public class VariantConfigurationTest {
         assertEquals("COMPLETED", execution.getExitStatus().getExitCode());
     }
 
+    /**
+     * This test has to fail because the opencgaHome is not set, so it will fail at loading the storage engine configuration.
+     */
     @Test
     public void invalidLoad() throws JobExecutionException {
         String input = VariantConfigurationTest.class.getResource(FILE_20).getFile();
@@ -285,18 +296,21 @@ public class VariantConfigurationTest {
         assertTrue(statsFile.exists());
     }
 
+    /**
+     * This test has to fail because it will try to extract variants from a non-existent DB.
+     */
     @Test
     public void invalidCreateStats() throws JobParametersInvalidException, JobExecutionAlreadyRunningException,
             JobRestartException, JobInstanceAlreadyCompleteException, IllegalAccessException, ClassNotFoundException,
             InstantiationException, StorageManagerException, IOException {
 
-        /*
         String input = VariantConfigurationTest.class.getResource(FILE_20).getFile();
+        VariantSource source = new VariantSource(input, "1", "1", "studyName");
         String opencgaHome = System.getenv("OPENCGA_HOME") != null ? System.getenv("OPENCGA_HOME") : "/opt/opencga";
         String dbName = INVALID_CREATE_STATS;
-
         String compressExtension = ".gz";
         String outputDir = "/tmp";
+
         JobParameters parameters = new JobParametersBuilder()
                 .addString("input", input)
                 .addString("outputDir", outputDir)
@@ -306,42 +320,23 @@ public class VariantConfigurationTest {
                 .addString("includeSrc", "FIRST_8_COLUMNS")
                 .addString("aggregated", "NONE")
                 .addString("studyType", "COLLECTION")
-                .addString("studyName", "studyName")
-                .addString("studyId", "1")
-                .addString("fileId", "1")
+                .addString("studyName", source.getStudyName())
+                .addString("studyId", source.getStudyId())
+                .addString("fileId", source.getFileId())
                 .addString("opencga.app.home", opencgaHome)
                 .toJobParameters();
 
         Job listenedJob = jobBuilderFactory
-                .get("listenedjob")
+                .get("customStatsJob")
                 .incrementer(new RunIdIncrementer())
                 .listener(listener)
                 .start(variantConfiguration.statsCreate())
                 .build();
 
-        new File(input).delete();
-        assertFalse(new File(input).exists());  // ensure the stats file doesn't exist from previous executions
         JobExecution execution = jobLauncher.run(listenedJob, parameters);
 
-
         assertEquals(input, execution.getJobParameters().getString("input"));
-        assertEquals("COMPLETED", execution.getExitStatus().getExitCode());
-
-        // counting variants in the DB
-        VariantStorageManager variantStorageManager = StorageManagerFactory.getVariantStorageManager();
-        VariantDBAdaptor variantDBAdaptor = variantStorageManager.getDBAdaptor(dbName, null);
-        VariantDBIterator iterator = variantDBAdaptor.iterator();
-        int variantRows = 0;
-        while(iterator.hasNext()) {
-            iterator.next();
-            variantRows++;
-        }
-
-        GZIPInputStream transformedInputStream = new GZIPInputStream(new FileInputStream(
-                getTransformedOutputPath(Paths.get(input).getFileName(), compressExtension, outputDir)));
-
-        assertEquals(variantRows, getLines(transformedInputStream));
-*/
+        assertEquals(ExitStatus.FAILED.getExitCode(), execution.getExitStatus().getExitCode());
     }
 
     @Test
@@ -371,7 +366,7 @@ public class VariantConfigurationTest {
     private static void cleanDBs() throws UnknownHostException {
         // Delete Mongo collection
         MongoClient mongoClient = new MongoClient("localhost");
-        List<String> dbs = Arrays.asList(VALID_TRANSFORM, INVALID_TRANSFORM, VALID_LOAD, INVALID_LOAD, VALID_CREATE_STATS);
+        List<String> dbs = Arrays.asList(VALID_TRANSFORM, INVALID_TRANSFORM, VALID_LOAD, INVALID_LOAD, VALID_CREATE_STATS, INVALID_CREATE_STATS);
         for (String dbName : dbs) {
             DB db = mongoClient.getDB(dbName);
             db.dropDatabase();
