@@ -23,6 +23,7 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.opencb.biodata.models.variant.VariantSource;
 import org.opencb.opencga.storage.core.StorageManagerException;
 import org.opencb.opencga.storage.core.StorageManagerFactory;
 import org.opencb.opencga.storage.core.variant.VariantStorageManager;
@@ -50,6 +51,7 @@ import java.util.zip.GZIPInputStream;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Created by jmmut on 2015-10-14.
@@ -236,11 +238,13 @@ public class VariantConfigurationTest {
             IllegalAccessException, ClassNotFoundException, InstantiationException, StorageManagerException {
 
         String input = VariantConfigurationTest.class.getResource(FILE_20).getFile();
+        VariantSource source = new VariantSource(input, "1", "1", "studyName");
         String opencgaHome = System.getenv("OPENCGA_HOME") != null ? System.getenv("OPENCGA_HOME") : "/opt/opencga";
         String dbName = VALID_CREATE_STATS;
-
         String compressExtension = ".gz";
         String outputDir = "/tmp";
+        File statsFile = new File(Paths.get(outputDir).resolve(VariantStorageManager.buildFilename(source)) + ".variants.stats.json.gz");
+
         JobParameters parameters = new JobParametersBuilder()
                 .addString("input", input)
                 .addString("outputDir", outputDir)
@@ -250,61 +254,35 @@ public class VariantConfigurationTest {
                 .addString("includeSrc", "FIRST_8_COLUMNS")
                 .addString("aggregated", "NONE")
                 .addString("studyType", "COLLECTION")
-                .addString("studyName", "studyName")
-                .addString("studyId", "1")
-                .addString("fileId", "1")
+                .addString("studyName", source.getStudyName())
+                .addString("studyId", source.getStudyId())
+                .addString("fileId", source.getFileId())
                 .addString("opencga.app.home", opencgaHome)
                 .toJobParameters();
 
+        statsFile.delete();
+        assertFalse(statsFile.exists());  // ensure the stats file doesn't exist from previous executions
         JobExecution execution = jobLauncher.run(job, parameters);
 
         assertEquals(input, execution.getJobParameters().getString("input"));
         assertEquals("COMPLETED", execution.getExitStatus().getExitCode());
-
-        // counting variants in the DB
-        VariantStorageManager variantStorageManager = StorageManagerFactory.getVariantStorageManager();
-        VariantDBAdaptor variantDBAdaptor = variantStorageManager.getDBAdaptor(dbName, null);
-        VariantDBIterator iterator = variantDBAdaptor.iterator();
-        int variantRows = 0;
-        while(iterator.hasNext()) {
-            iterator.next();
-            variantRows++;
-        }
-
-        GZIPInputStream transformedInputStream = new GZIPInputStream(new FileInputStream(
-                getTransformedOutputPath(Paths.get(input).getFileName(), compressExtension, outputDir)));
-
-        assertEquals(variantRows, getLines(transformedInputStream));
+        assertTrue(statsFile.exists());
 
         // test with an isolated step, instead of the whole job
 
         Job listenedJob = jobBuilderFactory
-                .get("listenedjob")
+                .get("customStatsJob")
                 .incrementer(new RunIdIncrementer())
                 .listener(listener)
                 .start(variantConfiguration.statsCreate())
                 .build();
 
-        new File(input).delete();
-        assertFalse(new File(input).exists());  // ensure the stats file doesn't exist from previous executions
+        statsFile.delete();
+        assertFalse(statsFile.exists());  // ensure the stats file doesn't exist from previous executions
         execution = jobLauncher.run(listenedJob, parameters);
 
         assertEquals("COMPLETED", execution.getExitStatus().getExitCode());
-
-        // counting variants in the DB
-        variantStorageManager = StorageManagerFactory.getVariantStorageManager();
-        variantDBAdaptor = variantStorageManager.getDBAdaptor(dbName, null);
-        iterator = variantDBAdaptor.iterator();
-        variantRows = 0;
-        while(iterator.hasNext()) {
-            iterator.next();
-            variantRows++;
-        }
-
-        transformedInputStream = new GZIPInputStream(new FileInputStream(
-                getTransformedOutputPath(Paths.get(input).getFileName(), compressExtension, outputDir)));
-
-        assertEquals(variantRows, getLines(transformedInputStream));
+        assertTrue(statsFile.exists());
     }
 
     @Test
@@ -315,7 +293,7 @@ public class VariantConfigurationTest {
         /*
         String input = VariantConfigurationTest.class.getResource(FILE_20).getFile();
         String opencgaHome = System.getenv("OPENCGA_HOME") != null ? System.getenv("OPENCGA_HOME") : "/opt/opencga";
-        String dbName = VALID_CREATE_STATS;
+        String dbName = INVALID_CREATE_STATS;
 
         String compressExtension = ".gz";
         String outputDir = "/tmp";
@@ -338,7 +316,7 @@ public class VariantConfigurationTest {
                 .get("listenedjob")
                 .incrementer(new RunIdIncrementer())
                 .listener(listener)
-                .start(variantConfiguration.load())
+                .start(variantConfiguration.statsCreate())
                 .build();
 
         new File(input).delete();

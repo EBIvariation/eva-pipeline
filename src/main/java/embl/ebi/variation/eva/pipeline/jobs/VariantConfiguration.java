@@ -85,7 +85,7 @@ public class VariantConfiguration {
         return jobBuilder
                 .start(transform())
                 .next(load())
-//                .next(statsCreate())
+                .next(statsCreate())
 //                .next(statsLoad())
 //                .next(annotation(stepBuilderFactory));
                 .build();
@@ -171,8 +171,8 @@ public class VariantConfiguration {
         TaskletStepBuilder tasklet = step1.tasklet(new Tasklet() {
             @Override
             public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
-                HashMap<String, Set<String>> samples = new HashMap<>(); // TODO fill properly. if this is null overwrite will take on
-                samples.put("SOME", new HashSet<>(Arrays.asList("HG00096", "HG00097")));
+//                HashMap<String, Set<String>> samples = new HashMap<>(); // TODO fill properly. if this is null overwrite will take on
+//                samples.put("SOME", new HashSet<>(Arrays.asList("HG00096", "HG00097")));
                 JobParameters parameters = chunkContext.getStepContext().getStepExecution().getJobParameters();
 
                 if (Boolean.parseBoolean(parameters.getString(SKIP_STATS_CREATE, "false"))) {
@@ -189,7 +189,7 @@ public class VariantConfiguration {
                     QueryOptions statsOptions = new QueryOptions(variantOptions);
 
                     // actual stats creation
-                    variantStatisticsManager.createStats(dbAdaptor, statsOutputUri, samples, statsOptions);
+                    variantStatisticsManager.createStats(dbAdaptor, statsOutputUri, null, statsOptions);
                 }
 
                 return RepeatStatus.FINISHED;
