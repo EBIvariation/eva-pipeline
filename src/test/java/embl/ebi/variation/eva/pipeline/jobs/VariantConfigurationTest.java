@@ -23,7 +23,9 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.opencb.biodata.models.variant.Variant;
 import org.opencb.biodata.models.variant.VariantSource;
+import org.opencb.datastore.core.QueryOptions;
 import org.opencb.opencga.storage.core.StorageManagerException;
 import org.opencb.opencga.storage.core.StorageManagerFactory;
 import org.opencb.opencga.storage.core.variant.VariantStorageManager;
@@ -46,6 +48,7 @@ import java.net.UnknownHostException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
 
@@ -76,6 +79,7 @@ public class VariantConfigurationTest {
     private static final String VALID_CREATE_STATS = "validCreateStats";
     private static final String INVALID_CREATE_STATS = "invalidCreateStats";
     private static final String VALID_LOAD_STATS = "validLoadStats";
+    private static final String VALID_LOAD_STATS_STEP = "validLoadStatsStep";
     private static final String INVALID_LOAD_STATS = "invalidLoadStats";
 
 
@@ -182,7 +186,7 @@ public class VariantConfigurationTest {
     }
 
     @Test
-    public void validLoad() throws JobExecutionException {
+    public void validLoad() throws JobExecutionException, IllegalAccessException, ClassNotFoundException, InstantiationException, StorageManagerException, IOException {
         String input = VariantConfigurationTest.class.getResource(FILE_20).getFile();
         String opencgaHome = System.getenv("OPENCGA_HOME") != null ? System.getenv("OPENCGA_HOME") : "/opt/opencga";
         String dbName = VALID_LOAD;
@@ -208,6 +212,27 @@ public class VariantConfigurationTest {
 
         assertEquals(input, execution.getJobParameters().getString("input"));
         assertEquals(ExitStatus.COMPLETED.getExitCode(), execution.getExitStatus().getExitCode());
+
+
+        // check ((documents in DB) == (lines in transformed file))
+        VariantStorageManager variantStorageManager = StorageManagerFactory.getVariantStorageManager();
+        VariantDBAdaptor variantDBAdaptor = variantStorageManager.getDBAdaptor(dbName, null);
+        VariantDBIterator iterator = variantDBAdaptor.iterator(new QueryOptions());
+
+        String outputFilename = getTransformedOutputPath(Paths.get(FILE_20).getFileName(),
+                parameters.getString("compressExtension"), parameters.getString("outputDir"));
+        long lines = getLines(new GZIPInputStream(new FileInputStream(outputFilename)));
+
+        assertEquals(countRows(iterator), lines);
+    }
+
+    private long countRows(Iterator<Variant> iterator) {
+        int variantRows = 0;
+        while(iterator.hasNext()) {
+            iterator.next();
+            variantRows++;
+        }
+        return variantRows;
     }
 
     /**
@@ -350,7 +375,7 @@ public class VariantConfigurationTest {
     }
 
     @Test
-    public void validLoadStats() throws JobParametersInvalidException, JobExecutionAlreadyRunningException, JobRestartException, JobInstanceAlreadyCompleteException, UnknownHostException {
+    public void validLoadStats() throws JobParametersInvalidException, JobExecutionAlreadyRunningException, JobRestartException, JobInstanceAlreadyCompleteException, IOException, IllegalAccessException, ClassNotFoundException, InstantiationException, StorageManagerException {
 
         String input = VariantConfigurationTest.class.getResource(FILE_20).getFile();
         VariantSource source = new VariantSource(input, "1", "1", "studyName");
@@ -383,7 +408,53 @@ public class VariantConfigurationTest {
         assertEquals(ExitStatus.COMPLETED.getExitCode(), execution.getExitStatus().getExitCode());
         assertTrue(statsFile.exists());
 
-        // testing the step alone
+        // check ((documents in DB) == (lines in transformed file))
+        VariantStorageManager variantStorageManager = StorageManagerFactory.getVariantStorageManager();
+        VariantDBAdaptor variantDBAdaptor = variantStorageManager.getDBAdaptor(dbName, null);
+        VariantDBIterator iterator = variantDBAdaptor.iterator(new QueryOptions());
+
+        String outputFilename = getTransformedOutputPath(Paths.get(FILE_20).getFileName(),
+                parameters.getString("compressExtension"), parameters.getString("outputDir"));
+        long lines = getLines(new GZIPInputStream(new FileInputStream(outputFilename)));
+
+        assertEquals(countRows(iterator), lines);
+
+        // check the DB docs have the field "st"
+
+        variantStorageManager = StorageManagerFactory.getVariantStorageManager();
+        variantDBAdaptor = variantStorageManager.getDBAdaptor(dbName, null);
+        iterator = variantDBAdaptor.iterator(new QueryOptions());
+
+        assertEquals(1, iterator.next().getSourceEntries().values().iterator().next().getCohortStats().size());
+
+        //////////////// testing the step alone. first load variants and create stats, and then another isolated step of load stats
+
+        dbName = VALID_LOAD_STATS_STEP;
+
+        JobParametersBuilder jobParametersBuilder = new JobParametersBuilder()
+                .addString("input", input)
+                .addString("outputDir", outputDir)
+                .addString("dbName", dbName)
+                .addString("compressExtension", compressExtension)
+                .addString("compressGenotypes", "true")
+                .addString("includeSrc", "FIRST_8_COLUMNS")
+                .addString("aggregated", "NONE")
+                .addString("studyType", "COLLECTION")
+                .addString("studyName", source.getStudyName())
+                .addString("studyId", source.getStudyId())
+                .addString("fileId", source.getFileId())
+                .addString("opencga.app.home", opencgaHome);
+
+        parameters = jobParametersBuilder.toJobParameters();
+
+        JobParameters parametersNoStats = jobParametersBuilder
+                .addString(VariantConfiguration.SKIP_STATS_LOAD, "true")
+                .toJobParameters();
+
+        execution = jobLauncher.run(job, parametersNoStats);
+        assertEquals(ExitStatus.COMPLETED.getExitCode(), execution.getExitStatus().getExitCode());
+
+        // isolated load stats step
         Job listenedJob = jobBuilderFactory
                 .get("customStatsJob")
                 .incrementer(new RunIdIncrementer())
@@ -391,15 +462,28 @@ public class VariantConfigurationTest {
                 .start(variantConfiguration.statsLoad())
                 .build();
 
-        MongoClient mongoClient = new MongoClient("localhost"); // ensure the stats DB is emtpy, for loading again
-        DB db = mongoClient.getDB(VALID_LOAD_STATS);
-        db.dropDatabase();
-        mongoClient.close();
-
         execution = jobLauncher.run(listenedJob, parameters);
-
         assertEquals(ExitStatus.COMPLETED.getExitCode(), execution.getExitStatus().getExitCode());
-        assertTrue(statsFile.exists());
+
+        // check ((documents in DB) == (lines in transformed file))
+        variantStorageManager = StorageManagerFactory.getVariantStorageManager();
+        variantDBAdaptor = variantStorageManager.getDBAdaptor(dbName, null);
+        iterator = variantDBAdaptor.iterator(new QueryOptions());
+
+        outputFilename = getTransformedOutputPath(Paths.get(FILE_20).getFileName(),
+                parameters.getString("compressExtension"), parameters.getString("outputDir"));
+        lines = getLines(new GZIPInputStream(new FileInputStream(outputFilename)));
+
+        assertEquals(countRows(iterator), lines);
+
+        // check the DB docs have the field "st"
+
+        variantStorageManager = StorageManagerFactory.getVariantStorageManager();
+        variantDBAdaptor = variantStorageManager.getDBAdaptor(dbName, null);
+        iterator = variantDBAdaptor.iterator(new QueryOptions());
+
+        assertEquals(1, iterator.next().getSourceEntries().values().iterator().next().getCohortStats().size());
+
     }
 
     /**
@@ -454,13 +538,23 @@ public class VariantConfigurationTest {
 
     @AfterClass
     public static void afterTests() throws UnknownHostException {
-//        cleanDBs();
+        cleanDBs();
     }
 
     private static void cleanDBs() throws UnknownHostException {
         // Delete Mongo collection
         MongoClient mongoClient = new MongoClient("localhost");
-        List<String> dbs = Arrays.asList(VALID_TRANSFORM, INVALID_TRANSFORM, VALID_LOAD, INVALID_LOAD, VALID_CREATE_STATS, INVALID_CREATE_STATS, VALID_LOAD_STATS, INVALID_LOAD_STATS);
+        List<String> dbs = Arrays.asList(
+                VALID_TRANSFORM,
+                INVALID_TRANSFORM,
+                VALID_LOAD,
+                INVALID_LOAD,
+                VALID_CREATE_STATS,
+                INVALID_CREATE_STATS,
+                VALID_LOAD_STATS,
+                VALID_LOAD_STATS_STEP,
+                INVALID_LOAD_STATS);
+
         for (String dbName : dbs) {
             DB db = mongoClient.getDB(dbName);
             db.dropDatabase();
