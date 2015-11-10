@@ -55,6 +55,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
 
+import static embl.ebi.variation.eva.pipeline.jobs.JobTestUtils.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -75,40 +76,20 @@ public class VariantConfigurationTest {
     private static final Logger logger = LoggerFactory.getLogger(VariantConfigurationTest.class);
 
     // iterable doing an enum. Does it worth it?
-    private static final String VALID_TRANSFORM = "validTransform";
-    private static final String INVALID_TRANSFORM = "invalidTransform";
-    private static final String VALID_LOAD = "validLoad";
-    private static final String INVALID_LOAD = "invalidLoad";
-    private static final String VALID_CREATE_STATS = "validCreateStats";
-    private static final String INVALID_CREATE_STATS = "invalidCreateStats";
-    private static final String VALID_LOAD_STATS = "validLoadStats";
-    private static final String VALID_LOAD_STATS_STEP = "validLoadStatsStep";
-    private static final String INVALID_LOAD_STATS = "invalidLoadStats";
-    private static final String TWO_STAGES_STATS = "twoStagesStats";
-
+    private static final String VALID_TRANSFORM = "VariantConfigurationTest_vt";
+    private static final String INVALID_TRANSFORM = "VariantConfigurationTest_it";
+    private static final String VALID_LOAD = "VariantConfigurationTest_vl";
+//    private static final String INVALID_LOAD = "invalidLoad";
+    private static final String VALID_CREATE_STATS = "VariantConfigurationTest_vcs";
+//    private static final String INVALID_CREATE_STATS = "invalidCreateStats";
+    private static final String VALID_LOAD_STATS = "VariantConfigurationTest_vls";
+//    private static final String INVALID_LOAD_STATS = "invalidLoadStats";
 
     @Autowired
-    VariantConfiguration variantConfiguration;
-
-    @Autowired
-    @Qualifier(VariantConfiguration.jobName)
     private Job job;
 
     @Autowired
-    @Qualifier(VariantConfiguration.loadJobName)
-    private Job loadJob;
-
-    @Autowired
-    @Qualifier(VariantConfiguration.statsJobName)
-    private Job statsJob;
-
-    @Autowired
     private JobLauncher jobLauncher;
-    @Autowired
-    private JobBuilderFactory jobBuilderFactory;
-    @Autowired
-    private JobExecutionListener listener;
-
 
     @Test
     public void validTransform() throws JobExecutionException, IOException {
@@ -151,19 +132,6 @@ public class VariantConfigurationTest {
 
         long lines = getLines(new GZIPInputStream(new FileInputStream(outputFilename)));
         assertEquals(300, lines);
-    }
-
-    private long getLines(InputStream in) throws IOException {
-        BufferedReader file = new BufferedReader(new InputStreamReader(in));
-        long lines = 0;
-        String line;
-        while ((line = file.readLine()) != null) {
-            if (line.charAt(0) != '#') {
-                lines++;
-            }
-        }
-        file.close();
-        return lines;
     }
 
     /**
@@ -240,49 +208,6 @@ public class VariantConfigurationTest {
         assertEquals(countRows(iterator), lines);
     }
 
-    private long countRows(Iterator<Variant> iterator) {
-        int variantRows = 0;
-        while(iterator.hasNext()) {
-            iterator.next();
-            variantRows++;
-        }
-        return variantRows;
-    }
-
-    /**
-     * This test has to fail because the opencgaHome is not set, so it will fail at loading the storage engine configuration.
-     */
-    @Test
-    public void invalidLoad() throws JobExecutionException {
-        String input = VariantConfigurationTest.class.getResource(FILE_20).getFile();
-        String outdir = input;
-        String dbName = INVALID_LOAD;
-//        String opencgaHome = System.getenv("OPENCGA_HOME") != null ? System.getenv("OPENCGA_HOME") : "/opt/opencga";  // TODO make it fail better
-
-        JobParameters parameters = new JobParametersBuilder()
-                .addString("input", input)
-                .addString("outputDir", outdir)
-                .addString("dbName", dbName)
-                .addString("compressExtension", ".gz")
-                .addString("compressGenotypes", "true")
-                .addString("includeSrc", "FIRST_8_COLUMNS")
-                .addString("aggregated", "NONE")
-                .addString("studyType", "COLLECTION")
-                .addString("studyName", "studyName")
-                .addString("studyId", "1")
-                .addString("fileId", "1")
-                .addString("opencga.app.home", null)
-                .addString(VariantsStatsCreate.SKIP_STATS_CREATE, "true")
-                .addString(VariantsStatsLoad.SKIP_STATS_LOAD, "true")
-                .toJobParameters();
-
-        System.out.println("parameters in load tests" + parameters.toString());
-        JobExecution execution = jobLauncher.run(loadJob, parameters);
-
-        assertEquals(input, execution.getJobParameters().getString("input"));
-        assertEquals(ExitStatus.FAILED.getExitCode(), execution.getExitStatus().getExitCode());
-    }
-
     @Test
     public void validCreateStats() throws JobParametersInvalidException, JobExecutionAlreadyRunningException,
             JobRestartException, JobInstanceAlreadyCompleteException, IOException, InterruptedException,
@@ -319,55 +244,12 @@ public class VariantConfigurationTest {
         assertEquals(input, execution.getJobParameters().getString("input"));
         assertEquals(ExitStatus.COMPLETED.getExitCode(), execution.getExitStatus().getExitCode());
         assertTrue(statsFile.exists());
-
-        // test with an isolated step, instead of the whole job
-        statsFile.delete();
-        assertFalse(statsFile.exists());  // ensure the stats file doesn't exist from previous executions
-        execution = jobLauncher.run(statsJob, parameters);
-
-        assertEquals(ExitStatus.COMPLETED.getExitCode(), execution.getExitStatus().getExitCode());
-        assertTrue(statsFile.exists());
-    }
-
-    /**
-     * This test has to fail because it will try to extract variants from a non-existent DB.
-     */
-    @Test
-    public void invalidCreateStats() throws JobParametersInvalidException, JobExecutionAlreadyRunningException,
-            JobRestartException, JobInstanceAlreadyCompleteException, IllegalAccessException, ClassNotFoundException,
-            InstantiationException, StorageManagerException, IOException {
-
-        String input = VariantConfigurationTest.class.getResource(FILE_20).getFile();
-        VariantSource source = new VariantSource(input, "1", "1", "studyName");
-        String opencgaHome = System.getenv("OPENCGA_HOME") != null ? System.getenv("OPENCGA_HOME") : "/opt/opencga";
-        String dbName = INVALID_CREATE_STATS;
-        String compressExtension = ".gz";
-        String outputDir = "/tmp";
-
-        JobParameters parameters = new JobParametersBuilder()
-                .addString("input", input)
-                .addString("outputDir", outputDir)
-                .addString("dbName", dbName)
-                .addString("compressExtension", compressExtension)
-                .addString("compressGenotypes", "true")
-                .addString("includeSrc", "FIRST_8_COLUMNS")
-                .addString("aggregated", "NONE")
-                .addString("studyType", "COLLECTION")
-                .addString("studyName", source.getStudyName())
-                .addString("studyId", source.getStudyId())
-                .addString("fileId", source.getFileId())
-                .addString("opencga.app.home", opencgaHome)
-                .addString(VariantsStatsLoad.SKIP_STATS_LOAD, "true")
-                .toJobParameters();
-
-        JobExecution execution = jobLauncher.run(statsJob, parameters);
-
-        assertEquals(input, execution.getJobParameters().getString("input"));
-        assertEquals(ExitStatus.FAILED.getExitCode(), execution.getExitStatus().getExitCode());
     }
 
     @Test
-    public void validLoadStats() throws JobParametersInvalidException, JobExecutionAlreadyRunningException, JobRestartException, JobInstanceAlreadyCompleteException, IOException, IllegalAccessException, ClassNotFoundException, InstantiationException, StorageManagerException {
+    public void validLoadStats() throws JobParametersInvalidException, JobExecutionAlreadyRunningException,
+            JobRestartException, JobInstanceAlreadyCompleteException, IOException, IllegalAccessException,
+            ClassNotFoundException, InstantiationException, StorageManagerException {
 
         String input = VariantConfigurationTest.class.getResource(FILE_20).getFile();
         VariantSource source = new VariantSource(input, "1", "1", "studyName");
@@ -418,98 +300,6 @@ public class VariantConfigurationTest {
         iterator = variantDBAdaptor.iterator(new QueryOptions());
 
         assertEquals(1, iterator.next().getSourceEntries().values().iterator().next().getCohortStats().size());
-
-        //////////////// testing the step alone. first load variants and create stats, and then another isolated step of load stats
-
-        dbName = VALID_LOAD_STATS_STEP;
-
-        JobParametersBuilder jobParametersBuilder = new JobParametersBuilder()
-                .addString("input", input)
-                .addString("outputDir", outputDir)
-                .addString("dbName", dbName)
-                .addString("compressExtension", compressExtension)
-                .addString("compressGenotypes", "true")
-                .addString("includeSrc", "FIRST_8_COLUMNS")
-                .addString("aggregated", "NONE")
-                .addString("studyType", "COLLECTION")
-                .addString("studyName", source.getStudyName())
-                .addString("studyId", source.getStudyId())
-                .addString("fileId", source.getFileId())
-                .addString("opencga.app.home", opencgaHome);
-
-        JobParameters jobParametersNoCreateStats = jobParametersBuilder
-                .addString(VariantsStatsCreate.SKIP_STATS_CREATE, "true")
-                .toJobParameters();
-
-        JobParameters parametersNoLoadStats = jobParametersBuilder
-                .addString(VariantsStatsLoad.SKIP_STATS_LOAD, "true")
-                .toJobParameters();
-
-        execution = jobLauncher.run(job, parametersNoLoadStats);
-        assertEquals(ExitStatus.COMPLETED.getExitCode(), execution.getExitStatus().getExitCode());
-
-        // isolated load stats step
-        execution = jobLauncher.run(statsJob, jobParametersNoCreateStats);
-        assertEquals(ExitStatus.COMPLETED.getExitCode(), execution.getExitStatus().getExitCode());
-
-        // check ((documents in DB) == (lines in transformed file))
-        variantStorageManager = StorageManagerFactory.getVariantStorageManager();
-        variantDBAdaptor = variantStorageManager.getDBAdaptor(dbName, null);
-        iterator = variantDBAdaptor.iterator(new QueryOptions());
-
-        outputFilename = getTransformedOutputPath(Paths.get(FILE_20).getFileName(),
-                parameters.getString("compressExtension"), parameters.getString("outputDir"));
-        lines = getLines(new GZIPInputStream(new FileInputStream(outputFilename)));
-
-        assertEquals(countRows(iterator), lines);
-
-        // check the DB docs have the field "st"
-
-        variantStorageManager = StorageManagerFactory.getVariantStorageManager();
-        variantDBAdaptor = variantStorageManager.getDBAdaptor(dbName, null);
-        iterator = variantDBAdaptor.iterator(new QueryOptions());
-
-        assertEquals(1, iterator.next().getSourceEntries().values().iterator().next().getCohortStats().size());
-
-    }
-
-    /**
-     * This test should fail because the variants.stats file is malformed, with an extra `"`.
-     */
-    @Test
-    public void invalidLoadStats() throws JobParametersInvalidException, JobExecutionAlreadyRunningException, JobRestartException, JobInstanceAlreadyCompleteException {
-
-        String input = VariantConfigurationTest.class.getResource(FILE_20).getFile();
-        VariantSource source = new VariantSource(input, "1", "1", "studyName");
-        String opencgaHome = System.getenv("OPENCGA_HOME") != null ? System.getenv("OPENCGA_HOME") : "/opt/opencga";
-        String dbName = INVALID_LOAD_STATS;
-        String compressExtension = ".gz";
-        String outputDir = input;
-
-        JobParameters parameters = new JobParametersBuilder()
-                .addString("input", input)
-                .addString("outputDir", outputDir)
-                .addString("dbName", dbName)
-                .addString("compressExtension", compressExtension)
-                .addString("compressGenotypes", "true")
-                .addString("includeSrc", "FIRST_8_COLUMNS")
-                .addString("aggregated", "NONE")
-                .addString("studyType", "COLLECTION")
-                .addString("studyName", source.getStudyName())
-                .addString("studyId", source.getStudyId())
-                .addString("fileId", source.getFileId())
-                .addString("opencga.app.home", opencgaHome)
-                .addString(VariantsStatsCreate.SKIP_STATS_CREATE, "true")
-                .toJobParameters();
-
-        JobExecution execution = jobLauncher.run(statsJob, parameters);
-
-        assertEquals(input, execution.getJobParameters().getString("input"));
-        assertEquals(ExitStatus.FAILED.getExitCode(), execution.getExitStatus().getExitCode());
-    }
-
-    private String getTransformedOutputPath(Path input, String compressExtension, String outputDir) {
-        return Paths.get(outputDir).resolve(input) + ".variants.json" + compressExtension;
     }
 
     @BeforeClass
@@ -523,35 +313,11 @@ public class VariantConfigurationTest {
     }
 
     private static void cleanDBs() throws UnknownHostException {
-        // Delete Mongo collection
-        MongoClient mongoClient = new MongoClient("localhost");
-        List<String> dbs = Arrays.asList(
+        JobTestUtils.cleanDBs(
                 VALID_TRANSFORM,
                 INVALID_TRANSFORM,
                 VALID_LOAD,
-                INVALID_LOAD,
                 VALID_CREATE_STATS,
-                INVALID_CREATE_STATS,
-                VALID_LOAD_STATS,
-                VALID_LOAD_STATS_STEP,
-                INVALID_LOAD_STATS,
-                TWO_STAGES_STATS);
-
-        for (String dbName : dbs) {
-            DB db = mongoClient.getDB(dbName);
-            db.dropDatabase();
-        }
-        mongoClient.close();
+                VALID_LOAD_STATS);
     }
-
-    /*
-    public JobLauncherTestUtils jobLauncherTestUtils(JobRepository jobRepository, JobLauncher jobLauncher, Job job) {
-        JobLauncherTestUtils jobLauncherTestUtils = new JobLauncherTestUtils();
-        jobLauncherTestUtils.setJobRepository(jobRepository);
-        jobLauncherTestUtils.setJobLauncher(jobLauncher);
-        jobLauncherTestUtils.setJob(job);
-        return jobLauncherTestUtils;
-    }
-    */
-
 }
