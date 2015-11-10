@@ -56,6 +56,9 @@ public class VariantConfiguration {
 
     private static final Logger logger = LoggerFactory.getLogger(VariantConfiguration.class);
     public static final String jobName = "variantJob";
+    public static final String loadJobName = "variantLoadJob";
+    public static final String statsJobName = "variantStatsJob";
+//    public static final String annotJobName = "variantAnnotationJob";
     public static final String SKIP_LOAD = "skipLoad";
     public static final String SKIP_STATS_CREATE = "skipStatsCreate";
     public static final String SKIP_STATS_LOAD = "skipStatsLoad";
@@ -89,6 +92,31 @@ public class VariantConfiguration {
                 .next(statsCreate())
                 .next(statsLoad())
 //                .next(annotation(stepBuilderFactory));
+                .build();
+    }
+
+    @Bean
+    public Job variantLoadJob() {
+        JobBuilder jobBuilder = jobBuilderFactory
+                .get(loadJobName)
+                .incrementer(new RunIdIncrementer())
+                .listener(listener);
+
+        return jobBuilder
+                .start(load())
+                .build();
+    }
+
+    @Bean
+    public Job variantStatsJob() {
+        JobBuilder jobBuilder = jobBuilderFactory
+                .get(statsJobName)
+                .incrementer(new RunIdIncrementer())
+                .listener(listener);
+
+        return jobBuilder
+                .start(statsCreate())
+                .next(statsLoad())
                 .build();
     }
 

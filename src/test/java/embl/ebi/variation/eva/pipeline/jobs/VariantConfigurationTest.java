@@ -41,6 +41,7 @@ import org.springframework.batch.core.repository.JobExecutionAlreadyRunningExcep
 import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
 import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
@@ -81,13 +82,24 @@ public class VariantConfigurationTest {
     private static final String VALID_LOAD_STATS = "validLoadStats";
     private static final String VALID_LOAD_STATS_STEP = "validLoadStatsStep";
     private static final String INVALID_LOAD_STATS = "invalidLoadStats";
+    private static final String TWO_STAGES_STATS = "twoStagesStats";
 
 
     @Autowired
     VariantConfiguration variantConfiguration;
 
     @Autowired
+    @Qualifier(VariantConfiguration.jobName)
     private Job job;
+
+    @Autowired
+    @Qualifier(VariantConfiguration.loadJobName)
+    private Job loadJob;
+
+    @Autowired
+    @Qualifier(VariantConfiguration.statsJobName)
+    private Job statsJob;
+
     @Autowired
     private JobLauncher jobLauncher;
     @Autowired
@@ -262,15 +274,8 @@ public class VariantConfigurationTest {
                 .addString(VariantConfiguration.SKIP_STATS_LOAD, "true")
                 .toJobParameters();
 
-        Job listenedJob = jobBuilderFactory
-                .get("listenedjob")
-                .incrementer(new RunIdIncrementer())
-                .listener(listener)
-                .start(variantConfiguration.load())
-                .build();
-
         System.out.println("parameters in load tests" + parameters.toString());
-        JobExecution execution = jobLauncher.run(listenedJob, parameters);
+        JobExecution execution = jobLauncher.run(loadJob, parameters);
 
         assertEquals(input, execution.getJobParameters().getString("input"));
         assertEquals(ExitStatus.FAILED.getExitCode(), execution.getExitStatus().getExitCode());
@@ -314,17 +319,9 @@ public class VariantConfigurationTest {
         assertTrue(statsFile.exists());
 
         // test with an isolated step, instead of the whole job
-
-        Job listenedJob = jobBuilderFactory
-                .get("customStatsJob")
-                .incrementer(new RunIdIncrementer())
-                .listener(listener)
-                .start(variantConfiguration.statsCreate())
-                .build();
-
         statsFile.delete();
         assertFalse(statsFile.exists());  // ensure the stats file doesn't exist from previous executions
-        execution = jobLauncher.run(listenedJob, parameters);
+        execution = jobLauncher.run(statsJob, parameters);
 
         assertEquals(ExitStatus.COMPLETED.getExitCode(), execution.getExitStatus().getExitCode());
         assertTrue(statsFile.exists());
@@ -361,14 +358,7 @@ public class VariantConfigurationTest {
                 .addString(VariantConfiguration.SKIP_STATS_LOAD, "true")
                 .toJobParameters();
 
-        Job listenedJob = jobBuilderFactory
-                .get("customStatsJob")
-                .incrementer(new RunIdIncrementer())
-                .listener(listener)
-                .start(variantConfiguration.statsCreate())
-                .build();
-
-        JobExecution execution = jobLauncher.run(listenedJob, parameters);
+        JobExecution execution = jobLauncher.run(statsJob, parameters);
 
         assertEquals(input, execution.getJobParameters().getString("input"));
         assertEquals(ExitStatus.FAILED.getExitCode(), execution.getExitStatus().getExitCode());
@@ -445,24 +435,19 @@ public class VariantConfigurationTest {
                 .addString("fileId", source.getFileId())
                 .addString("opencga.app.home", opencgaHome);
 
-        parameters = jobParametersBuilder.toJobParameters();
+        JobParameters jobParametersNoCreateStats = jobParametersBuilder
+                .addString(VariantConfiguration.SKIP_STATS_CREATE, "true")
+                .toJobParameters();
 
-        JobParameters parametersNoStats = jobParametersBuilder
+        JobParameters parametersNoLoadStats = jobParametersBuilder
                 .addString(VariantConfiguration.SKIP_STATS_LOAD, "true")
                 .toJobParameters();
 
-        execution = jobLauncher.run(job, parametersNoStats);
+        execution = jobLauncher.run(job, parametersNoLoadStats);
         assertEquals(ExitStatus.COMPLETED.getExitCode(), execution.getExitStatus().getExitCode());
 
         // isolated load stats step
-        Job listenedJob = jobBuilderFactory
-                .get("customStatsJob")
-                .incrementer(new RunIdIncrementer())
-                .listener(listener)
-                .start(variantConfiguration.statsLoad())
-                .build();
-
-        execution = jobLauncher.run(listenedJob, parameters);
+        execution = jobLauncher.run(statsJob, jobParametersNoCreateStats);
         assertEquals(ExitStatus.COMPLETED.getExitCode(), execution.getExitStatus().getExitCode());
 
         // check ((documents in DB) == (lines in transformed file))
@@ -512,16 +497,10 @@ public class VariantConfigurationTest {
                 .addString("studyId", source.getStudyId())
                 .addString("fileId", source.getFileId())
                 .addString("opencga.app.home", opencgaHome)
+                .addString(VariantConfiguration.SKIP_STATS_CREATE, "true")
                 .toJobParameters();
 
-        Job listenedJob = jobBuilderFactory
-                .get("customStatsJob")
-                .incrementer(new RunIdIncrementer())
-                .listener(listener)
-                .start(variantConfiguration.statsLoad())
-                .build();
-
-        JobExecution execution = jobLauncher.run(listenedJob, parameters);
+        JobExecution execution = jobLauncher.run(statsJob, parameters);
 
         assertEquals(input, execution.getJobParameters().getString("input"));
         assertEquals(ExitStatus.FAILED.getExitCode(), execution.getExitStatus().getExitCode());
@@ -553,7 +532,8 @@ public class VariantConfigurationTest {
                 INVALID_CREATE_STATS,
                 VALID_LOAD_STATS,
                 VALID_LOAD_STATS_STEP,
-                INVALID_LOAD_STATS);
+                INVALID_LOAD_STATS,
+                TWO_STAGES_STATS);
 
         for (String dbName : dbs) {
             DB db = mongoClient.getDB(dbName);
