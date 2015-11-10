@@ -19,6 +19,9 @@ import java.io.*;
 
 import com.mongodb.DB;
 import com.mongodb.MongoClient;
+import embl.ebi.variation.eva.pipeline.steps.VariantsLoad;
+import embl.ebi.variation.eva.pipeline.steps.VariantsStatsCreate;
+import embl.ebi.variation.eva.pipeline.steps.VariantsStatsLoad;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -36,7 +39,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.*;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.launch.JobLauncher;
-import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
 import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
 import org.springframework.batch.core.repository.JobRestartException;
@@ -127,9 +129,9 @@ public class VariantConfigurationTest {
                 .addString("studyId", "1")
                 .addString("fileId", "1")
                 .addString("opencga.app.home", opencgaHome)
-                .addString(VariantConfiguration.SKIP_LOAD, "true")
-                .addString(VariantConfiguration.SKIP_STATS_CREATE, "true")
-                .addString(VariantConfiguration.SKIP_STATS_LOAD, "true")
+                .addString(VariantsLoad.SKIP_LOAD, "true")
+                .addString(VariantsStatsCreate.SKIP_STATS_CREATE, "true")
+                .addString(VariantsStatsLoad.SKIP_STATS_LOAD, "true")
                 .toJobParameters();
 
         String outputFilename = getTransformedOutputPath(Paths.get(FILE_20).getFileName(),
@@ -186,9 +188,9 @@ public class VariantConfigurationTest {
                 .addString("studyId", "2")
                 .addString("fileId", "2")
                 .addString("opencga.app.home", opencgaHome)
-                .addString(VariantConfiguration.SKIP_LOAD, "true")
-                .addString(VariantConfiguration.SKIP_STATS_CREATE, "true")
-                .addString(VariantConfiguration.SKIP_STATS_LOAD, "true")
+                .addString(VariantsLoad.SKIP_LOAD, "true")
+                .addString(VariantsStatsCreate.SKIP_STATS_CREATE, "true")
+                .addString(VariantsStatsLoad.SKIP_STATS_LOAD, "true")
                 .toJobParameters();
 
         JobExecution execution = jobLauncher.run(job, parameters);
@@ -216,8 +218,8 @@ public class VariantConfigurationTest {
                 .addString("studyId", "1")
                 .addString("fileId", "1")
                 .addString("opencga.app.home", opencgaHome)
-                .addString(VariantConfiguration.SKIP_STATS_CREATE, "true")
-                .addString(VariantConfiguration.SKIP_STATS_LOAD, "true")
+                .addString(VariantsStatsCreate.SKIP_STATS_CREATE, "true")
+                .addString(VariantsStatsLoad.SKIP_STATS_LOAD, "true")
                 .toJobParameters();
 
         JobExecution execution = jobLauncher.run(job, parameters);
@@ -270,8 +272,8 @@ public class VariantConfigurationTest {
                 .addString("studyId", "1")
                 .addString("fileId", "1")
                 .addString("opencga.app.home", null)
-                .addString(VariantConfiguration.SKIP_STATS_CREATE, "true")
-                .addString(VariantConfiguration.SKIP_STATS_LOAD, "true")
+                .addString(VariantsStatsCreate.SKIP_STATS_CREATE, "true")
+                .addString(VariantsStatsLoad.SKIP_STATS_LOAD, "true")
                 .toJobParameters();
 
         System.out.println("parameters in load tests" + parameters.toString());
@@ -307,7 +309,7 @@ public class VariantConfigurationTest {
                 .addString("studyId", source.getStudyId())
                 .addString("fileId", source.getFileId())
                 .addString("opencga.app.home", opencgaHome)
-                .addString(VariantConfiguration.SKIP_STATS_LOAD, "true")
+                .addString(VariantsStatsLoad.SKIP_STATS_LOAD, "true")
                 .toJobParameters();
 
         statsFile.delete();
@@ -355,7 +357,7 @@ public class VariantConfigurationTest {
                 .addString("studyId", source.getStudyId())
                 .addString("fileId", source.getFileId())
                 .addString("opencga.app.home", opencgaHome)
-                .addString(VariantConfiguration.SKIP_STATS_LOAD, "true")
+                .addString(VariantsStatsLoad.SKIP_STATS_LOAD, "true")
                 .toJobParameters();
 
         JobExecution execution = jobLauncher.run(statsJob, parameters);
@@ -436,11 +438,11 @@ public class VariantConfigurationTest {
                 .addString("opencga.app.home", opencgaHome);
 
         JobParameters jobParametersNoCreateStats = jobParametersBuilder
-                .addString(VariantConfiguration.SKIP_STATS_CREATE, "true")
+                .addString(VariantsStatsCreate.SKIP_STATS_CREATE, "true")
                 .toJobParameters();
 
         JobParameters parametersNoLoadStats = jobParametersBuilder
-                .addString(VariantConfiguration.SKIP_STATS_LOAD, "true")
+                .addString(VariantsStatsLoad.SKIP_STATS_LOAD, "true")
                 .toJobParameters();
 
         execution = jobLauncher.run(job, parametersNoLoadStats);
@@ -497,7 +499,7 @@ public class VariantConfigurationTest {
                 .addString("studyId", source.getStudyId())
                 .addString("fileId", source.getFileId())
                 .addString("opencga.app.home", opencgaHome)
-                .addString(VariantConfiguration.SKIP_STATS_CREATE, "true")
+                .addString(VariantsStatsCreate.SKIP_STATS_CREATE, "true")
                 .toJobParameters();
 
         JobExecution execution = jobLauncher.run(statsJob, parameters);
