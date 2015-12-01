@@ -15,7 +15,6 @@
  */
 package embl.ebi.variation.eva.pipeline.steps;
 
-import embl.ebi.variation.eva.pipeline.jobs.VariantConfiguration;
 import embl.ebi.variation.eva.pipeline.listeners.JobParametersListener;
 import org.opencb.biodata.models.variant.VariantSource;
 import org.opencb.datastore.core.ObjectMap;

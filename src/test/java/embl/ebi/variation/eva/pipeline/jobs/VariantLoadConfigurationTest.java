@@ -86,7 +86,8 @@ public class VariantLoadConfigurationTest {
     private JobLauncher jobLauncher;
 
     @Test
-    public void validLoad() throws JobExecutionException, IllegalAccessException, ClassNotFoundException, InstantiationException, StorageManagerException, IOException {
+    public void validLoad() throws JobExecutionException, IllegalAccessException, ClassNotFoundException, 
+            InstantiationException, StorageManagerException, IOException {
         String input = VariantLoadConfigurationTest.class.getResource(FILE_20).getFile();
         String opencgaHome = System.getenv("OPENCGA_HOME") != null ? System.getenv("OPENCGA_HOME") : "/opt/opencga";
         String dbName = VALID_LOAD;

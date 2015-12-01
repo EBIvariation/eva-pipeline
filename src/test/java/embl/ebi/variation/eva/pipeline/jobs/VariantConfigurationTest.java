@@ -17,8 +17,6 @@ package embl.ebi.variation.eva.pipeline.jobs;
 
 import java.io.*;
 
-import com.mongodb.DB;
-import com.mongodb.MongoClient;
 import embl.ebi.variation.eva.pipeline.steps.VariantsLoad;
 import embl.ebi.variation.eva.pipeline.steps.VariantsStatsCreate;
 import embl.ebi.variation.eva.pipeline.steps.VariantsStatsLoad;
@@ -26,7 +24,6 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.opencb.biodata.models.variant.Variant;
 import org.opencb.biodata.models.variant.VariantSource;
 import org.opencb.datastore.core.QueryOptions;
 import org.opencb.opencga.storage.core.StorageManagerException;
@@ -37,22 +34,13 @@ import org.opencb.opencga.storage.core.variant.adaptors.VariantDBIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.*;
-import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.launch.JobLauncher;
-import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
-import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
-import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.net.UnknownHostException;
-import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
 import java.util.zip.GZIPInputStream;
 
 import static embl.ebi.variation.eva.pipeline.jobs.JobTestUtils.*;
@@ -96,7 +84,7 @@ public class VariantConfigurationTest {
         String input = VariantConfigurationTest.class.getResource(FILE_20).getFile();
         String opencgaHome = System.getenv("OPENCGA_HOME") != null ? System.getenv("OPENCGA_HOME") : "/opt/opencga";
         String dbName = VALID_TRANSFORM;
-        
+
         JobParameters parameters = new JobParametersBuilder()
                 .addString("input", input)
                 .addString("outputDir", "/tmp")
@@ -128,21 +116,20 @@ public class VariantConfigurationTest {
         assertEquals(ExitStatus.COMPLETED.getExitCode(), execution.getExitStatus().getExitCode());
 
         ////////// check transformed file
-
-
         long lines = getLines(new GZIPInputStream(new FileInputStream(outputFilename)));
         assertEquals(300, lines);
     }
 
     /**
-     * This test has to fail because the vcf FILE_WRONG_NO_ALT is malformed, in a variant has an empty alternate allele
+     * This test has to fail because the vcf FILE_WRONG_NO_ALT is malformed, in
+     * a variant has an empty alternate allele
      */
     @Test
     public void invalidTransform() throws JobExecutionException {
         String input = VariantConfigurationTest.class.getResource(FILE_WRONG_NO_ALT).getFile();
         String opencgaHome = System.getenv("OPENCGA_HOME") != null ? System.getenv("OPENCGA_HOME") : "/opt/opencga";
         String dbName = INVALID_TRANSFORM;
-        
+
         JobParameters parameters = new JobParametersBuilder()
                 .addString("input", input)
                 .addString("outputDir", "/tmp")
@@ -168,11 +155,12 @@ public class VariantConfigurationTest {
     }
 
     @Test
-    public void validLoad() throws JobExecutionException, IllegalAccessException, ClassNotFoundException, InstantiationException, StorageManagerException, IOException {
+    public void validLoad() throws JobExecutionException, IllegalAccessException, ClassNotFoundException,
+            InstantiationException, IOException, StorageManagerException {
         String input = VariantConfigurationTest.class.getResource(FILE_20).getFile();
         String opencgaHome = System.getenv("OPENCGA_HOME") != null ? System.getenv("OPENCGA_HOME") : "/opt/opencga";
         String dbName = VALID_LOAD;
-        
+
         JobParameters parameters = new JobParametersBuilder()
                 .addString("input", input)
                 .addString("outputDir", "/tmp")
@@ -195,7 +183,6 @@ public class VariantConfigurationTest {
         assertEquals(input, execution.getJobParameters().getString("input"));
         assertEquals(ExitStatus.COMPLETED.getExitCode(), execution.getExitStatus().getExitCode());
 
-
         // check ((documents in DB) == (lines in transformed file))
         VariantStorageManager variantStorageManager = StorageManagerFactory.getVariantStorageManager();
         VariantDBAdaptor variantDBAdaptor = variantStorageManager.getDBAdaptor(dbName, null);
@@ -209,8 +196,7 @@ public class VariantConfigurationTest {
     }
 
     @Test
-    public void validCreateStats() throws JobParametersInvalidException, JobExecutionAlreadyRunningException,
-            JobRestartException, JobInstanceAlreadyCompleteException, IOException, InterruptedException,
+    public void validCreateStats() throws JobExecutionException, IOException, InterruptedException,
             IllegalAccessException, ClassNotFoundException, InstantiationException, StorageManagerException {
 
         String input = VariantConfigurationTest.class.getResource(FILE_20).getFile();
@@ -247,8 +233,7 @@ public class VariantConfigurationTest {
     }
 
     @Test
-    public void validLoadStats() throws JobParametersInvalidException, JobExecutionAlreadyRunningException,
-            JobRestartException, JobInstanceAlreadyCompleteException, IOException, IllegalAccessException,
+    public void validLoadStats() throws JobExecutionException, IOException, IllegalAccessException,
             ClassNotFoundException, InstantiationException, StorageManagerException {
 
         String input = VariantConfigurationTest.class.getResource(FILE_20).getFile();
@@ -294,7 +279,6 @@ public class VariantConfigurationTest {
         assertEquals(countRows(iterator), lines);
 
         // check the DB docs have the field "st"
-
         variantStorageManager = StorageManagerFactory.getVariantStorageManager();
         variantDBAdaptor = variantStorageManager.getDBAdaptor(dbName, null);
         iterator = variantDBAdaptor.iterator(new QueryOptions());

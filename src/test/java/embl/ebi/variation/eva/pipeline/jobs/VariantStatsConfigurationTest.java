@@ -15,7 +15,6 @@
  */
 package embl.ebi.variation.eva.pipeline.jobs;
 
-import embl.ebi.variation.eva.pipeline.steps.VariantsLoad;
 import embl.ebi.variation.eva.pipeline.steps.VariantsStatsCreate;
 import embl.ebi.variation.eva.pipeline.steps.VariantsStatsLoad;
 import org.junit.AfterClass;
@@ -32,22 +31,13 @@ import org.opencb.opencga.storage.core.variant.adaptors.VariantDBIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.*;
-import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.launch.JobLauncher;
-import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
-import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
-import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.io.*;
 import java.net.UnknownHostException;
-import java.nio.file.Paths;
-import java.util.zip.GZIPInputStream;
-
-import static embl.ebi.variation.eva.pipeline.jobs.JobTestUtils.*;
 import static org.junit.Assert.*;
 
 /**
@@ -81,10 +71,7 @@ public class VariantStatsConfigurationTest {
      * This test has to fail because it will try to extract variants from a non-existent DB.
      */
     @Test
-    public void invalidCreateStats() throws JobParametersInvalidException, JobExecutionAlreadyRunningException,
-            JobRestartException, JobInstanceAlreadyCompleteException, IllegalAccessException, ClassNotFoundException,
-            InstantiationException, StorageManagerException, IOException {
-
+    public void invalidCreateStats() throws JobExecutionException {
         String input = VariantStatsConfigurationTest.class.getResource(FILE_20).getFile();
         VariantSource source = new VariantSource(input, "1", "1", "studyName");
         String opencgaHome = System.getenv("OPENCGA_HOME") != null ? System.getenv("OPENCGA_HOME") : "/opt/opencga";
@@ -115,8 +102,7 @@ public class VariantStatsConfigurationTest {
     }
 
     @Test
-    public void validLoadStats() throws JobParametersInvalidException, JobExecutionAlreadyRunningException,
-            JobRestartException, JobInstanceAlreadyCompleteException, IOException, IllegalAccessException,
+    public void validLoadStats() throws JobExecutionException, IOException, IllegalAccessException,
             ClassNotFoundException, InstantiationException, StorageManagerException {
 
         String input = VariantStatsConfigurationTest.class.getResource(FILE_20).getFile();
@@ -157,9 +143,7 @@ public class VariantStatsConfigurationTest {
      * This test should fail because the variants.stats file is malformed, with an extra `"`.
      */
     @Test
-    public void invalidLoadStats() throws JobParametersInvalidException, JobExecutionAlreadyRunningException,
-            JobRestartException, JobInstanceAlreadyCompleteException {
-
+    public void invalidLoadStats() throws JobExecutionException {
         String input = VariantStatsConfigurationTest.class.getResource(FILE_20).getFile();
         VariantSource source = new VariantSource(input, "1", "4", "studyName");
         String opencgaHome = System.getenv("OPENCGA_HOME") != null ? System.getenv("OPENCGA_HOME") : "/opt/opencga";
@@ -193,7 +177,6 @@ public class VariantStatsConfigurationTest {
     public static void beforeTests() throws IOException, InterruptedException {
         cleanDBs();
         fillDB();
-        
     }
 
     @AfterClass
