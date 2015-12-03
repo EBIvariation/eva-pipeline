@@ -54,7 +54,7 @@ public class JobParametersListener implements JobExecutionListener {
         // TODO validation checks for all the parameters
         Config.setOpenCGAHome(parameters.getString("opencga.app.home"));
 
-        // Load configuration
+        // VariantsLoad configuration
         VariantSource source = new VariantSource(
                 parameters.getString("input"), 
                 parameters.getString("fileId"),
