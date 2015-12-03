@@ -28,13 +28,13 @@ import org.springframework.batch.core.JobParameters;
 import org.springframework.stereotype.Component;
 
 @Component
-public class JobParametersListener implements JobExecutionListener {
-     
-    private static final Logger logger = LoggerFactory.getLogger(JobParametersListener.class);
-    
+public class AggregatedJobParametersListener implements JobExecutionListener {
+
+    private static final Logger logger = LoggerFactory.getLogger(AggregatedJobParametersListener.class);
+
     private final ObjectMap variantOptions;
-    
-    public JobParametersListener() {
+
+    public AggregatedJobParametersListener() {
         variantOptions = new ObjectMap();
     }
     
@@ -61,7 +61,10 @@ public class JobParametersListener implements JobExecutionListener {
                 parameters.getString("studyId"), 
                 parameters.getString("studyName"), 
                 VariantStudy.StudyType.valueOf(parameters.getString("studyType")), 
-                VariantSource.Aggregation.NONE);
+                VariantSource.Aggregation.valueOf(parameters.getString("aggregated")));
+        if (VariantSource.Aggregation.NONE.equals(source.getAggregation())) {
+            source.setAggregation(VariantSource.Aggregation.BASIC);
+        }
         variantOptions.put(VariantStorageManager.VARIANT_SOURCE, source);
 
         // TODO get samples
@@ -71,15 +74,16 @@ public class JobParametersListener implements JobExecutionListener {
 //                    throw new Exception("aborting");
 //                }
 //                variantOptions.put(VariantStorageManager.SAMPLE_IDS, Arrays.asList(config.samples.split(",")));
-        
+
+
         variantOptions.put(VariantStorageManager.CALCULATE_STATS, false);   // this is tested by hand
 //                variantOptions.put(VariantStorageManager.OVERWRITE_STATS, config.overwriteStats);
-        variantOptions.put(VariantStorageManager.INCLUDE_STATS, false);
+        variantOptions.put(VariantStorageManager.INCLUDE_STATS, Boolean.parseBoolean(parameters.getString(VariantStorageManager.INCLUDE_STATS)));
         
 //                variantOptions.put(VariantStorageManager.INCLUDE_GENOTYPES.key(), false);   // TODO rename samples to genotypes
-        variantOptions.put(VariantStorageManager.INCLUDE_SAMPLES, true);   // TODO rename samples to genotypes
+        variantOptions.put(VariantStorageManager.INCLUDE_SAMPLES, false);   // TODO rename samples to genotypes
         variantOptions.put(VariantStorageManager.INCLUDE_SRC, VariantStorageManager.IncludeSrc.parse(parameters.getString("includeSrc")));
-        variantOptions.put(VariantStorageManager.COMPRESS_GENOTYPES, Boolean.parseBoolean(parameters.getString("compressGenotypes")));
+        variantOptions.put(VariantStorageManager.COMPRESS_GENOTYPES, false);
         
 //                variantOptions.put(VariantStorageManager.AGGREGATED_TYPE, VariantSource.Aggregation.NONE);
         variantOptions.put(VariantStorageManager.DB_NAME, parameters.getString("dbName"));
