@@ -75,7 +75,7 @@ public class VariantAggregatedConfiguration {
     }
 
     @Bean
-    public Job variantJob() {
+    public Job aggregatedVariantJob() {
         JobBuilder jobBuilder = jobBuilderFactory
                 .get(jobName)
                 .incrementer(new RunIdIncrementer())
