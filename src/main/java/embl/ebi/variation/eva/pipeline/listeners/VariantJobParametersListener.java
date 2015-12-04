@@ -28,21 +28,9 @@ import org.springframework.batch.core.JobParameters;
 import org.springframework.stereotype.Component;
 
 @Component
-public class JobParametersListener implements JobExecutionListener {
-     
-    private static final Logger logger = LoggerFactory.getLogger(JobParametersListener.class);
-    
-    protected final ObjectMap variantOptions;
-    
-    public JobParametersListener() {
-        variantOptions = new ObjectMap();
-    }
-    
-    @Override
-    public void afterJob(JobExecution jobExecution) {
-        logger.info("afterJob STATUS + " + jobExecution.getStatus());
-        logger.info("afterJob : " + jobExecution);
-    }
+public class VariantJobParametersListener extends JobParametersListener {
+
+    private static final Logger logger = LoggerFactory.getLogger(VariantJobParametersListener.class);
 
     @Override
     public void beforeJob(JobExecution jobExecution) {
@@ -106,9 +94,5 @@ public class JobParametersListener implements JobExecutionListener {
 //                // stats config
 ////                statsOutputUri = outdirUri.resolve(VariantStorageManager.buildFilename(source) + "." + TimeUtils.getTime());  // TODO why was the timestamp required?
 //                statsOutputUri = outdirUri.resolve(VariantStorageManager.buildFilename(source));
-    }
-    
-    public ObjectMap getVariantOptions() {
-        return variantOptions;
     }
 }

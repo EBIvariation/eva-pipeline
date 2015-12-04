@@ -22,20 +22,26 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.opencb.biodata.models.variant.VariantSource;
+import org.opencb.datastore.core.QueryOptions;
+import org.opencb.opencga.storage.core.StorageManagerException;
+import org.opencb.opencga.storage.core.StorageManagerFactory;
+import org.opencb.opencga.storage.core.variant.VariantStorageManager;
+import org.opencb.opencga.storage.core.variant.adaptors.VariantDBAdaptor;
+import org.opencb.opencga.storage.core.variant.adaptors.VariantDBIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.*;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
+import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
+import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
+import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.UnknownHostException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -43,7 +49,12 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
 
+import static embl.ebi.variation.eva.pipeline.jobs.JobTestUtils.countRows;
+import static embl.ebi.variation.eva.pipeline.jobs.JobTestUtils.getLines;
+import static embl.ebi.variation.eva.pipeline.jobs.JobTestUtils.getTransformedOutputPath;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Created by jmmut on 2015-10-14.
@@ -99,6 +110,7 @@ public class VariantAggregatedConfigurationTest {
                 .addString("fileId", "1")
                 .addString("opencga.app.home", opencgaHome)
                 .addString("aggregated", VariantSource.Aggregation.BASIC.toString())
+                .addString("includeStats", "false")
                 .addString("skipLoad", "true")
                 .toJobParameters();
 
@@ -151,7 +163,7 @@ public class VariantAggregatedConfigurationTest {
 //    }
 
     @Test
-    public void validLoad() throws JobExecutionException {
+    public void validLoad() throws JobExecutionException, IllegalAccessException, ClassNotFoundException, InstantiationException, StorageManagerException, IOException {
         String input = VariantAggregatedConfigurationTest.class.getResource(FILE_AGGREGATED).getFile();
         String opencgaHome = System.getenv("OPENCGA_HOME") != null ? System.getenv("OPENCGA_HOME") : "/opt/opencga";
         String dbName = VALID_LOAD;
@@ -169,6 +181,7 @@ public class VariantAggregatedConfigurationTest {
                 .addString("studyId", "1")
                 .addString("fileId", "1")
                 .addString("aggregated", VariantSource.Aggregation.BASIC.toString())
+                .addString("includeStats", "false")
                 .addString("opencga.app.home", opencgaHome)
                 .toJobParameters();
 
@@ -176,8 +189,20 @@ public class VariantAggregatedConfigurationTest {
 
         assertEquals(input, execution.getJobParameters().getString("input"));
         assertEquals("COMPLETED", execution.getExitStatus().getExitCode());
-        //TODO fetch db to check insertions
-        //TODO drop database
+
+        // check ((documents in DB) == (lines in transformed file))
+        VariantStorageManager variantStorageManager = StorageManagerFactory.getVariantStorageManager();
+        VariantDBAdaptor variantDBAdaptor = variantStorageManager.getDBAdaptor(dbName, null);
+        VariantDBIterator iterator = variantDBAdaptor.iterator(new QueryOptions());
+
+        String outputFilename = getTransformedOutputPath(Paths.get(FILE_AGGREGATED).getFileName(),
+                parameters.getString("compressExtension"), parameters.getString("outputDir"));
+        long lines = getLines(new GZIPInputStream(new FileInputStream(outputFilename)));
+
+        assertEquals(countRows(iterator), lines);
+
+        // check stats aren't loaded
+        assertTrue(variantDBAdaptor.iterator(new QueryOptions()).next().getSourceEntries().values().iterator().next().getCohortStats().isEmpty());
     }
 //
 //    @Test
@@ -226,20 +251,55 @@ public class VariantAggregatedConfigurationTest {
     public void invalidCreateStats() {
 
     }
+    */
     @Test
-    public void validLoadStats() {
+    public void validLoadStats() throws JobParametersInvalidException, JobExecutionAlreadyRunningException, JobRestartException, JobInstanceAlreadyCompleteException, IllegalAccessException, ClassNotFoundException, InstantiationException, StorageManagerException, IOException {String input = VariantAggregatedConfigurationTest.class.getResource(FILE_AGGREGATED).getFile();
+        String opencgaHome = System.getenv("OPENCGA_HOME") != null ? System.getenv("OPENCGA_HOME") : "/opt/opencga";
+        String dbName = VALID_LOAD;
+
+        JobParameters parameters = new JobParametersBuilder()
+                .addString("input", input)
+                .addString("outputDir", "/tmp")
+                .addString("dbName", dbName)
+                .addString("compressExtension", ".gz")
+                .addString("compressGenotypes", "true")
+                .addString("includeSrc", "FIRST_8_COLUMNS")
+                .addString("aggregated", "NONE")
+                .addString("studyType", "COLLECTION")
+                .addString("studyName", "studyName")
+                .addString("studyId", "1")
+                .addString("fileId", "1")
+                .addString("aggregated", VariantSource.Aggregation.BASIC.toString())
+                .addString("includeStats", "true")
+                .addString("opencga.app.home", opencgaHome)
+                .toJobParameters();
+
+        JobExecution execution = jobLauncher.run(job, parameters);
+
+        assertEquals(input, execution.getJobParameters().getString("input"));
+        assertEquals("COMPLETED", execution.getExitStatus().getExitCode());
+
+        // check ((documents in DB) == (lines in transformed file))
+        VariantStorageManager variantStorageManager = StorageManagerFactory.getVariantStorageManager();
+        VariantDBAdaptor variantDBAdaptor = variantStorageManager.getDBAdaptor(dbName, null);
+        VariantDBIterator iterator = variantDBAdaptor.iterator(new QueryOptions());
+
+        String outputFilename = getTransformedOutputPath(Paths.get(FILE_AGGREGATED).getFileName(),
+                parameters.getString("compressExtension"), parameters.getString("outputDir"));
+        long lines = getLines(new GZIPInputStream(new FileInputStream(outputFilename)));
+
+        assertEquals(countRows(iterator), lines);
+
+        // check stats aren't loaded
+        assertFalse(variantDBAdaptor.iterator(new QueryOptions()).next().getSourceEntries().values().iterator().next().getCohortStats().isEmpty());
 
     }
-
+/*
     @Test
     public void invalidLoadStats() {
 
     }
     */
-
-    private String getTransformedOutputPath(Path input, String compressExtension, String outputDir) {
-        return Paths.get(outputDir).resolve(input) + ".variants.json" + compressExtension;
-    }
 
     @BeforeClass
     public static void beforeTests() throws UnknownHostException {
@@ -248,7 +308,7 @@ public class VariantAggregatedConfigurationTest {
 
     @AfterClass
     public static void afterTests() throws UnknownHostException {
-        cleanDBs();
+//        cleanDBs();
     }
 
     private static void cleanDBs() throws UnknownHostException {

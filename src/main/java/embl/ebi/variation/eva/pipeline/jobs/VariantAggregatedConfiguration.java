@@ -17,38 +17,28 @@ package embl.ebi.variation.eva.pipeline.jobs;
 
 
 import embl.ebi.variation.eva.pipeline.listeners.AggregatedJobParametersListener;
-import embl.ebi.variation.eva.pipeline.listeners.JobParametersListener;
-import org.opencb.biodata.models.variant.VariantSource;
-import org.opencb.datastore.core.ObjectMap;
-import org.opencb.opencga.storage.core.StorageManagerFactory;
-import org.opencb.opencga.storage.core.variant.VariantStorageManager;
+import embl.ebi.variation.eva.pipeline.steps.VariantsLoad;
+import embl.ebi.variation.eva.pipeline.steps.VariantsTransform;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.batch.core.*;
-import org.springframework.batch.core.configuration.JobRegistry;
+import org.springframework.batch.core.Job;
+import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
-import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.core.job.builder.JobBuilder;
-import org.springframework.batch.core.job.builder.JobFlowBuilder;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
-import org.springframework.batch.core.repository.JobRepository;
-import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.core.step.builder.TaskletStepBuilder;
-import org.springframework.batch.core.step.tasklet.Tasklet;
-import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 
 @Configuration
@@ -92,31 +82,7 @@ public class VariantAggregatedConfiguration {
 
     public Step transform() {
         StepBuilder step1 = stepBuilderFactory.get("transform");
-        final TaskletStepBuilder tasklet = step1.tasklet(new Tasklet() {
-            @Override
-            public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
-                JobParameters parameters = chunkContext.getStepContext().getStepExecution().getJobParameters();
-                ObjectMap variantOptions = listener.getVariantOptions();
-
-                URI outdirUri = createUri(parameters.getString("outputDir"));
-                URI nextFileUri = createUri(parameters.getString("input"));
-                URI pedigreeUri = parameters.getString("pedigree") != null ? createUri(parameters.getString("pedigree")) : null;
-
-                logger.info("transform file " + parameters.getString("input") + " to " + parameters.getString("outputDir"));
-
-                logger.info("Extract variants '{}'", nextFileUri);
-                VariantStorageManager variantStorageManager = StorageManagerFactory.getVariantStorageManager();
-                variantStorageManager.extract(nextFileUri, outdirUri, variantOptions);
-
-                logger.info("PreTransform variants '{}'", nextFileUri);
-                variantStorageManager.preTransform(nextFileUri, variantOptions);
-                logger.info("Transform variants '{}'", nextFileUri);
-                variantStorageManager.transform(nextFileUri, pedigreeUri, outdirUri, variantOptions);
-                logger.info("PostTransform variants '{}'", nextFileUri);
-                variantStorageManager.postTransform(nextFileUri, variantOptions);
-                return RepeatStatus.FINISHED;
-            }
-        });
+        final TaskletStepBuilder tasklet = step1.tasklet(new VariantsTransform(listener));
 
         // true: every job execution will do this step, even if this step is already COMPLETED
         // false: if the job was aborted and is relaunched, this step will NOT be done again
@@ -127,37 +93,7 @@ public class VariantAggregatedConfiguration {
 
     public Step load() {
         StepBuilder step1 = stepBuilderFactory.get("load");
-        TaskletStepBuilder tasklet = step1.tasklet(new Tasklet() {
-            @Override
-            public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
-                JobParameters parameters = chunkContext.getStepContext().getStepExecution().getJobParameters();
-                ObjectMap variantOptions = listener.getVariantOptions();
-
-                if (Boolean.parseBoolean(parameters.getString("skipLoad", "false"))) {
-                    logger.info("skipping load step, requested skipLoad=" + parameters.getString("skipLoad"));
-                } else {
-                    VariantStorageManager variantStorageManager = StorageManagerFactory.getVariantStorageManager();// TODO add mongo
-                    URI outdirUri = createUri(parameters.getString("outputDir"));
-                    URI nextFileUri = createUri(parameters.getString("input"));
-                    URI pedigreeUri = parameters.getString("pedigree") != null ? createUri(parameters.getString("pedigree")) : null;
-                    Path output = Paths.get(outdirUri.getPath());
-                    Path input = Paths.get(nextFileUri.getPath());
-                    Path outputVariantJsonFile = output.resolve(input.getFileName().toString() + ".variants.json" + parameters.getString("compressExtension"));
-//                outputFileJsonFile = output.resolve(input.getFileName().toString() + ".file.json" + config.compressExtension);
-                    URI transformedVariantsUri = outdirUri.resolve(outputVariantJsonFile.getFileName().toString());
-
-
-                    logger.info("-- PreLoad variants -- {}", nextFileUri);
-                    variantStorageManager.preLoad(transformedVariantsUri, outdirUri, variantOptions);
-                    logger.info("-- Load variants -- {}", nextFileUri);
-                    variantStorageManager.load(transformedVariantsUri, variantOptions);
-//                logger.info("-- PostLoad variants -- {}", nextFileUri);
-//                variantStorageManager.postLoad(transformedVariantsUri, outdirUri, variantOptions);
-                }
-
-                return RepeatStatus.FINISHED;
-            }
-        });
+        TaskletStepBuilder tasklet = step1.tasklet(new VariantsLoad(listener));
 
         // true: every job execution will do this step, even if this step is already COMPLETED
         // false: if the job was aborted and is relaunched, this step will NOT be done again

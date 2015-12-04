@@ -28,39 +28,31 @@ import org.springframework.batch.core.JobParameters;
 import org.springframework.stereotype.Component;
 
 @Component
-public class AggregatedJobParametersListener implements JobExecutionListener {
+public class AggregatedJobParametersListener extends JobParametersListener {
 
     private static final Logger logger = LoggerFactory.getLogger(AggregatedJobParametersListener.class);
 
-    private final ObjectMap variantOptions;
-
-    public AggregatedJobParametersListener() {
-        variantOptions = new ObjectMap();
-    }
-    
-    @Override
-    public void afterJob(JobExecution jobExecution) {
-        logger.info("afterJob STATUS + " + jobExecution.getStatus());
-        logger.info("afterJob : " + jobExecution);
-    }
 
     @Override
     public void beforeJob(JobExecution jobExecution) {
+        // default decisions
+        String defaultIncludeStats = "true";
+
         JobParameters parameters = jobExecution.getJobParameters();
-        
+
         logger.info("beforeJob : STARTING");
         logger.info("beforeJob JobParameters : " + parameters);
-        
+
         // TODO validation checks for all the parameters
         Config.setOpenCGAHome(parameters.getString("opencga.app.home"));
 
         // Load configuration
         VariantSource source = new VariantSource(
-                parameters.getString("input"), 
+                parameters.getString("input"),
                 parameters.getString("fileId"),
-                parameters.getString("studyId"), 
-                parameters.getString("studyName"), 
-                VariantStudy.StudyType.valueOf(parameters.getString("studyType")), 
+                parameters.getString("studyId"),
+                parameters.getString("studyName"),
+                VariantStudy.StudyType.valueOf(parameters.getString("studyType")),
                 VariantSource.Aggregation.valueOf(parameters.getString("aggregated")));
         if (VariantSource.Aggregation.NONE.equals(source.getAggregation())) {
             source.setAggregation(VariantSource.Aggregation.BASIC);
@@ -78,7 +70,8 @@ public class AggregatedJobParametersListener implements JobExecutionListener {
 
         variantOptions.put(VariantStorageManager.CALCULATE_STATS, false);   // this is tested by hand
 //                variantOptions.put(VariantStorageManager.OVERWRITE_STATS, config.overwriteStats);
-        variantOptions.put(VariantStorageManager.INCLUDE_STATS, Boolean.parseBoolean(parameters.getString(VariantStorageManager.INCLUDE_STATS)));
+        variantOptions.put(VariantStorageManager.INCLUDE_STATS, Boolean.parseBoolean(
+                parameters.getString(VariantStorageManager.INCLUDE_STATS, defaultIncludeStats)));
         
 //                variantOptions.put(VariantStorageManager.INCLUDE_GENOTYPES.key(), false);   // TODO rename samples to genotypes
         variantOptions.put(VariantStorageManager.INCLUDE_SAMPLES, false);   // TODO rename samples to genotypes
@@ -111,8 +104,5 @@ public class AggregatedJobParametersListener implements JobExecutionListener {
 ////                statsOutputUri = outdirUri.resolve(VariantStorageManager.buildFilename(source) + "." + TimeUtils.getTime());  // TODO why was the timestamp required?
 //                statsOutputUri = outdirUri.resolve(VariantStorageManager.buildFilename(source));
     }
-    
-    public ObjectMap getVariantOptions() {
-        return variantOptions;
-    }
+
 }
