@@ -27,7 +27,7 @@ import org.springframework.batch.core.JobExecutionListener;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.stereotype.Component;
 
-@Component
+
 public class JobParametersListener implements JobExecutionListener {
      
     private static final Logger logger = LoggerFactory.getLogger(JobParametersListener.class);

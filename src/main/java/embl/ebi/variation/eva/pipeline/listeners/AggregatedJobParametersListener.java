@@ -32,7 +32,6 @@ public class AggregatedJobParametersListener extends JobParametersListener {
 
     private static final Logger logger = LoggerFactory.getLogger(AggregatedJobParametersListener.class);
 
-
     @Override
     public void beforeJob(JobExecution jobExecution) {
         // default decisions

@@ -15,7 +15,6 @@
  */
 package embl.ebi.variation.eva.pipeline.jobs;
 
-
 import embl.ebi.variation.eva.pipeline.listeners.AggregatedJobParametersListener;
 import embl.ebi.variation.eva.pipeline.steps.VariantsLoad;
 import embl.ebi.variation.eva.pipeline.steps.VariantsTransform;

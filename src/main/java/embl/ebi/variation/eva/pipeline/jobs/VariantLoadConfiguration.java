@@ -55,8 +55,8 @@ public class VariantLoadConfiguration {
     Environment environment;
 
     @Bean
-    public JobParametersListener jobParametersListener() {
-        return new JobParametersListener();
+    public VariantJobParametersListener variantJobParametersListener() {
+        return new VariantJobParametersListener();
     }
 
     @Bean
