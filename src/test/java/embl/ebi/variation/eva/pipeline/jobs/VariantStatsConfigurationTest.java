@@ -145,7 +145,7 @@ public class VariantStatsConfigurationTest {
     @Test
     public void invalidLoadStats() throws JobExecutionException {
         String input = VariantStatsConfigurationTest.class.getResource(FILE_20).getFile();
-        VariantSource source = new VariantSource(input, "1", "4", "studyName");
+        VariantSource source = new VariantSource(input, "4", "1", "studyName");
         String opencgaHome = System.getenv("OPENCGA_HOME") != null ? System.getenv("OPENCGA_HOME") : "/opt/opencga";
         String dbName = INVALID_LOAD_STATS;
         String compressExtension = ".gz";

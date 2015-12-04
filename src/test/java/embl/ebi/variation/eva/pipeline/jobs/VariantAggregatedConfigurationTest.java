@@ -73,9 +73,10 @@ public class VariantAggregatedConfigurationTest {
 
     // iterable doing an enum. Does it worth it?
     private static final String VALID_TRANSFORM = "validAggTransform";
-    private static final String INVALID_TRANSFORM = "invalidAggTransform";
+//    private static final String INVALID_TRANSFORM = "invalidAggTransform";
     private static final String VALID_LOAD = "validAggLoad";
-    private static final String INVALID_LOAD = "invalidAggLoad";
+//    private static final String INVALID_LOAD = "invalidAggLoad";
+    private static final String  VALID_LOAD_STATS = "validAggStatsLoad";
 
 
 
@@ -255,7 +256,7 @@ public class VariantAggregatedConfigurationTest {
     @Test
     public void validLoadStats() throws JobParametersInvalidException, JobExecutionAlreadyRunningException, JobRestartException, JobInstanceAlreadyCompleteException, IllegalAccessException, ClassNotFoundException, InstantiationException, StorageManagerException, IOException {String input = VariantAggregatedConfigurationTest.class.getResource(FILE_AGGREGATED).getFile();
         String opencgaHome = System.getenv("OPENCGA_HOME") != null ? System.getenv("OPENCGA_HOME") : "/opt/opencga";
-        String dbName = VALID_LOAD;
+        String dbName = VALID_LOAD_STATS;
 
         JobParameters parameters = new JobParametersBuilder()
                 .addString("input", input)
@@ -314,7 +315,7 @@ public class VariantAggregatedConfigurationTest {
     private static void cleanDBs() throws UnknownHostException {
         // Delete Mongo collection
         MongoClient mongoClient = new MongoClient("localhost");
-        List<String> dbs = Arrays.asList(VALID_TRANSFORM, INVALID_TRANSFORM, VALID_LOAD, INVALID_LOAD);
+        List<String> dbs = Arrays.asList(VALID_TRANSFORM, VALID_LOAD, VALID_LOAD_STATS);
         for (String dbName : dbs) {
             DB db = mongoClient.getDB(dbName);
             db.dropDatabase();
