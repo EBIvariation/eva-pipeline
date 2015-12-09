@@ -17,10 +17,7 @@ package embl.ebi.variation.eva.pipeline.jobs;
 
 import embl.ebi.variation.eva.pipeline.listeners.JobParametersListener;
 import embl.ebi.variation.eva.pipeline.listeners.VariantJobParametersListener;
-import embl.ebi.variation.eva.pipeline.steps.VariantsLoad;
-import embl.ebi.variation.eva.pipeline.steps.VariantsStatsCreate;
-import embl.ebi.variation.eva.pipeline.steps.VariantsStatsLoad;
-import embl.ebi.variation.eva.pipeline.steps.VariantsTransform;
+import embl.ebi.variation.eva.pipeline.steps.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.Job;
@@ -75,7 +72,7 @@ public class VariantConfiguration {
                 .next(load())
                 .next(statsCreate())
                 .next(statsLoad())
-//                .next(annotation(stepBuilderFactory));
+                .next(annotationPreCreate())
                 .build();
     }
 
@@ -113,6 +110,16 @@ public class VariantConfiguration {
     public Step statsLoad() {
         StepBuilder step1 = stepBuilderFactory.get("statsLoad");
         TaskletStepBuilder tasklet = step1.tasklet(new VariantsStatsLoad(listener));
+
+        // true: every job execution will do this step, even if this step is already COMPLETED
+        // false: if the job was aborted and is relaunched, this step will NOT be done again
+        tasklet.allowStartIfComplete(false);
+        return tasklet.build();
+    }
+
+    public Step annotationPreCreate() {
+        StepBuilder step1 = stepBuilderFactory.get("annotationPreCreate");
+        TaskletStepBuilder tasklet = step1.tasklet(new VariantsAnnotPreCreate(listener));
 
         // true: every job execution will do this step, even if this step is already COMPLETED
         // false: if the job was aborted and is relaunched, this step will NOT be done again

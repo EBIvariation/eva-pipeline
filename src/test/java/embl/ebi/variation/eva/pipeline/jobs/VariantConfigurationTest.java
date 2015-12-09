@@ -17,6 +17,7 @@ package embl.ebi.variation.eva.pipeline.jobs;
 
 import java.io.*;
 
+import embl.ebi.variation.eva.pipeline.steps.VariantsAnnotPreCreate;
 import embl.ebi.variation.eva.pipeline.steps.VariantsLoad;
 import embl.ebi.variation.eva.pipeline.steps.VariantsStatsCreate;
 import embl.ebi.variation.eva.pipeline.steps.VariantsStatsLoad;
@@ -41,12 +42,12 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.net.UnknownHostException;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.zip.GZIPInputStream;
 
 import static embl.ebi.variation.eva.pipeline.jobs.JobTestUtils.*;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * Created by jmmut on 2015-10-14.
@@ -67,11 +68,12 @@ public class VariantConfigurationTest {
     private static final String VALID_TRANSFORM = "VariantConfigurationTest_vt";
     private static final String INVALID_TRANSFORM = "VariantConfigurationTest_it";
     private static final String VALID_LOAD = "VariantConfigurationTest_vl";
-//    private static final String INVALID_LOAD = "invalidLoad";
+    //    private static final String INVALID_LOAD = "invalidLoad";
     private static final String VALID_CREATE_STATS = "VariantConfigurationTest_vcs";
-//    private static final String INVALID_CREATE_STATS = "invalidCreateStats";
+    //    private static final String INVALID_CREATE_STATS = "invalidCreateStats";
     private static final String VALID_LOAD_STATS = "VariantConfigurationTest_vls";
-//    private static final String INVALID_LOAD_STATS = "invalidLoadStats";
+    //    private static final String INVALID_LOAD_STATS = "invalidLoadStats";
+    private static final String VALID_PRE_ANNOT = "VariantConfigurationTest_vpa";
 
     @Autowired
     private Job job;
@@ -101,6 +103,7 @@ public class VariantConfigurationTest {
                 .addString(VariantsLoad.SKIP_LOAD, "true")
                 .addString(VariantsStatsCreate.SKIP_STATS_CREATE, "true")
                 .addString(VariantsStatsLoad.SKIP_STATS_LOAD, "true")
+                .addString(VariantsAnnotPreCreate.SKIP_ANNOT_PRE_CREATE, "true")
                 .toJobParameters();
 
         String outputFilename = getTransformedOutputPath(Paths.get(FILE_20).getFileName(),
@@ -146,6 +149,7 @@ public class VariantConfigurationTest {
                 .addString(VariantsLoad.SKIP_LOAD, "true")
                 .addString(VariantsStatsCreate.SKIP_STATS_CREATE, "true")
                 .addString(VariantsStatsLoad.SKIP_STATS_LOAD, "true")
+                .addString(VariantsAnnotPreCreate.SKIP_ANNOT_PRE_CREATE, "true")
                 .toJobParameters();
 
         JobExecution execution = jobLauncher.run(job, parameters);
@@ -176,6 +180,7 @@ public class VariantConfigurationTest {
                 .addString("opencga.app.home", opencgaHome)
                 .addString(VariantsStatsCreate.SKIP_STATS_CREATE, "true")
                 .addString(VariantsStatsLoad.SKIP_STATS_LOAD, "true")
+                .addString(VariantsAnnotPreCreate.SKIP_ANNOT_PRE_CREATE, "true")
                 .toJobParameters();
 
         JobExecution execution = jobLauncher.run(job, parameters);
@@ -221,6 +226,7 @@ public class VariantConfigurationTest {
                 .addString("fileId", source.getFileId())
                 .addString("opencga.app.home", opencgaHome)
                 .addString(VariantsStatsLoad.SKIP_STATS_LOAD, "true")
+                .addString(VariantsAnnotPreCreate.SKIP_ANNOT_PRE_CREATE, "true")
                 .toJobParameters();
 
         statsFile.delete();
@@ -256,6 +262,7 @@ public class VariantConfigurationTest {
                 .addString("studyName", source.getStudyName())
                 .addString("studyId", source.getStudyId())
                 .addString("fileId", source.getFileId())
+                .addString(VariantsAnnotPreCreate.SKIP_ANNOT_PRE_CREATE, "true")
                 .addString("opencga.app.home", opencgaHome)
                 .toJobParameters();
 
@@ -286,6 +293,63 @@ public class VariantConfigurationTest {
         assertEquals(1, iterator.next().getSourceEntries().values().iterator().next().getCohortStats().size());
     }
 
+    @Test
+    public void validAnnotPreCreate() throws Exception {
+
+        String input = VariantConfigurationTest.class.getResource(FILE_20).getFile();
+        VariantSource source = new VariantSource(input, "annotTest", "1", "studyName");
+        String opencgaHome = System.getenv("OPENCGA_HOME") != null ? System.getenv("OPENCGA_HOME") : "/opt/opencga";
+        String dbName = VALID_PRE_ANNOT;
+        String compressExtension = ".gz";
+        String outputDir = "/tmp";
+        File annotFile = new File(Paths.get(outputDir).resolve(VariantStorageManager.buildFilename(source)) + ".variants.preannot.gz");
+
+        JobParameters parameters = new JobParametersBuilder()
+                .addString("input", input)
+                .addString("outputDir", outputDir)
+                .addString("dbName", dbName)
+                .addString("compressExtension", compressExtension)
+                .addString("compressGenotypes", "true")
+                .addString("includeSrc", "FIRST_8_COLUMNS")
+                .addString("aggregated", "NONE")
+                .addString("studyType", "COLLECTION")
+                .addString("studyName", source.getStudyName())
+                .addString("studyId", source.getStudyId())
+                .addString("fileId", source.getFileId())
+                .addString("opencga.app.home", opencgaHome)
+                .addString(VariantsStatsCreate.SKIP_STATS_CREATE, "true")
+                .addString(VariantsStatsLoad.SKIP_STATS_LOAD, "true")
+                .addString("vepInput", annotFile.toString())
+                .toJobParameters();
+
+        annotFile.delete();
+        assertFalse(annotFile.exists());  // ensure the stats file doesn't exist from previous executions
+        JobExecution execution = jobLauncher.run(job, parameters);
+        assertEquals(ExitStatus.COMPLETED.getExitCode(), execution.getExitStatus().getExitCode());
+        assertTrue(annotFile.exists());
+
+        // compare files
+        BufferedReader testReader = new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(
+                VariantConfigurationTest.class.getResource("/preannot.sorted.gz").getFile()))));
+        BufferedReader actualReader = new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(
+                annotFile.toString()))));
+
+        ArrayList<String> rows = new ArrayList<>();
+
+        String s;
+        while((s = actualReader.readLine()) != null) {
+            rows.add(s);
+        }
+        Collections.sort(rows);
+
+        String testLine = testReader.readLine();
+        for (String row : rows) {
+            assertEquals(testLine, row);
+            testLine = testReader.readLine();
+        }
+        assertNull(testLine); // if both files have the same length testReader should be after the last line
+    }
+
     @BeforeClass
     public static void beforeTests() throws UnknownHostException {
         cleanDBs();
@@ -293,7 +357,7 @@ public class VariantConfigurationTest {
 
     @AfterClass
     public static void afterTests() throws UnknownHostException {
-        cleanDBs();
+//        cleanDBs();
     }
 
     private static void cleanDBs() throws UnknownHostException {
@@ -302,6 +366,8 @@ public class VariantConfigurationTest {
                 INVALID_TRANSFORM,
                 VALID_LOAD,
                 VALID_CREATE_STATS,
-                VALID_LOAD_STATS);
+                VALID_LOAD_STATS,
+                VALID_PRE_ANNOT
+        );
     }
 }

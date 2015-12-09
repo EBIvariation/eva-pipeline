@@ -17,6 +17,7 @@ package embl.ebi.variation.eva.pipeline.jobs;
 
 import com.mongodb.DB;
 import com.mongodb.MongoClient;
+import embl.ebi.variation.eva.pipeline.steps.VariantsAnnotPreCreate;
 import embl.ebi.variation.eva.pipeline.steps.VariantsLoad;
 import embl.ebi.variation.eva.pipeline.steps.VariantsStatsCreate;
 import embl.ebi.variation.eva.pipeline.steps.VariantsStatsLoad;
@@ -107,6 +108,7 @@ public class VariantLoadConfigurationTest {
                 .addString("opencga.app.home", opencgaHome)
                 .addString(VariantsStatsCreate.SKIP_STATS_CREATE, "true")
                 .addString(VariantsStatsLoad.SKIP_STATS_LOAD, "true")
+                .addString(VariantsAnnotPreCreate.SKIP_ANNOT_PRE_CREATE, "true")
                 .toJobParameters();
 
         JobExecution execution = jobLauncher.run(job, parameters);
@@ -127,9 +129,6 @@ public class VariantLoadConfigurationTest {
         assertEquals(countRows(iterator), lines);
     }
 
-    /**
-     * This test has to fail because the opencgaHome is not set, so it will fail at loading the storage engine configuration.
-     */
     @Test
     public void invalidLoad() throws JobExecutionException {
         String input = VariantLoadConfigurationTest.class.getResource(FILE_20).getFile();
@@ -152,6 +151,7 @@ public class VariantLoadConfigurationTest {
                 .addString("opencga.app.home", null)
                 .addString(VariantsStatsCreate.SKIP_STATS_CREATE, "true")
                 .addString(VariantsStatsLoad.SKIP_STATS_LOAD, "true")
+                .addString(VariantsAnnotPreCreate.SKIP_ANNOT_PRE_CREATE, "true")
                 .toJobParameters();
 
         System.out.println("parameters in load tests" + parameters.toString());
