@@ -72,6 +72,7 @@ public class VariantsAnnotPreCreate implements Tasklet {
             QueryOptions options = new QueryOptions(VariantDBAdaptor.ANNOTATION_EXISTS, false);
             options.add(VariantDBAdaptor.STUDIES, variantSource.getStudyId());
             options.add(VariantDBAdaptor.FILES, variantSource.getFileId());
+            options.add("include", "chromosome,start,end,reference,alternative");
 
             Iterator<Variant> iterator = dbAdaptor.iterator(options);
             while(iterator.hasNext()) {
