@@ -17,10 +17,7 @@ package embl.ebi.variation.eva.pipeline.jobs;
 
 import com.mongodb.DB;
 import com.mongodb.MongoClient;
-import embl.ebi.variation.eva.pipeline.steps.VariantsAnnotPreCreate;
-import embl.ebi.variation.eva.pipeline.steps.VariantsLoad;
-import embl.ebi.variation.eva.pipeline.steps.VariantsStatsCreate;
-import embl.ebi.variation.eva.pipeline.steps.VariantsStatsLoad;
+import embl.ebi.variation.eva.pipeline.steps.*;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -109,6 +106,7 @@ public class VariantLoadConfigurationTest {
                 .addString(VariantsStatsCreate.SKIP_STATS_CREATE, "true")
                 .addString(VariantsStatsLoad.SKIP_STATS_LOAD, "true")
                 .addString(VariantsAnnotPreCreate.SKIP_ANNOT_PRE_CREATE, "true")
+                .addString(VariantsAnnotCreate.SKIP_ANNOT_CREATE, "true")
                 .toJobParameters();
 
         JobExecution execution = jobLauncher.run(job, parameters);
@@ -152,6 +150,7 @@ public class VariantLoadConfigurationTest {
                 .addString(VariantsStatsCreate.SKIP_STATS_CREATE, "true")
                 .addString(VariantsStatsLoad.SKIP_STATS_LOAD, "true")
                 .addString(VariantsAnnotPreCreate.SKIP_ANNOT_PRE_CREATE, "true")
+                .addString(VariantsAnnotCreate.SKIP_ANNOT_CREATE, "true")
                 .toJobParameters();
 
         System.out.println("parameters in load tests" + parameters.toString());

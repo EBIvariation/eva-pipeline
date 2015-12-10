@@ -17,10 +17,7 @@ package embl.ebi.variation.eva.pipeline.jobs;
 
 import java.io.*;
 
-import embl.ebi.variation.eva.pipeline.steps.VariantsAnnotPreCreate;
-import embl.ebi.variation.eva.pipeline.steps.VariantsLoad;
-import embl.ebi.variation.eva.pipeline.steps.VariantsStatsCreate;
-import embl.ebi.variation.eva.pipeline.steps.VariantsStatsLoad;
+import embl.ebi.variation.eva.pipeline.steps.*;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -74,6 +71,7 @@ public class VariantConfigurationTest {
     private static final String VALID_LOAD_STATS = "VariantConfigurationTest_vls";
     //    private static final String INVALID_LOAD_STATS = "invalidLoadStats";
     private static final String VALID_PRE_ANNOT = "VariantConfigurationTest_vpa";
+    private static final String VALID_ANNOT = "VariantConfigurationTest_va";
 
     @Autowired
     private Job job;
@@ -104,6 +102,7 @@ public class VariantConfigurationTest {
                 .addString(VariantsStatsCreate.SKIP_STATS_CREATE, "true")
                 .addString(VariantsStatsLoad.SKIP_STATS_LOAD, "true")
                 .addString(VariantsAnnotPreCreate.SKIP_ANNOT_PRE_CREATE, "true")
+                .addString(VariantsAnnotCreate.SKIP_ANNOT_CREATE, "true")
                 .toJobParameters();
 
         String outputFilename = getTransformedOutputPath(Paths.get(FILE_20).getFileName(),
@@ -150,6 +149,7 @@ public class VariantConfigurationTest {
                 .addString(VariantsStatsCreate.SKIP_STATS_CREATE, "true")
                 .addString(VariantsStatsLoad.SKIP_STATS_LOAD, "true")
                 .addString(VariantsAnnotPreCreate.SKIP_ANNOT_PRE_CREATE, "true")
+                .addString(VariantsAnnotCreate.SKIP_ANNOT_CREATE, "true")
                 .toJobParameters();
 
         JobExecution execution = jobLauncher.run(job, parameters);
@@ -181,6 +181,7 @@ public class VariantConfigurationTest {
                 .addString(VariantsStatsCreate.SKIP_STATS_CREATE, "true")
                 .addString(VariantsStatsLoad.SKIP_STATS_LOAD, "true")
                 .addString(VariantsAnnotPreCreate.SKIP_ANNOT_PRE_CREATE, "true")
+                .addString(VariantsAnnotCreate.SKIP_ANNOT_CREATE, "true")
                 .toJobParameters();
 
         JobExecution execution = jobLauncher.run(job, parameters);
@@ -227,6 +228,7 @@ public class VariantConfigurationTest {
                 .addString("opencga.app.home", opencgaHome)
                 .addString(VariantsStatsLoad.SKIP_STATS_LOAD, "true")
                 .addString(VariantsAnnotPreCreate.SKIP_ANNOT_PRE_CREATE, "true")
+                .addString(VariantsAnnotCreate.SKIP_ANNOT_CREATE, "true")
                 .toJobParameters();
 
         statsFile.delete();
@@ -263,6 +265,7 @@ public class VariantConfigurationTest {
                 .addString("studyId", source.getStudyId())
                 .addString("fileId", source.getFileId())
                 .addString(VariantsAnnotPreCreate.SKIP_ANNOT_PRE_CREATE, "true")
+                .addString(VariantsAnnotCreate.SKIP_ANNOT_CREATE, "true")
                 .addString("opencga.app.home", opencgaHome)
                 .toJobParameters();
 
@@ -319,6 +322,7 @@ public class VariantConfigurationTest {
                 .addString("opencga.app.home", opencgaHome)
                 .addString(VariantsStatsCreate.SKIP_STATS_CREATE, "true")
                 .addString(VariantsStatsLoad.SKIP_STATS_LOAD, "true")
+                .addString(VariantsAnnotCreate.SKIP_ANNOT_CREATE, "true")
                 .addString("vepInput", annotFile.toString())
                 .toJobParameters();
 
@@ -348,6 +352,72 @@ public class VariantConfigurationTest {
             testLine = testReader.readLine();
         }
         assertNull(testLine); // if both files have the same length testReader should be after the last line
+    }
+
+    /**
+     * This test uses a mock of VEP, that takes every line and appends a string " annotated". The idea is to test only
+     * that the pipes are working as expected.
+     * @throws Exception
+     */
+    @Test
+    public void validAnnotCreate() throws Exception {
+
+        String input = VariantConfigurationTest.class.getResource(FILE_20).getFile();
+        VariantSource source = new VariantSource(input, "annotTest", "1", "studyName");
+        String opencgaHome = System.getenv("OPENCGA_HOME") != null ? System.getenv("OPENCGA_HOME") : "/opt/opencga";
+        String dbName = VALID_ANNOT;
+        String compressExtension = ".gz";
+        String outputDir = "/tmp";
+        File vepInput = new File(Paths.get(outputDir).resolve(VariantStorageManager.buildFilename(source)) + ".variants.preannot.gz");
+        File vepOutput = new File(Paths.get(outputDir).resolve(VariantStorageManager.buildFilename(source)) + ".variants.annot.gz");
+        String mockVep = VariantConfigurationTest.class.getResource("/mockvep.pl").getFile();
+
+        JobParameters parameters = new JobParametersBuilder()
+                .addString("input", input)
+                .addString("outputDir", outputDir)
+                .addString("dbName", dbName)
+                .addString("compressExtension", compressExtension)
+                .addString("compressGenotypes", "true")
+                .addString("includeSrc", "FIRST_8_COLUMNS")
+                .addString("aggregated", "NONE")
+                .addString("studyType", "COLLECTION")
+                .addString("studyName", source.getStudyName())
+                .addString("studyId", source.getStudyId())
+                .addString("fileId", source.getFileId())
+                .addString("opencga.app.home", opencgaHome)
+                .addString(VariantsStatsCreate.SKIP_STATS_CREATE, "true")
+                .addString(VariantsStatsLoad.SKIP_STATS_LOAD, "true")
+                .addString("vepInput", vepInput.toString())
+                .addString("vepParameters", mockVep)
+                .addString("vepOutput", vepOutput.toString())
+                .toJobParameters();
+
+        vepInput.delete();
+        vepOutput.delete();
+        assertFalse(vepInput.exists());  // ensure the pre annot file doesn't exist from previous executions
+        assertFalse(vepOutput.exists());  // ensure the annot file doesn't exist from previous executions
+        JobExecution execution = jobLauncher.run(job, parameters);
+        assertEquals(ExitStatus.COMPLETED.getExitCode(), execution.getExitStatus().getExitCode());
+        assertTrue(vepInput.exists());
+        assertTrue(vepOutput.exists());
+
+        // compare files
+        assertEquals(getLines(new GZIPInputStream(new FileInputStream(vepInput))),
+                getLines(new GZIPInputStream(new FileInputStream(vepOutput))));
+
+        BufferedReader inputReader = new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(
+                vepInput))));
+        BufferedReader outputReader = new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(
+                vepOutput))));
+
+        String inputLine = inputReader.readLine();
+        String ouputLine = outputReader.readLine();
+        while (inputLine != null) {
+
+            assertEquals(inputLine + " annotated", ouputLine);
+            inputLine = inputReader.readLine();
+            ouputLine = outputReader.readLine();
+        }
     }
 
     @BeforeClass

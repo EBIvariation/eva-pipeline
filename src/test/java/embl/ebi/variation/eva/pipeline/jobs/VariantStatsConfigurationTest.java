@@ -15,6 +15,7 @@
  */
 package embl.ebi.variation.eva.pipeline.jobs;
 
+import embl.ebi.variation.eva.pipeline.steps.VariantsAnnotCreate;
 import embl.ebi.variation.eva.pipeline.steps.VariantsAnnotPreCreate;
 import embl.ebi.variation.eva.pipeline.steps.VariantsStatsCreate;
 import embl.ebi.variation.eva.pipeline.steps.VariantsStatsLoad;
@@ -94,6 +95,8 @@ public class VariantStatsConfigurationTest {
                 .addString("fileId", source.getFileId())
                 .addString("opencga.app.home", opencgaHome)
                 .addString(VariantsStatsLoad.SKIP_STATS_LOAD, "true")
+                .addString(VariantsAnnotPreCreate.SKIP_ANNOT_PRE_CREATE, "true")
+                .addString(VariantsAnnotCreate.SKIP_ANNOT_CREATE, "true")
                 .toJobParameters();
 
         JobExecution execution = jobLauncher.run(job, parameters);
@@ -127,6 +130,8 @@ public class VariantStatsConfigurationTest {
                 .addString("fileId", source.getFileId())
                 .addString("opencga.app.home", opencgaHome)
                 .addString(VariantsStatsCreate.SKIP_STATS_CREATE, "true")
+                .addString(VariantsAnnotPreCreate.SKIP_ANNOT_PRE_CREATE, "true")
+                .addString(VariantsAnnotCreate.SKIP_ANNOT_CREATE, "true")
                 .toJobParameters();
 
         JobExecution execution = jobLauncher.run(job, jobParameters);
@@ -167,6 +172,7 @@ public class VariantStatsConfigurationTest {
                 .addString("opencga.app.home", opencgaHome)
                 .addString(VariantsStatsCreate.SKIP_STATS_CREATE, "true")
                 .addString(VariantsAnnotPreCreate.SKIP_ANNOT_PRE_CREATE, "true")
+                .addString(VariantsAnnotCreate.SKIP_ANNOT_CREATE, "true")
                 .toJobParameters();
 
         JobExecution execution = jobLauncher.run(job, parameters);

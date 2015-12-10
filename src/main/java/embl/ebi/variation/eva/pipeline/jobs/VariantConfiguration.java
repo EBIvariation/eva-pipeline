@@ -73,6 +73,7 @@ public class VariantConfiguration {
                 .next(statsCreate())
                 .next(statsLoad())
                 .next(annotationPreCreate())
+                .next(annotationCreate())
                 .build();
     }
 
@@ -120,6 +121,16 @@ public class VariantConfiguration {
     public Step annotationPreCreate() {
         StepBuilder step1 = stepBuilderFactory.get("annotationPreCreate");
         TaskletStepBuilder tasklet = step1.tasklet(new VariantsAnnotPreCreate(listener));
+
+        // true: every job execution will do this step, even if this step is already COMPLETED
+        // false: if the job was aborted and is relaunched, this step will NOT be done again
+        tasklet.allowStartIfComplete(false);
+        return tasklet.build();
+    }
+
+    public Step annotationCreate() {
+        StepBuilder step1 = stepBuilderFactory.get("annotationCreate");
+        TaskletStepBuilder tasklet = step1.tasklet(new VariantsAnnotCreate(listener));
 
         // true: every job execution will do this step, even if this step is already COMPLETED
         // false: if the job was aborted and is relaunched, this step will NOT be done again
