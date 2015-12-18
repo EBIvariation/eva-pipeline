@@ -34,7 +34,7 @@ class CreateProject(luigi.Task):
               'password'	: config['catalog_pass'],
               'name'		: self.name,
               'organization'	: self.organization,
-              'description'	: self.description,
+              'description'	: self.description.replace("\"", "\\\""),
               'alias'		: self.alias}
     shellout_no_stdout(command, **kwargs)
     
@@ -100,7 +100,7 @@ class CreateStudy(luigi.Task):
               'user'		: config['catalog_user'],
               'password'	: config['catalog_pass'],
               'name'		: self.name,
-              'description'	: self.description,
+              'description'	: self.description.replace("\"", "\\\""),
               'alias'		: self.alias,
               'project-alias'	: self.project_alias}
     
