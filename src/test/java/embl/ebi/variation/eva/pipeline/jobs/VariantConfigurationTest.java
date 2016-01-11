@@ -72,6 +72,7 @@ public class VariantConfigurationTest {
     //    private static final String INVALID_LOAD_STATS = "invalidLoadStats";
     private static final String VALID_PRE_ANNOT = "VariantConfigurationTest_vpa";
     private static final String VALID_ANNOT = "VariantConfigurationTest_va";
+    private static final String VALID_ANNOT_LOAD = "VariantConfigurationTest_val";
 
     @Autowired
     private Job job;
@@ -418,6 +419,47 @@ public class VariantConfigurationTest {
             inputLine = inputReader.readLine();
             ouputLine = outputReader.readLine();
         }
+    }
+
+    /**
+     * TODO findout how to call cellbase annotator
+     * @throws Exception
+     */
+    @Test
+    public void testAnnotLoad() throws Exception {
+        String input = VariantConfigurationTest.class.getResource(FILE_20).getFile();
+        VariantSource source = new VariantSource(input, "annotTest", "1", "studyName");
+        String opencgaHome = System.getenv("OPENCGA_HOME") != null ? System.getenv("OPENCGA_HOME") : "/opt/opencga";
+        String dbName = VALID_ANNOT_LOAD;
+        String compressExtension = ".gz";
+        String outputDir = "/tmp";
+        String vepOutput = VariantConfigurationTest.class.getResource("/annot.tsv.gz").getFile();
+
+        JobParameters parameters = new JobParametersBuilder()
+                .addString("input", input)
+                .addString("outputDir", outputDir)
+                .addString("dbName", dbName)
+                .addString("compressExtension", compressExtension)
+                .addString("compressGenotypes", "true")
+                .addString("includeSrc", "FIRST_8_COLUMNS")
+                .addString("aggregated", "NONE")
+                .addString("studyType", "COLLECTION")
+                .addString("studyName", source.getStudyName())
+                .addString("studyId", source.getStudyId())
+                .addString("fileId", source.getFileId())
+                .addString("opencga.app.home", opencgaHome)
+                .addString(VariantsStatsCreate.SKIP_STATS_CREATE, "true")
+                .addString(VariantsStatsLoad.SKIP_STATS_LOAD, "true")
+                .addString(VariantsAnnotPreCreate.SKIP_ANNOT_PRE_CREATE, "true")
+                .addString(VariantsAnnotCreate.SKIP_ANNOT_CREATE, "true")
+                .addString("vepOutput", vepOutput)
+                .toJobParameters();
+
+        JobExecution execution = jobLauncher.run(job, parameters);
+        assertEquals(ExitStatus.COMPLETED.getExitCode(), execution.getExitStatus().getExitCode());
+
+
+        // TODO: check DB is annotated
     }
 
     @BeforeClass
