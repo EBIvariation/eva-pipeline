@@ -22,6 +22,7 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.opencb.biodata.models.variant.Variant;
 import org.opencb.biodata.models.variant.VariantSource;
 import org.opencb.datastore.core.QueryOptions;
 import org.opencb.opencga.storage.core.StorageManagerException;
@@ -104,6 +105,7 @@ public class VariantConfigurationTest {
                 .addString(VariantsStatsLoad.SKIP_STATS_LOAD, "true")
                 .addString(VariantsAnnotPreCreate.SKIP_ANNOT_PRE_CREATE, "true")
                 .addString(VariantsAnnotCreate.SKIP_ANNOT_CREATE, "true")
+                .addString(VariantsAnnotLoad.SKIP_ANNOT_LOAD, "true")
                 .toJobParameters();
 
         String outputFilename = getTransformedOutputPath(Paths.get(FILE_20).getFileName(),
@@ -151,6 +153,7 @@ public class VariantConfigurationTest {
                 .addString(VariantsStatsLoad.SKIP_STATS_LOAD, "true")
                 .addString(VariantsAnnotPreCreate.SKIP_ANNOT_PRE_CREATE, "true")
                 .addString(VariantsAnnotCreate.SKIP_ANNOT_CREATE, "true")
+                .addString(VariantsAnnotLoad.SKIP_ANNOT_LOAD, "true")
                 .toJobParameters();
 
         JobExecution execution = jobLauncher.run(job, parameters);
@@ -183,6 +186,7 @@ public class VariantConfigurationTest {
                 .addString(VariantsStatsLoad.SKIP_STATS_LOAD, "true")
                 .addString(VariantsAnnotPreCreate.SKIP_ANNOT_PRE_CREATE, "true")
                 .addString(VariantsAnnotCreate.SKIP_ANNOT_CREATE, "true")
+                .addString(VariantsAnnotLoad.SKIP_ANNOT_LOAD, "true")
                 .toJobParameters();
 
         JobExecution execution = jobLauncher.run(job, parameters);
@@ -230,6 +234,7 @@ public class VariantConfigurationTest {
                 .addString(VariantsStatsLoad.SKIP_STATS_LOAD, "true")
                 .addString(VariantsAnnotPreCreate.SKIP_ANNOT_PRE_CREATE, "true")
                 .addString(VariantsAnnotCreate.SKIP_ANNOT_CREATE, "true")
+                .addString(VariantsAnnotLoad.SKIP_ANNOT_LOAD, "true")
                 .toJobParameters();
 
         statsFile.delete();
@@ -267,6 +272,7 @@ public class VariantConfigurationTest {
                 .addString("fileId", source.getFileId())
                 .addString(VariantsAnnotPreCreate.SKIP_ANNOT_PRE_CREATE, "true")
                 .addString(VariantsAnnotCreate.SKIP_ANNOT_CREATE, "true")
+                .addString(VariantsAnnotLoad.SKIP_ANNOT_LOAD, "true")
                 .addString("opencga.app.home", opencgaHome)
                 .toJobParameters();
 
@@ -324,6 +330,7 @@ public class VariantConfigurationTest {
                 .addString(VariantsStatsCreate.SKIP_STATS_CREATE, "true")
                 .addString(VariantsStatsLoad.SKIP_STATS_LOAD, "true")
                 .addString(VariantsAnnotCreate.SKIP_ANNOT_CREATE, "true")
+                .addString(VariantsAnnotLoad.SKIP_ANNOT_LOAD, "true")
                 .addString("vepInput", annotFile.toString())
                 .toJobParameters();
 
@@ -388,6 +395,7 @@ public class VariantConfigurationTest {
                 .addString("opencga.app.home", opencgaHome)
                 .addString(VariantsStatsCreate.SKIP_STATS_CREATE, "true")
                 .addString(VariantsStatsLoad.SKIP_STATS_LOAD, "true")
+                .addString(VariantsAnnotLoad.SKIP_ANNOT_LOAD, "true")
                 .addString("vepInput", vepInput.toString())
                 .addString("vepParameters", mockVep)
                 .addString("vepOutput", vepOutput.toString())
@@ -458,8 +466,15 @@ public class VariantConfigurationTest {
         JobExecution execution = jobLauncher.run(job, parameters);
         assertEquals(ExitStatus.COMPLETED.getExitCode(), execution.getExitStatus().getExitCode());
 
+        // check documents in DB have annotation (only consequence type)
+        VariantStorageManager variantStorageManager = StorageManagerFactory.getVariantStorageManager();
+        VariantDBAdaptor variantDBAdaptor = variantStorageManager.getDBAdaptor(dbName, null);
+        VariantDBIterator iterator = variantDBAdaptor.iterator(new QueryOptions());
 
-        // TODO: check DB is annotated
+        while (iterator.hasNext()) {
+            Variant next = iterator.next();
+            assertTrue(next.getAnnotation().getConsequenceTypes() != null);
+        }
     }
 
     @BeforeClass
@@ -479,7 +494,8 @@ public class VariantConfigurationTest {
                 VALID_LOAD,
                 VALID_CREATE_STATS,
                 VALID_LOAD_STATS,
-                VALID_PRE_ANNOT
+                VALID_PRE_ANNOT,
+                VALID_ANNOT_LOAD
         );
     }
 }

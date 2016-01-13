@@ -107,6 +107,7 @@ public class VariantLoadConfigurationTest {
                 .addString(VariantsStatsLoad.SKIP_STATS_LOAD, "true")
                 .addString(VariantsAnnotPreCreate.SKIP_ANNOT_PRE_CREATE, "true")
                 .addString(VariantsAnnotCreate.SKIP_ANNOT_CREATE, "true")
+                .addString(VariantsAnnotLoad.SKIP_ANNOT_LOAD, "true")
                 .toJobParameters();
 
         JobExecution execution = jobLauncher.run(job, parameters);
@@ -151,6 +152,7 @@ public class VariantLoadConfigurationTest {
                 .addString(VariantsStatsLoad.SKIP_STATS_LOAD, "true")
                 .addString(VariantsAnnotPreCreate.SKIP_ANNOT_PRE_CREATE, "true")
                 .addString(VariantsAnnotCreate.SKIP_ANNOT_CREATE, "true")
+                .addString(VariantsAnnotLoad.SKIP_ANNOT_LOAD, "true")
                 .toJobParameters();
 
         System.out.println("parameters in load tests" + parameters.toString());

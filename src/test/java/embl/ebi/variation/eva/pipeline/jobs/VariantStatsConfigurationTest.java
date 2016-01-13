@@ -15,10 +15,7 @@
  */
 package embl.ebi.variation.eva.pipeline.jobs;
 
-import embl.ebi.variation.eva.pipeline.steps.VariantsAnnotCreate;
-import embl.ebi.variation.eva.pipeline.steps.VariantsAnnotPreCreate;
-import embl.ebi.variation.eva.pipeline.steps.VariantsStatsCreate;
-import embl.ebi.variation.eva.pipeline.steps.VariantsStatsLoad;
+import embl.ebi.variation.eva.pipeline.steps.*;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -173,6 +170,7 @@ public class VariantStatsConfigurationTest {
                 .addString(VariantsStatsCreate.SKIP_STATS_CREATE, "true")
                 .addString(VariantsAnnotPreCreate.SKIP_ANNOT_PRE_CREATE, "true")
                 .addString(VariantsAnnotCreate.SKIP_ANNOT_CREATE, "true")
+                .addString(VariantsAnnotLoad.SKIP_ANNOT_LOAD, "true")
                 .toJobParameters();
 
         JobExecution execution = jobLauncher.run(job, parameters);
