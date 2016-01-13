@@ -61,7 +61,7 @@ public class VariantsAnnotLoad implements Tasklet {
         JobParameters parameters = chunkContext.getStepContext().getStepExecution().getJobParameters();
 
         if (Boolean.parseBoolean(parameters.getString(SKIP_ANNOT_LOAD, "false"))) {
-            logger.info("skipping annot loading");
+            logger.info("skipping annot loading, requested " + SKIP_ANNOT_LOAD + "=" + parameters.getString(SKIP_ANNOT_LOAD));
         } else {
             String vepOutput = parameters.getString("vepOutput");
 

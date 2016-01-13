@@ -397,7 +397,9 @@ public class VariantConfigurationTest {
                 .addString(VariantsStatsLoad.SKIP_STATS_LOAD, "true")
                 .addString(VariantsAnnotLoad.SKIP_ANNOT_LOAD, "true")
                 .addString("vepInput", vepInput.toString())
-                .addString("vepParameters", mockVep)
+                .addString("vepPath", mockVep)
+                .addString("vepParameters", "")
+                .addString("vepFasta", "")
                 .addString("vepOutput", vepOutput.toString())
                 .toJobParameters();
 

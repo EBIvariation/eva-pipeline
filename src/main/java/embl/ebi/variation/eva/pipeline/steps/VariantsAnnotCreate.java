@@ -61,11 +61,12 @@ public class VariantsAnnotCreate implements Tasklet {
         final AtomicBoolean asyncWriteOk = new AtomicBoolean(true);
 
         if (Boolean.parseBoolean(parameters.getString(SKIP_ANNOT_CREATE, "false"))) {
-            logger.info("skipping annotation pre creation step, requested " + SKIP_ANNOT_CREATE + "=" + parameters.getString(SKIP_ANNOT_CREATE));
+            logger.info("skipping annotation creation step, requested " + SKIP_ANNOT_CREATE + "=" + parameters.getString(SKIP_ANNOT_CREATE));
         } else {
             final String vepInput = parameters.getString("vepInput");
             String vepOutput = parameters.getString("vepOutput");
-            String vepParameters = parameters.getString("vepParameters");
+            String vepParameters = parameters.getString("vepPath") + " " + parameters.getString("vepParameters") + " "
+                    + parameters.getString("vepFasta");
 
             // perl's streams
             Process cat = Runtime.getRuntime().exec("perl " + vepParameters);
