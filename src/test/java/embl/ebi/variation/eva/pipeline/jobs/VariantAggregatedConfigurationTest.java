@@ -15,8 +15,6 @@
  */
 package embl.ebi.variation.eva.pipeline.jobs;
 
-import com.mongodb.DB;
-import com.mongodb.MongoClient;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -33,7 +31,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.*;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.launch.JobLauncher;
-import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
 import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
 import org.springframework.batch.core.repository.JobRestartException;
@@ -43,10 +40,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.io.*;
 import java.net.UnknownHostException;
-import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.List;
 import java.util.zip.GZIPInputStream;
 
 import static embl.ebi.variation.eva.pipeline.jobs.JobTestUtils.countRows;
@@ -76,9 +70,7 @@ public class VariantAggregatedConfigurationTest {
 //    private static final String INVALID_TRANSFORM = "invalidAggTransform";
     private static final String VALID_LOAD = "validAggLoad";
 //    private static final String INVALID_LOAD = "invalidAggLoad";
-    private static final String  VALID_LOAD_STATS = "validAggStatsLoad";
-
-
+    private static final String VALID_LOAD_STATS = "validAggStatsLoad";
 
     @Autowired
     VariantAggregatedConfiguration variantConfiguration;
@@ -92,13 +84,12 @@ public class VariantAggregatedConfigurationTest {
     @Autowired
     private JobExecutionListener listener;
 
-
     @Test
     public void validTransform() throws JobExecutionException, IOException {
         String input = VariantAggregatedConfigurationTest.class.getResource(FILE_AGGREGATED).getFile();
         String opencgaHome = System.getenv("OPENCGA_HOME") != null ? System.getenv("OPENCGA_HOME") : "/opt/opencga";
         String dbName = VALID_TRANSFORM;
-        
+
         JobParameters parameters = new JobParametersBuilder()
                 .addString("input", input)
                 .addString("outputDir", "/tmp")
@@ -118,23 +109,17 @@ public class VariantAggregatedConfigurationTest {
         JobExecution execution = jobLauncher.run(job, parameters);
 
         assertEquals(input, execution.getJobParameters().getString("input"));
-        assertEquals("COMPLETED", execution.getExitStatus().getExitCode());
+        assertEquals(ExitStatus.COMPLETED.getExitCode(), execution.getExitStatus().getExitCode());
 
         ////////// check transformed file
         String outputFilename = getTransformedOutputPath(Paths.get(FILE_AGGREGATED).getFileName(),
                 parameters.getString("compressExtension"), parameters.getString("outputDir"));
         logger.info("reading transformed output from: " + outputFilename);
 
-
-        BufferedReader file = new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(outputFilename))));
-        long lines = 0;
-        while (file.readLine() != null) {
-            lines++;
-        }
-        file.close();
+        long lines = getLines(new GZIPInputStream(new FileInputStream(outputFilename)));
         assertEquals(156, lines);
     }
-//
+
 //    @Test
 //    public void invalidTransform() throws JobExecutionException {
 //        String input = VariantAggregatedConfigurationTest.class.getResource(FILE_WRONG_NO_ALT).getFile();
@@ -168,7 +153,7 @@ public class VariantAggregatedConfigurationTest {
         String input = VariantAggregatedConfigurationTest.class.getResource(FILE_AGGREGATED).getFile();
         String opencgaHome = System.getenv("OPENCGA_HOME") != null ? System.getenv("OPENCGA_HOME") : "/opt/opencga";
         String dbName = VALID_LOAD;
-        
+
         JobParameters parameters = new JobParametersBuilder()
                 .addString("input", input)
                 .addString("outputDir", "/tmp")
@@ -205,7 +190,7 @@ public class VariantAggregatedConfigurationTest {
         // check stats aren't loaded
         assertTrue(variantDBAdaptor.iterator(new QueryOptions()).next().getSourceEntries().values().iterator().next().getCohortStats().isEmpty());
     }
-//
+
 //    @Test
 //    public void invalidLoad() throws JobExecutionException {
 //        String input = VariantAggregatedConfigurationTest.class.getResource(FILE_20).getFile();
@@ -242,19 +227,9 @@ public class VariantAggregatedConfigurationTest {
 //        assertEquals("FAILED", execution.getExitStatus().getExitCode());
 //    }
 
-    /*
     @Test
-    public void validCreateStats() {
-
-    }
-
-    @Test
-    public void invalidCreateStats() {
-
-    }
-    */
-    @Test
-    public void validLoadStats() throws JobParametersInvalidException, JobExecutionAlreadyRunningException, JobRestartException, JobInstanceAlreadyCompleteException, IllegalAccessException, ClassNotFoundException, InstantiationException, StorageManagerException, IOException {String input = VariantAggregatedConfigurationTest.class.getResource(FILE_AGGREGATED).getFile();
+    public void validLoadStats() throws JobParametersInvalidException, JobExecutionAlreadyRunningException, JobRestartException, JobInstanceAlreadyCompleteException, IllegalAccessException, ClassNotFoundException, InstantiationException, StorageManagerException, IOException {
+        String input = VariantAggregatedConfigurationTest.class.getResource(FILE_AGGREGATED).getFile();
         String opencgaHome = System.getenv("OPENCGA_HOME") != null ? System.getenv("OPENCGA_HOME") : "/opt/opencga";
         String dbName = VALID_LOAD_STATS;
 
@@ -291,16 +266,16 @@ public class VariantAggregatedConfigurationTest {
 
         assertEquals(countRows(iterator), lines);
 
-        // check stats aren't loaded
+        // check stats are loaded
         assertFalse(variantDBAdaptor.iterator(new QueryOptions()).next().getSourceEntries().values().iterator().next().getCohortStats().isEmpty());
-
     }
+    
 /*
-    @Test
-    public void invalidLoadStats() {
+     @Test
+     public void invalidLoadStats() {
 
-    }
-    */
+     }
+ */
 
     @BeforeClass
     public static void beforeTests() throws UnknownHostException {
@@ -313,24 +288,7 @@ public class VariantAggregatedConfigurationTest {
     }
 
     private static void cleanDBs() throws UnknownHostException {
-        // Delete Mongo collection
-        MongoClient mongoClient = new MongoClient("localhost");
-        List<String> dbs = Arrays.asList(VALID_TRANSFORM, VALID_LOAD, VALID_LOAD_STATS);
-        for (String dbName : dbs) {
-            DB db = mongoClient.getDB(dbName);
-            db.dropDatabase();
-        }
-        mongoClient.close();
+        JobTestUtils.cleanDBs(VALID_TRANSFORM, VALID_LOAD, VALID_LOAD_STATS);
     }
-
-    /*
-    public JobLauncherTestUtils jobLauncherTestUtils(JobRepository jobRepository, JobLauncher jobLauncher, Job job) {
-        JobLauncherTestUtils jobLauncherTestUtils = new JobLauncherTestUtils();
-        jobLauncherTestUtils.setJobRepository(jobRepository);
-        jobLauncherTestUtils.setJobLauncher(jobLauncher);
-        jobLauncherTestUtils.setJob(job);
-        return jobLauncherTestUtils;
-    }
-    */
 
 }
