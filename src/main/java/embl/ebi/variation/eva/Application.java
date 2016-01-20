@@ -27,9 +27,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  *
  *     java -jar target/gs-batch-processing-0.1.0.jar --spring.batch.job.names=variantJob
  *
- * or, create a file `application.properties` in your working directory setting it.
- *
- *     spring.batch.job.names=variantJob
+ * append any parameter needed. See VariantJobParametersListener to know some of them.
+ * TODO document all parameters
  *
  */
 @SpringBootApplication

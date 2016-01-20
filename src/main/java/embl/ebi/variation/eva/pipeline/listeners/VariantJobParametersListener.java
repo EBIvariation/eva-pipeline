@@ -61,7 +61,7 @@ public class VariantJobParametersListener extends JobParametersListener {
 //                variantOptions.put(VariantStorageManager.SAMPLE_IDS, Arrays.asList(config.samples.split(",")));
         
         variantOptions.put(VariantStorageManager.CALCULATE_STATS, false);   // this is tested by hand
-//                variantOptions.put(VariantStorageManager.OVERWRITE_STATS, config.overwriteStats);
+        variantOptions.put(VariantStorageManager.OVERWRITE_STATS, parameters.getString("overwriteStats"));
         variantOptions.put(VariantStorageManager.INCLUDE_STATS, false);
         
 //                variantOptions.put(VariantStorageManager.INCLUDE_GENOTYPES.key(), false);   // TODO rename samples to genotypes

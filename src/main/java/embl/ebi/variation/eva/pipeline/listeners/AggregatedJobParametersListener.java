@@ -68,7 +68,7 @@ public class AggregatedJobParametersListener extends JobParametersListener {
 
 
         variantOptions.put(VariantStorageManager.CALCULATE_STATS, false);   // this is tested by hand
-//                variantOptions.put(VariantStorageManager.OVERWRITE_STATS, config.overwriteStats);
+        variantOptions.put(VariantStorageManager.OVERWRITE_STATS, parameters.getString("overwriteStats"));
         variantOptions.put(VariantStorageManager.INCLUDE_STATS, Boolean.parseBoolean(
                 parameters.getString(VariantStorageManager.INCLUDE_STATS, defaultIncludeStats)));
         

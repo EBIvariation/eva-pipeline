@@ -42,7 +42,6 @@ public class VariantConfiguration {
 
     private static final Logger logger = LoggerFactory.getLogger(VariantConfiguration.class);
     public static final String jobName = "variantJob";
-    public static final String statsJobName = "variantStatsJob";
 
     @Autowired
     private JobBuilderFactory jobBuilderFactory;
