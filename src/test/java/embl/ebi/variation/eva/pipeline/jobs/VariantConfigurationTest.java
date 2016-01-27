@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 EMBL - European Bioinformatics Institute
+ * Copyright 2015-2016 EMBL - European Bioinformatics Institute
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -103,7 +103,7 @@ public class VariantConfigurationTest {
                 .addString(VariantsLoad.SKIP_LOAD, "true")
                 .addString(VariantsStatsCreate.SKIP_STATS_CREATE, "true")
                 .addString(VariantsStatsLoad.SKIP_STATS_LOAD, "true")
-                .addString(VariantsAnnotPreCreate.SKIP_ANNOT_PRE_CREATE, "true")
+                .addString(VariantsAnnotGenerateInput.SKIP_ANNOT_GENERATE_INPUT, "true")
                 .addString(VariantsAnnotCreate.SKIP_ANNOT_CREATE, "true")
                 .addString(VariantsAnnotLoad.SKIP_ANNOT_LOAD, "true")
                 .toJobParameters();
@@ -151,7 +151,7 @@ public class VariantConfigurationTest {
                 .addString(VariantsLoad.SKIP_LOAD, "true")
                 .addString(VariantsStatsCreate.SKIP_STATS_CREATE, "true")
                 .addString(VariantsStatsLoad.SKIP_STATS_LOAD, "true")
-                .addString(VariantsAnnotPreCreate.SKIP_ANNOT_PRE_CREATE, "true")
+                .addString(VariantsAnnotGenerateInput.SKIP_ANNOT_GENERATE_INPUT, "true")
                 .addString(VariantsAnnotCreate.SKIP_ANNOT_CREATE, "true")
                 .addString(VariantsAnnotLoad.SKIP_ANNOT_LOAD, "true")
                 .toJobParameters();
@@ -184,7 +184,7 @@ public class VariantConfigurationTest {
                 .addString("opencga.app.home", opencgaHome)
                 .addString(VariantsStatsCreate.SKIP_STATS_CREATE, "true")
                 .addString(VariantsStatsLoad.SKIP_STATS_LOAD, "true")
-                .addString(VariantsAnnotPreCreate.SKIP_ANNOT_PRE_CREATE, "true")
+                .addString(VariantsAnnotGenerateInput.SKIP_ANNOT_GENERATE_INPUT, "true")
                 .addString(VariantsAnnotCreate.SKIP_ANNOT_CREATE, "true")
                 .addString(VariantsAnnotLoad.SKIP_ANNOT_LOAD, "true")
                 .toJobParameters();
@@ -232,7 +232,7 @@ public class VariantConfigurationTest {
                 .addString("fileId", source.getFileId())
                 .addString("opencga.app.home", opencgaHome)
                 .addString(VariantsStatsLoad.SKIP_STATS_LOAD, "true")
-                .addString(VariantsAnnotPreCreate.SKIP_ANNOT_PRE_CREATE, "true")
+                .addString(VariantsAnnotGenerateInput.SKIP_ANNOT_GENERATE_INPUT, "true")
                 .addString(VariantsAnnotCreate.SKIP_ANNOT_CREATE, "true")
                 .addString(VariantsAnnotLoad.SKIP_ANNOT_LOAD, "true")
                 .toJobParameters();
@@ -270,7 +270,7 @@ public class VariantConfigurationTest {
                 .addString("studyName", source.getStudyName())
                 .addString("studyId", source.getStudyId())
                 .addString("fileId", source.getFileId())
-                .addString(VariantsAnnotPreCreate.SKIP_ANNOT_PRE_CREATE, "true")
+                .addString(VariantsAnnotGenerateInput.SKIP_ANNOT_GENERATE_INPUT, "true")
                 .addString(VariantsAnnotCreate.SKIP_ANNOT_CREATE, "true")
                 .addString(VariantsAnnotLoad.SKIP_ANNOT_LOAD, "true")
                 .addString("opencga.app.home", opencgaHome)
@@ -304,7 +304,7 @@ public class VariantConfigurationTest {
     }
 
     @Test
-    public void validAnnotPreCreate() throws Exception {
+    public void validAnnotGenerateInput() throws Exception {
 
         String input = VariantConfigurationTest.class.getResource(FILE_20).getFile();
         VariantSource source = new VariantSource(input, "annotTest", "1", "studyName");
@@ -460,7 +460,7 @@ public class VariantConfigurationTest {
                 .addString("opencga.app.home", opencgaHome)
                 .addString(VariantsStatsCreate.SKIP_STATS_CREATE, "true")
                 .addString(VariantsStatsLoad.SKIP_STATS_LOAD, "true")
-                .addString(VariantsAnnotPreCreate.SKIP_ANNOT_PRE_CREATE, "true")
+                .addString(VariantsAnnotGenerateInput.SKIP_ANNOT_GENERATE_INPUT, "true")
                 .addString(VariantsAnnotCreate.SKIP_ANNOT_CREATE, "true")
                 .addString("vepOutput", vepOutput)
                 .toJobParameters();

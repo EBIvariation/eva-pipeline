@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 EMBL - European Bioinformatics Institute
+ * Copyright 2015-2016 EMBL - European Bioinformatics Institute
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,22 +58,22 @@ public class VariantAnnotConfiguration {
     }
 
     @Bean
-    public Job variantStatsJob() {
+    public Job variantAnnotJob() {
         JobBuilder jobBuilder = jobBuilderFactory
                 .get(jobName)
                 .incrementer(new RunIdIncrementer())
                 .listener(listener);
 
         return jobBuilder
-                .start(annotationPreCreate())
+                .start(annotationGenerateInput())
                 .next(annotationCreate())
                 .next(annotationLoad())
                 .build();
     }
 
-    public Step annotationPreCreate() {
-        StepBuilder step1 = stepBuilderFactory.get("annotationPreCreate");
-        TaskletStepBuilder tasklet = step1.tasklet(new VariantsAnnotPreCreate(listener));
+    public Step annotationGenerateInput() {
+        StepBuilder step1 = stepBuilderFactory.get("annotationGenerateInput");
+        TaskletStepBuilder tasklet = step1.tasklet(new VariantsAnnotGenerateInput(listener));
 
         // true: every job execution will do this step, even if this step is already COMPLETED
         // false: if the job was aborted and is relaunched, this step will NOT be done again

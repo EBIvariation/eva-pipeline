@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 EMBL - European Bioinformatics Institute
+ * Copyright 2015-2016 EMBL - European Bioinformatics Institute
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,13 +43,13 @@ import java.util.zip.GZIPOutputStream;
  *
  * @author Jose Miguel Mut Lopez &lt;jmmut@ebi.ac.uk&gt;
  */
-public class VariantsAnnotPreCreate implements Tasklet {
-    private static final Logger logger = LoggerFactory.getLogger(VariantsAnnotPreCreate.class);
+public class VariantsAnnotGenerateInput implements Tasklet {
+    private static final Logger logger = LoggerFactory.getLogger(VariantsAnnotGenerateInput.class);
 
     private JobParametersListener listener;
-    public static final String SKIP_ANNOT_PRE_CREATE = "skipAnnotPreCreate";
+    public static final String SKIP_ANNOT_GENERATE_INPUT = "skipAnnotGenerateInput";
 
-    public VariantsAnnotPreCreate(JobParametersListener listener) {
+    public VariantsAnnotGenerateInput(JobParametersListener listener) {
         this.listener = listener;
     }
 
@@ -58,8 +58,8 @@ public class VariantsAnnotPreCreate implements Tasklet {
 
         JobParameters parameters = chunkContext.getStepContext().getStepExecution().getJobParameters();
 
-        if (Boolean.parseBoolean(parameters.getString(SKIP_ANNOT_PRE_CREATE, "false"))) {
-            logger.info("skipping annotation pre creation step, requested " + SKIP_ANNOT_PRE_CREATE + "=" + parameters.getString(SKIP_ANNOT_PRE_CREATE));
+        if (Boolean.parseBoolean(parameters.getString(SKIP_ANNOT_GENERATE_INPUT, "false"))) {
+            logger.info("skipping annotation pre creation step, requested " + SKIP_ANNOT_GENERATE_INPUT + "=" + parameters.getString(SKIP_ANNOT_GENERATE_INPUT));
         } else {
             ObjectMap variantOptions = listener.getVariantOptions();
             VariantStorageManager variantStorageManager = StorageManagerFactory.getVariantStorageManager();
