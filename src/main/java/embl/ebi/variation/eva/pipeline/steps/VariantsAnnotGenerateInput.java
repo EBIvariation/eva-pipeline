@@ -90,11 +90,12 @@ public class VariantsAnnotGenerateInput implements Tasklet {
      * see http://www.ensembl.org/info/docs/tools/vep/vep_formats.html for an explanation of the format we are serializing here.
      */
     public String serializeVariant(Variant variant) {
+        Variant formattedVariant = variant.copyInEnsemblFormat();
         return String.format("%s\t%s\t%s\t%s/%s\t+\n",
-                variant.getChromosome(),
-                variant.getStart(),
-                variant.getReference().isEmpty() ? variant.getStart() -1 : variant.getEnd(),
-                variant.getReference().isEmpty() ? "-" : variant.getReference(),
-                variant.getAlternate().isEmpty() ? "-" : variant.getAlternate());
+                formattedVariant.getChromosome(),
+                formattedVariant.getStart(),
+                formattedVariant.getEnd(),
+                formattedVariant.getReference(),
+                formattedVariant.getAlternate());
     }
 }
