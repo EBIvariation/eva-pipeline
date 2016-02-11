@@ -63,6 +63,7 @@
                 </exclusion>
             </exclusions>
         </dependency>
+
         <dependency>
             <groupId>org.opencb.opencga</groupId>
             <artifactId>opencga-storage-core</artifactId>
@@ -71,6 +72,27 @@
                 <exclusion>
                     <groupId>org.slf4j</groupId>
                     <artifactId>slf4j-simple</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.opencb.biodata</groupId>
+            <artifactId>biodata-models</artifactId>
+            <version>${biodata.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.opencb.biodata</groupId>
+            <artifactId>biodata-formats</artifactId>
+            <version>${biodata.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.opencb.biodata</groupId>
+            <artifactId>biodata-tools</artifactId>
+            <version>${biodata.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.opencb.datastore</groupId>
+                    <artifactId>datastore-core</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
