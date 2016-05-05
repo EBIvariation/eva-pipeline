@@ -1,8 +1,7 @@
 use warnings;
 use strict;
 
-my $line;
-while (defined($line = <STDIN>)) {
-  my $cline = chomp($line);
-  print "$line annotated\n";
+my $i;
+for($i = 0; $i < 300; $i = $i + 1) {
+    print "$i annotated\n";
 }

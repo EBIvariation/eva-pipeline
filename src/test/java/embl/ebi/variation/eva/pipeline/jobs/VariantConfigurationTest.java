@@ -412,23 +412,18 @@ public class VariantConfigurationTest {
         assertTrue(vepInput.exists());
         assertTrue(vepOutput.exists());
 
-        // compare files
-        assertEquals(getLines(new GZIPInputStream(new FileInputStream(vepInput))),
-                getLines(new GZIPInputStream(new FileInputStream(vepOutput))));
-
-        BufferedReader inputReader = new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(
-                vepInput))));
-        BufferedReader outputReader = new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(
-                vepOutput))));
-
-        String inputLine = inputReader.readLine();
-        String ouputLine = outputReader.readLine();
-        while (inputLine != null) {
-
-            assertEquals(inputLine + " annotated", ouputLine);
-            inputLine = inputReader.readLine();
-            ouputLine = outputReader.readLine();
+        BufferedReader outputReader = new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(vepOutput))));
+        
+        // Check output file contents
+        int numLinesRead;
+        String outputLine = outputReader.readLine();
+        for (numLinesRead = 0; outputLine != null; numLinesRead++) {
+            assertEquals(numLinesRead + " annotated", outputLine);
+            outputLine = outputReader.readLine();
         }
+        
+        // Check output file length
+        assertEquals(300, numLinesRead);
     }
 
     /**
