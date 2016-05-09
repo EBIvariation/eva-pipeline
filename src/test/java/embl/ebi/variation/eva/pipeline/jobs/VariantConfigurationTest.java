@@ -398,8 +398,11 @@ public class VariantConfigurationTest {
                 .addString(VariantsAnnotLoad.SKIP_ANNOT_LOAD, "true")
                 .addString("vepInput", vepInput.toString())
                 .addString("vepPath", mockVep)
-                .addString("vepParameters", "")
-                .addString("vepFasta", "")
+                .addString("vepCacheVersion", "79")
+                .addString("vepCacheDirectory", "/path/to/cache")
+                .addString("vepSpecies", "homo_sapiens")
+                .addString("vepFasta", "/path/to/file.fa")
+                .addString("vepNumForks", "4")
                 .addString("vepOutput", vepOutput.toString())
                 .toJobParameters();
 

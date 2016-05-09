@@ -25,6 +25,7 @@ import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
 
 import java.io.*;
+import java.util.Arrays;
 import java.util.zip.GZIPOutputStream;
 
 /**
@@ -52,12 +53,22 @@ public class VariantsAnnotCreate implements Tasklet {
         } else {
             ProcessBuilder processBuilder = new ProcessBuilder("perl", 
                     parameters.getString("vepPath"), 
-                    parameters.getString("vepParameters"), 
-                    parameters.getString("vepFasta"),
-                    " -i " + parameters.getString("vepInput")
+                    "--cache",
+                    "--cache_version", parameters.getString("vepCacheVersion"),
+                    "-dir", parameters.getString("vepCacheDirectory"),
+                    "--species", parameters.getString("vepSpecies"),
+                    "--fasta", parameters.getString("vepFasta"),
+                    "--fork", parameters.getString("vepNumForks"),
+                    "-i", parameters.getString("vepInput"),
+                    "-o", "STDOUT",
+                    "--force_overwrite", 
+                    "--offline", 
+                    "--everything"
             );
             
-            logger.debug("starting read from perl output");
+            logger.debug("VEP annotation parameters = " + Arrays.toString(processBuilder.command().toArray()));
+            
+            logger.info("Starting read from VEP output");
             Process process = processBuilder.start();
             
             int written = connectStreams(
@@ -65,7 +76,7 @@ public class VariantsAnnotCreate implements Tasklet {
                     new GZIPOutputStream(new FileOutputStream(parameters.getString("vepOutput"))));
             
             int exitValue = process.waitFor();
-            logger.debug("finishing read from perl output, bytes written: " + written); 
+            logger.info("Finishing read from VEP output, bytes written: " + written); 
             
             if (exitValue > 0) {
                 throw new Exception("Error while running VEP (exit status " + exitValue + ")");
