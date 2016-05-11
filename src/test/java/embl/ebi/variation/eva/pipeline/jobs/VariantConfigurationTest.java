@@ -426,7 +426,8 @@ public class VariantConfigurationTest {
         }
         
         // Check output file length
-        assertEquals(300, numLinesRead);
+        assertEquals(getLines(new GZIPInputStream(new FileInputStream(vepInput))),
+                     getLines(new GZIPInputStream(new FileInputStream(vepOutput))));
     }
 
     /**
