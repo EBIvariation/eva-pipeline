@@ -15,6 +15,7 @@
  */
 package embl.ebi.variation.eva.pipeline.jobs;
 
+import embl.ebi.variation.eva.pipeline.listeners.VariantJobParametersListener;
 import embl.ebi.variation.eva.pipeline.steps.*;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -45,7 +46,7 @@ import static org.junit.Assert.*;
  * @author Jose Miguel Mut Lopez &lt;jmmut@ebi.ac.uk&gt;
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = {VariantStatsConfiguration.class})
+@ContextConfiguration(classes = {VariantStatsConfiguration.class, VariantJobParametersListener.class})
 public class VariantStatsConfigurationTest {
 
     public static final String FILE_20 = "/small20.vcf.gz";

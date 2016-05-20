@@ -53,11 +53,6 @@ public class VariantAnnotConfiguration {
     Environment environment;
 
     @Bean
-    public VariantJobParametersListener variantJobParametersListener() {
-        return new VariantJobParametersListener();
-    }
-
-    @Bean
     public Job variantAnnotJob() {
         JobBuilder jobBuilder = jobBuilderFactory
                 .get(jobName)

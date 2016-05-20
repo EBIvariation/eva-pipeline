@@ -15,7 +15,6 @@
  */
 package embl.ebi.variation.eva.pipeline.jobs;
 
-import embl.ebi.variation.eva.pipeline.listeners.JobParametersListener;
 import embl.ebi.variation.eva.pipeline.listeners.VariantJobParametersListener;
 import embl.ebi.variation.eva.pipeline.steps.*;
 import org.slf4j.Logger;
@@ -31,7 +30,6 @@ import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.core.step.builder.TaskletStepBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
@@ -53,11 +51,6 @@ public class VariantConfiguration {
     JobLauncher jobLauncher;
     @Autowired
     Environment environment;
-
-    @Bean
-    public VariantJobParametersListener variantJobParametersListener() {
-        return new VariantJobParametersListener();
-    }
 
     @Bean
     public Job variantJob() {
