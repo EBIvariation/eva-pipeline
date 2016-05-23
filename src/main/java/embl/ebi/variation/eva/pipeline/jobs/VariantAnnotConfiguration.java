@@ -68,7 +68,7 @@ public class VariantAnnotConfiguration {
 
     public Step annotationGenerateInput() {
         StepBuilder step1 = stepBuilderFactory.get("annotationGenerateInput");
-        TaskletStepBuilder tasklet = step1.tasklet(new VariantsAnnotGenerateInput(listener));
+        TaskletStepBuilder tasklet = step1.tasklet(new VariantsAnnotGenerateInput());
 
         // true: every job execution will do this step, even if this step is already COMPLETED
         // false: if the job was aborted and is relaunched, this step will NOT be done again
@@ -78,7 +78,7 @@ public class VariantAnnotConfiguration {
 
     public Step annotationCreate() {
         StepBuilder step1 = stepBuilderFactory.get("annotationCreate");
-        TaskletStepBuilder tasklet = step1.tasklet(new VariantsAnnotCreate(listener));
+        TaskletStepBuilder tasklet = step1.tasklet(new VariantsAnnotCreate());
 
         // true: every job execution will do this step, even if this step is already COMPLETED
         // false: if the job was aborted and is relaunched, this step will NOT be done again
@@ -88,7 +88,7 @@ public class VariantAnnotConfiguration {
 
     public Step annotationLoad() {
         StepBuilder step1 = stepBuilderFactory.get("annotationLoad");
-        TaskletStepBuilder tasklet = step1.tasklet(new VariantsAnnotLoad(listener));
+        TaskletStepBuilder tasklet = step1.tasklet(new VariantsAnnotLoad());
 
         // true: every job execution will do this step, even if this step is already COMPLETED
         // false: if the job was aborted and is relaunched, this step will NOT be done again

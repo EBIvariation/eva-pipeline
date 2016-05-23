@@ -92,9 +92,9 @@ public class VariantStatsConfigurationTest {
                 .addString("studyId", source.getStudyId())
                 .addString("fileId", source.getFileId())
                 .addString("opencga.app.home", opencgaHome)
-                .addString(VariantsStatsLoad.SKIP_STATS_LOAD, "true")
-                .addString(VariantsAnnotGenerateInput.SKIP_ANNOT_GENERATE_INPUT, "true")
-                .addString(VariantsAnnotCreate.SKIP_ANNOT_CREATE, "true")
+                .addString("skipStatsLoad", "true")
+                .addString("skipAnnotGenerateInput", "true")
+                .addString("skipAnnotCreate", "true")
                 .toJobParameters();
 
         JobExecution execution = jobLauncher.run(job, parameters);
@@ -127,9 +127,10 @@ public class VariantStatsConfigurationTest {
                 .addString("studyId", source.getStudyId())
                 .addString("fileId", source.getFileId())
                 .addString("opencga.app.home", opencgaHome)
-                .addString(VariantsStatsCreate.SKIP_STATS_CREATE, "true")
-                .addString(VariantsAnnotGenerateInput.SKIP_ANNOT_GENERATE_INPUT, "true")
-                .addString(VariantsAnnotCreate.SKIP_ANNOT_CREATE, "true")
+                .addString("skipStatsCreate", "true")
+                .addString("skipStatsLoad", "true")
+                .addString("skipAnnotGenerateInput", "true")
+                .addString("skipAnnotCreate", "true")
                 .toJobParameters();
 
         JobExecution execution = jobLauncher.run(job, jobParameters);
@@ -168,9 +169,10 @@ public class VariantStatsConfigurationTest {
                 .addString("studyId", source.getStudyId())
                 .addString("fileId", source.getFileId())
                 .addString("opencga.app.home", opencgaHome)
-                .addString(VariantsStatsCreate.SKIP_STATS_CREATE, "true")
-                .addString(VariantsAnnotGenerateInput.SKIP_ANNOT_GENERATE_INPUT, "true")
-                .addString(VariantsAnnotCreate.SKIP_ANNOT_CREATE, "true")
+                .addString("skipStatsCreate", "true")
+                .addString("skipStatsLoad", "true")
+                .addString("skipAnnotGenerateInput", "true")
+                .addString("skipAnnotCreate", "true")
                 .addString(VariantsAnnotLoad.SKIP_ANNOT_LOAD, "true")
                 .toJobParameters();
 

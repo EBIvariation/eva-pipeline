@@ -15,14 +15,13 @@
  */
 package embl.ebi.variation.eva.pipeline.steps;
 
-import embl.ebi.variation.eva.pipeline.listeners.JobParametersListener;
 import org.opencb.datastore.core.ObjectMap;
+import org.opencb.opencga.lib.common.Config;
 import org.opencb.opencga.storage.core.StorageManagerFactory;
 import org.opencb.opencga.storage.core.variant.VariantStorageManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.batch.core.JobParameters;
-import org.springframework.batch.core.StepContribution;
+import org.springframework.batch.core.*;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
@@ -36,26 +35,24 @@ import java.nio.file.Paths;
  *
  * @author Jose Miguel Mut Lopez &lt;jmmut@ebi.ac.uk&gt;
  */
-public class VariantsTransform implements Tasklet {
+//@Scope("step")
+//@Component("transform")
+public class VariantsTransform implements Tasklet, StepExecutionListener {
     private static final Logger logger = LoggerFactory.getLogger(VariantsTransform.class);
-    private JobParametersListener listener;
 
-    public VariantsTransform(JobParametersListener listener) {
-        this.listener = listener;
-    }
+    private ObjectMap variantOptions;
+    private ObjectMap pipelineOptions;
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
-        JobParameters parameters = chunkContext.getStepContext().getStepExecution().getJobParameters();
-        ObjectMap variantOptions = listener.getVariantOptions();
+        URI outdirUri = createUri(pipelineOptions.getString("outputDir"));
+        URI nextFileUri = createUri(pipelineOptions.getString("input"));
+        URI pedigreeUri = pipelineOptions.getString("pedigree") != null ? createUri(pipelineOptions.getString("pedigree")) : null;
 
-        URI outdirUri = createUri(parameters.getString("outputDir"));
-        URI nextFileUri = createUri(parameters.getString("input"));
-        URI pedigreeUri = parameters.getString("pedigree") != null ? createUri(parameters.getString("pedigree")) : null;
-
-        logger.info("transform file " + parameters.getString("input") + " to " + parameters.getString("outputDir"));
+        logger.info("transform file {} to {}", pipelineOptions.getString("input"), pipelineOptions.getString("outputDir"));
 
         logger.info("Extract variants '{}'", nextFileUri);
+        Config.setOpenCGAHome(pipelineOptions.getString("opencgaAppHome"));
         VariantStorageManager variantStorageManager = StorageManagerFactory.getVariantStorageManager();
         variantStorageManager.extract(nextFileUri, outdirUri, variantOptions);
 
@@ -68,11 +65,22 @@ public class VariantsTransform implements Tasklet {
         return RepeatStatus.FINISHED;
     }
 
-    public static URI createUri(String input) throws URISyntaxException {
+    private static URI createUri(String input) throws URISyntaxException {
         URI sourceUri = new URI(input);
         if (sourceUri.getScheme() == null || sourceUri.getScheme().isEmpty()) {
             sourceUri = Paths.get(input).toUri();
         }
         return sourceUri;
+    }
+
+    @Override
+    public void beforeStep(StepExecution stepExecution) {
+        variantOptions = (ObjectMap) stepExecution.getJobExecution().getExecutionContext().get("variantOptions");
+        pipelineOptions = (ObjectMap) stepExecution.getJobExecution().getExecutionContext().get("pipelineOptions");
+    }
+
+    @Override
+    public ExitStatus afterStep(StepExecution stepExecution) {
+        return null;
     }
 }

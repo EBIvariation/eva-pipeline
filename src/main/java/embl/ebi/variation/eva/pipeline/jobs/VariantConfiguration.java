@@ -15,6 +15,7 @@
  */
 package embl.ebi.variation.eva.pipeline.jobs;
 
+import embl.ebi.variation.eva.pipeline.VariantJobsArgs;
 import embl.ebi.variation.eva.pipeline.listeners.VariantJobParametersListener;
 import embl.ebi.variation.eva.pipeline.steps.*;
 import org.slf4j.Logger;
@@ -72,7 +73,7 @@ public class VariantConfiguration {
 
     public Step transform() {
         StepBuilder step1 = stepBuilderFactory.get("transform");
-        TaskletStepBuilder tasklet = step1.tasklet(new VariantsTransform(listener));
+        TaskletStepBuilder tasklet = step1.tasklet(new VariantsTransform());
 
         // true: every job execution will do this step, even if this step is already COMPLETED
         // false: if the job was aborted and is relaunched, this step will NOT be done again
@@ -83,7 +84,7 @@ public class VariantConfiguration {
 
     public Step load() {
         StepBuilder step1 = stepBuilderFactory.get("load");
-        TaskletStepBuilder tasklet = step1.tasklet(new VariantsLoad(listener));
+        TaskletStepBuilder tasklet = step1.tasklet(new VariantsLoad());
 
         // true: every job execution will do this step, even if this step is already COMPLETED
         // false: if the job was aborted and is relaunched, this step will NOT be done again
@@ -93,7 +94,7 @@ public class VariantConfiguration {
 
     public Step statsCreate() {
         StepBuilder step1 = stepBuilderFactory.get("statsCreate");
-        TaskletStepBuilder tasklet = step1.tasklet(new VariantsStatsCreate(listener));
+        TaskletStepBuilder tasklet = step1.tasklet(new VariantsStatsCreate());
 
         // true: every job execution will do this step, even if this step is already COMPLETED
         // false: if the job was aborted and is relaunched, this step will NOT be done again
@@ -103,7 +104,7 @@ public class VariantConfiguration {
 
     public Step statsLoad() {
         StepBuilder step1 = stepBuilderFactory.get("statsLoad");
-        TaskletStepBuilder tasklet = step1.tasklet(new VariantsStatsLoad(listener));
+        TaskletStepBuilder tasklet = step1.tasklet(new VariantsStatsLoad());
 
         // true: every job execution will do this step, even if this step is already COMPLETED
         // false: if the job was aborted and is relaunched, this step will NOT be done again
@@ -113,7 +114,7 @@ public class VariantConfiguration {
 
     public Step annotationGenerateInput() {
         StepBuilder step1 = stepBuilderFactory.get("annotationGenerateInput");
-        TaskletStepBuilder tasklet = step1.tasklet(new VariantsAnnotGenerateInput(listener));
+        TaskletStepBuilder tasklet = step1.tasklet(new VariantsAnnotGenerateInput());
 
         // true: every job execution will do this step, even if this step is already COMPLETED
         // false: if the job was aborted and is relaunched, this step will NOT be done again
@@ -123,7 +124,7 @@ public class VariantConfiguration {
 
     public Step annotationCreate() {
         StepBuilder step1 = stepBuilderFactory.get("annotationCreate");
-        TaskletStepBuilder tasklet = step1.tasklet(new VariantsAnnotCreate(listener));
+        TaskletStepBuilder tasklet = step1.tasklet(new VariantsAnnotCreate());
 
         // true: every job execution will do this step, even if this step is already COMPLETED
         // false: if the job was aborted and is relaunched, this step will NOT be done again
@@ -133,11 +134,16 @@ public class VariantConfiguration {
 
     public Step annotationLoad() {
         StepBuilder step1 = stepBuilderFactory.get("annotationLoad");
-        TaskletStepBuilder tasklet = step1.tasklet(new VariantsAnnotLoad(listener));
+        TaskletStepBuilder tasklet = step1.tasklet(new VariantsAnnotLoad());
 
         // true: every job execution will do this step, even if this step is already COMPLETED
         // false: if the job was aborted and is relaunched, this step will NOT be done again
         tasklet.allowStartIfComplete(false);
         return tasklet.build();
+    }
+
+    @Bean
+    public VariantJobsArgs getVariantJobsArgs() {
+        return new VariantJobsArgs();
     }
 }

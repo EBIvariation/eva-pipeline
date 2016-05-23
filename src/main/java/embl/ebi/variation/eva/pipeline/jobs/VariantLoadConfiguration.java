@@ -67,7 +67,7 @@ public class VariantLoadConfiguration {
 
     public Step load() {
         StepBuilder step1 = stepBuilderFactory.get("load");
-        TaskletStepBuilder tasklet = step1.tasklet(new VariantsLoad(listener));
+        TaskletStepBuilder tasklet = step1.tasklet(new VariantsLoad());
 
         // true: every job execution will do this step, even if this step is already COMPLETED
         // false: if the job was aborted and is relaunched, this step will NOT be done again

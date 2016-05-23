@@ -68,7 +68,7 @@ public class VariantStatsConfiguration {
 
     public Step statsCreate() {
         StepBuilder step1 = stepBuilderFactory.get("statsCreate");
-        TaskletStepBuilder tasklet = step1.tasklet(new VariantsStatsCreate(listener));
+        TaskletStepBuilder tasklet = step1.tasklet(new VariantsStatsCreate());
 
         // true: every job execution will do this step, even if this step is already COMPLETED
         // false: if the job was aborted and is relaunched, this step will NOT be done again
@@ -78,7 +78,7 @@ public class VariantStatsConfiguration {
 
     public Step statsLoad() {
         StepBuilder step1 = stepBuilderFactory.get("statsLoad");
-        TaskletStepBuilder tasklet = step1.tasklet(new VariantsStatsLoad(listener));
+        TaskletStepBuilder tasklet = step1.tasklet(new VariantsStatsLoad());
 
         // true: every job execution will do this step, even if this step is already COMPLETED
         // false: if the job was aborted and is relaunched, this step will NOT be done again

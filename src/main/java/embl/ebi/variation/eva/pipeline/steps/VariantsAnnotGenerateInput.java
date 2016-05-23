@@ -15,7 +15,6 @@
  */
 package embl.ebi.variation.eva.pipeline.steps;
 
-import embl.ebi.variation.eva.pipeline.listeners.JobParametersListener;
 import org.opencb.biodata.models.variant.Variant;
 import org.opencb.biodata.models.variant.VariantSource;
 import org.opencb.datastore.core.ObjectMap;
@@ -25,8 +24,7 @@ import org.opencb.opencga.storage.core.variant.VariantStorageManager;
 import org.opencb.opencga.storage.core.variant.adaptors.VariantDBAdaptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.batch.core.JobParameters;
-import org.springframework.batch.core.StepContribution;
+import org.springframework.batch.core.*;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
@@ -43,29 +41,22 @@ import java.util.zip.GZIPOutputStream;
  *
  * @author Jose Miguel Mut Lopez &lt;jmmut@ebi.ac.uk&gt;
  */
-public class VariantsAnnotGenerateInput implements Tasklet {
+public class VariantsAnnotGenerateInput implements Tasklet, StepExecutionListener {
     private static final Logger logger = LoggerFactory.getLogger(VariantsAnnotGenerateInput.class);
 
-    private JobParametersListener listener;
-    public static final String SKIP_ANNOT_GENERATE_INPUT = "skipAnnotGenerateInput";
-
-    public VariantsAnnotGenerateInput(JobParametersListener listener) {
-        this.listener = listener;
-    }
+    private ObjectMap variantOptions;
+    private ObjectMap pipelineOptions;
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
 
-        JobParameters parameters = chunkContext.getStepContext().getStepExecution().getJobParameters();
-
-        if (Boolean.parseBoolean(parameters.getString(SKIP_ANNOT_GENERATE_INPUT, "false"))) {
-            logger.info("skipping annotation pre creation step, requested " + SKIP_ANNOT_GENERATE_INPUT + "=" + parameters.getString(SKIP_ANNOT_GENERATE_INPUT));
+        if (pipelineOptions.getBoolean("skipAnnotGenerateInput")) {
+            logger.info("skipping annotation pre creation step, skipAnnotGenerateInput is set to {}", pipelineOptions.getBoolean("skipAnnotGenerateInput"));
         } else {
-            ObjectMap variantOptions = listener.getVariantOptions();
             VariantStorageManager variantStorageManager = StorageManagerFactory.getVariantStorageManager();
             VariantSource variantSource = variantOptions.get(VariantStorageManager.VARIANT_SOURCE, VariantSource.class);
             VariantDBAdaptor dbAdaptor = variantStorageManager.getDBAdaptor(variantOptions.getString("dbName"), variantOptions);
-            String vepInput = parameters.getString("vepInput");
+            String vepInput = pipelineOptions.getString("vepInput");
 
             Writer writer = new OutputStreamWriter(new BufferedOutputStream(new GZIPOutputStream(new FileOutputStream(vepInput))));
 
@@ -89,7 +80,7 @@ public class VariantsAnnotGenerateInput implements Tasklet {
     /**
      * see http://www.ensembl.org/info/docs/tools/vep/vep_formats.html for an explanation of the format we are serializing here.
      */
-    public String serializeVariant(Variant variant) {
+    private String serializeVariant(Variant variant) {
         Variant formattedVariant = variant.copyInEnsemblFormat();
         return String.format("%s\t%s\t%s\t%s/%s\t+\n",
                 formattedVariant.getChromosome(),
@@ -97,5 +88,16 @@ public class VariantsAnnotGenerateInput implements Tasklet {
                 formattedVariant.getEnd(),
                 formattedVariant.getReference(),
                 formattedVariant.getAlternate());
+    }
+
+    @Override
+    public void beforeStep(StepExecution stepExecution) {
+        variantOptions = (ObjectMap) stepExecution.getJobExecution().getExecutionContext().get("variantOptions");
+        pipelineOptions = (ObjectMap) stepExecution.getJobExecution().getExecutionContext().get("pipelineOptions");
+    }
+
+    @Override
+    public ExitStatus afterStep(StepExecution stepExecution) {
+        return null;
     }
 }

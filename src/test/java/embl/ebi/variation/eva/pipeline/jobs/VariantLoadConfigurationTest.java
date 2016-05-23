@@ -91,10 +91,11 @@ public class VariantLoadConfigurationTest {
                 .addString("studyId", "7")
                 .addString("fileId", "10")
                 .addString("opencga.app.home", opencgaHome)
-                .addString(VariantsStatsCreate.SKIP_STATS_CREATE, "true")
-                .addString(VariantsStatsLoad.SKIP_STATS_LOAD, "true")
-                .addString(VariantsAnnotGenerateInput.SKIP_ANNOT_GENERATE_INPUT, "true")
-                .addString(VariantsAnnotCreate.SKIP_ANNOT_CREATE, "true")
+                .addString("skipLoad", "true")
+                .addString("skipStatsCreate", "true")
+                .addString("skipStatsLoad", "true")
+                .addString("skipAnnotGenerateInput", "true")
+                .addString("skipAnnotCreate", "true")
                 .addString(VariantsAnnotLoad.SKIP_ANNOT_LOAD, "true")
                 .toJobParameters();
 
@@ -136,10 +137,11 @@ public class VariantLoadConfigurationTest {
                 .addString("studyId", "1")
                 .addString("fileId", "1")
                 .addString("opencga.app.home", null)
-                .addString(VariantsStatsCreate.SKIP_STATS_CREATE, "true")
-                .addString(VariantsStatsLoad.SKIP_STATS_LOAD, "true")
-                .addString(VariantsAnnotGenerateInput.SKIP_ANNOT_GENERATE_INPUT, "true")
-                .addString(VariantsAnnotCreate.SKIP_ANNOT_CREATE, "true")
+                .addString("skipLoad", "true")
+                .addString("skipStatsCreate", "true")
+                .addString("skipStatsLoad", "true")
+                .addString("skipAnnotGenerateInput", "true")
+                .addString("skipAnnotCreate", "true")
                 .addString(VariantsAnnotLoad.SKIP_ANNOT_LOAD, "true")
                 .toJobParameters();
 
