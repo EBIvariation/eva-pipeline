@@ -40,7 +40,6 @@ public class VariantJobParametersListener extends JobParametersListener {
     @Override
     public void beforeJob(JobExecution jobExecution) {
         JobParameters parameters = jobExecution.getJobParameters();
-
         logger.info("beforeJob : STARTING");
         logger.info("beforeJob JobParameters : " + parameters);
         

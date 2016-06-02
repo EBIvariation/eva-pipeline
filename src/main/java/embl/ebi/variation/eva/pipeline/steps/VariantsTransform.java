@@ -15,6 +15,8 @@
  */
 package embl.ebi.variation.eva.pipeline.steps;
 
+import org.opencb.biodata.models.variant.VariantSource;
+import org.opencb.biodata.models.variant.VariantStudy;
 import org.opencb.datastore.core.ObjectMap;
 import org.opencb.opencga.lib.common.Config;
 import org.opencb.opencga.storage.core.StorageManagerFactory;
@@ -45,6 +47,18 @@ public class VariantsTransform implements Tasklet, StepExecutionListener {
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
+
+        VariantSource source = new VariantSource(
+                variantOptions.getString("input"),
+                variantOptions.getString("fileId"),
+                variantOptions.getString("studyId"),
+                variantOptions.getString("studyName"),
+                VariantStudy.StudyType.valueOf(variantOptions.getString("studyType")),
+                VariantSource.Aggregation.valueOf(variantOptions.getString("aggregated")));
+
+        variantOptions.put(VariantStorageManager.VARIANT_SOURCE, source);
+
+
         URI outdirUri = createUri(pipelineOptions.getString("outputDir"));
         URI nextFileUri = createUri(pipelineOptions.getString("input"));
         URI pedigreeUri = pipelineOptions.getString("pedigree") != null ? createUri(pipelineOptions.getString("pedigree")) : null;
@@ -62,6 +76,8 @@ public class VariantsTransform implements Tasklet, StepExecutionListener {
         variantStorageManager.transform(nextFileUri, pedigreeUri, outdirUri, variantOptions);
         logger.info("PostTransform variants '{}'", nextFileUri);
         variantStorageManager.postTransform(nextFileUri, variantOptions);
+
+        variantOptions.remove(VariantStorageManager.VARIANT_SOURCE);
         return RepeatStatus.FINISHED;
     }
 

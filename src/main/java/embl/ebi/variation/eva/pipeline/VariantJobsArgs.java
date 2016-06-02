@@ -32,12 +32,12 @@ public class VariantJobsArgs {
     @Value("${studyId}") private String studyId;
     @Value("${dbName}") private String dbName;
     @Value("${compressGenotypes}") private String compressGenotypes;
-    @Value("${overwriteStats:false}") private boolean overwriteStats;
-    @Value("${calculateStats:false}") private boolean calculateStats;
-    @Value("${includeSamples:false}") private String includeSamples;
-    @Value("${annotate:false}") private boolean annotate;
+    @Value("${overwriteStats}") private String overwriteStats;
+    @Value("${calculateStats}") private String calculateStats;
+    @Value("${includeSamples}") private String includeSamples;
+    @Value("${annotate}") private String annotate;
+    @Value("${includeStats}")private String includeStats;
     @Value("${includeSrc}") private String includeSrc;
-    @Value("${includeStats:false}")private String includeStats;
     @Value("${aggregated}") private String aggregated;
 
 
@@ -73,22 +73,28 @@ public class VariantJobsArgs {
         logger.info("Load args");
 
         // TODO validation checks for all the parameters
-        Config.setOpenCGAHome(opencgaAppHome);
+//        Config.setOpenCGAHome(opencgaAppHome);
 
         loadVariantOptions();
         loadPipelineOptions();
     }
 
     private void loadVariantOptions(){
-        VariantSource source = new VariantSource(
+     /*   VariantSource source = new VariantSource(
                 input,
                 fileId,
                 studyId,
                 studyName,
                 VariantStudy.StudyType.valueOf(studyType),
-                VariantSource.Aggregation.valueOf(aggregated));
+                VariantSource.Aggregation.valueOf(aggregated));*/
 
-        variantOptions.put(VariantStorageManager.VARIANT_SOURCE, source);
+        variantOptions.put("input", input);
+        variantOptions.put("fileId", fileId);
+        variantOptions.put("studyId", studyId);
+        variantOptions.put("studyName", studyName);
+        variantOptions.put("studyType", studyType);
+        variantOptions.put("aggregated", aggregated);
+        //variantOptions.put(VariantStorageManager.VARIANT_SOURCE, source);
         variantOptions.put(VariantStorageManager.OVERWRITE_STATS, overwriteStats);
         variantOptions.put(VariantStorageManager.INCLUDE_SRC, VariantStorageManager.IncludeSrc.parse(includeSrc));
         variantOptions.put("compressExtension", compressExtension);
@@ -101,7 +107,7 @@ public class VariantJobsArgs {
         variantOptions.put(VariantStorageManager.CALCULATE_STATS, false);   // this is tested by hand
         variantOptions.put(VariantStorageManager.INCLUDE_SAMPLES, true);   // TODO rename samples to genotypes
         variantOptions.put(VariantStorageManager.ANNOTATE, false);
-
+        System.out.println(input);
         logger.debug("Using as variantOptions: {}", variantOptions.entrySet().toString());
     }
 

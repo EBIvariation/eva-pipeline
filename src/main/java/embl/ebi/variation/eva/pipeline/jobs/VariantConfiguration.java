@@ -33,6 +33,7 @@ import org.springframework.batch.core.step.builder.TaskletStepBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.env.Environment;
 
 @Configuration
@@ -145,5 +146,10 @@ public class VariantConfiguration {
     @Bean
     public VariantJobsArgs getVariantJobsArgs() {
         return new VariantJobsArgs();
+    }
+
+    @Bean
+    public static PropertySourcesPlaceholderConfigurer properties()  {
+        return new PropertySourcesPlaceholderConfigurer();
     }
 }
