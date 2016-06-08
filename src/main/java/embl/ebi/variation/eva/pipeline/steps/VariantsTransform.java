@@ -15,18 +15,16 @@
  */
 package embl.ebi.variation.eva.pipeline.steps;
 
-import org.opencb.biodata.models.variant.VariantSource;
-import org.opencb.biodata.models.variant.VariantStudy;
 import org.opencb.datastore.core.ObjectMap;
-import org.opencb.opencga.lib.common.Config;
 import org.opencb.opencga.storage.core.StorageManagerFactory;
 import org.opencb.opencga.storage.core.variant.VariantStorageManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.batch.core.*;
+import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -37,36 +35,25 @@ import java.nio.file.Paths;
  *
  * @author Jose Miguel Mut Lopez &lt;jmmut@ebi.ac.uk&gt;
  */
-//@Scope("step")
-//@Component("transform")
-public class VariantsTransform implements Tasklet, StepExecutionListener {
+public class VariantsTransform implements Tasklet {
     private static final Logger logger = LoggerFactory.getLogger(VariantsTransform.class);
 
+    @Autowired
     private ObjectMap variantOptions;
+
+    @Autowired
     private ObjectMap pipelineOptions;
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
 
-        VariantSource source = new VariantSource(
-                variantOptions.getString("input"),
-                variantOptions.getString("fileId"),
-                variantOptions.getString("studyId"),
-                variantOptions.getString("studyName"),
-                VariantStudy.StudyType.valueOf(variantOptions.getString("studyType")),
-                VariantSource.Aggregation.valueOf(variantOptions.getString("aggregated")));
-
-        variantOptions.put(VariantStorageManager.VARIANT_SOURCE, source);
-
-
         URI outdirUri = createUri(pipelineOptions.getString("outputDir"));
         URI nextFileUri = createUri(pipelineOptions.getString("input"));
         URI pedigreeUri = pipelineOptions.getString("pedigree") != null ? createUri(pipelineOptions.getString("pedigree")) : null;
 
-        logger.info("transform file {} to {}", pipelineOptions.getString("input"), pipelineOptions.getString("outputDir"));
+        logger.info("Transform file {} to {}", pipelineOptions.getString("input"), pipelineOptions.getString("outputDir"));
 
         logger.info("Extract variants '{}'", nextFileUri);
-        Config.setOpenCGAHome(pipelineOptions.getString("opencgaAppHome"));
         VariantStorageManager variantStorageManager = StorageManagerFactory.getVariantStorageManager();
         variantStorageManager.extract(nextFileUri, outdirUri, variantOptions);
 
@@ -76,27 +63,14 @@ public class VariantsTransform implements Tasklet, StepExecutionListener {
         variantStorageManager.transform(nextFileUri, pedigreeUri, outdirUri, variantOptions);
         logger.info("PostTransform variants '{}'", nextFileUri);
         variantStorageManager.postTransform(nextFileUri, variantOptions);
-
-        variantOptions.remove(VariantStorageManager.VARIANT_SOURCE);
         return RepeatStatus.FINISHED;
     }
 
-    private static URI createUri(String input) throws URISyntaxException {
+    public static URI createUri(String input) throws URISyntaxException {
         URI sourceUri = new URI(input);
         if (sourceUri.getScheme() == null || sourceUri.getScheme().isEmpty()) {
             sourceUri = Paths.get(input).toUri();
         }
         return sourceUri;
-    }
-
-    @Override
-    public void beforeStep(StepExecution stepExecution) {
-        variantOptions = (ObjectMap) stepExecution.getJobExecution().getExecutionContext().get("variantOptions");
-        pipelineOptions = (ObjectMap) stepExecution.getJobExecution().getExecutionContext().get("pipelineOptions");
-    }
-
-    @Override
-    public ExitStatus afterStep(StepExecution stepExecution) {
-        return null;
     }
 }

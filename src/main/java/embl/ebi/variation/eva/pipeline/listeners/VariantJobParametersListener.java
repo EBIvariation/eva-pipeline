@@ -15,7 +15,6 @@
  */
 package embl.ebi.variation.eva.pipeline.listeners;
 
-import embl.ebi.variation.eva.pipeline.VariantJobsArgs;
 import org.opencb.biodata.models.variant.VariantSource;
 import org.opencb.biodata.models.variant.VariantStudy;
 import org.opencb.datastore.core.ObjectMap;
@@ -26,7 +25,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobExecutionListener;
 import org.springframework.batch.core.JobParameters;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -34,19 +32,17 @@ public class VariantJobParametersListener extends JobParametersListener {
 
     private static final Logger logger = LoggerFactory.getLogger(VariantJobParametersListener.class);
 
-    @Autowired
-    private VariantJobsArgs variantJobsArgs;
-
     @Override
     public void beforeJob(JobExecution jobExecution) {
         JobParameters parameters = jobExecution.getJobParameters();
+
         logger.info("beforeJob : STARTING");
         logger.info("beforeJob JobParameters : " + parameters);
         
         // TODO validation checks for all the parameters
         Config.setOpenCGAHome(parameters.getString("opencga.app.home"));
 
-/*        // VariantsLoad configuration
+        // VariantsLoad configuration
         VariantSource source = new VariantSource(
                 parameters.getString("input"), 
                 parameters.getString("fileId"),
@@ -77,10 +73,7 @@ public class VariantJobParametersListener extends JobParametersListener {
         variantOptions.put(VariantStorageManager.DB_NAME, parameters.getString("dbName"));
         variantOptions.put(VariantStorageManager.ANNOTATE, false);
 //                variantOptions.put(MongoDBVariantStorageManager.LOAD_THREADS, config.loadThreads);
-        variantOptions.put("compressExtension", parameters.getString("compressExtension"));*/
-
-        jobExecution.getExecutionContext().put("variantOptions", variantJobsArgs.getVariantOptions());
-        jobExecution.getExecutionContext().put("pipelineOptions", variantJobsArgs.getPipelineOptions());
+        variantOptions.put("compressExtension", parameters.getString("compressExtension"));
 
         logger.debug("Using as variantOptions: {}", variantOptions.entrySet().toString());
         logger.debug("Using as input: {}", parameters.getString("input"));

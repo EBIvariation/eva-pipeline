@@ -18,10 +18,11 @@ package embl.ebi.variation.eva.pipeline.steps;
 import org.opencb.datastore.core.ObjectMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.batch.core.*;
+import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.*;
 import java.util.Arrays;
@@ -33,16 +34,18 @@ import java.util.zip.GZIPOutputStream;
  * @author Jose Miguel Mut Lopez &lt;jmmut@ebi.ac.uk&gt;
  * @author Cristina Yenyxe Gonzalez Garcia &lt;cyenyxe@ebi.ac.uk&gt;
  */
-public class VariantsAnnotCreate implements Tasklet, StepExecutionListener {
+public class VariantsAnnotCreate implements Tasklet {
     private static final Logger logger = LoggerFactory.getLogger(VariantsAnnotCreate.class);
 
+    @Autowired
     private ObjectMap pipelineOptions;
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
 
         if (pipelineOptions.getBoolean("skipAnnotCreate")) {
-            logger.info("skipping annotation creation step, skipAnnotCreate is set to {}", pipelineOptions.getBoolean("skipAnnotCreate"));
+            logger.info("skipping annotation creation step, skipAnnotCreate is set to {} ",
+                    pipelineOptions.getBoolean("skipAnnotCreate"));
         } else {
             ProcessBuilder processBuilder = new ProcessBuilder("perl",
                     pipelineOptions.getString("vepPath"),
@@ -97,15 +100,5 @@ public class VariantsAnnotCreate implements Tasklet, StepExecutionListener {
         outputStream.close();
         inputStream.close();
         return written;
-    }
-
-    @Override
-    public void beforeStep(StepExecution stepExecution) {
-        pipelineOptions = (ObjectMap) stepExecution.getJobExecution().getExecutionContext().get("pipelineOptions");
-    }
-
-    @Override
-    public ExitStatus afterStep(StepExecution stepExecution) {
-        return null;
     }
 }

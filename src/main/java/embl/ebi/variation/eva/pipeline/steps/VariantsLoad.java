@@ -15,7 +15,6 @@
  */
 package embl.ebi.variation.eva.pipeline.steps;
 
-
 import org.opencb.datastore.core.ObjectMap;
 import org.opencb.opencga.storage.core.StorageManagerFactory;
 import org.opencb.opencga.storage.core.variant.VariantStorageManager;
@@ -25,6 +24,7 @@ import org.springframework.batch.core.*;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -36,26 +36,29 @@ import java.nio.file.Paths;
  *
  * @author Jose Miguel Mut Lopez &lt;jmmut@ebi.ac.uk&gt;
  */
-public class VariantsLoad implements Tasklet, StepExecutionListener {
+public class VariantsLoad implements Tasklet {
     private static final Logger logger = LoggerFactory.getLogger(VariantsLoad.class);
 
+    @Autowired
     private ObjectMap variantOptions;
+    @Autowired
     private ObjectMap pipelineOptions;
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
 
         if (pipelineOptions.getBoolean("skipLoad")) {
-            logger.info("skipping load step, skipLoad set to {}", pipelineOptions.getBoolean("skipLoad"));
+            logger.info("skipping load step, skipLoad is set to {}", pipelineOptions.getBoolean("skipLoad"));
         } else {
             VariantStorageManager variantStorageManager = StorageManagerFactory.getVariantStorageManager();// TODO add mongo
             URI outdirUri = createUri(pipelineOptions.getString("outputDir"));
             URI nextFileUri = createUri(pipelineOptions.getString("input"));
-            URI pedigreeUri = pipelineOptions.getString("pedigree") != null ? createUri(pipelineOptions.getString("pedigree")) : null;
+
+//          URI pedigreeUri = pipelineOptions.getString("pedigree") != null ? createUri(pipelineOptions.getString("pedigree")) : null;
             Path output = Paths.get(outdirUri.getPath());
             Path input = Paths.get(nextFileUri.getPath());
             Path outputVariantJsonFile = output.resolve(input.getFileName().toString() + ".variants.json" + pipelineOptions.getString("compressExtension"));
-//                outputFileJsonFile = output.resolve(input.getFileName().toString() + ".file.json" + config.compressExtension);
+//          outputFileJsonFile = output.resolve(input.getFileName().toString() + ".file.json" + config.compressExtension);
             URI transformedVariantsUri = outdirUri.resolve(outputVariantJsonFile.getFileName().toString());
 
 
@@ -63,14 +66,14 @@ public class VariantsLoad implements Tasklet, StepExecutionListener {
             variantStorageManager.preLoad(transformedVariantsUri, outdirUri, variantOptions);
             logger.info("-- Load variants -- {}", nextFileUri);
             variantStorageManager.load(transformedVariantsUri, variantOptions);
-//                logger.info("-- PostLoad variants -- {}", nextFileUri);
-//                variantStorageManager.postLoad(transformedVariantsUri, outdirUri, variantOptions);
+//          logger.info("-- PostLoad variants -- {}", nextFileUri);
+//          variantStorageManager.postLoad(transformedVariantsUri, outdirUri, variantOptions);
         }
 
         return RepeatStatus.FINISHED;
     }
 
-    private static URI createUri(String input) throws URISyntaxException {
+    public static URI createUri(String input) throws URISyntaxException {
         URI sourceUri = new URI(input);
         if (sourceUri.getScheme() == null || sourceUri.getScheme().isEmpty()) {
             sourceUri = Paths.get(input).toUri();
@@ -78,14 +81,4 @@ public class VariantsLoad implements Tasklet, StepExecutionListener {
         return sourceUri;
     }
 
-    @Override
-    public void beforeStep(StepExecution stepExecution) {
-        variantOptions = (ObjectMap) stepExecution.getJobExecution().getExecutionContext().get("variantOptions");
-        pipelineOptions = (ObjectMap) stepExecution.getJobExecution().getExecutionContext().get("pipelineOptions");
-    }
-
-    @Override
-    public ExitStatus afterStep(StepExecution stepExecution) {
-        return null;
-    }
 }

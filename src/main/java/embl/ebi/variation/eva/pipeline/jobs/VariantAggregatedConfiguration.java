@@ -15,7 +15,6 @@
  */
 package embl.ebi.variation.eva.pipeline.jobs;
 
-import embl.ebi.variation.eva.pipeline.listeners.AggregatedJobParametersListener;
 import embl.ebi.variation.eva.pipeline.steps.VariantsLoad;
 import embl.ebi.variation.eva.pipeline.steps.VariantsTransform;
 import org.slf4j.Logger;
@@ -31,9 +30,9 @@ import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.core.step.builder.TaskletStepBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.core.env.Environment;
 
 import java.net.URI;
@@ -42,6 +41,7 @@ import java.nio.file.Paths;
 
 @Configuration
 @EnableBatchProcessing
+@Import(VariantJobArgsConfig.class)
 public class VariantAggregatedConfiguration {
 
     private static final Logger logger = LoggerFactory.getLogger(VariantAggregatedConfiguration.class);
@@ -52,23 +52,15 @@ public class VariantAggregatedConfiguration {
     @Autowired
     private StepBuilderFactory stepBuilderFactory;
     @Autowired
-    private AggregatedJobParametersListener listener;
-    @Autowired
     JobLauncher jobLauncher;
     @Autowired
     Environment environment;
 
     @Bean
-    public AggregatedJobParametersListener aggregatedJobParametersListener() {
-        return new AggregatedJobParametersListener();
-    }
-
-    @Bean
     public Job aggregatedVariantJob() {
         JobBuilder jobBuilder = jobBuilderFactory
                 .get(jobName)
-                .incrementer(new RunIdIncrementer())
-                .listener(listener);
+                .incrementer(new RunIdIncrementer());
 
         return jobBuilder
                 .start(transform())
@@ -79,24 +71,34 @@ public class VariantAggregatedConfiguration {
                 .build();
     }
 
+    @Bean
+    public VariantsTransform variantsTransform(){
+        return new VariantsTransform();
+    }
+
     public Step transform() {
         StepBuilder step1 = stepBuilderFactory.get("transform");
-        final TaskletStepBuilder tasklet = step1.tasklet(new VariantsTransform());
+        final TaskletStepBuilder tasklet = step1.tasklet(variantsTransform());
 
         // true: every job execution will do this step, even if this step is already COMPLETED
         // false: if the job was aborted and is relaunched, this step will NOT be done again
-        tasklet.allowStartIfComplete(false);
+        tasklet.allowStartIfComplete(true);
 
         return tasklet.build();
     }
 
+    @Bean
+    public VariantsLoad variantsLoad(){
+        return new VariantsLoad();
+    }
+
     public Step load() {
         StepBuilder step1 = stepBuilderFactory.get("load");
-        TaskletStepBuilder tasklet = step1.tasklet(new VariantsLoad());
+        TaskletStepBuilder tasklet = step1.tasklet(variantsLoad());
 
         // true: every job execution will do this step, even if this step is already COMPLETED
         // false: if the job was aborted and is relaunched, this step will NOT be done again
-        tasklet.allowStartIfComplete(false);
+        tasklet.allowStartIfComplete(true);
         return tasklet.build();
     }
 
@@ -107,6 +109,8 @@ public class VariantAggregatedConfiguration {
         }
         return sourceUri;
     }
+
+
 /*
     @Autowired
     JobLauncher jobLauncher;

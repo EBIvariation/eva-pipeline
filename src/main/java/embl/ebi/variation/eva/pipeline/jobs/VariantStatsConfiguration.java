@@ -15,7 +15,6 @@
  */
 package embl.ebi.variation.eva.pipeline.jobs;
 
-import embl.ebi.variation.eva.pipeline.listeners.VariantJobParametersListener;
 import embl.ebi.variation.eva.pipeline.steps.VariantsStatsCreate;
 import embl.ebi.variation.eva.pipeline.steps.VariantsStatsLoad;
 import org.slf4j.Logger;
@@ -33,10 +32,12 @@ import org.springframework.batch.core.step.builder.TaskletStepBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.core.env.Environment;
 
 @Configuration
 @EnableBatchProcessing
+@Import(VariantJobArgsConfig.class)
 public class VariantStatsConfiguration {
 
     private static final Logger logger = LoggerFactory.getLogger(VariantStatsConfiguration.class);
@@ -47,8 +48,6 @@ public class VariantStatsConfiguration {
     @Autowired
     private StepBuilderFactory stepBuilderFactory;
     @Autowired
-    private VariantJobParametersListener listener;
-    @Autowired
     JobLauncher jobLauncher;
     @Autowired
     Environment environment;
@@ -57,8 +56,7 @@ public class VariantStatsConfiguration {
     public Job variantStatsJob() {
         JobBuilder jobBuilder = jobBuilderFactory
                 .get(jobName)
-                .incrementer(new RunIdIncrementer())
-                .listener(listener);
+                .incrementer(new RunIdIncrementer());
 
         return jobBuilder
                 .start(statsCreate())
@@ -66,23 +64,35 @@ public class VariantStatsConfiguration {
                 .build();
     }
 
+    @Bean
+    public VariantsStatsCreate variantsStatsCreate(){
+        return new VariantsStatsCreate();
+    }
+
     public Step statsCreate() {
         StepBuilder step1 = stepBuilderFactory.get("statsCreate");
-        TaskletStepBuilder tasklet = step1.tasklet(new VariantsStatsCreate());
+        TaskletStepBuilder tasklet = step1.tasklet(variantsStatsCreate());
 
         // true: every job execution will do this step, even if this step is already COMPLETED
         // false: if the job was aborted and is relaunched, this step will NOT be done again
-        tasklet.allowStartIfComplete(false);
+        tasklet.allowStartIfComplete(true);
         return tasklet.build();
+    }
+
+    @Bean
+    public VariantsStatsLoad variantsStatsLoad(){
+        return new VariantsStatsLoad();
     }
 
     public Step statsLoad() {
         StepBuilder step1 = stepBuilderFactory.get("statsLoad");
-        TaskletStepBuilder tasklet = step1.tasklet(new VariantsStatsLoad());
+        TaskletStepBuilder tasklet = step1.tasklet(variantsStatsLoad());
 
         // true: every job execution will do this step, even if this step is already COMPLETED
         // false: if the job was aborted and is relaunched, this step will NOT be done again
-        tasklet.allowStartIfComplete(false);
+        tasklet.allowStartIfComplete(true);
         return tasklet.build();
     }
+
+
 }

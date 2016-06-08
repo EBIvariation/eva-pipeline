@@ -15,7 +15,6 @@
  */
 package embl.ebi.variation.eva.pipeline.jobs;
 
-import embl.ebi.variation.eva.pipeline.listeners.VariantJobParametersListener;
 import embl.ebi.variation.eva.pipeline.steps.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,8 +45,6 @@ public class VariantAnnotConfiguration {
     @Autowired
     private StepBuilderFactory stepBuilderFactory;
     @Autowired
-    private VariantJobParametersListener listener;
-    @Autowired
     JobLauncher jobLauncher;
     @Autowired
     Environment environment;
@@ -56,8 +53,7 @@ public class VariantAnnotConfiguration {
     public Job variantAnnotJob() {
         JobBuilder jobBuilder = jobBuilderFactory
                 .get(jobName)
-                .incrementer(new RunIdIncrementer())
-                .listener(listener);
+                .incrementer(new RunIdIncrementer());
 
         return jobBuilder
                 .start(annotationGenerateInput())
@@ -66,33 +62,49 @@ public class VariantAnnotConfiguration {
                 .build();
     }
 
+    @Bean
+    public VariantsAnnotGenerateInput variantsAnnotGenerateInput(){
+        return new VariantsAnnotGenerateInput();
+    }
+
     public Step annotationGenerateInput() {
         StepBuilder step1 = stepBuilderFactory.get("annotationGenerateInput");
-        TaskletStepBuilder tasklet = step1.tasklet(new VariantsAnnotGenerateInput());
+        TaskletStepBuilder tasklet = step1.tasklet(variantsAnnotGenerateInput());
 
         // true: every job execution will do this step, even if this step is already COMPLETED
         // false: if the job was aborted and is relaunched, this step will NOT be done again
         tasklet.allowStartIfComplete(false);
         return tasklet.build();
+    }
+
+    @Bean
+    public VariantsAnnotCreate variantsAnnotCreate(){
+        return new VariantsAnnotCreate();
     }
 
     public Step annotationCreate() {
         StepBuilder step1 = stepBuilderFactory.get("annotationCreate");
-        TaskletStepBuilder tasklet = step1.tasklet(new VariantsAnnotCreate());
+        TaskletStepBuilder tasklet = step1.tasklet(variantsAnnotCreate());
 
         // true: every job execution will do this step, even if this step is already COMPLETED
         // false: if the job was aborted and is relaunched, this step will NOT be done again
         tasklet.allowStartIfComplete(false);
         return tasklet.build();
+    }
+
+    @Bean
+    public VariantsAnnotLoad variantsAnnotLoad(){
+        return new VariantsAnnotLoad();
     }
 
     public Step annotationLoad() {
         StepBuilder step1 = stepBuilderFactory.get("annotationLoad");
-        TaskletStepBuilder tasklet = step1.tasklet(new VariantsAnnotLoad());
+        TaskletStepBuilder tasklet = step1.tasklet(variantsAnnotLoad());
 
         // true: every job execution will do this step, even if this step is already COMPLETED
         // false: if the job was aborted and is relaunched, this step will NOT be done again
         tasklet.allowStartIfComplete(false);
         return tasklet.build();
     }
+
 }

@@ -15,7 +15,6 @@
  */
 package embl.ebi.variation.eva.pipeline.jobs;
 
-import embl.ebi.variation.eva.pipeline.listeners.VariantJobParametersListener;
 import embl.ebi.variation.eva.pipeline.steps.VariantsLoad;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,10 +31,12 @@ import org.springframework.batch.core.step.builder.TaskletStepBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.core.env.Environment;
 
 @Configuration
 @EnableBatchProcessing
+@Import(VariantJobArgsConfig.class)
 public class VariantLoadConfiguration {
 
     private static final Logger logger = LoggerFactory.getLogger(VariantLoadConfiguration.class);
@@ -46,8 +47,6 @@ public class VariantLoadConfiguration {
     @Autowired
     private StepBuilderFactory stepBuilderFactory;
     @Autowired
-    private VariantJobParametersListener listener;
-    @Autowired
     JobLauncher jobLauncher;
     @Autowired
     Environment environment;
@@ -56,8 +55,7 @@ public class VariantLoadConfiguration {
     public Job variantLoadJob() {
         JobBuilder jobBuilder = jobBuilderFactory
                 .get(jobName)
-                .incrementer(new RunIdIncrementer())
-                .listener(listener);
+                .incrementer(new RunIdIncrementer());
 
         return jobBuilder
                 .start(load())
@@ -65,13 +63,19 @@ public class VariantLoadConfiguration {
     }
 
 
+    @Bean
+    public VariantsLoad variantsLoad(){
+        return new VariantsLoad();
+    }
+
     public Step load() {
         StepBuilder step1 = stepBuilderFactory.get("load");
-        TaskletStepBuilder tasklet = step1.tasklet(new VariantsLoad());
+        TaskletStepBuilder tasklet = step1.tasklet(variantsLoad());
 
         // true: every job execution will do this step, even if this step is already COMPLETED
         // false: if the job was aborted and is relaunched, this step will NOT be done again
-        tasklet.allowStartIfComplete(false);
+        tasklet.allowStartIfComplete(true);
         return tasklet.build();
     }
+
 }

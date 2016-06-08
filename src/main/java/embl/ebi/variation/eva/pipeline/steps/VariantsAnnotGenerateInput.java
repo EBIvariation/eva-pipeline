@@ -24,10 +24,11 @@ import org.opencb.opencga.storage.core.variant.VariantStorageManager;
 import org.opencb.opencga.storage.core.variant.adaptors.VariantDBAdaptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.batch.core.*;
+import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
@@ -41,17 +42,21 @@ import java.util.zip.GZIPOutputStream;
  *
  * @author Jose Miguel Mut Lopez &lt;jmmut@ebi.ac.uk&gt;
  */
-public class VariantsAnnotGenerateInput implements Tasklet, StepExecutionListener {
+public class VariantsAnnotGenerateInput implements Tasklet {
     private static final Logger logger = LoggerFactory.getLogger(VariantsAnnotGenerateInput.class);
 
+    @Autowired
     private ObjectMap variantOptions;
+
+    @Autowired
     private ObjectMap pipelineOptions;
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
 
         if (pipelineOptions.getBoolean("skipAnnotGenerateInput")) {
-            logger.info("skipping annotation pre creation step, skipAnnotGenerateInput is set to {}", pipelineOptions.getBoolean("skipAnnotGenerateInput"));
+            logger.info("skipping annotation pre creation step, skipAnnotGenerateInput is set to {}",
+                    pipelineOptions.getBoolean("skipAnnotGenerateInput"));
         } else {
             VariantStorageManager variantStorageManager = StorageManagerFactory.getVariantStorageManager();
             VariantSource variantSource = variantOptions.get(VariantStorageManager.VARIANT_SOURCE, VariantSource.class);
@@ -88,16 +93,5 @@ public class VariantsAnnotGenerateInput implements Tasklet, StepExecutionListene
                 formattedVariant.getEnd(),
                 formattedVariant.getReference(),
                 formattedVariant.getAlternate());
-    }
-
-    @Override
-    public void beforeStep(StepExecution stepExecution) {
-        variantOptions = (ObjectMap) stepExecution.getJobExecution().getExecutionContext().get("variantOptions");
-        pipelineOptions = (ObjectMap) stepExecution.getJobExecution().getExecutionContext().get("pipelineOptions");
-    }
-
-    @Override
-    public ExitStatus afterStep(StepExecution stepExecution) {
-        return null;
     }
 }

@@ -24,10 +24,11 @@ import org.opencb.opencga.storage.core.variant.adaptors.VariantDBAdaptor;
 import org.opencb.opencga.storage.core.variant.stats.VariantStatisticsManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.batch.core.*;
+import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -38,19 +39,23 @@ import java.nio.file.Paths;
  *
  * @author Jose Miguel Mut Lopez &lt;jmmut@ebi.ac.uk&gt;
  */
-public class VariantsStatsCreate implements Tasklet, StepExecutionListener {
+public class VariantsStatsCreate implements Tasklet {
     private static final Logger logger = LoggerFactory.getLogger(VariantsStatsCreate.class);
 
+    @Autowired
     private ObjectMap variantOptions;
+
+    @Autowired
     private ObjectMap pipelineOptions;
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
 //                HashMap<String, Set<String>> samples = new HashMap<>(); // TODO fill properly. if this is null overwrite will take on
 //                samples.put("SOME", new HashSet<>(Arrays.asList("HG00096", "HG00097")));
+        //JobParameters parameters = chunkContext.getStepContext().getStepExecution().getJobParameters();
 
         if (pipelineOptions.getBoolean("skipStatsCreate")) {
-            logger.info("skipping stats creation step, skipStatsCreate set to {}", pipelineOptions.getBoolean("skipStatsCreate"));
+            logger.info("skipping stats creation step, skipStatsCreate is set to {}" + pipelineOptions.getBoolean("skipStatsCreate"));
         } else {
             VariantStorageManager variantStorageManager = StorageManagerFactory.getVariantStorageManager();
             VariantSource variantSource = variantOptions.get(VariantStorageManager.VARIANT_SOURCE, VariantSource.class);
@@ -74,16 +79,5 @@ public class VariantsStatsCreate implements Tasklet, StepExecutionListener {
             sourceUri = Paths.get(input).toUri();
         }
         return sourceUri;
-    }
-
-    @Override
-    public void beforeStep(StepExecution stepExecution) {
-        variantOptions = (ObjectMap) stepExecution.getJobExecution().getExecutionContext().get("variantOptions");
-        pipelineOptions = (ObjectMap) stepExecution.getJobExecution().getExecutionContext().get("pipelineOptions");
-    }
-
-    @Override
-    public ExitStatus afterStep(StepExecution stepExecution) {
-        return null;
     }
 }

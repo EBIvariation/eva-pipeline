@@ -24,10 +24,11 @@ import org.opencb.opencga.storage.core.variant.adaptors.VariantDBAdaptor;
 import org.opencb.opencga.storage.core.variant.stats.VariantStatisticsManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.batch.core.*;
+import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -38,14 +39,19 @@ import java.nio.file.Paths;
  *
  * @author Jose Miguel Mut Lopez &lt;jmmut@ebi.ac.uk&gt;
  */
-public class VariantsStatsLoad implements Tasklet, StepExecutionListener {
+public class VariantsStatsLoad implements Tasklet {
     private static final Logger logger = LoggerFactory.getLogger(VariantsStatsLoad.class);
 
+    @Autowired
     private ObjectMap variantOptions;
+
+    @Autowired
     private ObjectMap pipelineOptions;
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
+
+        //JobParameters parameters = chunkContext.getStepContext().getStepExecution().getJobParameters();
 
         if (pipelineOptions.getBoolean("skipStatsLoad")) {
             logger.info("skipping stats loading");
@@ -65,22 +71,11 @@ public class VariantsStatsLoad implements Tasklet, StepExecutionListener {
         return RepeatStatus.FINISHED;
     }
 
-    private static URI createUri(String input) throws URISyntaxException {
+    public static URI createUri(String input) throws URISyntaxException {
         URI sourceUri = new URI(input);
         if (sourceUri.getScheme() == null || sourceUri.getScheme().isEmpty()) {
             sourceUri = Paths.get(input).toUri();
         }
         return sourceUri;
-    }
-
-    @Override
-    public void beforeStep(StepExecution stepExecution) {
-        variantOptions = (ObjectMap) stepExecution.getJobExecution().getExecutionContext().get("variantOptions");
-        pipelineOptions = (ObjectMap) stepExecution.getJobExecution().getExecutionContext().get("pipelineOptions");
-    }
-
-    @Override
-    public ExitStatus afterStep(StepExecution stepExecution) {
-        return null;
     }
 }
