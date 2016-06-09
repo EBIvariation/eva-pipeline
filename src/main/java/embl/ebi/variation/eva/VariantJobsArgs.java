@@ -1,5 +1,21 @@
-package embl.ebi.variation.eva.pipeline;
+/*
+ * Copyright 2015 EMBL - European Bioinformatics Institute
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package embl.ebi.variation.eva;
 
+import embl.ebi.variation.eva.pipeline.steps.*;
 import org.opencb.biodata.models.variant.VariantSource;
 import org.opencb.biodata.models.variant.VariantStudy;
 import org.opencb.datastore.core.ObjectMap;
@@ -11,16 +27,20 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /**
- * Created by diego on 19/05/2016.
  *
- * // TODO: 20/05/2016 add type validator?
+ * Class to extract configuration from properties files and from command line.
+ * Default values are in resources/application.properties
+ *
+ * @author Diego Poggioli &lt;diego@ebi.ac.uk&gt;
+ *
+ * TODO: 20/05/2016 add type validator?
  */
 @Component
 public class VariantJobsArgs {
     private static final Logger logger = LoggerFactory.getLogger(VariantJobsArgs.class);
 
     ////common
-    @Value("${input}") private String input;
+    @Value("${input:}") private String input;
     @Value("${compressExtension}") private String compressExtension;
 
     ////opencga
@@ -107,12 +127,12 @@ public class VariantJobsArgs {
         pipelineOptions.put("compressExtension", compressExtension);
         pipelineOptions.put("outputDir", outputDir);
         pipelineOptions.put("pedigree", pedigree);
-        pipelineOptions.put("skipLoad", skipLoad);
-        pipelineOptions.put("skipStatsCreate", skipStatsCreate);
-        pipelineOptions.put("skipStatsLoad", skipStatsLoad);
-        pipelineOptions.put("skipAnnotGenerateInput", skipAnnotGenerateInput);
-        pipelineOptions.put("skipAnnotCreate", skipAnnotCreate);
-        pipelineOptions.put("skipAnnotLoad", skipAnnotLoad);
+        pipelineOptions.put(VariantsLoad.SKIP_LOAD, skipLoad);
+        pipelineOptions.put(VariantsStatsCreate.SKIP_STATS_CREATE, skipStatsCreate);
+        pipelineOptions.put(VariantsStatsLoad.SKIP_STATS_LOAD, skipStatsLoad);
+        pipelineOptions.put(VariantsAnnotGenerateInput.SKIP_ANNOT_GENERATE_INPUT, skipAnnotGenerateInput);
+        pipelineOptions.put(VariantsAnnotCreate.SKIP_ANNOT_CREATE, skipAnnotCreate);
+        pipelineOptions.put(VariantsAnnotLoad.SKIP_ANNOT_LOAD, skipAnnotLoad);
         pipelineOptions.put("vepInput", vepInput);
         pipelineOptions.put("vepOutput", vepOutput);
         pipelineOptions.put("vepPath", vepPath);

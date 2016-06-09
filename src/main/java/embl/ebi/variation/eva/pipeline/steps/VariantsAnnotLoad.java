@@ -42,6 +42,7 @@ import java.nio.file.Paths;
  */
 public class VariantsAnnotLoad implements Tasklet {
     private static final Logger logger = LoggerFactory.getLogger(VariantsAnnotLoad.class);
+    public static final String SKIP_ANNOT_LOAD = "skipAnnotLoad";
 
     @Autowired
     private ObjectMap variantOptions;
@@ -52,8 +53,8 @@ public class VariantsAnnotLoad implements Tasklet {
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
 
-        if (pipelineOptions.getBoolean("skipAnnotLoad")) {
-            logger.info("skipping annot loading, skipAnnotLoad is set to {} ", pipelineOptions.getBoolean("skipAnnotLoad"));
+        if (pipelineOptions.getBoolean(SKIP_ANNOT_LOAD)) {
+            logger.info("skipping annot loading, skipAnnotLoad is set to {} ", pipelineOptions.getBoolean(SKIP_ANNOT_LOAD));
         } else {
             String vepOutput = pipelineOptions.getString("vepOutput");
 

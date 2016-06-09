@@ -15,7 +15,10 @@
  */
 package embl.ebi.variation.eva.pipeline.jobs;
 
+import embl.ebi.variation.eva.VariantJobsArgs;
+import embl.ebi.variation.eva.pipeline.steps.VariantsLoad;
 import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -30,14 +33,11 @@ import org.opencb.opencga.storage.core.variant.adaptors.VariantDBIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.*;
-import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
 import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
 import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -45,7 +45,6 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import java.io.*;
 import java.net.UnknownHostException;
 import java.nio.file.Paths;
-import java.util.Properties;
 import java.util.zip.GZIPInputStream;
 
 import static embl.ebi.variation.eva.pipeline.jobs.JobTestUtils.countRows;
@@ -61,7 +60,7 @@ import static org.junit.Assert.assertTrue;
  * @author Jose Miguel Mut Lopez &lt;jmmut@ebi.ac.uk&gt;
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = {VariantAggregatedConfiguration.class, VariantAggregatedConfigurationTest.Configs.class})
+@ContextConfiguration(classes = {VariantAggregatedConfiguration.class, CommonConfig.class})
 public class VariantAggregatedConfigurationTest {
 
     public static final String FILE_AGGREGATED = "/aggregated.vcf.gz";
@@ -87,58 +86,10 @@ public class VariantAggregatedConfigurationTest {
     private Job job;
 
     @Autowired
-    public ObjectMap variantOptions;
+    public VariantJobsArgs variantJobsArgs;
 
-    @Autowired
-    public ObjectMap pipelineOptions;
-
-    @Configuration
-    static class Configs {
-        private static String opencgaHome = System.getenv("OPENCGA_HOME") != null ? System.getenv("OPENCGA_HOME") : "/opt/opencga";
-
-        @Bean
-        static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
-            PropertySourcesPlaceholderConfigurer configurer = new PropertySourcesPlaceholderConfigurer();
-
-            Properties properties = new Properties();
-            properties.put("input", "");
-            properties.put("overwriteStats", "false");
-            properties.put("calculateStats", "false");
-            properties.put("outputDir", "/tmp");
-            properties.put("dbName", "");
-            properties.put("compressExtension", ".gz");
-            properties.put("compressGenotypes", "true");
-            properties.put("includeSrc", "FIRST_8_COLUMNS");
-            properties.put("pedigree", "FIRST_8_COLUMNS");
-            properties.put("annotate", "false");
-            properties.put("includeSamples", "false");
-            properties.put("includeStats", "false");
-            properties.put("aggregated", "BASIC");
-            properties.put("studyType", "COLLECTION");
-            properties.put("studyName", "studyName");
-            properties.put("studyId", "1");
-            properties.put("fileId", "1");
-            properties.put("opencga.app.home", opencgaHome);
-            properties.put("skipLoad", "true");
-            properties.put("skipStatsCreate", "true");
-            properties.put("skipStatsLoad", "true");
-            properties.put("skipAnnotGenerateInput", "true");
-            properties.put("skipAnnotCreate", "true");
-            properties.put("skipAnnotLoad", "true");
-            properties.put("vepInput", "");
-            properties.put("vepOutput", "");
-            properties.put("vepPath", "");
-            properties.put("vepCacheDirectory", "");
-            properties.put("vepCacheVersion", "");
-            properties.put("vepSpecies", "");
-            properties.put("vepFasta", "");
-            properties.put("vepNumForks", "3");
-
-            configurer.setProperties(properties);
-
-            return configurer;
-        }
-    }
+    private ObjectMap variantOptions;
+    private ObjectMap pipelineOptions;
 
     @Test
     public void validTransform() throws JobExecutionException, IOException {
@@ -146,10 +97,9 @@ public class VariantAggregatedConfigurationTest {
         String dbName = VALID_TRANSFORM;
 
         pipelineOptions.put("input", input);
-        pipelineOptions.put("skipLoad", true);
+        pipelineOptions.put(VariantsLoad.SKIP_LOAD, true);
         variantOptions.put(VariantStorageManager.DB_NAME, dbName);
 
-        //// TODO: 07/06/2016 move this in a method
         VariantSource source = (VariantSource) variantOptions.get(VariantStorageManager.VARIANT_SOURCE);
 
         variantOptions.put(VariantStorageManager.VARIANT_SOURCE, new VariantSource(
@@ -193,7 +143,7 @@ public class VariantAggregatedConfigurationTest {
 //                .addString("studyId", "2")
 //                .addString("fileId", "2")
 //                .addString("opencga.app.home", opencgaHome)
-//                .addString("skipLoad", "true")
+//                .addString(VariantsLoad.SKIP_LOAD, "true")
 //                .toJobParameters();
 //
 //        JobExecution execution = jobLauncher.run(job, parameters);
@@ -207,26 +157,9 @@ public class VariantAggregatedConfigurationTest {
         String input = VariantAggregatedConfigurationTest.class.getResource(FILE_AGGREGATED).getFile();
         String dbName = VALID_LOAD;
 
-/*        JobParameters parameters = new JobParametersBuilder()
-                .addString("input", input)
-                .addString("outputDir", "/tmp")
-                .addString("dbName", dbName)
-                .addString("compressExtension", ".gz")
-                .addString("compressGenotypes", "true")
-                .addString("includeSrc", "FIRST_8_COLUMNS")
-                .addString("aggregated", "NONE")
-                .addString("studyType", "COLLECTION")
-                .addString("studyName", "studyName")
-                .addString("studyId", "1")
-                .addString("fileId", "1")
-                .addString("aggregated", VariantSource.Aggregation.BASIC.toString())
-                .addString("includeStats", "false")
-                .addString("opencga.app.home", opencgaHome)
-                .toJobParameters();*/
-
         pipelineOptions.put("input", input);
         variantOptions.put(VariantStorageManager.DB_NAME, dbName);
-        pipelineOptions.put("skipLoad", false);
+        pipelineOptions.put(VariantsLoad.SKIP_LOAD, false);
 
         VariantSource source = (VariantSource) variantOptions.get(VariantStorageManager.VARIANT_SOURCE);
 
@@ -299,30 +232,11 @@ public class VariantAggregatedConfigurationTest {
         String input = VariantAggregatedConfigurationTest.class.getResource(FILE_AGGREGATED).getFile();
         String dbName = VALID_LOAD_STATS;
 
-/*        JobParameters parameters = new JobParametersBuilder()
-                .addString("input", input)
-                .addString("outputDir", "/tmp")
-                .addString("dbName", dbName)
-                .addString("compressExtension", ".gz")
-                .addString("compressGenotypes", "true")
-                .addString("includeSrc", "FIRST_8_COLUMNS")
-                .addString("aggregated", "NONE")
-                .addString("studyType", "COLLECTION")
-                .addString("studyName", "studyName")
-                .addString("studyId", "1")
-                .addString("fileId", "1")
-
-                .addString("aggregated", VariantSource.Aggregation.BASIC.toString())
-                .addString("includeStats", "true")
-                .addString("opencga.app.home", opencgaHome)
-                .toJobParameters();*/
-
         pipelineOptions.put("input", input);
         variantOptions.put(VariantStorageManager.DB_NAME, dbName);
 
         variantOptions.put("includeStats", true);
-        variantOptions.put("aggregated", VariantSource.Aggregation.BASIC.toString());
-        pipelineOptions.put("skipLoad", false);
+        pipelineOptions.put(VariantsLoad.SKIP_LOAD, false);
 
         VariantSource source = (VariantSource) variantOptions.get(VariantStorageManager.VARIANT_SOURCE);
 
@@ -332,7 +246,7 @@ public class VariantAggregatedConfigurationTest {
                 source.getStudyId(),
                 source.getStudyName(),
                 source.getType(),
-                source.getAggregation()));
+                VariantSource.Aggregation.BASIC));
 
         JobExecution execution = jobLauncher.run(job, new JobParameters());
 
@@ -364,6 +278,14 @@ public class VariantAggregatedConfigurationTest {
     @BeforeClass
     public static void beforeTests() throws UnknownHostException {
         cleanDBs();
+    }
+
+    @Before
+    public void setUp() throws Exception {
+        //re-initialize common config before each test
+        variantJobsArgs.loadArgs();
+        pipelineOptions = variantJobsArgs.getPipelineOptions();
+        variantOptions = variantJobsArgs.getVariantOptions();
     }
 
     @AfterClass

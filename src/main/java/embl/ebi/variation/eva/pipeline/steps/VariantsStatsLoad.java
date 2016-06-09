@@ -41,6 +41,7 @@ import java.nio.file.Paths;
  */
 public class VariantsStatsLoad implements Tasklet {
     private static final Logger logger = LoggerFactory.getLogger(VariantsStatsLoad.class);
+    public static final String SKIP_STATS_LOAD = "skipStatsLoad";
 
     @Autowired
     private ObjectMap variantOptions;
@@ -51,9 +52,7 @@ public class VariantsStatsLoad implements Tasklet {
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
 
-        //JobParameters parameters = chunkContext.getStepContext().getStepExecution().getJobParameters();
-
-        if (pipelineOptions.getBoolean("skipStatsLoad")) {
+        if (pipelineOptions.getBoolean(SKIP_STATS_LOAD)) {
             logger.info("skipping stats loading");
         } else {
             VariantStorageManager variantStorageManager = StorageManagerFactory.getVariantStorageManager();

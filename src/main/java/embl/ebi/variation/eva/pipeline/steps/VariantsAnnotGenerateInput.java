@@ -44,6 +44,7 @@ import java.util.zip.GZIPOutputStream;
  */
 public class VariantsAnnotGenerateInput implements Tasklet {
     private static final Logger logger = LoggerFactory.getLogger(VariantsAnnotGenerateInput.class);
+    public static final String SKIP_ANNOT_GENERATE_INPUT = "skipAnnotGenerateInput";
 
     @Autowired
     private ObjectMap variantOptions;
@@ -54,9 +55,9 @@ public class VariantsAnnotGenerateInput implements Tasklet {
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
 
-        if (pipelineOptions.getBoolean("skipAnnotGenerateInput")) {
+        if (pipelineOptions.getBoolean(SKIP_ANNOT_GENERATE_INPUT)) {
             logger.info("skipping annotation pre creation step, skipAnnotGenerateInput is set to {}",
-                    pipelineOptions.getBoolean("skipAnnotGenerateInput"));
+                    pipelineOptions.getBoolean(SKIP_ANNOT_GENERATE_INPUT));
         } else {
             VariantStorageManager variantStorageManager = StorageManagerFactory.getVariantStorageManager();
             VariantSource variantSource = variantOptions.get(VariantStorageManager.VARIANT_SOURCE, VariantSource.class);

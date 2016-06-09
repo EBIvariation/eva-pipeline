@@ -38,6 +38,7 @@ import java.nio.file.Paths;
  */
 public class VariantsLoad implements Tasklet {
     private static final Logger logger = LoggerFactory.getLogger(VariantsLoad.class);
+    public static final String SKIP_LOAD = "skipLoad";
 
     @Autowired
     private ObjectMap variantOptions;
@@ -47,8 +48,8 @@ public class VariantsLoad implements Tasklet {
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
 
-        if (pipelineOptions.getBoolean("skipLoad")) {
-            logger.info("skipping load step, skipLoad is set to {}", pipelineOptions.getBoolean("skipLoad"));
+        if (pipelineOptions.getBoolean(SKIP_LOAD)) {
+            logger.info("skipping load step, skipLoad is set to {}", pipelineOptions.getBoolean(SKIP_LOAD));
         } else {
             VariantStorageManager variantStorageManager = StorageManagerFactory.getVariantStorageManager();// TODO add mongo
             URI outdirUri = createUri(pipelineOptions.getString("outputDir"));

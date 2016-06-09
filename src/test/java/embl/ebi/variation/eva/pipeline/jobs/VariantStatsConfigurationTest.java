@@ -15,9 +15,12 @@
  */
 package embl.ebi.variation.eva.pipeline.jobs;
 
-import embl.ebi.variation.eva.pipeline.listeners.VariantJobParametersListener;
-import embl.ebi.variation.eva.pipeline.steps.*;
+import embl.ebi.variation.eva.VariantJobsArgs;
+import embl.ebi.variation.eva.pipeline.steps.VariantsLoad;
+import embl.ebi.variation.eva.pipeline.steps.VariantsStatsCreate;
+import embl.ebi.variation.eva.pipeline.steps.VariantsStatsLoad;
 import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -34,16 +37,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.*;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.io.*;
 import java.net.UnknownHostException;
-import java.nio.file.Paths;
-import java.util.Properties;
 
 import static org.junit.Assert.*;
 
@@ -53,7 +52,7 @@ import static org.junit.Assert.*;
  * @author Jose Miguel Mut Lopez &lt;jmmut@ebi.ac.uk&gt;
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = {VariantStatsConfiguration.class, VariantStatsConfigurationTest.Configs.class})
+@ContextConfiguration(classes = {VariantStatsConfiguration.class, CommonConfig.class})
 public class VariantStatsConfigurationTest {
 
     public static final String FILE_20 = "/small20.vcf.gz";
@@ -78,58 +77,10 @@ public class VariantStatsConfigurationTest {
     private JobLauncher jobLauncher;
 
     @Autowired
-    public ObjectMap variantOptions;
+    public VariantJobsArgs variantJobsArgs;
 
-    @Autowired
-    public ObjectMap pipelineOptions;
-
-    @Configuration
-    static class Configs {
-        private static String opencgaHome = System.getenv("OPENCGA_HOME") != null ? System.getenv("OPENCGA_HOME") : "/opt/opencga";
-
-        @Bean
-        static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
-            PropertySourcesPlaceholderConfigurer configurer = new PropertySourcesPlaceholderConfigurer();
-
-            Properties properties = new Properties();
-            properties.put("input", "");
-            properties.put("overwriteStats", "false");
-            properties.put("calculateStats", "false");
-            properties.put("outputDir", "/tmp");
-            properties.put("dbName", "");
-            properties.put("compressExtension", ".gz");
-            properties.put("compressGenotypes", "true");
-            properties.put("includeSrc", "FIRST_8_COLUMNS");
-            properties.put("pedigree", "FIRST_8_COLUMNS");
-            properties.put("annotate", "false");
-            properties.put("includeSamples", "false");
-            properties.put("includeStats", "false");
-            properties.put("aggregated", "NONE");
-            properties.put("studyType", "COLLECTION");
-            properties.put("studyName", "studyName");
-            properties.put("studyId", "1");
-            properties.put("fileId", "1");
-            properties.put("opencga.app.home", opencgaHome);
-            properties.put("skipLoad", "true");
-            properties.put("skipStatsCreate", "true");
-            properties.put("skipStatsLoad", "true");
-            properties.put("skipAnnotGenerateInput", "true");
-            properties.put("skipAnnotCreate", "true");
-            properties.put("skipAnnotLoad", "true");
-            properties.put("vepInput", "");
-            properties.put("vepOutput", "");
-            properties.put("vepPath", "");
-            properties.put("vepCacheDirectory", "");
-            properties.put("vepCacheVersion", "");
-            properties.put("vepSpecies", "");
-            properties.put("vepFasta", "");
-            properties.put("vepNumForks", "3");
-
-            configurer.setProperties(properties);
-
-            return configurer;
-        }
-    }
+    private ObjectMap variantOptions;
+    private ObjectMap pipelineOptions;
 
     /**
      * This test has to fail because it will try to extract variants from a non-existent DB.
@@ -143,8 +94,8 @@ public class VariantStatsConfigurationTest {
 
         pipelineOptions.put("input", input);
         pipelineOptions.put("outputDir", outputDir);
-        pipelineOptions.put("skipLoad", false);
-        pipelineOptions.put("skipStatsCreate", false);
+        pipelineOptions.put(VariantsLoad.SKIP_LOAD, false);
+        pipelineOptions.put(VariantsStatsCreate.SKIP_STATS_CREATE, false);
         variantOptions.put(VariantStorageManager.DB_NAME, dbName);
         variantOptions.put(VariantStorageManager.VARIANT_SOURCE, source);
 
@@ -165,8 +116,8 @@ public class VariantStatsConfigurationTest {
 
         pipelineOptions.put("input", input);
         pipelineOptions.put("outputDir", outputDir);
-        pipelineOptions.put("skipLoad", false);
-        pipelineOptions.put("skipStatsLoad", false);
+        pipelineOptions.put(VariantsLoad.SKIP_LOAD, false);
+        pipelineOptions.put(VariantsStatsLoad.SKIP_STATS_LOAD, false);
         variantOptions.put(VariantStorageManager.DB_NAME, dbName);
         variantOptions.put(VariantStorageManager.VARIANT_SOURCE, source);
 
@@ -193,8 +144,8 @@ public class VariantStatsConfigurationTest {
 
         pipelineOptions.put("input", input);
         pipelineOptions.put("outputDir", outputDir);
-        pipelineOptions.put("skipLoad", false);
-        pipelineOptions.put("skipStatsLoad", false);
+        pipelineOptions.put(VariantsLoad.SKIP_LOAD, false);
+        pipelineOptions.put(VariantsStatsLoad.SKIP_STATS_LOAD, false);
         variantOptions.put(VariantStorageManager.DB_NAME, dbName);
         variantOptions.put(VariantStorageManager.VARIANT_SOURCE, source);
 
@@ -209,6 +160,15 @@ public class VariantStatsConfigurationTest {
         cleanDBs();
         fillDB();
     }
+
+    @Before
+    public void setUp() throws Exception {
+        //re-initialize common config before each test
+        variantJobsArgs.loadArgs();
+        pipelineOptions = variantJobsArgs.getPipelineOptions();
+        variantOptions = variantJobsArgs.getVariantOptions();
+    }
+
 
     @AfterClass
     public static void afterTests() throws UnknownHostException {

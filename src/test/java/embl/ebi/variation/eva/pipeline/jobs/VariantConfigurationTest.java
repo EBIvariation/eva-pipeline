@@ -1,6 +1,24 @@
+/*
+ * Copyright 2015-2016 EMBL - European Bioinformatics Institute
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package embl.ebi.variation.eva.pipeline.jobs;
 
+import embl.ebi.variation.eva.VariantJobsArgs;
+import embl.ebi.variation.eva.pipeline.steps.*;
 import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -17,8 +35,6 @@ import org.opencb.opencga.storage.core.variant.adaptors.VariantDBIterator;
 import org.springframework.batch.core.*;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -28,19 +44,19 @@ import java.net.UnknownHostException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Properties;
 import java.util.zip.GZIPInputStream;
 
-import static embl.ebi.variation.eva.pipeline.jobs.JobTestUtils.countRows;
 import static embl.ebi.variation.eva.pipeline.jobs.JobTestUtils.getLines;
 import static embl.ebi.variation.eva.pipeline.jobs.JobTestUtils.getTransformedOutputPath;
 import static org.junit.Assert.*;
 
 /**
- * Created by diego on 23/05/2016.
+ * Created by jmmut on 2015-10-14.
+ *
+ * @author Jose Miguel Mut Lopez &lt;jmmut@ebi.ac.uk&gt;
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = { VariantConfiguration.class, VariantConfigurationTest.Configs.class})
+@ContextConfiguration(classes = { VariantConfiguration.class, CommonConfig.class})
 public class VariantConfigurationTest {
 
     public static final String FILE_20 = "/small20.vcf.gz";
@@ -69,59 +85,11 @@ public class VariantConfigurationTest {
     @Autowired
     private Job job;
 
-    @Autowired
-    public ObjectMap variantOptions;
+    private ObjectMap variantOptions;
+    private ObjectMap pipelineOptions;
 
     @Autowired
-    public ObjectMap pipelineOptions;
-
-    @Configuration
-    static class Configs {
-        private static String opencgaHome = System.getenv("OPENCGA_HOME") != null ? System.getenv("OPENCGA_HOME") : "/opt/opencga";
-
-        @Bean
-        static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
-            PropertySourcesPlaceholderConfigurer configurer = new PropertySourcesPlaceholderConfigurer();
-
-            Properties properties = new Properties();
-            properties.put("input", "");
-            properties.put("overwriteStats", "false");
-            properties.put("calculateStats", "false");
-            properties.put("outputDir", "/tmp");
-            properties.put("dbName", "");
-            properties.put("compressExtension", ".gz");
-            properties.put("compressGenotypes", "true");
-            properties.put("includeSrc", "FIRST_8_COLUMNS");
-            properties.put("pedigree", "FIRST_8_COLUMNS");
-            properties.put("annotate", "false");
-            properties.put("includeSamples", "false");
-            properties.put("includeStats", "false");
-            properties.put("aggregated", "NONE");
-            properties.put("studyType", "COLLECTION");
-            properties.put("studyName", "studyName");
-            properties.put("studyId", "1");
-            properties.put("fileId", "1");
-            properties.put("opencga.app.home", opencgaHome);
-            properties.put("skipLoad", "true");
-            properties.put("skipStatsCreate", "true");
-            properties.put("skipStatsLoad", "true");
-            properties.put("skipAnnotGenerateInput", "true");
-            properties.put("skipAnnotCreate", "true");
-            properties.put("skipAnnotLoad", "true");
-            properties.put("vepInput", "");
-            properties.put("vepOutput", "");
-            properties.put("vepPath", "");
-            properties.put("vepCacheDirectory", "");
-            properties.put("vepCacheVersion", "");
-            properties.put("vepSpecies", "");
-            properties.put("vepFasta", "");
-            properties.put("vepNumForks", "3");
-
-            configurer.setProperties(properties);
-
-            return configurer;
-        }
-    }
+    public VariantJobsArgs variantJobsArgs;
 
     @Test
     public void validTransform() throws Exception {
@@ -131,7 +99,6 @@ public class VariantConfigurationTest {
         pipelineOptions.put("input", input);
         variantOptions.put(VariantStorageManager.DB_NAME, dbName);
 
-        //// TODO: 07/06/2016 move this in a method
         VariantSource source = (VariantSource) variantOptions.get(VariantStorageManager.VARIANT_SOURCE);
 
         variantOptions.put(VariantStorageManager.VARIANT_SOURCE, new VariantSource(
@@ -195,7 +162,7 @@ public class VariantConfigurationTest {
 
         pipelineOptions.put("input", input);
         variantOptions.put(VariantStorageManager.DB_NAME, dbName);
-        pipelineOptions.put("skipLoad", false);
+        pipelineOptions.put(VariantsLoad.SKIP_LOAD, false);
 
         VariantSource source = (VariantSource) variantOptions.get(VariantStorageManager.VARIANT_SOURCE);
 
@@ -235,8 +202,8 @@ public class VariantConfigurationTest {
 
         pipelineOptions.put("input", input);
         variantOptions.put(VariantStorageManager.DB_NAME, dbName);
-        pipelineOptions.put("skipLoad", false);
-        pipelineOptions.put("skipStatsCreate", false);
+        pipelineOptions.put(VariantsLoad.SKIP_LOAD, false);
+        pipelineOptions.put(VariantsStatsCreate.SKIP_STATS_CREATE, false);
         variantOptions.put(VariantStorageManager.VARIANT_SOURCE, source);
 
         File statsFile = new File(Paths.get(outputDir).resolve(VariantStorageManager.buildFilename(source))
@@ -263,9 +230,9 @@ public class VariantConfigurationTest {
 
         pipelineOptions.put("input", input);
         variantOptions.put(VariantStorageManager.DB_NAME, dbName);
-        pipelineOptions.put("skipLoad", false);
-        pipelineOptions.put("skipStatsCreate", false);
-        pipelineOptions.put("skipStatsLoad", false);
+        pipelineOptions.put(VariantsLoad.SKIP_LOAD, false);
+        pipelineOptions.put(VariantsStatsCreate.SKIP_STATS_CREATE, false);
+        pipelineOptions.put(VariantsStatsLoad.SKIP_STATS_LOAD, false);
         variantOptions.put(VariantStorageManager.VARIANT_SOURCE, source);
 
         File statsFile = new File(Paths.get(outputDir).resolve(VariantStorageManager.buildFilename(source)) + ".variants.stats.json.gz");
@@ -307,8 +274,8 @@ public class VariantConfigurationTest {
 
         pipelineOptions.put("input", input);
         variantOptions.put(VariantStorageManager.DB_NAME, dbName);
-        pipelineOptions.put("skipLoad", false);
-        pipelineOptions.put("skipAnnotGenerateInput", false);
+        pipelineOptions.put(VariantsLoad.SKIP_LOAD, false);
+        pipelineOptions.put(VariantsAnnotGenerateInput.SKIP_ANNOT_GENERATE_INPUT, false);
         variantOptions.put(VariantStorageManager.VARIANT_SOURCE, source);
         pipelineOptions.put("vepInput", annotFile.toString());
 
@@ -359,9 +326,9 @@ public class VariantConfigurationTest {
 
         pipelineOptions.put("input", input);
         variantOptions.put(VariantStorageManager.DB_NAME, dbName);
-        pipelineOptions.put("skipLoad", false);
-        pipelineOptions.put("skipAnnotGenerateInput", false);
-        pipelineOptions.put("skipAnnotCreate", false);
+        pipelineOptions.put(VariantsLoad.SKIP_LOAD, false);
+        pipelineOptions.put(VariantsAnnotGenerateInput.SKIP_ANNOT_GENERATE_INPUT, false);
+        pipelineOptions.put(VariantsAnnotCreate.SKIP_ANNOT_CREATE, false);
         variantOptions.put(VariantStorageManager.VARIANT_SOURCE, source);
 
         pipelineOptions.put("vepInput", vepInput.toString());
@@ -406,13 +373,15 @@ public class VariantConfigurationTest {
         String input = VariantConfigurationTest.class.getResource(FILE_20).getFile();
         VariantSource source = new VariantSource(input, "annotTest", "1", "studyName");
         String dbName = VALID_ANNOT_LOAD;
-        String vepOutput = VariantConfigurationTest.class.getResource("/annot.tsv.gz").getFile();
+        String vepOutput = VariantConfigurationTest.class.getResource("/load_annot.tsv.gz").getFile();
 
         pipelineOptions.put("input", input);
         variantOptions.put(VariantStorageManager.DB_NAME, dbName);
-        pipelineOptions.put("skipAnnotLoad", false);
+        pipelineOptions.put(VariantsAnnotLoad.SKIP_ANNOT_LOAD, false);
+        pipelineOptions.put(VariantsLoad.SKIP_LOAD, false); //this is needed because we need the DB to load the annotations to
         variantOptions.put(VariantStorageManager.VARIANT_SOURCE, source);
         pipelineOptions.put("vepOutput", vepOutput.toString());
+
 
         JobExecution execution = jobLauncher.run(job, new JobParameters());
         assertEquals(ExitStatus.COMPLETED.getExitCode(), execution.getExitStatus().getExitCode());
@@ -422,15 +391,26 @@ public class VariantConfigurationTest {
         VariantDBAdaptor variantDBAdaptor = variantStorageManager.getDBAdaptor(dbName, null);
         VariantDBIterator iterator = variantDBAdaptor.iterator(new QueryOptions());
 
+        int cnt=0;
         while (iterator.hasNext()) {
+            cnt++;
             Variant next = iterator.next();
             assertTrue(next.getAnnotation().getConsequenceTypes() != null);
         }
+        assertTrue(cnt>0);
     }
 
     @BeforeClass
     public static void beforeTests() throws UnknownHostException {
         cleanDBs();
+    }
+
+    @Before
+    public void setUp() throws Exception {
+        //re-initialize common config before each test
+        variantJobsArgs.loadArgs();
+        pipelineOptions = variantJobsArgs.getPipelineOptions();
+        variantOptions = variantJobsArgs.getVariantOptions();
     }
 
     @AfterClass

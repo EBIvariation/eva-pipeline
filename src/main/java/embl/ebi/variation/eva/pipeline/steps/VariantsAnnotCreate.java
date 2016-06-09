@@ -36,6 +36,7 @@ import java.util.zip.GZIPOutputStream;
  */
 public class VariantsAnnotCreate implements Tasklet {
     private static final Logger logger = LoggerFactory.getLogger(VariantsAnnotCreate.class);
+    public static final String SKIP_ANNOT_CREATE = "skipAnnotCreate";
 
     @Autowired
     private ObjectMap pipelineOptions;
@@ -43,9 +44,9 @@ public class VariantsAnnotCreate implements Tasklet {
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
 
-        if (pipelineOptions.getBoolean("skipAnnotCreate")) {
+        if (pipelineOptions.getBoolean(SKIP_ANNOT_CREATE)) {
             logger.info("skipping annotation creation step, skipAnnotCreate is set to {} ",
-                    pipelineOptions.getBoolean("skipAnnotCreate"));
+                    pipelineOptions.getBoolean(SKIP_ANNOT_CREATE));
         } else {
             ProcessBuilder processBuilder = new ProcessBuilder("perl",
                     pipelineOptions.getString("vepPath"),
