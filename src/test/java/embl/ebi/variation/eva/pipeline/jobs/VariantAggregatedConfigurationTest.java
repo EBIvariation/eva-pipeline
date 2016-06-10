@@ -47,9 +47,7 @@ import java.net.UnknownHostException;
 import java.nio.file.Paths;
 import java.util.zip.GZIPInputStream;
 
-import static embl.ebi.variation.eva.pipeline.jobs.JobTestUtils.countRows;
-import static embl.ebi.variation.eva.pipeline.jobs.JobTestUtils.getLines;
-import static embl.ebi.variation.eva.pipeline.jobs.JobTestUtils.getTransformedOutputPath;
+import static embl.ebi.variation.eva.pipeline.jobs.JobTestUtils.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -110,7 +108,7 @@ public class VariantAggregatedConfigurationTest {
                 source.getType(),
                 source.getAggregation()));
 
-        JobExecution execution = jobLauncher.run(job, new JobParameters());
+        JobExecution execution = jobLauncher.run(job, getJobParameters());
 
         assertEquals(input, pipelineOptions.getString("input"));
         assertEquals(ExitStatus.COMPLETED.getExitCode(), execution.getExitStatus().getExitCode());
@@ -153,7 +151,8 @@ public class VariantAggregatedConfigurationTest {
 //    }
 
     @Test
-    public void validLoad() throws JobExecutionException, IllegalAccessException, ClassNotFoundException, InstantiationException, StorageManagerException, IOException {
+    public void validLoad() throws JobExecutionException, IllegalAccessException, ClassNotFoundException,
+            InstantiationException, StorageManagerException, IOException {
         String input = VariantAggregatedConfigurationTest.class.getResource(FILE_AGGREGATED).getFile();
         String dbName = VALID_LOAD;
 
@@ -171,7 +170,7 @@ public class VariantAggregatedConfigurationTest {
                 source.getType(),
                 source.getAggregation()));
 
-        JobExecution execution = jobLauncher.run(job, new JobParameters());
+        JobExecution execution = jobLauncher.run(job, getJobParameters());
 
         assertEquals(input, pipelineOptions.getString("input"));
         assertEquals("COMPLETED", execution.getExitStatus().getExitCode());
@@ -228,7 +227,9 @@ public class VariantAggregatedConfigurationTest {
 //    }
 
     @Test
-    public void validLoadStats() throws JobParametersInvalidException, JobExecutionAlreadyRunningException, JobRestartException, JobInstanceAlreadyCompleteException, IllegalAccessException, ClassNotFoundException, InstantiationException, StorageManagerException, IOException {
+    public void validLoadStats() throws JobParametersInvalidException, JobExecutionAlreadyRunningException,
+            JobRestartException, JobInstanceAlreadyCompleteException, IllegalAccessException, ClassNotFoundException,
+            InstantiationException, StorageManagerException, IOException {
         String input = VariantAggregatedConfigurationTest.class.getResource(FILE_AGGREGATED).getFile();
         String dbName = VALID_LOAD_STATS;
 
@@ -248,7 +249,7 @@ public class VariantAggregatedConfigurationTest {
                 source.getType(),
                 VariantSource.Aggregation.BASIC));
 
-        JobExecution execution = jobLauncher.run(job, new JobParameters());
+        JobExecution execution = jobLauncher.run(job, getJobParameters());
 
         assertEquals(input, pipelineOptions.getString("input"));
         assertEquals("COMPLETED", execution.getExitStatus().getExitCode());

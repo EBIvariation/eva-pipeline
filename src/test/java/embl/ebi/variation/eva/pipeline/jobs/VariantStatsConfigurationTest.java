@@ -44,6 +44,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import java.io.*;
 import java.net.UnknownHostException;
 
+import static embl.ebi.variation.eva.pipeline.jobs.JobTestUtils.getJobParameters;
 import static org.junit.Assert.*;
 
 /**
@@ -99,7 +100,7 @@ public class VariantStatsConfigurationTest {
         variantOptions.put(VariantStorageManager.DB_NAME, dbName);
         variantOptions.put(VariantStorageManager.VARIANT_SOURCE, source);
 
-        JobExecution execution = jobLauncher.run(job, new JobParameters());
+        JobExecution execution = jobLauncher.run(job, getJobParameters());
 
         assertEquals(input, pipelineOptions.getString("input"));
         assertEquals(ExitStatus.FAILED.getExitCode(), execution.getExitStatus().getExitCode());
@@ -121,7 +122,7 @@ public class VariantStatsConfigurationTest {
         variantOptions.put(VariantStorageManager.DB_NAME, dbName);
         variantOptions.put(VariantStorageManager.VARIANT_SOURCE, source);
 
-        JobExecution execution = jobLauncher.run(job, new JobParameters());
+        JobExecution execution = jobLauncher.run(job, getJobParameters());
         assertEquals(ExitStatus.COMPLETED.getExitCode(), execution.getExitStatus().getExitCode());
 
         // check the DB docs have the field "st"
@@ -149,7 +150,7 @@ public class VariantStatsConfigurationTest {
         variantOptions.put(VariantStorageManager.DB_NAME, dbName);
         variantOptions.put(VariantStorageManager.VARIANT_SOURCE, source);
 
-        JobExecution execution = jobLauncher.run(job, new JobParameters());
+        JobExecution execution = jobLauncher.run(job, getJobParameters());
 
         assertEquals(input, pipelineOptions.getString("input"));
         assertEquals(ExitStatus.FAILED.getExitCode(), execution.getExitStatus().getExitCode());

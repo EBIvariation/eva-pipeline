@@ -82,7 +82,7 @@ public class VariantAggregatedConfiguration {
 
         // true: every job execution will do this step, even if this step is already COMPLETED
         // false: if the job was aborted and is relaunched, this step will NOT be done again
-        tasklet.allowStartIfComplete(true);
+        tasklet.allowStartIfComplete(false);
 
         return tasklet.build();
     }
@@ -98,7 +98,7 @@ public class VariantAggregatedConfiguration {
 
         // true: every job execution will do this step, even if this step is already COMPLETED
         // false: if the job was aborted and is relaunched, this step will NOT be done again
-        tasklet.allowStartIfComplete(true);
+        tasklet.allowStartIfComplete(false);
         return tasklet.build();
     }
 

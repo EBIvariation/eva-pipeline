@@ -18,6 +18,8 @@ package embl.ebi.variation.eva.pipeline.jobs;
 import com.mongodb.DB;
 import com.mongodb.MongoClient;
 import org.opencb.biodata.models.variant.Variant;
+import org.springframework.batch.core.JobParameters;
+import org.springframework.batch.core.JobParametersBuilder;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -73,5 +75,12 @@ public class JobTestUtils {
         }
         mongoClient.close();
     }
+
+    public static JobParameters getJobParameters(){
+        return new JobParametersBuilder()
+                        .addLong("time",System.currentTimeMillis()).toJobParameters();
+    }
+
+
 
 }

@@ -46,6 +46,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.zip.GZIPInputStream;
 
+import static embl.ebi.variation.eva.pipeline.jobs.JobTestUtils.getJobParameters;
 import static embl.ebi.variation.eva.pipeline.jobs.JobTestUtils.getLines;
 import static embl.ebi.variation.eva.pipeline.jobs.JobTestUtils.getTransformedOutputPath;
 import static org.junit.Assert.*;
@@ -115,7 +116,7 @@ public class VariantConfigurationTest {
         file.delete();
         assertFalse(file.exists());
 
-        JobExecution execution = jobLauncher.run(job, new JobParameters());
+        JobExecution execution = jobLauncher.run(job, getJobParameters());
 
         assertEquals(input, pipelineOptions.getString("input"));
         assertEquals(ExitStatus.COMPLETED.getExitCode(), execution.getExitStatus().getExitCode());
@@ -147,7 +148,7 @@ public class VariantConfigurationTest {
                 source.getType(),
                 source.getAggregation()));
 
-        JobExecution execution = jobLauncher.run(job, new JobParameters());
+        JobExecution execution = jobLauncher.run(job, getJobParameters());
 
         assertEquals(input, pipelineOptions.getString("input"));
         assertEquals(ExitStatus.FAILED.getExitCode(), execution.getExitStatus().getExitCode());
@@ -174,7 +175,7 @@ public class VariantConfigurationTest {
                 source.getType(),
                 source.getAggregation()));
 
-        JobExecution execution = jobLauncher.run(job, new JobParameters());
+        JobExecution execution = jobLauncher.run(job, getJobParameters());
 
         assertEquals(input, pipelineOptions.getString("input"));
         assertEquals(ExitStatus.COMPLETED.getExitCode(), execution.getExitStatus().getExitCode());
@@ -211,7 +212,7 @@ public class VariantConfigurationTest {
         statsFile.delete();
         assertFalse(statsFile.exists());  // ensure the stats file doesn't exist from previous executions
 
-        JobExecution execution = jobLauncher.run(job, new JobParameters());
+        JobExecution execution = jobLauncher.run(job, getJobParameters());
 
         assertEquals(input, pipelineOptions.getString("input"));
         assertEquals(ExitStatus.COMPLETED.getExitCode(), execution.getExitStatus().getExitCode());
@@ -238,7 +239,8 @@ public class VariantConfigurationTest {
         File statsFile = new File(Paths.get(outputDir).resolve(VariantStorageManager.buildFilename(source)) + ".variants.stats.json.gz");
         statsFile.delete();
         assertFalse(statsFile.exists());  // ensure the stats file doesn't exist from previous executions
-        JobExecution execution = jobLauncher.run(job, new JobParameters());
+
+        JobExecution execution = jobLauncher.run(job, getJobParameters());
 
         assertEquals(input, pipelineOptions.getString("input"));
         assertEquals(ExitStatus.COMPLETED.getExitCode(), execution.getExitStatus().getExitCode());
@@ -281,7 +283,7 @@ public class VariantConfigurationTest {
 
         annotFile.delete();
         assertFalse(annotFile.exists());  // ensure the stats file doesn't exist from previous executions
-        JobExecution execution = jobLauncher.run(job, new JobParameters());
+        JobExecution execution = jobLauncher.run(job, getJobParameters());
         assertEquals(ExitStatus.COMPLETED.getExitCode(), execution.getExitStatus().getExitCode());
         assertTrue(annotFile.exists());
 
@@ -344,7 +346,9 @@ public class VariantConfigurationTest {
         vepOutput.delete();
         assertFalse(vepInput.exists());  // ensure the pre annot file doesn't exist from previous executions
         assertFalse(vepOutput.exists());  // ensure the annot file doesn't exist from previous executions
-        JobExecution execution = jobLauncher.run(job, new JobParameters());
+
+        JobExecution execution = jobLauncher.run(job, getJobParameters());
+
         assertEquals(ExitStatus.COMPLETED.getExitCode(), execution.getExitStatus().getExitCode());
         assertTrue(vepInput.exists());
         assertTrue(vepOutput.exists());
@@ -373,7 +377,7 @@ public class VariantConfigurationTest {
         String input = VariantConfigurationTest.class.getResource(FILE_20).getFile();
         VariantSource source = new VariantSource(input, "annotTest", "1", "studyName");
         String dbName = VALID_ANNOT_LOAD;
-        String vepOutput = VariantConfigurationTest.class.getResource("/load_annot.tsv.gz").getFile();
+        String vepOutput = VariantConfigurationTest.class.getResource("/annot.tsv.gz").getFile();
 
         pipelineOptions.put("input", input);
         variantOptions.put(VariantStorageManager.DB_NAME, dbName);
@@ -382,8 +386,8 @@ public class VariantConfigurationTest {
         variantOptions.put(VariantStorageManager.VARIANT_SOURCE, source);
         pipelineOptions.put("vepOutput", vepOutput.toString());
 
+        JobExecution execution = jobLauncher.run(job, getJobParameters());
 
-        JobExecution execution = jobLauncher.run(job, new JobParameters());
         assertEquals(ExitStatus.COMPLETED.getExitCode(), execution.getExitStatus().getExitCode());
 
         // check documents in DB have annotation (only consequence type)

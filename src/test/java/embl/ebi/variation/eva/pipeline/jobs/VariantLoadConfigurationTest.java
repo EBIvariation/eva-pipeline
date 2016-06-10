@@ -105,7 +105,7 @@ public class VariantLoadConfigurationTest {
                 source.getType(),
                 source.getAggregation()));
 
-        JobExecution execution = jobLauncher.run(job, new JobParameters());
+        JobExecution execution = jobLauncher.run(job, getJobParameters());
 
         assertEquals(input, pipelineOptions.getString("input"));
         assertEquals(ExitStatus.COMPLETED.getExitCode(), execution.getExitStatus().getExitCode());
@@ -149,7 +149,7 @@ public class VariantLoadConfigurationTest {
                 source.getType(),
                 source.getAggregation()));
 
-        JobExecution execution = jobLauncher.run(job, new JobParameters());
+        JobExecution execution = jobLauncher.run(job, getJobParameters());
 
         assertEquals(input, pipelineOptions.getString("input"));
         assertEquals(ExitStatus.FAILED.getExitCode(), execution.getExitStatus().getExitCode());
