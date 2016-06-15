@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 EMBL - European Bioinformatics Institute
+ * Copyright 2016 EMBL - European Bioinformatics Institute
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ import org.springframework.stereotype.Component;
  *
  * @author Diego Poggioli &lt;diego@ebi.ac.uk&gt;
  *
- * TODO: 20/05/2016 add type validator?
+ * TODO: 20/05/2016 add type/null/file/dir validators
  */
 @Component
 public class VariantJobsArgs {
