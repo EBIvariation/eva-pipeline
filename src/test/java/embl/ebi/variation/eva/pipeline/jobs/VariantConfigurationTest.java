@@ -46,9 +46,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.zip.GZIPInputStream;
 
-import static embl.ebi.variation.eva.pipeline.jobs.JobTestUtils.getJobParameters;
-import static embl.ebi.variation.eva.pipeline.jobs.JobTestUtils.getLines;
-import static embl.ebi.variation.eva.pipeline.jobs.JobTestUtils.getTransformedOutputPath;
+import static embl.ebi.variation.eva.pipeline.jobs.JobTestUtils.*;
 import static org.junit.Assert.*;
 
 /**
@@ -154,7 +152,9 @@ public class VariantConfigurationTest {
         assertEquals(ExitStatus.FAILED.getExitCode(), execution.getExitStatus().getExitCode());
     }
 
-/*    @Test
+    // TODO: 15/06/2016 double check if this is a duplicate of:
+    // embl.ebi.variation.eva.pipeline.jobs.VariantLoadConfigurationTest.validLoad
+    @Test
     public void validLoad() throws JobExecutionException, IllegalAccessException, ClassNotFoundException,
             InstantiationException, IOException, StorageManagerException {
 
@@ -190,7 +190,7 @@ public class VariantConfigurationTest {
         long lines = getLines(new GZIPInputStream(new FileInputStream(outputFilename)));
 
         assertEquals(countRows(iterator), lines);
-    }*/
+    }
 
     @Test
     public void validCreateStats() throws JobExecutionException, IOException, InterruptedException,
@@ -219,7 +219,9 @@ public class VariantConfigurationTest {
         assertTrue(statsFile.exists());
     }
 
-/*    @Test
+    //// TODO: 15/06/2016 double check if this is a duplicate of:
+    // embl.ebi.variation.eva.pipeline.jobs.VariantStatsConfigurationTest.validLoadStats()
+    @Test
     public void validLoadStats() throws JobExecutionException, IOException, IllegalAccessException,
             ClassNotFoundException, InstantiationException, StorageManagerException {
 
@@ -263,7 +265,7 @@ public class VariantConfigurationTest {
         iterator = variantDBAdaptor.iterator(new QueryOptions());
 
         assertEquals(1, iterator.next().getSourceEntries().values().iterator().next().getCohortStats().size());
-    }*/
+    }
 
     @Test
     public void validAnnotGenerateInput() throws Exception {
