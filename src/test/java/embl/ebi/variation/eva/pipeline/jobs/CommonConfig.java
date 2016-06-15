@@ -69,6 +69,7 @@ public class CommonConfig {
         properties.put("vepSpecies", "");
         properties.put("vepFasta", "");
         properties.put("vepNumForks", "3");
+        properties.put("allowStartIfComplete", false);
 
         configurer.setProperties(properties);
 

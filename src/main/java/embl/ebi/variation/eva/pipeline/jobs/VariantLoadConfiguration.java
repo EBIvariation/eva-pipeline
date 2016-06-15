@@ -16,6 +16,7 @@
 package embl.ebi.variation.eva.pipeline.jobs;
 
 import embl.ebi.variation.eva.pipeline.steps.VariantsLoad;
+import org.opencb.datastore.core.ObjectMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.Job;
@@ -50,6 +51,8 @@ public class VariantLoadConfiguration {
     JobLauncher jobLauncher;
     @Autowired
     Environment environment;
+    @Autowired
+    private ObjectMap pipelineOptions;
 
     @Bean
     public Job variantLoadJob() {
@@ -70,11 +73,21 @@ public class VariantLoadConfiguration {
     public Step load() {
         StepBuilder step1 = stepBuilderFactory.get("load");
         TaskletStepBuilder tasklet = step1.tasklet(variantsLoad());
+        initStep(tasklet);
+        return tasklet.build();
+    }
+
+    /**
+     * Initialize a Step with common configuration
+     * @param tasklet to be initialized with common configuration
+     */
+    private void initStep(TaskletStepBuilder tasklet) {
+
+        boolean allowStartIfComplete  = pipelineOptions.getBoolean("allowStartIfComplete");
 
         // true: every job execution will do this step, even if this step is already COMPLETED
-        // false: if the job was aborted and is relaunched, this step will NOT be done again
-        tasklet.allowStartIfComplete(false);
-        return tasklet.build();
+        // false(default): if the job was aborted and is relaunched, this step will NOT be done again
+        tasklet.allowStartIfComplete(allowStartIfComplete);
     }
 
 }
