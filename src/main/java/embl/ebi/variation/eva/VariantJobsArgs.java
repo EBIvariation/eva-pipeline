@@ -131,6 +131,7 @@ public class VariantJobsArgs {
         pipelineOptions.put("compressExtension", compressExtension);
         pipelineOptions.put("outputDir", outputDir);
         pipelineOptions.put("pedigree", pedigree);
+        pipelineOptions.put(VariantStorageManager.DB_NAME, dbName);
         pipelineOptions.put(VariantsLoad.SKIP_LOAD, skipLoad);
         pipelineOptions.put(VariantsStatsCreate.SKIP_STATS_CREATE, skipStatsCreate);
         pipelineOptions.put(VariantsStatsLoad.SKIP_STATS_LOAD, skipStatsLoad);

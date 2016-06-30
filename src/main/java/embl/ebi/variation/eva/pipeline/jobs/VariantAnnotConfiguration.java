@@ -32,10 +32,12 @@ import org.springframework.batch.core.step.builder.TaskletStepBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.core.env.Environment;
 
 @Configuration
 @EnableBatchProcessing
+@Import(VariantJobArgsConfig.class)
 public class VariantAnnotConfiguration {
 
     private static final Logger logger = LoggerFactory.getLogger(VariantAnnotConfiguration.class);
@@ -82,6 +84,7 @@ public class VariantAnnotConfiguration {
         return new VariantsAnnotCreate();
     }
 
+    @Bean
     public Step annotationCreate() {
         StepBuilder step1 = stepBuilderFactory.get("annotationCreate");
         TaskletStepBuilder tasklet = step1.tasklet(variantsAnnotCreate());
