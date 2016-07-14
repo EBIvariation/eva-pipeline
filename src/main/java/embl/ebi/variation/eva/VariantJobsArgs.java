@@ -26,6 +26,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.nio.file.Paths;
+
 /**
  *
  * Class to extract configuration from properties files and from command line.
@@ -98,7 +100,7 @@ public class VariantJobsArgs {
 
     private void loadVariantOptions(){
         VariantSource source = new VariantSource(
-                input,
+                Paths.get(input).getFileName().toString(),
                 fileId,
                 studyId,
                 studyName,
