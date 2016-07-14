@@ -68,15 +68,18 @@ public class VariantsAnnotCreate implements Tasklet {
             logger.info("Starting read from VEP output");
             Process process = processBuilder.start();
             
-            int written = connectStreams(
+            long written = connectStreams(
                     new BufferedInputStream(process.getInputStream()), 
                     new GZIPOutputStream(new FileOutputStream(pipelineOptions.getString("vepOutput"))));
             
             int exitValue = process.waitFor();
-            logger.info("Finishing read from VEP output, bytes written: " + written); 
+            logger.info("Finishing read from VEP output, bytes written: " + written);
             
             if (exitValue > 0) {
-                throw new Exception("Error while running VEP (exit status " + exitValue + ")");
+                String errorLog = pipelineOptions.getString("vepOutput") + ".errors.txt";
+                connectStreams(new BufferedInputStream(process.getErrorStream()), new FileOutputStream(errorLog));
+                throw new Exception("Error while running VEP (exit status " + exitValue + "). See "
+                        + errorLog  + " for the errors description from VEP.");
             }
         }
 
@@ -89,9 +92,9 @@ public class VariantsAnnotCreate implements Tasklet {
      * TODO: optimize with buffers?
      * @throws IOException
      */
-    private int connectStreams(InputStream inputStream, OutputStream outputStream) throws IOException {
+    private long connectStreams(InputStream inputStream, OutputStream outputStream) throws IOException {
         int read = inputStream.read();
-        int written = 0;
+        long written = 0;
         while (read != -1) {
             written++;
             outputStream.write(read);
