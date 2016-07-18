@@ -85,6 +85,8 @@ public class VariantJobsArgs {
     @Value("${vepFasta}") private String vepFasta;
     @Value("${vepNumForks}") private String vepNumForks;
 
+    @Value("${allowStartIfComplete}") private boolean allowStartIfComplete;
+
     private ObjectMap variantOptions  = new ObjectMap();
     private ObjectMap pipelineOptions  = new ObjectMap();
 
@@ -143,6 +145,7 @@ public class VariantJobsArgs {
         pipelineOptions.put("vepSpecies", vepSpecies);
         pipelineOptions.put("vepFasta", vepFasta);
         pipelineOptions.put("vepNumForks", vepNumForks);
+        pipelineOptions.put("allowStartIfComplete", allowStartIfComplete);
 
         logger.debug("Using as pipelineOptions: {}", pipelineOptions.entrySet().toString());
     }

@@ -17,6 +17,7 @@ package embl.ebi.variation.eva.pipeline.jobs;
 
 import embl.ebi.variation.eva.pipeline.steps.VariantsLoad;
 import embl.ebi.variation.eva.pipeline.steps.VariantsTransform;
+import org.opencb.datastore.core.ObjectMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.Job;
@@ -55,6 +56,8 @@ public class VariantAggregatedConfiguration {
     JobLauncher jobLauncher;
     @Autowired
     Environment environment;
+    @Autowired
+    private ObjectMap pipelineOptions;
 
     @Bean
     public Job aggregatedVariantJob() {
@@ -79,11 +82,7 @@ public class VariantAggregatedConfiguration {
     public Step transform() {
         StepBuilder step1 = stepBuilderFactory.get("transform");
         final TaskletStepBuilder tasklet = step1.tasklet(variantsTransform());
-
-        // true: every job execution will do this step, even if this step is already COMPLETED
-        // false: if the job was aborted and is relaunched, this step will NOT be done again
-        tasklet.allowStartIfComplete(false);
-
+        initStep(tasklet);
         return tasklet.build();
     }
 
@@ -95,10 +94,7 @@ public class VariantAggregatedConfiguration {
     public Step load() {
         StepBuilder step1 = stepBuilderFactory.get("load");
         TaskletStepBuilder tasklet = step1.tasklet(variantsLoad());
-
-        // true: every job execution will do this step, even if this step is already COMPLETED
-        // false: if the job was aborted and is relaunched, this step will NOT be done again
-        tasklet.allowStartIfComplete(false);
+        initStep(tasklet);
         return tasklet.build();
     }
 
@@ -108,6 +104,19 @@ public class VariantAggregatedConfiguration {
             sourceUri = Paths.get(input).toUri();
         }
         return sourceUri;
+    }
+
+    /**
+     * Initialize a Step with common configuration
+     * @param tasklet to be initialized with common configuration
+     */
+    private void initStep(TaskletStepBuilder tasklet) {
+
+        boolean allowStartIfComplete  = pipelineOptions.getBoolean("allowStartIfComplete");
+
+        // true: every job execution will do this step, even if this step is already COMPLETED
+        // false(default): if the job was aborted and is relaunched, this step will NOT be done again
+        tasklet.allowStartIfComplete(allowStartIfComplete);
     }
 
 

@@ -16,6 +16,7 @@
 package embl.ebi.variation.eva.pipeline.jobs;
 
 import embl.ebi.variation.eva.pipeline.steps.*;
+import org.opencb.datastore.core.ObjectMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.Job;
@@ -51,6 +52,8 @@ public class VariantConfiguration {
     JobLauncher jobLauncher;
     @Autowired
     Environment environment;
+    @Autowired
+    private ObjectMap pipelineOptions;
 
     @Bean
     public Job variantJob() {
@@ -77,11 +80,7 @@ public class VariantConfiguration {
     public Step transform() {
         StepBuilder step1 = stepBuilderFactory.get("transform");
         TaskletStepBuilder tasklet = step1.tasklet(variantsTransform());
-
-        // true: every job execution will do this step, even if this step is already COMPLETED
-        // false: if the job was aborted and is relaunched, this step will NOT be done again
-        tasklet.allowStartIfComplete(false);
-
+        initStep(tasklet);
         return tasklet.build();
     }
 
@@ -93,10 +92,7 @@ public class VariantConfiguration {
     public Step load() {
         StepBuilder step1 = stepBuilderFactory.get("load");
         TaskletStepBuilder tasklet = step1.tasklet(variantsLoad());
-
-        // true: every job execution will do this step, even if this step is already COMPLETED
-        // false: if the job was aborted and is relaunched, this step will NOT be done again
-        tasklet.allowStartIfComplete(false);
+        initStep(tasklet);
         return tasklet.build();
     }
 
@@ -108,10 +104,7 @@ public class VariantConfiguration {
     public Step statsCreate() {
         StepBuilder step1 = stepBuilderFactory.get("statsCreate");
         TaskletStepBuilder tasklet = step1.tasklet(variantsStatsCreate());
-
-        // true: every job execution will do this step, even if this step is already COMPLETED
-        // false: if the job was aborted and is relaunched, this step will NOT be done again
-        tasklet.allowStartIfComplete(false);
+        initStep(tasklet);
         return tasklet.build();
     }
 
@@ -123,10 +116,7 @@ public class VariantConfiguration {
     public Step statsLoad() {
         StepBuilder step1 = stepBuilderFactory.get("statsLoad");
         TaskletStepBuilder tasklet = step1.tasklet(variantsStatsLoad());
-
-        // true: every job execution will do this step, even if this step is already COMPLETED
-        // false: if the job was aborted and is relaunched, this step will NOT be done again
-        tasklet.allowStartIfComplete(false);
+        initStep(tasklet);
         return tasklet.build();
     }
 
@@ -138,10 +128,7 @@ public class VariantConfiguration {
     public Step annotationGenerateInput() {
         StepBuilder step1 = stepBuilderFactory.get("annotationGenerateInput");
         TaskletStepBuilder tasklet = step1.tasklet(variantsAnnotGenerateInput());
-
-        // true: every job execution will do this step, even if this step is already COMPLETED
-        // false: if the job was aborted and is relaunched, this step will NOT be done again
-        tasklet.allowStartIfComplete(false);
+        initStep(tasklet);
         return tasklet.build();
     }
 
@@ -153,10 +140,7 @@ public class VariantConfiguration {
     public Step annotationCreate() {
         StepBuilder step1 = stepBuilderFactory.get("annotationCreate");
         TaskletStepBuilder tasklet = step1.tasklet(variantsAnnotCreate());
-
-        // true: every job execution will do this step, even if this step is already COMPLETED
-        // false: if the job was aborted and is relaunched, this step will NOT be done again
-        tasklet.allowStartIfComplete(false);
+        initStep(tasklet);
         return tasklet.build();
     }
 
@@ -168,11 +152,21 @@ public class VariantConfiguration {
     public Step annotationLoad() {
         StepBuilder step1 = stepBuilderFactory.get("annotationLoad");
         TaskletStepBuilder tasklet = step1.tasklet(variantsAnnotLoad());
+        initStep(tasklet);
+        return tasklet.build();
+    }
+
+    /**
+     * Initialize a Step with common configuration
+     * @param tasklet to be initialized with common configuration
+     */
+    private void initStep(TaskletStepBuilder tasklet) {
+
+        boolean allowStartIfComplete  = pipelineOptions.getBoolean("allowStartIfComplete");
 
         // true: every job execution will do this step, even if this step is already COMPLETED
-        // false: if the job was aborted and is relaunched, this step will NOT be done again
-        tasklet.allowStartIfComplete(false );
-        return tasklet.build();
+        // false(default): if the job was aborted and is relaunched, this step will NOT be done again
+        tasklet.allowStartIfComplete(allowStartIfComplete);
     }
 
 }

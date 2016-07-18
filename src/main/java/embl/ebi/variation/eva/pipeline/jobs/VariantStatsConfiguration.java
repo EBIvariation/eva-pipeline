@@ -17,6 +17,7 @@ package embl.ebi.variation.eva.pipeline.jobs;
 
 import embl.ebi.variation.eva.pipeline.steps.VariantsStatsCreate;
 import embl.ebi.variation.eva.pipeline.steps.VariantsStatsLoad;
+import org.opencb.datastore.core.ObjectMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.Job;
@@ -51,6 +52,8 @@ public class VariantStatsConfiguration {
     JobLauncher jobLauncher;
     @Autowired
     Environment environment;
+    @Autowired
+    private ObjectMap pipelineOptions;
 
     @Bean
     public Job variantStatsJob() {
@@ -72,10 +75,7 @@ public class VariantStatsConfiguration {
     public Step statsCreate() {
         StepBuilder step1 = stepBuilderFactory.get("statsCreate");
         TaskletStepBuilder tasklet = step1.tasklet(variantsStatsCreate());
-
-        // true: every job execution will do this step, even if this step is already COMPLETED
-        // false: if the job was aborted and is relaunched, this step will NOT be done again
-        tasklet.allowStartIfComplete(false);
+        initStep(tasklet);
         return tasklet.build();
     }
 
@@ -87,12 +87,20 @@ public class VariantStatsConfiguration {
     public Step statsLoad() {
         StepBuilder step1 = stepBuilderFactory.get("statsLoad");
         TaskletStepBuilder tasklet = step1.tasklet(variantsStatsLoad());
-
-        // true: every job execution will do this step, even if this step is already COMPLETED
-        // false: if the job was aborted and is relaunched, this step will NOT be done again
-        tasklet.allowStartIfComplete(false);
+        initStep(tasklet);
         return tasklet.build();
     }
 
+    /**
+     * Initialize a Step with common configuration
+     * @param tasklet to be initialized with common configuration
+     */
+    private void initStep(TaskletStepBuilder tasklet) {
 
+        boolean allowStartIfComplete  = pipelineOptions.getBoolean("allowStartIfComplete");
+
+        // true: every job execution will do this step, even if this step is already COMPLETED
+        // false(default): if the job was aborted and is relaunched, this step will NOT be done again
+        tasklet.allowStartIfComplete(allowStartIfComplete);
+    }
 }
