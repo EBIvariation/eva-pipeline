@@ -50,7 +50,6 @@ public class VariantJobsArgs {
     @Value("${studyType}") private String studyType;
     @Value("${studyName}") private String studyName;
     @Value("${studyId}") private String studyId;
-    @Value("${dbName}") private String dbName;
     @Value("${compressGenotypes}") private String compressGenotypes;
     @Value("${overwriteStats:false}") private boolean overwriteStats;
     @Value("${calculateStats:false}") private boolean calculateStats;
@@ -60,8 +59,16 @@ public class VariantJobsArgs {
     @Value("${includeStats:false}")private String includeStats;
     @Value("${aggregated}") private String aggregated;
 
-
     @Value("${opencga.app.home}") private String opencgaAppHome;
+
+    /// DB connection
+    @Value("${dbHosts:}") private String dbHosts;
+    @Value("${dbAuthenticationDb:}") private String dbAuthenticationDb;
+    @Value("${dbUser:}") private String dbUser;
+    @Value("${dbPassword:}") private String dbPassword;
+    @Value("${dbName}") private String dbName;
+    @Value("${dbCollectionVariantsName}") private String dbCollectionVariantsName;
+    @Value("${dbCollectionFilesName}") private String dbCollectionFilesName;
 
     ////pipeline
     @Value("${outputDir}") private String outputDir;
@@ -131,7 +138,13 @@ public class VariantJobsArgs {
         pipelineOptions.put("compressExtension", compressExtension);
         pipelineOptions.put("outputDir", outputDir);
         pipelineOptions.put("pedigree", pedigree);
+        pipelineOptions.put("dbHosts", dbHosts);
+        pipelineOptions.put("dbAuthenticationDb", dbAuthenticationDb);
         pipelineOptions.put(VariantStorageManager.DB_NAME, dbName);
+        pipelineOptions.put("dbCollectionVariantsName", dbCollectionVariantsName);
+        pipelineOptions.put("dbCollectionFilesName", dbCollectionFilesName);
+        pipelineOptions.put("dbUser", dbUser);
+        pipelineOptions.put("dbPassword", dbPassword);
         pipelineOptions.put(VariantsLoad.SKIP_LOAD, skipLoad);
         pipelineOptions.put(VariantsStatsCreate.SKIP_STATS_CREATE, skipStatsCreate);
         pipelineOptions.put(VariantsStatsLoad.SKIP_STATS_LOAD, skipStatsLoad);

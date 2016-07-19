@@ -16,12 +16,14 @@
 package embl.ebi.variation.eva.pipeline.steps;
 
 import com.mongodb.DBObject;
-import com.mongodb.MongoClient;
+import embl.ebi.variation.eva.pipeline.ConnectionHelper;
 import embl.ebi.variation.eva.pipeline.annotation.generateInput.VariantAnnotationItemProcessor;
 import embl.ebi.variation.eva.pipeline.annotation.generateInput.VariantWrapper;
 import embl.ebi.variation.eva.pipeline.jobs.VariantJobArgsConfig;
 import org.opencb.datastore.core.ObjectMap;
 import org.opencb.opencga.storage.core.variant.VariantStorageManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
@@ -68,6 +70,8 @@ import java.util.Map;
 @Import(VariantJobArgsConfig.class)
 public class VariantsAnnotGenerateInputBatch {
 
+    private static final Logger logger = LoggerFactory.getLogger(VariantsAnnotGenerateInputBatch.class);
+
     @Autowired
     private StepBuilderFactory steps;
 
@@ -99,10 +103,17 @@ public class VariantsAnnotGenerateInputBatch {
 
     @Bean
     public ItemReader<DBObject> variantReader() throws Exception {
-        MongoTemplate template =
-                new MongoTemplate(new MongoClient(), pipelineOptions.getString(VariantStorageManager.DB_NAME));
+        MongoTemplate template = ConnectionHelper.getMongoTemplate(
+                pipelineOptions.getString("dbHosts"),
+                pipelineOptions.getString("dbAuthenticationDb"),
+                pipelineOptions.getString(VariantStorageManager.DB_NAME),
+                pipelineOptions.getString("dbUser"),
+                pipelineOptions.getString("dbPassword").toCharArray()
+        );
+//        template.setReadPreference();
+//        template.setWriteConcern();
 
-        return initReader(pipelineOptions.getString(VariantStorageManager.DB_NAME), template);
+        return initReader(pipelineOptions.getString("dbCollectionVariantsName"), template);
     }
 
 
@@ -152,5 +163,4 @@ public class VariantsAnnotGenerateInputBatch {
         writer.setLineAggregator(delLineAgg);
         return writer;
     }
-
 }

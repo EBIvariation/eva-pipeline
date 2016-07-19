@@ -16,13 +16,15 @@
 
 package embl.ebi.variation.eva.pipeline.steps;
 
-import com.mongodb.MongoClient;
+import embl.ebi.variation.eva.pipeline.ConnectionHelper;
 import embl.ebi.variation.eva.pipeline.annotation.load.VariantAnnotationLineMapper;
 import embl.ebi.variation.eva.pipeline.annotation.load.VariantAnnotationMongoItemWriter;
 import embl.ebi.variation.eva.pipeline.jobs.VariantJobArgsConfig;
 import org.opencb.biodata.models.variant.annotation.VariantAnnotation;
 import org.opencb.datastore.core.ObjectMap;
 import org.opencb.opencga.storage.core.variant.VariantStorageManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
@@ -58,8 +60,10 @@ import java.net.UnknownHostException;
 @Import(VariantJobArgsConfig.class)
 public class VariantAnnotLoadBatch {
 
-	@Autowired
-	private StepBuilderFactory steps;
+    private static final Logger logger = LoggerFactory.getLogger(VariantAnnotLoadBatch.class);
+
+    @Autowired
+    private StepBuilderFactory steps;
 
     @Autowired
     private ObjectMap pipelineOptions;
@@ -86,31 +90,36 @@ public class VariantAnnotLoadBatch {
                 .build();
     }
 
-	@Bean
-	public FlatFileItemReader<VariantAnnotation> variantAnnotationReader() {
-		FlatFileItemReader<VariantAnnotation> reader = new FlatFileItemReader<>();
+    @Bean
+    public FlatFileItemReader<VariantAnnotation> variantAnnotationReader() {
+        FlatFileItemReader<VariantAnnotation> reader = new FlatFileItemReader<>();
         reader.setResource(new FileSystemResource(pipelineOptions.getString("vepOutput")));
         reader.setLineMapper(new VariantAnnotationLineMapper());
-		return reader;
-	}
+        return reader;
+    }
 
-	@Bean
-	public ItemWriter<VariantAnnotation> variantAnnotationWriter(){
-		MongoItemWriter<VariantAnnotation> writer = new VariantAnnotationMongoItemWriter(mongoOperations());
-		writer.setCollection(pipelineOptions.getString(VariantStorageManager.DB_NAME));
-		writer.setTemplate(mongoOperations());
-		return writer;
-	}
+    @Bean
+    public ItemWriter<VariantAnnotation> variantAnnotationWriter(){
+        MongoItemWriter<VariantAnnotation> writer = new VariantAnnotationMongoItemWriter(mongoOperations());
+        writer.setCollection(pipelineOptions.getString("dbCollectionVariantsName"));
+        writer.setTemplate(mongoOperations());
+        return writer;
+    }
 
     @Bean
     public MongoOperations mongoOperations() {
         MongoTemplate mongoTemplate;
         try {
-            mongoTemplate = new MongoTemplate(new MongoClient(), pipelineOptions.getString(VariantStorageManager.DB_NAME));
+            mongoTemplate = ConnectionHelper.getMongoTemplate(
+                    pipelineOptions.getString("dbHosts"),
+                    pipelineOptions.getString("dbAuthenticationDb"),
+                    pipelineOptions.getString(VariantStorageManager.DB_NAME),
+                    pipelineOptions.getString("dbUser"),
+                    pipelineOptions.getString("dbPassword").toCharArray()
+            );
         } catch (UnknownHostException e) {
             throw new RuntimeException("Unable to initialize MongoDB", e);
         }
         return mongoTemplate;
     }
-	
 }
