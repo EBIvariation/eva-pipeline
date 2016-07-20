@@ -17,6 +17,7 @@
 package embl.ebi.variation.eva.pipeline.steps;
 
 import embl.ebi.variation.eva.pipeline.ConnectionHelper;
+import embl.ebi.variation.eva.pipeline.annotation.GzipLazyResource;
 import embl.ebi.variation.eva.pipeline.annotation.load.VariantAnnotationLineMapper;
 import embl.ebi.variation.eva.pipeline.annotation.load.VariantAnnotationMongoItemWriter;
 import embl.ebi.variation.eva.pipeline.jobs.VariantJobArgsConfig;
@@ -40,6 +41,7 @@ import org.springframework.core.io.FileSystemResource;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.data.mongodb.core.MongoTemplate;
 
+import java.io.IOException;
 import java.net.UnknownHostException;
 
 /**
@@ -83,7 +85,7 @@ public class VariantAnnotLoadBatch {
 
     @Bean
     @Qualifier("variantAnnotLoadBatchStep")
-    public Step variantAnnotLoadBatchStep(){
+    public Step variantAnnotLoadBatchStep() throws IOException {
         return steps.get("variantAnnotLoadBatchStep").<VariantAnnotation, VariantAnnotation> chunk(10)
                 .reader(variantAnnotationReader())
                 .writer(variantAnnotationWriter())
@@ -91,9 +93,9 @@ public class VariantAnnotLoadBatch {
     }
 
     @Bean
-    public FlatFileItemReader<VariantAnnotation> variantAnnotationReader() {
+    public FlatFileItemReader<VariantAnnotation> variantAnnotationReader() throws IOException {
         FlatFileItemReader<VariantAnnotation> reader = new FlatFileItemReader<>();
-        reader.setResource(new FileSystemResource(pipelineOptions.getString("vepOutput")));
+        reader.setResource(new GzipLazyResource(new FileSystemResource(pipelineOptions.getString("vepOutput"))));
         reader.setLineMapper(new VariantAnnotationLineMapper());
         return reader;
     }

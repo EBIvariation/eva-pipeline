@@ -32,11 +32,9 @@ import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
 import org.springframework.data.mongodb.core.MongoTemplate;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.util.Collections;
+import java.util.zip.GZIPInputStream;
 
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertFalse;
@@ -148,10 +146,12 @@ public class VariantsAnnotGenerateInputBatchTest {
     * Read a line from the output file, if the reader has not been created,
     * recreate. This method is only necessary because running the tests in a
     * UNIX environment locks the file if it's open for writing.
+    *
+    * The variant list should be compressed.
     */
     private String readLine() throws IOException {
         if (reader == null) {
-            reader = new BufferedReader(new FileReader(outputFile));
+            reader = new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(outputFile))));
         }
 
         return reader.readLine();
