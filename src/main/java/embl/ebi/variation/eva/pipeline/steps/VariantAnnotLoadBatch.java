@@ -38,6 +38,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.data.mongodb.core.MongoTemplate;
 
@@ -94,17 +95,28 @@ public class VariantAnnotLoadBatch {
 
     @Bean
     public FlatFileItemReader<VariantAnnotation> variantAnnotationReader() throws IOException {
+        Resource resource = new GzipLazyResource(pipelineOptions.getString("vepOutput"));
+        return initReader(resource);
+    }
+
+    public FlatFileItemReader<VariantAnnotation> initReader(Resource resource) {
         FlatFileItemReader<VariantAnnotation> reader = new FlatFileItemReader<>();
-        reader.setResource(new GzipLazyResource(new FileSystemResource(pipelineOptions.getString("vepOutput"))));
+        reader.setResource(resource);
         reader.setLineMapper(new VariantAnnotationLineMapper());
         return reader;
     }
 
+
     @Bean
     public ItemWriter<VariantAnnotation> variantAnnotationWriter(){
-        MongoItemWriter<VariantAnnotation> writer = new VariantAnnotationMongoItemWriter(mongoOperations());
-        writer.setCollection(pipelineOptions.getString("dbCollectionVariantsName"));
-        writer.setTemplate(mongoOperations());
+        String dbCollectionVariantsName = pipelineOptions.getString("dbCollectionVariantsName");
+        return initWriter(dbCollectionVariantsName, mongoOperations());
+    }
+
+    public MongoItemWriter<VariantAnnotation> initWriter(String dbCollectionVariantsName, MongoOperations mongoOperations) {
+        MongoItemWriter<VariantAnnotation> writer = new VariantAnnotationMongoItemWriter(mongoOperations);
+        writer.setCollection(dbCollectionVariantsName);
+        writer.setTemplate(mongoOperations);
         return writer;
     }
 

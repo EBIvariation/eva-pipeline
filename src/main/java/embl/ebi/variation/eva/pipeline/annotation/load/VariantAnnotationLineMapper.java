@@ -50,7 +50,7 @@ import java.util.Map;
  *  - ConsequenceTypes
  *  - Hgvs
  */
-public class VariantAnnotationLineMapper implements LineMapper {
+public class VariantAnnotationLineMapper implements LineMapper<VariantAnnotation> {
     private static final Logger logger = LoggerFactory.getLogger(VariantAnnotationLineMapper.class);
 
     /**

@@ -57,13 +57,18 @@ public class VariantAnnotationMongoItemWriter extends MongoItemWriter<VariantAnn
     private static final Logger logger = LoggerFactory.getLogger(VariantAnnotationMongoItemWriter.class);
 
     private MongoOperations mongoOperations;
+    private String collection;
 
     public VariantAnnotationMongoItemWriter(MongoOperations mongoOperations) {
         this.mongoOperations = mongoOperations;
     }
 
-
- /*    public VariantAnnotationMongoItemWriter() {
+    @Override
+    public void setCollection(String collection) {
+        super.setCollection(collection);
+        this.collection = collection;
+    }
+/*    public VariantAnnotationMongoItemWriter() {
         this.template = mongoTemplate();
     }
 
@@ -80,19 +85,20 @@ public class VariantAnnotationMongoItemWriter extends MongoItemWriter<VariantAnn
 
     @Override
     protected void doWrite(List<? extends VariantAnnotation> variantAnnotations) {
+        //// TODO: 30/06/2016 move in constructor?
+        DBObjectToVariantAnnotationConverter converter = new DBObjectToVariantAnnotationConverter();
+
         for (VariantAnnotation variantAnnotation : variantAnnotations) {
             //logger.debug("Writing into mongo {}", variantAnnotation);
-
-            //// TODO: 30/06/2016 move in constructor? 
-            DBObjectToVariantAnnotationConverter converter = new DBObjectToVariantAnnotationConverter();
 
             String storageId = buildStorageId(variantAnnotation.getChromosome(), variantAnnotation.getStart(),
                     variantAnnotation.getReferenceAllele(), variantAnnotation.getAlternativeAllele());
 
             BasicDBObject find = new BasicDBObject("_id", storageId);
 
-            //find existing variant with same Id
-            DBObject existingVariantStorage = mongoOperations.getCollection("variants").findOne(find);
+            //find existing variant with same Id, and bring only the annotation
+            DBObject existingVariantStorage = mongoOperations.getCollection(collection)
+                    .findOne(find, new BasicDBObject("annot", 1));
 
             //update annotation in existing variant
             if (null != existingVariantStorage){
@@ -120,7 +126,7 @@ public class VariantAnnotationMongoItemWriter extends MongoItemWriter<VariantAnn
             DBObject storageVariantAnnotation = converter.convertToStorageType(variantAnnotation);
 
             BasicDBObject update = new BasicDBObject("$set", new BasicDBObject("annot", storageVariantAnnotation));
-            mongoOperations.getCollection("variants").update(find, update);
+            mongoOperations.getCollection(collection).update(find, update);
 
         }
     }
