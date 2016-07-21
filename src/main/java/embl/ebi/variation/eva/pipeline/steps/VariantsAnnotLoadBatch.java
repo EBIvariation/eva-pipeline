@@ -24,8 +24,6 @@ import embl.ebi.variation.eva.pipeline.jobs.VariantJobArgsConfig;
 import org.opencb.biodata.models.variant.annotation.VariantAnnotation;
 import org.opencb.datastore.core.ObjectMap;
 import org.opencb.opencga.storage.core.variant.VariantStorageManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
@@ -37,7 +35,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -61,9 +58,9 @@ import java.net.UnknownHostException;
 @Configuration
 @EnableBatchProcessing
 @Import(VariantJobArgsConfig.class)
-public class VariantAnnotLoadBatch {
+public class VariantsAnnotLoadBatch {
 
-    private static final Logger logger = LoggerFactory.getLogger(VariantAnnotLoadBatch.class);
+    public static final String SKIP_ANNOT_LOAD = "skipAnnotLoad";
 
     @Autowired
     private StepBuilderFactory steps;

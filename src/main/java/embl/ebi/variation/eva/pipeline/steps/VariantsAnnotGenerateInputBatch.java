@@ -44,6 +44,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.data.mongodb.core.MongoTemplate;
 
+import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -71,6 +72,8 @@ import java.util.Map;
 public class VariantsAnnotGenerateInputBatch {
 
     private static final Logger logger = LoggerFactory.getLogger(VariantsAnnotGenerateInputBatch.class);
+
+    public static final String SKIP_ANNOT_GENERATE_INPUT = "skipAnnotGenerateInput";
 
     @Autowired
     private StepBuilderFactory steps;
@@ -103,17 +106,7 @@ public class VariantsAnnotGenerateInputBatch {
 
     @Bean
     public ItemReader<DBObject> variantReader() throws Exception {
-        MongoTemplate template = ConnectionHelper.getMongoTemplate(
-                pipelineOptions.getString("dbHosts"),
-                pipelineOptions.getString("dbAuthenticationDb"),
-                pipelineOptions.getString(VariantStorageManager.DB_NAME),
-                pipelineOptions.getString("dbUser"),
-                pipelineOptions.getString("dbPassword").toCharArray()
-        );
-//        template.setReadPreference();
-//        template.setWriteConcern();
-
-        return initReader(pipelineOptions.getString("dbCollectionVariantsName"), template);
+        return initReader(pipelineOptions.getString("dbCollectionVariantsName"), mongoOperations());
     }
 
 
@@ -147,7 +140,7 @@ public class VariantsAnnotGenerateInputBatch {
         return initWriter(new FileSystemResource(pipelineOptions.getString("vepInput")));
     }
 
-    public FlatFileItemWriter<VariantWrapper> initWriter(Resource resource){
+    public static FlatFileItemWriter<VariantWrapper> initWriter(Resource resource){
         BeanWrapperFieldExtractor<VariantWrapper> fieldExtractor = new BeanWrapperFieldExtractor<>();
         fieldExtractor.setNames(new String[] {"chr", "start", "end", "refAlt", "strand"});
 
@@ -162,5 +155,22 @@ public class VariantsAnnotGenerateInputBatch {
         writer.setShouldDeleteIfExists(true);
         writer.setLineAggregator(delLineAgg);
         return writer;
+    }
+
+    @Bean
+    public MongoOperations mongoOperations() {
+        MongoTemplate mongoTemplate;
+        try {
+            mongoTemplate = ConnectionHelper.getMongoTemplate(
+                    pipelineOptions.getString("dbHosts"),
+                    pipelineOptions.getString("dbAuthenticationDb"),
+                    pipelineOptions.getString(VariantStorageManager.DB_NAME),
+                    pipelineOptions.getString("dbUser"),
+                    pipelineOptions.getString("dbPassword").toCharArray()
+            );
+        } catch (UnknownHostException e) {
+            throw new RuntimeException("Unable to initialize MongoDB", e);
+        }
+        return mongoTemplate;
     }
 }

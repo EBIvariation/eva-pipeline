@@ -16,15 +16,22 @@
 
 package embl.ebi.variation.eva.pipeline.jobs;
 
-import embl.ebi.variation.eva.pipeline.steps.VariantAnnotLoadBatch;
+import embl.ebi.variation.eva.pipeline.annotation.OptionalDecider;
+import embl.ebi.variation.eva.pipeline.steps.VariantsAnnotLoadBatch;
 import embl.ebi.variation.eva.pipeline.steps.VariantsAnnotCreate;
 import embl.ebi.variation.eva.pipeline.steps.VariantsAnnotGenerateInputBatch;
+import org.opencb.datastore.core.ObjectMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
+import org.springframework.batch.core.job.builder.FlowBuilder;
+import org.springframework.batch.core.job.builder.FlowJobBuilder;
 import org.springframework.batch.core.job.builder.JobBuilder;
+import org.springframework.batch.core.job.flow.Flow;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.core.step.builder.TaskletStepBuilder;
@@ -52,13 +59,17 @@ import org.springframework.context.annotation.Import;
 
 @Configuration
 @EnableBatchProcessing
-@Import({VariantsAnnotGenerateInputBatch.class, VariantAnnotLoadBatch.class, VariantJobArgsConfig.class})
+@Import({VariantsAnnotGenerateInputBatch.class, VariantsAnnotLoadBatch.class, VariantJobArgsConfig.class})
 public class VariantAnnotConfigurationBatch {
+    private static final Logger logger = LoggerFactory.getLogger(VariantAnnotConfigurationBatch.class);
     public static final String jobName = "variantAnnotBatchJob";
 
     @Autowired private JobBuilderFactory jobBuilderFactory;
 
     @Autowired private StepBuilderFactory stepBuilderFactory;
+
+    @Autowired
+    private ObjectMap pipelineOptions;
 
     @Qualifier("variantsAnnotGenerateInputBatchStep")
     @Autowired public Step variantsAnnotGenerateInputBatchStep;
@@ -75,11 +86,36 @@ public class VariantAnnotConfigurationBatch {
                 .get(jobName)
                 .incrementer(new RunIdIncrementer());
 
-        return jobBuilder
-                .start(variantsAnnotGenerateInputBatchStep)
-                .next(annotationCreate)
-                .next(variantAnnotLoadBatchStep)
+        OptionalDecider genInputDec = new OptionalDecider(pipelineOptions, VariantsAnnotGenerateInputBatch.SKIP_ANNOT_GENERATE_INPUT);
+        OptionalDecider createDec = new OptionalDecider(pipelineOptions, VariantsAnnotCreate.SKIP_ANNOT_CREATE);
+        OptionalDecider loadDec = new OptionalDecider(pipelineOptions, VariantsAnnotLoadBatch.SKIP_ANNOT_LOAD);
+
+        // optional flow for generateInput step
+        Flow genInputFlow = new FlowBuilder<Flow>("genInputFlow")
+                .start(genInputDec).on(OptionalDecider.DO_STEP).to(variantsAnnotGenerateInputBatchStep)
+                .from(genInputDec).on(OptionalDecider.SKIP_STEP).end("COMPLETED")
                 .build();
+
+        // optional flow for create step
+        Flow createFlow = new FlowBuilder<Flow>("createFlow")
+                .start(createDec).on(OptionalDecider.DO_STEP).to(annotationCreate)
+                .from(createDec).on(OptionalDecider.SKIP_STEP).end("COMPLETED")
+                .build();
+
+        // optional flow for load step
+        Flow loadFlow = new FlowBuilder<Flow>("loadFlow")
+                .start(loadDec).on(OptionalDecider.DO_STEP).to(variantAnnotLoadBatchStep)
+                .from(loadDec).on(OptionalDecider.SKIP_STEP).end("COMPLETED")
+                .build();
+
+        // assemble job
+        FlowJobBuilder builder = jobBuilder
+                .start(genInputFlow)
+                .next(createFlow)
+                .next(loadFlow)
+                .end();
+
+        return builder.build();
     }
 
     @Bean

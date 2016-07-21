@@ -43,19 +43,19 @@ import static junit.framework.TestCase.assertTrue;
 /**
  * @author Diego Poggioli
  *
- * Test {@link VariantAnnotLoadBatch}
+ * Test {@link VariantsAnnotLoadBatch}
  */
-public class VariantAnnotLoadBatchTest {
+public class VariantsAnnotLoadBatchTest {
 
 
-    private VariantAnnotLoadBatch variantAnnotLoadBatch;
+    private VariantsAnnotLoadBatch variantsAnnotLoadBatch;
     private ExecutionContext executionContext;
 
     @Before
     public void setUp() throws Exception {
         executionContext = MetaDataInstanceFactory.createStepExecution().getExecutionContext();
 
-        variantAnnotLoadBatch = new VariantAnnotLoadBatch();
+        variantsAnnotLoadBatch = new VariantsAnnotLoadBatch();
     }
 
     @Test
@@ -69,9 +69,9 @@ public class VariantAnnotLoadBatchTest {
 
     @Test
     public void variantAnnotationReaderShouldReadAllLinesInVepOutput() throws Exception {
-        String vepOutput = VariantAnnotLoadBatchTest.class.getResource("/annot.tsv.gz").getFile();
+        String vepOutput = VariantsAnnotLoadBatchTest.class.getResource("/annot.tsv.gz").getFile();
 
-        FlatFileItemReader<VariantAnnotation> reader = variantAnnotLoadBatch.initReader(new GzipLazyResource(vepOutput));
+        FlatFileItemReader<VariantAnnotation> reader = variantsAnnotLoadBatch.initReader(new GzipLazyResource(vepOutput));
 
         reader.setSaveState(false);
         reader.open(executionContext);
@@ -121,7 +121,7 @@ public class VariantAnnotLoadBatchTest {
 
         // now, load the annotation
         MongoOperations mongoOperations = new MongoTemplate(new MongoClient(), dbName);
-        MongoItemWriter<VariantAnnotation> writer = variantAnnotLoadBatch.initWriter("variants", mongoOperations);
+        MongoItemWriter<VariantAnnotation> writer = variantsAnnotLoadBatch.initWriter("variants", mongoOperations);
 
         writer.write(annotations);
 
