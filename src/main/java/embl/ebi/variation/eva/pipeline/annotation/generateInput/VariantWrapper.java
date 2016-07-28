@@ -3,7 +3,9 @@ package embl.ebi.variation.eva.pipeline.annotation.generateInput;
 import org.opencb.biodata.models.variant.Variant;
 
 /**
- * Created by diego on 29/06/2016.
+ * @author Diego Poggioli
+ *
+ * Container for {@link Variant} including strand. By default strand in VCF is always '+'
  */
 public class VariantWrapper {
 
@@ -33,6 +35,5 @@ public class VariantWrapper {
     public String getStrand() {
         return strand;
     }
-
 
 }
