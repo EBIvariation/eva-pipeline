@@ -34,7 +34,6 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 
 import java.io.*;
 import java.util.Collections;
-import java.util.zip.GZIPInputStream;
 
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertFalse;
@@ -151,7 +150,7 @@ public class VariantsAnnotGenerateInputBatchTest {
     */
     private String readLine() throws IOException {
         if (reader == null) {
-            reader = new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(outputFile))));
+            reader = new BufferedReader(new FileReader(outputFile));
         }
 
         return reader.readLine();
