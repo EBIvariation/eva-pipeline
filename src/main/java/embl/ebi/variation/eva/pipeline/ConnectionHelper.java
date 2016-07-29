@@ -47,8 +47,7 @@ public class ConnectionHelper {
     }
 
     public static MongoTemplate getMongoTemplate(String hosts, String authenticationDB, String database,
-                                                 String user, char[] password)
-            throws UnknownHostException {
+                                                 String user, char[] password) throws UnknownHostException {
         return new MongoTemplate(
                 new SimpleMongoDbFactory(
                         new MongoClient(
@@ -61,6 +60,14 @@ public class ConnectionHelper {
                                 )
                         ),
                         database
+                )
+        );
+    }
+
+    public static MongoTemplate getMongoTemplate(String database) throws UnknownHostException {
+        return new MongoTemplate(
+                new SimpleMongoDbFactory(
+                        new MongoClient(), database
                 )
         );
     }
