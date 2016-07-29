@@ -49,18 +49,12 @@ import java.net.UnknownHostException;
  * - READ: read a list of VEP {@link VariantAnnotation} from flat file
  * - LOAD: write the {@link VariantAnnotation} into Mongo db
  *
- * TODO:
- * - handle the template connection details
- *         https://github.com/opencb/datastore/tree/v0.3.3/datastore-mongodb/src/main/java/org/opencb/datastore/mongodb
- *         or add in the property file: spring.data.mongodb.uri=mongodb://localhost:27017/test
  */
 
 @Configuration
 @EnableBatchProcessing
 @Import(VariantJobArgsConfig.class)
 public class VariantsAnnotLoadBatch {
-
-    public static final String SKIP_ANNOT_LOAD = "skipAnnotLoad";
 
     @Autowired
     private StepBuilderFactory steps;
@@ -121,6 +115,20 @@ public class VariantsAnnotLoadBatch {
     public MongoOperations mongoOperations() {
         MongoTemplate mongoTemplate;
         try {
+            mongoTemplate = getMongoTemplate();
+        } catch (UnknownHostException e) {
+            throw new RuntimeException("Unable to initialize MongoDB", e);
+        }
+        return mongoTemplate;
+    }
+
+    private MongoTemplate getMongoTemplate() throws UnknownHostException {
+        MongoTemplate mongoTemplate;
+        if(pipelineOptions.getString("dbAuthenticationDb").isEmpty()){
+            mongoTemplate = ConnectionHelper.getMongoTemplate(
+                    pipelineOptions.getString(VariantStorageManager.DB_NAME)
+            );
+        }else {
             mongoTemplate = ConnectionHelper.getMongoTemplate(
                     pipelineOptions.getString("dbHosts"),
                     pipelineOptions.getString("dbAuthenticationDb"),
@@ -128,8 +136,6 @@ public class VariantsAnnotLoadBatch {
                     pipelineOptions.getString("dbUser"),
                     pipelineOptions.getString("dbPassword").toCharArray()
             );
-        } catch (UnknownHostException e) {
-            throw new RuntimeException("Unable to initialize MongoDB", e);
         }
         return mongoTemplate;
     }

@@ -59,11 +59,13 @@ import java.util.Map;
  * - LOAD: write the {@link VariantWrapper} into a flatfile
  *
  * TODO:
- * - handle the overwrite
- * - handle the template connection details:
- *      https://github.com/opencb/datastore/tree/v0.3.3/datastore-mongodb/src/main/java/org/opencb/datastore/mongodb
- *      or add in the property file: spring.data.mongodb.uri=mongodb://localhost:27017/test
- *
+ * - Handle the overwrite
+ * - The variant list should be compressed. It is not possible to write into a zipped file with FlatFile item writer
+ *  see jmmut comment at https://github.com/EBIvariation/eva-v2/pull/22
+ *  We can create an extra step to convert the file and remove the nonp-zipped one
+ *  https://www.mkyong.com/java/how-to-compress-a-file-in-gzip-format/
+ *  https://examples.javacodegeeks.com/core-java/io/fileinputstream/compress-a-file-in-gzip-format-in-java/
+ *  http://www.journaldev.com/966/java-gzip-example-compress-and-decompress-file-in-gzip-format-in-java
  */
 
 @Configuration
@@ -72,8 +74,6 @@ import java.util.Map;
 public class VariantsAnnotGenerateInputBatch {
 
     private static final Logger logger = LoggerFactory.getLogger(VariantsAnnotGenerateInputBatch.class);
-
-    public static final String SKIP_ANNOT_GENERATE_INPUT = "skipAnnotGenerateInput";
 
     @Autowired
     private StepBuilderFactory steps;
@@ -94,6 +94,7 @@ public class VariantsAnnotGenerateInputBatch {
                 .writer(writer).allowStartIfComplete(false)
                 .build();
     }*/
+
     @Bean
     @Qualifier("variantsAnnotGenerateInputBatchStep")
     public Step variantsAnnotGenerateInputBatchStep() throws Exception {
@@ -108,7 +109,6 @@ public class VariantsAnnotGenerateInputBatch {
     public ItemReader<DBObject> variantReader() throws Exception {
         return initReader(pipelineOptions.getString("dbCollectionVariantsName"), mongoOperations());
     }
-
 
     public MongoItemReader<DBObject> initReader(String collection, MongoOperations template){
         MongoItemReader<DBObject> reader = new MongoItemReader<>();
@@ -134,6 +134,8 @@ public class VariantsAnnotGenerateInputBatch {
     /**
      * @return must return a {@link FlatFileItemWriter} and not a {@link org.springframework.batch.item.ItemWriter}
      * {@see https://jira.spring.io/browse/BATCH-2097
+     *
+     * TODO: The variant list should be compressed
      */
     @Bean
     public FlatFileItemWriter<VariantWrapper> vepInputWriter() throws Exception {
@@ -161,6 +163,20 @@ public class VariantsAnnotGenerateInputBatch {
     public MongoOperations mongoOperations() {
         MongoTemplate mongoTemplate;
         try {
+            mongoTemplate = getMongoTemplate();
+        } catch (UnknownHostException e) {
+            throw new RuntimeException("Unable to initialize MongoDB", e);
+        }
+        return mongoTemplate;
+    }
+
+    private MongoTemplate getMongoTemplate() throws UnknownHostException {
+        MongoTemplate mongoTemplate;
+        if(pipelineOptions.getString("dbAuthenticationDb").isEmpty()){
+            mongoTemplate = ConnectionHelper.getMongoTemplate(
+                    pipelineOptions.getString(VariantStorageManager.DB_NAME)
+            );
+        }else {
             mongoTemplate = ConnectionHelper.getMongoTemplate(
                     pipelineOptions.getString("dbHosts"),
                     pipelineOptions.getString("dbAuthenticationDb"),
@@ -168,8 +184,6 @@ public class VariantsAnnotGenerateInputBatch {
                     pipelineOptions.getString("dbUser"),
                     pipelineOptions.getString("dbPassword").toCharArray()
             );
-        } catch (UnknownHostException e) {
-            throw new RuntimeException("Unable to initialize MongoDB", e);
         }
         return mongoTemplate;
     }
