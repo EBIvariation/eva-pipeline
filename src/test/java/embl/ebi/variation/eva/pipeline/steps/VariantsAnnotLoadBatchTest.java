@@ -28,13 +28,18 @@ import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.item.data.MongoItemWriter;
 import org.springframework.batch.item.file.FlatFileItemReader;
 import org.springframework.batch.test.MetaDataInstanceFactory;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.data.mongodb.core.MongoTemplate;
 
-import java.io.FileInputStream;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertTrue;
@@ -72,6 +77,18 @@ public class VariantsAnnotLoadBatchTest {
         String vepOutput = VariantsAnnotLoadBatchTest.class.getResource("/annot.tsv.gz").getFile();
 
         FlatFileItemReader<VariantAnnotation> reader = variantsAnnotLoadBatch.initReader(new GzipLazyResource(vepOutput));
+
+/*      // Suggestion to avoid to use an external file
+        ByteArrayOutputStream baostream = new ByteArrayOutputStream();
+        OutputStream outStream = new GZIPOutputStream(baostream);
+        outStream.write(vepOutput.getBytes("UTF-8"));
+        outStream.close();
+        byte[] compressedBytes = baostream.toByteArray();
+
+
+        Resource r = new InputStreamResource(new GZIPInputStream(new ByteArrayInputStream(compressedBytes)));
+        FlatFileItemReader<VariantAnnotation> reader = variantsAnnotLoadBatch.initReader(r);*/
+
 
         reader.setSaveState(false);
         reader.open(executionContext);
