@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package embl.ebi.variation.eva.pipeline;
+package embl.ebi.variation.eva.pipeline.utils;
 
 import com.mongodb.MongoClient;
 import com.mongodb.MongoCredential;
@@ -33,20 +33,20 @@ import java.util.List;
  */
 public class ConnectionHelper {
     public static List<ServerAddress> parseServerAddresses(String hosts) throws UnknownHostException {
-        List<ServerAddress> erverAddresses = new LinkedList<>();
+        List<ServerAddress> serverAddresses = new LinkedList<>();
         for (String hostPort : hosts.split(",")) {
             if (hostPort.contains(":")) {
                 String[] split = hostPort.split(":");
                 Integer port = Integer.valueOf(split[1]);
-                erverAddresses.add(new ServerAddress(split[0], port));
+                serverAddresses.add(new ServerAddress(split[0], port));
             } else {
-                erverAddresses.add(new ServerAddress(hostPort, 27017));
+                serverAddresses.add(new ServerAddress(hostPort, 27017));
             }
         }
-        return erverAddresses;
+        return serverAddresses;
     }
 
-    public static MongoTemplate getMongoTemplate(String hosts, String authenticationDB, String database,
+    public static MongoTemplate getMongoTemplate(String database, String hosts, String authenticationDB,
                                                  String user, char[] password) throws UnknownHostException {
         return new MongoTemplate(
                 new SimpleMongoDbFactory(
