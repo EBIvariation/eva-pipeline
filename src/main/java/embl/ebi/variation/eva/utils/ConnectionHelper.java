@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package embl.ebi.variation.eva.pipeline.utils;
+package embl.ebi.variation.eva.utils;
 
 import com.mongodb.MongoClient;
 import com.mongodb.MongoCredential;

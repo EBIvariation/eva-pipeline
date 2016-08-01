@@ -16,7 +16,7 @@
 package embl.ebi.variation.eva.pipeline.steps;
 
 import com.mongodb.DBObject;
-import embl.ebi.variation.eva.pipeline.utils.ConnectionHelper;
+import embl.ebi.variation.eva.utils.ConnectionHelper;
 import embl.ebi.variation.eva.pipeline.annotation.generateInput.VariantAnnotationItemProcessor;
 import embl.ebi.variation.eva.pipeline.annotation.generateInput.VariantWrapper;
 import embl.ebi.variation.eva.pipeline.jobs.VariantJobArgsConfig;

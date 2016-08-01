@@ -16,7 +16,7 @@
 
 package embl.ebi.variation.eva.pipeline.steps;
 
-import embl.ebi.variation.eva.pipeline.utils.ConnectionHelper;
+import embl.ebi.variation.eva.utils.ConnectionHelper;
 import embl.ebi.variation.eva.pipeline.annotation.GzipLazyResource;
 import embl.ebi.variation.eva.pipeline.annotation.load.VariantAnnotationLineMapper;
 import embl.ebi.variation.eva.pipeline.annotation.load.VariantAnnotationMongoItemWriter;
