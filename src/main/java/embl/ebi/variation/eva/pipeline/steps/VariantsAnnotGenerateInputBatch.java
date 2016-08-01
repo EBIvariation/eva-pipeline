@@ -16,7 +16,7 @@
 package embl.ebi.variation.eva.pipeline.steps;
 
 import com.mongodb.DBObject;
-import embl.ebi.variation.eva.pipeline.ConnectionHelper;
+import embl.ebi.variation.eva.pipeline.utils.ConnectionHelper;
 import embl.ebi.variation.eva.pipeline.annotation.generateInput.VariantAnnotationItemProcessor;
 import embl.ebi.variation.eva.pipeline.annotation.generateInput.VariantWrapper;
 import embl.ebi.variation.eva.pipeline.jobs.VariantJobArgsConfig;
@@ -178,9 +178,9 @@ public class VariantsAnnotGenerateInputBatch {
             );
         }else {
             mongoTemplate = ConnectionHelper.getMongoTemplate(
+                    pipelineOptions.getString(VariantStorageManager.DB_NAME),
                     pipelineOptions.getString("dbHosts"),
                     pipelineOptions.getString("dbAuthenticationDb"),
-                    pipelineOptions.getString(VariantStorageManager.DB_NAME),
                     pipelineOptions.getString("dbUser"),
                     pipelineOptions.getString("dbPassword").toCharArray()
             );
