@@ -58,9 +58,11 @@ public class VariantAnnotationMongoItemWriter extends MongoItemWriter<VariantAnn
 
     private MongoOperations mongoOperations;
     private String collection;
+    private DBObjectToVariantAnnotationConverter converter;
 
     public VariantAnnotationMongoItemWriter(MongoOperations mongoOperations) {
         this.mongoOperations = mongoOperations;
+        converter = new DBObjectToVariantAnnotationConverter();
     }
 
     @Override
@@ -68,28 +70,12 @@ public class VariantAnnotationMongoItemWriter extends MongoItemWriter<VariantAnn
         super.setCollection(collection);
         this.collection = collection;
     }
-/*    public VariantAnnotationMongoItemWriter() {
-        this.template = mongoTemplate();
-    }
-
-    public MongoTemplate mongoTemplate() {
-        MongoTemplate mongoTemplate;
-        try {
-            //mongoTemplate = new MongoTemplate(new MongoClient(), pipelineOptions.getString(VariantStorageManager.DB_NAME));
-            mongoTemplate = new MongoTemplate(new MongoClient(), "variants");
-        } catch (UnknownHostException e) {
-            throw new RuntimeException("Unable to initialize MongoDB", e);
-        }
-        return mongoTemplate;
-    }*/
 
     @Override
     protected void doWrite(List<? extends VariantAnnotation> variantAnnotations) {
-        //// TODO: 30/06/2016 move in constructor?
-        DBObjectToVariantAnnotationConverter converter = new DBObjectToVariantAnnotationConverter();
 
         for (VariantAnnotation variantAnnotation : variantAnnotations) {
-            //logger.debug("Writing into mongo {}", variantAnnotation);
+            logger.debug("Writing into mongo {}", variantAnnotation);
 
             String storageId = buildStorageId(variantAnnotation.getChromosome(), variantAnnotation.getStart(),
                     variantAnnotation.getReferenceAllele(), variantAnnotation.getAlternativeAllele());
@@ -101,18 +87,18 @@ public class VariantAnnotationMongoItemWriter extends MongoItemWriter<VariantAnn
                     .findOne(find, new BasicDBObject("annot", 1));
 
             //update annotation in existing variant
-            if (null != existingVariantStorage){
+            if (existingVariantStorage != null){
                 if(existingVariantStorage.containsField("annot")){
 
                     //update ConsequenceTypes
                     VariantAnnotation existingAnnotation = converter.convertToDataModelType((DBObject) existingVariantStorage.get("annot"));
 
-                    if(null != variantAnnotation.getConsequenceTypes()){
+                    if(variantAnnotation.getConsequenceTypes() != null){
                         existingAnnotation.getConsequenceTypes().addAll(variantAnnotation.getConsequenceTypes());
                     }
 
                     //update Hgvs
-                    if(null != variantAnnotation.getHgvs()){
+                    if(variantAnnotation.getHgvs() != null){
                         if(null == existingAnnotation.getHgvs()){
                             existingAnnotation.setHgvs(new ArrayList<>());
                         }
