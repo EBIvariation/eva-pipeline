@@ -72,24 +72,21 @@ public class VariantAnnotationLineMapper implements LineMapper<VariantAnnotation
         String[] lineFields = line.split("\t");
 
         Map<String,String> variantMap = parseVariant(lineFields[0], lineFields[1]);  // coordinates and alternative are only parsed once
-        VariantAnnotation currentAnnotation = new VariantAnnotation(variantMap.get("chromosome"),
+        VariantAnnotation currentAnnotation = new VariantAnnotation(
+                variantMap.get("chromosome"),
                 Integer.valueOf(variantMap.get("start")),
                 Integer.valueOf(variantMap.get("end")), variantMap.get("reference"),
                 variantMap.get("alternative"));
 
         // Initialize list of consequence types
-        if(currentAnnotation.getConsequenceTypes()==null) {
-            currentAnnotation.setConsequenceTypes(new ArrayList<>());
-        }
+        currentAnnotation.setConsequenceTypes(new ArrayList<>());
 
         // Initialize Hgvs
-        if(currentAnnotation.getHgvs()==null) {
-            currentAnnotation.setHgvs(new ArrayList<>());
-        }
+        currentAnnotation.setHgvs(new ArrayList<>());
 
         /**
-         * parses extra column and populates fields as required. Some lines do not have extra field and end with a \t: the split function above does not return that field
-         * true parameter indicates the function to also parse frequencies
+         * parses extra column and populates fields as required.
+         * Some lines do not have extra field and end with a \t: the split function above does not return that field
          */
         if(lineFields.length>13) {
             parseExtraField(consequenceType, lineFields[13], currentAnnotation);
@@ -97,7 +94,7 @@ public class VariantAnnotationLineMapper implements LineMapper<VariantAnnotation
 
         // Remaining fields only of interest if the feature is a transcript
         if(lineFields[5].toLowerCase().equals("transcript")) {
-            parseRemainingFields(consequenceType, lineFields);
+            parseTranscriptFields(consequenceType, lineFields);
             // Otherwise just set SO terms
         } else {
             consequenceType.setSoTermsFromSoNames(Arrays.asList(lineFields[6].split(",")));   // fill so terms
@@ -111,9 +108,12 @@ public class VariantAnnotationLineMapper implements LineMapper<VariantAnnotation
      * From org.opencb.biodata.formats.annotation.io.VepFormatReader
      * #parseRemainingFields(org.opencb.biodata.models.variant.annotation.ConsequenceType, java.lang.String[])
      */
-    private void parseRemainingFields(ConsequenceType consequenceType, String[] lineFields) {
+    private void parseTranscriptFields(ConsequenceType consequenceType, String[] lineFields) {
         consequenceType.setEnsemblGeneId(lineFields[3]);    // fill Ensembl gene id
         consequenceType.setEnsemblTranscriptId(lineFields[4]);  // fill Ensembl transcript id
+        if(!lineFields[6].equals("") && !lineFields.equals("-")) {  // VEP may leave this field empty
+            consequenceType.setSoTermsFromSoNames(Arrays.asList(lineFields[6].split(",")));    // fill so terms
+        }
         if(!lineFields[7].equals("-")) {
             consequenceType.setcDnaPosition(parseStringInterval(lineFields[7]));    // fill cdna position
         }
@@ -125,9 +125,6 @@ public class VariantAnnotationLineMapper implements LineMapper<VariantAnnotation
         }
         consequenceType.setAaChange(lineFields[10]);  // fill aa change
         consequenceType.setCodon(lineFields[11]); // fill codon change
-        if(!lineFields[6].equals("") && !lineFields.equals("-")) {  // VEP may leave this field empty
-            consequenceType.setSoTermsFromSoNames(Arrays.asList(lineFields[6].split(",")));    // fill so terms
-        }
     }
 
     /**
@@ -158,9 +155,8 @@ public class VariantAnnotationLineMapper implements LineMapper<VariantAnnotation
 //            parsedVariant.put("start", variantLocationFields[1]);
             parsedVariant.put("end", (variantLocationFields.length > 2) ? variantLocationFields[2] : variantLocationFields[1]);
         } catch (ArrayIndexOutOfBoundsException e) {
-            System.out.println("Unexpected format for column 2: "+coordinatesString);
+            logger.error("Unexpected format for column 2: "+coordinatesString);
             e.printStackTrace();
-            System.exit(1);
         }
 
         try {
@@ -183,9 +179,8 @@ public class VariantAnnotationLineMapper implements LineMapper<VariantAnnotation
             parsedVariant.put("reference", leftVariantFields[leftVariantFields.length-1]);
             parsedVariant.put("alternative", variantFields[1]);
         } catch (ArrayIndexOutOfBoundsException e) {
-            System.out.println("Unexpected variant format for column 1: "+variantString);
+            logger.error("Unexpected variant format for column 1: "+variantString);
             e.printStackTrace();
-            System.exit(1);
         }
 
         return parsedVariant;
