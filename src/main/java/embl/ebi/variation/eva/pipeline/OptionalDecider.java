@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package embl.ebi.variation.eva.pipeline.annotation;
+package embl.ebi.variation.eva.pipeline;
 
 import org.opencb.datastore.core.ObjectMap;
 import org.slf4j.Logger;
@@ -52,11 +52,11 @@ public class OptionalDecider implements JobExecutionDecider {
     public FlowExecutionStatus decide(JobExecution jobExecution, StepExecution stepExecution) {
 
         if (Boolean.parseBoolean(pipelineOptions.getString(skipStep))) {
-            logger.info("Skipping step, {} was set to true", skipStep);
+            logger.info("Skipping step because {} is enabled", skipStep);
             return new FlowExecutionStatus(SKIP_STEP);
         }
 
-        logger.info("Doing step, {} was set to false", skipStep);
+        logger.info("Running step because {} is disabled", skipStep);
         return new FlowExecutionStatus(DO_STEP);
     }
 
