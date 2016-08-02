@@ -17,22 +17,29 @@ package embl.ebi.variation.eva.pipeline.steps;
 
 import com.mongodb.*;
 import com.mongodb.util.JSON;
+import embl.ebi.variation.eva.VariantJobsArgs;
 import embl.ebi.variation.eva.pipeline.annotation.generateInput.VariantAnnotationItemProcessor;
 import embl.ebi.variation.eva.pipeline.annotation.generateInput.VariantWrapper;
+import embl.ebi.variation.eva.pipeline.jobs.AnnotationConfig;
+import embl.ebi.variation.eva.pipeline.jobs.VariantAnnotConfigurationBatchTest;
+import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.opencb.opencga.storage.core.variant.VariantStorageManager;
 import org.opencb.opencga.storage.mongodb.variant.DBObjectToVariantConverter;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.data.MongoItemReader;
 import org.springframework.batch.item.file.FlatFileItemWriter;
 import org.springframework.batch.test.MetaDataInstanceFactory;
-import org.springframework.core.io.FileSystemResource;
-import org.springframework.core.io.support.PropertiesLoaderUtils;
-import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.io.*;
+import java.net.URL;
 import java.util.Collections;
 
 import static junit.framework.TestCase.assertEquals;
@@ -44,13 +51,25 @@ import static junit.framework.TestCase.assertTrue;
  *
  * Test {@link VariantsAnnotGenerateInputBatch}
  */
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(classes = { VariantsAnnotGenerateInputBatch.class, AnnotationConfig.class})
 public class VariantsAnnotGenerateInputBatchTest {
 
-    private MongoClient mongoClient;
-    private String databaseName;
-    private String collectionName = "dummy";
+    @Autowired
+    private MongoItemReader<DBObject> mongoItemReader;
 
-    private VariantsAnnotGenerateInputBatch variantsAnnotGenerateInputBatch;
+    @Autowired
+    private FlatFileItemWriter<VariantWrapper> writer;
+
+    @Autowired
+    public VariantJobsArgs variantJobsArgs;
+
+    private MongoClient mongoClient;
+    private String dbName;
+    private String collectionName;
+    private String variantWithAnnotation;
+    private String variantWithoutAnnotation;
+
     private ExecutionContext executionContext;
 
     // temporary output file
@@ -61,13 +80,22 @@ public class VariantsAnnotGenerateInputBatchTest {
 
     @Before
     public void setUp() throws Exception {
-        databaseName = PropertiesLoaderUtils.loadAllProperties("application.properties").getProperty("mongo.db");
         mongoClient = new MongoClient();
 
-        variantsAnnotGenerateInputBatch = new VariantsAnnotGenerateInputBatch();
         executionContext = MetaDataInstanceFactory.createStepExecution().getExecutionContext();
 
-        outputFile = File.createTempFile("flatfile-test-output-", ".tmp");
+        URL variantWithNoAnnotationUrl =
+                VariantAnnotConfigurationBatchTest.class.getResource("/annotation/VariantWithOutAnnotation");
+        variantWithoutAnnotation = FileUtils.readFileToString(new File(variantWithNoAnnotationUrl.getFile()));
+
+        URL variantWithAnnotationUrl =
+                VariantAnnotConfigurationBatchTest.class.getResource("/annotation/VariantWithAnnotation");
+        variantWithAnnotation = FileUtils.readFileToString(new File(variantWithAnnotationUrl.getFile()));
+
+        variantJobsArgs.loadArgs();
+        dbName = variantJobsArgs.getPipelineOptions().getString(VariantStorageManager.DB_NAME);
+        collectionName = variantJobsArgs.getPipelineOptions().getString("dbCollectionVariantsName");
+        outputFile = new File(variantJobsArgs.getPipelineOptions().getString("vepInput"));
 
         collection().drop();
     }
@@ -87,7 +115,6 @@ public class VariantsAnnotGenerateInputBatchTest {
     @Test
     public void variantReaderShouldReadVariantsWithoutAnnotationField() throws Exception {
         insertDocuments();
-        MongoItemReader<DBObject> mongoItemReader = variantsAnnotGenerateInputBatch.initReader(collectionName, new MongoTemplate(mongoClient, databaseName));
         mongoItemReader.open(executionContext);
 
         int itemCount = 0;
@@ -120,21 +147,19 @@ public class VariantsAnnotGenerateInputBatchTest {
         DBObjectToVariantConverter converter = new DBObjectToVariantConverter();
         VariantWrapper variant = new VariantWrapper(converter.convertToDataModelType(constructDbo(variantWithAnnotation)));
 
-        FlatFileItemWriter<VariantWrapper> writer = variantsAnnotGenerateInputBatch.initWriter(new FileSystemResource(outputFile));
         writer.open(executionContext);
         writer.write(Collections.singletonList(variant));
         assertEquals("20\t60344\t60348\tG/A\t+", readLine());
         writer.close();
     }
 
-
-    private void insertDocuments() {
+    private void insertDocuments() throws IOException {
         collection().insert(constructDbo(variantWithAnnotation));
         collection().insert(constructDbo(variantWithoutAnnotation));
     }
 
     private DBCollection collection() {
-        return mongoClient.getDB(databaseName).getCollection(collectionName);
+        return mongoClient.getDB(dbName).getCollection(collectionName);
     }
 
     private DBObject constructDbo(String variant) {
@@ -156,139 +181,4 @@ public class VariantsAnnotGenerateInputBatchTest {
         return reader.readLine();
     }
 
-
-    private final String variantWithoutAnnotation = "{\n" +
-            "\t\"_id\" : \"20_60343_G_A\",\n" +
-            "\t\"chr\" : \"20\",\n" +
-            "\t\"start\" : 60343,\n" +
-            "\t\"files\" : [\n" +
-            "\t\t{\n" +
-            "\t\t\t\"fid\" : \"5\",\n" +
-            "\t\t\t\"sid\" : \"7\",\n" +
-            "\t\t\t\"attrs\" : {\n" +
-            "\t\t\t\t\"QUAL\" : \"100.0\",\n" +
-            "\t\t\t\t\"FILTER\" : \"PASS\",\n" +
-            "\t\t\t\t\"AC\" : \"1\",\n" +
-            "\t\t\t\t\"AF\" : \"0.000199681\",\n" +
-            "\t\t\t\t\"AN\" : \"5008\",\n" +
-            "\t\t\t\t\"NS\" : \"2504\",\n" +
-            "\t\t\t\t\"DP\" : \"0\",\n" +
-            "\t\t\t\t\"ASN_AF\" : \"0.0000\",\n" +
-            "\t\t\t\t\"AMR_AF\" : \"0.0014\",\n" +
-            "\t\t\t\t\"AFR_AF\" : \"0.0000\",\n" +
-            "\t\t\t\t\"EUR_AF\" : \"0.0000\",\n" +
-            "\t\t\t\t\"SAN_AF\" : \"0.0000\",\n" +
-            "\t\t\t\t\"ssID\" : \"ss1363765667\",\n" +
-            "\t\t\t}\n" +
-            "\t\t}\n" +
-            "\t],\n" +
-            "\t\"ids\" : [\n" +
-            "\t\t\"rs527639301\"\n" +
-            "\t],\n" +
-            "\t\"type\" : \"SNV\",\n" +
-            "\t\"end\" : 60343,\n" +
-            "\t\"len\" : 1,\n" +
-            "\t\"ref\" : \"G\",\n" +
-            "\t\"alt\" : \"A\",\n" +
-            "\t\"_at\" : {\n" +
-            "\t\t\"chunkIds\" : [\n" +
-            "\t\t\t\"20_60_1k\",\n" +
-            "\t\t\t\"20_6_10k\"\n" +
-            "\t\t]\n" +
-            "\t},\n" +
-            "\t\"hgvs\" : [\n" +
-            "\t\t{\n" +
-            "\t\t\t\"type\" : \"genomic\",\n" +
-            "\t\t\t\"name\" : \"20:g.60343G>A\"\n" +
-            "\t\t}\n" +
-            "\t],\n" +
-            "\t\"st\" : [\n" +
-            "\t\t{\n" +
-            "\t\t\t\"maf\" : -1,\n" +
-            "\t\t\t\"mgf\" : -1,\n" +
-            "\t\t\t\"mafAl\" : null,\n" +
-            "\t\t\t\"mgfGt\" : null,\n" +
-            "\t\t\t\"missAl\" : 0,\n" +
-            "\t\t\t\"missGt\" : 0,\n" +
-            "\t\t\t\"numGt\" : {\n" +
-            "\t\t\t\t\n" +
-            "\t\t\t},\n" +
-            "\t\t\t\"cid\" : \"ALL\",\n" +
-            "\t\t\t\"sid\" : \"7\",\n" +
-            "\t\t\t\"fid\" : \"5\"\n" +
-            "\t\t}\n" +
-            "\t]\n" +
-            "}";
-
-    private final String variantWithAnnotation = "{\n" +
-            "\t\"_id\" : \"20_60344_G_T\",\n" +
-            "\t\"chr\" : \"20\",\n" +
-            "\t\"start\" : 60344,\n" +
-            "\t\"files\" : [\n" +
-            "\t\t{\n" +
-            "\t\t\t\"fid\" : \"5\",\n" +
-            "\t\t\t\"sid\" : \"7\",\n" +
-            "\t\t\t\"attrs\" : {\n" +
-            "\t\t\t\t\"QUAL\" : \"100.0\",\n" +
-            "\t\t\t\t\"FILTER\" : \"PASS\",\n" +
-            "\t\t\t\t\"AC\" : \"1\",\n" +
-            "\t\t\t\t\"AF\" : \"0.000199681\",\n" +
-            "\t\t\t\t\"AN\" : \"5008\",\n" +
-            "\t\t\t\t\"NS\" : \"2504\",\n" +
-            "\t\t\t\t\"DP\" : \"0\",\n" +
-            "\t\t\t\t\"ASN_AF\" : \"0.0000\",\n" +
-            "\t\t\t\t\"AMR_AF\" : \"0.0014\",\n" +
-            "\t\t\t\t\"AFR_AF\" : \"0.0000\",\n" +
-            "\t\t\t\t\"EUR_AF\" : \"0.0000\",\n" +
-            "\t\t\t\t\"SAN_AF\" : \"0.0000\",\n" +
-            "\t\t\t\t\"ssID\" : \"ss1363765667\",\n" +
-            "\t\t\t}\n" +
-            "\t\t}\n" +
-            "\t],\n" +
-            "\t\"ids\" : [\n" +
-            "\t\t\"rs527639301\"\n" +
-            "\t],\n" +
-            "\t\"type\" : \"SNV\",\n" +
-            "\t\"end\" : 60348,\n" +
-            "\t\"len\" : 1,\n" +
-            "\t\"ref\" : \"G\",\n" +
-            "\t\"alt\" : \"A\",\n" +
-            "\t\"_at\" : {\n" +
-            "\t\t\"chunkIds\" : [\n" +
-            "\t\t\t\"20_60_1k\",\n" +
-            "\t\t\t\"20_6_10k\"\n" +
-            "\t\t]\n" +
-            "\t},\n" +
-            "\t\"hgvs\" : [\n" +
-            "\t\t{\n" +
-            "\t\t\t\"type\" : \"genomic\",\n" +
-            "\t\t\t\"name\" : \"20:g.60343G>A\"\n" +
-            "\t\t}\n" +
-            "\t],\n" +
-            "\t\"st\" : [\n" +
-            "\t\t{\n" +
-            "\t\t\t\"maf\" : -1,\n" +
-            "\t\t\t\"mgf\" : -1,\n" +
-            "\t\t\t\"mafAl\" : null,\n" +
-            "\t\t\t\"mgfGt\" : null,\n" +
-            "\t\t\t\"missAl\" : 0,\n" +
-            "\t\t\t\"missGt\" : 0,\n" +
-            "\t\t\t\"numGt\" : {\n" +
-            "\t\t\t\t\n" +
-            "\t\t\t},\n" +
-            "\t\t\t\"cid\" : \"ALL\",\n" +
-            "\t\t\t\"sid\" : \"7\",\n" +
-            "\t\t\t\"fid\" : \"5\"\n" +
-            "\t\t}\n" +
-            "\t],\n" +
-            "\t\"annot\" : {\n" +
-            "\t\t\"ct\" : [\n" +
-            "\t\t\t{\n" +
-            "\t\t\t\t\"so\" : [\n" +
-            "\t\t\t\t\t1628\n" +
-            "\t\t\t\t]\n" +
-            "\t\t\t}\n" +
-            "\t\t]\n" +
-            "\t}\n" +
-            "}";
 }

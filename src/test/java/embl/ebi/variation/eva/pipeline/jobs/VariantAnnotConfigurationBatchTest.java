@@ -22,7 +22,7 @@ import com.mongodb.DBObject;
 import com.mongodb.MongoClient;
 import com.mongodb.util.JSON;
 import embl.ebi.variation.eva.VariantJobsArgs;
-import junit.framework.TestCase;
+import org.apache.commons.io.FileUtils;
 import org.junit.*;
 import org.junit.runner.RunWith;
 import org.opencb.biodata.models.variant.annotation.VariantAnnotation;
@@ -36,11 +36,13 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.io.*;
+import java.net.URL;
 import java.net.UnknownHostException;
-import java.util.zip.GZIPOutputStream;
 
+import static embl.ebi.variation.eva.pipeline.jobs.JobTestUtils.makeGzipFile;
 import static junit.framework.TestCase.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -50,7 +52,7 @@ import static org.junit.Assert.assertTrue;
  */
 @IntegrationTest
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = { VariantAnnotConfigurationBatch.class, AnnotationConfig.class})
+@ContextConfiguration(classes = { VariantAnnotConfigurationBatch.class, AnnotationConfig.class, JobLauncherTestUtils.class})
 public class VariantAnnotConfigurationBatchTest {
 
     @Autowired
@@ -61,13 +63,11 @@ public class VariantAnnotConfigurationBatchTest {
 
     private static String dbName;
     private static MongoClient mongoClient;
-    private BufferedReader reader;
     private File vepInputFile;
     private DBObjectToVariantAnnotationConverter converter;
 
     @Test
     public void validAnnotationJob () throws Exception {
-        variantJobsArgs.loadArgs();
 
         insertVariantsWithoutAnnotations(dbName, dbName);
 
@@ -76,7 +76,11 @@ public class VariantAnnotConfigurationBatchTest {
 
         assertFalse(vepInputFile.exists());
 
-        makeVepAnnotationTmpGzipFile();
+        //Simulate VEP prediction file
+        String vepAnnotation =
+                "20_60343_G/A\t20:63351\tG\tENSG00000178591\tENST00000608838\tTranscript\tupstream_gene_variant\t-\t-\t-\t-\t-\trs181305519\tDISTANCE=4540;STRAND=1;SYMBOL=DEFB125;SYMBOL_SOURCE=HGNC;HGNC_ID=18105;BIOTYPE=processed_transcript;GMAF=G:0.0005;AFR_MAF=G:0.0020\n";
+
+        makeGzipFile(vepAnnotation, variantJobsArgs.getPipelineOptions().getString("vepOutput"));
 
         JobExecution jobExecution = jobLauncherTestUtils.launchJob();
 
@@ -95,7 +99,7 @@ public class VariantAnnotConfigurationBatchTest {
         while (cursor.hasNext()) {
             cnt++;
             VariantAnnotation annot = converter.convertToDataModelType((DBObject)cursor.next().get("annot"));
-            TestCase.assertTrue(annot.getConsequenceTypes() != null);
+            assertNotNull(annot.getConsequenceTypes());
             consequenceTypeCount += annot.getConsequenceTypes().size();
         }
 
@@ -103,28 +107,10 @@ public class VariantAnnotConfigurationBatchTest {
         assertEquals(1, consequenceTypeCount);
     }
 
-    /**
-     * This simulate VEP prediction
-     *
-     * @throws IOException
-     */
-    private void makeVepAnnotationTmpGzipFile() throws IOException {
-        String vepAnnotation =
-                "20_60343_G/A\t20:63351\tG\tENSG00000178591\tENST00000608838\tTranscript\tupstream_gene_variant\t-\t-\t-\t-\t-\trs181305519\tDISTANCE=4540;STRAND=1;SYMBOL=DEFB125;SYMBOL_SOURCE=HGNC;HGNC_ID=18105;BIOTYPE=processed_transcript;GMAF=G:0.0005;AFR_MAF=G:0.0020\n";
-
-        try(FileOutputStream output = new FileOutputStream(variantJobsArgs.getPipelineOptions().getString("vepOutput"))) {
-            try(Writer writer = new OutputStreamWriter(new GZIPOutputStream(output), "UTF-8")) {
-                writer.write(vepAnnotation);
-            }
-        }
-
-    }
-
     private String readLine(File outputFile) throws IOException {
-        if (reader == null) {
-            reader = new BufferedReader(new FileReader(outputFile));
+        try(BufferedReader reader = new BufferedReader(new FileReader(outputFile))){
+            return reader.readLine();
         }
-        return reader.readLine();
     }
 
     @Before
@@ -149,10 +135,6 @@ public class VariantAnnotConfigurationBatchTest {
      */
     @After
     public void tearDown() throws Exception {
-        if (reader != null) {
-            reader.close();
-        }
-
         mongoClient.close();
 
         vepInputFile.delete();
@@ -165,7 +147,10 @@ public class VariantAnnotConfigurationBatchTest {
         );
     }
 
-    private void insertVariantsWithoutAnnotations(String databaseName, String collectionName) {
+    private void insertVariantsWithoutAnnotations(String databaseName, String collectionName) throws IOException {
+        URL variantWithNoAnnotationUrl =
+                VariantAnnotConfigurationBatchTest.class.getResource("/annotation/VariantWithOutAnnotation");
+        String variantWithoutAnnotation = FileUtils.readFileToString(new File(variantWithNoAnnotationUrl.getFile()));
         collection(databaseName, collectionName).insert(constructDbo(variantWithoutAnnotation));
     }
 
@@ -176,68 +161,5 @@ public class VariantAnnotConfigurationBatchTest {
     private DBObject constructDbo(String variant) {
         return (DBObject) JSON.parse(variant);
     }
-
-    private final String variantWithoutAnnotation = "{\n" +
-            "\t\"_id\" : \"20_60343_G_A\",\n" +
-            "\t\"chr\" : \"20\",\n" +
-            "\t\"start\" : 60343,\n" +
-            "\t\"files\" : [\n" +
-            "\t\t{\n" +
-            "\t\t\t\"fid\" : \"5\",\n" +
-            "\t\t\t\"sid\" : \"7\",\n" +
-            "\t\t\t\"attrs\" : {\n" +
-            "\t\t\t\t\"QUAL\" : \"100.0\",\n" +
-            "\t\t\t\t\"FILTER\" : \"PASS\",\n" +
-            "\t\t\t\t\"AC\" : \"1\",\n" +
-            "\t\t\t\t\"AF\" : \"0.000199681\",\n" +
-            "\t\t\t\t\"AN\" : \"5008\",\n" +
-            "\t\t\t\t\"NS\" : \"2504\",\n" +
-            "\t\t\t\t\"DP\" : \"0\",\n" +
-            "\t\t\t\t\"ASN_AF\" : \"0.0000\",\n" +
-            "\t\t\t\t\"AMR_AF\" : \"0.0014\",\n" +
-            "\t\t\t\t\"AFR_AF\" : \"0.0000\",\n" +
-            "\t\t\t\t\"EUR_AF\" : \"0.0000\",\n" +
-            "\t\t\t\t\"SAN_AF\" : \"0.0000\",\n" +
-            "\t\t\t\t\"ssID\" : \"ss1363765667\",\n" +
-            "\t\t\t}\n" +
-            "\t\t}\n" +
-            "\t],\n" +
-            "\t\"ids\" : [\n" +
-            "\t\t\"rs527639301\"\n" +
-            "\t],\n" +
-            "\t\"type\" : \"SNV\",\n" +
-            "\t\"end\" : 60343,\n" +
-            "\t\"len\" : 1,\n" +
-            "\t\"ref\" : \"G\",\n" +
-            "\t\"alt\" : \"A\",\n" +
-            "\t\"_at\" : {\n" +
-            "\t\t\"chunkIds\" : [\n" +
-            "\t\t\t\"20_60_1k\",\n" +
-            "\t\t\t\"20_6_10k\"\n" +
-            "\t\t]\n" +
-            "\t},\n" +
-            "\t\"hgvs\" : [\n" +
-            "\t\t{\n" +
-            "\t\t\t\"type\" : \"genomic\",\n" +
-            "\t\t\t\"name\" : \"20:g.60343G>A\"\n" +
-            "\t\t}\n" +
-            "\t],\n" +
-            "\t\"st\" : [\n" +
-            "\t\t{\n" +
-            "\t\t\t\"maf\" : -1,\n" +
-            "\t\t\t\"mgf\" : -1,\n" +
-            "\t\t\t\"mafAl\" : null,\n" +
-            "\t\t\t\"mgfGt\" : null,\n" +
-            "\t\t\t\"missAl\" : 0,\n" +
-            "\t\t\t\"missGt\" : 0,\n" +
-            "\t\t\t\"numGt\" : {\n" +
-            "\t\t\t\t\n" +
-            "\t\t\t},\n" +
-            "\t\t\t\"cid\" : \"ALL\",\n" +
-            "\t\t\t\"sid\" : \"7\",\n" +
-            "\t\t\t\"fid\" : \"5\"\n" +
-            "\t\t}\n" +
-            "\t]\n" +
-            "}";
 
 }

@@ -16,19 +16,17 @@
 package embl.ebi.variation.eva.pipeline.steps;
 
 import com.mongodb.DBObject;
-import embl.ebi.variation.eva.utils.ConnectionHelper;
+import embl.ebi.variation.eva.pipeline.MongoDBHelper;
 import embl.ebi.variation.eva.pipeline.annotation.generateInput.VariantAnnotationItemProcessor;
 import embl.ebi.variation.eva.pipeline.annotation.generateInput.VariantWrapper;
 import embl.ebi.variation.eva.pipeline.jobs.VariantJobArgsConfig;
 import org.opencb.datastore.core.ObjectMap;
-import org.opencb.opencga.storage.core.variant.VariantStorageManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.item.ItemProcessor;
-import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.data.MongoItemReader;
 import org.springframework.batch.item.file.FlatFileItemWriter;
 import org.springframework.batch.item.file.transform.BeanWrapperFieldExtractor;
@@ -39,12 +37,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.io.FileSystemResource;
-import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.mongodb.core.MongoOperations;
-import org.springframework.data.mongodb.core.MongoTemplate;
 
-import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -81,20 +75,6 @@ public class VariantsAnnotGenerateInputBatch {
     @Autowired
     private ObjectMap pipelineOptions;
 
-/*
-    public static final String jobName = "variantsAnnotGenerateInputJob";
-
-    @Bean
-    public Step variantsAnnotGenerateInputBatchStep(ItemReader<DBObject> reader,
-                      ItemProcessor<DBObject, VepInputLine> processor,
-                      ItemWriter<VepInputLine> writer) {
-        return steps.get("step1").<DBObject, VepInputLine> chunk(10)
-                .reader(reader)
-                .processor(processor)
-                .writer(writer).allowStartIfComplete(false)
-                .build();
-    }*/
-
     @Bean
     @Qualifier("variantsAnnotGenerateInputBatchStep")
     public Step variantsAnnotGenerateInputBatchStep() throws Exception {
@@ -106,23 +86,20 @@ public class VariantsAnnotGenerateInputBatch {
     }
 
     @Bean
-    public ItemReader<DBObject> variantReader() throws Exception {
-        return initReader(pipelineOptions.getString("dbCollectionVariantsName"), mongoOperations());
-    }
-
-    public MongoItemReader<DBObject> initReader(String collection, MongoOperations template){
+    public MongoItemReader<DBObject> variantReader() throws Exception {
         MongoItemReader<DBObject> reader = new MongoItemReader<>();
-        reader.setCollection(collection);
+        reader.setCollection(pipelineOptions.getString("dbCollectionVariantsName"));
 
         reader.setQuery("{ annot : { $exists : false } }");
         reader.setFields("{ chr : 1, start : 1, end : 1, ref : 1, alt : 1, type : 1}");
         reader.setTargetType(DBObject.class);
-        reader.setTemplate(template);
+        reader.setTemplate(MongoDBHelper.getMongoOperationsFromPipelineOptions(pipelineOptions));
 
         Map<String, Sort.Direction> coordinatesSort = new HashMap<>();
         coordinatesSort.put("chr", Sort.Direction.ASC);
         coordinatesSort.put("start", Sort.Direction.ASC);
         reader.setSort(coordinatesSort);
+
         return reader;
     }
 
@@ -139,10 +116,6 @@ public class VariantsAnnotGenerateInputBatch {
      */
     @Bean
     public FlatFileItemWriter<VariantWrapper> vepInputWriter() throws Exception {
-        return initWriter(new FileSystemResource(pipelineOptions.getString("vepInput")));
-    }
-
-    public static FlatFileItemWriter<VariantWrapper> initWriter(Resource resource){
         BeanWrapperFieldExtractor<VariantWrapper> fieldExtractor = new BeanWrapperFieldExtractor<>();
         fieldExtractor.setNames(new String[] {"chr", "start", "end", "refAlt", "strand"});
 
@@ -152,39 +125,11 @@ public class VariantsAnnotGenerateInputBatch {
 
         FlatFileItemWriter<VariantWrapper> writer = new FlatFileItemWriter<>();
 
-        writer.setResource(resource);
+        writer.setResource(new FileSystemResource(pipelineOptions.getString("vepInput")));
         writer.setAppendAllowed(false);
         writer.setShouldDeleteIfExists(true);
         writer.setLineAggregator(delLineAgg);
         return writer;
     }
 
-    @Bean
-    public MongoOperations mongoOperations() {
-        MongoTemplate mongoTemplate;
-        try {
-            mongoTemplate = getMongoTemplate();
-        } catch (UnknownHostException e) {
-            throw new RuntimeException("Unable to initialize MongoDB", e);
-        }
-        return mongoTemplate;
-    }
-
-    private MongoTemplate getMongoTemplate() throws UnknownHostException {
-        MongoTemplate mongoTemplate;
-        if(pipelineOptions.getString("dbAuthenticationDb").isEmpty()){
-            mongoTemplate = ConnectionHelper.getMongoTemplate(
-                    pipelineOptions.getString(VariantStorageManager.DB_NAME)
-            );
-        }else {
-            mongoTemplate = ConnectionHelper.getMongoTemplate(
-                    pipelineOptions.getString(VariantStorageManager.DB_NAME),
-                    pipelineOptions.getString("dbHosts"),
-                    pipelineOptions.getString("dbAuthenticationDb"),
-                    pipelineOptions.getString("dbUser"),
-                    pipelineOptions.getString("dbPassword").toCharArray()
-            );
-        }
-        return mongoTemplate;
-    }
 }
