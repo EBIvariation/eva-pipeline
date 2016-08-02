@@ -44,6 +44,7 @@ public class CommonConfig {
         properties.put("dbName", "");
         properties.put("dbCollectionVariantsName", "variants");
         properties.put("dbCollectionFilesName", "files");
+        properties.put("readPreference", "primary");
         properties.put("compressExtension", ".gz");
         properties.put("compressGenotypes", "true");
         properties.put("includeSrc", "FIRST_8_COLUMNS");
