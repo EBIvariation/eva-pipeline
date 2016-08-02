@@ -1,0 +1,62 @@
+{
+	"_id" : "20_60343_G_A",
+	"chr" : "20",
+	"start" : 60343,
+	"files" : [
+		{
+			"fid" : "5",
+			"sid" : "7",
+			"attrs" : {
+				"QUAL" : "100.0",
+				"FILTER" : "PASS",
+				"AC" : "1",
+				"AF" : "0.000199681",
+				"AN" : "5008",
+				"NS" : "2504",
+				"DP" : "0",
+				"ASN_AF" : "0.0000",
+				"AMR_AF" : "0.0014",
+				"AFR_AF" : "0.0000",
+				"EUR_AF" : "0.0000",
+				"SAN_AF" : "0.0000",
+				"ssID" : "ss1363765667",
+			}
+		}
+	],
+	"ids" : [
+		"rs527639301"
+	],
+	"type" : "SNV",
+	"end" : 60343,
+	"len" : 1,
+	"ref" : "G",
+	"alt" : "A",
+	"_at" : {
+		"chunkIds" : [
+			"20_60_1k",
+			"20_6_10k"
+		]
+	},
+	"hgvs" : [
+		{
+			"type" : "genomic",
+			"name" : "20:g.60343G>A"
+		}
+	],
+	"st" : [
+		{
+			"maf" : -1,
+			"mgf" : -1,
+			"mafAl" : null,
+			"mgfGt" : null,
+			"missAl" : 0,
+			"missGt" : 0,
+			"numGt" : {
+
+			},
+			"cid" : "ALL",
+			"sid" : "7",
+			"fid" : "5"
+		}
+	]
+}
