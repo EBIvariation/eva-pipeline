@@ -21,16 +21,14 @@ import org.opencb.biodata.models.variant.Variant;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.UnknownHostException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.zip.GZIPOutputStream;
 
 /**
  * Created by jmmut on 2015-11-10.
@@ -81,6 +79,12 @@ public class JobTestUtils {
                         .addLong("time",System.currentTimeMillis()).toJobParameters();
     }
 
-
+    public static void makeGzipFile(String content, String file) throws IOException {
+        try(FileOutputStream output = new FileOutputStream(file)) {
+            try(Writer writer = new OutputStreamWriter(new GZIPOutputStream(output), "UTF-8")) {
+                writer.write(content);
+            }
+        }
+    }
 
 }
