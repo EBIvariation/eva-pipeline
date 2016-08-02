@@ -16,7 +16,6 @@
 
 package embl.ebi.variation.eva.pipeline.jobs;
 
-import embl.ebi.variation.eva.pipeline.steps.Steps;
 import embl.ebi.variation.eva.pipeline.steps.VariantsAnnotLoadBatch;
 import embl.ebi.variation.eva.pipeline.steps.VariantsAnnotCreate;
 import embl.ebi.variation.eva.pipeline.steps.VariantsAnnotGenerateInputBatch;
@@ -34,7 +33,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.stereotype.Component;
 
 /**
  * @author Diego Poggioli
