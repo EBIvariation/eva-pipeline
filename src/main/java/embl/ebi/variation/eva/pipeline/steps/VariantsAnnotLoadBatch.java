@@ -16,14 +16,13 @@
 
 package embl.ebi.variation.eva.pipeline.steps;
 
-import embl.ebi.variation.eva.utils.ConnectionHelper;
+import embl.ebi.variation.eva.pipeline.MongoDBHelper;
 import embl.ebi.variation.eva.pipeline.annotation.GzipLazyResource;
 import embl.ebi.variation.eva.pipeline.annotation.load.VariantAnnotationLineMapper;
 import embl.ebi.variation.eva.pipeline.annotation.load.VariantAnnotationMongoItemWriter;
 import embl.ebi.variation.eva.pipeline.jobs.VariantJobArgsConfig;
 import org.opencb.biodata.models.variant.annotation.VariantAnnotation;
 import org.opencb.datastore.core.ObjectMap;
-import org.opencb.opencga.storage.core.variant.VariantStorageManager;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
@@ -37,10 +36,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.io.Resource;
 import org.springframework.data.mongodb.core.MongoOperations;
-import org.springframework.data.mongodb.core.MongoTemplate;
 
 import java.io.IOException;
-import java.net.UnknownHostException;
 
 /**
  * @author Diego Poggioli
@@ -62,19 +59,6 @@ public class VariantsAnnotLoadBatch {
     @Autowired
     private ObjectMap pipelineOptions;
 
-    /*
-    public static final String jobName = "load";
-
-    @Autowired
-    private JobBuilderFactory jobs;
-
-    @Bean
-    public Job variantAnnotLoadBatchJob() throws Exception {
-        return jobs.get(jobName)
-                .start(variantAnnotLoadBatchStep())
-                .build();
-    }*/
-
     @Bean
     @Qualifier("variantAnnotLoadBatchStep")
     public Step variantAnnotLoadBatchStep() throws IOException {
@@ -87,56 +71,19 @@ public class VariantsAnnotLoadBatch {
     @Bean
     public FlatFileItemReader<VariantAnnotation> variantAnnotationReader() throws IOException {
         Resource resource = new GzipLazyResource(pipelineOptions.getString("vepOutput"));
-        return initReader(resource);
-    }
-
-    public FlatFileItemReader<VariantAnnotation> initReader(Resource resource) {
         FlatFileItemReader<VariantAnnotation> reader = new FlatFileItemReader<>();
         reader.setResource(resource);
         reader.setLineMapper(new VariantAnnotationLineMapper());
         return reader;
     }
 
-
     @Bean
     public ItemWriter<VariantAnnotation> variantAnnotationWriter(){
-        String dbCollectionVariantsName = pipelineOptions.getString("dbCollectionVariantsName");
-        return initWriter(dbCollectionVariantsName, mongoOperations());
-    }
-
-    public MongoItemWriter<VariantAnnotation> initWriter(String dbCollectionVariantsName, MongoOperations mongoOperations) {
+        MongoOperations mongoOperations = MongoDBHelper.getMongoOperationsFromPipelineOptions(pipelineOptions);
         MongoItemWriter<VariantAnnotation> writer = new VariantAnnotationMongoItemWriter(mongoOperations);
-        writer.setCollection(dbCollectionVariantsName);
+        writer.setCollection(pipelineOptions.getString("dbCollectionVariantsName"));
         writer.setTemplate(mongoOperations);
         return writer;
     }
 
-    @Bean
-    public MongoOperations mongoOperations() {
-        MongoTemplate mongoTemplate;
-        try {
-            mongoTemplate = getMongoTemplate();
-        } catch (UnknownHostException e) {
-            throw new RuntimeException("Unable to initialize MongoDB", e);
-        }
-        return mongoTemplate;
-    }
-
-    private MongoTemplate getMongoTemplate() throws UnknownHostException {
-        MongoTemplate mongoTemplate;
-        if(pipelineOptions.getString("dbAuthenticationDb").isEmpty()){
-            mongoTemplate = ConnectionHelper.getMongoTemplate(
-                    pipelineOptions.getString(VariantStorageManager.DB_NAME)
-            );
-        }else {
-            mongoTemplate = ConnectionHelper.getMongoTemplate(
-                    pipelineOptions.getString(VariantStorageManager.DB_NAME),
-                    pipelineOptions.getString("dbHosts"),
-                    pipelineOptions.getString("dbAuthenticationDb"),
-                    pipelineOptions.getString("dbUser"),
-                    pipelineOptions.getString("dbPassword").toCharArray()
-            );
-        }
-        return mongoTemplate;
-    }
 }

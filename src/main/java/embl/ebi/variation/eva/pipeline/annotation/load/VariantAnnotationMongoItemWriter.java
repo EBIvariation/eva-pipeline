@@ -18,8 +18,8 @@ package embl.ebi.variation.eva.pipeline.annotation.load;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
+import embl.ebi.variation.eva.pipeline.MongoDBHelper;
 import org.opencb.biodata.models.variant.annotation.VariantAnnotation;
-import org.opencb.commons.utils.CryptoUtils;
 import org.opencb.opencga.storage.mongodb.variant.DBObjectToVariantAnnotationConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -77,8 +77,11 @@ public class VariantAnnotationMongoItemWriter extends MongoItemWriter<VariantAnn
         for (VariantAnnotation variantAnnotation : variantAnnotations) {
             logger.debug("Writing into mongo {}", variantAnnotation);
 
-            String storageId = buildStorageId(variantAnnotation.getChromosome(), variantAnnotation.getStart(),
-                    variantAnnotation.getReferenceAllele(), variantAnnotation.getAlternativeAllele());
+            String storageId = MongoDBHelper.buildStorageId(
+                    variantAnnotation.getChromosome(),
+                    variantAnnotation.getStart(),
+                    variantAnnotation.getReferenceAllele(),
+                    variantAnnotation.getAlternativeAllele());
 
             BasicDBObject find = new BasicDBObject("_id", storageId);
 
@@ -115,40 +118,6 @@ public class VariantAnnotationMongoItemWriter extends MongoItemWriter<VariantAnn
             mongoOperations.getCollection(collection).update(find, update);
 
         }
-    }
-    
-    /**
-     * From org.opencb.opencga.storage.mongodb.variant.DBObjectToVariantConverter
-     * #buildStorageId(java.lang.String, int, java.lang.String, java.lang.String)
-     *
-     * To avoid the initialization of:
-     * - DBObjectToVariantSourceEntryConverter
-     * - DBObjectToVariantConverter
-     *
-     */
-    private String buildStorageId(String chromosome, int start, String reference, String alternate) {
-        StringBuilder builder = new StringBuilder(chromosome);
-        builder.append("_");
-        builder.append(start);
-        builder.append("_");
-        if(!reference.equals("-")) {
-            if(reference.length() < 50) {
-                builder.append(reference);
-            } else {
-                builder.append(new String(CryptoUtils.encryptSha1(reference)));
-            }
-        }
-
-        builder.append("_");
-        if(!alternate.equals("-")) {
-            if(alternate.length() < 50) {
-                builder.append(alternate);
-            } else {
-                builder.append(new String(CryptoUtils.encryptSha1(alternate)));
-            }
-        }
-
-        return builder.toString();
     }
 
 }
