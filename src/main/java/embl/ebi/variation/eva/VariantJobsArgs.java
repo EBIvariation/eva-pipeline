@@ -69,6 +69,7 @@ public class VariantJobsArgs {
     @Value("${dbName}") private String dbName;
     @Value("${dbCollectionVariantsName}") private String dbCollectionVariantsName;
     @Value("${dbCollectionFilesName}") private String dbCollectionFilesName;
+    @Value("${readPreference}") private String readPreference;
 
     ////pipeline
     @Value("${outputDir}") private String outputDir;
@@ -145,6 +146,7 @@ public class VariantJobsArgs {
         pipelineOptions.put("dbCollectionFilesName", dbCollectionFilesName);
         pipelineOptions.put("dbUser", dbUser);
         pipelineOptions.put("dbPassword", dbPassword);
+        pipelineOptions.put("readPreference", readPreference);
         pipelineOptions.put(VariantsLoad.SKIP_LOAD, skipLoad);
         pipelineOptions.put(VariantsStatsCreate.SKIP_STATS_CREATE, skipStatsCreate);
         pipelineOptions.put(VariantsStatsLoad.SKIP_STATS_LOAD, skipStatsLoad);
