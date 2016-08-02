@@ -88,7 +88,7 @@ public class VariantAnnotationLineMapper implements LineMapper<VariantAnnotation
          * parses extra column and populates fields as required.
          * Some lines do not have extra field and end with a \t: the split function above does not return that field
          */
-        if(lineFields.length>13) {
+        if(lineFields.length == 14) {
             parseExtraField(consequenceType, lineFields[13], currentAnnotation);
         }
 
