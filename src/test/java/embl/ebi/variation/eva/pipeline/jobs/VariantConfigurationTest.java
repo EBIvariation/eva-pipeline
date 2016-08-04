@@ -24,6 +24,7 @@ import org.junit.runner.RunWith;
 import org.opencb.biodata.models.variant.Variant;
 import org.opencb.biodata.models.variant.VariantSource;
 import org.opencb.datastore.core.QueryOptions;
+import org.opencb.opencga.lib.common.Config;
 import org.opencb.opencga.storage.core.StorageManagerException;
 import org.opencb.opencga.storage.core.StorageManagerFactory;
 import org.opencb.opencga.storage.core.variant.VariantStorageManager;
@@ -80,6 +81,8 @@ public class VariantConfigurationTest {
     private String vepInput;
     private String vepOutput;
 
+    private static String opencgaHome = System.getenv("OPENCGA_HOME") != null ? System.getenv("OPENCGA_HOME") : "/opt/opencga";
+
     @Test
     public void fullVariantConfig() throws Exception {
 
@@ -88,6 +91,8 @@ public class VariantConfigurationTest {
 
         variantJobsArgs.getPipelineOptions().put("input", inputFile);
         variantJobsArgs.getPipelineOptions().put("vepPath", mockVep);
+
+        Config.setOpenCGAHome(opencgaHome);
 
         // transformedVcf file init
         String transformedVcf = outputDir + inputFileResouce + ".variants.json" + compressExtension;
