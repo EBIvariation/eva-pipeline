@@ -48,12 +48,12 @@ import static org.junit.Assert.assertTrue;
 /**
  * @author Diego Poggioli
  *
- * Test for {@link VariantAnnotConfigurationBatch}
+ * Test for {@link VariantAnnotConfiguration}
  */
 @IntegrationTest
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = { VariantAnnotConfigurationBatch.class, AnnotationConfig.class, JobLauncherTestUtils.class})
-public class VariantAnnotConfigurationBatchTest {
+@ContextConfiguration(classes = { VariantAnnotConfiguration.class, AnnotationConfig.class, JobLauncherTestUtils.class})
+public class VariantAnnotConfigurationTest {
 
     @Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
@@ -149,7 +149,7 @@ public class VariantAnnotConfigurationBatchTest {
 
     private void insertVariantsWithoutAnnotations(String databaseName, String collectionName) throws IOException {
         URL variantWithNoAnnotationUrl =
-                VariantAnnotConfigurationBatchTest.class.getResource("/annotation/VariantWithOutAnnotation");
+                VariantAnnotConfigurationTest.class.getResource("/annotation/VariantWithOutAnnotation");
         String variantWithoutAnnotation = FileUtils.readFileToString(new File(variantWithNoAnnotationUrl.getFile()));
         collection(databaseName, collectionName).insert(constructDbo(variantWithoutAnnotation));
     }
