@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2016 EMBL - European Bioinformatics Institute
+ * Copyright 2016 EMBL - European Bioinformatics Institute
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,70 +13,84 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package embl.ebi.variation.eva.pipeline.jobs;
 
-import embl.ebi.variation.eva.pipeline.steps.*;
+import embl.ebi.variation.eva.pipeline.steps.VariantsAnnotGenerateInput;
+import embl.ebi.variation.eva.pipeline.steps.VariantsAnnotLoad;
+import embl.ebi.variation.eva.pipeline.steps.VariantsAnnotCreate;
 import org.opencb.datastore.core.ObjectMap;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
+import org.springframework.batch.core.job.builder.FlowBuilder;
 import org.springframework.batch.core.job.builder.JobBuilder;
-import org.springframework.batch.core.launch.JobLauncher;
+import org.springframework.batch.core.job.flow.Flow;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.core.step.builder.TaskletStepBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.core.env.Environment;
+
+/**
+ * @author Diego Poggioli
+ *
+ * Batch class to wire together:
+ * 1) variantsAnnotGenerateInputBatchStep - Dump a list of variants without annotations to be used as input for VEP
+ * 2) annotationCreate - run VEP
+ * 3) variantAnnotLoadBatchStep - Load VEP annotations into mongo
+ *
+ * At the moment is no longer possible to skip a single step like skipAnnotGenerateInput=true in the property
+ * To solve this we can implement the dynamic-workflow (https://github.com/EBIvariation/examples/tree/master/spring-batch-dynamic-workflow)
+ * or we can create a new Job class for each possible scenario
+ *
+ * TODO:
+ * - move variantsAnnotCreate and annotationCreate into a separate class to reuse across different jobs
+ */
 
 @Configuration
 @EnableBatchProcessing
-@Import(VariantJobArgsConfig.class)
+@Import({VariantsAnnotGenerateInput.class, VariantsAnnotLoad.class, VariantJobArgsConfig.class})
 public class VariantAnnotConfiguration {
+    public static final String jobName = "variantAnnotBatchJob";
 
-    private static final Logger logger = LoggerFactory.getLogger(VariantAnnotConfiguration.class);
-    public static final String jobName = "variantAnnotJob";
+    @Autowired private JobBuilderFactory jobBuilderFactory;
 
-    @Autowired
-    private JobBuilderFactory jobBuilderFactory;
-    @Autowired
-    private StepBuilderFactory stepBuilderFactory;
-    @Autowired
-    JobLauncher jobLauncher;
-    @Autowired
-    Environment environment;
-    @Autowired
-    private ObjectMap pipelineOptions;
+    @Autowired private StepBuilderFactory stepBuilderFactory;
+
+    @Autowired private ObjectMap pipelineOptions;
+
+    @Qualifier("variantsAnnotGenerateInputBatchStep")
+    @Autowired public Step variantsAnnotGenerateInputBatchStep;
+
+    @Qualifier("variantAnnotLoadBatchStep")
+    @Autowired private Step variantAnnotLoadBatchStep;
+
+    @Qualifier("annotationCreate")
+    @Autowired private Step annotationCreate;
 
     @Bean
-    public Job variantAnnotJob() {
+    public Job variantAnnotationBatchJob(){
         JobBuilder jobBuilder = jobBuilderFactory
                 .get(jobName)
                 .incrementer(new RunIdIncrementer());
 
-        return jobBuilder
-                .start(annotationGenerateInput())
-                .next(annotationCreate())
-                .next(annotationLoad())
-                .build();
+        return jobBuilder.start(variantAnnotationFlow()).build().build();
     }
 
     @Bean
-    public VariantsAnnotGenerateInput variantsAnnotGenerateInput(){
-        return new VariantsAnnotGenerateInput();
-    }
-
-    public Step annotationGenerateInput() {
-        StepBuilder step1 = stepBuilderFactory.get("annotationGenerateInput");
-        TaskletStepBuilder tasklet = step1.tasklet(variantsAnnotGenerateInput());
-        initStep(tasklet);
-        return tasklet.build();
+    public Flow variantAnnotationFlow(){
+        Flow annotationFlow = new FlowBuilder<Flow>("annotationFlow")
+                .start(variantsAnnotGenerateInputBatchStep)
+                .next(annotationCreate)
+                .next(variantAnnotLoadBatchStep)
+                .build();
+        return annotationFlow;
     }
 
     @Bean
@@ -85,21 +99,10 @@ public class VariantAnnotConfiguration {
     }
 
     @Bean
+    @Qualifier("annotationCreate")
     public Step annotationCreate() {
         StepBuilder step1 = stepBuilderFactory.get("annotationCreate");
         TaskletStepBuilder tasklet = step1.tasklet(variantsAnnotCreate());
-        initStep(tasklet);
-        return tasklet.build();
-    }
-
-    @Bean
-    public VariantsAnnotLoad variantsAnnotLoad(){
-        return new VariantsAnnotLoad();
-    }
-
-    public Step annotationLoad() {
-        StepBuilder step1 = stepBuilderFactory.get("annotationLoad");
-        TaskletStepBuilder tasklet = step1.tasklet(variantsAnnotLoad());
         initStep(tasklet);
         return tasklet.build();
     }
