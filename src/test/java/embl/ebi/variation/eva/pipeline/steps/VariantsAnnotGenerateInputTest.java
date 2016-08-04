@@ -21,7 +21,7 @@ import embl.ebi.variation.eva.VariantJobsArgs;
 import embl.ebi.variation.eva.pipeline.annotation.generateInput.VariantAnnotationItemProcessor;
 import embl.ebi.variation.eva.pipeline.annotation.generateInput.VariantWrapper;
 import embl.ebi.variation.eva.pipeline.jobs.AnnotationConfig;
-import embl.ebi.variation.eva.pipeline.jobs.VariantAnnotConfigurationBatchTest;
+import embl.ebi.variation.eva.pipeline.jobs.VariantAnnotConfigurationTest;
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Before;
@@ -49,11 +49,11 @@ import static junit.framework.TestCase.assertTrue;
 /**
  * @author Diego Poggioli
  *
- * Test {@link VariantsAnnotGenerateInputBatch}
+ * Test {@link VariantsAnnotGenerateInput}
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = { VariantsAnnotGenerateInputBatch.class, AnnotationConfig.class})
-public class VariantsAnnotGenerateInputBatchTest {
+@ContextConfiguration(classes = { VariantsAnnotGenerateInput.class, AnnotationConfig.class})
+public class VariantsAnnotGenerateInputTest {
 
     @Autowired
     private MongoItemReader<DBObject> mongoItemReader;
@@ -85,11 +85,11 @@ public class VariantsAnnotGenerateInputBatchTest {
         executionContext = MetaDataInstanceFactory.createStepExecution().getExecutionContext();
 
         URL variantWithNoAnnotationUrl =
-                VariantAnnotConfigurationBatchTest.class.getResource("/annotation/VariantWithOutAnnotation");
+                VariantAnnotConfigurationTest.class.getResource("/annotation/VariantWithOutAnnotation");
         variantWithoutAnnotation = FileUtils.readFileToString(new File(variantWithNoAnnotationUrl.getFile()));
 
         URL variantWithAnnotationUrl =
-                VariantAnnotConfigurationBatchTest.class.getResource("/annotation/VariantWithAnnotation");
+                VariantAnnotConfigurationTest.class.getResource("/annotation/VariantWithAnnotation");
         variantWithAnnotation = FileUtils.readFileToString(new File(variantWithAnnotationUrl.getFile()));
 
         variantJobsArgs.loadArgs();
