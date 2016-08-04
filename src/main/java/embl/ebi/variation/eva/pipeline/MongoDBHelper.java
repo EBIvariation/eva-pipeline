@@ -72,7 +72,8 @@ public class MongoDBHelper {
                 return ReadPreference.secondary();
             default:
                 throw new IllegalArgumentException(
-                        String.format("%s is not a valid ReadPreference type, please double check!", readPreference));
+                        String.format("%s is not a valid ReadPreference type, please use \"primary\" or \"secondary\"",
+                                readPreference));
         }
 
     }
