@@ -36,6 +36,7 @@ import java.nio.file.Paths;
  * @author Diego Poggioli &lt;diego@ebi.ac.uk&gt;
  *
  * TODO: 20/05/2016 add type/null/file/dir validators
+ * TODO validation checks for all the parameters
  */
 @Component
 public class VariantJobsArgs {
@@ -79,9 +80,7 @@ public class VariantJobsArgs {
     @Value("${skipLoad:false}") private boolean skipLoad;
     @Value("${skipStatsCreate:false}") private boolean skipStatsCreate;
     @Value("${skipStatsLoad:false}") private boolean skipStatsLoad;
-    @Value("${skipAnnotGenerateInput:false}") private boolean skipAnnotGenerateInput;
     @Value("${skipAnnotCreate:false}") private boolean skipAnnotCreate;
-    @Value("${skipAnnotLoad:false}") private boolean skipAnnotLoad;
 
     //VEP
     @Value("${vepInput}") private String vepInput;
@@ -101,7 +100,7 @@ public class VariantJobsArgs {
     public void loadArgs() {
         logger.info("Load args");
 
-        // TODO validation checks for all the parameters
+
         Config.setOpenCGAHome(opencgaAppHome);
 
         loadVariantOptions();
@@ -150,9 +149,7 @@ public class VariantJobsArgs {
         pipelineOptions.put(VariantsLoad.SKIP_LOAD, skipLoad);
         pipelineOptions.put(VariantsStatsCreate.SKIP_STATS_CREATE, skipStatsCreate);
         pipelineOptions.put(VariantsStatsLoad.SKIP_STATS_LOAD, skipStatsLoad);
-        pipelineOptions.put(VariantsAnnotGenerateInput.SKIP_ANNOT_GENERATE_INPUT, skipAnnotGenerateInput);
         pipelineOptions.put(VariantsAnnotCreate.SKIP_ANNOT_CREATE, skipAnnotCreate);
-        pipelineOptions.put(VariantsAnnotLoad.SKIP_ANNOT_LOAD, skipAnnotLoad);
         pipelineOptions.put("vepInput", vepInput);
         pipelineOptions.put("vepOutput", vepOutput);
         pipelineOptions.put("vepPath", vepPath);
