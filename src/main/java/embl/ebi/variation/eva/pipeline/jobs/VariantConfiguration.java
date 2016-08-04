@@ -25,12 +25,13 @@ import org.springframework.batch.core.configuration.annotation.EnableBatchProces
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.job.builder.JobBuilder;
+import org.springframework.batch.core.job.flow.Flow;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.core.step.builder.TaskletStepBuilder;
-import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -38,7 +39,7 @@ import org.springframework.core.env.Environment;
 
 @Configuration
 @EnableBatchProcessing
-@Import(VariantJobArgsConfig.class)
+@Import({VariantJobArgsConfig.class, VariantAnnotConfiguration.class})
 public class VariantConfiguration {
 
     private static final Logger logger = LoggerFactory.getLogger(VariantConfiguration.class);
@@ -54,22 +55,24 @@ public class VariantConfiguration {
     Environment environment;
     @Autowired
     private ObjectMap pipelineOptions;
+    @Autowired
+    Flow variantAnnotationFlow;
 
     @Bean
+    @Qualifier("variantJob")
     public Job variantJob() {
+
         JobBuilder jobBuilder = jobBuilderFactory
                 .get(jobName)
                 .incrementer(new RunIdIncrementer());
 
         return jobBuilder
-                .start(transform())
+                .flow(transform())
                 .next(load())
                 .next(statsCreate())
                 .next(statsLoad())
-                .next(annotationGenerateInput())
-                .next(annotationCreate())
-                .next(annotationLoad())
-                .build();
+                .next(variantAnnotationFlow)
+                .build().build();
     }
 
     @Bean
@@ -116,42 +119,6 @@ public class VariantConfiguration {
     public Step statsLoad() {
         StepBuilder step1 = stepBuilderFactory.get("statsLoad");
         TaskletStepBuilder tasklet = step1.tasklet(variantsStatsLoad());
-        initStep(tasklet);
-        return tasklet.build();
-    }
-
-    @Bean
-    public VariantsAnnotGenerateInput variantsAnnotGenerateInput(){
-        return new VariantsAnnotGenerateInput();
-    }
-
-    public Step annotationGenerateInput() {
-        StepBuilder step1 = stepBuilderFactory.get("annotationGenerateInput");
-        TaskletStepBuilder tasklet = step1.tasklet(variantsAnnotGenerateInput());
-        initStep(tasklet);
-        return tasklet.build();
-    }
-
-    @Bean
-    public VariantsAnnotCreate variantsAnnotCreate(){
-        return new VariantsAnnotCreate();
-    }
-
-    public Step annotationCreate() {
-        StepBuilder step1 = stepBuilderFactory.get("annotationCreate");
-        TaskletStepBuilder tasklet = step1.tasklet(variantsAnnotCreate());
-        initStep(tasklet);
-        return tasklet.build();
-    }
-
-    @Bean
-    public VariantsAnnotLoad variantsAnnotLoad(){
-        return new VariantsAnnotLoad();
-    }
-
-    public Step annotationLoad() {
-        StepBuilder step1 = stepBuilderFactory.get("annotationLoad");
-        TaskletStepBuilder tasklet = step1.tasklet(variantsAnnotLoad());
         initStep(tasklet);
         return tasklet.build();
     }
