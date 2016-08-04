@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 EMBL - European Bioinformatics Institute
+ * Copyright 2016 EMBL - European Bioinformatics Institute
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,69 +13,77 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package embl.ebi.variation.eva.pipeline.steps;
 
+import embl.ebi.variation.eva.pipeline.MongoDBHelper;
+import embl.ebi.variation.eva.pipeline.annotation.GzipLazyResource;
+import embl.ebi.variation.eva.pipeline.annotation.load.VariantAnnotationLineMapper;
+import embl.ebi.variation.eva.pipeline.annotation.load.VariantAnnotationMongoItemWriter;
+import embl.ebi.variation.eva.pipeline.jobs.VariantJobArgsConfig;
+import org.opencb.biodata.models.variant.annotation.VariantAnnotation;
 import org.opencb.datastore.core.ObjectMap;
-import org.opencb.datastore.core.QueryOptions;
-import org.opencb.opencga.storage.core.StorageManagerFactory;
-import org.opencb.opencga.storage.core.variant.VariantStorageManager;
-import org.opencb.opencga.storage.core.variant.adaptors.VariantDBAdaptor;
-import org.opencb.opencga.storage.core.variant.annotation.VariantAnnotationManager;
-import org.opencb.opencga.storage.core.variant.annotation.VariantAnnotator;
-import org.opencb.opencga.storage.core.variant.annotation.VepVariantAnnotator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.batch.core.StepContribution;
-import org.springframework.batch.core.scope.context.ChunkContext;
-import org.springframework.batch.core.step.tasklet.Tasklet;
-import org.springframework.batch.repeat.RepeatStatus;
+import org.springframework.batch.core.Step;
+import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
+import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
+import org.springframework.batch.item.ItemWriter;
+import org.springframework.batch.item.data.MongoItemWriter;
+import org.springframework.batch.item.file.FlatFileItemReader;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
+import org.springframework.core.io.Resource;
+import org.springframework.data.mongodb.core.MongoOperations;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.nio.file.Paths;
+import java.io.IOException;
 
 /**
- * Created by jmmut on 2015-11-10.
+ * @author Diego Poggioli
  *
- * @author Jose Miguel Mut Lopez &lt;jmmut@ebi.ac.uk&gt;
+ * Step class that:
+ * - READ: read a list of VEP {@link VariantAnnotation} from flat file
+ * - LOAD: write the {@link VariantAnnotation} into Mongo db
+ *
  */
-public class VariantsAnnotLoad implements Tasklet {
-    private static final Logger logger = LoggerFactory.getLogger(VariantsAnnotLoad.class);
-    public static final String SKIP_ANNOT_LOAD = "skipAnnotLoad";
+
+@Configuration
+@EnableBatchProcessing
+@Import(VariantJobArgsConfig.class)
+public class VariantsAnnotLoad {
 
     @Autowired
-    private ObjectMap variantOptions;
+    private StepBuilderFactory steps;
 
     @Autowired
     private ObjectMap pipelineOptions;
 
-    @Override
-    public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
-
-        if (pipelineOptions.getBoolean(SKIP_ANNOT_LOAD)) {
-            logger.info("skipping annot loading, skipAnnotLoad is set to {} ", pipelineOptions.getBoolean(SKIP_ANNOT_LOAD));
-        } else {
-            String vepOutput = pipelineOptions.getString("vepOutput");
-
-            VariantStorageManager variantStorageManager = StorageManagerFactory.getVariantStorageManager();
-            VariantDBAdaptor dbAdaptor = variantStorageManager.getDBAdaptor(variantOptions.getString("dbName"), variantOptions);
-            VariantAnnotationManager.AnnotationSource annotatorSource = VariantAnnotationManager.AnnotationSource.VEP;
-            logger.info("Annotating with {}", annotatorSource);
-            VariantAnnotator annotator = VepVariantAnnotator.buildVepAnnotator();   // TODO generify to other annotators?
-            VariantAnnotationManager variantAnnotationManager = new VariantAnnotationManager(annotator, dbAdaptor);
-
-            variantAnnotationManager.loadAnnotation(createUri(vepOutput), new QueryOptions());
-        }
-
-        return RepeatStatus.FINISHED;
+    @Bean
+    @Qualifier("variantAnnotLoadBatchStep")
+    public Step variantAnnotLoadBatchStep() throws IOException {
+        return steps.get("variantAnnotLoadBatchStep").<VariantAnnotation, VariantAnnotation> chunk(10)
+                .reader(variantAnnotationReader())
+                .writer(variantAnnotationWriter())
+                .build();
     }
 
-    private static URI createUri(String input) throws URISyntaxException {
-        URI sourceUri = new URI(input);
-        if (sourceUri.getScheme() == null || sourceUri.getScheme().isEmpty()) {
-            sourceUri = Paths.get(input).toUri();
-        }
-        return sourceUri;
+    @Bean
+    public FlatFileItemReader<VariantAnnotation> variantAnnotationReader() throws IOException {
+        Resource resource = new GzipLazyResource(pipelineOptions.getString("vepOutput"));
+        FlatFileItemReader<VariantAnnotation> reader = new FlatFileItemReader<>();
+        reader.setResource(resource);
+        reader.setLineMapper(new VariantAnnotationLineMapper());
+        return reader;
     }
+
+    @Bean
+    public ItemWriter<VariantAnnotation> variantAnnotationWriter(){
+        MongoOperations mongoOperations = MongoDBHelper.getMongoOperationsFromPipelineOptions(pipelineOptions);
+        MongoItemWriter<VariantAnnotation> writer = new VariantAnnotationMongoItemWriter(mongoOperations);
+        writer.setCollection(pipelineOptions.getString("dbCollectionVariantsName"));
+        writer.setTemplate(mongoOperations);
+        return writer;
+    }
+
 }
