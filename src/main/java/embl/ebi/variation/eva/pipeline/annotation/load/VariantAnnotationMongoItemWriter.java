@@ -75,7 +75,7 @@ public class VariantAnnotationMongoItemWriter extends MongoItemWriter<VariantAnn
     protected void doWrite(List<? extends VariantAnnotation> variantAnnotations) {
 
         for (VariantAnnotation variantAnnotation : variantAnnotations) {
-            logger.debug("Writing into mongo {}", variantAnnotation);
+            logger.debug("Writing into mongo {}", variantAnnotation.getStart());
 
             String storageId = MongoDBHelper.buildStorageId(
                     variantAnnotation.getChromosome(),
