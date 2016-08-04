@@ -49,11 +49,11 @@ import static junit.framework.TestCase.assertTrue;
 /**
  * @author Diego Poggioli
  *
- * Test {@link VariantsAnnotLoadBatch}
+ * Test {@link VariantsAnnotLoad}
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = { VariantsAnnotLoadBatch.class, AnnotationConfig.class})
-public class VariantsAnnotLoadBatchTest {
+@ContextConfiguration(classes = { VariantsAnnotLoad.class, AnnotationConfig.class})
+public class VariantsAnnotLoadTest {
 
     @Autowired
     private FlatFileItemReader<VariantAnnotation> annotationReader;
