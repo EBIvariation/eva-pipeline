@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2016 EMBL - European Bioinformatics Institute
+ * Copyright 2016 EMBL - European Bioinformatics Institute
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,84 +15,121 @@
  */
 package embl.ebi.variation.eva.pipeline.steps;
 
-import org.opencb.biodata.models.variant.Variant;
-import org.opencb.biodata.models.variant.VariantSource;
+import com.mongodb.DBObject;
+import embl.ebi.variation.eva.pipeline.MongoDBHelper;
+import embl.ebi.variation.eva.pipeline.annotation.generateInput.VariantAnnotationItemProcessor;
+import embl.ebi.variation.eva.pipeline.annotation.generateInput.VariantWrapper;
+import embl.ebi.variation.eva.pipeline.jobs.VariantJobArgsConfig;
 import org.opencb.datastore.core.ObjectMap;
-import org.opencb.datastore.core.QueryOptions;
-import org.opencb.opencga.storage.core.StorageManagerFactory;
-import org.opencb.opencga.storage.core.variant.VariantStorageManager;
-import org.opencb.opencga.storage.core.variant.adaptors.VariantDBAdaptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.batch.core.StepContribution;
-import org.springframework.batch.core.scope.context.ChunkContext;
-import org.springframework.batch.core.step.tasklet.Tasklet;
-import org.springframework.batch.repeat.RepeatStatus;
+import org.springframework.batch.core.Step;
+import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
+import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
+import org.springframework.batch.item.ItemProcessor;
+import org.springframework.batch.item.data.MongoItemReader;
+import org.springframework.batch.item.file.FlatFileItemWriter;
+import org.springframework.batch.item.file.transform.BeanWrapperFieldExtractor;
+import org.springframework.batch.item.file.transform.DelimitedLineAggregator;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.data.domain.Sort;
 
-import java.io.BufferedOutputStream;
-import java.io.FileOutputStream;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
-import java.util.Iterator;
-import java.util.zip.GZIPOutputStream;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
- * Created by jmmut on 2015-12-09.
+ * @author Diego Poggioli
  *
- * @author Jose Miguel Mut Lopez &lt;jmmut@ebi.ac.uk&gt;
+ * Dump a list of variants without annotations from mongo
+ *
+ * Step class that:
+ * - READ: read the variants without annotations from mongo
+ * - PROCESS convert, filter, validate... the {@link VariantWrapper}
+ * - LOAD: write the {@link VariantWrapper} into a flatfile
+ *
+ * TODO:
+ * - Handle the overwrite
+ * - The variant list should be compressed. It is not possible to write into a zipped file with FlatFile item writer
+ *  see jmmut comment at https://github.com/EBIvariation/eva-v2/pull/22
+ *  We can create an extra step to convert the file and remove the nonp-zipped one
+ *  https://www.mkyong.com/java/how-to-compress-a-file-in-gzip-format/
+ *  https://examples.javacodegeeks.com/core-java/io/fileinputstream/compress-a-file-in-gzip-format-in-java/
+ *  http://www.journaldev.com/966/java-gzip-example-compress-and-decompress-file-in-gzip-format-in-java
  */
-public class VariantsAnnotGenerateInput implements Tasklet {
+
+@Configuration
+@EnableBatchProcessing
+@Import(VariantJobArgsConfig.class)
+public class VariantsAnnotGenerateInput {
+
     private static final Logger logger = LoggerFactory.getLogger(VariantsAnnotGenerateInput.class);
-    public static final String SKIP_ANNOT_GENERATE_INPUT = "skipAnnotGenerateInput";
 
     @Autowired
-    private ObjectMap variantOptions;
+    private StepBuilderFactory steps;
 
     @Autowired
     private ObjectMap pipelineOptions;
 
-    @Override
-    public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
+    @Bean
+    @Qualifier("variantsAnnotGenerateInputBatchStep")
+    public Step variantsAnnotGenerateInputBatchStep() throws Exception {
+        return steps.get("variantsAnnotGenerateInputBatchStep").<DBObject, VariantWrapper> chunk(10)
+                .reader(variantReader())
+                .processor(vepInputLineProcessor())
+                .writer(vepInputWriter()).allowStartIfComplete(false)
+                .build();
+    }
 
-        if (pipelineOptions.getBoolean(SKIP_ANNOT_GENERATE_INPUT)) {
-            logger.info("skipping annotation pre creation step, skipAnnotGenerateInput is set to {}",
-                    pipelineOptions.getBoolean(SKIP_ANNOT_GENERATE_INPUT));
-        } else {
-            VariantStorageManager variantStorageManager = StorageManagerFactory.getVariantStorageManager();
-            VariantSource variantSource = variantOptions.get(VariantStorageManager.VARIANT_SOURCE, VariantSource.class);
-            VariantDBAdaptor dbAdaptor = variantStorageManager.getDBAdaptor(variantOptions.getString("dbName"), variantOptions);
-            String vepInput = pipelineOptions.getString("vepInput");
+    @Bean
+    public MongoItemReader<DBObject> variantReader() throws Exception {
+        MongoItemReader<DBObject> reader = new MongoItemReader<>();
+        reader.setCollection(pipelineOptions.getString("dbCollectionVariantsName"));
 
-            Writer writer = new OutputStreamWriter(new BufferedOutputStream(new GZIPOutputStream(new FileOutputStream(vepInput))));
+        reader.setQuery("{ annot : { $exists : false } }");
+        reader.setFields("{ chr : 1, start : 1, end : 1, ref : 1, alt : 1, type : 1}");
+        reader.setTargetType(DBObject.class);
+        reader.setTemplate(MongoDBHelper.getMongoOperationsFromPipelineOptions(pipelineOptions));
 
-            QueryOptions options = new QueryOptions(VariantDBAdaptor.ANNOTATION_EXISTS, false);
-            options.add(VariantDBAdaptor.STUDIES, variantSource.getStudyId());
-            options.add(VariantDBAdaptor.FILES, variantSource.getFileId());
-            options.add("include", "chromosome,start,end,reference,alternative");
+        Map<String, Sort.Direction> coordinatesSort = new HashMap<>();
+        coordinatesSort.put("chr", Sort.Direction.ASC);
+        coordinatesSort.put("start", Sort.Direction.ASC);
+        reader.setSort(coordinatesSort);
 
-            Iterator<Variant> iterator = dbAdaptor.iterator(options);
-            while(iterator.hasNext()) {
-                Variant variant = iterator.next();
-                writer.write(serializeVariant(variant));
-            }
+        return reader;
+    }
 
-            writer.close();
-        }
-
-        return RepeatStatus.FINISHED;
+    @Bean
+    public ItemProcessor<DBObject, VariantWrapper> vepInputLineProcessor() {
+        return new VariantAnnotationItemProcessor();
     }
 
     /**
-     * see http://www.ensembl.org/info/docs/tools/vep/vep_formats.html for an explanation of the format we are serializing here.
+     * @return must return a {@link FlatFileItemWriter} and not a {@link org.springframework.batch.item.ItemWriter}
+     * {@see https://jira.spring.io/browse/BATCH-2097
+     *
+     * TODO: The variant list should be compressed
      */
-    private String serializeVariant(Variant variant) {
-        Variant formattedVariant = variant.copyInEnsemblFormat();
-        return String.format("%s\t%s\t%s\t%s/%s\t+\n",
-                formattedVariant.getChromosome(),
-                formattedVariant.getStart(),
-                formattedVariant.getEnd(),
-                formattedVariant.getReference(),
-                formattedVariant.getAlternate());
+    @Bean
+    public FlatFileItemWriter<VariantWrapper> vepInputWriter() throws Exception {
+        BeanWrapperFieldExtractor<VariantWrapper> fieldExtractor = new BeanWrapperFieldExtractor<>();
+        fieldExtractor.setNames(new String[] {"chr", "start", "end", "refAlt", "strand"});
+
+        DelimitedLineAggregator<VariantWrapper> delLineAgg = new DelimitedLineAggregator<>();
+        delLineAgg.setDelimiter("\t");
+        delLineAgg.setFieldExtractor(fieldExtractor);
+
+        FlatFileItemWriter<VariantWrapper> writer = new FlatFileItemWriter<>();
+
+        writer.setResource(new FileSystemResource(pipelineOptions.getString("vepInput")));
+        writer.setAppendAllowed(false);
+        writer.setShouldDeleteIfExists(true);
+        writer.setLineAggregator(delLineAgg);
+        return writer;
     }
+
 }
