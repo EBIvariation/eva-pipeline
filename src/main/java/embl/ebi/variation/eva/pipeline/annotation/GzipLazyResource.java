@@ -35,7 +35,7 @@ import java.util.zip.GZIPInputStream;
  *
  * @author Jose Miguel Mut Lopez &lt;jmmut@ebi.ac.uk&gt;
  */
-public class GzipLazyResource extends FileSystemResource implements Resource {
+public class GzipLazyResource extends FileSystemResource {
 
     public GzipLazyResource(File file) {
         super(file);
