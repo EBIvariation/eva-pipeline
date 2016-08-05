@@ -156,7 +156,7 @@ public class VariantAnnotationLineMapper implements LineMapper<VariantAnnotation
             parsedVariant.put("end", (variantLocationFields.length > 2) ? variantLocationFields[2] : variantLocationFields[1]);
         } catch (ArrayIndexOutOfBoundsException e) {
             logger.error("Unexpected format for column 2: "+coordinatesString);
-            e.printStackTrace();
+            throw e;
         }
 
         try {
@@ -180,7 +180,7 @@ public class VariantAnnotationLineMapper implements LineMapper<VariantAnnotation
             parsedVariant.put("alternative", variantFields[1]);
         } catch (ArrayIndexOutOfBoundsException e) {
             logger.error("Unexpected variant format for column 1: "+variantString);
-            e.printStackTrace();
+            throw e;
         }
 
         return parsedVariant;

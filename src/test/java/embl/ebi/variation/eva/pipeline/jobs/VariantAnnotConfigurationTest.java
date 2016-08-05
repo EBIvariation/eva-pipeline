@@ -16,10 +16,7 @@
 
 package embl.ebi.variation.eva.pipeline.jobs;
 
-import com.mongodb.DBCollection;
-import com.mongodb.DBCursor;
-import com.mongodb.DBObject;
-import com.mongodb.MongoClient;
+import com.mongodb.*;
 import com.mongodb.util.JSON;
 import embl.ebi.variation.eva.VariantJobsArgs;
 import org.apache.commons.io.FileUtils;
@@ -38,6 +35,9 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import java.io.*;
 import java.net.URL;
 import java.net.UnknownHostException;
+import java.util.List;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 import static embl.ebi.variation.eva.pipeline.jobs.JobTestUtils.makeGzipFile;
 import static junit.framework.TestCase.assertEquals;
@@ -67,7 +67,7 @@ public class VariantAnnotConfigurationTest {
     private DBObjectToVariantAnnotationConverter converter;
 
     @Test
-    public void validAnnotationJob () throws Exception {
+    public void fullAnnotationJob () throws Exception {
 
         insertVariantsWithoutAnnotations(dbName, dbName);
 
@@ -76,9 +76,10 @@ public class VariantAnnotConfigurationTest {
 
         assertFalse(vepInputFile.exists());
 
-        //Simulate VEP prediction file
+        //Simulate VEP prediction file (second line is malformed and it should be skipped)
         String vepAnnotation =
-                "20_60343_G/A\t20:63351\tG\tENSG00000178591\tENST00000608838\tTranscript\tupstream_gene_variant\t-\t-\t-\t-\t-\trs181305519\tDISTANCE=4540;STRAND=1;SYMBOL=DEFB125;SYMBOL_SOURCE=HGNC;HGNC_ID=18105;BIOTYPE=processed_transcript;GMAF=G:0.0005;AFR_MAF=G:0.0020\n";
+                "20_60343_G/A\t20:63351\tG\tENSG00000178591\tENST00000608838\tTranscript\tupstream_gene_variant\t-\t-\t-\t-\t-\trs181305519\tDISTANCE=4540;STRAND=1;SYMBOL=DEFB125;SYMBOL_SOURCE=HGNC;HGNC_ID=18105;BIOTYPE=processed_transcript;GMAF=G:0.0005;AFR_MAF=G:0.0020\n"
+                +"20_60344_GA\t20:63351\tG\tENSG00000178591\tENST00000608838\tTranscript\tupstream_gene_variant\t-\t-\t-\t-\t-\trs181305519\tDISTANCE=4540;STRAND=1;SYMBOL=DEFB125;SYMBOL_SOURCE=HGNC;HGNC_ID=18105;BIOTYPE=processed_transcript;GMAF=G:0.0005;AFR_MAF=G:0.0020\n";
 
         makeGzipFile(vepAnnotation, variantJobsArgs.getPipelineOptions().getString("vepOutput"));
 
@@ -98,13 +99,23 @@ public class VariantAnnotConfigurationTest {
         int consequenceTypeCount = 0;
         while (cursor.hasNext()) {
             cnt++;
-            VariantAnnotation annot = converter.convertToDataModelType((DBObject)cursor.next().get("annot"));
-            assertNotNull(annot.getConsequenceTypes());
-            consequenceTypeCount += annot.getConsequenceTypes().size();
+            DBObject dbObject = (DBObject)cursor.next().get("annot");
+            if(dbObject != null){
+                VariantAnnotation annot = converter.convertToDataModelType(dbObject);
+                assertNotNull(annot.getConsequenceTypes());
+                consequenceTypeCount += annot.getConsequenceTypes().size();
+            }
+
         }
 
         assertTrue(cnt>0);
         assertEquals(1, consequenceTypeCount);
+
+        //check that one line is skipped because malformed
+        List<StepExecution> variantAnnotationLoadStepExecution = jobExecution.getStepExecutions().stream()
+                .filter(stepExecution -> stepExecution.getStepName().equals("variantAnnotLoadBatchStep"))
+                .collect(Collectors.toList());
+        assertEquals(1, variantAnnotationLoadStepExecution.get(0).getReadSkipCount());
     }
 
     private String readLine(File outputFile) throws IOException {

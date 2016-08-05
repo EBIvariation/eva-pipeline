@@ -30,6 +30,7 @@ import org.opencb.opencga.storage.mongodb.variant.DBObjectToVariantAnnotationCon
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.file.FlatFileItemReader;
+import org.springframework.batch.item.file.FlatFileParseException;
 import org.springframework.batch.test.MetaDataInstanceFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
@@ -108,6 +109,24 @@ public class VariantsAnnotLoadTest {
         assertEquals(actualCount, count);
     }
 
+    // Missing '/' in 20_63351_AG (sould be 20_63351_A/G)
+    @Test(expected = FlatFileParseException.class)
+    public void malformedVariantFieldsAnnotationLinesShouldBeSkipped() throws Exception {
+        String vepOutput = variantJobsArgs.getPipelineOptions().getString("vepOutput");
+        makeGzipFile(vepOutputContentMalformedVariantFields, vepOutput);
+        annotationReader.open(executionContext);
+        annotationReader.read();
+    }
+
+    // Missing ':' in 20_63351 (should be 20:63351)
+    @Test(expected = FlatFileParseException.class)
+    public void malformedCoordinatesAnnotationLinesShouldBeSkipped() throws Exception {
+        String vepOutput = variantJobsArgs.getPipelineOptions().getString("vepOutput");
+        makeGzipFile(vepOutputContentMalformedCoordinates, vepOutput);
+        annotationReader.open(executionContext);
+        annotationReader.read();
+    }
+
     @Test
     public void variantAnnotationWriterShouldWriteAllFieldsIntoMongoDb() throws Exception {
         String dbName = variantJobsArgs.getPipelineOptions().getString(VariantStorageManager.DB_NAME);
@@ -165,4 +184,11 @@ public class VariantsAnnotLoadTest {
             "20_63399_G/A\t20:63399\tA\tENSG00000178591\tENST00000608838\tTranscript\tupstream_gene_variant\t-\t-\t-\t-\t-\t-\tDISTANCE=4492;STRAND=1;SYMBOL=DEFB125;SYMBOL_SOURCE=HGNC;HGNC_ID=18105;BIOTYPE=processed_transcript\n" +
             "20_63426_G/T\t20:63426\tT\tENSG00000178591\tENST00000382410\tTranscript\tupstream_gene_variant\t-\t-\t-\t-\t-\trs147063585\tDISTANCE=4925;STRAND=1;SYMBOL=DEFB125;SYMBOL_SOURCE=HGNC;HGNC_ID=18105;BIOTYPE=protein_coding;CANONICAL=YES;CCDS=CCDS12989.2;ENSP=ENSP00000371847;SWISSPROT=DB125_HUMAN;TREMBL=B2R4E8_HUMAN;UNIPARC=UPI00001A36DE;GMAF=T:0.0028;AFR_MAF=T:0.01\n" +
             "20_63426_G/T\t20:63426\tT\tENSG00000178591\tENST00000608838\tTranscript\tupstream_gene_variant\t-\t-\t-\t-\t-\trs147063585\tDISTANCE=4465;STRAND=1;SYMBOL=DEFB125;SYMBOL_SOURCE=HGNC;HGNC_ID=18105;BIOTYPE=processed_transcript;GMAF=T:0.0028;AFR_MAF=T:0.01\n";
+
+    private final String vepOutputContentMalformedVariantFields = "" +
+            "20_63351_AG\t20:63351\tG\tENSG00000178591\tENST00000608838\tTranscript\tupstream_gene_variant\t-\t-\t-\t-\t-\trs181305519\tDISTANCE=4540;STRAND=1;SYMBOL=DEFB125;SYMBOL_SOURCE=HGNC;HGNC_ID=18105;BIOTYPE=processed_transcript;GMAF=G:0.0005;AFR_MAF=G:0.0020\n";
+
+    private final String vepOutputContentMalformedCoordinates = "" +
+            "20_63351_A/G\t20_63351\tG\tENSG00000178591\tENST00000608838\tTranscript\tupstream_gene_variant\t-\t-\t-\t-\t-\trs181305519\tDISTANCE=4540;STRAND=1;SYMBOL=DEFB125;SYMBOL_SOURCE=HGNC;HGNC_ID=18105;BIOTYPE=processed_transcript;GMAF=G:0.0005;AFR_MAF=G:0.0020\n";
+
 }

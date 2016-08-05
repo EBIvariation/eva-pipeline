@@ -29,6 +29,7 @@ import org.springframework.batch.core.configuration.annotation.StepBuilderFactor
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.data.MongoItemWriter;
 import org.springframework.batch.item.file.FlatFileItemReader;
+import org.springframework.batch.item.file.FlatFileParseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -65,6 +66,7 @@ public class VariantsAnnotLoad {
         return steps.get("variantAnnotLoadBatchStep").<VariantAnnotation, VariantAnnotation> chunk(10)
                 .reader(variantAnnotationReader())
                 .writer(variantAnnotationWriter())
+                .faultTolerant().skipLimit(50).skip(FlatFileParseException.class)
                 .build();
     }
 
