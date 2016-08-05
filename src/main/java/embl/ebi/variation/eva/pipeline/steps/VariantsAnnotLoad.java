@@ -21,6 +21,7 @@ import embl.ebi.variation.eva.pipeline.annotation.GzipLazyResource;
 import embl.ebi.variation.eva.pipeline.annotation.load.VariantAnnotationLineMapper;
 import embl.ebi.variation.eva.pipeline.annotation.load.VariantAnnotationMongoItemWriter;
 import embl.ebi.variation.eva.pipeline.jobs.VariantJobArgsConfig;
+import embl.ebi.variation.eva.pipeline.listener.SkipCheckingListener;
 import org.opencb.biodata.models.variant.annotation.VariantAnnotation;
 import org.opencb.datastore.core.ObjectMap;
 import org.springframework.batch.core.Step;
@@ -67,6 +68,7 @@ public class VariantsAnnotLoad {
                 .reader(variantAnnotationReader())
                 .writer(variantAnnotationWriter())
                 .faultTolerant().skipLimit(50).skip(FlatFileParseException.class)
+                .listener(skipCheckingListener())
                 .build();
     }
 
@@ -86,6 +88,11 @@ public class VariantsAnnotLoad {
         writer.setCollection(pipelineOptions.getString("dbCollectionVariantsName"));
         writer.setTemplate(mongoOperations);
         return writer;
+    }
+
+    @Bean
+    public SkipCheckingListener skipCheckingListener(){
+        return new SkipCheckingListener();
     }
 
 }
