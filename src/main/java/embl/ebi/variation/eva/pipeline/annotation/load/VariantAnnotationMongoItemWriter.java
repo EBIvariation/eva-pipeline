@@ -27,6 +27,7 @@ import org.springframework.batch.item.data.MongoItemWriter;
 import org.springframework.data.mongodb.core.MongoOperations;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -76,8 +77,21 @@ public class VariantAnnotationMongoItemWriter extends MongoItemWriter<VariantAnn
     @Override
     protected void doWrite(List<? extends VariantAnnotation> variantAnnotations) {
 
-        Map<String, List<VariantAnnotation>> variantAnnotationsByStorageId = variantAnnotations.stream()
-                .collect(Collectors.groupingBy(this::buildStorageIdFromVariantAnnotation));
+        //group variant annotations by Id
+
+        // The following method is not working with java8 .<40. Should be resuscitated when travis is updated to a
+        // more recent java version (1.8.0_31 atm)
+        // http://stackoverflow.com/questions/37368060/why-this-code-compiles-with-jdk8u45-and-above-but-not-with-jdk8u25
+        //Map<String, List<VariantAnnotation>> variantAnnotationsByStorageId = variantAnnotations.stream()
+        //        .collect(Collectors.groupingBy(this::buildStorageIdFromVariantAnnotation));
+
+        Map<String, List<VariantAnnotation>> variantAnnotationsByStorageId = new HashMap<>();
+        for (VariantAnnotation variantAnnotation: variantAnnotations) {
+            String id = buildStorageIdFromVariantAnnotation(variantAnnotation);
+
+            variantAnnotationsByStorageId.putIfAbsent(id, new ArrayList<>());
+            variantAnnotationsByStorageId.get(id).add(variantAnnotation);
+        }
 
         for (Map.Entry<String, List<VariantAnnotation>> annotationsIn : variantAnnotationsByStorageId.entrySet()){
             String storageId = annotationsIn.getKey();
