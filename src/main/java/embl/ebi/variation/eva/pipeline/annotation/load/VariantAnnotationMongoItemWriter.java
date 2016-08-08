@@ -28,6 +28,8 @@ import org.springframework.data.mongodb.core.MongoOperations;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @author Diego Poggioli
@@ -62,7 +64,7 @@ public class VariantAnnotationMongoItemWriter extends MongoItemWriter<VariantAnn
 
     public VariantAnnotationMongoItemWriter(MongoOperations mongoOperations) {
         this.mongoOperations = mongoOperations;
-        converter = new DBObjectToVariantAnnotationConverter();
+        this.converter = new DBObjectToVariantAnnotationConverter();
     }
 
     @Override
@@ -74,50 +76,69 @@ public class VariantAnnotationMongoItemWriter extends MongoItemWriter<VariantAnn
     @Override
     protected void doWrite(List<? extends VariantAnnotation> variantAnnotations) {
 
-        for (VariantAnnotation variantAnnotation : variantAnnotations) {
-            logger.debug("Writing into mongo {}", variantAnnotation.getStart());
+        Map<String, List<VariantAnnotation>> variantAnnotationsByStorageId = variantAnnotations.stream()
+                .collect(Collectors.groupingBy(this::buildStorageIdFromVariantAnnotation));
 
-            String storageId = MongoDBHelper.buildStorageId(
-                    variantAnnotation.getChromosome(),
-                    variantAnnotation.getStart(),
-                    variantAnnotation.getReferenceAllele(),
-                    variantAnnotation.getAlternativeAllele());
+        for (Map.Entry<String, List<VariantAnnotation>> annotationsIn : variantAnnotationsByStorageId.entrySet()){
+            String storageId = annotationsIn.getKey();
+            List<VariantAnnotation> annotations = annotationsIn.getValue();
 
-            BasicDBObject find = new BasicDBObject("_id", storageId);
+            VariantAnnotation variantAnnotation = annotations.get(0);
 
-            //find existing variant with same Id, and bring only the annotation
-            DBObject existingVariantStorage = mongoOperations.getCollection(collection)
-                    .findOne(find, new BasicDBObject("annot", 1));
-
-            //update annotation in existing variant
-            if (existingVariantStorage != null){
-                if(existingVariantStorage.containsField("annot")){
-
-                    //update ConsequenceTypes
-                    VariantAnnotation existingAnnotation = converter.convertToDataModelType((DBObject) existingVariantStorage.get("annot"));
-
-                    if(variantAnnotation.getConsequenceTypes() != null){
-                        existingAnnotation.getConsequenceTypes().addAll(variantAnnotation.getConsequenceTypes());
-                    }
-
-                    //update Hgvs
-                    if(variantAnnotation.getHgvs() != null){
-                        if(null == existingAnnotation.getHgvs()){
-                            existingAnnotation.setHgvs(new ArrayList<>());
-                        }
-                        existingAnnotation.getHgvs().addAll(variantAnnotation.getHgvs());
-                    }
-
-                    variantAnnotation = existingAnnotation;
-                }
+            if(annotations.size()>1){
+                variantAnnotation = concatenateOtherAnnotations(
+                        variantAnnotation, annotations.subList(1, annotations.size()));
             }
 
-            DBObject storageVariantAnnotation = converter.convertToStorageType(variantAnnotation);
-
-            BasicDBObject update = new BasicDBObject("$set", new BasicDBObject("annot", storageVariantAnnotation));
-            mongoOperations.getCollection(collection).update(find, update);
-
+            logger.debug("Writing into mongo annotations for {}", storageId);
+            writeVariantAnnotationInMongoDb(new BasicDBObject("_id", storageId), variantAnnotation);
         }
+
+    }
+
+    /**
+     * Append multiple annotation into a single {@link VariantAnnotation}
+     * Updated fields are ConsequenceTypes and Hgvs
+     *
+     * @param variantAnnotation annotation where other annotations will be appended
+     * @param otherAnnotationsToConcatenate annotations to be appended
+     * @return a single {@link VariantAnnotation} ready to be persisted
+     */
+    private VariantAnnotation concatenateOtherAnnotations(VariantAnnotation variantAnnotation,
+                                                          List<VariantAnnotation> otherAnnotationsToConcatenate){
+
+        for (VariantAnnotation annotationToAppend : otherAnnotationsToConcatenate) {
+
+            //update ConsequenceTypes
+            if(annotationToAppend.getConsequenceTypes() != null){
+                variantAnnotation.getConsequenceTypes().addAll(annotationToAppend.getConsequenceTypes());
+            }
+
+            //update Hgvs
+            if(annotationToAppend.getHgvs() != null){
+                if(variantAnnotation.getHgvs() == null){
+                    variantAnnotation.setHgvs(new ArrayList<>());
+                }
+                variantAnnotation.getHgvs().addAll(annotationToAppend.getHgvs());
+            }
+        }
+
+        return variantAnnotation;
+    }
+
+
+    private void writeVariantAnnotationInMongoDb(BasicDBObject find, VariantAnnotation variantAnnotation){
+        DBObject storageVariantAnnotation = converter.convertToStorageType(variantAnnotation);
+        BasicDBObject update = new BasicDBObject("$set", new BasicDBObject("annot", storageVariantAnnotation));
+        mongoOperations.getCollection(collection).update(find, update);
+    }
+
+    private String buildStorageIdFromVariantAnnotation(VariantAnnotation variantAnnotation){
+        return MongoDBHelper.buildStorageId(
+                variantAnnotation.getChromosome(),
+                variantAnnotation.getStart(),
+                variantAnnotation.getReferenceAllele(),
+                variantAnnotation.getAlternativeAllele());
     }
 
 }

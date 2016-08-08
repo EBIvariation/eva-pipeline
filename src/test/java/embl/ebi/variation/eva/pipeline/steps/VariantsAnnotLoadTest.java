@@ -38,7 +38,9 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.zip.GZIPInputStream;
 
 import static embl.ebi.variation.eva.pipeline.jobs.JobTestUtils.makeGzipFile;
@@ -143,17 +145,20 @@ public class VariantsAnnotLoadTest {
         DBCollection variants =
                 mongoClient.getDB(dbName).getCollection(dbCollectionVariantsName);
         DBObjectToVariantAnnotationConverter converter = new DBObjectToVariantAnnotationConverter();
+
+        Set<String> uniqueIdsLoaded = new HashSet<>();
         for (VariantAnnotation annotation : annotations) {
             String id = MongoDBHelper.buildStorageId(
                     annotation.getChromosome(),
                     annotation.getStart(),
                     annotation.getReferenceAllele(),
                     annotation.getAlternativeAllele());
-            try {
+
+            if (!uniqueIdsLoaded.contains(id)){
                 variants.insert(new BasicDBObject("_id", id));
-            } catch (MongoException.DuplicateKey e) {
-                ; // ignore, we are just scaffolding the variants collection
+                uniqueIdsLoaded.add(id);
             }
+
         }
 
         // now, load the annotation
