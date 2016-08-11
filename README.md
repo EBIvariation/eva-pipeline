@@ -1,14 +1,11 @@
-# European Variation Archive (EVA) v2 [![Build Status](https://travis-ci.org/EBIvariation/eva-v2.svg)](https://travis-ci.org/EBIvariation/eva-v2)
+# European Variation Archive (EVA) Pipeline v2 [![Build Status](https://travis-ci.org/EBIvariation/eva-pipeline.svg)](https://travis-ci.org/EBIvariation/eva-pipeline)
 
-This repository contains work in progress for the next version of the European Variation Archive. If you are looking for the production source code, please check https://github.com/EBIvariation/eva and https://github.com/EBIvariation/eva-pipeline
+This repository contains work in progress for the next version of the European Variation Archive pipeline. If you are 
+looking for the production source code, please check https://github.com/EBIvariation/eva-ws for the REST web services 
+API, and the `master` branch of this same repository, https://github.com/EBIvariation/eva-pipeline.
 
-Its components form the core of the new EVA:
-
-* The pipeline for VCF file processing, based on the Spring Batch framework
-* The database access layer
-
-The web services and metadata components will be developed in independent repositories.
-
+The core of the new EVA is a pipeline for VCF file processing, implemented purely in Java and based on the Spring Batch 
+framework, instead of combining the Luigi workflow manager with Java binaries.
 
 ## EVA Pipeline
 #### Using OpenCGA and Spring batch
