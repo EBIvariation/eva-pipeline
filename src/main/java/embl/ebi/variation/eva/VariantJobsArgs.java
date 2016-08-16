@@ -43,7 +43,7 @@ public class VariantJobsArgs {
     private static final Logger logger = LoggerFactory.getLogger(VariantJobsArgs.class);
 
     ////common
-    @Value("${input:}") private String input;
+    @Value("${input}") private String input;
     @Value("${compressExtension}") private String compressExtension;
 
     ////opencga
