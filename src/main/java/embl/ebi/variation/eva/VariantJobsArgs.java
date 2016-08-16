@@ -44,23 +44,25 @@ public class VariantJobsArgs {
 
     ////common
     @Value("${input}") private String input;
-    @Value("${compressExtension}") private String compressExtension;
 
-    ////opencga
+    // OpenCGA
     @Value("${fileId}") private String fileId;
     @Value("${studyType}") private String studyType;
     @Value("${studyName}") private String studyName;
     @Value("${studyId}") private String studyId;
-    @Value("${compressGenotypes}") private String compressGenotypes;
     @Value("${overwriteStats:false}") private boolean overwriteStats;
-    @Value("${calculateStats:false}") private boolean calculateStats;
-    @Value("${includeSamples:false}") private String includeSamples;
-    @Value("${annotate:false}") private boolean annotate;
-    @Value("${includeSrc}") private String includeSrc;
-    @Value("${includeStats:false}")private String includeStats;
     @Value("${aggregated}") private String aggregated;
 
     @Value("${opencga.app.home}") private String opencgaAppHome;
+    
+    //// OpenCGA options with default values
+    private String compressExtension = ".gz";
+    private boolean includeSamples = true;
+    private boolean compressGenotypes = true;
+    private boolean calculateStats = false;
+    private boolean includeStats = false;
+    private boolean annotate = false;
+    private VariantStorageManager.IncludeSrc includeSourceLine = VariantStorageManager.IncludeSrc.FIRST_8_COLUMNS;
 
     /// DB connection
     @Value("${dbHosts:}") private String dbHosts;
@@ -118,18 +120,16 @@ public class VariantJobsArgs {
 
         variantOptions.put(VariantStorageManager.VARIANT_SOURCE, source);
         variantOptions.put(VariantStorageManager.OVERWRITE_STATS, overwriteStats);
-        variantOptions.put(VariantStorageManager.INCLUDE_SRC, VariantStorageManager.IncludeSrc.parse(includeSrc));
+        variantOptions.put(VariantStorageManager.INCLUDE_SRC, includeSourceLine);
         variantOptions.put("compressExtension", compressExtension);
         variantOptions.put(VariantStorageManager.DB_NAME, dbName);
-        variantOptions.put(VariantStorageManager.COMPRESS_GENOTYPES, Boolean.parseBoolean(compressGenotypes));
-        variantOptions.put(VariantStorageManager.INCLUDE_STATS, Boolean.parseBoolean(includeStats));
+        variantOptions.put(VariantStorageManager.INCLUDE_SAMPLES, includeSamples);   // TODO rename samples to genotypes
+        variantOptions.put(VariantStorageManager.COMPRESS_GENOTYPES, compressGenotypes);
+        variantOptions.put(VariantStorageManager.CALCULATE_STATS, calculateStats);   // this is tested by hand
+        variantOptions.put(VariantStorageManager.INCLUDE_STATS, includeStats);
+        variantOptions.put(VariantStorageManager.ANNOTATE, annotate);
 
         logger.debug("Using as input: {}", input);
-
-        variantOptions.put(VariantStorageManager.CALCULATE_STATS, false);   // this is tested by hand
-        variantOptions.put(VariantStorageManager.INCLUDE_SAMPLES, Boolean.parseBoolean(includeSamples));   // TODO rename samples to genotypes
-        variantOptions.put(VariantStorageManager.ANNOTATE, false);
-
         logger.debug("Using as variantOptions: {}", variantOptions.entrySet().toString());
     }
 
