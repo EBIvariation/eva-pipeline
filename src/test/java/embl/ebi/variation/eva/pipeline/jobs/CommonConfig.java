@@ -44,11 +44,13 @@ public class CommonConfig {
         properties.put("dbName", "");
         properties.put("dbCollectionVariantsName", "variants");
         properties.put("dbCollectionFilesName", "files");
+        properties.put("dbCollectionGenesName", "genes");
         properties.put("readPreference", "primary");
         properties.put("compressExtension", ".gz");
         properties.put("compressGenotypes", "true");
         properties.put("includeSrc", "FIRST_8_COLUMNS");
-        properties.put("pedigree", "FIRST_8_COLUMNS");
+        properties.put("pedigree", "");
+        properties.put("gtf", "");
         properties.put("annotate", "false");
         properties.put("includeSamples", "false");
         properties.put("includeStats", "false");

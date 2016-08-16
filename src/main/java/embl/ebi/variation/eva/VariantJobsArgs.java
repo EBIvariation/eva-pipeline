@@ -70,11 +70,13 @@ public class VariantJobsArgs {
     @Value("${dbName}") private String dbName;
     @Value("${dbCollectionVariantsName}") private String dbCollectionVariantsName;
     @Value("${dbCollectionFilesName}") private String dbCollectionFilesName;
+    @Value("${dbCollectionGenesName}") private String dbCollectionGenesName;
     @Value("${readPreference}") private String readPreference;
 
     ////pipeline
     @Value("${outputDir}") private String outputDir;
     @Value("${pedigree}") private String pedigree;
+    @Value("${gtf}") private String gtf;
 
     //steps
     @Value("${skipLoad:false}") private boolean skipLoad;
@@ -138,11 +140,13 @@ public class VariantJobsArgs {
         pipelineOptions.put("compressExtension", compressExtension);
         pipelineOptions.put("outputDir", outputDir);
         pipelineOptions.put("pedigree", pedigree);
+        pipelineOptions.put("gtf", gtf);
         pipelineOptions.put("dbHosts", dbHosts);
         pipelineOptions.put("dbAuthenticationDb", dbAuthenticationDb);
         pipelineOptions.put(VariantStorageManager.DB_NAME, dbName);
         pipelineOptions.put("dbCollectionVariantsName", dbCollectionVariantsName);
         pipelineOptions.put("dbCollectionFilesName", dbCollectionFilesName);
+        pipelineOptions.put("dbCollectionGenesName", dbCollectionGenesName);
         pipelineOptions.put("dbUser", dbUser);
         pipelineOptions.put("dbPassword", dbPassword);
         pipelineOptions.put("readPreference", readPreference);
