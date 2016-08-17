@@ -54,9 +54,9 @@ public class VariantJobsArgs {
     // OpenCGA
     @Value("${input.vcf.id}") private String fileId;
     @Value("${input.vcf.aggregation}") private String aggregated;
-    @Value("${studyType}") private String studyType;
-    @Value("${studyName}") private String studyName;
-    @Value("${studyId}") private String studyId;
+    @Value("${input.study.type}") private String studyType;
+    @Value("${input.study.name}") private String studyName;
+    @Value("${input.study.id}") private String studyId;
     @Value("${overwriteStats:false}") private boolean overwriteStats;
 
     @Value("${opencga.app.home}") private String opencgaAppHome;

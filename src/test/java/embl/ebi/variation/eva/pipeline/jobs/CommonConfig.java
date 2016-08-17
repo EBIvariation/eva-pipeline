@@ -58,9 +58,9 @@ public class CommonConfig {
         properties.put("annotate", "false");
         properties.put("includeSamples", "false");
         properties.put("includeStats", "false");
-        properties.put("studyType", "COLLECTION");
-        properties.put("studyName", "studyName");
-        properties.put("studyId", "1");
+        properties.put("input.study.type", "COLLECTION");
+        properties.put("input.study.name", "input.study.name");
+        properties.put("input.study.id", "1");
         properties.put("opencga.app.home", opencgaHome);
         properties.put(VariantsLoad.SKIP_LOAD, "true");
         properties.put(VariantsStatsCreate.SKIP_STATS_CREATE, "true");
