@@ -39,6 +39,8 @@ public class CommonConfig {
 
         Properties properties = new Properties();
         properties.put("input.vcf", "");
+        properties.put("input.vcf.id", "1");
+        properties.put("input.vcf.aggregation", "NONE");
         properties.put("overwriteStats", "false");
         properties.put("calculateStats", "false");
         properties.put("outputDir", "/tmp");
@@ -56,11 +58,9 @@ public class CommonConfig {
         properties.put("annotate", "false");
         properties.put("includeSamples", "false");
         properties.put("includeStats", "false");
-        properties.put("aggregated", "NONE");
         properties.put("studyType", "COLLECTION");
         properties.put("studyName", "studyName");
         properties.put("studyId", "1");
-        properties.put("fileId", "1");
         properties.put("opencga.app.home", opencgaHome);
         properties.put(VariantsLoad.SKIP_LOAD, "true");
         properties.put(VariantsStatsCreate.SKIP_STATS_CREATE, "true");

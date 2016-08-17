@@ -135,11 +135,11 @@ public class VariantAggregatedConfigurationTest {
 //                .addString("compressExtension", ".gz")
 //                .addString("compressGenotypes", "true")
 //                .addString("includeSrc", "FIRST_8_COLUMNS")
-//                .addString("aggregated", "NONE")
+//                .addString("input.vcf.aggregation", "NONE")
 //                .addString("studyType", "COLLECTION")
 //                .addString("studyName", "studyName")
 //                .addString("studyId", "2")
-//                .addString("fileId", "2")
+//                .addString("input.vcf.id", "2")
 //                .addString("opencga.app.home", opencgaHome)
 //                .addString(VariantsLoad.SKIP_LOAD, "true")
 //                .toJobParameters();
@@ -204,11 +204,11 @@ public class VariantAggregatedConfigurationTest {
 //                .addString("compressExtension", ".gz")
 //                .addString("compressGenotypes", "true")
 //                .addString("includeSrc", "FIRST_8_COLUMNS")
-//                .addString("aggregated", "NONE")
+//                .addString("input.vcf.aggregation", "NONE")
 //                .addString("studyType", "COLLECTION")
 //                .addString("studyName", "studyName")
 //                .addString("studyId", "1")
-//                .addString("fileId", "1")
+//                .addString("input.vcf.id", "1")
 //                .addString("opencga.app.home", null)
 //                .toJobParameters();
 //

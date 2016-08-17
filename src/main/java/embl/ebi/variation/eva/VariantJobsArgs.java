@@ -52,16 +52,16 @@ public class VariantJobsArgs {
     @Value("${input.vcf}") private String input;
 
     // OpenCGA
-    @Value("${fileId}") private String fileId;
+    @Value("${input.vcf.id}") private String fileId;
+    @Value("${input.vcf.aggregation}") private String aggregated;
     @Value("${studyType}") private String studyType;
     @Value("${studyName}") private String studyName;
     @Value("${studyId}") private String studyId;
     @Value("${overwriteStats:false}") private boolean overwriteStats;
-    @Value("${aggregated}") private String aggregated;
 
     @Value("${opencga.app.home}") private String opencgaAppHome;
     
-    //// OpenCGA options with default values
+    //// OpenCGA options with default values (non-customizable)
     private String compressExtension = ".gz";
     private boolean includeSamples = true;
     private boolean compressGenotypes = true;
