@@ -56,7 +56,7 @@ public class VariantsStatsCreate implements Tasklet {
         //JobParameters parameters = chunkContext.getStepContext().getStepExecution().getJobParameters();
 
         if (pipelineOptions.getBoolean(SKIP_STATS_CREATE)) {
-            logger.info("skipping stats creation step, skipStatsCreate is set to {}" + pipelineOptions.getBoolean(SKIP_STATS_CREATE));
+            logger.info("skipping stats creation step, skipStatsCreate is set to {}", pipelineOptions.getBoolean(SKIP_STATS_CREATE));
         } else {
             VariantStorageManager variantStorageManager = StorageManagerFactory.getVariantStorageManager();
             VariantSource variantSource = variantOptions.get(VariantStorageManager.VARIANT_SOURCE, VariantSource.class);
