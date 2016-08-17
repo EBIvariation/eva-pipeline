@@ -89,7 +89,7 @@ public class VariantConfigurationTest {
         String inputFile = VariantConfigurationTest.class.getResource(inputFileResouce).getFile();
         String mockVep = VariantConfigurationTest.class.getResource("/mockvep.pl").getFile();
 
-        variantJobsArgs.getPipelineOptions().put("input", inputFile);
+        variantJobsArgs.getPipelineOptions().put("input.vcf", inputFile);
         variantJobsArgs.getPipelineOptions().put("vepPath", mockVep);
 
         Config.setOpenCGAHome(opencgaHome);
@@ -204,7 +204,7 @@ public class VariantConfigurationTest {
         jobLauncherTestUtils.setJob(job);
         jobLauncherTestUtils.setJobLauncher(jobLauncher);
 
-        inputFileResouce = variantJobsArgs.getPipelineOptions().getString("input");
+        inputFileResouce = variantJobsArgs.getPipelineOptions().getString("input.vcf");
         outputDir = variantJobsArgs.getPipelineOptions().getString("outputDir");
         compressExtension = variantJobsArgs.getPipelineOptions().getString("compressExtension");
         dbName = variantJobsArgs.getPipelineOptions().getString("dbName");

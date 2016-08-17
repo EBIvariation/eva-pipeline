@@ -53,7 +53,7 @@ public class VariantsLoad implements Tasklet {
         } else {
             VariantStorageManager variantStorageManager = StorageManagerFactory.getVariantStorageManager();// TODO add mongo
             URI outdirUri = createUri(pipelineOptions.getString("outputDir"));
-            URI nextFileUri = createUri(pipelineOptions.getString("input"));
+            URI nextFileUri = createUri(pipelineOptions.getString("input.vcf"));
 
 //          URI pedigreeUri = pipelineOptions.getString("pedigree") != null ? createUri(pipelineOptions.getString("pedigree")) : null;
             Path output = Paths.get(outdirUri.getPath());

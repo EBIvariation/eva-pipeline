@@ -89,7 +89,7 @@ public class VariantLoadConfigurationTest {
         String input = VariantLoadConfigurationTest.class.getResource(FILE_20).getFile();
         String dbName = VALID_LOAD;
 
-        pipelineOptions.put("input", input);
+        pipelineOptions.put("input.vcf", input);
         pipelineOptions.put("outputDir", Paths.get(input).getParent().toString());    // reusing transformed path in resources
 
         variantOptions.put(VariantStorageManager.DB_NAME, dbName);
@@ -107,7 +107,7 @@ public class VariantLoadConfigurationTest {
 
         JobExecution execution = jobLauncher.run(job, getJobParameters());
 
-        assertEquals(input, pipelineOptions.getString("input"));
+        assertEquals(input, pipelineOptions.getString("input.vcf"));
         assertEquals(ExitStatus.COMPLETED.getExitCode(), execution.getExitStatus().getExitCode());
 
         // check ((documents in DB) == (lines in transformed file))
@@ -134,7 +134,7 @@ public class VariantLoadConfigurationTest {
 
         Config.setOpenCGAHome("");
 
-        pipelineOptions.put("input", input);
+        pipelineOptions.put("input.vcf", input);
         pipelineOptions.put("outputDir", outdir);
         variantOptions.put(VariantStorageManager.DB_NAME, dbName);
         pipelineOptions.put(VariantsLoad.SKIP_LOAD, false);
@@ -151,7 +151,7 @@ public class VariantLoadConfigurationTest {
 
         JobExecution execution = jobLauncher.run(job, getJobParameters());
 
-        assertEquals(input, pipelineOptions.getString("input"));
+        assertEquals(input, pipelineOptions.getString("input.vcf"));
         assertEquals(ExitStatus.FAILED.getExitCode(), execution.getExitStatus().getExitCode());
     }
 

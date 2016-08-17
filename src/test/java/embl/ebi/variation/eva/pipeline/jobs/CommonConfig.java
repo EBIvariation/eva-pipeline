@@ -38,7 +38,7 @@ public class CommonConfig {
         PropertySourcesPlaceholderConfigurer configurer = new PropertySourcesPlaceholderConfigurer();
 
         Properties properties = new Properties();
-        properties.put("input", "");
+        properties.put("input.vcf", "");
         properties.put("overwriteStats", "false");
         properties.put("calculateStats", "false");
         properties.put("outputDir", "/tmp");

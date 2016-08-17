@@ -93,7 +93,7 @@ public class VariantStatsConfigurationTest {
         String dbName = INVALID_CREATE_STATS;
         String outputDir = "/tmp";
 
-        pipelineOptions.put("input", input);
+        pipelineOptions.put("input.vcf", input);
         pipelineOptions.put("outputDir", outputDir);
         pipelineOptions.put(VariantsLoad.SKIP_LOAD, false);
         pipelineOptions.put(VariantsStatsCreate.SKIP_STATS_CREATE, false);
@@ -102,7 +102,7 @@ public class VariantStatsConfigurationTest {
 
         JobExecution execution = jobLauncher.run(job, getJobParameters());
 
-        assertEquals(input, pipelineOptions.getString("input"));
+        assertEquals(input, pipelineOptions.getString("input.vcf"));
         assertEquals(ExitStatus.FAILED.getExitCode(), execution.getExitStatus().getExitCode());
     }
 
@@ -115,7 +115,7 @@ public class VariantStatsConfigurationTest {
         String dbName = VALID_LOAD_STATS;
         String outputDir = input;
 
-        pipelineOptions.put("input", input);
+        pipelineOptions.put("input.vcf", input);
         pipelineOptions.put("outputDir", outputDir);
         pipelineOptions.put(VariantsLoad.SKIP_LOAD, false);
         pipelineOptions.put(VariantsStatsLoad.SKIP_STATS_LOAD, false);
@@ -143,7 +143,7 @@ public class VariantStatsConfigurationTest {
         String dbName = INVALID_LOAD_STATS;
         String outputDir = input;
 
-        pipelineOptions.put("input", input);
+        pipelineOptions.put("input.vcf", input);
         pipelineOptions.put("outputDir", outputDir);
         pipelineOptions.put(VariantsLoad.SKIP_LOAD, false);
         pipelineOptions.put(VariantsStatsLoad.SKIP_STATS_LOAD, false);
@@ -152,7 +152,7 @@ public class VariantStatsConfigurationTest {
 
         JobExecution execution = jobLauncher.run(job, getJobParameters());
 
-        assertEquals(input, pipelineOptions.getString("input"));
+        assertEquals(input, pipelineOptions.getString("input.vcf"));
         assertEquals(ExitStatus.FAILED.getExitCode(), execution.getExitStatus().getExitCode());
     }
 

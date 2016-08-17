@@ -49,7 +49,7 @@ public class VariantJobsArgs {
     private static final Logger logger = LoggerFactory.getLogger(VariantJobsArgs.class);
 
     ////common
-    @Value("${input}") private String input;
+    @Value("${input.vcf}") private String input;
 
     // OpenCGA
     @Value("${fileId}") private String fileId;
@@ -176,7 +176,7 @@ public class VariantJobsArgs {
     }
 
     private void loadPipelineOptions() {
-        pipelineOptions.put("input", input);
+        pipelineOptions.put("input.vcf", input);
         pipelineOptions.put("compressExtension", compressExtension);
         pipelineOptions.put("outputDir", outputDir);
         pipelineOptions.put("pedigree", pedigree);
