@@ -81,7 +81,8 @@ public class VariantsAnnotGenerateInput {
         return steps.get("variantsAnnotGenerateInputBatchStep").<DBObject, VariantWrapper> chunk(10)
                 .reader(variantReader())
                 .processor(vepInputLineProcessor())
-                .writer(vepInputWriter()).allowStartIfComplete(false)
+                .writer(vepInputWriter())
+                .allowStartIfComplete(pipelineOptions.getBoolean("allowStartIfComplete"))
                 .build();
     }
 

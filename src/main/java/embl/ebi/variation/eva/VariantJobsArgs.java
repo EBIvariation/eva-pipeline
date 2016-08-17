@@ -100,7 +100,7 @@ public class VariantJobsArgs {
     @Value("${vepFasta}") private String vepFasta;
     @Value("${vepNumForks}") private String vepNumForks;
 
-    @Value("${allowStartIfComplete}") private boolean allowStartIfComplete;
+    @Value("${allowStartIfComplete:false}") private boolean allowStartIfComplete;
 
     private ObjectMap variantOptions  = new ObjectMap();
     private ObjectMap pipelineOptions  = new ObjectMap();
