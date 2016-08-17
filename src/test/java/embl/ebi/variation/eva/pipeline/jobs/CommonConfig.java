@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 EMBL - European Bioinformatics Institute
+ * Copyright 2016 EMBL - European Bioinformatics Institute
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import java.util.Properties;
 
 /**
  * @author Diego Poggioli
+ * @author Cristina Yenyxe Gonzalez
  *
  * Common configuration used to test different job scenario
  * Test must change the property based on the job configuration and the step that it's running
@@ -41,10 +42,13 @@ public class CommonConfig {
         properties.put("overwriteStats", "false");
         properties.put("calculateStats", "false");
         properties.put("outputDir", "/tmp");
+        
+        properties.put("dbHosts", "localhost:27017");
         properties.put("dbName", "");
         properties.put("dbCollectionVariantsName", "variants");
         properties.put("dbCollectionFilesName", "files");
         properties.put("readPreference", "primary");
+        
         properties.put("compressExtension", ".gz");
         properties.put("compressGenotypes", "true");
         properties.put("includeSrc", "FIRST_8_COLUMNS");

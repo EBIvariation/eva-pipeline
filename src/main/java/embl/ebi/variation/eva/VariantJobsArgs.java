@@ -16,10 +16,14 @@
 package embl.ebi.variation.eva;
 
 import embl.ebi.variation.eva.pipeline.steps.*;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.URI;
 import org.opencb.biodata.models.variant.VariantSource;
 import org.opencb.biodata.models.variant.VariantStudy;
 import org.opencb.datastore.core.ObjectMap;
-import org.opencb.opencga.lib.common.Config;
 import org.opencb.opencga.storage.core.variant.VariantStorageManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +31,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.nio.file.Paths;
+import java.util.Properties;
+import org.opencb.opencga.lib.common.Config;
+import org.opencb.opencga.storage.mongodb.variant.MongoDBVariantStorageManager;
 
 /**
  *
@@ -64,14 +71,14 @@ public class VariantJobsArgs {
     private boolean annotate = false;
     private VariantStorageManager.IncludeSrc includeSourceLine = VariantStorageManager.IncludeSrc.FIRST_8_COLUMNS;
 
-    /// DB connection
-    @Value("${dbHosts:}") private String dbHosts;
-    @Value("${dbAuthenticationDb:}") private String dbAuthenticationDb;
-    @Value("${dbUser:}") private String dbUser;
-    @Value("${dbPassword:}") private String dbPassword;
-    @Value("${dbName}") private String dbName;
-    @Value("${dbCollectionVariantsName}") private String dbCollectionVariantsName;
-    @Value("${dbCollectionFilesName}") private String dbCollectionFilesName;
+    /// DB connection (most parameters read from OpenCGA "conf" folder)
+    private String dbHosts;
+    private String dbAuthenticationDb;
+    private String dbUser;
+    private String dbPassword;
+    private String dbName;
+    private String dbCollectionVariantsName;
+    private String dbCollectionFilesName;
     @Value("${readPreference}") private String readPreference;
 
     ////pipeline
@@ -99,17 +106,47 @@ public class VariantJobsArgs {
     private ObjectMap variantOptions  = new ObjectMap();
     private ObjectMap pipelineOptions  = new ObjectMap();
 
-    public void loadArgs() {
-        logger.info("Load args");
-
-
+    public void loadArgs() throws IOException {
+        logger.info("Loading job arguments");
+        
+        if (opencgaAppHome == null || opencgaAppHome.isEmpty()) {
+            opencgaAppHome = System.getenv("OPENCGA_HOME") != null ? System.getenv("OPENCGA_HOME") : "/opt/opencga";
+        }
         Config.setOpenCGAHome(opencgaAppHome);
 
-        loadVariantOptions();
+        loadDbConnectionOptions();
+        loadOpencgaOptions();
         loadPipelineOptions();
     }
 
-    private void loadVariantOptions(){
+    private void loadDbConnectionOptions() throws IOException {
+        URI configUri = URI.create(Config.getOpenCGAHome() + "/").resolve("conf/").resolve("storage-mongodb.properties");
+        Properties properties = new Properties();
+        properties.load(new InputStreamReader(new FileInputStream(configUri.getPath())));
+        
+        dbHosts = properties.getProperty("OPENCGA.STORAGE.MONGODB.VARIANT.DB.HOSTS");
+        dbAuthenticationDb = properties.getProperty("OPENCGA.STORAGE.MONGODB.VARIANT.DB.AUTHENTICATION.DB", "");
+        dbUser = properties.getProperty("OPENCGA.STORAGE.MONGODB.VARIANT.DB.USER", "");
+        dbPassword = properties.getProperty("OPENCGA.STORAGE.MONGODB.VARIANT.DB.PASS", "");
+        dbName = properties.getProperty("OPENCGA.STORAGE.MONGODB.VARIANT.DB.NAME");
+        dbCollectionVariantsName = properties.getProperty("OPENCGA.STORAGE.MONGODB.VARIANT.DB.COLLECTION.VARIANTS", "variants");
+        dbCollectionFilesName = properties.getProperty("OPENCGA.STORAGE.MONGODB.VARIANT.DB.COLLECTION.FILES", "files");
+        
+        if (dbHosts == null || dbHosts.isEmpty()) {
+            throw new IllegalArgumentException("Please provide a database hostname");
+        }
+        if (dbName == null || dbName.isEmpty()) {
+            throw new IllegalArgumentException("Please provide a database name");
+        }
+        if (dbCollectionVariantsName == null || dbCollectionVariantsName.isEmpty()) {
+            throw new IllegalArgumentException("Please provide a name for the collection to store the variant information into");
+        }
+        if (dbCollectionFilesName == null || dbCollectionFilesName.isEmpty()) {
+            throw new IllegalArgumentException("Please provide a name for the collection to store the file information into");
+        }
+    }
+            
+    private void loadOpencgaOptions() {
         VariantSource source = new VariantSource(
                 Paths.get(input).getFileName().toString(),
                 fileId,
@@ -122,18 +159,24 @@ public class VariantJobsArgs {
         variantOptions.put(VariantStorageManager.OVERWRITE_STATS, overwriteStats);
         variantOptions.put(VariantStorageManager.INCLUDE_SRC, includeSourceLine);
         variantOptions.put("compressExtension", compressExtension);
-        variantOptions.put(VariantStorageManager.DB_NAME, dbName);
         variantOptions.put(VariantStorageManager.INCLUDE_SAMPLES, includeSamples);   // TODO rename samples to genotypes
         variantOptions.put(VariantStorageManager.COMPRESS_GENOTYPES, compressGenotypes);
         variantOptions.put(VariantStorageManager.CALCULATE_STATS, calculateStats);   // this is tested by hand
         variantOptions.put(VariantStorageManager.INCLUDE_STATS, includeStats);
         variantOptions.put(VariantStorageManager.ANNOTATE, annotate);
+        
+        variantOptions.put(VariantStorageManager.DB_NAME, dbName);
+        variantOptions.put(MongoDBVariantStorageManager.OPENCGA_STORAGE_MONGODB_VARIANT_DB_NAME, dbName);
+        variantOptions.put(MongoDBVariantStorageManager.OPENCGA_STORAGE_MONGODB_VARIANT_DB_HOSTS, dbHosts);
+        variantOptions.put(MongoDBVariantStorageManager.OPENCGA_STORAGE_MONGODB_VARIANT_DB_AUTHENTICATION_DB, dbAuthenticationDb);
+        variantOptions.put(MongoDBVariantStorageManager.OPENCGA_STORAGE_MONGODB_VARIANT_DB_USER, dbUser);
+        variantOptions.put(MongoDBVariantStorageManager.OPENCGA_STORAGE_MONGODB_VARIANT_DB_PASS, dbPassword);
 
         logger.debug("Using as input: {}", input);
         logger.debug("Using as variantOptions: {}", variantOptions.entrySet().toString());
     }
 
-    private void loadPipelineOptions(){
+    private void loadPipelineOptions() {
         pipelineOptions.put("input", input);
         pipelineOptions.put("compressExtension", compressExtension);
         pipelineOptions.put("outputDir", outputDir);
