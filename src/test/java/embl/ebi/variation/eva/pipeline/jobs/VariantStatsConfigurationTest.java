@@ -32,8 +32,6 @@ import org.opencb.opencga.storage.core.StorageManagerFactory;
 import org.opencb.opencga.storage.core.variant.VariantStorageManager;
 import org.opencb.opencga.storage.core.variant.adaptors.VariantDBAdaptor;
 import org.opencb.opencga.storage.core.variant.adaptors.VariantDBIterator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.*;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,6 +43,7 @@ import java.io.*;
 import java.net.UnknownHostException;
 
 import static embl.ebi.variation.eva.pipeline.jobs.JobTestUtils.getJobParameters;
+import static embl.ebi.variation.eva.pipeline.jobs.JobTestUtils.restoreMongoDbFromDump;
 import static org.junit.Assert.*;
 
 /**
@@ -56,11 +55,7 @@ import static org.junit.Assert.*;
 @ContextConfiguration(classes = {VariantStatsConfiguration.class, CommonConfig.class})
 public class VariantStatsConfigurationTest {
 
-    public static final String FILE_20 = "/small20.vcf.gz";
-    public static final String FILE_22 = "/small22.vcf.gz";
-    public static final String FILE_WRONG_NO_ALT = "/wrong_no_alt.vcf.gz";
-
-    private static final Logger logger = LoggerFactory.getLogger(VariantStatsConfigurationTest.class);
+    private static final String FILE_20 = "/small20.vcf.gz";
 
     // iterable doing an enum. Does it worth it?
 //    private static final String VALID_CREATE_STATS = "VariantStatsConfigurationTest_vc";
@@ -90,14 +85,13 @@ public class VariantStatsConfigurationTest {
     public void invalidCreateStats() throws JobExecutionException {
         String input = VariantStatsConfigurationTest.class.getResource(FILE_20).getFile();
         VariantSource source = new VariantSource(input, "1", "1", "studyName");
-        String dbName = INVALID_CREATE_STATS;
         String outputDir = "/tmp";
 
         pipelineOptions.put("input", input);
         pipelineOptions.put("outputDir", outputDir);
         pipelineOptions.put(VariantsLoad.SKIP_LOAD, false);
         pipelineOptions.put(VariantsStatsCreate.SKIP_STATS_CREATE, false);
-        variantOptions.put(VariantStorageManager.DB_NAME, dbName);
+        variantOptions.put(VariantStorageManager.DB_NAME, INVALID_CREATE_STATS);
         variantOptions.put(VariantStorageManager.VARIANT_SOURCE, source);
 
         JobExecution execution = jobLauncher.run(job, getJobParameters());
@@ -113,10 +107,9 @@ public class VariantStatsConfigurationTest {
         String input = VariantStatsConfigurationTest.class.getResource(FILE_20).getFile();
         VariantSource source = new VariantSource(input, "1", "1", "studyName");
         String dbName = VALID_LOAD_STATS;
-        String outputDir = input;
 
         pipelineOptions.put("input", input);
-        pipelineOptions.put("outputDir", outputDir);
+        pipelineOptions.put("outputDir", input);
         pipelineOptions.put(VariantsLoad.SKIP_LOAD, false);
         pipelineOptions.put(VariantsStatsLoad.SKIP_STATS_LOAD, false);
         variantOptions.put(VariantStorageManager.DB_NAME, dbName);
@@ -140,14 +133,12 @@ public class VariantStatsConfigurationTest {
     public void invalidLoadStats() throws JobExecutionException {
         String input = VariantStatsConfigurationTest.class.getResource(FILE_20).getFile();
         VariantSource source = new VariantSource(input, "4", "1", "studyName");
-        String dbName = INVALID_LOAD_STATS;
-        String outputDir = input;
 
         pipelineOptions.put("input", input);
-        pipelineOptions.put("outputDir", outputDir);
+        pipelineOptions.put("outputDir", input);
         pipelineOptions.put(VariantsLoad.SKIP_LOAD, false);
         pipelineOptions.put(VariantsStatsLoad.SKIP_STATS_LOAD, false);
-        variantOptions.put(VariantStorageManager.DB_NAME, dbName);
+        variantOptions.put(VariantStorageManager.DB_NAME, INVALID_LOAD_STATS);
         variantOptions.put(VariantStorageManager.VARIANT_SOURCE, source);
 
         JobExecution execution = jobLauncher.run(job, getJobParameters());
@@ -159,7 +150,8 @@ public class VariantStatsConfigurationTest {
     @BeforeClass
     public static void beforeTests() throws IOException, InterruptedException {
         cleanDBs();
-        fillDB();
+        String dump = VariantStatsConfigurationTest.class.getResource("/dump/").getFile();
+        restoreMongoDbFromDump(dump);
     }
 
     @Before
@@ -180,23 +172,4 @@ public class VariantStatsConfigurationTest {
         JobTestUtils.cleanDBs(INVALID_CREATE_STATS, VALID_LOAD_STATS, INVALID_LOAD_STATS);
     }
 
-    public static void fillDB() throws IOException, InterruptedException {
-        String dump = VariantStatsConfigurationTest.class.getResource("/dump/").getFile();
-        logger.info("restoring DB from " + dump);
-        Process exec = Runtime.getRuntime().exec("mongorestore " + dump);
-        exec.waitFor();
-        String line;
-        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(exec.getInputStream()));
-        while ((line = bufferedReader.readLine()) != null) {
-            logger.info("mongorestore output:" + line);
-        }
-        bufferedReader.close();
-        bufferedReader = new BufferedReader(new InputStreamReader(exec.getErrorStream()));
-        while ((line = bufferedReader.readLine()) != null) {
-            logger.info("mongorestore errorOutput:" + line);
-        }
-        bufferedReader.close();
-
-        logger.info("mongorestore exit value: " + exec.exitValue());
-    }
 }

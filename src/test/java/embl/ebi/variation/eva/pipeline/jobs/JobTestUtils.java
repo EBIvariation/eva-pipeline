@@ -18,6 +18,8 @@ package embl.ebi.variation.eva.pipeline.jobs;
 import com.mongodb.DB;
 import com.mongodb.MongoClient;
 import org.opencb.biodata.models.variant.Variant;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
 
@@ -36,6 +38,7 @@ import java.util.zip.GZIPOutputStream;
  * @author Jose Miguel Mut Lopez &lt;jmmut@ebi.ac.uk&gt;
  */
 public class JobTestUtils {
+    private static final Logger logger = LoggerFactory.getLogger(JobTestUtils.class);
 
     public static long getLines(InputStream in) throws IOException {
         BufferedReader file = new BufferedReader(new InputStreamReader(in));
@@ -85,6 +88,26 @@ public class JobTestUtils {
                 writer.write(content);
             }
         }
+    }
+
+    public static void restoreMongoDbFromDump(String dumpLocation) throws IOException, InterruptedException {
+        logger.info("restoring DB from " + dumpLocation);
+
+        Process exec = Runtime.getRuntime().exec("mongorestore " + dumpLocation);
+        exec.waitFor();
+        String line;
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(exec.getInputStream()));
+        while ((line = bufferedReader.readLine()) != null) {
+            logger.info("mongorestore output:" + line);
+        }
+        bufferedReader.close();
+        bufferedReader = new BufferedReader(new InputStreamReader(exec.getErrorStream()));
+        while ((line = bufferedReader.readLine()) != null) {
+            logger.info("mongorestore errorOutput:" + line);
+        }
+        bufferedReader.close();
+
+        logger.info("mongorestore exit value: " + exec.exitValue());
     }
 
 }
