@@ -19,6 +19,7 @@ import embl.ebi.variation.eva.VariantJobsArgs;
 import embl.ebi.variation.eva.pipeline.steps.VariantsLoad;
 import embl.ebi.variation.eva.pipeline.steps.VariantsStatsCreate;
 import embl.ebi.variation.eva.pipeline.steps.VariantsStatsLoad;
+import org.apache.commons.io.FileUtils;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -85,10 +86,8 @@ public class VariantStatsConfigurationTest {
     public void invalidCreateStats() throws JobExecutionException {
         String input = VariantStatsConfigurationTest.class.getResource(FILE_20).getFile();
         VariantSource source = new VariantSource(input, "1", "1", "studyName");
-        String outputDir = "/tmp";
 
         pipelineOptions.put("input", input);
-        pipelineOptions.put("outputDir", outputDir);
         pipelineOptions.put(VariantsLoad.SKIP_LOAD, false);
         pipelineOptions.put(VariantsStatsCreate.SKIP_STATS_CREATE, false);
         variantOptions.put(VariantStorageManager.DB_NAME, INVALID_CREATE_STATS);
@@ -104,12 +103,28 @@ public class VariantStatsConfigurationTest {
     public void validLoadStats() throws JobExecutionException, IOException, IllegalAccessException,
             ClassNotFoundException, InstantiationException, StorageManagerException {
 
+        String outputDir = pipelineOptions.getString("outputDir");
+
+        //simulate a variantStatsCreate step already completed
         String input = VariantStatsConfigurationTest.class.getResource(FILE_20).getFile();
+        File inputFile = new File(input);
+        File tmpInput = new File(outputDir, inputFile.getName());
+        FileUtils.copyFile(inputFile, tmpInput);
+
+        String variantStats = VariantStatsConfigurationTest.class.getResource("/1_1.variants.stats.json.gz").getFile();
+        File variantStatsFile = new File(variantStats);
+        File tmpVariantStatsFile = new File(outputDir, variantStatsFile.getName());
+        FileUtils.copyFile(variantStatsFile, tmpVariantStatsFile);
+
+        String sourceStats = VariantStatsConfigurationTest.class.getResource("/1_1.source.stats.json.gz").getFile();
+        File sourceStatsFile = new File(sourceStats);
+        File tmpSourceStatsFile = new File(outputDir, sourceStatsFile.getName());
+        FileUtils.copyFile(sourceStatsFile, tmpSourceStatsFile);
+
         VariantSource source = new VariantSource(input, "1", "1", "studyName");
         String dbName = VALID_LOAD_STATS;
 
         pipelineOptions.put("input", input);
-        pipelineOptions.put("outputDir", input);
         pipelineOptions.put(VariantsLoad.SKIP_LOAD, false);
         pipelineOptions.put(VariantsStatsLoad.SKIP_STATS_LOAD, false);
         variantOptions.put(VariantStorageManager.DB_NAME, dbName);
@@ -135,7 +150,6 @@ public class VariantStatsConfigurationTest {
         VariantSource source = new VariantSource(input, "4", "1", "studyName");
 
         pipelineOptions.put("input", input);
-        pipelineOptions.put("outputDir", input);
         pipelineOptions.put(VariantsLoad.SKIP_LOAD, false);
         pipelineOptions.put(VariantsStatsLoad.SKIP_STATS_LOAD, false);
         variantOptions.put(VariantStorageManager.DB_NAME, INVALID_LOAD_STATS);
