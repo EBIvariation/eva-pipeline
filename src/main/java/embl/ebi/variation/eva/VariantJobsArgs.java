@@ -48,15 +48,16 @@ import org.opencb.opencga.storage.mongodb.variant.MongoDBVariantStorageManager;
 public class VariantJobsArgs {
     private static final Logger logger = LoggerFactory.getLogger(VariantJobsArgs.class);
 
-    ////common
+    // Input
     @Value("${input.vcf}") private String input;
-
-    // OpenCGA
     @Value("${input.vcf.id}") private String fileId;
     @Value("${input.vcf.aggregation}") private String aggregated;
     @Value("${input.study.type}") private String studyType;
     @Value("${input.study.name}") private String studyName;
     @Value("${input.study.id}") private String studyId;
+    @Value("${input.pedigree:}") private String pedigree;
+    
+    
     @Value("${overwriteStats:false}") private boolean overwriteStats;
 
     @Value("${opencga.app.home}") private String opencgaAppHome;
@@ -82,7 +83,6 @@ public class VariantJobsArgs {
 
     ////pipeline
     @Value("${outputDir}") private String outputDir;
-    @Value("${pedigree}") private String pedigree;
 
     //steps
     @Value("${skipLoad:false}") private boolean skipLoad;
@@ -179,7 +179,7 @@ public class VariantJobsArgs {
         pipelineOptions.put("input.vcf", input);
         pipelineOptions.put("compressExtension", compressExtension);
         pipelineOptions.put("outputDir", outputDir);
-        pipelineOptions.put("pedigree", pedigree);
+        pipelineOptions.put("input.pedigree", pedigree);
         pipelineOptions.put("dbHosts", dbHosts);
         pipelineOptions.put("dbAuthenticationDb", dbAuthenticationDb);
         pipelineOptions.put(VariantStorageManager.DB_NAME, dbName);

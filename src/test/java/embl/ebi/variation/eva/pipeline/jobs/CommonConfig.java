@@ -54,7 +54,7 @@ public class CommonConfig {
         properties.put("compressExtension", ".gz");
         properties.put("compressGenotypes", "true");
         properties.put("includeSrc", "FIRST_8_COLUMNS");
-        properties.put("pedigree", "FIRST_8_COLUMNS");
+        properties.put("input.pedigree", "");
         properties.put("annotate", "false");
         properties.put("includeSamples", "false");
         properties.put("includeStats", "false");

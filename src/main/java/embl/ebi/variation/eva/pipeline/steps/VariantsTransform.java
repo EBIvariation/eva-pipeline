@@ -49,7 +49,7 @@ public class VariantsTransform implements Tasklet {
 
         URI outdirUri = createUri(pipelineOptions.getString("outputDir"));
         URI nextFileUri = createUri(pipelineOptions.getString("input.vcf"));
-        URI pedigreeUri = pipelineOptions.getString("pedigree") != null ? createUri(pipelineOptions.getString("pedigree")) : null;
+        URI pedigreeUri = pipelineOptions.getString("input.pedigree") != null ? createUri(pipelineOptions.getString("input.pedigree")) : null;
 
         logger.info("Transform file {} to {}", pipelineOptions.getString("input.vcf"), pipelineOptions.getString("outputDir"));
 

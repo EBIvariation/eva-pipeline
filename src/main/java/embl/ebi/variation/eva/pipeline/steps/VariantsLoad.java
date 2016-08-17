@@ -55,7 +55,7 @@ public class VariantsLoad implements Tasklet {
             URI outdirUri = createUri(pipelineOptions.getString("outputDir"));
             URI nextFileUri = createUri(pipelineOptions.getString("input.vcf"));
 
-//          URI pedigreeUri = pipelineOptions.getString("pedigree") != null ? createUri(pipelineOptions.getString("pedigree")) : null;
+//          URI pedigreeUri = pipelineOptions.getString("input.pedigree") != null ? createUri(pipelineOptions.getString("input.pedigree")) : null;
             Path output = Paths.get(outdirUri.getPath());
             Path input = Paths.get(nextFileUri.getPath());
             Path outputVariantJsonFile = output.resolve(input.getFileName().toString() + ".variants.json" + pipelineOptions.getString("compressExtension"));
