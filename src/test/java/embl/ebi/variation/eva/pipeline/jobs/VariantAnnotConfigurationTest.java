@@ -17,7 +17,6 @@
 package embl.ebi.variation.eva.pipeline.jobs;
 
 import com.mongodb.*;
-import com.mongodb.util.JSON;
 import embl.ebi.variation.eva.VariantJobsArgs;
 import junit.framework.TestCase;
 import org.apache.commons.io.FileUtils;
@@ -34,7 +33,6 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.io.*;
-import java.net.URL;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
@@ -70,8 +68,6 @@ public class VariantAnnotConfigurationTest {
 
     @Test
     public void fullAnnotationJob () throws Exception {
-
-        //insertVariantsWithoutAnnotations(dbName, dbName);
         String dump = VariantStatsConfigurationTest.class.getResource("/dump/").getFile();
         restoreMongoDbFromDump(dump);
 
@@ -141,8 +137,8 @@ public class VariantAnnotConfigurationTest {
         vepOutputFile.delete();
     }
 
-    private String readFirstLine(File outputFile) throws IOException {
-        try(BufferedReader reader = new BufferedReader(new FileReader(outputFile))){
+    private String readFirstLine(File file) throws IOException {
+        try(BufferedReader reader = new BufferedReader(new FileReader(file))){
             return reader.readLine();
         }
     }
@@ -173,10 +169,6 @@ public class VariantAnnotConfigurationTest {
 
     private DBCollection collection(String databaseName, String collectionName) {
         return mongoClient.getDB(databaseName).getCollection(collectionName);
-    }
-
-    private DBObject constructDbo(String variant) {
-        return (DBObject) JSON.parse(variant);
     }
 
 }

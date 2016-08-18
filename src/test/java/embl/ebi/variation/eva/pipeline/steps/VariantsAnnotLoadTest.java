@@ -19,18 +19,24 @@ import com.mongodb.*;
 import embl.ebi.variation.eva.VariantJobsArgs;
 import embl.ebi.variation.eva.pipeline.MongoDBHelper;
 import embl.ebi.variation.eva.pipeline.annotation.load.VariantAnnotationLineMapper;
-import embl.ebi.variation.eva.pipeline.jobs.AnnotationConfig;
-import embl.ebi.variation.eva.pipeline.jobs.JobTestUtils;
+import embl.ebi.variation.eva.pipeline.jobs.*;
+import org.apache.commons.io.FileUtils;
+import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.opencb.biodata.models.variant.annotation.VariantAnnotation;
 import org.opencb.opencga.storage.core.variant.VariantStorageManager;
 import org.opencb.opencga.storage.mongodb.variant.DBObjectToVariantAnnotationConverter;
+import org.springframework.batch.core.BatchStatus;
+import org.springframework.batch.core.ExitStatus;
+import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.file.FlatFileItemReader;
 import org.springframework.batch.item.file.FlatFileParseException;
+import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.batch.test.MetaDataInstanceFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
@@ -41,9 +47,11 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
 
 import static embl.ebi.variation.eva.pipeline.jobs.JobTestUtils.makeGzipFile;
+import static embl.ebi.variation.eva.pipeline.jobs.JobTestUtils.restoreMongoDbFromDump;
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertNotNull;
 import static junit.framework.TestCase.assertTrue;
@@ -52,27 +60,68 @@ import static junit.framework.TestCase.assertTrue;
 /**
  * @author Diego Poggioli
  *
- * Test {@link VariantsAnnotLoad}
+ * Test for {@link VariantsAnnotLoad}. In the context it is loaded {@link VariantAnnotConfiguration}
+ * because {@link JobLauncherTestUtils} require one {@link org.springframework.batch.core.Job} to be present in order
+ * to run properly.
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = { VariantsAnnotLoad.class, AnnotationConfig.class})
+@ContextConfiguration(classes = { VariantAnnotConfiguration.class, AnnotationConfig.class, JobLauncherTestUtils.class})
 public class VariantsAnnotLoadTest {
 
-    @Autowired
-    private FlatFileItemReader<VariantAnnotation> annotationReader;
-
-    @Autowired
-    private ItemWriter<VariantAnnotation> annotationWriter;
-
-    @Autowired
-    public VariantJobsArgs variantJobsArgs;
+    @Autowired private JobLauncherTestUtils jobLauncherTestUtils;
+    @Autowired private FlatFileItemReader<VariantAnnotation> annotationReader;
+    @Autowired private ItemWriter<VariantAnnotation> annotationWriter;
+    @Autowired private VariantJobsArgs variantJobsArgs;
 
     private ExecutionContext executionContext;
+    private String dbName;
+    private DBObjectToVariantAnnotationConverter converter;
+    private MongoClient mongoClient;
 
     @Before
     public void setUp() throws Exception {
         variantJobsArgs.loadArgs();
+        dbName = variantJobsArgs.getPipelineOptions().getString(VariantStorageManager.DB_NAME);
         executionContext = MetaDataInstanceFactory.createStepExecution().getExecutionContext();
+        converter = new DBObjectToVariantAnnotationConverter();
+        mongoClient = new MongoClient();
+    }
+
+    @Test
+    public void variantAnnotLoadStepShouldLoadAllAnnotations() throws Exception {
+        String dump = VariantStatsConfigurationTest.class.getResource("/dump/").getFile();
+        restoreMongoDbFromDump(dump);
+
+        String annotations = VariantsAnnotLoadTest.class.getResource("/variants.annot.tsv.gz").getFile();
+
+        File annotationsFile = new File(annotations);
+        File tmpAnnotationsFile = new File(variantJobsArgs.getPipelineOptions().getString("vepOutput"));
+
+        FileUtils.copyFile(annotationsFile, tmpAnnotationsFile);
+
+        JobExecution jobExecution = jobLauncherTestUtils.launchStep("variantAnnotLoadBatchStep");
+
+        assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
+        assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());
+
+        //check that documents have the annotation
+        DBCursor cursor =
+                collection(dbName, variantJobsArgs.getPipelineOptions().getString("dbCollectionVariantsName")).find();
+
+        int cnt=0;
+        int consequenceTypeCount = 0;
+        while (cursor.hasNext()) {
+            cnt++;
+            DBObject dbObject = (DBObject)cursor.next().get("annot");
+            if(dbObject != null){
+                VariantAnnotation annot = converter.convertToDataModelType(dbObject);
+                Assert.assertNotNull(annot.getConsequenceTypes());
+                consequenceTypeCount += annot.getConsequenceTypes().size();
+            }
+        }
+
+        assertEquals(300, cnt);
+        assertTrue(consequenceTypeCount>0);
     }
 
     @Test
@@ -131,7 +180,6 @@ public class VariantsAnnotLoadTest {
 
     @Test
     public void variantAnnotationWriterShouldWriteAllFieldsIntoMongoDb() throws Exception {
-        String dbName = variantJobsArgs.getPipelineOptions().getString(VariantStorageManager.DB_NAME);
         String dbCollectionVariantsName = variantJobsArgs.getPipelineOptions().getString("dbCollectionVariantsName");
         JobTestUtils.cleanDBs(dbName);
 
@@ -177,8 +225,20 @@ public class VariantsAnnotLoadTest {
         }
         assertTrue(cnt>0);
         assertEquals(annotations.size(), consequenceTypeCount);
+    }
 
+    /**
+     * Release resources and delete the temporary output file
+     */
+    @After
+    public void tearDown() throws Exception {
+        mongoClient.close();
+        new File(variantJobsArgs.getPipelineOptions().getString("vepOutput")).delete();
         JobTestUtils.cleanDBs(dbName);
+    }
+
+    private DBCollection collection(String databaseName, String collectionName) {
+        return mongoClient.getDB(databaseName).getCollection(collectionName);
     }
 
     private final String vepOutputContent = "" +
