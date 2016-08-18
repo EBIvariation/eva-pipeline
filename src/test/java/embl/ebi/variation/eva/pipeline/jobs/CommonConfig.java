@@ -48,7 +48,7 @@ public class CommonConfig {
         
         properties.put("output.dir", "/tmp");
         
-        properties.put("overwriteStats", "false");
+        properties.put("statistics.overwrite", "false");
         properties.put("calculateStats", "false");
         
         properties.put("dbHosts", "localhost:27017");

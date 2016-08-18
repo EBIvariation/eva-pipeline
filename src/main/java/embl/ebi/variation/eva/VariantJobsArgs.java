@@ -58,7 +58,7 @@ public class VariantJobsArgs {
     @Value("${input.pedigree:}") private String pedigree;
     
     
-    @Value("${overwriteStats:false}") private boolean overwriteStats;
+    @Value("${statistics.overwrite:false}") private boolean overwriteStats;
 
     @Value("${opencga.app.home}") private String opencgaAppHome;
     
