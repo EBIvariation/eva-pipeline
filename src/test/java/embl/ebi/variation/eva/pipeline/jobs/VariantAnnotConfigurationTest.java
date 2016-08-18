@@ -76,6 +76,11 @@ public class VariantAnnotConfigurationTest {
 
         assertFalse(vepInputFile.exists());
 
+        File vepPathFile =
+                new File(VariantAnnotConfigurationTest.class.getResource("/mockvep.pl").getFile());
+
+        variantJobsArgs.getPipelineOptions().put("vepPath", vepPathFile);
+
         JobExecution jobExecution = jobLauncherTestUtils.launchJob();
 
         assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
@@ -114,7 +119,7 @@ public class VariantAnnotConfigurationTest {
     @Test
     public void annotCreateStepShouldGenerateAnnotations() throws Exception {
 
-        String vepPath  = variantJobsArgs.getPipelineOptions().getString("vepPath");
+        //String vepPath  = variantJobsArgs.getPipelineOptions().getString("vepPath");
 
         File vepPathFile =
                 new File(VariantAnnotConfigurationTest.class.getResource("/mockvep.pl").getFile());
