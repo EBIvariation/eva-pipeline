@@ -205,7 +205,7 @@ public class VariantConfigurationTest {
         jobLauncherTestUtils.setJobLauncher(jobLauncher);
 
         inputFileResouce = variantJobsArgs.getPipelineOptions().getString("input.vcf");
-        outputDir = variantJobsArgs.getPipelineOptions().getString("outputDir");
+        outputDir = variantJobsArgs.getPipelineOptions().getString("output.dir");
         compressExtension = variantJobsArgs.getPipelineOptions().getString("compressExtension");
         dbName = variantJobsArgs.getPipelineOptions().getString("dbName");
         vepInput = variantJobsArgs.getPipelineOptions().getString("vepInput");

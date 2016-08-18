@@ -82,7 +82,7 @@ public class VariantJobsArgs {
     @Value("${readPreference}") private String readPreference;
 
     ////pipeline
-    @Value("${outputDir}") private String outputDir;
+    @Value("${output.dir}") private String outputDir;
 
     //steps
     @Value("${skipLoad:false}") private boolean skipLoad;
@@ -178,7 +178,7 @@ public class VariantJobsArgs {
     private void loadPipelineOptions() {
         pipelineOptions.put("input.vcf", input);
         pipelineOptions.put("compressExtension", compressExtension);
-        pipelineOptions.put("outputDir", outputDir);
+        pipelineOptions.put("output.dir", outputDir);
         pipelineOptions.put("input.pedigree", pedigree);
         pipelineOptions.put("dbHosts", dbHosts);
         pipelineOptions.put("dbAuthenticationDb", dbAuthenticationDb);

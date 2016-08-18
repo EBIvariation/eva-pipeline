@@ -41,9 +41,15 @@ public class CommonConfig {
         properties.put("input.vcf", "");
         properties.put("input.vcf.id", "1");
         properties.put("input.vcf.aggregation", "NONE");
+        properties.put("input.study.type", "COLLECTION");
+        properties.put("input.study.name", "input.study.name");
+        properties.put("input.study.id", "1");
+        properties.put("input.pedigree", "");
+        
+        properties.put("output.dir", "/tmp");
+        
         properties.put("overwriteStats", "false");
         properties.put("calculateStats", "false");
-        properties.put("outputDir", "/tmp");
         
         properties.put("dbHosts", "localhost:27017");
         properties.put("dbName", "");
@@ -54,13 +60,9 @@ public class CommonConfig {
         properties.put("compressExtension", ".gz");
         properties.put("compressGenotypes", "true");
         properties.put("includeSrc", "FIRST_8_COLUMNS");
-        properties.put("input.pedigree", "");
         properties.put("annotate", "false");
         properties.put("includeSamples", "false");
         properties.put("includeStats", "false");
-        properties.put("input.study.type", "COLLECTION");
-        properties.put("input.study.name", "input.study.name");
-        properties.put("input.study.id", "1");
         properties.put("opencga.app.home", opencgaHome);
         properties.put(VariantsLoad.SKIP_LOAD, "true");
         properties.put(VariantsStatsCreate.SKIP_STATS_CREATE, "true");

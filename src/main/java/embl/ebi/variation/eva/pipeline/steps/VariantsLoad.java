@@ -52,7 +52,7 @@ public class VariantsLoad implements Tasklet {
             logger.info("skipping load step, skipLoad is set to {}", pipelineOptions.getBoolean(SKIP_LOAD));
         } else {
             VariantStorageManager variantStorageManager = StorageManagerFactory.getVariantStorageManager();// TODO add mongo
-            URI outdirUri = createUri(pipelineOptions.getString("outputDir"));
+            URI outdirUri = createUri(pipelineOptions.getString("output.dir"));
             URI nextFileUri = createUri(pipelineOptions.getString("input.vcf"));
 
 //          URI pedigreeUri = pipelineOptions.getString("input.pedigree") != null ? createUri(pipelineOptions.getString("input.pedigree")) : null;

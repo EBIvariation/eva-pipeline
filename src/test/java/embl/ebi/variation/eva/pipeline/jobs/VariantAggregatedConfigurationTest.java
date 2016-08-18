@@ -115,7 +115,7 @@ public class VariantAggregatedConfigurationTest {
 
         ////////// check transformed file
         String outputFilename = getTransformedOutputPath(Paths.get(FILE_AGGREGATED).getFileName(),
-                variantOptions.getString("compressExtension"), pipelineOptions.getString("outputDir"));
+                variantOptions.getString("compressExtension"), pipelineOptions.getString("output.dir"));
         logger.info("reading transformed output from: " + outputFilename);
 
         long lines = getLines(new GZIPInputStream(new FileInputStream(outputFilename)));
@@ -130,7 +130,7 @@ public class VariantAggregatedConfigurationTest {
 //
 //        JobParameters parameters = new JobParametersBuilder()
 //                .addString("input.vcf", input)
-//                .addString("outputDir", "/tmp")
+//                .addString("output.dir", "/tmp")
 //                .addString("dbName", dbName)
 //                .addString("compressExtension", ".gz")
 //                .addString("compressGenotypes", "true")
@@ -181,7 +181,7 @@ public class VariantAggregatedConfigurationTest {
         VariantDBIterator iterator = variantDBAdaptor.iterator(new QueryOptions());
 
         String outputFilename = getTransformedOutputPath(Paths.get(FILE_AGGREGATED).getFileName(),
-                variantOptions.getString("compressExtension"), pipelineOptions.getString("outputDir"));
+                variantOptions.getString("compressExtension"), pipelineOptions.getString("output.dir"));
         long lines = getLines(new GZIPInputStream(new FileInputStream(outputFilename)));
 
         assertEquals(countRows(iterator), lines);
@@ -199,7 +199,7 @@ public class VariantAggregatedConfigurationTest {
 //
 //        JobParameters parameters = new JobParametersBuilder()
 //                .addString("input.vcf", input)
-//                .addString("outputDir", outdir)
+//                .addString("output.dir", outdir)
 //                .addString("dbName", dbName)
 //                .addString("compressExtension", ".gz")
 //                .addString("compressGenotypes", "true")
@@ -260,7 +260,7 @@ public class VariantAggregatedConfigurationTest {
         VariantDBIterator iterator = variantDBAdaptor.iterator(new QueryOptions());
 
         String outputFilename = getTransformedOutputPath(Paths.get(FILE_AGGREGATED).getFileName(),
-                variantOptions.getString("compressExtension"), pipelineOptions.getString("outputDir"));
+                variantOptions.getString("compressExtension"), pipelineOptions.getString("output.dir"));
         long lines = getLines(new GZIPInputStream(new FileInputStream(outputFilename)));
 
         assertEquals(countRows(iterator), lines);

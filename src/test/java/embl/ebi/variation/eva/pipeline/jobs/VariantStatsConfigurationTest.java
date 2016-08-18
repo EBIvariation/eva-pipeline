@@ -94,7 +94,7 @@ public class VariantStatsConfigurationTest {
         String outputDir = "/tmp";
 
         pipelineOptions.put("input.vcf", input);
-        pipelineOptions.put("outputDir", outputDir);
+        pipelineOptions.put("output.dir", outputDir);
         pipelineOptions.put(VariantsLoad.SKIP_LOAD, false);
         pipelineOptions.put(VariantsStatsCreate.SKIP_STATS_CREATE, false);
         variantOptions.put(VariantStorageManager.DB_NAME, dbName);
@@ -116,7 +116,7 @@ public class VariantStatsConfigurationTest {
         String outputDir = input;
 
         pipelineOptions.put("input.vcf", input);
-        pipelineOptions.put("outputDir", outputDir);
+        pipelineOptions.put("output.dir", outputDir);
         pipelineOptions.put(VariantsLoad.SKIP_LOAD, false);
         pipelineOptions.put(VariantsStatsLoad.SKIP_STATS_LOAD, false);
         variantOptions.put(VariantStorageManager.DB_NAME, dbName);
@@ -144,7 +144,7 @@ public class VariantStatsConfigurationTest {
         String outputDir = input;
 
         pipelineOptions.put("input.vcf", input);
-        pipelineOptions.put("outputDir", outputDir);
+        pipelineOptions.put("output.dir", outputDir);
         pipelineOptions.put(VariantsLoad.SKIP_LOAD, false);
         pipelineOptions.put(VariantsStatsLoad.SKIP_STATS_LOAD, false);
         variantOptions.put(VariantStorageManager.DB_NAME, dbName);
