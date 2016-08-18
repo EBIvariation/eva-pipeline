@@ -113,7 +113,7 @@ public class VariantAnnotConfiguration {
      */
     private void initStep(TaskletStepBuilder tasklet) {
 
-        boolean allowStartIfComplete  = pipelineOptions.getBoolean("allowStartIfComplete");
+        boolean allowStartIfComplete  = pipelineOptions.getBoolean("config.restartability.allow");
 
         // true: every job execution will do this step, even if this step is already COMPLETED
         // false(default): if the job was aborted and is relaunched, this step will NOT be done again

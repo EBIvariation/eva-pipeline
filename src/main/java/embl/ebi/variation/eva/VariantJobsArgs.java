@@ -82,7 +82,7 @@ public class VariantJobsArgs {
     private String dbName;
     private String dbCollectionVariantsName;
     private String dbCollectionFilesName;
-    @Value("${readPreference}") private String readPreference;
+    @Value("${config.db.read-preference}") private String readPreference;
 
     //steps
     @Value("${load.skip:false}") private boolean skipLoad;
@@ -98,7 +98,7 @@ public class VariantJobsArgs {
     @Value("${input.fasta}") private String vepFasta;
     @Value("${app.vep.num-forks}") private String vepNumForks;
 
-    @Value("${allowStartIfComplete:false}") private boolean allowStartIfComplete;
+    @Value("${config.restartability.allow:false}") private boolean allowStartIfComplete;
 
     private ObjectMap variantOptions  = new ObjectMap();
     private ObjectMap pipelineOptions  = new ObjectMap();
@@ -185,7 +185,7 @@ public class VariantJobsArgs {
         pipelineOptions.put("dbCollectionFilesName", dbCollectionFilesName);
         pipelineOptions.put("dbUser", dbUser);
         pipelineOptions.put("dbPassword", dbPassword);
-        pipelineOptions.put("readPreference", readPreference);
+        pipelineOptions.put("config.db.read-preference", readPreference);
         pipelineOptions.put(VariantsLoad.SKIP_LOAD, skipLoad);
         pipelineOptions.put(VariantsStatsCreate.SKIP_STATS_CREATE, skipStatsCreate);
         pipelineOptions.put(VariantsStatsLoad.SKIP_STATS_LOAD, skipStatsLoad);
@@ -201,7 +201,7 @@ public class VariantJobsArgs {
         pipelineOptions.put("app.vep.cache.species", vepSpecies);
         pipelineOptions.put("input.fasta", vepFasta);
         pipelineOptions.put("app.vep.num-forks", vepNumForks);
-        pipelineOptions.put("allowStartIfComplete", allowStartIfComplete);
+        pipelineOptions.put("config.restartability.allow", allowStartIfComplete);
 
         logger.debug("Using as pipelineOptions: {}", pipelineOptions.entrySet().toString());
     }

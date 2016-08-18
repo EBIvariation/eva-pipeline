@@ -82,7 +82,7 @@ public class VariantsAnnotGenerateInput {
                 .reader(variantReader())
                 .processor(vepInputLineProcessor())
                 .writer(vepInputWriter())
-                .allowStartIfComplete(pipelineOptions.getBoolean("allowStartIfComplete"))
+                .allowStartIfComplete(pipelineOptions.getBoolean("config.restartability.allow"))
                 .build();
     }
 

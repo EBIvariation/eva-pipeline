@@ -49,13 +49,12 @@ public class CommonConfig {
         properties.put("output.dir", "/tmp");
         
         properties.put("statistics.overwrite", "false");
-        properties.put("calculateStats", "false");
         
         properties.put("dbHosts", "localhost:27017");
         properties.put("dbName", "");
         properties.put("dbCollectionVariantsName", "variants");
         properties.put("dbCollectionFilesName", "files");
-        properties.put("readPreference", "primary");
+        properties.put("config.db.read-preference", "primary");
         
         properties.put("app.opencga.path", opencgaHome);
         properties.put(VariantsLoad.SKIP_LOAD, "true");
@@ -69,7 +68,7 @@ public class CommonConfig {
         properties.put("app.vep.cache.species", "");
         properties.put("input.fasta", "");
         properties.put("app.vep.num-forks", "3");
-        properties.put("allowStartIfComplete", false);
+        properties.put("config.restartability.allow", false);
 
         configurer.setProperties(properties);
 
