@@ -57,12 +57,6 @@ public class CommonConfig {
         properties.put("dbCollectionFilesName", "files");
         properties.put("readPreference", "primary");
         
-        properties.put("compressExtension", ".gz");
-        properties.put("compressGenotypes", "true");
-        properties.put("includeSrc", "FIRST_8_COLUMNS");
-        properties.put("annotate", "false");
-        properties.put("includeSamples", "false");
-        properties.put("includeStats", "false");
         properties.put("opencga.app.home", opencgaHome);
         properties.put(VariantsLoad.SKIP_LOAD, "true");
         properties.put(VariantsStatsCreate.SKIP_STATS_CREATE, "true");
