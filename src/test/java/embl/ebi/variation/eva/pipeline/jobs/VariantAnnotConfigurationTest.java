@@ -19,6 +19,7 @@ package embl.ebi.variation.eva.pipeline.jobs;
 import com.mongodb.*;
 import com.mongodb.util.JSON;
 import embl.ebi.variation.eva.VariantJobsArgs;
+import junit.framework.TestCase;
 import org.apache.commons.io.FileUtils;
 import org.junit.*;
 import org.junit.runner.RunWith;
@@ -34,12 +35,12 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.io.*;
 import java.net.URL;
-import java.net.UnknownHostException;
 import java.util.List;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
+import java.util.zip.GZIPInputStream;
 
-import static embl.ebi.variation.eva.pipeline.jobs.JobTestUtils.makeGzipFile;
+import static embl.ebi.variation.eva.pipeline.jobs.JobTestUtils.getLines;
+import static embl.ebi.variation.eva.pipeline.jobs.JobTestUtils.restoreMongoDbFromDump;
 import static junit.framework.TestCase.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -64,24 +65,20 @@ public class VariantAnnotConfigurationTest {
     private static String dbName;
     private static MongoClient mongoClient;
     private File vepInputFile;
+    private File vepOutputFile;
     private DBObjectToVariantAnnotationConverter converter;
 
     @Test
     public void fullAnnotationJob () throws Exception {
 
-        insertVariantsWithoutAnnotations(dbName, dbName);
+        //insertVariantsWithoutAnnotations(dbName, dbName);
+        String dump = VariantStatsConfigurationTest.class.getResource("/dump/").getFile();
+        restoreMongoDbFromDump(dump);
 
         if(vepInputFile.exists())
             vepInputFile.delete();
 
         assertFalse(vepInputFile.exists());
-
-        //Simulate VEP prediction file (second line is malformed and it should be skipped)
-        String vepAnnotation =
-                "20_60343_G/A\t20:63351\tG\tENSG00000178591\tENST00000608838\tTranscript\tupstream_gene_variant\t-\t-\t-\t-\t-\trs181305519\tDISTANCE=4540;STRAND=1;SYMBOL=DEFB125;SYMBOL_SOURCE=HGNC;HGNC_ID=18105;BIOTYPE=processed_transcript;GMAF=G:0.0005;AFR_MAF=G:0.0020\n"
-                +"20_60344_GA\t20:63351\tG\tENSG00000178591\tENST00000608838\tTranscript\tupstream_gene_variant\t-\t-\t-\t-\t-\trs181305519\tDISTANCE=4540;STRAND=1;SYMBOL=DEFB125;SYMBOL_SOURCE=HGNC;HGNC_ID=18105;BIOTYPE=processed_transcript;GMAF=G:0.0005;AFR_MAF=G:0.0020\n";
-
-        makeGzipFile(vepAnnotation, variantJobsArgs.getPipelineOptions().getString("vepOutput"));
 
         JobExecution jobExecution = jobLauncherTestUtils.launchJob();
 
@@ -90,10 +87,11 @@ public class VariantAnnotConfigurationTest {
 
         //check list of variants without annotation output file
         assertTrue(vepInputFile.exists());
-        assertEquals("20\t60343\t60343\tG/A\t+", readLine(vepInputFile));
+        assertEquals("20\t60343\t60343\tG/A\t+", readFirstLine(vepInputFile));
 
         //check that documents have the annotation
-        DBCursor cursor = collection(dbName, dbName).find();
+        DBCursor cursor =
+                collection(dbName, variantJobsArgs.getPipelineOptions().getString("dbCollectionVariantsName")).find();
 
         int cnt=0;
         int consequenceTypeCount = 0;
@@ -105,11 +103,10 @@ public class VariantAnnotConfigurationTest {
                 assertNotNull(annot.getConsequenceTypes());
                 consequenceTypeCount += annot.getConsequenceTypes().size();
             }
-
         }
 
-        assertTrue(cnt>0);
-        assertEquals(1, consequenceTypeCount);
+        assertEquals(300, cnt);
+        assertEquals(533, consequenceTypeCount);
 
         //check that one line is skipped because malformed
         List<StepExecution> variantAnnotationLoadStepExecution = jobExecution.getStepExecutions().stream()
@@ -118,7 +115,33 @@ public class VariantAnnotConfigurationTest {
         assertEquals(1, variantAnnotationLoadStepExecution.get(0).getReadSkipCount());
     }
 
-    private String readLine(File outputFile) throws IOException {
+    @Test
+    public void annotCreateStepShouldGenerateAnnotations() throws Exception {
+
+        String vepPath  = variantJobsArgs.getPipelineOptions().getString("vepPath");
+
+        File vepPathFile =
+                new File(VariantAnnotConfigurationTest.class.getResource("/"+new File(vepPath).getName()).getFile());
+        File tmpVepPathFile = new File(variantJobsArgs.getPipelineOptions().getString("outputDir"), vepPathFile.getName());
+        FileUtils.copyFile(vepPathFile, tmpVepPathFile);
+
+        vepOutputFile.delete();
+        TestCase.assertFalse(vepOutputFile.exists());  // ensure the annot file doesn't exist from previous executions
+
+        // When the execute method in variantsAnnotCreate is executed
+        JobExecution jobExecution = jobLauncherTestUtils.launchStep("annotationCreate");
+
+        //Then variantsAnnotCreate step should complete correctly
+        assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
+        assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());
+
+        // And VEP output should exist and annotations should be in the file
+        TestCase.assertTrue(vepOutputFile.exists());
+        Assert.assertEquals(537, getLines(new GZIPInputStream(new FileInputStream(vepOutputFile))));
+        vepOutputFile.delete();
+    }
+
+    private String readFirstLine(File outputFile) throws IOException {
         try(BufferedReader reader = new BufferedReader(new FileReader(outputFile))){
             return reader.readLine();
         }
@@ -128,17 +151,11 @@ public class VariantAnnotConfigurationTest {
     public void setUp() throws Exception {
         variantJobsArgs.loadArgs();
         vepInputFile = new File(variantJobsArgs.getPipelineOptions().getString("vepInput"));
+        vepOutputFile = new File(variantJobsArgs.getPipelineOptions().getString("vepOutput"));
         converter = new DBObjectToVariantAnnotationConverter();
 
         dbName = variantJobsArgs.getPipelineOptions().getString(VariantStorageManager.DB_NAME);
         mongoClient = new MongoClient();
-
-        cleanDBs();
-    }
-
-    @AfterClass
-    public static void afterTests() throws UnknownHostException {
-        cleanDBs();
     }
 
     /**
@@ -150,19 +167,8 @@ public class VariantAnnotConfigurationTest {
 
         vepInputFile.delete();
         new File(variantJobsArgs.getPipelineOptions().getString("vepOutput")).delete();
-    }
 
-    private static void cleanDBs() throws UnknownHostException {
-        JobTestUtils.cleanDBs(
-                dbName
-        );
-    }
-
-    private void insertVariantsWithoutAnnotations(String databaseName, String collectionName) throws IOException {
-        URL variantWithNoAnnotationUrl =
-                VariantAnnotConfigurationTest.class.getResource("/annotation/VariantWithOutAnnotation");
-        String variantWithoutAnnotation = FileUtils.readFileToString(new File(variantWithNoAnnotationUrl.getFile()));
-        collection(databaseName, collectionName).insert(constructDbo(variantWithoutAnnotation));
+        JobTestUtils.cleanDBs(dbName);
     }
 
     private DBCollection collection(String databaseName, String collectionName) {

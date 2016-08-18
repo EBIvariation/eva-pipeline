@@ -30,10 +30,7 @@ import org.opencb.opencga.storage.core.StorageManagerFactory;
 import org.opencb.opencga.storage.core.variant.VariantStorageManager;
 import org.opencb.opencga.storage.core.variant.adaptors.VariantDBAdaptor;
 import org.opencb.opencga.storage.core.variant.adaptors.VariantDBIterator;
-import org.springframework.batch.core.BatchStatus;
-import org.springframework.batch.core.ExitStatus;
-import org.springframework.batch.core.Job;
-import org.springframework.batch.core.JobExecution;
+import org.springframework.batch.core.*;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,9 +46,12 @@ import java.io.InputStreamReader;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
 
 import static embl.ebi.variation.eva.pipeline.jobs.JobTestUtils.*;
+import static junit.framework.TestCase.assertEquals;
 import static org.junit.Assert.*;
 
 /**
@@ -178,17 +178,26 @@ public class VariantConfigurationTest {
         assertEquals(537, getLines(new GZIPInputStream(new FileInputStream(vepOutput))) );
 
         // 8 Annotation load step: check documents in DB have annotation (only consequence type)
-        //variantStorageManager = StorageManagerFactory.getVariantStorageManager();
-        //variantDBAdaptor = variantStorageManager.getDBAdaptor(dbName, null);
         iterator = getVariantDBIterator();
 
         int cnt=0;
+        int consequenceTypeCount = 0;
         while (iterator.hasNext()) {
             cnt++;
             Variant next = iterator.next();
-            assertTrue(next.getAnnotation().getConsequenceTypes() != null);
+            if(next.getAnnotation().getConsequenceTypes() != null){
+                consequenceTypeCount += next.getAnnotation().getConsequenceTypes().size();
+            }
         }
-        assertTrue(cnt>0);
+
+        assertEquals(300, cnt);
+        assertEquals(533, consequenceTypeCount);
+
+        //check that one line is skipped because malformed
+        List<StepExecution> variantAnnotationLoadStepExecution = jobExecution.getStepExecutions().stream()
+                .filter(stepExecution -> stepExecution.getStepName().equals("variantAnnotLoadBatchStep"))
+                .collect(Collectors.toList());
+        assertEquals(1, variantAnnotationLoadStepExecution.get(0).getReadSkipCount());
 
     }
 
