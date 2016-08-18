@@ -57,6 +57,9 @@ public class VariantJobsArgs {
     @Value("${input.study.id}") private String studyId;
     @Value("${input.pedigree:}") private String pedigree;
     
+    // Output
+    @Value("${output.dir}") private String outputDir;
+    @Value("${output.dir.annotation}") private String outputDirAnnotation;
     
     @Value("${statistics.overwrite:false}") private boolean overwriteStats;
 
@@ -81,9 +84,6 @@ public class VariantJobsArgs {
     private String dbCollectionFilesName;
     @Value("${readPreference}") private String readPreference;
 
-    ////pipeline
-    @Value("${output.dir}") private String outputDir;
-
     //steps
     @Value("${load.skip:false}") private boolean skipLoad;
     @Value("${skipStatsCreate:false}") private boolean skipStatsCreate;
@@ -91,8 +91,6 @@ public class VariantJobsArgs {
     @Value("${skipAnnotCreate:false}") private boolean skipAnnotCreate;
 
     //VEP
-    @Value("${vepInput}") private String vepInput;
-    @Value("${vepOutput}") private String vepOutput;
     @Value("${vepPath}") private String vepPath;
     @Value("${vepCacheDirectory}") private String vepCacheDirectory;
     @Value("${vepCacheVersion}") private String vepCacheVersion;
@@ -192,8 +190,11 @@ public class VariantJobsArgs {
         pipelineOptions.put(VariantsStatsCreate.SKIP_STATS_CREATE, skipStatsCreate);
         pipelineOptions.put(VariantsStatsLoad.SKIP_STATS_LOAD, skipStatsLoad);
         pipelineOptions.put(VariantsAnnotCreate.SKIP_ANNOT_CREATE, skipAnnotCreate);
-        pipelineOptions.put("vepInput", vepInput);
-        pipelineOptions.put("vepOutput", vepOutput);
+        
+        String annotationFilesPrefix = studyId + "_" + fileId;
+        pipelineOptions.put("vep.input", URI.create(outputDirAnnotation + "/").resolve(annotationFilesPrefix + "_variants_to_annotate.tsv.gz").toString());
+        pipelineOptions.put("vep.output", URI.create(outputDirAnnotation + "/").resolve(annotationFilesPrefix + "_vep_annotation.tsv.gz").toString());
+        
         pipelineOptions.put("vepPath", vepPath);
         pipelineOptions.put("vepCacheDirectory", vepCacheDirectory);
         pipelineOptions.put("vepCacheVersion", vepCacheVersion);

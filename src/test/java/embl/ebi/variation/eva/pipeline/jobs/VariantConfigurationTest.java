@@ -208,8 +208,8 @@ public class VariantConfigurationTest {
         outputDir = variantJobsArgs.getPipelineOptions().getString("output.dir");
         compressExtension = variantJobsArgs.getPipelineOptions().getString("compressExtension");
         dbName = variantJobsArgs.getPipelineOptions().getString("dbName");
-        vepInput = variantJobsArgs.getPipelineOptions().getString("vepInput");
-        vepOutput = variantJobsArgs.getPipelineOptions().getString("vepOutput");
+        vepInput = variantJobsArgs.getPipelineOptions().getString("vep.input");
+        vepOutput = variantJobsArgs.getPipelineOptions().getString("vep.output");
     }
 
     @After

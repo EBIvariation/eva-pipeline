@@ -56,7 +56,7 @@ public class VariantsAnnotCreate implements Tasklet {
                     "--species", pipelineOptions.getString("vepSpecies"),
                     "--fasta", pipelineOptions.getString("vepFasta"),
                     "--fork", pipelineOptions.getString("vepNumForks"),
-                    "-i", pipelineOptions.getString("vepInput"),
+                    "-i", pipelineOptions.getString("vep.input"),
                     "-o", "STDOUT",
                     "--force_overwrite", 
                     "--offline", 
@@ -70,13 +70,13 @@ public class VariantsAnnotCreate implements Tasklet {
             
             long written = connectStreams(
                     new BufferedInputStream(process.getInputStream()), 
-                    new GZIPOutputStream(new FileOutputStream(pipelineOptions.getString("vepOutput"))));
+                    new GZIPOutputStream(new FileOutputStream(pipelineOptions.getString("vep.output"))));
             
             int exitValue = process.waitFor();
             logger.info("Finishing read from VEP output, bytes written: " + written);
             
             if (exitValue > 0) {
-                String errorLog = pipelineOptions.getString("vepOutput") + ".errors.txt";
+                String errorLog = pipelineOptions.getString("vep.output") + ".errors.txt";
                 connectStreams(new BufferedInputStream(process.getErrorStream()), new FileOutputStream(errorLog));
                 throw new Exception("Error while running VEP (exit status " + exitValue + "). See "
                         + errorLog  + " for the errors description from VEP.");

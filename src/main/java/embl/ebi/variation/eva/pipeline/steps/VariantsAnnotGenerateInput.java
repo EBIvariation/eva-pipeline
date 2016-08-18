@@ -126,7 +126,7 @@ public class VariantsAnnotGenerateInput {
 
         FlatFileItemWriter<VariantWrapper> writer = new FlatFileItemWriter<>();
 
-        writer.setResource(new FileSystemResource(pipelineOptions.getString("vepInput")));
+        writer.setResource(new FileSystemResource(pipelineOptions.getString("vep.input")));
         writer.setAppendAllowed(false);
         writer.setShouldDeleteIfExists(true);
         writer.setLineAggregator(delLineAgg);

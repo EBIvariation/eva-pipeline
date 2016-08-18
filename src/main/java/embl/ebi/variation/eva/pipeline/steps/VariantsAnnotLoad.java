@@ -74,7 +74,7 @@ public class VariantsAnnotLoad {
 
     @Bean
     public FlatFileItemReader<VariantAnnotation> variantAnnotationReader() throws IOException {
-        Resource resource = new GzipLazyResource(pipelineOptions.getString("vepOutput"));
+        Resource resource = new GzipLazyResource(pipelineOptions.getString("vep.output"));
         FlatFileItemReader<VariantAnnotation> reader = new FlatFileItemReader<>();
         reader.setResource(resource);
         reader.setLineMapper(new VariantAnnotationLineMapper());

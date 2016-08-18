@@ -62,8 +62,7 @@ public class CommonConfig {
         properties.put(VariantsStatsCreate.SKIP_STATS_CREATE, "true");
         properties.put(VariantsStatsLoad.SKIP_STATS_LOAD, "true");
         properties.put(VariantsAnnotCreate.SKIP_ANNOT_CREATE, "true");
-        properties.put("vepInput", "");
-        properties.put("vepOutput", "");
+        properties.put("output.dir.annotation", "");
         properties.put("vepPath", "");
         properties.put("vepCacheDirectory", "");
         properties.put("vepCacheVersion", "");

@@ -95,7 +95,7 @@ public class VariantsAnnotGenerateInputTest {
         variantJobsArgs.loadArgs();
         dbName = variantJobsArgs.getPipelineOptions().getString(VariantStorageManager.DB_NAME);
         collectionName = variantJobsArgs.getPipelineOptions().getString("dbCollectionVariantsName");
-        outputFile = new File(variantJobsArgs.getPipelineOptions().getString("vepInput"));
+        outputFile = new File(variantJobsArgs.getPipelineOptions().getString("vep.input"));
 
         collection().drop();
     }
