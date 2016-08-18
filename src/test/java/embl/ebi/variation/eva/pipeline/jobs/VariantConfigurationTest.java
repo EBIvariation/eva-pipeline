@@ -90,7 +90,7 @@ public class VariantConfigurationTest {
         String mockVep = VariantConfigurationTest.class.getResource("/mockvep.pl").getFile();
 
         variantJobsArgs.getPipelineOptions().put("input.vcf", inputFile);
-        variantJobsArgs.getPipelineOptions().put("vepPath", mockVep);
+        variantJobsArgs.getPipelineOptions().put("app.vep.path", mockVep);
 
         Config.setOpenCGAHome(opencgaHome);
 

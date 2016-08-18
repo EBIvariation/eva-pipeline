@@ -63,12 +63,12 @@ public class CommonConfig {
         properties.put(VariantsStatsLoad.SKIP_STATS_LOAD, "true");
         properties.put(VariantsAnnotCreate.SKIP_ANNOT_CREATE, "true");
         properties.put("output.dir.annotation", "");
-        properties.put("vepPath", "");
-        properties.put("vepCacheDirectory", "");
-        properties.put("vepCacheVersion", "");
-        properties.put("vepSpecies", "");
-        properties.put("vepFasta", "");
-        properties.put("vepNumForks", "3");
+        properties.put("app.vep.path", "");
+        properties.put("app.vep.cache.path", "");
+        properties.put("app.vep.cache.version", "");
+        properties.put("app.vep.cache.species", "");
+        properties.put("input.fasta", "");
+        properties.put("app.vep.num-forks", "3");
         properties.put("allowStartIfComplete", false);
 
         configurer.setProperties(properties);

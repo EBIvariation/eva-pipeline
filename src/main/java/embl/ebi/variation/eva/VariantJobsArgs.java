@@ -91,12 +91,12 @@ public class VariantJobsArgs {
     @Value("${skipAnnotCreate:false}") private boolean skipAnnotCreate;
 
     //VEP
-    @Value("${vepPath}") private String vepPath;
-    @Value("${vepCacheDirectory}") private String vepCacheDirectory;
-    @Value("${vepCacheVersion}") private String vepCacheVersion;
-    @Value("${vepSpecies}") private String vepSpecies;
-    @Value("${vepFasta}") private String vepFasta;
-    @Value("${vepNumForks}") private String vepNumForks;
+    @Value("${app.vep.path}") private String vepPath;
+    @Value("${app.vep.cache.path}") private String vepCacheDirectory;
+    @Value("${app.vep.cache.version}") private String vepCacheVersion;
+    @Value("${app.vep.cache.species}") private String vepSpecies;
+    @Value("${input.fasta}") private String vepFasta;
+    @Value("${app.vep.num-forks}") private String vepNumForks;
 
     @Value("${allowStartIfComplete:false}") private boolean allowStartIfComplete;
 
@@ -195,12 +195,12 @@ public class VariantJobsArgs {
         pipelineOptions.put("vep.input", URI.create(outputDirAnnotation + "/").resolve(annotationFilesPrefix + "_variants_to_annotate.tsv.gz").toString());
         pipelineOptions.put("vep.output", URI.create(outputDirAnnotation + "/").resolve(annotationFilesPrefix + "_vep_annotation.tsv.gz").toString());
         
-        pipelineOptions.put("vepPath", vepPath);
-        pipelineOptions.put("vepCacheDirectory", vepCacheDirectory);
-        pipelineOptions.put("vepCacheVersion", vepCacheVersion);
-        pipelineOptions.put("vepSpecies", vepSpecies);
-        pipelineOptions.put("vepFasta", vepFasta);
-        pipelineOptions.put("vepNumForks", vepNumForks);
+        pipelineOptions.put("app.vep.path", vepPath);
+        pipelineOptions.put("app.vep.cache.path", vepCacheDirectory);
+        pipelineOptions.put("app.vep.cache.version", vepCacheVersion);
+        pipelineOptions.put("app.vep.cache.species", vepSpecies);
+        pipelineOptions.put("input.fasta", vepFasta);
+        pipelineOptions.put("app.vep.num-forks", vepNumForks);
         pipelineOptions.put("allowStartIfComplete", allowStartIfComplete);
 
         logger.debug("Using as pipelineOptions: {}", pipelineOptions.entrySet().toString());
