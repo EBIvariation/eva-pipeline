@@ -117,9 +117,12 @@ public class VariantAnnotConfigurationTest {
         String vepPath  = variantJobsArgs.getPipelineOptions().getString("vepPath");
 
         File vepPathFile =
-                new File(VariantAnnotConfigurationTest.class.getResource("/"+new File(vepPath).getName()).getFile());
-        File tmpVepPathFile = new File(variantJobsArgs.getPipelineOptions().getString("outputDir"), vepPathFile.getName());
-        FileUtils.copyFile(vepPathFile, tmpVepPathFile);
+                new File(VariantAnnotConfigurationTest.class.getResource("/mockvep.pl").getFile());
+        //File tmpVepPathFile = new File(variantJobsArgs.getPipelineOptions().getString("outputDir"), vepPathFile.getName());
+        //FileUtils.copyFile(vepPathFile, tmpVepPathFile);
+
+        variantJobsArgs.getPipelineOptions().put("vepPath", vepPathFile);
+
 
         vepOutputFile.delete();
         TestCase.assertFalse(vepOutputFile.exists());  // ensure the annot file doesn't exist from previous executions

@@ -20,7 +20,6 @@ import embl.ebi.variation.eva.VariantJobsArgs;
 import embl.ebi.variation.eva.pipeline.MongoDBHelper;
 import embl.ebi.variation.eva.pipeline.annotation.load.VariantAnnotationLineMapper;
 import embl.ebi.variation.eva.pipeline.jobs.*;
-import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -47,7 +46,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
 
 import static embl.ebi.variation.eva.pipeline.jobs.JobTestUtils.makeGzipFile;
@@ -93,11 +91,7 @@ public class VariantsAnnotLoadTest {
         restoreMongoDbFromDump(dump);
 
         String annotations = VariantsAnnotLoadTest.class.getResource("/variants.annot.tsv.gz").getFile();
-
-        File annotationsFile = new File(annotations);
-        File tmpAnnotationsFile = new File(variantJobsArgs.getPipelineOptions().getString("vepOutput"));
-
-        FileUtils.copyFile(annotationsFile, tmpAnnotationsFile);
+        variantJobsArgs.getPipelineOptions().put("vepOutput", new File(annotations));
 
         JobExecution jobExecution = jobLauncherTestUtils.launchStep("variantAnnotLoadBatchStep");
 
