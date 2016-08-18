@@ -15,6 +15,8 @@
  */
 package embl.ebi.variation.eva;
 
+import embl.ebi.variation.eva.pipeline.jobs.VariantAnnotConfiguration;
+import embl.ebi.variation.eva.pipeline.jobs.VariantStatsConfiguration;
 import embl.ebi.variation.eva.pipeline.steps.*;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -91,6 +93,9 @@ public class VariantJobsArgs {
     @Value("${statistics.create.skip:false}") private boolean skipStatsCreate;
     @Value("${statistics.load.skip:false}") private boolean skipStatsLoad;
     @Value("${annotation.create.skip:false}") private boolean skipAnnotCreate;
+
+    @Value("${statistics.skip:false}") private boolean skipStats;
+    @Value("${annotation.skip:false}") private boolean skipAnnot;
 
     //VEP
     @Value("${app.vep.path}") private String vepPath;
@@ -208,6 +213,8 @@ public class VariantJobsArgs {
         pipelineOptions.put(VariantsStatsCreate.SKIP_STATS_CREATE, skipStatsCreate);
         pipelineOptions.put(VariantsStatsLoad.SKIP_STATS_LOAD, skipStatsLoad);
         pipelineOptions.put(VariantsAnnotCreate.SKIP_ANNOT_CREATE, skipAnnotCreate);
+        pipelineOptions.put(VariantAnnotConfiguration.SKIP_ANNOT, skipAnnot);
+        pipelineOptions.put(VariantStatsConfiguration.SKIP_STATS, skipStats);
         
         String annotationFilesPrefix = studyId + "_" + fileId;
         pipelineOptions.put("vep.input", URI.create(outputDirAnnotation + "/").resolve(annotationFilesPrefix + "_variants_to_annotate.tsv.gz").toString());

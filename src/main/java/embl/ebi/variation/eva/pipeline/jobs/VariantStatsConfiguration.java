@@ -15,6 +15,7 @@
  */
 package embl.ebi.variation.eva.pipeline.jobs;
 
+import embl.ebi.variation.eva.pipeline.OptionalDecider;
 import embl.ebi.variation.eva.pipeline.steps.VariantsStatsCreate;
 import embl.ebi.variation.eva.pipeline.steps.VariantsStatsLoad;
 import org.opencb.datastore.core.ObjectMap;
@@ -25,7 +26,9 @@ import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
+import org.springframework.batch.core.job.builder.FlowBuilder;
 import org.springframework.batch.core.job.builder.JobBuilder;
+import org.springframework.batch.core.job.flow.Flow;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.step.builder.StepBuilder;
@@ -43,6 +46,7 @@ public class VariantStatsConfiguration {
 
     private static final Logger logger = LoggerFactory.getLogger(VariantStatsConfiguration.class);
     public static final String jobName = "calculate-statistics";
+    public static final String SKIP_STATS = "statistics.skip";
 
     @Autowired
     private JobBuilderFactory jobBuilderFactory;
@@ -62,8 +66,20 @@ public class VariantStatsConfiguration {
                 .incrementer(new RunIdIncrementer());
 
         return jobBuilder
-                .start(statsCreate())
+                .start(variantStatsFlow())
+                .build().build();
+    }
+
+    @Bean
+    public Flow variantStatsFlow(){
+
+        OptionalDecider statisticsOptionalDecider = new OptionalDecider(pipelineOptions, SKIP_STATS);
+
+        return new FlowBuilder<Flow>("statsFlow")
+                .start(statisticsOptionalDecider).on(OptionalDecider.DO_STEP)
+                .to(statsCreate())
                 .next(statsLoad())
+                .from(statisticsOptionalDecider).on(OptionalDecider.SKIP_STEP).end("COMPLETED")
                 .build();
     }
 
@@ -96,7 +112,6 @@ public class VariantStatsConfiguration {
      * @param tasklet to be initialized with common configuration
      */
     private void initStep(TaskletStepBuilder tasklet) {
-
         boolean allowStartIfComplete  = pipelineOptions.getBoolean("config.restartability.allow");
 
         // true: every job execution will do this step, even if this step is already COMPLETED
