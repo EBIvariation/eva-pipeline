@@ -85,7 +85,7 @@ public class VariantJobsArgs {
     @Value("${output.dir}") private String outputDir;
 
     //steps
-    @Value("${skipLoad:false}") private boolean skipLoad;
+    @Value("${load.skip:false}") private boolean skipLoad;
     @Value("${skipStatsCreate:false}") private boolean skipStatsCreate;
     @Value("${skipStatsLoad:false}") private boolean skipStatsLoad;
     @Value("${skipAnnotCreate:false}") private boolean skipAnnotCreate;

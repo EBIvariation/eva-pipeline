@@ -38,7 +38,7 @@ import java.nio.file.Paths;
  */
 public class VariantsLoad implements Tasklet {
     private static final Logger logger = LoggerFactory.getLogger(VariantsLoad.class);
-    public static final String SKIP_LOAD = "skipLoad";
+    public static final String SKIP_LOAD = "load.skip";
 
     @Autowired
     private ObjectMap variantOptions;
