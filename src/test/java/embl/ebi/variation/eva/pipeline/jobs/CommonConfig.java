@@ -57,7 +57,7 @@ public class CommonConfig {
         properties.put("dbCollectionFilesName", "files");
         properties.put("readPreference", "primary");
         
-        properties.put("opencga.app.home", opencgaHome);
+        properties.put("app.opencga.path", opencgaHome);
         properties.put(VariantsLoad.SKIP_LOAD, "true");
         properties.put(VariantsStatsCreate.SKIP_STATS_CREATE, "true");
         properties.put(VariantsStatsLoad.SKIP_STATS_LOAD, "true");

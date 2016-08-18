@@ -60,7 +60,7 @@ public class VariantJobsArgs {
     
     @Value("${statistics.overwrite:false}") private boolean overwriteStats;
 
-    @Value("${opencga.app.home}") private String opencgaAppHome;
+    @Value("${app.opencga.path}") private String opencgaAppHome;
     
     //// OpenCGA options with default values (non-customizable)
     private String compressExtension = ".gz";

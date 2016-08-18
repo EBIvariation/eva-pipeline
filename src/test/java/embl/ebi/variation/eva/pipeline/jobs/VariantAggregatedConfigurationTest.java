@@ -140,7 +140,7 @@ public class VariantAggregatedConfigurationTest {
 //                .addString("input.study.name", "studyName")
 //                .addString("input.study.id", "2")
 //                .addString("input.vcf.id", "2")
-//                .addString("opencga.app.home", opencgaHome)
+//                .addString("app.opencga.path", opencgaHome)
 //                .addString(VariantsLoad.SKIP_LOAD, "true")
 //                .toJobParameters();
 //
@@ -209,7 +209,7 @@ public class VariantAggregatedConfigurationTest {
 //                .addString("input.study.name", "studyName")
 //                .addString("input.study.id", "1")
 //                .addString("input.vcf.id", "1")
-//                .addString("opencga.app.home", null)
+//                .addString("app.opencga.path", null)
 //                .toJobParameters();
 //
 //        Job listenedJob = jobBuilderFactory
