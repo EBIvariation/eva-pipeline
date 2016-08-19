@@ -15,7 +15,6 @@
  */
 package embl.ebi.variation.eva.pipeline.jobs;
 
-import embl.ebi.variation.eva.pipeline.OptionalDecider;
 import embl.ebi.variation.eva.pipeline.steps.*;
 import org.opencb.datastore.core.ObjectMap;
 import org.slf4j.Logger;
@@ -41,6 +40,15 @@ import org.springframework.context.annotation.Import;
 import org.springframework.core.env.Environment;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 
+/**
+ *  Complete pipeline workflow:
+ *
+ *                       |--> (variantStatsFlow: statsCreate --> statsLoad)
+ *  transform ---> load -+
+ *                       |--> (variantAnnotationFlow: variantsAnnotGenerateInputBatchStep --> annotationCreate --> variantAnnotLoadBatchStep)
+ *
+ *  Steps in () are optional
+ */
 @Configuration
 @EnableBatchProcessing
 @Import({VariantJobArgsConfig.class, VariantAnnotConfiguration.class, VariantStatsConfiguration.class})
