@@ -42,7 +42,7 @@ import org.springframework.core.env.Environment;
 public class VariantStatsConfiguration {
 
     private static final Logger logger = LoggerFactory.getLogger(VariantStatsConfiguration.class);
-    public static final String jobName = "variantStatsJob";
+    public static final String jobName = "calculate-statistics";
 
     @Autowired
     private JobBuilderFactory jobBuilderFactory;

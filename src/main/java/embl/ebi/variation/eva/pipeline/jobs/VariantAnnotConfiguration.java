@@ -57,7 +57,7 @@ import org.springframework.context.annotation.Import;
 @EnableBatchProcessing
 @Import({VariantsAnnotGenerateInput.class, VariantsAnnotLoad.class, VariantJobArgsConfig.class})
 public class VariantAnnotConfiguration {
-    public static final String jobName = "variantAnnotBatchJob";
+    public static final String jobName = "annotate-variants";
 
     @Autowired private JobBuilderFactory jobBuilderFactory;
 

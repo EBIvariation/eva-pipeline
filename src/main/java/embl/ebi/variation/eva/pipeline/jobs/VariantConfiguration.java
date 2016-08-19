@@ -43,7 +43,7 @@ import org.springframework.core.env.Environment;
 public class VariantConfiguration {
 
     private static final Logger logger = LoggerFactory.getLogger(VariantConfiguration.class);
-    public static final String jobName = "variantJob";
+    public static final String jobName = "load-genotyped-vcf";
 
     @Autowired
     JobBuilderFactory jobBuilderFactory;
