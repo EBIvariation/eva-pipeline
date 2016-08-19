@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 EMBL - European Bioinformatics Institute
+ * Copyright 2015-2016 EMBL - European Bioinformatics Institute
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,7 +71,7 @@ public class VariantLoadConfiguration {
     }
 
     public Step load() {
-        StepBuilder step1 = stepBuilderFactory.get("Load statistics");
+        StepBuilder step1 = stepBuilderFactory.get("Load variants");
         TaskletStepBuilder tasklet = step1.tasklet(variantsLoad());
         initStep(tasklet);
         return tasklet.build();
