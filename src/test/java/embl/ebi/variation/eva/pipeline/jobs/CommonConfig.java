@@ -45,8 +45,10 @@ public class CommonConfig {
         properties.put("input.study.name", "input.study.name");
         properties.put("input.study.id", "1");
         properties.put("input.pedigree", "");
+        properties.put("input.fasta", "");
         
         properties.put("output.dir", "/tmp");
+        properties.put("output.dir.annotation", "");
         
         properties.put("statistics.overwrite", "false");
         
@@ -57,17 +59,16 @@ public class CommonConfig {
         properties.put("config.db.read-preference", "primary");
         
         properties.put("app.opencga.path", opencgaHome);
-        properties.put(VariantsLoad.SKIP_LOAD, "true");
-        properties.put(VariantsStatsCreate.SKIP_STATS_CREATE, "true");
-        properties.put(VariantsStatsLoad.SKIP_STATS_LOAD, "true");
-        properties.put(VariantsAnnotCreate.SKIP_ANNOT_CREATE, "true");
-        properties.put("output.dir.annotation", "");
         properties.put("app.vep.path", "");
         properties.put("app.vep.cache.path", "");
         properties.put("app.vep.cache.version", "");
         properties.put("app.vep.cache.species", "");
-        properties.put("input.fasta", "");
         properties.put("app.vep.num-forks", "3");
+        
+        properties.put(VariantsLoad.SKIP_LOAD, "true");
+        properties.put(VariantsStatsCreate.SKIP_STATS_CREATE, "true");
+        properties.put(VariantsStatsLoad.SKIP_STATS_LOAD, "true");
+        properties.put(VariantsAnnotCreate.SKIP_ANNOT_CREATE, "true");
         properties.put("config.restartability.allow", false);
 
         configurer.setProperties(properties);

@@ -39,7 +39,7 @@ public class OptionalDecider implements JobExecutionDecider {
 
     /**
      * @param pipelineOptions ObjectMap that will have a boolean for .get(skipStep), telling whether to skip or not
-     * @param skipStep name of the key that the user sets to skip a step, e.g. "skipAnnotCreate"
+     * @param skipStep name of the key that the user sets to skip a step, e.g. "annotation.create.skip"
      * It's recommended to use pre-defined constants, such as VariantsAnnotCreate.SKIP_ANNOT_CREATE to avoid
      * misspelling mistakes.
      */

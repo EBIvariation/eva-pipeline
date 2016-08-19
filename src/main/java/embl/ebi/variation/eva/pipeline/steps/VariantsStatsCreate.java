@@ -41,7 +41,7 @@ import java.nio.file.Paths;
  */
 public class VariantsStatsCreate implements Tasklet {
     private static final Logger logger = LoggerFactory.getLogger(VariantsStatsCreate.class);
-    public static final String SKIP_STATS_CREATE = "skipStatsCreate";
+    public static final String SKIP_STATS_CREATE = "statistics.create.skip";
 
     @Autowired
     private ObjectMap variantOptions;

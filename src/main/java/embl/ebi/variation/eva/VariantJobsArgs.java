@@ -86,9 +86,9 @@ public class VariantJobsArgs {
 
     //steps
     @Value("${load.skip:false}") private boolean skipLoad;
-    @Value("${skipStatsCreate:false}") private boolean skipStatsCreate;
-    @Value("${skipStatsLoad:false}") private boolean skipStatsLoad;
-    @Value("${skipAnnotCreate:false}") private boolean skipAnnotCreate;
+    @Value("${statistics.create.skip:false}") private boolean skipStatsCreate;
+    @Value("${statistics.load.skip:false}") private boolean skipStatsLoad;
+    @Value("${annotation.create.skip:false}") private boolean skipAnnotCreate;
 
     //VEP
     @Value("${app.vep.path}") private String vepPath;

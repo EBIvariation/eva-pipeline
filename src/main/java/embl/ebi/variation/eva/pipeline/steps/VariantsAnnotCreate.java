@@ -36,7 +36,7 @@ import java.util.zip.GZIPOutputStream;
  */
 public class VariantsAnnotCreate implements Tasklet {
     private static final Logger logger = LoggerFactory.getLogger(VariantsAnnotCreate.class);
-    public static final String SKIP_ANNOT_CREATE = "skipAnnotCreate";
+    public static final String SKIP_ANNOT_CREATE = "annotation.create.skip";
 
     @Autowired
     private ObjectMap pipelineOptions;
