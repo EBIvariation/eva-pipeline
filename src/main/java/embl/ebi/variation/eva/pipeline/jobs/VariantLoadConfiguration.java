@@ -71,7 +71,7 @@ public class VariantLoadConfiguration {
     }
 
     public Step load() {
-        StepBuilder step1 = stepBuilderFactory.get("load");
+        StepBuilder step1 = stepBuilderFactory.get("Load statistics");
         TaskletStepBuilder tasklet = step1.tasklet(variantsLoad());
         initStep(tasklet);
         return tasklet.build();

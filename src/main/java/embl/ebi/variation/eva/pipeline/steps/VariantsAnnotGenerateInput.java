@@ -76,9 +76,9 @@ public class VariantsAnnotGenerateInput {
     private ObjectMap pipelineOptions;
 
     @Bean
-    @Qualifier("variantsAnnotGenerateInputBatchStep")
+    @Qualifier("variantsAnnotGenerateInput")
     public Step variantsAnnotGenerateInputBatchStep() throws Exception {
-        return steps.get("variantsAnnotGenerateInputBatchStep").<DBObject, VariantWrapper> chunk(10)
+        return steps.get("Find variants to annotate").<DBObject, VariantWrapper> chunk(10)
                 .reader(variantReader())
                 .processor(vepInputLineProcessor())
                 .writer(vepInputWriter())

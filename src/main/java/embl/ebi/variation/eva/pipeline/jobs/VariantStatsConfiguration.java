@@ -73,7 +73,7 @@ public class VariantStatsConfiguration {
     }
 
     public Step statsCreate() {
-        StepBuilder step1 = stepBuilderFactory.get("statsCreate");
+        StepBuilder step1 = stepBuilderFactory.get("Calculate statistics");
         TaskletStepBuilder tasklet = step1.tasklet(variantsStatsCreate());
         initStep(tasklet);
         return tasklet.build();
@@ -85,7 +85,7 @@ public class VariantStatsConfiguration {
     }
 
     public Step statsLoad() {
-        StepBuilder step1 = stepBuilderFactory.get("statsLoad");
+        StepBuilder step1 = stepBuilderFactory.get("Load statistics");
         TaskletStepBuilder tasklet = step1.tasklet(variantsStatsLoad());
         initStep(tasklet);
         return tasklet.build();

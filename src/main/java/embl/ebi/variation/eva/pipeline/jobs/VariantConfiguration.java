@@ -81,7 +81,7 @@ public class VariantConfiguration {
     }
 
     public Step transform() {
-        StepBuilder step1 = stepBuilderFactory.get("transform");
+        StepBuilder step1 = stepBuilderFactory.get("Normalize variants");
         TaskletStepBuilder tasklet = step1.tasklet(variantsTransform());
         initStep(tasklet);
         return tasklet.build();
@@ -93,7 +93,7 @@ public class VariantConfiguration {
     }
 
     public Step load() {
-        StepBuilder step1 = stepBuilderFactory.get("load");
+        StepBuilder step1 = stepBuilderFactory.get("Load variants");
         TaskletStepBuilder tasklet = step1.tasklet(variantsLoad());
         initStep(tasklet);
         return tasklet.build();
@@ -105,7 +105,7 @@ public class VariantConfiguration {
     }
 
     public Step statsCreate() {
-        StepBuilder step1 = stepBuilderFactory.get("statsCreate");
+        StepBuilder step1 = stepBuilderFactory.get("Calculate statistics");
         TaskletStepBuilder tasklet = step1.tasklet(variantsStatsCreate());
         initStep(tasklet);
         return tasklet.build();
@@ -117,7 +117,7 @@ public class VariantConfiguration {
     }
 
     public Step statsLoad() {
-        StepBuilder step1 = stepBuilderFactory.get("statsLoad");
+        StepBuilder step1 = stepBuilderFactory.get("Load statistics");
         TaskletStepBuilder tasklet = step1.tasklet(variantsStatsLoad());
         initStep(tasklet);
         return tasklet.build();

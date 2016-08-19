@@ -65,10 +65,10 @@ public class VariantAnnotConfiguration {
 
     @Autowired private ObjectMap pipelineOptions;
 
-    @Qualifier("variantsAnnotGenerateInputBatchStep")
+    @Qualifier("variantsAnnotGenerateInput")
     @Autowired public Step variantsAnnotGenerateInputBatchStep;
 
-    @Qualifier("variantAnnotLoadBatchStep")
+    @Qualifier("variantAnnotLoad")
     @Autowired private Step variantAnnotLoadBatchStep;
 
     @Qualifier("annotationCreate")
@@ -85,7 +85,7 @@ public class VariantAnnotConfiguration {
 
     @Bean
     public Flow variantAnnotationFlow(){
-        Flow annotationFlow = new FlowBuilder<Flow>("annotationFlow")
+        Flow annotationFlow = new FlowBuilder<Flow>("Variant VEP annotation flow")
                 .start(variantsAnnotGenerateInputBatchStep)
                 .next(annotationCreate)
                 .next(variantAnnotLoadBatchStep)
@@ -101,7 +101,7 @@ public class VariantAnnotConfiguration {
     @Bean
     @Qualifier("annotationCreate")
     public Step annotationCreate() {
-        StepBuilder step1 = stepBuilderFactory.get("annotationCreate");
+        StepBuilder step1 = stepBuilderFactory.get("Generate VEP annotation");
         TaskletStepBuilder tasklet = step1.tasklet(variantsAnnotCreate());
         initStep(tasklet);
         return tasklet.build();

@@ -80,7 +80,7 @@ public class VariantAggregatedConfiguration {
     }
 
     public Step transform() {
-        StepBuilder step1 = stepBuilderFactory.get("transform");
+        StepBuilder step1 = stepBuilderFactory.get("Normalize variants");
         final TaskletStepBuilder tasklet = step1.tasklet(variantsTransform());
         initStep(tasklet);
         return tasklet.build();
@@ -92,7 +92,7 @@ public class VariantAggregatedConfiguration {
     }
 
     public Step load() {
-        StepBuilder step1 = stepBuilderFactory.get("load");
+        StepBuilder step1 = stepBuilderFactory.get("Load variants");
         TaskletStepBuilder tasklet = step1.tasklet(variantsLoad());
         initStep(tasklet);
         return tasklet.build();

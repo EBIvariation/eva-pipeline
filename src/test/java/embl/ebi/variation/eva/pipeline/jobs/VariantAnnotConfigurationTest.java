@@ -113,7 +113,7 @@ public class VariantAnnotConfigurationTest {
 
         //check that one line is skipped because malformed
         List<StepExecution> variantAnnotationLoadStepExecution = jobExecution.getStepExecutions().stream()
-                .filter(stepExecution -> stepExecution.getStepName().equals("variantAnnotLoadBatchStep"))
+                .filter(stepExecution -> stepExecution.getStepName().equals("Load VEP annotation"))
                 .collect(Collectors.toList());
         assertEquals(1, variantAnnotationLoadStepExecution.get(0).getReadSkipCount());
     }
