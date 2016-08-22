@@ -20,20 +20,20 @@ package embl.ebi.variation.eva.pipeline.gene;
  *
  * @author Jose Miguel Mut Lopez &lt;jmmut@ebi.ac.uk&gt;
  */
-public class GeneMongoBean {
+public class FeatureCoordinates {
 
-    private String geneId;
+    private String featureId;
     private String name;
     private String feature;
     private String chromosome;
     private int start;
     private int end;
 
-    public GeneMongoBean() {
+    public FeatureCoordinates() {
     }
 
-    public GeneMongoBean(String geneId, String name, String feature, String chromosome, int start, int end) {
-        this.geneId = geneId;
+    public FeatureCoordinates(String featureId, String name, String feature, String chromosome, int start, int end) {
+        this.featureId = featureId;
         this.name = name;
         this.feature = feature;
         this.chromosome = chromosome;
@@ -41,12 +41,12 @@ public class GeneMongoBean {
         this.end = end;
     }
 
-    public String getGeneId() {
-        return geneId;
+    public String getFeatureId() {
+        return featureId;
     }
 
-    public void setGeneId(String geneId) {
-        this.geneId = geneId;
+    public void setFeatureId(String featureId) {
+        this.featureId = featureId;
     }
 
     public String getName() {

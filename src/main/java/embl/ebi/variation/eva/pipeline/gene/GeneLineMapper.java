@@ -25,9 +25,9 @@ import java.util.TreeMap;
  *
  * @author Jose Miguel Mut Lopez &lt;jmmut@ebi.ac.uk&gt;
  */
-public class GeneLineMapper implements LineMapper<GeneMongoBean> {
+public class GeneLineMapper implements LineMapper<FeatureCoordinates> {
     @Override
-    public GeneMongoBean mapLine(String line, int lineNumber) throws Exception {
+    public FeatureCoordinates mapLine(String line, int lineNumber) throws Exception {
         String[] lineSplit = line.split("\t");
         String[] attributesSplit = lineSplit[8].split(";");
         Map<String, String> attributes = new TreeMap<>();
@@ -35,15 +35,17 @@ public class GeneLineMapper implements LineMapper<GeneMongoBean> {
             String[] keyValue = attribute.split(" ");
 
             // don't do a `put(keyValue[0], keyValue[1])`: a space may appear before the key
-            String value = keyValue[keyValue.length - 1];
-            String valueWithoutQuotes = value.substring(1, value.length() - 1); // remove quotes
-            attributes.put(keyValue[keyValue.length - 2], valueWithoutQuotes);
+            // also, remove quotes from the value
+            int valueLength = keyValue[keyValue.length - 1].length();
+            attributes.put(keyValue[keyValue.length - 2], keyValue[keyValue.length - 1].substring(1, valueLength - 1));
         }
 
-        return new GeneMongoBean(attributes.get("gene_id"), attributes.get("gene_name"), lineSplit[2], lineSplit[0],
-                Integer.parseInt(lineSplit[3]), Integer.parseInt(lineSplit[4]));
+        String feature = lineSplit[2];
+        return new FeatureCoordinates(attributes.get(feature + "_id"), attributes.get(feature + "_name"), feature,
+                lineSplit[0], Integer.parseInt(lineSplit[3]), Integer.parseInt(lineSplit[4]));
 //        return new Gene(attributes.get("gene_id"), attributes.get("gene_name"), attributes.get("gene_biotype"),
 //                null, lineSplit[0], Integer.parseInt(lineSplit[3]), Integer.parseInt(lineSplit[4]), lineSplit[6],
 //                lineSplit[1], null, null, null);
     }
+
 }

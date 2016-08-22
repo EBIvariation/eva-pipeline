@@ -22,9 +22,9 @@ import org.springframework.batch.item.ItemProcessor;
  *
  * @author Jose Miguel Mut Lopez &lt;jmmut@ebi.ac.uk&gt;
  */
-public class GeneFilterProcessor implements ItemProcessor<GeneMongoBean, GeneMongoBean> {
+public class GeneFilterProcessor implements ItemProcessor<FeatureCoordinates, FeatureCoordinates> {
     @Override
-    public GeneMongoBean process(GeneMongoBean item) throws Exception {
+    public FeatureCoordinates process(FeatureCoordinates item) throws Exception {
         if (item.getFeature().equals("gene") || item.getFeature().equals("transcript")) {
             return item;
         } else {

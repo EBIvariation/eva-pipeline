@@ -17,23 +17,18 @@ package embl.ebi.variation.eva.pipeline.steps;
 
 import com.mongodb.*;
 import embl.ebi.variation.eva.VariantJobsArgs;
-import embl.ebi.variation.eva.pipeline.MongoDBHelper;
-import embl.ebi.variation.eva.pipeline.annotation.load.VariantAnnotationLineMapper;
 import embl.ebi.variation.eva.pipeline.gene.GeneLineMapper;
-import embl.ebi.variation.eva.pipeline.gene.GeneMongoBean;
+import embl.ebi.variation.eva.pipeline.gene.FeatureCoordinates;
 import embl.ebi.variation.eva.pipeline.jobs.AnnotationConfig;
 import embl.ebi.variation.eva.pipeline.jobs.JobTestUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.opencb.biodata.models.variant.annotation.VariantAnnotation;
 import org.opencb.opencga.storage.core.variant.VariantStorageManager;
-import org.opencb.opencga.storage.mongodb.variant.DBObjectToVariantAnnotationConverter;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.file.FlatFileItemReader;
-import org.springframework.batch.item.file.FlatFileParseException;
 import org.springframework.batch.test.MetaDataInstanceFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
@@ -57,13 +52,13 @@ import static junit.framework.TestCase.*;
 public class GenesLoadTest {
 
     @Autowired
-    private FlatFileItemReader<GeneMongoBean> geneReader;
+    private FlatFileItemReader<FeatureCoordinates> geneReader;
 
     @Autowired
-    private ItemProcessor<GeneMongoBean, GeneMongoBean> geneFilterProcessor;
+    private ItemProcessor<FeatureCoordinates, FeatureCoordinates> geneFilterProcessor;
 
     @Autowired
-    private ItemWriter<GeneMongoBean> geneWriter;
+    private ItemWriter<FeatureCoordinates> geneWriter;
 
     @Autowired
     public VariantJobsArgs variantJobsArgs;
@@ -81,7 +76,7 @@ public class GenesLoadTest {
         GeneLineMapper lineMapper = new GeneLineMapper();
         for (String gtfLine : gtfContent.split("\n")) {
             if (!gtfLine.startsWith("#")) {
-                GeneMongoBean gene = lineMapper.mapLine(gtfLine, 0);
+                FeatureCoordinates gene = lineMapper.mapLine(gtfLine, 0);
                 assertNotNull(gene.getChromosome());
             }
         }
@@ -97,7 +92,7 @@ public class GenesLoadTest {
         geneReader.setSaveState(false);
         geneReader.open(executionContext);
 
-        GeneMongoBean gene;
+        FeatureCoordinates gene;
         int chromosomeCount = 0;
         int count = 0;
         while ((gene = geneReader.read()) != null) {
@@ -124,12 +119,12 @@ public class GenesLoadTest {
         geneReader.setSaveState(false);
         geneReader.open(executionContext);
 
-        GeneMongoBean gene;
+        FeatureCoordinates gene;
         int count = 0;
         int keptGenes = 0;
         while ((gene = geneReader.read()) != null) {
             count++;
-            GeneMongoBean processedGene = geneFilterProcessor.process(gene);
+            FeatureCoordinates processedGene = geneFilterProcessor.process(gene);
             if (processedGene != null) {
                 keptGenes++;
             }
@@ -146,7 +141,7 @@ public class GenesLoadTest {
         JobTestUtils.cleanDBs(dbName);
 
         GeneLineMapper lineMapper = new GeneLineMapper();
-        List<GeneMongoBean> genes = new ArrayList<>();
+        List<FeatureCoordinates> genes = new ArrayList<>();
         for (String gtfLine : gtfContent.split("\n")) {
             if (!gtfLine.startsWith("#")) {
                 genes.add(lineMapper.mapLine(gtfLine, 0));

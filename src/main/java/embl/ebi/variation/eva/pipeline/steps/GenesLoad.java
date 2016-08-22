@@ -20,7 +20,7 @@ import embl.ebi.variation.eva.pipeline.MongoDBHelper;
 import embl.ebi.variation.eva.pipeline.annotation.GzipLazyResource;
 import embl.ebi.variation.eva.pipeline.gene.GeneFilterProcessor;
 import embl.ebi.variation.eva.pipeline.gene.GeneLineMapper;
-import embl.ebi.variation.eva.pipeline.gene.GeneMongoBean;
+import embl.ebi.variation.eva.pipeline.gene.FeatureCoordinates;
 import embl.ebi.variation.eva.pipeline.jobs.VariantJobArgsConfig;
 import embl.ebi.variation.eva.pipeline.listener.SkipCheckingListener;
 import org.opencb.datastore.core.ObjectMap;
@@ -47,8 +47,8 @@ import java.io.IOException;
  * @author Jose Miguel Mut Lopez &lt;jmmut@ebi.ac.uk&gt;
  *
  * Step class that:
- * - READ: read a list of {@link GeneMongoBean} from flat file
- * - LOAD: write the {@link GeneMongoBean} into Mongo db
+ * - READ: read a list of {@link FeatureCoordinates} from flat file
+ * - LOAD: write the {@link FeatureCoordinates} into Mongo db
  *
  */
 
@@ -66,7 +66,7 @@ public class GenesLoad {
     @Bean
     @Qualifier("genesLoadStep")
     public Step genesLoadStep() throws IOException {
-        return steps.get("genesLoadStep").<GeneMongoBean, GeneMongoBean>chunk(10)
+        return steps.get("genesLoadStep").<FeatureCoordinates, FeatureCoordinates>chunk(10)
                 .reader(geneReader())
                 .processor(geneFilterProcessor())
                 .writer(geneWriter())
@@ -76,9 +76,9 @@ public class GenesLoad {
     }
 
     @Bean
-    public FlatFileItemReader<GeneMongoBean> geneReader() throws IOException {
+    public FlatFileItemReader<FeatureCoordinates> geneReader() throws IOException {
         Resource resource = new GzipLazyResource(pipelineOptions.getString("gtf"));
-        FlatFileItemReader<GeneMongoBean> reader = new FlatFileItemReader<>();
+        FlatFileItemReader<FeatureCoordinates> reader = new FlatFileItemReader<>();
         reader.setResource(resource);
         reader.setLineMapper(new GeneLineMapper());
         reader.setComments(new String[] { "#" });   // explicit statement not necessary, it's set up this way by default
@@ -86,9 +86,9 @@ public class GenesLoad {
     }
 
     @Bean
-    public ItemWriter<GeneMongoBean> geneWriter(){
+    public ItemWriter<FeatureCoordinates> geneWriter(){
         MongoOperations mongoOperations = MongoDBHelper.getMongoOperationsFromPipelineOptions(pipelineOptions);
-        MongoItemWriter<GeneMongoBean> writer = new MongoItemWriter<>();
+        MongoItemWriter<FeatureCoordinates> writer = new MongoItemWriter<>();
         writer.setCollection(pipelineOptions.getString("dbCollectionGenesName"));
         writer.setTemplate(mongoOperations);
         return writer;
