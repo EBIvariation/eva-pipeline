@@ -87,12 +87,12 @@ public class VariantsAnnotLoadTest {
 
     @Test
     public void variantAnnotLoadStepShouldLoadAllAnnotations() throws Exception {
-        String dump = VariantStatsConfigurationTest.class.getResource("/dump/").getFile();
+        String dump = VariantsAnnotLoadTest.class.getResource("/dump/").getFile();
         restoreMongoDbFromDump(dump);
 
-        String annotations = VariantsAnnotLoadTest.class.getResource("/variants.annot.tsv.gz").getFile();
-        variantJobsArgs.getPipelineOptions().put("vepOutput", new File(annotations));
-
+        String vepOutput = variantJobsArgs.getPipelineOptions().getString("vepOutput");
+        makeGzipFile(vepOutputContent, vepOutput);
+        
         JobExecution jobExecution = jobLauncherTestUtils.launchStep("variantAnnotLoadBatchStep");
 
         assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
@@ -115,7 +115,7 @@ public class VariantsAnnotLoadTest {
         }
 
         assertEquals(300, cnt);
-        assertTrue(consequenceTypeCount>0);
+        assertTrue("Annotations not found", consequenceTypeCount>0);
     }
 
     @Test
@@ -227,7 +227,6 @@ public class VariantsAnnotLoadTest {
     @After
     public void tearDown() throws Exception {
         mongoClient.close();
-        new File(variantJobsArgs.getPipelineOptions().getString("vepOutput")).delete();
         JobTestUtils.cleanDBs(dbName);
     }
 
