@@ -38,7 +38,7 @@ import java.nio.file.Paths;
  */
 public class VariantsLoad implements Tasklet {
     private static final Logger logger = LoggerFactory.getLogger(VariantsLoad.class);
-    public static final String SKIP_LOAD = "skipLoad";
+    public static final String SKIP_LOAD = "load.skip";
 
     @Autowired
     private ObjectMap variantOptions;
@@ -52,10 +52,10 @@ public class VariantsLoad implements Tasklet {
             logger.info("skipping load step, skipLoad is set to {}", pipelineOptions.getBoolean(SKIP_LOAD));
         } else {
             VariantStorageManager variantStorageManager = StorageManagerFactory.getVariantStorageManager();// TODO add mongo
-            URI outdirUri = createUri(pipelineOptions.getString("outputDir"));
-            URI nextFileUri = createUri(pipelineOptions.getString("input"));
+            URI outdirUri = createUri(pipelineOptions.getString("output.dir"));
+            URI nextFileUri = createUri(pipelineOptions.getString("input.vcf"));
 
-//          URI pedigreeUri = pipelineOptions.getString("pedigree") != null ? createUri(pipelineOptions.getString("pedigree")) : null;
+//          URI pedigreeUri = pipelineOptions.getString("input.pedigree") != null ? createUri(pipelineOptions.getString("input.pedigree")) : null;
             Path output = Paths.get(outdirUri.getPath());
             Path input = Paths.get(nextFileUri.getPath());
             Path outputVariantJsonFile = output.resolve(input.getFileName().toString() + ".variants.json" + pipelineOptions.getString("compressExtension"));

@@ -62,9 +62,9 @@ public class VariantsAnnotLoad {
     private ObjectMap pipelineOptions;
 
     @Bean
-    @Qualifier("variantAnnotLoadBatchStep")
+    @Qualifier("variantAnnotLoad")
     public Step variantAnnotLoadBatchStep() throws IOException {
-        return steps.get("variantAnnotLoadBatchStep").<VariantAnnotation, VariantAnnotation> chunk(10)
+        return steps.get("Load VEP annotation").<VariantAnnotation, VariantAnnotation> chunk(10)
                 .reader(variantAnnotationReader())
                 .writer(variantAnnotationWriter())
                 .faultTolerant().skipLimit(50).skip(FlatFileParseException.class)
@@ -74,7 +74,7 @@ public class VariantsAnnotLoad {
 
     @Bean
     public FlatFileItemReader<VariantAnnotation> variantAnnotationReader() throws IOException {
-        Resource resource = new GzipLazyResource(pipelineOptions.getString("vepOutput"));
+        Resource resource = new GzipLazyResource(pipelineOptions.getString("vep.output"));
         FlatFileItemReader<VariantAnnotation> reader = new FlatFileItemReader<>();
         reader.setResource(resource);
         reader.setLineMapper(new VariantAnnotationLineMapper());

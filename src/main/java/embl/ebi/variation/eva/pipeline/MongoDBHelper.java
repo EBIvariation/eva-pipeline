@@ -59,7 +59,7 @@ public class MongoDBHelper {
             );
         }
 
-        mongoTemplate.setReadPreference(getMongoTemplateReadPreferences(pipelineOptions.getString("readPreference")));
+        mongoTemplate.setReadPreference(getMongoTemplateReadPreferences(pipelineOptions.getString("config.db.read-preference")));
 
         return mongoTemplate;
     }

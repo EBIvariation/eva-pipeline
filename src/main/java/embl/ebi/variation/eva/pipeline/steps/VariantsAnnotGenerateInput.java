@@ -76,12 +76,13 @@ public class VariantsAnnotGenerateInput {
     private ObjectMap pipelineOptions;
 
     @Bean
-    @Qualifier("variantsAnnotGenerateInputBatchStep")
+    @Qualifier("variantsAnnotGenerateInput")
     public Step variantsAnnotGenerateInputBatchStep() throws Exception {
-        return steps.get("variantsAnnotGenerateInputBatchStep").<DBObject, VariantWrapper> chunk(10)
+        return steps.get("Find variants to annotate").<DBObject, VariantWrapper> chunk(10)
                 .reader(variantReader())
                 .processor(vepInputLineProcessor())
-                .writer(vepInputWriter()).allowStartIfComplete(false)
+                .writer(vepInputWriter())
+                .allowStartIfComplete(pipelineOptions.getBoolean("config.restartability.allow"))
                 .build();
     }
 
@@ -125,7 +126,7 @@ public class VariantsAnnotGenerateInput {
 
         FlatFileItemWriter<VariantWrapper> writer = new FlatFileItemWriter<>();
 
-        writer.setResource(new FileSystemResource(pipelineOptions.getString("vepInput")));
+        writer.setResource(new FileSystemResource(pipelineOptions.getString("vep.input")));
         writer.setAppendAllowed(false);
         writer.setShouldDeleteIfExists(true);
         writer.setLineAggregator(delLineAgg);
