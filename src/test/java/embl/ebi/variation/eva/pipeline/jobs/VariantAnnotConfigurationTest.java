@@ -81,7 +81,7 @@ public class VariantAnnotConfigurationTest {
                 "20_60343_G/A\t20:63351\tG\tENSG00000178591\tENST00000608838\tTranscript\tupstream_gene_variant\t-\t-\t-\t-\t-\trs181305519\tDISTANCE=4540;STRAND=1;SYMBOL=DEFB125;SYMBOL_SOURCE=HGNC;HGNC_ID=18105;BIOTYPE=processed_transcript;GMAF=G:0.0005;AFR_MAF=G:0.0020\n"
                 +"20_60344_GA\t20:63351\tG\tENSG00000178591\tENST00000608838\tTranscript\tupstream_gene_variant\t-\t-\t-\t-\t-\trs181305519\tDISTANCE=4540;STRAND=1;SYMBOL=DEFB125;SYMBOL_SOURCE=HGNC;HGNC_ID=18105;BIOTYPE=processed_transcript;GMAF=G:0.0005;AFR_MAF=G:0.0020\n";
 
-        makeGzipFile(vepAnnotation, variantJobsArgs.getPipelineOptions().getString("vepOutput"));
+        makeGzipFile(vepAnnotation, variantJobsArgs.getPipelineOptions().getString("vep.output"));
 
         JobExecution jobExecution = jobLauncherTestUtils.launchJob();
 
@@ -113,7 +113,7 @@ public class VariantAnnotConfigurationTest {
 
         //check that one line is skipped because malformed
         List<StepExecution> variantAnnotationLoadStepExecution = jobExecution.getStepExecutions().stream()
-                .filter(stepExecution -> stepExecution.getStepName().equals("variantAnnotLoadBatchStep"))
+                .filter(stepExecution -> stepExecution.getStepName().equals("Load VEP annotation"))
                 .collect(Collectors.toList());
         assertEquals(1, variantAnnotationLoadStepExecution.get(0).getReadSkipCount());
     }
@@ -127,7 +127,7 @@ public class VariantAnnotConfigurationTest {
     @Before
     public void setUp() throws Exception {
         variantJobsArgs.loadArgs();
-        vepInputFile = new File(variantJobsArgs.getPipelineOptions().getString("vepInput"));
+        vepInputFile = new File(variantJobsArgs.getPipelineOptions().getString("vep.input"));
         converter = new DBObjectToVariantAnnotationConverter();
 
         dbName = variantJobsArgs.getPipelineOptions().getString(VariantStorageManager.DB_NAME);
@@ -149,7 +149,7 @@ public class VariantAnnotConfigurationTest {
         mongoClient.close();
 
         vepInputFile.delete();
-        new File(variantJobsArgs.getPipelineOptions().getString("vepOutput")).delete();
+        new File(variantJobsArgs.getPipelineOptions().getString("vep.output")).delete();
     }
 
     private static void cleanDBs() throws UnknownHostException {

@@ -43,7 +43,7 @@ import org.springframework.core.env.Environment;
 public class InitDBConfiguration {
 
     private static final Logger logger = LoggerFactory.getLogger(InitDBConfiguration.class);
-    public static final String jobName = "initDBJob";
+    public static final String jobName = "initialize-database";
 
     @Autowired
     JobBuilderFactory jobBuilderFactory;
@@ -57,8 +57,8 @@ public class InitDBConfiguration {
 
 
     @Bean
-    @Qualifier("variantJob")
-    public Job variantJob() {
+    @Qualifier("initDBJob")
+    public Job initDBJob() {
 
         JobBuilder jobBuilder = jobBuilderFactory
                 .get(jobName)

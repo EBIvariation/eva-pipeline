@@ -47,11 +47,11 @@ public class VariantsTransform implements Tasklet {
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
 
-        URI outdirUri = createUri(pipelineOptions.getString("outputDir"));
-        URI nextFileUri = createUri(pipelineOptions.getString("input"));
-        URI pedigreeUri = pipelineOptions.getString("pedigree") != null ? createUri(pipelineOptions.getString("pedigree")) : null;
+        URI outdirUri = createUri(pipelineOptions.getString("output.dir"));
+        URI nextFileUri = createUri(pipelineOptions.getString("input.vcf"));
+        URI pedigreeUri = pipelineOptions.getString("input.pedigree") != null ? createUri(pipelineOptions.getString("input.pedigree")) : null;
 
-        logger.info("Transform file {} to {}", pipelineOptions.getString("input"), pipelineOptions.getString("outputDir"));
+        logger.info("Transform file {} to {}", pipelineOptions.getString("input.vcf"), pipelineOptions.getString("output.dir"));
 
         logger.info("Extract variants '{}'", nextFileUri);
         VariantStorageManager variantStorageManager = StorageManagerFactory.getVariantStorageManager();

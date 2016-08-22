@@ -36,7 +36,7 @@ import java.util.zip.GZIPOutputStream;
  */
 public class VariantsAnnotCreate implements Tasklet {
     private static final Logger logger = LoggerFactory.getLogger(VariantsAnnotCreate.class);
-    public static final String SKIP_ANNOT_CREATE = "skipAnnotCreate";
+    public static final String SKIP_ANNOT_CREATE = "annotation.create.skip";
 
     @Autowired
     private ObjectMap pipelineOptions;
@@ -49,14 +49,14 @@ public class VariantsAnnotCreate implements Tasklet {
                     pipelineOptions.getBoolean(SKIP_ANNOT_CREATE));
         } else {
             ProcessBuilder processBuilder = new ProcessBuilder("perl",
-                    pipelineOptions.getString("vepPath"),
+                    pipelineOptions.getString("app.vep.path"),
                     "--cache",
-                    "--cache_version", pipelineOptions.getString("vepCacheVersion"),
-                    "-dir", pipelineOptions.getString("vepCacheDirectory"),
-                    "--species", pipelineOptions.getString("vepSpecies"),
-                    "--fasta", pipelineOptions.getString("vepFasta"),
-                    "--fork", pipelineOptions.getString("vepNumForks"),
-                    "-i", pipelineOptions.getString("vepInput"),
+                    "--cache_version", pipelineOptions.getString("app.vep.cache.version"),
+                    "-dir", pipelineOptions.getString("app.vep.cache.path"),
+                    "--species", pipelineOptions.getString("app.vep.cache.species"),
+                    "--fasta", pipelineOptions.getString("input.fasta"),
+                    "--fork", pipelineOptions.getString("app.vep.num-forks"),
+                    "-i", pipelineOptions.getString("vep.input"),
                     "-o", "STDOUT",
                     "--force_overwrite", 
                     "--offline", 
@@ -70,13 +70,13 @@ public class VariantsAnnotCreate implements Tasklet {
             
             long written = connectStreams(
                     new BufferedInputStream(process.getInputStream()), 
-                    new GZIPOutputStream(new FileOutputStream(pipelineOptions.getString("vepOutput"))));
+                    new GZIPOutputStream(new FileOutputStream(pipelineOptions.getString("vep.output"))));
             
             int exitValue = process.waitFor();
             logger.info("Finishing read from VEP output, bytes written: " + written);
             
             if (exitValue > 0) {
-                String errorLog = pipelineOptions.getString("vepOutput") + ".errors.txt";
+                String errorLog = pipelineOptions.getString("vep.output") + ".errors.txt";
                 connectStreams(new BufferedInputStream(process.getErrorStream()), new FileOutputStream(errorLog));
                 throw new Exception("Error while running VEP (exit status " + exitValue + "). See "
                         + errorLog  + " for the errors description from VEP.");

@@ -42,7 +42,7 @@ import org.springframework.core.env.Environment;
 public class VariantStatsConfiguration {
 
     private static final Logger logger = LoggerFactory.getLogger(VariantStatsConfiguration.class);
-    public static final String jobName = "variantStatsJob";
+    public static final String jobName = "calculate-statistics";
 
     @Autowired
     private JobBuilderFactory jobBuilderFactory;
@@ -73,7 +73,7 @@ public class VariantStatsConfiguration {
     }
 
     public Step statsCreate() {
-        StepBuilder step1 = stepBuilderFactory.get("statsCreate");
+        StepBuilder step1 = stepBuilderFactory.get("Calculate statistics");
         TaskletStepBuilder tasklet = step1.tasklet(variantsStatsCreate());
         initStep(tasklet);
         return tasklet.build();
@@ -85,7 +85,7 @@ public class VariantStatsConfiguration {
     }
 
     public Step statsLoad() {
-        StepBuilder step1 = stepBuilderFactory.get("statsLoad");
+        StepBuilder step1 = stepBuilderFactory.get("Load statistics");
         TaskletStepBuilder tasklet = step1.tasklet(variantsStatsLoad());
         initStep(tasklet);
         return tasklet.build();
@@ -97,7 +97,7 @@ public class VariantStatsConfiguration {
      */
     private void initStep(TaskletStepBuilder tasklet) {
 
-        boolean allowStartIfComplete  = pipelineOptions.getBoolean("allowStartIfComplete");
+        boolean allowStartIfComplete  = pipelineOptions.getBoolean("config.restartability.allow");
 
         // true: every job execution will do this step, even if this step is already COMPLETED
         // false(default): if the job was aborted and is relaunched, this step will NOT be done again

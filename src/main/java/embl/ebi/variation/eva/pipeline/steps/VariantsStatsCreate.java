@@ -41,7 +41,7 @@ import java.nio.file.Paths;
  */
 public class VariantsStatsCreate implements Tasklet {
     private static final Logger logger = LoggerFactory.getLogger(VariantsStatsCreate.class);
-    public static final String SKIP_STATS_CREATE = "skipStatsCreate";
+    public static final String SKIP_STATS_CREATE = "statistics.create.skip";
 
     @Autowired
     private ObjectMap variantOptions;
@@ -61,7 +61,7 @@ public class VariantsStatsCreate implements Tasklet {
             VariantStorageManager variantStorageManager = StorageManagerFactory.getVariantStorageManager();
             VariantSource variantSource = variantOptions.get(VariantStorageManager.VARIANT_SOURCE, VariantSource.class);
             VariantDBAdaptor dbAdaptor = variantStorageManager.getDBAdaptor(variantOptions.getString("dbName"), variantOptions);
-            URI outdirUri = createUri(pipelineOptions.getString("outputDir"));
+            URI outdirUri = createUri(pipelineOptions.getString("output.dir"));
             URI statsOutputUri = outdirUri.resolve(VariantStorageManager.buildFilename(variantSource));
 
             VariantStatisticsManager variantStatisticsManager = new VariantStatisticsManager();

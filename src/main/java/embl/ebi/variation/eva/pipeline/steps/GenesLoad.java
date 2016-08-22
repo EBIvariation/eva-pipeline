@@ -77,7 +77,7 @@ public class GenesLoad {
 
     @Bean
     public FlatFileItemReader<FeatureCoordinates> geneReader() throws IOException {
-        Resource resource = new GzipLazyResource(pipelineOptions.getString("gtf"));
+        Resource resource = new GzipLazyResource(pipelineOptions.getString("input.gtf"));
         FlatFileItemReader<FeatureCoordinates> reader = new FlatFileItemReader<>();
         reader.setResource(resource);
         reader.setLineMapper(new GeneLineMapper());
@@ -89,7 +89,7 @@ public class GenesLoad {
     public ItemWriter<FeatureCoordinates> geneWriter(){
         MongoOperations mongoOperations = MongoDBHelper.getMongoOperationsFromPipelineOptions(pipelineOptions);
         MongoItemWriter<FeatureCoordinates> writer = new MongoItemWriter<>();
-        writer.setCollection(pipelineOptions.getString("dbCollectionGenesName"));
+        writer.setCollection(pipelineOptions.getString("db.collections.features.name"));
         writer.setTemplate(mongoOperations);
         return writer;
     }

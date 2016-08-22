@@ -20,6 +20,7 @@ import embl.ebi.variation.eva.VariantJobsArgs;
 import embl.ebi.variation.eva.pipeline.gene.GeneLineMapper;
 import embl.ebi.variation.eva.pipeline.gene.FeatureCoordinates;
 import embl.ebi.variation.eva.pipeline.jobs.AnnotationConfig;
+import embl.ebi.variation.eva.pipeline.jobs.InitDBConfig;
 import embl.ebi.variation.eva.pipeline.jobs.JobTestUtils;
 import org.junit.Before;
 import org.junit.Test;
@@ -48,7 +49,7 @@ import static junit.framework.TestCase.*;
  * Test {@link GenesLoad}
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = { GenesLoad.class, AnnotationConfig.class})
+@ContextConfiguration(classes = { GenesLoad.class, InitDBConfig.class})
 public class GenesLoadTest {
 
     @Autowired
@@ -84,7 +85,7 @@ public class GenesLoadTest {
 
     @Test
     public void geneReaderShouldReadAllLinesInGtf() throws Exception {
-        String gtf = variantJobsArgs.getPipelineOptions().getString("gtf");
+        String gtf = variantJobsArgs.getPipelineOptions().getString("input.gtf");
 
         //simulate VEP output file
         makeGzipFile(gtfContent, gtf);
@@ -111,7 +112,7 @@ public class GenesLoadTest {
 
     @Test
     public void geneFilterProcessorShouldKeepGenesAndTranscripts() throws Exception {
-        String gtf = variantJobsArgs.getPipelineOptions().getString("gtf");
+        String gtf = variantJobsArgs.getPipelineOptions().getString("input.gtf");
 
         //simulate VEP output file
         makeGzipFile(gtfContent, gtf);
@@ -137,7 +138,7 @@ public class GenesLoadTest {
     @Test
     public void geneWriterShouldWriteAllFieldsIntoMongoDb() throws Exception {
         String dbName = variantJobsArgs.getPipelineOptions().getString(VariantStorageManager.DB_NAME);
-        String dbCollectionGenesName = variantJobsArgs.getPipelineOptions().getString("dbCollectionGenesName");
+        String dbCollectionGenesName = variantJobsArgs.getPipelineOptions().getString("db.collections.features.name");
         JobTestUtils.cleanDBs(dbName);
 
         GeneLineMapper lineMapper = new GeneLineMapper();
@@ -166,7 +167,7 @@ public class GenesLoadTest {
         }
         assertEquals(genes.size(), count);
 
-        JobTestUtils.cleanDBs(dbName);
+//        JobTestUtils.cleanDBs(dbName);
     }
 
     private final String gtfContent = "" +

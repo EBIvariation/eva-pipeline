@@ -57,7 +57,7 @@ import org.springframework.context.annotation.Import;
 @EnableBatchProcessing
 @Import({VariantsAnnotGenerateInput.class, VariantsAnnotLoad.class, VariantJobArgsConfig.class})
 public class VariantAnnotConfiguration {
-    public static final String jobName = "variantAnnotBatchJob";
+    public static final String jobName = "annotate-variants";
 
     @Autowired private JobBuilderFactory jobBuilderFactory;
 
@@ -65,10 +65,10 @@ public class VariantAnnotConfiguration {
 
     @Autowired private ObjectMap pipelineOptions;
 
-    @Qualifier("variantsAnnotGenerateInputBatchStep")
+    @Qualifier("variantsAnnotGenerateInput")
     @Autowired public Step variantsAnnotGenerateInputBatchStep;
 
-    @Qualifier("variantAnnotLoadBatchStep")
+    @Qualifier("variantAnnotLoad")
     @Autowired private Step variantAnnotLoadBatchStep;
 
     @Qualifier("annotationCreate")
@@ -85,7 +85,7 @@ public class VariantAnnotConfiguration {
 
     @Bean
     public Flow variantAnnotationFlow(){
-        Flow annotationFlow = new FlowBuilder<Flow>("annotationFlow")
+        Flow annotationFlow = new FlowBuilder<Flow>("Variant VEP annotation flow")
                 .start(variantsAnnotGenerateInputBatchStep)
                 .next(annotationCreate)
                 .next(variantAnnotLoadBatchStep)
@@ -101,7 +101,7 @@ public class VariantAnnotConfiguration {
     @Bean
     @Qualifier("annotationCreate")
     public Step annotationCreate() {
-        StepBuilder step1 = stepBuilderFactory.get("annotationCreate");
+        StepBuilder step1 = stepBuilderFactory.get("Generate VEP annotation");
         TaskletStepBuilder tasklet = step1.tasklet(variantsAnnotCreate());
         initStep(tasklet);
         return tasklet.build();
@@ -113,7 +113,7 @@ public class VariantAnnotConfiguration {
      */
     private void initStep(TaskletStepBuilder tasklet) {
 
-        boolean allowStartIfComplete  = pipelineOptions.getBoolean("allowStartIfComplete");
+        boolean allowStartIfComplete  = pipelineOptions.getBoolean("config.restartability.allow");
 
         // true: every job execution will do this step, even if this step is already COMPLETED
         // false(default): if the job was aborted and is relaunched, this step will NOT be done again
