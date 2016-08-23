@@ -79,7 +79,7 @@ public class VariantAnnotConfigurationTest {
         File vepPathFile =
                 new File(VariantAnnotConfigurationTest.class.getResource("/mockvep.pl").getFile());
 
-        variantJobsArgs.getPipelineOptions().put("vepPath", vepPathFile);
+        variantJobsArgs.getPipelineOptions().put("app.vep.path", vepPathFile);
 
         JobExecution jobExecution = jobLauncherTestUtils.launchJob();
 
@@ -111,7 +111,7 @@ public class VariantAnnotConfigurationTest {
 
         //check that one line is skipped because malformed
         List<StepExecution> variantAnnotationLoadStepExecution = jobExecution.getStepExecutions().stream()
-                .filter(stepExecution -> stepExecution.getStepName().equals("variantAnnotLoadBatchStep"))
+                .filter(stepExecution -> stepExecution.getStepName().equals("Load VEP annotation"))
                 .collect(Collectors.toList());
         assertEquals(1, variantAnnotationLoadStepExecution.get(0).getReadSkipCount());
     }
@@ -119,14 +119,14 @@ public class VariantAnnotConfigurationTest {
     @Test
     public void annotCreateStepShouldGenerateAnnotations() throws Exception {
 
-        //String vepPath  = variantJobsArgs.getPipelineOptions().getString("vepPath");
+        //String vepPath  = variantJobsArgs.getPipelineOptions().getString("app.vep.path");
 
         File vepPathFile =
                 new File(VariantAnnotConfigurationTest.class.getResource("/mockvep.pl").getFile());
-        //File tmpVepPathFile = new File(variantJobsArgs.getPipelineOptions().getString("outputDir"), vepPathFile.getName());
+        //File tmpVepPathFile = new File(variantJobsArgs.getPipelineOptions().getString("output.dir"), vepPathFile.getName());
         //FileUtils.copyFile(vepPathFile, tmpVepPathFile);
 
-        variantJobsArgs.getPipelineOptions().put("vepPath", vepPathFile);
+        variantJobsArgs.getPipelineOptions().put("app.vep.path", vepPathFile);
 
 
         vepOutputFile.delete();
@@ -154,8 +154,8 @@ public class VariantAnnotConfigurationTest {
     @Before
     public void setUp() throws Exception {
         variantJobsArgs.loadArgs();
-        vepInputFile = new File(variantJobsArgs.getPipelineOptions().getString("vepInput"));
-        vepOutputFile = new File(variantJobsArgs.getPipelineOptions().getString("vepOutput"));
+        vepInputFile = new File(variantJobsArgs.getPipelineOptions().getString("vep.input"));
+        vepOutputFile = new File(variantJobsArgs.getPipelineOptions().getString("vep.output"));
         converter = new DBObjectToVariantAnnotationConverter();
 
         dbName = variantJobsArgs.getPipelineOptions().getString(VariantStorageManager.DB_NAME);
@@ -170,7 +170,7 @@ public class VariantAnnotConfigurationTest {
         mongoClient.close();
 
         vepInputFile.delete();
-        new File(variantJobsArgs.getPipelineOptions().getString("vepOutput")).delete();
+        new File(variantJobsArgs.getPipelineOptions().getString("vep.output")).delete();
 
         JobTestUtils.cleanDBs(dbName);
     }

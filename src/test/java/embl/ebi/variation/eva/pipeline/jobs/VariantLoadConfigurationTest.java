@@ -77,11 +77,11 @@ public class VariantLoadConfigurationTest {
         String input = FILE_20;
         String dbName = VALID_LOAD;
 
-        pipelineOptions.put("input", input);
+        pipelineOptions.put("input.vcf", input);
         variantOptions.put(VariantStorageManager.DB_NAME, dbName);
         pipelineOptions.put(VariantsLoad.SKIP_LOAD, false);
 
-        String outputDir = pipelineOptions.getString("outputDir");
+        String outputDir = pipelineOptions.getString("output.dir");
 
         variantOptions.put(VARIANT_SOURCE, new VariantSource(
                 input,
@@ -129,8 +129,8 @@ public class VariantLoadConfigurationTest {
 
         Config.setOpenCGAHome("");
 
-        pipelineOptions.put("input", input);
-        pipelineOptions.put("outputDir", outdir);
+        pipelineOptions.put("input.vcf", input);
+        pipelineOptions.put("output.dir", outdir);
         variantOptions.put(VariantStorageManager.DB_NAME, dbName);
         pipelineOptions.put(VariantsLoad.SKIP_LOAD, false);
 
@@ -146,7 +146,7 @@ public class VariantLoadConfigurationTest {
 
         JobExecution jobExecution = jobLauncherTestUtils.launchStep("load");
 
-        assertEquals(input, pipelineOptions.getString("input"));
+        assertEquals(input, pipelineOptions.getString("input.vcf"));
         assertEquals(ExitStatus.FAILED.getExitCode(), jobExecution.getExitStatus().getExitCode());
     }
 

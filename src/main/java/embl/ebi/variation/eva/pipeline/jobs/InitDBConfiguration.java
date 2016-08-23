@@ -15,7 +15,7 @@
  */
 package embl.ebi.variation.eva.pipeline.jobs;
 
-import embl.ebi.variation.eva.pipeline.steps.VariantsLoad;
+import embl.ebi.variation.eva.pipeline.steps.*;
 import org.opencb.datastore.core.ObjectMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,11 +25,13 @@ import org.springframework.batch.core.configuration.annotation.EnableBatchProces
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.job.builder.JobBuilder;
+import org.springframework.batch.core.job.flow.Flow;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.core.step.builder.TaskletStepBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -37,57 +39,33 @@ import org.springframework.core.env.Environment;
 
 @Configuration
 @EnableBatchProcessing
-@Import(VariantJobArgsConfig.class)
-public class VariantLoadConfiguration {
+@Import({VariantJobArgsConfig.class, GenesLoad.class})
+public class InitDBConfiguration {
 
-    private static final Logger logger = LoggerFactory.getLogger(VariantLoadConfiguration.class);
-    public static final String jobName = "variantLoadJob";
+    private static final Logger logger = LoggerFactory.getLogger(InitDBConfiguration.class);
+    public static final String jobName = "initialize-database";
 
     @Autowired
-    private JobBuilderFactory jobBuilderFactory;
+    JobBuilderFactory jobBuilderFactory;
     @Autowired
-    private StepBuilderFactory stepBuilderFactory;
-    @Autowired
-    JobLauncher jobLauncher;
-    @Autowired
-    Environment environment;
+    StepBuilderFactory stepBuilderFactory;
     @Autowired
     private ObjectMap pipelineOptions;
 
+    @Qualifier("genesLoadStep")
+    @Autowired private Step genesLoadStep;
+
+
     @Bean
-    public Job variantLoadJob() {
+    @Qualifier("initDBJob")
+    public Job initDBJob() {
+
         JobBuilder jobBuilder = jobBuilderFactory
                 .get(jobName)
                 .incrementer(new RunIdIncrementer());
 
         return jobBuilder
-                .start(load())
+                .start(genesLoadStep)
                 .build();
     }
-
-    @Bean
-    public VariantsLoad variantsLoad(){
-        return new VariantsLoad();
-    }
-
-    public Step load() {
-        StepBuilder step1 = stepBuilderFactory.get("Load variants");
-        TaskletStepBuilder tasklet = step1.tasklet(variantsLoad());
-        initStep(tasklet);
-        return tasklet.build();
-    }
-
-    /**
-     * Initialize a Step with common configuration
-     * @param tasklet to be initialized with common configuration
-     */
-    private void initStep(TaskletStepBuilder tasklet) {
-
-        boolean allowStartIfComplete  = pipelineOptions.getBoolean("config.restartability.allow");
-
-        // true: every job execution will do this step, even if this step is already COMPLETED
-        // false(default): if the job was aborted and is relaunched, this step will NOT be done again
-        tasklet.allowStartIfComplete(allowStartIfComplete);
-    }
-
 }

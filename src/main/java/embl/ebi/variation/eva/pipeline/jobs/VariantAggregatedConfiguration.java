@@ -46,7 +46,7 @@ import java.nio.file.Paths;
 public class VariantAggregatedConfiguration {
 
     private static final Logger logger = LoggerFactory.getLogger(VariantAggregatedConfiguration.class);
-    public static final String jobName = "aggregatedVariantJob";
+    public static final String jobName = "load-aggregated-vcf";
 
     @Autowired
     private JobBuilderFactory jobBuilderFactory;
@@ -80,7 +80,7 @@ public class VariantAggregatedConfiguration {
     }
 
     public Step transform() {
-        StepBuilder step1 = stepBuilderFactory.get("transform");
+        StepBuilder step1 = stepBuilderFactory.get("Normalize variants");
         final TaskletStepBuilder tasklet = step1.tasklet(variantsTransform());
         initStep(tasklet);
         return tasklet.build();
@@ -92,7 +92,7 @@ public class VariantAggregatedConfiguration {
     }
 
     public Step load() {
-        StepBuilder step1 = stepBuilderFactory.get("load");
+        StepBuilder step1 = stepBuilderFactory.get("Load variants");
         TaskletStepBuilder tasklet = step1.tasklet(variantsLoad());
         initStep(tasklet);
         return tasklet.build();
@@ -112,7 +112,7 @@ public class VariantAggregatedConfiguration {
      */
     private void initStep(TaskletStepBuilder tasklet) {
 
-        boolean allowStartIfComplete  = pipelineOptions.getBoolean("allowStartIfComplete");
+        boolean allowStartIfComplete  = pipelineOptions.getBoolean("config.restartability.allow");
 
         // true: every job execution will do this step, even if this step is already COMPLETED
         // false(default): if the job was aborted and is relaunched, this step will NOT be done again

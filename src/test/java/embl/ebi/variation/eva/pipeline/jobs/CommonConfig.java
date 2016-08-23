@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 EMBL - European Bioinformatics Institute
+ * Copyright 2016 EMBL - European Bioinformatics Institute
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import java.util.Properties;
 
 /**
  * @author Diego Poggioli
+ * @author Cristina Yenyxe Gonzalez
  *
  * Common configuration used to test different job scenario
  * Test must change the property based on the job configuration and the step that it's running
@@ -37,40 +38,40 @@ public class CommonConfig {
         PropertySourcesPlaceholderConfigurer configurer = new PropertySourcesPlaceholderConfigurer();
 
         Properties properties = new Properties();
-        properties.put("input", "");
-        properties.put("overwriteStats", "false");
-        properties.put("calculateStats", "false");
-        properties.put("outputDir", "/tmp");
+        properties.put("input.vcf", "");
+        properties.put("input.vcf.id", "1");
+        properties.put("input.vcf.aggregation", "NONE");
+        properties.put("input.study.type", "COLLECTION");
+        properties.put("input.study.name", "input.study.name");
+        properties.put("input.study.id", "1");
+        properties.put("input.pedigree", "");
+        properties.put("input.gtf", "");
+        properties.put("input.fasta", "");
+        
+        properties.put("output.dir", "/tmp");
+        properties.put("output.dir.annotation", "");
+        
+        properties.put("statistics.overwrite", "false");
+        
+        properties.put("dbHosts", "localhost:27017");
         properties.put("dbName", "");
         properties.put("dbCollectionVariantsName", "variants");
         properties.put("dbCollectionFilesName", "files");
-        properties.put("readPreference", "primary");
-        properties.put("compressExtension", ".gz");
-        properties.put("compressGenotypes", "true");
-        properties.put("includeSrc", "FIRST_8_COLUMNS");
-        properties.put("pedigree", "FIRST_8_COLUMNS");
-        properties.put("annotate", "false");
-        properties.put("includeSamples", "false");
-        properties.put("includeStats", "false");
-        properties.put("aggregated", "NONE");
-        properties.put("studyType", "COLLECTION");
-        properties.put("studyName", "studyName");
-        properties.put("studyId", "1");
-        properties.put("fileId", "1");
-        properties.put("opencga.app.home", opencgaHome);
+        properties.put("db.collections.features.name", "features");
+        properties.put("config.db.read-preference", "primary");
+        
+        properties.put("app.opencga.path", opencgaHome);
+        properties.put("app.vep.path", "");
+        properties.put("app.vep.cache.path", "");
+        properties.put("app.vep.cache.version", "");
+        properties.put("app.vep.cache.species", "");
+        properties.put("app.vep.num-forks", "3");
+        
         properties.put(VariantsLoad.SKIP_LOAD, "true");
         properties.put(VariantsStatsCreate.SKIP_STATS_CREATE, "true");
         properties.put(VariantsStatsLoad.SKIP_STATS_LOAD, "true");
         properties.put(VariantsAnnotCreate.SKIP_ANNOT_CREATE, "true");
-        properties.put("vepInput", "");
-        properties.put("vepOutput", "");
-        properties.put("vepPath", "");
-        properties.put("vepCacheDirectory", "");
-        properties.put("vepCacheVersion", "");
-        properties.put("vepSpecies", "");
-        properties.put("vepFasta", "");
-        properties.put("vepNumForks", "3");
-        properties.put("allowStartIfComplete", false);
+        properties.put("config.restartability.allow", false);
 
         configurer.setProperties(properties);
 

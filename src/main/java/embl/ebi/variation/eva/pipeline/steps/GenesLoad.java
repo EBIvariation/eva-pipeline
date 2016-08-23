@@ -18,11 +18,11 @@ package embl.ebi.variation.eva.pipeline.steps;
 
 import embl.ebi.variation.eva.pipeline.MongoDBHelper;
 import embl.ebi.variation.eva.pipeline.annotation.GzipLazyResource;
-import embl.ebi.variation.eva.pipeline.annotation.load.VariantAnnotationLineMapper;
-import embl.ebi.variation.eva.pipeline.annotation.load.VariantAnnotationMongoItemWriter;
+import embl.ebi.variation.eva.pipeline.gene.GeneFilterProcessor;
+import embl.ebi.variation.eva.pipeline.gene.GeneLineMapper;
+import embl.ebi.variation.eva.pipeline.gene.FeatureCoordinates;
 import embl.ebi.variation.eva.pipeline.jobs.VariantJobArgsConfig;
 import embl.ebi.variation.eva.pipeline.listener.SkipCheckingListener;
-import org.opencb.biodata.models.variant.annotation.VariantAnnotation;
 import org.opencb.datastore.core.ObjectMap;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
@@ -42,18 +42,20 @@ import org.springframework.data.mongodb.core.MongoOperations;
 import java.io.IOException;
 
 /**
- * @author Diego Poggioli
+ * Created by jmmut on 2016-08-16.
+ *
+ * @author Jose Miguel Mut Lopez &lt;jmmut@ebi.ac.uk&gt;
  *
  * Step class that:
- * - READ: read a list of VEP {@link VariantAnnotation} from flat file
- * - LOAD: write the {@link VariantAnnotation} into Mongo db
+ * - READ: read a list of {@link FeatureCoordinates} from flat file
+ * - LOAD: write the {@link FeatureCoordinates} into Mongo db
  *
  */
 
 @Configuration
 @EnableBatchProcessing
 @Import(VariantJobArgsConfig.class)
-public class VariantsAnnotLoad {
+public class GenesLoad {
 
     @Autowired
     private StepBuilderFactory steps;
@@ -62,30 +64,32 @@ public class VariantsAnnotLoad {
     private ObjectMap pipelineOptions;
 
     @Bean
-    @Qualifier("variantAnnotLoad")
-    public Step variantAnnotLoadBatchStep() throws IOException {
-        return steps.get("Load VEP annotation").<VariantAnnotation, VariantAnnotation> chunk(10)
-                .reader(variantAnnotationReader())
-                .writer(variantAnnotationWriter())
+    @Qualifier("genesLoadStep")
+    public Step genesLoadStep() throws IOException {
+        return steps.get("genesLoadStep").<FeatureCoordinates, FeatureCoordinates>chunk(10)
+                .reader(geneReader())
+                .processor(geneFilterProcessor())
+                .writer(geneWriter())
                 .faultTolerant().skipLimit(50).skip(FlatFileParseException.class)
                 .listener(skipCheckingListener())
                 .build();
     }
 
     @Bean
-    public FlatFileItemReader<VariantAnnotation> variantAnnotationReader() throws IOException {
-        Resource resource = new GzipLazyResource(pipelineOptions.getString("vep.output"));
-        FlatFileItemReader<VariantAnnotation> reader = new FlatFileItemReader<>();
+    public FlatFileItemReader<FeatureCoordinates> geneReader() throws IOException {
+        Resource resource = new GzipLazyResource(pipelineOptions.getString("input.gtf"));
+        FlatFileItemReader<FeatureCoordinates> reader = new FlatFileItemReader<>();
         reader.setResource(resource);
-        reader.setLineMapper(new VariantAnnotationLineMapper());
+        reader.setLineMapper(new GeneLineMapper());
+        reader.setComments(new String[] { "#" });   // explicit statement not necessary, it's set up this way by default
         return reader;
     }
 
     @Bean
-    public ItemWriter<VariantAnnotation> variantAnnotationWriter(){
+    public ItemWriter<FeatureCoordinates> geneWriter(){
         MongoOperations mongoOperations = MongoDBHelper.getMongoOperationsFromPipelineOptions(pipelineOptions);
-        MongoItemWriter<VariantAnnotation> writer = new VariantAnnotationMongoItemWriter(mongoOperations);
-        writer.setCollection(pipelineOptions.getString("dbCollectionVariantsName"));
+        MongoItemWriter<FeatureCoordinates> writer = new MongoItemWriter<>();
+        writer.setCollection(pipelineOptions.getString("db.collections.features.name"));
         writer.setTemplate(mongoOperations);
         return writer;
     }
@@ -95,4 +99,8 @@ public class VariantsAnnotLoad {
         return new SkipCheckingListener();
     }
 
+    @Bean
+    public GeneFilterProcessor geneFilterProcessor(){
+        return new GeneFilterProcessor();
+    }
 }

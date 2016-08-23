@@ -86,7 +86,7 @@ public class VariantStatsConfigurationTest {
         //Given a valid VCF input file
         String input = SMALL_VCF_FILE;
 
-        pipelineOptions.put("input", input);
+        pipelineOptions.put("input.vcf", input);
         variantOptions.put(VariantStorageManager.DB_NAME, STATS_DB);
         pipelineOptions.put(VariantsStatsCreate.SKIP_STATS_CREATE, false);
 
@@ -100,7 +100,7 @@ public class VariantStatsConfigurationTest {
 
         variantOptions.put(VARIANT_SOURCE, source);
 
-        statsFile = new File(Paths.get(pipelineOptions.getString("outputDir")).resolve(VariantStorageManager.buildFilename(source))
+        statsFile = new File(Paths.get(pipelineOptions.getString("output.dir")).resolve(VariantStorageManager.buildFilename(source))
                 + ".variants.stats.json.gz");
         statsFile.delete();
         assertFalse(statsFile.exists());  // ensure the stats file doesn't exist from previous executions
@@ -117,7 +117,7 @@ public class VariantStatsConfigurationTest {
 
         //delete created files
         statsFile.delete();
-        new File(Paths.get(pipelineOptions.getString("outputDir")).resolve(VariantStorageManager.buildFilename(source))
+        new File(Paths.get(pipelineOptions.getString("output.dir")).resolve(VariantStorageManager.buildFilename(source))
                 + ".source.stats.json.gz").delete();
 
     }
@@ -131,7 +131,7 @@ public class VariantStatsConfigurationTest {
         //Given a valid VCF input file
         String input = SMALL_VCF_FILE;
 
-        pipelineOptions.put("input", input);
+        pipelineOptions.put("input.vcf", input);
         variantOptions.put(VariantStorageManager.DB_NAME, STATS_DB);
         pipelineOptions.put(VariantsStatsCreate.SKIP_STATS_CREATE, false);
 
@@ -145,7 +145,7 @@ public class VariantStatsConfigurationTest {
 
         variantOptions.put(VARIANT_SOURCE, source);
 
-        statsFile = new File(Paths.get(pipelineOptions.getString("outputDir")).resolve(VariantStorageManager.buildFilename(source))
+        statsFile = new File(Paths.get(pipelineOptions.getString("output.dir")).resolve(VariantStorageManager.buildFilename(source))
                 + ".variants.stats.json.gz");
         statsFile.delete();
         assertFalse(statsFile.exists());  // ensure the stats file doesn't exist from previous executions
@@ -164,7 +164,7 @@ public class VariantStatsConfigurationTest {
 
         String dbName = STATS_DB;
 
-        pipelineOptions.put("input", input);
+        pipelineOptions.put("input.vcf", input);
         pipelineOptions.put(VariantsStatsLoad.SKIP_STATS_LOAD, "false");
         variantOptions.put(VariantStorageManager.DB_NAME, dbName);
         variantOptions.put(VariantStorageManager.VARIANT_SOURCE, source);
@@ -194,7 +194,7 @@ public class VariantStatsConfigurationTest {
         String dump = VariantStatsConfigurationTest.class.getResource("/dump/").getFile();
         restoreMongoDbFromDump(dump);
 
-        String outputDir = pipelineOptions.getString("outputDir");
+        String outputDir = pipelineOptions.getString("output.dir");
 
         // copy stat file to load
         String variantsFileName = "/1_1.variants.stats.json.gz";
@@ -223,14 +223,14 @@ public class VariantStatsConfigurationTest {
         String input = VariantStatsConfigurationTest.class.getResource(SMALL_VCF_FILE).getFile();
         VariantSource source = new VariantSource(input, "4", "1", "studyName");
 
-        pipelineOptions.put("input", input);
+        pipelineOptions.put("input.vcf", input);
         pipelineOptions.put(VariantsStatsLoad.SKIP_STATS_LOAD, false);
         variantOptions.put(VariantStorageManager.DB_NAME, STATS_DB);
         variantOptions.put(VariantStorageManager.VARIANT_SOURCE, source);
 
         JobExecution jobExecution = jobLauncherTestUtils.launchStep("statsLoad");
 
-        assertEquals(input, pipelineOptions.getString("input"));
+        assertEquals(input, pipelineOptions.getString("input.vcf"));
         assertEquals(ExitStatus.FAILED.getExitCode(), jobExecution.getExitStatus().getExitCode());
     }
 
@@ -239,7 +239,7 @@ public class VariantStatsConfigurationTest {
         //Given a valid VCF input file
         String input = SMALL_VCF_FILE;
 
-        pipelineOptions.put("input", input);
+        pipelineOptions.put("input.vcf", input);
         variantOptions.put(VariantStorageManager.DB_NAME, STATS_DB);
         pipelineOptions.put(VariantsStatsCreate.SKIP_STATS_CREATE, false);
         pipelineOptions.put(VariantsStatsLoad.SKIP_STATS_LOAD, false);
@@ -254,7 +254,7 @@ public class VariantStatsConfigurationTest {
 
         variantOptions.put(VARIANT_SOURCE, source);
 
-        statsFile = new File(Paths.get(pipelineOptions.getString("outputDir")).resolve(VariantStorageManager.buildFilename(source))
+        statsFile = new File(Paths.get(pipelineOptions.getString("output.dir")).resolve(VariantStorageManager.buildFilename(source))
                 + ".variants.stats.json.gz");
         statsFile.delete();
         assertFalse(statsFile.exists());  // ensure the stats file doesn't exist from previous executions
@@ -270,7 +270,7 @@ public class VariantStatsConfigurationTest {
 
         //delete created files
         statsFile.delete();
-        new File(Paths.get(pipelineOptions.getString("outputDir")).resolve(VariantStorageManager.buildFilename(source))
+        new File(Paths.get(pipelineOptions.getString("output.dir")).resolve(VariantStorageManager.buildFilename(source))
                 + ".source.stats.json.gz").delete();
 
         // The DB docs should have the field "st"

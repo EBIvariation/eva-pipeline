@@ -90,10 +90,10 @@ public class VariantsAnnotLoadTest {
         String dump = VariantsAnnotLoadTest.class.getResource("/dump/").getFile();
         restoreMongoDbFromDump(dump);
 
-        String vepOutput = variantJobsArgs.getPipelineOptions().getString("vepOutput");
+        String vepOutput = variantJobsArgs.getPipelineOptions().getString("vep.output");
         makeGzipFile(vepOutputContent, vepOutput);
         
-        JobExecution jobExecution = jobLauncherTestUtils.launchStep("variantAnnotLoadBatchStep");
+        JobExecution jobExecution = jobLauncherTestUtils.launchStep("Load VEP annotation");
 
         assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
         assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());
@@ -129,7 +129,7 @@ public class VariantsAnnotLoadTest {
 
     @Test
     public void variantAnnotationReaderShouldReadAllLinesInVepOutput() throws Exception {
-        String vepOutput = variantJobsArgs.getPipelineOptions().getString("vepOutput");
+        String vepOutput = variantJobsArgs.getPipelineOptions().getString("vep.output");
 
         //simulate VEP output file
         makeGzipFile(vepOutputContent, vepOutput);
@@ -157,7 +157,7 @@ public class VariantsAnnotLoadTest {
     // Missing '/' in 20_63351_AG (sould be 20_63351_A/G)
     @Test(expected = FlatFileParseException.class)
     public void malformedVariantFieldsAnnotationLinesShouldBeSkipped() throws Exception {
-        String vepOutput = variantJobsArgs.getPipelineOptions().getString("vepOutput");
+        String vepOutput = variantJobsArgs.getPipelineOptions().getString("vep.output");
         makeGzipFile(vepOutputContentMalformedVariantFields, vepOutput);
         annotationReader.open(executionContext);
         annotationReader.read();
@@ -166,7 +166,7 @@ public class VariantsAnnotLoadTest {
     // Missing ':' in 20_63351 (should be 20:63351)
     @Test(expected = FlatFileParseException.class)
     public void malformedCoordinatesAnnotationLinesShouldBeSkipped() throws Exception {
-        String vepOutput = variantJobsArgs.getPipelineOptions().getString("vepOutput");
+        String vepOutput = variantJobsArgs.getPipelineOptions().getString("vep.output");
         makeGzipFile(vepOutputContentMalformedCoordinates, vepOutput);
         annotationReader.open(executionContext);
         annotationReader.read();
