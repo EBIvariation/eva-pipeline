@@ -103,7 +103,7 @@ public class VariantLoadConfigurationTest {
         FileUtils.copyFile(transformedVariantsFile, tmpTransformedVariantsFile);
 
         // When the execute method in variantsLoad is executed
-        JobExecution jobExecution = jobLauncherTestUtils.launchStep("load");
+        JobExecution jobExecution = jobLauncherTestUtils.launchStep("Load variants");
 
         //Then variantsLoad step should complete correctly
         assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
@@ -144,7 +144,7 @@ public class VariantLoadConfigurationTest {
                 source.getType(),
                 source.getAggregation()));
 
-        JobExecution jobExecution = jobLauncherTestUtils.launchStep("load");
+        JobExecution jobExecution = jobLauncherTestUtils.launchStep("Load variants");
 
         assertEquals(input, pipelineOptions.getString("input.vcf"));
         assertEquals(ExitStatus.FAILED.getExitCode(), jobExecution.getExitStatus().getExitCode());

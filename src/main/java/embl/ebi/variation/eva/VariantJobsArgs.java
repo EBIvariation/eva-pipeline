@@ -76,15 +76,15 @@ public class VariantJobsArgs {
     private VariantStorageManager.IncludeSrc includeSourceLine = VariantStorageManager.IncludeSrc.FIRST_8_COLUMNS;
 
     /// DB connection (most parameters read from OpenCGA "conf" folder)
-    private String dbHosts;
-    private String dbAuthenticationDb;
-    private String dbUser;
-    private String dbPassword;
-    private String dbName;
-    private String dbCollectionVariantsName;
-    private String dbCollectionFilesName;
-    @Value("${config.db.read-preference}") private String readPreference;
+    @Value("${config.db.hosts:#{null}}") private String dbHosts;
+    @Value("${config.db.authentication-db:#{null}}") private String dbAuthenticationDb;
+    @Value("${config.db.user:#{null}}") private String dbUser;
+    @Value("${config.db.password:#{null}}") private String dbPassword;
+    @Value("${db.name:#{null}}") private String dbName;
+    @Value("${db.collections.variants.name:#{null}}") private String dbCollectionVariantsName;
+    @Value("${db.collections.files.name:#{null}}") private String dbCollectionFilesName;
     @Value("${db.collections.features.name}") private String dbCollectionGenesName;
+    @Value("${config.db.read-preference}") private String readPreference;
 
     //steps
     @Value("${load.skip:false}") private boolean skipLoad;
@@ -123,13 +123,27 @@ public class VariantJobsArgs {
         Properties properties = new Properties();
         properties.load(new InputStreamReader(new FileInputStream(configUri.getPath())));
         
-        dbHosts = properties.getProperty("OPENCGA.STORAGE.MONGODB.VARIANT.DB.HOSTS");
-        dbAuthenticationDb = properties.getProperty("OPENCGA.STORAGE.MONGODB.VARIANT.DB.AUTHENTICATION.DB", "");
-        dbUser = properties.getProperty("OPENCGA.STORAGE.MONGODB.VARIANT.DB.USER", "");
-        dbPassword = properties.getProperty("OPENCGA.STORAGE.MONGODB.VARIANT.DB.PASS", "");
-        dbName = properties.getProperty("OPENCGA.STORAGE.MONGODB.VARIANT.DB.NAME");
-        dbCollectionVariantsName = properties.getProperty("OPENCGA.STORAGE.MONGODB.VARIANT.DB.COLLECTION.VARIANTS", "variants");
-        dbCollectionFilesName = properties.getProperty("OPENCGA.STORAGE.MONGODB.VARIANT.DB.COLLECTION.FILES", "files");
+        if (dbHosts == null) {
+            dbHosts = properties.getProperty("OPENCGA.STORAGE.MONGODB.VARIANT.DB.HOSTS");
+        }
+        if (dbAuthenticationDb == null) {
+            dbAuthenticationDb = properties.getProperty("OPENCGA.STORAGE.MONGODB.VARIANT.DB.AUTHENTICATION.DB", "");
+        }
+        if (dbUser == null) {
+            dbUser = properties.getProperty("OPENCGA.STORAGE.MONGODB.VARIANT.DB.USER", "");
+        }
+        if (dbPassword == null) {
+            dbPassword = properties.getProperty("OPENCGA.STORAGE.MONGODB.VARIANT.DB.PASS", "");
+        }
+        if (dbName == null) {
+            dbName = properties.getProperty("OPENCGA.STORAGE.MONGODB.VARIANT.DB.NAME");
+        }
+        if (dbCollectionVariantsName == null) {
+            dbCollectionVariantsName = properties.getProperty("OPENCGA.STORAGE.MONGODB.VARIANT.DB.COLLECTION.VARIANTS", "variants");
+        }
+        if (dbCollectionFilesName == null) {
+            dbCollectionFilesName = properties.getProperty("OPENCGA.STORAGE.MONGODB.VARIANT.DB.COLLECTION.FILES", "files");
+        }
         
         if (dbHosts == null || dbHosts.isEmpty()) {
             throw new IllegalArgumentException("Please provide a database hostname");

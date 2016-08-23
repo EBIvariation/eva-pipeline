@@ -99,7 +99,7 @@ public class VariantConfigurationTest {
         Config.setOpenCGAHome(opencgaHome);
 
         String inputFile = VariantConfigurationTest.class.getResource(input).getFile();
-        variantJobsArgs.getPipelineOptions().put("input", inputFile);
+        variantJobsArgs.getPipelineOptions().put("input.vcf", inputFile);
 
         String outputFilename = getTransformedOutputPath(Paths.get(input).getFileName(), ".gz", "/tmp");
 
@@ -109,7 +109,7 @@ public class VariantConfigurationTest {
         assertFalse(file.exists());
 
         // When the execute method in variantsTransform is executed
-        JobExecution jobExecution = jobLauncherTestUtils.launchStep("transform");
+        JobExecution jobExecution = jobLauncherTestUtils.launchStep("Normalize variants");
 
         //Then variantsTransform should complete correctly
         assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
@@ -142,7 +142,7 @@ public class VariantConfigurationTest {
         assertFalse(file.exists());
 
         //When the execute method in variantsTransform is invoked then a StorageManagerException is thrown
-        JobExecution jobExecution = jobLauncherTestUtils.launchStep("transform");
+        JobExecution jobExecution = jobLauncherTestUtils.launchStep("Normalize variants");
         assertEquals(ExitStatus.FAILED.getExitCode(), jobExecution.getExitStatus().getExitCode());
     }
 
@@ -258,7 +258,7 @@ public class VariantConfigurationTest {
 
         //check that one line is skipped because malformed
         List<StepExecution> variantAnnotationLoadStepExecution = jobExecution.getStepExecutions().stream()
-                .filter(stepExecution -> stepExecution.getStepName().equals("variantAnnotLoadBatchStep"))
+                .filter(stepExecution -> stepExecution.getStepName().equals("Load VEP annotation"))
                 .collect(Collectors.toList());
         assertEquals(1, variantAnnotationLoadStepExecution.get(0).getReadSkipCount());
 

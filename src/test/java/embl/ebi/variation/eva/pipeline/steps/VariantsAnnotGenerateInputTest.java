@@ -99,14 +99,14 @@ public class VariantsAnnotGenerateInputTest {
     public void variantsAnnotGenerateInputStepShouldGenerateVepInput() throws Exception {
         String dump = VariantStatsConfigurationTest.class.getResource("/dump/").getFile();
         restoreMongoDbFromDump(dump);
-        File vepInputFile = new File(variantJobsArgs.getPipelineOptions().getString("vepInput"));
+        File vepInputFile = new File(variantJobsArgs.getPipelineOptions().getString("vep.input"));
 
         if(vepInputFile.exists())
             vepInputFile.delete();
 
         Assert.assertFalse(vepInputFile.exists());
 
-        JobExecution jobExecution = jobLauncherTestUtils.launchStep("variantsAnnotGenerateInputBatchStep");
+        JobExecution jobExecution = jobLauncherTestUtils.launchStep("Find variants to annotate");
 
         assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
         assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());
@@ -148,7 +148,7 @@ public class VariantsAnnotGenerateInputTest {
     @Test
     public void vepInputWriterShouldWriteAllFieldsToFile() throws Exception {
         DBObjectToVariantConverter converter = new DBObjectToVariantConverter();
-        File outputFile = new File(variantJobsArgs.getPipelineOptions().getString("vepInput"));
+        File outputFile = new File(variantJobsArgs.getPipelineOptions().getString("vep.input"));
         VariantWrapper variant = new VariantWrapper(converter.convertToDataModelType(constructDbo(variantWithAnnotation)));
 
         writer.open(executionContext);
