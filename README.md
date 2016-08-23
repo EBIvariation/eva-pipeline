@@ -32,7 +32,7 @@ Skeletons to load genotyped and aggregated VCF files are provided in the `exampl
 `application.properties` is used to configure database connections and applications the pipeline depends on: 
 [OpenCGA](https://github.com/opencb/opencga/tree/hotfix/0.5) and [Ensembl VEP](http://www.ensembl.org/info/docs/tools/vep/index.html).
 
-`load-genotyped-vcf.properties` and `load-aggregated-vcf.properties` are job-specific configurations.
+`load-genotyped-vcf.properties`, `load-aggregated-vcf.properties` and `initialize-database.properties` are job-specific configurations.
 
 If more convenient for your use case, the global and job configuration files can be merged into one.
 
@@ -41,9 +41,8 @@ the location of your MongoDB databases, your OpenCGA/VEP installation directory,
 
 By using these properties files, a job can be launched with a single command like:
 
-    java -jar target/eva-pipeline-0.1.jar --spring.config.name=application,load-genotyped-vcf
-
-Please note the `.properties` extension must not be specified.
+    java -jar target/eva-pipeline-0.1.jar \
+        --spring.config.location=file:examples/application.properties,file:examples/load-genotyped-vcf.properties
 
 The contents from the configuration files can be provided directly as command-line arguments, like the following:
 
