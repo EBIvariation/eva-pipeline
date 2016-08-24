@@ -133,7 +133,7 @@ public class VariantConfigurationTest {
 
         //Given a malformed VCF input file
         String input = VariantConfigurationTest.class.getResource(FILE_WRONG_NO_ALT).getFile();
-        variantJobsArgs.getPipelineOptions().put("input", input);
+        variantJobsArgs.getPipelineOptions().put("input.vcf", input);
 
         String outputFilename = getTransformedOutputPath(Paths.get(FILE_WRONG_NO_ALT).getFileName(), ".gz", "/tmp");
 
@@ -275,7 +275,7 @@ public class VariantConfigurationTest {
         input = variantJobsArgs.getPipelineOptions().getString("input.vcf");
         outputDir = variantJobsArgs.getPipelineOptions().getString("output.dir");
         compressExtension = variantJobsArgs.getPipelineOptions().getString("compressExtension");
-        dbName = variantJobsArgs.getPipelineOptions().getString("dbName");
+        dbName = variantJobsArgs.getPipelineOptions().getString("db.name");
         vepInput = variantJobsArgs.getPipelineOptions().getString("vep.input");
         vepOutput = variantJobsArgs.getPipelineOptions().getString("vep.output");
     }

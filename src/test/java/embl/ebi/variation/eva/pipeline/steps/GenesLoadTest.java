@@ -137,7 +137,7 @@ public class GenesLoadTest {
 
     @Test
     public void geneWriterShouldWriteAllFieldsIntoMongoDb() throws Exception {
-        String dbName = variantJobsArgs.getPipelineOptions().getString(VariantStorageManager.DB_NAME);
+        String dbName = variantJobsArgs.getPipelineOptions().getString("db.name");
         String dbCollectionGenesName = variantJobsArgs.getPipelineOptions().getString("db.collections.features.name");
         JobTestUtils.cleanDBs(dbName);
 

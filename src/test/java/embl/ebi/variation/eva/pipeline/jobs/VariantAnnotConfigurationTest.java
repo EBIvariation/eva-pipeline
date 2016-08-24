@@ -92,7 +92,7 @@ public class VariantAnnotConfigurationTest {
 
         //check that documents have the annotation
         DBCursor cursor =
-                collection(dbName, variantJobsArgs.getPipelineOptions().getString("dbCollectionVariantsName")).find();
+                collection(dbName, variantJobsArgs.getPipelineOptions().getString("db.collections.variants.name")).find();
 
         int cnt=0;
         int consequenceTypeCount = 0;
@@ -158,7 +158,7 @@ public class VariantAnnotConfigurationTest {
         vepOutputFile = new File(variantJobsArgs.getPipelineOptions().getString("vep.output"));
         converter = new DBObjectToVariantAnnotationConverter();
 
-        dbName = variantJobsArgs.getPipelineOptions().getString(VariantStorageManager.DB_NAME);
+        dbName = variantJobsArgs.getPipelineOptions().getString("db.name");
         mongoClient = new MongoClient();
     }
 

@@ -79,7 +79,7 @@ public class VariantsAnnotLoadTest {
     @Before
     public void setUp() throws Exception {
         variantJobsArgs.loadArgs();
-        dbName = variantJobsArgs.getPipelineOptions().getString(VariantStorageManager.DB_NAME);
+        dbName = variantJobsArgs.getPipelineOptions().getString("db.name");
         executionContext = MetaDataInstanceFactory.createStepExecution().getExecutionContext();
         converter = new DBObjectToVariantAnnotationConverter();
         mongoClient = new MongoClient();
@@ -100,7 +100,7 @@ public class VariantsAnnotLoadTest {
 
         //check that documents have the annotation
         DBCursor cursor =
-                collection(dbName, variantJobsArgs.getPipelineOptions().getString("dbCollectionVariantsName")).find();
+                collection(dbName, variantJobsArgs.getPipelineOptions().getString("db.collections.variants.name")).find();
 
         int cnt=0;
         int consequenceTypeCount = 0;
@@ -174,7 +174,7 @@ public class VariantsAnnotLoadTest {
 
     @Test
     public void variantAnnotationWriterShouldWriteAllFieldsIntoMongoDb() throws Exception {
-        String dbCollectionVariantsName = variantJobsArgs.getPipelineOptions().getString("dbCollectionVariantsName");
+        String dbCollectionVariantsName = variantJobsArgs.getPipelineOptions().getString("db.collections.variants.name");
         JobTestUtils.cleanDBs(dbName);
 
         // first do a mock of a "variants" collection, with just the _id

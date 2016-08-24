@@ -89,8 +89,8 @@ public class VariantsAnnotGenerateInputTest {
         variantWithAnnotation = FileUtils.readFileToString(new File(variantWithAnnotationUrl.getFile()));
 
         variantJobsArgs.loadArgs();
-        dbName = variantJobsArgs.getPipelineOptions().getString(VariantStorageManager.DB_NAME);
-        collectionName = variantJobsArgs.getPipelineOptions().getString("dbCollectionVariantsName");
+        dbName = variantJobsArgs.getPipelineOptions().getString("db.name");
+        collectionName = variantJobsArgs.getPipelineOptions().getString("db.collections.variants.name");
 
         collection().drop();
     }

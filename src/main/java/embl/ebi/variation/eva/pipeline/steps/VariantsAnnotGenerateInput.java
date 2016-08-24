@@ -89,7 +89,7 @@ public class VariantsAnnotGenerateInput {
     @Bean
     public MongoItemReader<DBObject> variantReader() throws Exception {
         MongoItemReader<DBObject> reader = new MongoItemReader<>();
-        reader.setCollection(pipelineOptions.getString("dbCollectionVariantsName"));
+        reader.setCollection(pipelineOptions.getString("db.collections.variants.name"));
 
         reader.setQuery("{ annot : { $exists : false } }");
         reader.setFields("{ chr : 1, start : 1, end : 1, ref : 1, alt : 1, type : 1}");
