@@ -17,24 +17,23 @@ package embl.ebi.variation.eva.pipeline.jobs;
 
 import embl.ebi.variation.eva.VariantJobsArgs;
 import embl.ebi.variation.eva.pipeline.steps.VariantsLoad;
+import org.apache.commons.io.FileUtils;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.opencb.biodata.models.variant.VariantSource;
+import org.opencb.biodata.models.variant.VariantStudy;
 import org.opencb.datastore.core.ObjectMap;
 import org.opencb.datastore.core.QueryOptions;
 import org.opencb.opencga.lib.common.Config;
-import org.opencb.opencga.storage.core.StorageManagerException;
 import org.opencb.opencga.storage.core.StorageManagerFactory;
 import org.opencb.opencga.storage.core.variant.VariantStorageManager;
 import org.opencb.opencga.storage.core.variant.adaptors.VariantDBAdaptor;
 import org.opencb.opencga.storage.core.variant.adaptors.VariantDBIterator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.*;
-import org.springframework.batch.core.launch.JobLauncher;
+import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.test.context.ContextConfiguration;
@@ -42,11 +41,11 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.io.*;
 import java.net.UnknownHostException;
-import java.nio.file.Paths;
 import java.util.zip.GZIPInputStream;
 
 import static embl.ebi.variation.eva.pipeline.jobs.JobTestUtils.*;
 import static org.junit.Assert.*;
+import static org.opencb.opencga.storage.core.variant.VariantStorageManager.VARIANT_SOURCE;
 
 /**
  * Created by jmmut on 2015-10-14.
@@ -54,80 +53,76 @@ import static org.junit.Assert.*;
  * @author Jose Miguel Mut Lopez &lt;jmmut@ebi.ac.uk&gt;
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = {VariantLoadConfiguration.class, CommonConfig.class})
+@ContextConfiguration(classes = {VariantLoadConfiguration.class, CommonConfig.class, JobLauncherTestUtils.class})
 public class VariantLoadConfigurationTest {
 
-    public static final String FILE_20 = "/small20.vcf.gz";
-    public static final String FILE_22 = "/small22.vcf.gz";
-    public static final String FILE_WRONG_NO_ALT = "/wrong_no_alt.vcf.gz";
-
-    private static final Logger logger = LoggerFactory.getLogger(VariantLoadConfigurationTest.class);
-
-    // iterable doing an enum. Does it worth it?
+    private static final String FILE_20 = "/small20.vcf.gz";
     private static final String VALID_LOAD = "VariantLoadConfigurationTest_v";
     private static final String INVALID_LOAD = "VariantLoadConfigurationTest_i";
 
     @Autowired
+    private JobLauncherTestUtils jobLauncherTestUtils;
+
+    @Autowired
     PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer;
-
-    @Autowired
-    private Job job;
-
-    @Autowired
-    private JobLauncher jobLauncher;
 
     @Autowired
     public VariantJobsArgs variantJobsArgs;
 
     private ObjectMap variantOptions;
     private ObjectMap pipelineOptions;
-
     @Test
-    public void validLoad() throws JobExecutionException, IllegalAccessException, ClassNotFoundException,
-            InstantiationException, IOException, StorageManagerException {
-
-        String input = VariantLoadConfigurationTest.class.getResource(FILE_20).getFile();
+    public void loadStepShouldLoadAllVariants() throws Exception {
+        //Given a valid VCF input file
+        String input = FILE_20;
         String dbName = VALID_LOAD;
 
         pipelineOptions.put("input.vcf", input);
-        pipelineOptions.put("output.dir", Paths.get(input).getParent().toString());    // reusing transformed path in resources
-
         variantOptions.put(VariantStorageManager.DB_NAME, dbName);
         pipelineOptions.put(VariantsLoad.SKIP_LOAD, false);
 
-        VariantSource source = (VariantSource) variantOptions.get(VariantStorageManager.VARIANT_SOURCE);
+        String outputDir = pipelineOptions.getString("output.dir");
 
-        variantOptions.put(VariantStorageManager.VARIANT_SOURCE, new VariantSource(
+        variantOptions.put(VARIANT_SOURCE, new VariantSource(
                 input,
-                source.getFileId(),
-                source.getStudyId(),
-                source.getStudyName(),
-                source.getType(),
-                source.getAggregation()));
+                "1",
+                "1",
+                "studyName",
+                VariantStudy.StudyType.COLLECTION,
+                VariantSource.Aggregation.NONE));
 
-        JobExecution execution = jobLauncher.run(job, getJobParameters());
+        //and a variants transform step already executed
+        File transformedVcfVariantsFile =
+                new File(VariantLoadConfigurationTest.class.getResource("/small20.vcf.gz.variants.json.gz").getFile());
+        File tmpTransformedVcfVariantsFile = new File(outputDir, transformedVcfVariantsFile.getName());
+        FileUtils.copyFile(transformedVcfVariantsFile, tmpTransformedVcfVariantsFile);
 
-        assertEquals(input, pipelineOptions.getString("input.vcf"));
-        assertEquals(ExitStatus.COMPLETED.getExitCode(), execution.getExitStatus().getExitCode());
+        File transformedVariantsFile =
+                new File(VariantLoadConfigurationTest.class.getResource("/small20.vcf.gz.file.json.gz").getFile());
+        File tmpTransformedVariantsFile = new File(outputDir, transformedVariantsFile.getName());
+        FileUtils.copyFile(transformedVariantsFile, tmpTransformedVariantsFile);
 
-        // check ((documents in DB) == (lines in transformed file))
+        // When the execute method in variantsLoad is executed
+        JobExecution jobExecution = jobLauncherTestUtils.launchStep("Load variants");
+
+        //Then variantsLoad step should complete correctly
+        assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
+        assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());
+
+        // And the number of documents in db should be the same number of line of the vcf transformed file
         VariantStorageManager variantStorageManager = StorageManagerFactory.getVariantStorageManager();
         VariantDBAdaptor variantDBAdaptor = variantStorageManager.getDBAdaptor(dbName, null);
         VariantDBIterator iterator = variantDBAdaptor.iterator(new QueryOptions());
-
-        String outputFilename = getTransformedOutputPath(Paths.get(FILE_20).getFileName(),
-                variantOptions.getString("compressExtension"), pipelineOptions.getString("output.dir"));
-        long lines = getLines(new GZIPInputStream(new FileInputStream(outputFilename)));
+        long lines = getLines(new GZIPInputStream(new FileInputStream(transformedVcfVariantsFile)));
 
         assertEquals(countRows(iterator), lines);
+
+        tmpTransformedVcfVariantsFile.delete();
+        tmpTransformedVariantsFile.delete();
     }
 
-    /**
-     * The test should fail because OpenCGAHome is not set properly
-     * @throws JobExecutionException
-     */
     @Test
-    public void invalidLoad() throws JobExecutionException {
+    public void loadStepShouldFailBecauseOpenCGAHomeIsWrong() throws JobExecutionException {
         String input = VariantLoadConfigurationTest.class.getResource(FILE_20).getFile();
         String outdir = input;
         String dbName = INVALID_LOAD;
@@ -149,10 +144,10 @@ public class VariantLoadConfigurationTest {
                 source.getType(),
                 source.getAggregation()));
 
-        JobExecution execution = jobLauncher.run(job, getJobParameters());
+        JobExecution jobExecution = jobLauncherTestUtils.launchStep("Load variants");
 
         assertEquals(input, pipelineOptions.getString("input.vcf"));
-        assertEquals(ExitStatus.FAILED.getExitCode(), execution.getExitStatus().getExitCode());
+        assertEquals(ExitStatus.FAILED.getExitCode(), jobExecution.getExitStatus().getExitCode());
     }
 
     @BeforeClass

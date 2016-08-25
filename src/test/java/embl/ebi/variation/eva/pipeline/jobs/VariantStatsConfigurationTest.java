@@ -16,15 +16,12 @@
 package embl.ebi.variation.eva.pipeline.jobs;
 
 import embl.ebi.variation.eva.VariantJobsArgs;
-import embl.ebi.variation.eva.pipeline.steps.VariantsLoad;
-import embl.ebi.variation.eva.pipeline.steps.VariantsStatsCreate;
-import embl.ebi.variation.eva.pipeline.steps.VariantsStatsLoad;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import embl.ebi.variation.eva.pipeline.steps.*;
+import org.apache.commons.io.FileUtils;
+import org.junit.*;
 import org.junit.runner.RunWith;
 import org.opencb.biodata.models.variant.VariantSource;
+import org.opencb.biodata.models.variant.VariantStudy;
 import org.opencb.datastore.core.ObjectMap;
 import org.opencb.datastore.core.QueryOptions;
 import org.opencb.opencga.storage.core.StorageManagerException;
@@ -32,50 +29,42 @@ import org.opencb.opencga.storage.core.StorageManagerFactory;
 import org.opencb.opencga.storage.core.variant.VariantStorageManager;
 import org.opencb.opencga.storage.core.variant.adaptors.VariantDBAdaptor;
 import org.opencb.opencga.storage.core.variant.adaptors.VariantDBIterator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.*;
-import org.springframework.batch.core.launch.JobLauncher;
+import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.io.*;
-import java.net.UnknownHostException;
+import java.nio.file.Paths;
 
-import static embl.ebi.variation.eva.pipeline.jobs.JobTestUtils.getJobParameters;
+import static embl.ebi.variation.eva.pipeline.jobs.JobTestUtils.restoreMongoDbFromDump;
+import static junit.framework.TestCase.assertFalse;
+import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.*;
+import static org.opencb.opencga.storage.core.variant.VariantStorageManager.VARIANT_SOURCE;
 
 /**
  * Created by jmmut on 2015-10-14.
  *
  * @author Jose Miguel Mut Lopez &lt;jmmut@ebi.ac.uk&gt;
+ *
+ * Test for {@link VariantStatsConfiguration}
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = {VariantStatsConfiguration.class, CommonConfig.class})
+@ContextConfiguration(classes = {VariantStatsConfiguration.class, CommonConfig.class, JobLauncherTestUtils.class})
 public class VariantStatsConfigurationTest {
 
-    public static final String FILE_20 = "/small20.vcf.gz";
-    public static final String FILE_22 = "/small22.vcf.gz";
-    public static final String FILE_WRONG_NO_ALT = "/wrong_no_alt.vcf.gz";
+    private static final String SMALL_VCF_FILE = "/small20.vcf.gz";
 
-    private static final Logger logger = LoggerFactory.getLogger(VariantStatsConfigurationTest.class);
+    private static final String STATS_DB = "VariantStatsConfigurationTest_vl"; //this name should be the same of the dump DB in /dump
 
-    // iterable doing an enum. Does it worth it?
-//    private static final String VALID_CREATE_STATS = "VariantStatsConfigurationTest_vc";
-    private static final String INVALID_CREATE_STATS = "VariantStatsConfigurationTest_ic";
-    private static final String VALID_LOAD_STATS = "VariantStatsConfigurationTest_vl";
-    private static final String INVALID_LOAD_STATS = "VariantStatsConfigurationTest_il";
+    @Autowired
+    private JobLauncherTestUtils jobLauncherTestUtils;
 
     @Autowired
     PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer;
-
-    @Autowired
-    private Job job;
-
-    @Autowired
-    private JobLauncher jobLauncher;
 
     @Autowired
     public VariantJobsArgs variantJobsArgs;
@@ -83,83 +72,216 @@ public class VariantStatsConfigurationTest {
     private ObjectMap variantOptions;
     private ObjectMap pipelineOptions;
 
-    /**
-     * This test has to fail because it will try to extract variants from a non-existent DB.
-     */
+    private File statsFile;
+    private File statsFileToLoad;
+    private File sourceFileToLoad;
+    private File vcfFileToLoad;
+
     @Test
-    public void invalidCreateStats() throws JobExecutionException {
-        String input = VariantStatsConfigurationTest.class.getResource(FILE_20).getFile();
-        VariantSource source = new VariantSource(input, "1", "1", "studyName");
-        String dbName = INVALID_CREATE_STATS;
-        String outputDir = "/tmp";
+    public void statsCreateStepShouldCalculateStats() throws IOException, InterruptedException {
+        //and a valid variants load step already completed
+        String dump = VariantStatsConfigurationTest.class.getResource("/dump/").getFile();
+        restoreMongoDbFromDump(dump);
+
+        //Given a valid VCF input file
+        String input = SMALL_VCF_FILE;
 
         pipelineOptions.put("input.vcf", input);
-        pipelineOptions.put("output.dir", outputDir);
-        pipelineOptions.put(VariantsLoad.SKIP_LOAD, false);
+        variantOptions.put(VariantStorageManager.DB_NAME, STATS_DB);
         pipelineOptions.put(VariantsStatsCreate.SKIP_STATS_CREATE, false);
-        variantOptions.put(VariantStorageManager.DB_NAME, dbName);
-        variantOptions.put(VariantStorageManager.VARIANT_SOURCE, source);
 
-        JobExecution execution = jobLauncher.run(job, getJobParameters());
+        VariantSource source = new VariantSource(
+                input,
+                "1",
+                "1",
+                "studyName",
+                VariantStudy.StudyType.COLLECTION,
+                VariantSource.Aggregation.NONE);
 
-        assertEquals(input, pipelineOptions.getString("input.vcf"));
-        assertEquals(ExitStatus.FAILED.getExitCode(), execution.getExitStatus().getExitCode());
+        variantOptions.put(VARIANT_SOURCE, source);
+
+        statsFile = new File(Paths.get(pipelineOptions.getString("output.dir")).resolve(VariantStorageManager.buildFilename(source))
+                + ".variants.stats.json.gz");
+        statsFile.delete();
+        assertFalse(statsFile.exists());  // ensure the stats file doesn't exist from previous executions
+
+        // When the execute method in variantsStatsCreate is executed
+        JobExecution jobExecution = jobLauncherTestUtils.launchStep("Calculate statistics");
+
+        //Then variantsStatsCreate step should complete correctly
+        assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
+        assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());
+
+        //and the file containing statistics should exist
+        assertTrue(statsFile.exists());
+
+        //delete created files
+        statsFile.delete();
+        new File(Paths.get(pipelineOptions.getString("output.dir")).resolve(VariantStorageManager.buildFilename(source))
+                + ".source.stats.json.gz").delete();
+
+    }
+
+    /**
+     * This test has to fail because it will try to extract variants from a non-existent DB.
+     * Variants not loaded.. so nothing to query!
+     */
+    @Test
+    public void statsCreateStepShouldFailIfVariantLoadStepIsNotCompleted() throws Exception {
+        //Given a valid VCF input file
+        String input = SMALL_VCF_FILE;
+
+        pipelineOptions.put("input.vcf", input);
+        variantOptions.put(VariantStorageManager.DB_NAME, STATS_DB);
+        pipelineOptions.put(VariantsStatsCreate.SKIP_STATS_CREATE, false);
+
+        VariantSource source = new VariantSource(
+                input,
+                "1",
+                "1",
+                "studyName",
+                VariantStudy.StudyType.COLLECTION,
+                VariantSource.Aggregation.NONE);
+
+        variantOptions.put(VARIANT_SOURCE, source);
+
+        statsFile = new File(Paths.get(pipelineOptions.getString("output.dir")).resolve(VariantStorageManager.buildFilename(source))
+                + ".variants.stats.json.gz");
+        statsFile.delete();
+        assertFalse(statsFile.exists());  // ensure the stats file doesn't exist from previous executions
+
+        // When the execute method in variantsStatsCreate is executed
+        JobExecution jobExecution = jobLauncherTestUtils.launchStep("Calculate statistics");
+        assertEquals(ExitStatus.FAILED.getExitCode(), jobExecution.getExitStatus().getExitCode());
     }
 
     @Test
-    public void validLoadStats() throws JobExecutionException, IOException, IllegalAccessException,
-            ClassNotFoundException, InstantiationException, StorageManagerException {
-
-        String input = VariantStatsConfigurationTest.class.getResource(FILE_20).getFile();
+    public void statsLoadStepShouldLoadStatsIntoDb() throws StorageManagerException, IllegalAccessException,
+            ClassNotFoundException, InstantiationException, IOException, InterruptedException {
+        //Given a valid VCF input file
+        String input = VariantStatsConfigurationTest.class.getResource(SMALL_VCF_FILE).getFile();
         VariantSource source = new VariantSource(input, "1", "1", "studyName");
-        String dbName = VALID_LOAD_STATS;
-        String outputDir = input;
+
+        String dbName = STATS_DB;
 
         pipelineOptions.put("input.vcf", input);
-        pipelineOptions.put("output.dir", outputDir);
-        pipelineOptions.put(VariantsLoad.SKIP_LOAD, false);
-        pipelineOptions.put(VariantsStatsLoad.SKIP_STATS_LOAD, false);
+        pipelineOptions.put(VariantsStatsLoad.SKIP_STATS_LOAD, "false");
         variantOptions.put(VariantStorageManager.DB_NAME, dbName);
         variantOptions.put(VariantStorageManager.VARIANT_SOURCE, source);
 
-        JobExecution execution = jobLauncher.run(job, getJobParameters());
-        assertEquals(ExitStatus.COMPLETED.getExitCode(), execution.getExitStatus().getExitCode());
+        initStatsLoadStepFiles();
 
-        // check the DB docs have the field "st"
+        // When the execute method in variantsStatsLoad is executed
+        JobExecution jobExecution = jobLauncherTestUtils.launchStep("Load statistics");
+
+        // Then variantsStatsLoad step should complete correctly
+        assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
+        assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());
+
+        // The DB docs should have the field "st"
         VariantStorageManager variantStorageManager = StorageManagerFactory.getVariantStorageManager();
         VariantDBAdaptor variantDBAdaptor = variantStorageManager.getDBAdaptor(dbName, null);
         VariantDBIterator iterator = variantDBAdaptor.iterator(new QueryOptions());
-
         assertEquals(1, iterator.next().getSourceEntries().values().iterator().next().getCohortStats().size());
+
+        statsFileToLoad.delete();
+        sourceFileToLoad.delete();
+        vcfFileToLoad.delete();
+    }
+
+    private void initStatsLoadStepFiles() throws IOException, InterruptedException {
+        //and a valid variants load and stats create steps already completed
+        String dump = VariantStatsConfigurationTest.class.getResource("/dump/").getFile();
+        restoreMongoDbFromDump(dump);
+
+        String outputDir = pipelineOptions.getString("output.dir");
+
+        // copy stat file to load
+        String variantsFileName = "/1_1.variants.stats.json.gz";
+        statsFileToLoad = new File(outputDir, variantsFileName);
+        File variantStatsFile = new File(VariantStatsConfigurationTest.class.getResource(variantsFileName).getFile());
+        FileUtils.copyFile(variantStatsFile, statsFileToLoad);
+
+        // copy source file to load
+        String sourceFileName = "/1_1.source.stats.json.gz";
+        sourceFileToLoad = new File(outputDir, sourceFileName);
+        File sourceStatsFile = new File(VariantStatsConfigurationTest.class.getResource(sourceFileName).getFile());
+        FileUtils.copyFile(sourceStatsFile, sourceFileToLoad);
+
+        // copy transformed vcf
+        String vcfFileName = "/small20.vcf.gz.variants.json.gz";
+        vcfFileToLoad = new File(outputDir, vcfFileName);
+        File vcfFile = new File(VariantStatsConfigurationTest.class.getResource(vcfFileName).getFile());
+        FileUtils.copyFile(vcfFile, vcfFileToLoad);
     }
 
     /**
-     * This test should fail because the variants.stats file is malformed, with an extra `"`.
+     *  This test should fail because the variants.stats file is missing
      */
     @Test
     public void invalidLoadStats() throws JobExecutionException {
-        String input = VariantStatsConfigurationTest.class.getResource(FILE_20).getFile();
+        String input = VariantStatsConfigurationTest.class.getResource(SMALL_VCF_FILE).getFile();
         VariantSource source = new VariantSource(input, "4", "1", "studyName");
-        String dbName = INVALID_LOAD_STATS;
-        String outputDir = input;
 
         pipelineOptions.put("input.vcf", input);
-        pipelineOptions.put("output.dir", outputDir);
-        pipelineOptions.put(VariantsLoad.SKIP_LOAD, false);
         pipelineOptions.put(VariantsStatsLoad.SKIP_STATS_LOAD, false);
-        variantOptions.put(VariantStorageManager.DB_NAME, dbName);
+        variantOptions.put(VariantStorageManager.DB_NAME, STATS_DB);
         variantOptions.put(VariantStorageManager.VARIANT_SOURCE, source);
 
-        JobExecution execution = jobLauncher.run(job, getJobParameters());
+        JobExecution jobExecution = jobLauncherTestUtils.launchStep("Load statistics");
 
         assertEquals(input, pipelineOptions.getString("input.vcf"));
-        assertEquals(ExitStatus.FAILED.getExitCode(), execution.getExitStatus().getExitCode());
+        assertEquals(ExitStatus.FAILED.getExitCode(), jobExecution.getExitStatus().getExitCode());
     }
 
-    @BeforeClass
-    public static void beforeTests() throws IOException, InterruptedException {
-        cleanDBs();
-        fillDB();
+    @Test
+    public void fullStatsJob() throws Exception {
+        //Given a valid VCF input file
+        String input = SMALL_VCF_FILE;
+
+        pipelineOptions.put("input.vcf", input);
+        variantOptions.put(VariantStorageManager.DB_NAME, STATS_DB);
+        pipelineOptions.put(VariantsStatsCreate.SKIP_STATS_CREATE, false);
+        pipelineOptions.put(VariantsStatsLoad.SKIP_STATS_LOAD, false);
+
+        VariantSource source = new VariantSource(
+                input,
+                "1",
+                "1",
+                "studyName",
+                VariantStudy.StudyType.COLLECTION,
+                VariantSource.Aggregation.NONE);
+
+        variantOptions.put(VARIANT_SOURCE, source);
+
+        statsFile = new File(Paths.get(pipelineOptions.getString("output.dir")).resolve(VariantStorageManager.buildFilename(source))
+                + ".variants.stats.json.gz");
+        statsFile.delete();
+        assertFalse(statsFile.exists());  // ensure the stats file doesn't exist from previous executions
+
+        initStatsLoadStepFiles();
+
+        JobExecution jobExecution = jobLauncherTestUtils.launchJob();
+        assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
+        assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());
+
+        //and the file containing statistics should exist
+        assertTrue(statsFile.exists());
+
+        //delete created files
+        statsFile.delete();
+        new File(Paths.get(pipelineOptions.getString("output.dir")).resolve(VariantStorageManager.buildFilename(source))
+                + ".source.stats.json.gz").delete();
+
+        // The DB docs should have the field "st"
+        VariantStorageManager variantStorageManager = StorageManagerFactory.getVariantStorageManager();
+        VariantDBAdaptor variantDBAdaptor = variantStorageManager.getDBAdaptor(STATS_DB, null);
+        VariantDBIterator iterator = variantDBAdaptor.iterator(new QueryOptions());
+        assertEquals(1, iterator.next().getSourceEntries().values().iterator().next().getCohortStats().size());
+
+        statsFileToLoad.delete();
+        sourceFileToLoad.delete();
+        vcfFileToLoad.delete();
     }
 
     @Before
@@ -170,33 +292,9 @@ public class VariantStatsConfigurationTest {
         variantOptions = variantJobsArgs.getVariantOptions();
     }
 
-
-    @AfterClass
-    public static void afterTests() throws UnknownHostException {
-        cleanDBs();
+    @After
+    public void tearDown() throws Exception {
+        JobTestUtils.cleanDBs(STATS_DB);
     }
 
-    private static void cleanDBs() throws UnknownHostException {
-        JobTestUtils.cleanDBs(INVALID_CREATE_STATS, VALID_LOAD_STATS, INVALID_LOAD_STATS);
-    }
-
-    public static void fillDB() throws IOException, InterruptedException {
-        String dump = VariantStatsConfigurationTest.class.getResource("/dump/").getFile();
-        logger.info("restoring DB from " + dump);
-        Process exec = Runtime.getRuntime().exec("mongorestore " + dump);
-        exec.waitFor();
-        String line;
-        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(exec.getInputStream()));
-        while ((line = bufferedReader.readLine()) != null) {
-            logger.info("mongorestore output:" + line);
-        }
-        bufferedReader.close();
-        bufferedReader = new BufferedReader(new InputStreamReader(exec.getErrorStream()));
-        while ((line = bufferedReader.readLine()) != null) {
-            logger.info("mongorestore errorOutput:" + line);
-        }
-        bufferedReader.close();
-
-        logger.info("mongorestore exit value: " + exec.exitValue());
-    }
 }

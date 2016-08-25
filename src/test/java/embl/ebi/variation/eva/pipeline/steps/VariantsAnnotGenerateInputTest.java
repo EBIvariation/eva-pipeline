@@ -21,18 +21,24 @@ import embl.ebi.variation.eva.VariantJobsArgs;
 import embl.ebi.variation.eva.pipeline.annotation.generateInput.VariantAnnotationItemProcessor;
 import embl.ebi.variation.eva.pipeline.annotation.generateInput.VariantWrapper;
 import embl.ebi.variation.eva.pipeline.jobs.AnnotationConfig;
+import embl.ebi.variation.eva.pipeline.jobs.VariantAnnotConfiguration;
 import embl.ebi.variation.eva.pipeline.jobs.VariantAnnotConfigurationTest;
+import embl.ebi.variation.eva.pipeline.jobs.VariantStatsConfigurationTest;
 import org.apache.commons.io.FileUtils;
-import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.opencb.opencga.storage.core.variant.VariantStorageManager;
 import org.opencb.opencga.storage.mongodb.variant.DBObjectToVariantConverter;
+import org.springframework.batch.core.BatchStatus;
+import org.springframework.batch.core.ExitStatus;
+import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.data.MongoItemReader;
 import org.springframework.batch.item.file.FlatFileItemWriter;
+import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.batch.test.MetaDataInstanceFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
@@ -42,6 +48,7 @@ import java.io.*;
 import java.net.URL;
 import java.util.Collections;
 
+import static embl.ebi.variation.eva.pipeline.jobs.JobTestUtils.restoreMongoDbFromDump;
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertFalse;
 import static junit.framework.TestCase.assertTrue;
@@ -52,31 +59,20 @@ import static junit.framework.TestCase.assertTrue;
  * Test {@link VariantsAnnotGenerateInput}
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = { VariantsAnnotGenerateInput.class, AnnotationConfig.class})
+@ContextConfiguration(classes = { VariantAnnotConfiguration.class, AnnotationConfig.class, JobLauncherTestUtils.class})
 public class VariantsAnnotGenerateInputTest {
 
-    @Autowired
-    private MongoItemReader<DBObject> mongoItemReader;
-
-    @Autowired
-    private FlatFileItemWriter<VariantWrapper> writer;
-
-    @Autowired
-    public VariantJobsArgs variantJobsArgs;
+    @Autowired private MongoItemReader<DBObject> mongoItemReader;
+    @Autowired private FlatFileItemWriter<VariantWrapper> writer;
+    @Autowired private VariantJobsArgs variantJobsArgs;
+    @Autowired private JobLauncherTestUtils jobLauncherTestUtils;
 
     private MongoClient mongoClient;
     private String dbName;
     private String collectionName;
     private String variantWithAnnotation;
     private String variantWithoutAnnotation;
-
     private ExecutionContext executionContext;
-
-    // temporary output file
-    private File outputFile;
-
-    // reads the output file to check the result
-    private BufferedReader reader;
 
     @Before
     public void setUp() throws Exception {
@@ -93,23 +89,30 @@ public class VariantsAnnotGenerateInputTest {
         variantWithAnnotation = FileUtils.readFileToString(new File(variantWithAnnotationUrl.getFile()));
 
         variantJobsArgs.loadArgs();
-        dbName = variantJobsArgs.getPipelineOptions().getString(VariantStorageManager.DB_NAME);
-        collectionName = variantJobsArgs.getPipelineOptions().getString("dbCollectionVariantsName");
-        outputFile = new File(variantJobsArgs.getPipelineOptions().getString("vep.input"));
+        dbName = variantJobsArgs.getPipelineOptions().getString("db.name");
+        collectionName = variantJobsArgs.getPipelineOptions().getString("db.collections.variants.name");
 
         collection().drop();
     }
 
-    /**
-     * Release resources and delete the temporary output file
-     */
-    @After
-    public void tearDown() throws Exception {
-        if (reader != null) {
-            reader.close();
-        }
+    @Test
+    public void variantsAnnotGenerateInputStepShouldGenerateVepInput() throws Exception {
+        String dump = VariantStatsConfigurationTest.class.getResource("/dump/").getFile();
+        restoreMongoDbFromDump(dump);
+        File vepInputFile = new File(variantJobsArgs.getPipelineOptions().getString("vep.input"));
 
-        outputFile.delete();
+        if(vepInputFile.exists())
+            vepInputFile.delete();
+
+        Assert.assertFalse(vepInputFile.exists());
+
+        JobExecution jobExecution = jobLauncherTestUtils.launchStep("Find variants to annotate");
+
+        assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
+        assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());
+
+        assertTrue(vepInputFile.exists());
+        assertEquals("20\t61118\t61118\tA/G\t+", readFirstLine(vepInputFile));
     }
 
     @Test
@@ -145,12 +148,14 @@ public class VariantsAnnotGenerateInputTest {
     @Test
     public void vepInputWriterShouldWriteAllFieldsToFile() throws Exception {
         DBObjectToVariantConverter converter = new DBObjectToVariantConverter();
+        File outputFile = new File(variantJobsArgs.getPipelineOptions().getString("vep.input"));
         VariantWrapper variant = new VariantWrapper(converter.convertToDataModelType(constructDbo(variantWithAnnotation)));
 
         writer.open(executionContext);
         writer.write(Collections.singletonList(variant));
-        assertEquals("20\t60344\t60348\tG/A\t+", readLine());
+        assertEquals("20\t60344\t60348\tG/A\t+", readFirstLine(outputFile));
         writer.close();
+        outputFile.delete();
     }
 
     private void insertDocuments() throws IOException {
@@ -166,19 +171,10 @@ public class VariantsAnnotGenerateInputTest {
         return (DBObject) JSON.parse(variant);
     }
 
-    /*
-    * Read a line from the output file, if the reader has not been created,
-    * recreate. This method is only necessary because running the tests in a
-    * UNIX environment locks the file if it's open for writing.
-    *
-    * The variant list should be compressed.
-    */
-    private String readLine() throws IOException {
-        if (reader == null) {
-            reader = new BufferedReader(new FileReader(outputFile));
+    private String readFirstLine(File file) throws IOException {
+        try(BufferedReader reader = new BufferedReader(new FileReader(file))){
+            return reader.readLine();
         }
-
-        return reader.readLine();
     }
 
 }

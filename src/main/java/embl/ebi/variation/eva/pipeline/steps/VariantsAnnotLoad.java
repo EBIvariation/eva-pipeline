@@ -85,7 +85,7 @@ public class VariantsAnnotLoad {
     public ItemWriter<VariantAnnotation> variantAnnotationWriter(){
         MongoOperations mongoOperations = MongoDBHelper.getMongoOperationsFromPipelineOptions(pipelineOptions);
         MongoItemWriter<VariantAnnotation> writer = new VariantAnnotationMongoItemWriter(mongoOperations);
-        writer.setCollection(pipelineOptions.getString("dbCollectionVariantsName"));
+        writer.setCollection(pipelineOptions.getString("db.collections.variants.name"));
         writer.setTemplate(mongoOperations);
         return writer;
     }

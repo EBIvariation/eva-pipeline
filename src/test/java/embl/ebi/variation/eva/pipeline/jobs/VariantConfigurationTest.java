@@ -18,6 +18,7 @@ package embl.ebi.variation.eva.pipeline.jobs;
 
 import embl.ebi.variation.eva.VariantJobsArgs;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -30,11 +31,9 @@ import org.opencb.opencga.storage.core.StorageManagerFactory;
 import org.opencb.opencga.storage.core.variant.VariantStorageManager;
 import org.opencb.opencga.storage.core.variant.adaptors.VariantDBAdaptor;
 import org.opencb.opencga.storage.core.variant.adaptors.VariantDBIterator;
-import org.springframework.batch.core.BatchStatus;
-import org.springframework.batch.core.ExitStatus;
-import org.springframework.batch.core.Job;
-import org.springframework.batch.core.JobExecution;
+import org.springframework.batch.core.*;
 import org.springframework.batch.core.launch.JobLauncher;
+import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -49,15 +48,27 @@ import java.io.InputStreamReader;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
 
 import static embl.ebi.variation.eva.pipeline.jobs.JobTestUtils.*;
+import static junit.framework.TestCase.assertEquals;
 import static org.junit.Assert.*;
 
 /**
  * @author Diego Poggioli
  *
  * Test for {@link VariantConfiguration}
+ *
+ * JobLauncherTestUtils is initialized in @Before because in VariantConfiguration there are two Job beans:
+ * variantJob and variantAnnotationBatchJob (used by test). In this way it is possible to specify the Job to run
+ * and avoid NoUniqueBeanDefinitionException. There are also other solutions like:
+ *  - http://stackoverflow.com/questions/29655796/how-can-i-qualify-an-autowired-setter-that-i-dont-own
+ *  - https://jira.spring.io/browse/BATCH-2366
+ *
+ * TODO:
+ * FILE_WRONG_NO_ALT should be renamed because the alt allele is not missing but is the same as the reference
  */
 @IntegrationTest
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -67,14 +78,14 @@ public class VariantConfigurationTest {
     private JobLauncherTestUtils jobLauncherTestUtils;
 
     @Autowired public VariantJobsArgs variantJobsArgs;
-
     @Autowired private JobLauncher jobLauncher;
+    @Autowired private JobRepository jobRepository;
 
     @Autowired
     @Qualifier("variantJob")
     public Job job;
 
-    private String inputFileResouce;
+    private String input;
     private String outputDir;
     private String compressExtension;
     private String dbName;
@@ -84,9 +95,61 @@ public class VariantConfigurationTest {
     private static String opencgaHome = System.getenv("OPENCGA_HOME") != null ? System.getenv("OPENCGA_HOME") : "/opt/opencga";
 
     @Test
+    public void transformStepShouldTransformAllVariants() throws Exception {
+        Config.setOpenCGAHome(opencgaHome);
+
+        String inputFile = VariantConfigurationTest.class.getResource(input).getFile();
+        variantJobsArgs.getPipelineOptions().put("input.vcf", inputFile);
+
+        String outputFilename = getTransformedOutputPath(Paths.get(input).getFileName(), ".gz", "/tmp");
+
+        File file = new File(outputFilename);
+        if(file.exists())
+            file.delete();
+        assertFalse(file.exists());
+
+        // When the execute method in variantsTransform is executed
+        JobExecution jobExecution = jobLauncherTestUtils.launchStep("Normalize variants");
+
+        //Then variantsTransform should complete correctly
+        assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
+        assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());
+
+        // And the transformed file should contain the same number of line of the Vcf input file
+        Assert.assertEquals(300, getLines(new GZIPInputStream(new FileInputStream(outputFilename))));
+
+        file.delete();
+        new File(outputDir, "small20.vcf.gz.file.json.gz").delete();
+    }
+
+    /**
+     * This test has to fail because the vcf FILE_WRONG_NO_ALT is malformed:
+     * in a variant a reference and a alternate allele are the same
+     */
+    @Test
+    public void transformStepShouldFailIfVariantsAreMalformed(){
+        final String FILE_WRONG_NO_ALT = "/wrong_no_alt.vcf.gz";
+        Config.setOpenCGAHome(opencgaHome);
+
+        //Given a malformed VCF input file
+        String input = VariantConfigurationTest.class.getResource(FILE_WRONG_NO_ALT).getFile();
+        variantJobsArgs.getPipelineOptions().put("input.vcf", input);
+
+        String outputFilename = getTransformedOutputPath(Paths.get(FILE_WRONG_NO_ALT).getFileName(), ".gz", "/tmp");
+
+        File file = new File(outputFilename);
+        file.delete();
+        assertFalse(file.exists());
+
+        //When the execute method in variantsTransform is invoked then a StorageManagerException is thrown
+        JobExecution jobExecution = jobLauncherTestUtils.launchStep("Normalize variants");
+        assertEquals(ExitStatus.FAILED.getExitCode(), jobExecution.getExitStatus().getExitCode());
+    }
+
+    @Test
     public void fullVariantConfig() throws Exception {
 
-        String inputFile = VariantConfigurationTest.class.getResource(inputFileResouce).getFile();
+        String inputFile = VariantConfigurationTest.class.getResource(input).getFile();
         String mockVep = VariantConfigurationTest.class.getResource("/mockvep.pl").getFile();
 
         variantJobsArgs.getPipelineOptions().put("input.vcf", inputFile);
@@ -95,7 +158,7 @@ public class VariantConfigurationTest {
         Config.setOpenCGAHome(opencgaHome);
 
         // transformedVcf file init
-        String transformedVcf = outputDir + inputFileResouce + ".variants.json" + compressExtension;
+        String transformedVcf = outputDir + input + ".variants.json" + compressExtension;
         File transformedVcfFile = new File(transformedVcf);
         transformedVcfFile.delete();
         assertFalse(transformedVcfFile.exists());
@@ -178,36 +241,41 @@ public class VariantConfigurationTest {
         assertEquals(537, getLines(new GZIPInputStream(new FileInputStream(vepOutput))) );
 
         // 8 Annotation load step: check documents in DB have annotation (only consequence type)
-        //variantStorageManager = StorageManagerFactory.getVariantStorageManager();
-        //variantDBAdaptor = variantStorageManager.getDBAdaptor(dbName, null);
         iterator = getVariantDBIterator();
 
         int cnt=0;
+        int consequenceTypeCount = 0;
         while (iterator.hasNext()) {
             cnt++;
             Variant next = iterator.next();
-            assertTrue(next.getAnnotation().getConsequenceTypes() != null);
+            if(next.getAnnotation().getConsequenceTypes() != null){
+                consequenceTypeCount += next.getAnnotation().getConsequenceTypes().size();
+            }
         }
-        assertTrue(cnt>0);
+
+        assertEquals(300, cnt);
+        assertEquals(533, consequenceTypeCount);
+
+        //check that one line is skipped because malformed
+        List<StepExecution> variantAnnotationLoadStepExecution = jobExecution.getStepExecutions().stream()
+                .filter(stepExecution -> stepExecution.getStepName().equals("Load VEP annotation"))
+                .collect(Collectors.toList());
+        assertEquals(1, variantAnnotationLoadStepExecution.get(0).getReadSkipCount());
 
     }
 
-    /**
-     * JobLauncherTestUtils is initialized here because in VariantConfiguration there are two Job beans
-     * in this way it is possible to specify the Job to run (and avoid NoUniqueBeanDefinitionException)
-     * @throws Exception
-     */
     @Before
     public void setUp() throws Exception {
         variantJobsArgs.loadArgs();
         jobLauncherTestUtils = new JobLauncherTestUtils();
         jobLauncherTestUtils.setJob(job);
         jobLauncherTestUtils.setJobLauncher(jobLauncher);
+        jobLauncherTestUtils.setJobRepository(jobRepository);
 
-        inputFileResouce = variantJobsArgs.getPipelineOptions().getString("input.vcf");
+        input = variantJobsArgs.getPipelineOptions().getString("input.vcf");
         outputDir = variantJobsArgs.getPipelineOptions().getString("output.dir");
         compressExtension = variantJobsArgs.getPipelineOptions().getString("compressExtension");
-        dbName = variantJobsArgs.getPipelineOptions().getString("dbName");
+        dbName = variantJobsArgs.getPipelineOptions().getString("db.name");
         vepInput = variantJobsArgs.getPipelineOptions().getString("vep.input");
         vepOutput = variantJobsArgs.getPipelineOptions().getString("vep.output");
     }

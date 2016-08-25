@@ -45,17 +45,17 @@ public class MongoDBHelper {
 
     private static MongoTemplate getMongoTemplate(ObjectMap pipelineOptions) throws UnknownHostException {
         MongoTemplate mongoTemplate;
-        if(pipelineOptions.getString("dbAuthenticationDb").isEmpty()){
+        if(pipelineOptions.getString("config.db.authentication-db").isEmpty()){
             mongoTemplate = ConnectionHelper.getMongoTemplate(
-                    pipelineOptions.getString(VariantStorageManager.DB_NAME)
+                    pipelineOptions.getString("db.name")
             );
         }else {
             mongoTemplate = ConnectionHelper.getMongoTemplate(
-                    pipelineOptions.getString(VariantStorageManager.DB_NAME),
-                    pipelineOptions.getString("dbHosts"),
-                    pipelineOptions.getString("dbAuthenticationDb"),
-                    pipelineOptions.getString("dbUser"),
-                    pipelineOptions.getString("dbPassword").toCharArray()
+                    pipelineOptions.getString("db.name"),
+                    pipelineOptions.getString("config.db.hosts"),
+                    pipelineOptions.getString("config.db.authentication-db"),
+                    pipelineOptions.getString("config.db.user"),
+                    pipelineOptions.getString("config.db.password").toCharArray()
             );
         }
 

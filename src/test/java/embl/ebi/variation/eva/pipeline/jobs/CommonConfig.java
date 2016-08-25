@@ -53,10 +53,10 @@ public class CommonConfig {
         
         properties.put("statistics.overwrite", "false");
         
-        properties.put("dbHosts", "localhost:27017");
-        properties.put("dbName", "");
-        properties.put("dbCollectionVariantsName", "variants");
-        properties.put("dbCollectionFilesName", "files");
+        properties.put("db.hosts", "localhost:27017");
+//        properties.put("dbName", null);
+        properties.put("db.collection.variants.name", "variants");
+        properties.put("db.collection.files.name", "files");
         properties.put("db.collections.features.name", "features");
         properties.put("config.db.read-preference", "primary");
         
