@@ -45,7 +45,7 @@ import org.springframework.core.task.SimpleAsyncTaskExecutor;
  *
  *                       |--> (variantStatsFlow: statsCreate --> statsLoad)
  *  transform ---> load -+
- *                       |--> (variantAnnotationFlow: variantsAnnotGenerateInputBatchStep --> annotationCreate --> variantAnnotLoadBatchStep)
+ *                       |--> (variantAnnotationFlow: variantsAnnotGenerateInput --> annotationCreate --> variantAnnotLoad)
  *
  *  Steps in () are optional
  */
@@ -80,7 +80,7 @@ public class VariantConfiguration {
                 .get(jobName)
                 .incrementer(new RunIdIncrementer());
 
-        Flow parallelStatsAndAnnotation = new FlowBuilder<Flow>("parallelStatsAndAnnotation")
+        Flow parallelStatsAndAnnotation = new FlowBuilder<Flow>("Parallel statistics and annotation")
                 .split(new SimpleAsyncTaskExecutor())
                 .add(variantStatsFlow, variantAnnotationFlow)
                 .build();

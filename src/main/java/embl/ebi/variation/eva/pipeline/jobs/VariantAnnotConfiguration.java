@@ -89,7 +89,7 @@ public class VariantAnnotConfiguration {
     public Flow variantAnnotationFlow(){
         OptionalDecider annotationOptionalDecider = new OptionalDecider(pipelineOptions, SKIP_ANNOT);
 
-        return new FlowBuilder<Flow>("annotationFlow")
+        return new FlowBuilder<Flow>("Variant VEP annotation flow")
                 .start(annotationOptionalDecider).on(OptionalDecider.DO_STEP)
                 .to(variantsAnnotGenerateInputBatchStep)
                 .next(annotationCreate())
