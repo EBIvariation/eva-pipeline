@@ -40,7 +40,6 @@ import java.util.*;
 import java.util.zip.GZIPInputStream;
 
 import static embl.ebi.variation.eva.pipeline.jobs.JobTestUtils.makeGzipFile;
-import static junit.framework.Assert.assertEquals;
 import static junit.framework.TestCase.*;
 
 /**
