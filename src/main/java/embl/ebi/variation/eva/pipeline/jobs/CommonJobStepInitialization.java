@@ -4,9 +4,6 @@ import org.opencb.datastore.core.ObjectMap;
 import org.springframework.batch.core.step.builder.TaskletStepBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 
-/**
- * Created by jorizci on 26/08/16.
- */
 public class CommonJobStepInitialization {
 
     @Autowired
