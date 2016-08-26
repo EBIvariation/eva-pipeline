@@ -57,15 +57,13 @@ import org.springframework.context.annotation.Import;
 @Configuration
 @EnableBatchProcessing
 @Import({VariantsAnnotGenerateInput.class, VariantsAnnotLoad.class, VariantJobArgsConfig.class})
-public class VariantAnnotConfiguration {
+public class VariantAnnotConfiguration extends CommonJobStepInitialization{
     public static final String jobName = "annotate-variants";
     public static final String SKIP_ANNOT = "annotation.skip";
 
     @Autowired private JobBuilderFactory jobBuilderFactory;
 
     @Autowired private StepBuilderFactory stepBuilderFactory;
-
-    @Autowired private ObjectMap pipelineOptions;
 
     @Qualifier("variantsAnnotGenerateInput")
     @Autowired public Step variantsAnnotGenerateInputBatchStep;
@@ -87,7 +85,7 @@ public class VariantAnnotConfiguration {
 
     @Bean
     public Flow variantAnnotationFlow(){
-        OptionalDecider annotationOptionalDecider = new OptionalDecider(pipelineOptions, SKIP_ANNOT);
+        OptionalDecider annotationOptionalDecider = new OptionalDecider(getPipelineOptions(), SKIP_ANNOT);
 
         return new FlowBuilder<Flow>("Variant VEP annotation flow")
                 .start(annotationOptionalDecider).on(OptionalDecider.DO_STEP)
@@ -111,18 +109,6 @@ public class VariantAnnotConfiguration {
         TaskletStepBuilder tasklet = step1.tasklet(variantsAnnotCreate());
         initStep(tasklet);
         return tasklet.build();
-    }
-
-    /**
-     * Initialize a Step with common configuration
-     * @param tasklet to be initialized with common configuration
-     */
-    private void initStep(TaskletStepBuilder tasklet) {
-        boolean allowStartIfComplete  = pipelineOptions.getBoolean("config.restartability.allow");
-
-        // true: every job execution will do this step, even if this step is already COMPLETED
-        // false(default): if the job was aborted and is relaunched, this step will NOT be done again
-        tasklet.allowStartIfComplete(allowStartIfComplete);
     }
 
 }

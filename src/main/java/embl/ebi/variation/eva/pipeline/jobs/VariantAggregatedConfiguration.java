@@ -43,7 +43,7 @@ import java.nio.file.Paths;
 @Configuration
 @EnableBatchProcessing
 @Import(VariantJobArgsConfig.class)
-public class VariantAggregatedConfiguration {
+public class VariantAggregatedConfiguration extends CommonJobStepInitialization{
 
     private static final Logger logger = LoggerFactory.getLogger(VariantAggregatedConfiguration.class);
     public static final String jobName = "load-aggregated-vcf";
@@ -56,8 +56,6 @@ public class VariantAggregatedConfiguration {
     JobLauncher jobLauncher;
     @Autowired
     Environment environment;
-    @Autowired
-    private ObjectMap pipelineOptions;
 
     @Bean
     public Job aggregatedVariantJob() {
@@ -97,28 +95,6 @@ public class VariantAggregatedConfiguration {
         initStep(tasklet);
         return tasklet.build();
     }
-
-    public static URI createUri(String input) throws URISyntaxException {
-        URI sourceUri = new URI(null, input, null);
-        if (sourceUri.getScheme() == null || sourceUri.getScheme().isEmpty()) {
-            sourceUri = Paths.get(input).toUri();
-        }
-        return sourceUri;
-    }
-
-    /**
-     * Initialize a Step with common configuration
-     * @param tasklet to be initialized with common configuration
-     */
-    private void initStep(TaskletStepBuilder tasklet) {
-
-        boolean allowStartIfComplete  = pipelineOptions.getBoolean("config.restartability.allow");
-
-        // true: every job execution will do this step, even if this step is already COMPLETED
-        // false(default): if the job was aborted and is relaunched, this step will NOT be done again
-        tasklet.allowStartIfComplete(allowStartIfComplete);
-    }
-
 
 /*
     @Autowired

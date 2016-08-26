@@ -52,7 +52,7 @@ import org.springframework.core.task.SimpleAsyncTaskExecutor;
 @Configuration
 @EnableBatchProcessing
 @Import({VariantJobArgsConfig.class, VariantAnnotConfiguration.class, VariantStatsConfiguration.class, VariantsLoad.class, VariantsTransform.class})
-public class VariantConfiguration {
+public class VariantConfiguration extends CommonJobStepInitialization{
 
     private static final Logger logger = LoggerFactory.getLogger(VariantConfiguration.class);
     public static final String jobName = "load-genotyped-vcf";
@@ -61,8 +61,6 @@ public class VariantConfiguration {
     private JobBuilderFactory jobBuilderFactory;
     @Autowired
     private StepBuilderFactory stepBuilderFactory;
-    @Autowired
-    private ObjectMap pipelineOptions;
     @Autowired
     private Flow variantAnnotationFlow;
     @Autowired
@@ -106,18 +104,6 @@ public class VariantConfiguration {
         TaskletStepBuilder tasklet = step1.tasklet(variantsLoad);
         initStep(tasklet);
         return tasklet.build();
-    }
-
-    /**
-     * Initialize a Step with common configuration
-     * @param tasklet to be initialized with common configuration
-     */
-    private void initStep(TaskletStepBuilder tasklet) {
-        boolean allowStartIfComplete  = pipelineOptions.getBoolean("config.restartability.allow");
-
-        // true: every job execution will do this step, even if this step is already COMPLETED
-        // false(default): if the job was aborted and is relaunched, this step will NOT be done again
-        tasklet.allowStartIfComplete(allowStartIfComplete);
     }
 
 }

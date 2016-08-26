@@ -38,7 +38,7 @@ import org.springframework.core.env.Environment;
 @Configuration
 @EnableBatchProcessing
 @Import(VariantJobArgsConfig.class)
-public class VariantLoadConfiguration {
+public class VariantLoadConfiguration extends CommonJobStepInitialization{
 
     private static final Logger logger = LoggerFactory.getLogger(VariantLoadConfiguration.class);
     public static final String jobName = "variantLoadJob";
@@ -51,8 +51,6 @@ public class VariantLoadConfiguration {
     JobLauncher jobLauncher;
     @Autowired
     Environment environment;
-    @Autowired
-    private ObjectMap pipelineOptions;
 
     @Bean
     public Job variantLoadJob() {
@@ -75,19 +73,6 @@ public class VariantLoadConfiguration {
         TaskletStepBuilder tasklet = step1.tasklet(variantsLoad());
         initStep(tasklet);
         return tasklet.build();
-    }
-
-    /**
-     * Initialize a Step with common configuration
-     * @param tasklet to be initialized with common configuration
-     */
-    private void initStep(TaskletStepBuilder tasklet) {
-
-        boolean allowStartIfComplete  = pipelineOptions.getBoolean("config.restartability.allow");
-
-        // true: every job execution will do this step, even if this step is already COMPLETED
-        // false(default): if the job was aborted and is relaunched, this step will NOT be done again
-        tasklet.allowStartIfComplete(allowStartIfComplete);
     }
 
 }

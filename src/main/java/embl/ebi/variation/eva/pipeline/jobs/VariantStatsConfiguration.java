@@ -42,7 +42,7 @@ import org.springframework.core.env.Environment;
 @Configuration
 @EnableBatchProcessing
 @Import(VariantJobArgsConfig.class)
-public class VariantStatsConfiguration {
+public class VariantStatsConfiguration extends CommonJobStepInitialization{
 
     private static final Logger logger = LoggerFactory.getLogger(VariantStatsConfiguration.class);
     public static final String jobName = "calculate-statistics";
@@ -56,8 +56,6 @@ public class VariantStatsConfiguration {
     private JobLauncher jobLauncher;
     @Autowired
     private Environment environment;
-    @Autowired
-    private ObjectMap pipelineOptions;
 
     @Bean
     public Job variantStatsJob() {
@@ -73,7 +71,7 @@ public class VariantStatsConfiguration {
     @Bean
     public Flow variantStatsFlow(){
 
-        OptionalDecider statisticsOptionalDecider = new OptionalDecider(pipelineOptions, SKIP_STATS);
+        OptionalDecider statisticsOptionalDecider = new OptionalDecider(getPipelineOptions(), SKIP_STATS);
 
         return new FlowBuilder<Flow>("statsFlow")
                 .start(statisticsOptionalDecider).on(OptionalDecider.DO_STEP)
@@ -105,17 +103,5 @@ public class VariantStatsConfiguration {
         TaskletStepBuilder tasklet = step1.tasklet(variantsStatsLoad());
         initStep(tasklet);
         return tasklet.build();
-    }
-
-    /**
-     * Initialize a Step with common configuration
-     * @param tasklet to be initialized with common configuration
-     */
-    private void initStep(TaskletStepBuilder tasklet) {
-        boolean allowStartIfComplete  = pipelineOptions.getBoolean("config.restartability.allow");
-
-        // true: every job execution will do this step, even if this step is already COMPLETED
-        // false(default): if the job was aborted and is relaunched, this step will NOT be done again
-        tasklet.allowStartIfComplete(allowStartIfComplete);
     }
 }
