@@ -15,6 +15,7 @@
  */
 package embl.ebi.variation.eva.pipeline.steps;
 
+import embl.ebi.variation.eva.utils.URLHelper;
 import org.opencb.biodata.models.variant.VariantSource;
 import org.opencb.datastore.core.ObjectMap;
 import org.opencb.datastore.core.QueryOptions;
@@ -59,7 +60,7 @@ public class VariantsStatsLoad implements Tasklet {
             QueryOptions statsOptions = new QueryOptions(variantOptions);
             VariantStatisticsManager variantStatisticsManager = new VariantStatisticsManager();
             VariantDBAdaptor dbAdaptor = variantStorageManager.getDBAdaptor(variantOptions.getString("dbName"), variantOptions);
-            URI outdirUri = createUri(pipelineOptions.getString("output.dir"));
+            URI outdirUri = URLHelper.createUri(pipelineOptions.getString("output.dir"));
             VariantSource variantSource = variantOptions.get(VariantStorageManager.VARIANT_SOURCE, VariantSource.class);
             URI statsOutputUri = outdirUri.resolve(VariantStorageManager.buildFilename(variantSource));
 
@@ -68,13 +69,5 @@ public class VariantsStatsLoad implements Tasklet {
         }
 
         return RepeatStatus.FINISHED;
-    }
-
-    public static URI createUri(String input) throws URISyntaxException {
-        URI sourceUri = new URI(input);
-        if (sourceUri.getScheme() == null || sourceUri.getScheme().isEmpty()) {
-            sourceUri = Paths.get(input).toUri();
-        }
-        return sourceUri;
     }
 }
