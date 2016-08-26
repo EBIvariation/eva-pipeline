@@ -46,8 +46,8 @@ import static org.junit.Assert.*;
  */
 @IntegrationTest
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = { VariantConfiguration.class, VariantConfig.class})
-public class VariantConfigurationPipingTest {
+@ContextConfiguration(classes = { VariantConfiguration.class, VariantWorkflowConfig.class})
+public class VariantConfigurationWorkflowTest {
 
     private JobLauncherTestUtils jobLauncherTestUtils;
 
@@ -70,7 +70,6 @@ public class VariantConfigurationPipingTest {
 
     @Test
     public void allStepsShouldBeExecuted() throws Exception {
-
         initVariantConfigurationJob();
 
         JobExecution execution = jobLauncherTestUtils.launchJob();
@@ -250,6 +249,7 @@ public class VariantConfigurationPipingTest {
         dbName = variantJobsArgs.getPipelineOptions().getString("db.name");
         vepInput = variantJobsArgs.getPipelineOptions().getString("vep.input");
         vepOutput = variantJobsArgs.getPipelineOptions().getString("vep.output");
+        JobTestUtils.cleanDBs(dbName);
     }
 
     @After
