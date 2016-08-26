@@ -58,19 +58,19 @@ public class VariantConfiguration {
     public static final String jobName = "load-genotyped-vcf";
 
     @Autowired
-    JobBuilderFactory jobBuilderFactory;
+    private JobBuilderFactory jobBuilderFactory;
     @Autowired
-    StepBuilderFactory stepBuilderFactory;
+    private StepBuilderFactory stepBuilderFactory;
     @Autowired
-    JobLauncher jobLauncher;
+    private JobLauncher jobLauncher;
     @Autowired
-    Environment environment;
+    private Environment environment;
     @Autowired
     private ObjectMap pipelineOptions;
     @Autowired
-    Flow variantAnnotationFlow;
+    private Flow variantAnnotationFlow;
     @Autowired
-    Flow variantStatsFlow;
+    private Flow variantStatsFlow;
 
     @Bean
     @Qualifier("variantJob")
