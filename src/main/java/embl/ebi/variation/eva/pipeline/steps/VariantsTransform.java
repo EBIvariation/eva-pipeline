@@ -15,6 +15,7 @@
  */
 package embl.ebi.variation.eva.pipeline.steps;
 
+import embl.ebi.variation.eva.utils.URLHelper;
 import org.opencb.datastore.core.ObjectMap;
 import org.opencb.opencga.storage.core.StorageManagerFactory;
 import org.opencb.opencga.storage.core.variant.VariantStorageManager;
@@ -51,9 +52,9 @@ public class VariantsTransform implements Tasklet {
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
 
-        URI outdirUri = createUri(pipelineOptions.getString("output.dir"));
-        URI nextFileUri = createUri(pipelineOptions.getString("input.vcf"));
-        URI pedigreeUri = pipelineOptions.getString("input.pedigree") != null ? createUri(pipelineOptions.getString("input.pedigree")) : null;
+        URI outdirUri = URLHelper.createUri(pipelineOptions.getString("output.dir"));
+        URI nextFileUri = URLHelper.createUri(pipelineOptions.getString("input.vcf"));
+        URI pedigreeUri = pipelineOptions.getString("input.pedigree") != null ? URLHelper.createUri(pipelineOptions.getString("input.pedigree")) : null;
 
         logger.info("Transform file {} to {}", pipelineOptions.getString("input.vcf"), pipelineOptions.getString("output.dir"));
 
@@ -70,11 +71,4 @@ public class VariantsTransform implements Tasklet {
         return RepeatStatus.FINISHED;
     }
 
-    public static URI createUri(String input) throws URISyntaxException {
-        URI sourceUri = new URI(input);
-        if (sourceUri.getScheme() == null || sourceUri.getScheme().isEmpty()) {
-            sourceUri = Paths.get(input).toUri();
-        }
-        return sourceUri;
-    }
 }

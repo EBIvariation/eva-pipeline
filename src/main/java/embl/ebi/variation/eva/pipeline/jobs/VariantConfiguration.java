@@ -51,7 +51,7 @@ import org.springframework.core.task.SimpleAsyncTaskExecutor;
  */
 @Configuration
 @EnableBatchProcessing
-@Import({VariantJobArgsConfig.class, VariantAnnotConfiguration.class, VariantStatsConfiguration.class})
+@Import({VariantJobArgsConfig.class, VariantAnnotConfiguration.class, VariantStatsConfiguration.class, VariantsLoad.class, VariantsTransform.class})
 public class VariantConfiguration {
 
     private static final Logger logger = LoggerFactory.getLogger(VariantConfiguration.class);
@@ -68,10 +68,14 @@ public class VariantConfiguration {
     @Autowired
     private Flow variantStatsFlow;
 
+    @Autowired
+    private VariantsLoad variantsLoad;
+    @Autowired
+    private VariantsTransform variantsTransform;
+
     @Bean
     @Qualifier("variantJob")
     public Job variantJob() {
-
         JobBuilder jobBuilder = jobBuilderFactory
                 .get(jobName)
                 .incrementer(new RunIdIncrementer());
@@ -90,26 +94,16 @@ public class VariantConfiguration {
         return builder.build();
     }
 
-    @Bean
-    public VariantsTransform variantsTransform(){
-        return new VariantsTransform();
-    }
-
     public Step transform() {
         StepBuilder step1 = stepBuilderFactory.get("Normalize variants");
-        TaskletStepBuilder tasklet = step1.tasklet(variantsTransform());
+        TaskletStepBuilder tasklet = step1.tasklet(variantsTransform);
         initStep(tasklet);
         return tasklet.build();
     }
 
-    @Bean
-    public VariantsLoad variantsLoad(){
-        return new VariantsLoad();
-    }
-
     public Step load() {
         StepBuilder step1 = stepBuilderFactory.get("Load variants");
-        TaskletStepBuilder tasklet = step1.tasklet(variantsLoad());
+        TaskletStepBuilder tasklet = step1.tasklet(variantsLoad);
         initStep(tasklet);
         return tasklet.build();
     }
