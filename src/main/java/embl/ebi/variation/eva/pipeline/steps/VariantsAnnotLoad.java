@@ -22,6 +22,7 @@ import embl.ebi.variation.eva.pipeline.annotation.load.VariantAnnotationLineMapp
 import embl.ebi.variation.eva.pipeline.annotation.load.VariantAnnotationMongoItemWriter;
 import embl.ebi.variation.eva.pipeline.jobs.VariantJobArgsConfig;
 import embl.ebi.variation.eva.pipeline.listener.SkipCheckingListener;
+import embl.ebi.variation.eva.pipeline.steps.writers.VariantAnnotationWriter;
 import org.opencb.biodata.models.variant.annotation.VariantAnnotation;
 import org.opencb.datastore.core.ObjectMap;
 import org.springframework.batch.core.Step;
@@ -66,9 +67,9 @@ public class VariantsAnnotLoad {
     public Step variantAnnotLoadBatchStep() throws IOException {
         return stepBuilderFactory.get("Load VEP annotation").<VariantAnnotation, VariantAnnotation> chunk(10)
                 .reader(variantAnnotationReader())
-                .writer(variantAnnotationWriter())
+                .writer(new VariantAnnotationWriter(pipelineOptions))
                 .faultTolerant().skipLimit(50).skip(FlatFileParseException.class)
-                .listener(skipCheckingListener())
+                .listener(new SkipCheckingListener())
                 .build();
     }
 
@@ -79,20 +80,6 @@ public class VariantsAnnotLoad {
         reader.setResource(resource);
         reader.setLineMapper(new VariantAnnotationLineMapper());
         return reader;
-    }
-
-    @Bean
-    public ItemWriter<VariantAnnotation> variantAnnotationWriter(){
-        MongoOperations mongoOperations = MongoDBHelper.getMongoOperationsFromPipelineOptions(pipelineOptions);
-        MongoItemWriter<VariantAnnotation> writer = new VariantAnnotationMongoItemWriter(mongoOperations);
-        writer.setCollection(pipelineOptions.getString("db.collections.variants.name"));
-        writer.setTemplate(mongoOperations);
-        return writer;
-    }
-
-    @Bean
-    public SkipCheckingListener skipCheckingListener(){
-        return new SkipCheckingListener();
     }
 
 }

@@ -20,6 +20,7 @@ import embl.ebi.variation.eva.VariantJobsArgs;
 import embl.ebi.variation.eva.pipeline.MongoDBHelper;
 import embl.ebi.variation.eva.pipeline.annotation.load.VariantAnnotationLineMapper;
 import embl.ebi.variation.eva.pipeline.jobs.*;
+import embl.ebi.variation.eva.pipeline.steps.writers.VariantAnnotationWriter;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -68,7 +69,6 @@ public class VariantsAnnotLoadTest {
 
     @Autowired private JobLauncherTestUtils jobLauncherTestUtils;
     @Autowired private FlatFileItemReader<VariantAnnotation> annotationReader;
-    @Autowired private ItemWriter<VariantAnnotation> annotationWriter;
     @Autowired private VariantJobsArgs variantJobsArgs;
 
     private ExecutionContext executionContext;
@@ -204,6 +204,7 @@ public class VariantsAnnotLoadTest {
         }
 
         // now, load the annotation
+        VariantAnnotationWriter annotationWriter = new VariantAnnotationWriter(variantJobsArgs.getPipelineOptions());
         annotationWriter.write(annotations);
 
         // and finally check that documents in DB have annotation (only consequence type)
