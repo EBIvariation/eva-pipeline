@@ -16,6 +16,7 @@
 
 package embl.ebi.variation.eva.pipeline.jobs;
 
+import embl.ebi.variation.eva.pipeline.OptionalDecider;
 import embl.ebi.variation.eva.pipeline.steps.VariantsAnnotGenerateInput;
 import embl.ebi.variation.eva.pipeline.steps.VariantsAnnotLoad;
 import embl.ebi.variation.eva.pipeline.steps.VariantsAnnotCreate;
@@ -58,6 +59,7 @@ import org.springframework.context.annotation.Import;
 @Import({VariantsAnnotGenerateInput.class, VariantsAnnotLoad.class, VariantJobArgsConfig.class})
 public class VariantAnnotConfiguration {
     public static final String jobName = "annotate-variants";
+    public static final String SKIP_ANNOT = "annotation.skip";
 
     @Autowired private JobBuilderFactory jobBuilderFactory;
 
@@ -85,12 +87,16 @@ public class VariantAnnotConfiguration {
 
     @Bean
     public Flow variantAnnotationFlow(){
-        Flow annotationFlow = new FlowBuilder<Flow>("Variant VEP annotation flow")
-                .start(variantsAnnotGenerateInputBatchStep)
-                .next(annotationCreate)
+        OptionalDecider annotationOptionalDecider = new OptionalDecider(pipelineOptions, SKIP_ANNOT);
+
+        return new FlowBuilder<Flow>("Variant VEP annotation flow")
+                .start(annotationOptionalDecider).on(OptionalDecider.DO_STEP)
+                .to(variantsAnnotGenerateInputBatchStep)
+                .next(annotationCreate())
                 .next(variantAnnotLoadBatchStep)
+                .from(annotationOptionalDecider).on(OptionalDecider.SKIP_STEP).end("COMPLETED")
                 .build();
-        return annotationFlow;
+
     }
 
     @Bean
@@ -112,7 +118,6 @@ public class VariantAnnotConfiguration {
      * @param tasklet to be initialized with common configuration
      */
     private void initStep(TaskletStepBuilder tasklet) {
-
         boolean allowStartIfComplete  = pipelineOptions.getBoolean("config.restartability.allow");
 
         // true: every job execution will do this step, even if this step is already COMPLETED

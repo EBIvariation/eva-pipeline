@@ -24,6 +24,8 @@ import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
+import org.springframework.batch.core.job.builder.FlowBuilder;
+import org.springframework.batch.core.job.builder.FlowJobBuilder;
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.job.flow.Flow;
 import org.springframework.batch.core.launch.JobLauncher;
@@ -36,10 +38,20 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.env.Environment;
+import org.springframework.core.task.SimpleAsyncTaskExecutor;
 
+/**
+ *  Complete pipeline workflow:
+ *
+ *                       |--> (variantStatsFlow: statsCreate --> statsLoad)
+ *  transform ---> load -+
+ *                       |--> (variantAnnotationFlow: variantsAnnotGenerateInput --> annotationCreate --> variantAnnotLoad)
+ *
+ *  Steps in () are optional
+ */
 @Configuration
 @EnableBatchProcessing
-@Import({VariantJobArgsConfig.class, VariantAnnotConfiguration.class})
+@Import({VariantJobArgsConfig.class, VariantAnnotConfiguration.class, VariantStatsConfiguration.class})
 public class VariantConfiguration {
 
     private static final Logger logger = LoggerFactory.getLogger(VariantConfiguration.class);
@@ -57,6 +69,8 @@ public class VariantConfiguration {
     private ObjectMap pipelineOptions;
     @Autowired
     Flow variantAnnotationFlow;
+    @Autowired
+    Flow variantStatsFlow;
 
     @Bean
     @Qualifier("variantJob")
@@ -66,18 +80,23 @@ public class VariantConfiguration {
                 .get(jobName)
                 .incrementer(new RunIdIncrementer());
 
-        return jobBuilder
+        Flow parallelStatsAndAnnotation = new FlowBuilder<Flow>("Parallel statistics and annotation")
+                .split(new SimpleAsyncTaskExecutor())
+                .add(variantStatsFlow, variantAnnotationFlow)
+                .build();
+
+        FlowJobBuilder builder = jobBuilder
                 .flow(transform())
                 .next(load())
-                .next(statsCreate())
-                .next(statsLoad())
-                .next(variantAnnotationFlow)
-                .build().build();
+                .next(parallelStatsAndAnnotation)
+                .end();
+
+        return builder.build();
     }
 
     @Bean
     public VariantsTransform variantsTransform(){
-         return new VariantsTransform();
+        return new VariantsTransform();
     }
 
     public Step transform() {
@@ -99,36 +118,11 @@ public class VariantConfiguration {
         return tasklet.build();
     }
 
-    @Bean
-    public VariantsStatsCreate variantsStatsCreate(){
-        return new VariantsStatsCreate();
-    }
-
-    public Step statsCreate() {
-        StepBuilder step1 = stepBuilderFactory.get("Calculate statistics");
-        TaskletStepBuilder tasklet = step1.tasklet(variantsStatsCreate());
-        initStep(tasklet);
-        return tasklet.build();
-    }
-
-    @Bean
-    public VariantsStatsLoad variantsStatsLoad(){
-        return new VariantsStatsLoad();
-    }
-
-    public Step statsLoad() {
-        StepBuilder step1 = stepBuilderFactory.get("Load statistics");
-        TaskletStepBuilder tasklet = step1.tasklet(variantsStatsLoad());
-        initStep(tasklet);
-        return tasklet.build();
-    }
-
     /**
      * Initialize a Step with common configuration
      * @param tasklet to be initialized with common configuration
      */
     private void initStep(TaskletStepBuilder tasklet) {
-
         boolean allowStartIfComplete  = pipelineOptions.getBoolean("config.restartability.allow");
 
         // true: every job execution will do this step, even if this step is already COMPLETED

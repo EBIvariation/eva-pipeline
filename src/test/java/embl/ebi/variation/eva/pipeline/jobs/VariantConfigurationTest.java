@@ -148,7 +148,6 @@ public class VariantConfigurationTest {
 
     @Test
     public void fullVariantConfig() throws Exception {
-
         String inputFile = VariantConfigurationTest.class.getResource(input).getFile();
         String mockVep = VariantConfigurationTest.class.getResource("/mockvep.pl").getFile();
 
@@ -278,6 +277,7 @@ public class VariantConfigurationTest {
         dbName = variantJobsArgs.getPipelineOptions().getString("db.name");
         vepInput = variantJobsArgs.getPipelineOptions().getString("vep.input");
         vepOutput = variantJobsArgs.getPipelineOptions().getString("vep.output");
+        JobTestUtils.cleanDBs(dbName);
     }
 
     @After
