@@ -53,9 +53,9 @@ public class VariantStatsConfiguration {
     @Autowired
     private StepBuilderFactory stepBuilderFactory;
     @Autowired
-    JobLauncher jobLauncher;
+    private JobLauncher jobLauncher;
     @Autowired
-    Environment environment;
+    private Environment environment;
     @Autowired
     private ObjectMap pipelineOptions;
 
