@@ -17,11 +17,14 @@ package embl.ebi.variation.eva.pipeline.steps;
 
 import com.mongodb.*;
 import embl.ebi.variation.eva.VariantJobsArgs;
+import embl.ebi.variation.eva.pipeline.gene.GeneFilterProcessor;
 import embl.ebi.variation.eva.pipeline.gene.GeneLineMapper;
 import embl.ebi.variation.eva.pipeline.gene.FeatureCoordinates;
 import embl.ebi.variation.eva.pipeline.jobs.AnnotationConfig;
 import embl.ebi.variation.eva.pipeline.jobs.InitDBConfig;
 import embl.ebi.variation.eva.pipeline.jobs.JobTestUtils;
+import embl.ebi.variation.eva.pipeline.steps.readers.GeneReader;
+import embl.ebi.variation.eva.pipeline.steps.writers.GeneWriter;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -48,17 +51,10 @@ import static junit.framework.TestCase.*;
  * Test {@link GenesLoad}
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = { GenesLoad.class, InitDBConfig.class})
+@ContextConfiguration(classes = { GenesLoad.class, InitDBConfig.class,})
 public class GenesLoadTest {
 
-    @Autowired
-    private FlatFileItemReader<FeatureCoordinates> geneReader;
-
-    @Autowired
     private ItemProcessor<FeatureCoordinates, FeatureCoordinates> geneFilterProcessor;
-
-    @Autowired
-    private ItemWriter<FeatureCoordinates> geneWriter;
 
     @Autowired
     public VariantJobsArgs variantJobsArgs;
@@ -67,6 +63,7 @@ public class GenesLoadTest {
 
     @Before
     public void setUp() throws Exception {
+        geneFilterProcessor =  new GeneFilterProcessor();
         variantJobsArgs.loadArgs();
         executionContext = MetaDataInstanceFactory.createStepExecution().getExecutionContext();
     }
@@ -89,6 +86,7 @@ public class GenesLoadTest {
         //simulate VEP output file
         makeGzipFile(gtfContent, gtf);
 
+        GeneReader geneReader = new GeneReader(variantJobsArgs.getPipelineOptions());
         geneReader.setSaveState(false);
         geneReader.open(executionContext);
 
@@ -116,6 +114,7 @@ public class GenesLoadTest {
         //simulate VEP output file
         makeGzipFile(gtfContent, gtf);
 
+        GeneReader geneReader = new GeneReader(variantJobsArgs.getPipelineOptions());
         geneReader.setSaveState(false);
         geneReader.open(executionContext);
 
@@ -139,6 +138,8 @@ public class GenesLoadTest {
         String dbName = variantJobsArgs.getPipelineOptions().getString("db.name");
         String dbCollectionGenesName = variantJobsArgs.getPipelineOptions().getString("db.collections.features.name");
         JobTestUtils.cleanDBs(dbName);
+
+        GeneWriter geneWriter = new GeneWriter(variantJobsArgs.getPipelineOptions());
 
         GeneLineMapper lineMapper = new GeneLineMapper();
         List<FeatureCoordinates> genes = new ArrayList<>();

@@ -23,6 +23,8 @@ import embl.ebi.variation.eva.pipeline.gene.GeneLineMapper;
 import embl.ebi.variation.eva.pipeline.gene.FeatureCoordinates;
 import embl.ebi.variation.eva.pipeline.jobs.VariantJobArgsConfig;
 import embl.ebi.variation.eva.pipeline.listener.SkipCheckingListener;
+import embl.ebi.variation.eva.pipeline.steps.readers.GeneReader;
+import embl.ebi.variation.eva.pipeline.steps.writers.GeneWriter;
 import org.opencb.datastore.core.ObjectMap;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
@@ -67,40 +69,12 @@ public class GenesLoad {
     @Qualifier("genesLoadStep")
     public Step genesLoadStep() throws IOException {
         return stepBuilderFactory.get("genesLoadStep").<FeatureCoordinates, FeatureCoordinates>chunk(10)
-                .reader(geneReader())
-                .processor(geneFilterProcessor())
-                .writer(geneWriter())
+                .reader(new GeneReader(pipelineOptions))
+                .processor(new GeneFilterProcessor())
+                .writer(new GeneWriter(pipelineOptions))
                 .faultTolerant().skipLimit(50).skip(FlatFileParseException.class)
-                .listener(skipCheckingListener())
+                .listener(new SkipCheckingListener())
                 .build();
     }
 
-    @Bean
-    public FlatFileItemReader<FeatureCoordinates> geneReader() throws IOException {
-        Resource resource = new GzipLazyResource(pipelineOptions.getString("input.gtf"));
-        FlatFileItemReader<FeatureCoordinates> reader = new FlatFileItemReader<>();
-        reader.setResource(resource);
-        reader.setLineMapper(new GeneLineMapper());
-        reader.setComments(new String[] { "#" });   // explicit statement not necessary, it's set up this way by default
-        return reader;
-    }
-
-    @Bean
-    public ItemWriter<FeatureCoordinates> geneWriter(){
-        MongoOperations mongoOperations = MongoDBHelper.getMongoOperationsFromPipelineOptions(pipelineOptions);
-        MongoItemWriter<FeatureCoordinates> writer = new MongoItemWriter<>();
-        writer.setCollection(pipelineOptions.getString("db.collections.features.name"));
-        writer.setTemplate(mongoOperations);
-        return writer;
-    }
-
-    @Bean
-    public SkipCheckingListener skipCheckingListener(){
-        return new SkipCheckingListener();
-    }
-
-    @Bean
-    public GeneFilterProcessor geneFilterProcessor(){
-        return new GeneFilterProcessor();
-    }
 }
