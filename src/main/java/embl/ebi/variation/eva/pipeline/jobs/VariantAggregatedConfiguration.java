@@ -46,7 +46,7 @@ import java.nio.file.Paths;
 public class VariantAggregatedConfiguration extends CommonJobStepInitialization{
 
     private static final Logger logger = LoggerFactory.getLogger(VariantAggregatedConfiguration.class);
-    public static final String jobName = "load-aggregated-vcf";
+    private static final String jobName = "load-aggregated-vcf";
 
     @Autowired
     private JobBuilderFactory jobBuilderFactory;
