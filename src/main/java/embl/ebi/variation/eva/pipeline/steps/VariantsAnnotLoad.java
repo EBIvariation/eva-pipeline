@@ -56,7 +56,7 @@ import java.io.IOException;
 public class VariantsAnnotLoad {
 
     @Autowired
-    private StepBuilderFactory steps;
+    private StepBuilderFactory stepBuilderFactory;
 
     @Autowired
     private ObjectMap pipelineOptions;
@@ -64,7 +64,7 @@ public class VariantsAnnotLoad {
     @Bean
     @Qualifier("variantAnnotLoad")
     public Step variantAnnotLoadBatchStep() throws IOException {
-        return steps.get("Load VEP annotation").<VariantAnnotation, VariantAnnotation> chunk(10)
+        return stepBuilderFactory.get("Load VEP annotation").<VariantAnnotation, VariantAnnotation> chunk(10)
                 .reader(variantAnnotationReader())
                 .writer(variantAnnotationWriter())
                 .faultTolerant().skipLimit(50).skip(FlatFileParseException.class)

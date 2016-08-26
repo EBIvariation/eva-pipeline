@@ -58,7 +58,7 @@ import java.io.IOException;
 public class GenesLoad {
 
     @Autowired
-    private StepBuilderFactory steps;
+    private StepBuilderFactory stepBuilderFactory;
 
     @Autowired
     private ObjectMap pipelineOptions;
@@ -66,7 +66,7 @@ public class GenesLoad {
     @Bean
     @Qualifier("genesLoadStep")
     public Step genesLoadStep() throws IOException {
-        return steps.get("genesLoadStep").<FeatureCoordinates, FeatureCoordinates>chunk(10)
+        return stepBuilderFactory.get("genesLoadStep").<FeatureCoordinates, FeatureCoordinates>chunk(10)
                 .reader(geneReader())
                 .processor(geneFilterProcessor())
                 .writer(geneWriter())
