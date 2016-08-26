@@ -42,7 +42,7 @@ import java.nio.file.Paths;
 
 @Configuration
 @EnableBatchProcessing
-@Import(VariantJobArgsConfig.class)
+@Import({VariantJobArgsConfig.class, VariantsLoad.class, VariantsTransform.class})
 public class VariantAggregatedConfiguration extends CommonJobStepInitialization{
 
     private static final Logger logger = LoggerFactory.getLogger(VariantAggregatedConfiguration.class);
@@ -52,10 +52,11 @@ public class VariantAggregatedConfiguration extends CommonJobStepInitialization{
     private JobBuilderFactory jobBuilderFactory;
     @Autowired
     private StepBuilderFactory stepBuilderFactory;
+
     @Autowired
-    JobLauncher jobLauncher;
+    private VariantsLoad variantsLoad;
     @Autowired
-    Environment environment;
+    private VariantsTransform variantsTransform;
 
     @Bean
     public Job aggregatedVariantJob() {
@@ -72,26 +73,16 @@ public class VariantAggregatedConfiguration extends CommonJobStepInitialization{
                 .build();
     }
 
-    @Bean
-    public VariantsTransform variantsTransform(){
-        return new VariantsTransform();
-    }
-
-    public Step transform() {
+    private Step transform() {
         StepBuilder step1 = stepBuilderFactory.get("Normalize variants");
-        final TaskletStepBuilder tasklet = step1.tasklet(variantsTransform());
+        final TaskletStepBuilder tasklet = step1.tasklet(variantsTransform);
         initStep(tasklet);
         return tasklet.build();
     }
 
-    @Bean
-    public VariantsLoad variantsLoad(){
-        return new VariantsLoad();
-    }
-
-    public Step load() {
+    private Step load() {
         StepBuilder step1 = stepBuilderFactory.get("Load variants");
-        TaskletStepBuilder tasklet = step1.tasklet(variantsLoad());
+        TaskletStepBuilder tasklet = step1.tasklet(variantsLoad);
         initStep(tasklet);
         return tasklet.build();
     }
