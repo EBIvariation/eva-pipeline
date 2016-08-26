@@ -22,6 +22,7 @@ import embl.ebi.variation.eva.pipeline.annotation.load.VariantAnnotationLineMapp
 import embl.ebi.variation.eva.pipeline.annotation.load.VariantAnnotationMongoItemWriter;
 import embl.ebi.variation.eva.pipeline.jobs.VariantJobArgsConfig;
 import embl.ebi.variation.eva.pipeline.listener.SkipCheckingListener;
+import embl.ebi.variation.eva.pipeline.steps.readers.VariantAnnotationReader;
 import embl.ebi.variation.eva.pipeline.steps.writers.VariantAnnotationWriter;
 import org.opencb.biodata.models.variant.annotation.VariantAnnotation;
 import org.opencb.datastore.core.ObjectMap;
@@ -66,20 +67,11 @@ public class VariantsAnnotLoad {
     @Qualifier("variantAnnotLoad")
     public Step variantAnnotLoadBatchStep() throws IOException {
         return stepBuilderFactory.get("Load VEP annotation").<VariantAnnotation, VariantAnnotation> chunk(10)
-                .reader(variantAnnotationReader())
+                .reader(new VariantAnnotationReader(pipelineOptions))
                 .writer(new VariantAnnotationWriter(pipelineOptions))
                 .faultTolerant().skipLimit(50).skip(FlatFileParseException.class)
                 .listener(new SkipCheckingListener())
                 .build();
-    }
-
-    @Bean
-    public FlatFileItemReader<VariantAnnotation> variantAnnotationReader() throws IOException {
-        Resource resource = new GzipLazyResource(pipelineOptions.getString("vep.output"));
-        FlatFileItemReader<VariantAnnotation> reader = new FlatFileItemReader<>();
-        reader.setResource(resource);
-        reader.setLineMapper(new VariantAnnotationLineMapper());
-        return reader;
     }
 
 }

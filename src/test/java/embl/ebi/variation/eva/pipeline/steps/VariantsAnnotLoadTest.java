@@ -20,6 +20,7 @@ import embl.ebi.variation.eva.VariantJobsArgs;
 import embl.ebi.variation.eva.pipeline.MongoDBHelper;
 import embl.ebi.variation.eva.pipeline.annotation.load.VariantAnnotationLineMapper;
 import embl.ebi.variation.eva.pipeline.jobs.*;
+import embl.ebi.variation.eva.pipeline.steps.readers.VariantAnnotationReader;
 import embl.ebi.variation.eva.pipeline.steps.writers.VariantAnnotationWriter;
 import org.junit.After;
 import org.junit.Assert;
@@ -68,7 +69,6 @@ import static junit.framework.TestCase.assertTrue;
 public class VariantsAnnotLoadTest {
 
     @Autowired private JobLauncherTestUtils jobLauncherTestUtils;
-    @Autowired private FlatFileItemReader<VariantAnnotation> annotationReader;
     @Autowired private VariantJobsArgs variantJobsArgs;
 
     private ExecutionContext executionContext;
@@ -134,13 +134,14 @@ public class VariantsAnnotLoadTest {
         //simulate VEP output file
         makeGzipFile(vepOutputContent, vepOutput);
 
-        annotationReader.setSaveState(false);
-        annotationReader.open(executionContext);
+        VariantAnnotationReader variantAnnotationReader = new VariantAnnotationReader(variantJobsArgs.getPipelineOptions());
+        variantAnnotationReader.setSaveState(false);
+        variantAnnotationReader.open(executionContext);
 
         VariantAnnotation variantAnnotation;
         int consequenceTypeCount = 0;
         int count = 0;
-        while ((variantAnnotation = annotationReader.read()) != null) {
+        while ((variantAnnotation = variantAnnotationReader.read()) != null) {
             count++;
             if (variantAnnotation.getConsequenceTypes() != null && !variantAnnotation.getConsequenceTypes().isEmpty()) {
                 consequenceTypeCount++;
@@ -159,8 +160,9 @@ public class VariantsAnnotLoadTest {
     public void malformedVariantFieldsAnnotationLinesShouldBeSkipped() throws Exception {
         String vepOutput = variantJobsArgs.getPipelineOptions().getString("vep.output");
         makeGzipFile(vepOutputContentMalformedVariantFields, vepOutput);
-        annotationReader.open(executionContext);
-        annotationReader.read();
+        VariantAnnotationReader variantAnnotationReader = new VariantAnnotationReader(variantJobsArgs.getPipelineOptions());
+        variantAnnotationReader.open(executionContext);
+        variantAnnotationReader.read();
     }
 
     // Missing ':' in 20_63351 (should be 20:63351)
@@ -168,8 +170,9 @@ public class VariantsAnnotLoadTest {
     public void malformedCoordinatesAnnotationLinesShouldBeSkipped() throws Exception {
         String vepOutput = variantJobsArgs.getPipelineOptions().getString("vep.output");
         makeGzipFile(vepOutputContentMalformedCoordinates, vepOutput);
-        annotationReader.open(executionContext);
-        annotationReader.read();
+        VariantAnnotationReader variantAnnotationReader = new VariantAnnotationReader(variantJobsArgs.getPipelineOptions());
+        variantAnnotationReader.open(executionContext);
+        variantAnnotationReader.read();
     }
 
     @Test
