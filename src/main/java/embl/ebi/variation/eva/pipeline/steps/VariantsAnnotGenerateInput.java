@@ -80,7 +80,7 @@ public class VariantsAnnotGenerateInput {
     public Step variantsAnnotGenerateInputBatchStep() throws Exception {
         return stepBuilderFactory.get("Find variants to annotate").<DBObject, VariantWrapper> chunk(10)
                 .reader(variantReader())
-                .processor(vepInputLineProcessor())
+                .processor(new VariantAnnotationItemProcessor())
                 .writer(vepInputWriter())
                 .allowStartIfComplete(pipelineOptions.getBoolean("config.restartability.allow"))
                 .build();
@@ -102,11 +102,6 @@ public class VariantsAnnotGenerateInput {
         reader.setSort(coordinatesSort);
 
         return reader;
-    }
-
-    @Bean
-    public ItemProcessor<DBObject, VariantWrapper> vepInputLineProcessor() {
-        return new VariantAnnotationItemProcessor();
     }
 
     /**
