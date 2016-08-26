@@ -62,10 +62,6 @@ public class VariantConfiguration {
     @Autowired
     private StepBuilderFactory stepBuilderFactory;
     @Autowired
-    private JobLauncher jobLauncher;
-    @Autowired
-    private Environment environment;
-    @Autowired
     private ObjectMap pipelineOptions;
     @Autowired
     private Flow variantAnnotationFlow;
