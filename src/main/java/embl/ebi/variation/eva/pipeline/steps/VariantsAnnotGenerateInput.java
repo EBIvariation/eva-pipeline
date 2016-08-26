@@ -20,6 +20,7 @@ import embl.ebi.variation.eva.pipeline.MongoDBHelper;
 import embl.ebi.variation.eva.pipeline.annotation.generateInput.VariantAnnotationItemProcessor;
 import embl.ebi.variation.eva.pipeline.annotation.generateInput.VariantWrapper;
 import embl.ebi.variation.eva.pipeline.jobs.VariantJobArgsConfig;
+import embl.ebi.variation.eva.pipeline.steps.writers.VepInputWriter;
 import org.opencb.datastore.core.ObjectMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -81,7 +82,7 @@ public class VariantsAnnotGenerateInput {
         return stepBuilderFactory.get("Find variants to annotate").<DBObject, VariantWrapper> chunk(10)
                 .reader(variantReader())
                 .processor(new VariantAnnotationItemProcessor())
-                .writer(vepInputWriter())
+                .writer(new VepInputWriter(pipelineOptions))
                 .allowStartIfComplete(pipelineOptions.getBoolean("config.restartability.allow"))
                 .build();
     }
@@ -102,30 +103,6 @@ public class VariantsAnnotGenerateInput {
         reader.setSort(coordinatesSort);
 
         return reader;
-    }
-
-    /**
-     * @return must return a {@link FlatFileItemWriter} and not a {@link org.springframework.batch.item.ItemWriter}
-     * {@see https://jira.spring.io/browse/BATCH-2097
-     *
-     * TODO: The variant list should be compressed
-     */
-    @Bean
-    public FlatFileItemWriter<VariantWrapper> vepInputWriter() throws Exception {
-        BeanWrapperFieldExtractor<VariantWrapper> fieldExtractor = new BeanWrapperFieldExtractor<>();
-        fieldExtractor.setNames(new String[] {"chr", "start", "end", "refAlt", "strand"});
-
-        DelimitedLineAggregator<VariantWrapper> delLineAgg = new DelimitedLineAggregator<>();
-        delLineAgg.setDelimiter("\t");
-        delLineAgg.setFieldExtractor(fieldExtractor);
-
-        FlatFileItemWriter<VariantWrapper> writer = new FlatFileItemWriter<>();
-
-        writer.setResource(new FileSystemResource(pipelineOptions.getString("vep.input")));
-        writer.setAppendAllowed(false);
-        writer.setShouldDeleteIfExists(true);
-        writer.setLineAggregator(delLineAgg);
-        return writer;
     }
 
 }

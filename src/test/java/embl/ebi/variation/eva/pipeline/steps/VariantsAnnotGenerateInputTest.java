@@ -24,6 +24,7 @@ import embl.ebi.variation.eva.pipeline.jobs.AnnotationConfig;
 import embl.ebi.variation.eva.pipeline.jobs.VariantAnnotConfiguration;
 import embl.ebi.variation.eva.pipeline.jobs.VariantAnnotConfigurationTest;
 import embl.ebi.variation.eva.pipeline.jobs.VariantStatsConfigurationTest;
+import embl.ebi.variation.eva.pipeline.steps.writers.VepInputWriter;
 import org.apache.commons.io.FileUtils;
 import org.junit.Assert;
 import org.junit.Before;
@@ -63,7 +64,6 @@ import static junit.framework.TestCase.assertTrue;
 public class VariantsAnnotGenerateInputTest {
 
     @Autowired private MongoItemReader<DBObject> mongoItemReader;
-    @Autowired private FlatFileItemWriter<VariantWrapper> writer;
     @Autowired private VariantJobsArgs variantJobsArgs;
     @Autowired private JobLauncherTestUtils jobLauncherTestUtils;
 
@@ -151,6 +151,7 @@ public class VariantsAnnotGenerateInputTest {
         File outputFile = new File(variantJobsArgs.getPipelineOptions().getString("vep.input"));
         VariantWrapper variant = new VariantWrapper(converter.convertToDataModelType(constructDbo(variantWithAnnotation)));
 
+        VepInputWriter writer = new VepInputWriter(variantJobsArgs.getPipelineOptions());
         writer.open(executionContext);
         writer.write(Collections.singletonList(variant));
         assertEquals("20\t60344\t60348\tG/A\t+", readFirstLine(outputFile));
