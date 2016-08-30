@@ -32,7 +32,7 @@ import org.springframework.batch.item.ItemProcessor;
  *
  */
 public class VariantAnnotationItemProcessor implements ItemProcessor<DBObject, VariantWrapper> {
-    private static final Logger logger = LoggerFactory.getLogger(VariantsAnnotCreate.class);
+    private static final Logger logger = LoggerFactory.getLogger(VariantAnnotationItemProcessor.class);
 
     private DBObjectToVariantConverter converter;
 
