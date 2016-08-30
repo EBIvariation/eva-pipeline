@@ -21,6 +21,7 @@ import embl.ebi.variation.eva.pipeline.MongoDBHelper;
 import embl.ebi.variation.eva.pipeline.annotation.generateInput.VariantAnnotationItemProcessor;
 import embl.ebi.variation.eva.pipeline.annotation.generateInput.VariantWrapper;
 import embl.ebi.variation.eva.pipeline.jobs.VariantJobArgsConfig;
+import embl.ebi.variation.eva.pipeline.steps.readers.VariantReader;
 import embl.ebi.variation.eva.pipeline.steps.writers.VepInputWriter;
 import org.opencb.datastore.core.ObjectMap;
 import org.slf4j.Logger;
@@ -81,29 +82,10 @@ public class VariantsAnnotGenerateInput {
     @Qualifier("variantsAnnotGenerateInput")
     public Step variantsAnnotGenerateInputBatchStep() throws Exception {
         return stepBuilderFactory.get("Find variants to annotate").<DBObject, VariantWrapper> chunk(10)
-                .reader(variantReader())
+                .reader(new VariantReader(variantJobsArgs.getPipelineOptions()))
                 .processor(new VariantAnnotationItemProcessor())
                 .writer(new VepInputWriter(variantJobsArgs.getPipelineOptions()))
                 .allowStartIfComplete(variantJobsArgs.getPipelineOptions().getBoolean("config.restartability.allow"))
                 .build();
     }
-
-    @Bean
-    public MongoItemReader<DBObject> variantReader() throws Exception {
-        MongoItemReader<DBObject> reader = new MongoItemReader<>();
-        reader.setCollection(variantJobsArgs.getPipelineOptions().getString("db.collections.variants.name"));
-
-        reader.setQuery("{ annot : { $exists : false } }");
-        reader.setFields("{ chr : 1, start : 1, end : 1, ref : 1, alt : 1, type : 1}");
-        reader.setTargetType(DBObject.class);
-        reader.setTemplate(MongoDBHelper.getMongoOperationsFromPipelineOptions(variantJobsArgs.getPipelineOptions()));
-
-        Map<String, Sort.Direction> coordinatesSort = new HashMap<>();
-        coordinatesSort.put("chr", Sort.Direction.ASC);
-        coordinatesSort.put("start", Sort.Direction.ASC);
-        reader.setSort(coordinatesSort);
-
-        return reader;
-    }
-
 }
