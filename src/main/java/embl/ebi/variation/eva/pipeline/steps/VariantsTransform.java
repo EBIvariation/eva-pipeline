@@ -15,6 +15,7 @@
  */
 package embl.ebi.variation.eva.pipeline.steps;
 
+import embl.ebi.variation.eva.VariantJobsArgs;
 import embl.ebi.variation.eva.utils.URLHelper;
 import org.opencb.datastore.core.ObjectMap;
 import org.opencb.opencga.storage.core.StorageManagerFactory;
@@ -44,13 +45,12 @@ public class VariantsTransform implements Tasklet {
     private static final Logger logger = LoggerFactory.getLogger(VariantsTransform.class);
 
     @Autowired
-    private ObjectMap variantOptions;
-
-    @Autowired
-    private ObjectMap pipelineOptions;
+    private VariantJobsArgs variantJobsArgs;
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
+        ObjectMap variantOptions = variantJobsArgs.getVariantOptions();
+        ObjectMap pipelineOptions = variantJobsArgs.getPipelineOptions();
 
         URI outdirUri = URLHelper.createUri(pipelineOptions.getString("output.dir"));
         URI nextFileUri = URLHelper.createUri(pipelineOptions.getString("input.vcf"));

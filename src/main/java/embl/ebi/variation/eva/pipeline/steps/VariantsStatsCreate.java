@@ -15,6 +15,7 @@
  */
 package embl.ebi.variation.eva.pipeline.steps;
 
+import embl.ebi.variation.eva.VariantJobsArgs;
 import embl.ebi.variation.eva.utils.URLHelper;
 import org.opencb.biodata.models.variant.VariantSource;
 import org.opencb.datastore.core.ObjectMap;
@@ -47,13 +48,13 @@ public class VariantsStatsCreate implements Tasklet {
     public static final String SKIP_STATS_CREATE = "statistics.create.skip";
 
     @Autowired
-    private ObjectMap variantOptions;
-
-    @Autowired
-    private ObjectMap pipelineOptions;
+    private VariantJobsArgs variantJobsArgs;
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
+        ObjectMap variantOptions = variantJobsArgs.getVariantOptions();
+        ObjectMap pipelineOptions = variantJobsArgs.getPipelineOptions();
+
 //                HashMap<String, Set<String>> samples = new HashMap<>(); // TODO fill properly. if this is null overwrite will take on
 //                samples.put("SOME", new HashSet<>(Arrays.asList("HG00096", "HG00097")));
         //JobParameters parameters = chunkContext.getStepContext().getStepExecution().getJobParameters();

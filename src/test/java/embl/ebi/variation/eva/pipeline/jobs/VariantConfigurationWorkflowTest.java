@@ -47,7 +47,7 @@ import static org.junit.Assert.*;
  */
 @IntegrationTest
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = { VariantConfiguration.class, VariantWorkflowConfig.class})
+@ContextConfiguration(classes = { VariantJobsArgs.class, VariantConfiguration.class, VariantWorkflowConfig.class})
 public class VariantConfigurationWorkflowTest {
 
     private JobLauncherTestUtils jobLauncherTestUtils;

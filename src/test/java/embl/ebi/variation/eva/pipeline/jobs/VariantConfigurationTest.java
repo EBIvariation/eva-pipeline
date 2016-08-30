@@ -73,7 +73,7 @@ import static org.junit.Assert.*;
  */
 @IntegrationTest
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = { VariantConfiguration.class, VariantConfig.class})
+@ContextConfiguration(classes = { VariantJobsArgs.class, VariantConfiguration.class, VariantConfig.class})
 public class VariantConfigurationTest {
 
     private JobLauncherTestUtils jobLauncherTestUtils;

@@ -57,7 +57,7 @@ import static org.junit.Assert.*;
  * @author Jose Miguel Mut Lopez &lt;jmmut@ebi.ac.uk&gt;
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = {VariantAggregatedConfiguration.class, CommonConfig.class})
+@ContextConfiguration(classes = {VariantJobsArgs.class, VariantAggregatedConfiguration.class, CommonConfig.class})
 public class VariantAggregatedConfigurationTest {
 
     public static final String FILE_AGGREGATED = "/aggregated.vcf.gz";

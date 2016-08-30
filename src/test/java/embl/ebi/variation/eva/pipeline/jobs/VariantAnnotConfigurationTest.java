@@ -50,7 +50,7 @@ import static org.junit.Assert.assertTrue;
  */
 @IntegrationTest
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = { VariantAnnotConfiguration.class, AnnotationConfig.class, JobLauncherTestUtils.class})
+@ContextConfiguration(classes = { VariantJobsArgs.class, VariantAnnotConfiguration.class, AnnotationConfig.class, JobLauncherTestUtils.class})
 public class VariantAnnotConfigurationTest {
 
     @Autowired

@@ -51,7 +51,7 @@ import org.springframework.core.task.SimpleAsyncTaskExecutor;
  */
 @Configuration
 @EnableBatchProcessing
-@Import({VariantJobArgsConfig.class, VariantAnnotConfiguration.class, VariantStatsConfiguration.class, VariantsLoad.class, VariantsTransform.class})
+@Import({VariantAnnotConfiguration.class, VariantStatsConfiguration.class, VariantsLoad.class, VariantsTransform.class})
 public class VariantConfiguration extends CommonJobStepInitialization{
 
     private static final Logger logger = LoggerFactory.getLogger(VariantConfiguration.class);

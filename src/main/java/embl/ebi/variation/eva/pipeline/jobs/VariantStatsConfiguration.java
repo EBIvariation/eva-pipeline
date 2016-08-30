@@ -41,7 +41,7 @@ import org.springframework.core.env.Environment;
 
 @Configuration
 @EnableBatchProcessing
-@Import({VariantJobArgsConfig.class,VariantsStatsCreate.class, VariantsStatsLoad.class})
+@Import({VariantsStatsCreate.class, VariantsStatsLoad.class})
 public class VariantStatsConfiguration extends CommonJobStepInitialization{
 
     private static final Logger logger = LoggerFactory.getLogger(VariantStatsConfiguration.class);

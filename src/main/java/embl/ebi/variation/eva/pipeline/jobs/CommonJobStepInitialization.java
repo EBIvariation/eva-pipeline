@@ -1,5 +1,6 @@
 package embl.ebi.variation.eva.pipeline.jobs;
 
+import embl.ebi.variation.eva.VariantJobsArgs;
 import org.opencb.datastore.core.ObjectMap;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
@@ -7,11 +8,13 @@ import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.core.step.builder.TaskletStepBuilder;
 import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Import;
 
+@Import({VariantJobsArgs.class})
 public class CommonJobStepInitialization {
 
     @Autowired
-    private ObjectMap pipelineOptions;
+    private VariantJobsArgs variantJobsArgs;
 
     @Autowired
     private StepBuilderFactory stepBuilderFactory;
@@ -22,7 +25,7 @@ public class CommonJobStepInitialization {
      */
     protected void initStep(final TaskletStepBuilder tasklet) {
 
-        boolean allowStartIfComplete  = pipelineOptions.getBoolean("config.restartability.allow");
+        boolean allowStartIfComplete  = getPipelineOptions().getBoolean("config.restartability.allow");
 
         // true: every job execution will do this step, even if this step is already COMPLETED
         // false(default): if the job was aborted and is relaunched, this step will NOT be done again
@@ -37,6 +40,6 @@ public class CommonJobStepInitialization {
     }
 
     public ObjectMap getPipelineOptions() {
-        return pipelineOptions;
+        return variantJobsArgs.getPipelineOptions();
     }
 }

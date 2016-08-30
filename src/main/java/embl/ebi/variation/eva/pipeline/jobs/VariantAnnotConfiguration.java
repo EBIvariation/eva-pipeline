@@ -52,7 +52,7 @@ import org.springframework.context.annotation.Import;
 
 @Configuration
 @EnableBatchProcessing
-@Import({VariantsAnnotGenerateInput.class, VariantsAnnotLoad.class, VariantJobArgsConfig.class})
+@Import({VariantsAnnotGenerateInput.class, VariantsAnnotLoad.class})
 public class VariantAnnotConfiguration extends CommonJobStepInitialization{
     public static final String jobName = "annotate-variants";
     public static final String SKIP_ANNOT = "annotation.skip";

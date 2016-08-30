@@ -16,6 +16,7 @@
 
 package embl.ebi.variation.eva.pipeline.steps;
 
+import embl.ebi.variation.eva.VariantJobsArgs;
 import embl.ebi.variation.eva.pipeline.MongoDBHelper;
 import embl.ebi.variation.eva.pipeline.annotation.GzipLazyResource;
 import embl.ebi.variation.eva.pipeline.gene.GeneFilterProcessor;
@@ -56,22 +57,22 @@ import java.io.IOException;
 
 @Configuration
 @EnableBatchProcessing
-@Import(VariantJobArgsConfig.class)
+@Import(VariantJobsArgs.class)
 public class GenesLoad {
 
     @Autowired
     private StepBuilderFactory stepBuilderFactory;
 
     @Autowired
-    private ObjectMap pipelineOptions;
+    private VariantJobsArgs variantJobsArgs;
 
     @Bean
     @Qualifier("genesLoadStep")
     public Step genesLoadStep() throws IOException {
         return stepBuilderFactory.get("genesLoadStep").<FeatureCoordinates, FeatureCoordinates>chunk(10)
-                .reader(new GeneReader(pipelineOptions))
+                .reader(new GeneReader(variantJobsArgs.getPipelineOptions()))
                 .processor(new GeneFilterProcessor())
-                .writer(new GeneWriter(pipelineOptions))
+                .writer(new GeneWriter(variantJobsArgs.getPipelineOptions()))
                 .faultTolerant().skipLimit(50).skip(FlatFileParseException.class)
                 .listener(new SkipCheckingListener())
                 .build();

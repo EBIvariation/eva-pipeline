@@ -16,6 +16,7 @@
 package embl.ebi.variation.eva.pipeline.steps;
 
 import com.mongodb.DBObject;
+import embl.ebi.variation.eva.VariantJobsArgs;
 import embl.ebi.variation.eva.pipeline.MongoDBHelper;
 import embl.ebi.variation.eva.pipeline.annotation.generateInput.VariantAnnotationItemProcessor;
 import embl.ebi.variation.eva.pipeline.annotation.generateInput.VariantWrapper;
@@ -65,7 +66,7 @@ import java.util.Map;
 
 @Configuration
 @EnableBatchProcessing
-@Import(VariantJobArgsConfig.class)
+@Import(VariantJobsArgs.class)
 public class VariantsAnnotGenerateInput {
 
     private static final Logger logger = LoggerFactory.getLogger(VariantsAnnotGenerateInput.class);
@@ -74,7 +75,7 @@ public class VariantsAnnotGenerateInput {
     private StepBuilderFactory stepBuilderFactory;
 
     @Autowired
-    private ObjectMap pipelineOptions;
+    private VariantJobsArgs variantJobsArgs;
 
     @Bean
     @Qualifier("variantsAnnotGenerateInput")
@@ -82,20 +83,20 @@ public class VariantsAnnotGenerateInput {
         return stepBuilderFactory.get("Find variants to annotate").<DBObject, VariantWrapper> chunk(10)
                 .reader(variantReader())
                 .processor(new VariantAnnotationItemProcessor())
-                .writer(new VepInputWriter(pipelineOptions))
-                .allowStartIfComplete(pipelineOptions.getBoolean("config.restartability.allow"))
+                .writer(new VepInputWriter(variantJobsArgs.getPipelineOptions()))
+                .allowStartIfComplete(variantJobsArgs.getPipelineOptions().getBoolean("config.restartability.allow"))
                 .build();
     }
 
     @Bean
     public MongoItemReader<DBObject> variantReader() throws Exception {
         MongoItemReader<DBObject> reader = new MongoItemReader<>();
-        reader.setCollection(pipelineOptions.getString("db.collections.variants.name"));
+        reader.setCollection(variantJobsArgs.getPipelineOptions().getString("db.collections.variants.name"));
 
         reader.setQuery("{ annot : { $exists : false } }");
         reader.setFields("{ chr : 1, start : 1, end : 1, ref : 1, alt : 1, type : 1}");
         reader.setTargetType(DBObject.class);
-        reader.setTemplate(MongoDBHelper.getMongoOperationsFromPipelineOptions(pipelineOptions));
+        reader.setTemplate(MongoDBHelper.getMongoOperationsFromPipelineOptions(variantJobsArgs.getPipelineOptions()));
 
         Map<String, Sort.Direction> coordinatesSort = new HashMap<>();
         coordinatesSort.put("chr", Sort.Direction.ASC);

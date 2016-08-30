@@ -34,7 +34,7 @@ import org.springframework.context.annotation.Import;
 
 @Configuration
 @EnableBatchProcessing
-@Import({VariantJobArgsConfig.class, VariantsLoad.class})
+@Import({VariantsLoad.class})
 public class VariantLoadConfiguration extends CommonJobStepInitialization{
 
     private static final Logger logger = LoggerFactory.getLogger(VariantLoadConfiguration.class);

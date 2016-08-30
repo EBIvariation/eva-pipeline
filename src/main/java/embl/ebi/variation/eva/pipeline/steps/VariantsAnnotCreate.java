@@ -15,6 +15,8 @@
  */
 package embl.ebi.variation.eva.pipeline.steps;
 
+import embl.ebi.variation.eva.VariantJobsArgs;
+import org.opencb.biodata.models.variant.Variant;
 import org.opencb.datastore.core.ObjectMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,10 +41,11 @@ public class VariantsAnnotCreate implements Tasklet {
     public static final String SKIP_ANNOT_CREATE = "annotation.create.skip";
 
     @Autowired
-    private ObjectMap pipelineOptions;
+    private VariantJobsArgs variantJobsArgs;
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
+        ObjectMap pipelineOptions = variantJobsArgs.getPipelineOptions();
 
         if (pipelineOptions.getBoolean(SKIP_ANNOT_CREATE)) {
             logger.info("skipping annotation creation step, skipAnnotCreate is set to {} ",

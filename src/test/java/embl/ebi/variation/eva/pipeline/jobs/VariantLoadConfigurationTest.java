@@ -58,7 +58,7 @@ import static org.opencb.opencga.storage.core.variant.VariantStorageManager.VARI
  * @author Jose Miguel Mut Lopez &lt;jmmut@ebi.ac.uk&gt;
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = {VariantLoadConfiguration.class, CommonConfig.class, JobLauncherTestUtils.class})
+@ContextConfiguration(classes = {VariantJobsArgs.class, VariantLoadConfiguration.class, CommonConfig.class, JobLauncherTestUtils.class})
 public class VariantLoadConfigurationTest {
 
     private static final String FILE_20 = "/small20.vcf.gz";

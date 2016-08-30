@@ -32,7 +32,7 @@ import org.springframework.context.annotation.Import;
 
 @Configuration
 @EnableBatchProcessing
-@Import({VariantJobArgsConfig.class, GenesLoad.class})
+@Import({GenesLoad.class})
 public class InitDBConfiguration {
 
     private static final Logger logger = LoggerFactory.getLogger(InitDBConfiguration.class);

@@ -15,6 +15,7 @@
  */
 package embl.ebi.variation.eva.pipeline.steps;
 
+import embl.ebi.variation.eva.VariantJobsArgs;
 import embl.ebi.variation.eva.utils.URLHelper;
 import org.opencb.datastore.core.ObjectMap;
 import org.opencb.opencga.storage.core.StorageManagerFactory;
@@ -45,12 +46,12 @@ public class VariantsLoad implements Tasklet {
     public static final String SKIP_LOAD = "load.skip";
 
     @Autowired
-    private ObjectMap variantOptions;
-    @Autowired
-    private ObjectMap pipelineOptions;
+    private VariantJobsArgs variantJobsArgs;
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
+        ObjectMap variantOptions = variantJobsArgs.getVariantOptions();
+        ObjectMap pipelineOptions = variantJobsArgs.getPipelineOptions();
 
         if (pipelineOptions.getBoolean(SKIP_LOAD)) {
             logger.info("skipping load step, skipLoad is set to {}", pipelineOptions.getBoolean(SKIP_LOAD));

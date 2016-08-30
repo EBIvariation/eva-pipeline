@@ -36,6 +36,8 @@ import java.util.Properties;
 import org.opencb.opencga.lib.common.Config;
 import org.opencb.opencga.storage.mongodb.variant.MongoDBVariantStorageManager;
 
+import javax.annotation.PostConstruct;
+
 /**
  *
  * Class to extract configuration from properties files and from command line.
@@ -110,6 +112,7 @@ public class VariantJobsArgs {
     private ObjectMap variantOptions  = new ObjectMap();
     private ObjectMap pipelineOptions  = new ObjectMap();
 
+    @PostConstruct
     public void loadArgs() throws IOException {
         logger.info("Loading job arguments");
         

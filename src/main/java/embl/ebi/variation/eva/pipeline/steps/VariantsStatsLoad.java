@@ -15,6 +15,7 @@
  */
 package embl.ebi.variation.eva.pipeline.steps;
 
+import embl.ebi.variation.eva.VariantJobsArgs;
 import embl.ebi.variation.eva.utils.URLHelper;
 import org.opencb.biodata.models.variant.VariantSource;
 import org.opencb.datastore.core.ObjectMap;
@@ -31,6 +32,7 @@ import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Import;
 import org.springframework.stereotype.Component;
 
 import java.net.URI;
@@ -44,18 +46,18 @@ import java.nio.file.Paths;
  */
 @Component
 @StepScope
+@Import({VariantJobsArgs.class})
 public class VariantsStatsLoad implements Tasklet {
     private static final Logger logger = LoggerFactory.getLogger(VariantsStatsLoad.class);
     public static final String SKIP_STATS_LOAD = "statistics.load.skip";
 
     @Autowired
-    private ObjectMap variantOptions;
-
-    @Autowired
-    private ObjectMap pipelineOptions;
+    private VariantJobsArgs variantJobsArgs;
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
+        ObjectMap variantOptions = variantJobsArgs.getVariantOptions();
+        ObjectMap pipelineOptions = variantJobsArgs.getPipelineOptions();
 
         if (pipelineOptions.getBoolean(SKIP_STATS_LOAD)) {
             logger.info("skipping stats loading");

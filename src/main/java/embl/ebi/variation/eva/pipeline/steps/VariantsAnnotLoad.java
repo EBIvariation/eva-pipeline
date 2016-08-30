@@ -16,6 +16,7 @@
 
 package embl.ebi.variation.eva.pipeline.steps;
 
+import embl.ebi.variation.eva.VariantJobsArgs;
 import embl.ebi.variation.eva.pipeline.MongoDBHelper;
 import embl.ebi.variation.eva.pipeline.annotation.GzipLazyResource;
 import embl.ebi.variation.eva.pipeline.annotation.load.VariantAnnotationLineMapper;
@@ -54,21 +55,21 @@ import java.io.IOException;
 
 @Configuration
 @EnableBatchProcessing
-@Import(VariantJobArgsConfig.class)
+@Import({VariantJobsArgs.class})
 public class VariantsAnnotLoad {
 
     @Autowired
     private StepBuilderFactory stepBuilderFactory;
 
     @Autowired
-    private ObjectMap pipelineOptions;
+    private VariantJobsArgs variantJobsArgs;
 
     @Bean
     @Qualifier("variantAnnotLoad")
     public Step variantAnnotLoadBatchStep() throws IOException {
         return stepBuilderFactory.get("Load VEP annotation").<VariantAnnotation, VariantAnnotation> chunk(10)
-                .reader(new VariantAnnotationReader(pipelineOptions))
-                .writer(new VariantAnnotationWriter(pipelineOptions))
+                .reader(new VariantAnnotationReader(variantJobsArgs.getPipelineOptions()))
+                .writer(new VariantAnnotationWriter(variantJobsArgs.getPipelineOptions()))
                 .faultTolerant().skipLimit(50).skip(FlatFileParseException.class)
                 .listener(new SkipCheckingListener())
                 .build();
