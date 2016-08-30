@@ -41,7 +41,7 @@ import org.springframework.core.env.Environment;
 
 @Configuration
 @EnableBatchProcessing
-@Import({VariantJobArgsConfig.class,VariantsStatsCreate.class})
+@Import({VariantJobArgsConfig.class,VariantsStatsCreate.class, VariantsStatsLoad.class})
 public class VariantStatsConfiguration extends CommonJobStepInitialization{
 
     private static final Logger logger = LoggerFactory.getLogger(VariantStatsConfiguration.class);
@@ -49,6 +49,8 @@ public class VariantStatsConfiguration extends CommonJobStepInitialization{
     public static final String SKIP_STATS = "statistics.skip";
     private static final String CALCULATE_STATISTICS = "Calculate statistics";
     private static final String LOAD_STATISTICS = "Load statistics";
+    private static final String STATS_FLOW = "statsFlow";
+    private static final String COMPLETED = "COMPLETED";
 
     @Autowired
     private JobBuilderFactory jobBuilderFactory;
@@ -59,6 +61,9 @@ public class VariantStatsConfiguration extends CommonJobStepInitialization{
 
     @Autowired
     private VariantsStatsCreate variantsStatsCreate;
+
+    @Autowired
+    private VariantsStatsLoad variantsStatsLoad;
 
     @Bean
     public Job variantStatsJob() {
@@ -76,11 +81,11 @@ public class VariantStatsConfiguration extends CommonJobStepInitialization{
 
         OptionalDecider statisticsOptionalDecider = new OptionalDecider(getPipelineOptions(), SKIP_STATS);
 
-        return new FlowBuilder<Flow>("statsFlow")
+        return new FlowBuilder<Flow>(STATS_FLOW)
                 .start(statisticsOptionalDecider).on(OptionalDecider.DO_STEP)
                 .to(statsCreate())
                 .next(statsLoad())
-                .from(statisticsOptionalDecider).on(OptionalDecider.SKIP_STEP).end("COMPLETED")
+                .from(statisticsOptionalDecider).on(OptionalDecider.SKIP_STEP).end(COMPLETED)
                 .build();
     }
 
@@ -88,12 +93,7 @@ public class VariantStatsConfiguration extends CommonJobStepInitialization{
         return generateStep(CALCULATE_STATISTICS,variantsStatsCreate);
     }
 
-    @Bean
-    public VariantsStatsLoad variantsStatsLoad(){
-        return new VariantsStatsLoad();
-    }
-
     private Step statsLoad() {
-        return generateStep(LOAD_STATISTICS, variantsStatsLoad());
+        return generateStep(LOAD_STATISTICS, variantsStatsLoad);
     }
 }
