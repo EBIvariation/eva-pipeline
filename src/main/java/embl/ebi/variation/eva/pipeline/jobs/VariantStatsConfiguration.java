@@ -41,7 +41,7 @@ import org.springframework.core.env.Environment;
 
 @Configuration
 @EnableBatchProcessing
-@Import(VariantJobArgsConfig.class)
+@Import({VariantJobArgsConfig.class,VariantsStatsCreate.class})
 public class VariantStatsConfiguration extends CommonJobStepInitialization{
 
     private static final Logger logger = LoggerFactory.getLogger(VariantStatsConfiguration.class);
@@ -56,6 +56,9 @@ public class VariantStatsConfiguration extends CommonJobStepInitialization{
     private JobLauncher jobLauncher;
     @Autowired
     private Environment environment;
+
+    @Autowired
+    private VariantsStatsCreate variantsStatsCreate;
 
     @Bean
     public Job variantStatsJob() {
@@ -81,13 +84,8 @@ public class VariantStatsConfiguration extends CommonJobStepInitialization{
                 .build();
     }
 
-    @Bean
-    public VariantsStatsCreate variantsStatsCreate(){
-        return new VariantsStatsCreate();
-    }
-
     private Step statsCreate() {
-        return generateStep(CALCULATE_STATISTICS,variantsStatsCreate());
+        return generateStep(CALCULATE_STATISTICS,variantsStatsCreate);
     }
 
     @Bean
