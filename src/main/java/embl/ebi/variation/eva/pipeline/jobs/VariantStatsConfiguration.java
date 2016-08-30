@@ -45,7 +45,7 @@ import org.springframework.core.env.Environment;
 public class VariantStatsConfiguration extends CommonJobStepInitialization{
 
     private static final Logger logger = LoggerFactory.getLogger(VariantStatsConfiguration.class);
-    public static final String jobName = "calculate-statistics";
+    private static final String jobName = "calculate-statistics";
     public static final String SKIP_STATS = "statistics.skip";
     private static final String CALCULATE_STATISTICS = "Calculate statistics";
     private static final String LOAD_STATISTICS = "Load statistics";
@@ -54,10 +54,6 @@ public class VariantStatsConfiguration extends CommonJobStepInitialization{
 
     @Autowired
     private JobBuilderFactory jobBuilderFactory;
-    @Autowired
-    private JobLauncher jobLauncher;
-    @Autowired
-    private Environment environment;
 
     @Autowired
     private VariantsStatsCreate variantsStatsCreate;
