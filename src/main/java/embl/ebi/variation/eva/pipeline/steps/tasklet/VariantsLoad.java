@@ -28,6 +28,7 @@ import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Import;
 import org.springframework.stereotype.Component;
 
 import java.net.URI;
@@ -41,6 +42,7 @@ import java.nio.file.Paths;
  */
 @Component
 @JobScope
+@Import({VariantJobsArgs.class})
 public class VariantsLoad implements Tasklet {
     private static final Logger logger = LoggerFactory.getLogger(VariantsLoad.class);
     public static final String SKIP_LOAD = "load.skip";

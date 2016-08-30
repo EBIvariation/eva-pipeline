@@ -32,6 +32,7 @@ import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Import;
 import org.springframework.stereotype.Component;
 
 import java.net.URI;
@@ -43,6 +44,7 @@ import java.net.URI;
  */
 @Component
 @StepScope
+@Import({VariantJobsArgs.class})
 public class VariantsStatsCreate implements Tasklet {
     private static final Logger logger = LoggerFactory.getLogger(VariantsStatsCreate.class);
     public static final String SKIP_STATS_CREATE = "statistics.create.skip";
