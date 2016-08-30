@@ -71,49 +71,4 @@ public class VariantAggregatedConfiguration extends CommonJobStepInitialization{
         return generateStep(LOAD_VARIANTS,variantsLoad);
     }
 
-/*
-    @Autowired
-    JobLauncher jobLauncher;
-    @Autowired
-    JobExplorer jobExplorer;
-    @Autowired
-    JobRepository jobRepository;
-    @Autowired
-    JobRegistry jobRegistry;
-
-
-    @Value("${input}")
-    private String input;
-
-    @Bean
-    public Job AggregatedVariantJob(JobBuilderFactory jobs, JobExecutionListener listener, StepBuilderFactory stepBuilderFactory) {
-        JobBuilder jobBuilder = jobs.get(jobName)
-                .repository(jobRepository)
-                .incrementer(new RunIdIncrementer())
-                .listener(listener);
-
-        JobFlowBuilder flow = jobBuilder.flow(transform(stepBuilderFactory));
-
-        return flow.end().build();
-    }
-
-    @Bean
-    public Step transform(StepBuilderFactory stepBuilderFactory) {
-        StepBuilder step1 = stepBuilderFactory.get("transform");
-        TaskletStepBuilder tasklet = step1.tasklet(new Tasklet() {
-            @Override
-            public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
-                log.info("transform mock, aggregated file " + input);
-                return RepeatStatus.FINISHED;
-            }
-        });
-
-        // true: every job execution will do this step, even if it is COMPLETED
-        // false: if the job was aborted and is relaunched, this step will NOT be done again
-        tasklet.allowStartIfComplete(false);
-
-        return tasklet.build();
-    }
-    */
-
 }
