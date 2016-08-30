@@ -69,7 +69,7 @@ public class VariantLoadConfigurationTest {
     private JobLauncherTestUtils jobLauncherTestUtils;
 
     @Autowired
-    public VariantJobsArgs variantJobsArgs;
+    private VariantJobsArgs variantJobsArgs;
 
     private ObjectMap variantOptions;
     private ObjectMap pipelineOptions;

@@ -66,8 +66,10 @@ import static junit.framework.TestCase.assertTrue;
 @ContextConfiguration(classes = { VariantAnnotConfiguration.class, AnnotationConfig.class, JobLauncherTestUtils.class})
 public class VariantsAnnotLoadTest {
 
-    @Autowired private JobLauncherTestUtils jobLauncherTestUtils;
-    @Autowired private VariantJobsArgs variantJobsArgs;
+    @Autowired
+    private JobLauncherTestUtils jobLauncherTestUtils;
+    @Autowired
+    private VariantJobsArgs variantJobsArgs;
 
     private ExecutionContext executionContext;
     private String dbName;

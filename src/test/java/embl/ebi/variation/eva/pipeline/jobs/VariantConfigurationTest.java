@@ -78,9 +78,12 @@ public class VariantConfigurationTest {
 
     private JobLauncherTestUtils jobLauncherTestUtils;
 
-    @Autowired public VariantJobsArgs variantJobsArgs;
-    @Autowired private JobLauncher jobLauncher;
-    @Autowired private JobRepository jobRepository;
+    @Autowired
+    private VariantJobsArgs variantJobsArgs;
+    @Autowired
+    private JobLauncher jobLauncher;
+    @Autowired
+    private JobRepository jobRepository;
 
     @Autowired
     @Qualifier("variantJob")

@@ -52,9 +52,11 @@ public class VariantConfigurationWorkflowTest {
 
     private JobLauncherTestUtils jobLauncherTestUtils;
 
-    @Autowired public VariantJobsArgs variantJobsArgs;
+    @Autowired
+    private VariantJobsArgs variantJobsArgs;
 
-    @Autowired private JobLauncher jobLauncher;
+    @Autowired
+    private JobLauncher jobLauncher;
 
     @Autowired
     @Qualifier("variantJob")

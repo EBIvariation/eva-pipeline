@@ -57,7 +57,7 @@ public class VariantAnnotConfigurationTest {
     private JobLauncherTestUtils jobLauncherTestUtils;
 
     @Autowired
-    public VariantJobsArgs variantJobsArgs;
+    private VariantJobsArgs variantJobsArgs;
 
     private static String dbName;
     private static MongoClient mongoClient;

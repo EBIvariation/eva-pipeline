@@ -80,7 +80,7 @@ public class VariantAggregatedConfigurationTest {
     private Job job;
 
     @Autowired
-    public VariantJobsArgs variantJobsArgs;
+    private VariantJobsArgs variantJobsArgs;
 
     private ObjectMap variantOptions;
     private ObjectMap pipelineOptions;

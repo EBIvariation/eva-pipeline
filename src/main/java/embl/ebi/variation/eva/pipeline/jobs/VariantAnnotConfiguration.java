@@ -60,16 +60,20 @@ public class VariantAnnotConfiguration extends CommonJobStepInitialization{
     private static final String VARIANT_VEP_ANNOTATION_FLOW = "Variant VEP annotation flow";
     private static final String COMPLETED = "COMPLETED";
 
-    @Autowired private JobBuilderFactory jobBuilderFactory;
+    @Autowired
+    private JobBuilderFactory jobBuilderFactory;
 
     @Qualifier("variantsAnnotGenerateInput")
-    @Autowired public Step variantsAnnotGenerateInputBatchStep;
+    @Autowired
+    public Step variantsAnnotGenerateInputBatchStep;
 
     @Qualifier("variantAnnotLoad")
-    @Autowired private Step variantAnnotLoadBatchStep;
+    @Autowired
+    private Step variantAnnotLoadBatchStep;
 
     @Qualifier("annotationCreate")
-    @Autowired private Step annotationCreate;
+    @Autowired
+    private Step annotationCreate;
 
     @Bean
     public Job variantAnnotationBatchJob(){
