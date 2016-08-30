@@ -16,9 +16,9 @@
 
 package embl.ebi.variation.eva.pipeline.jobs;
 
-import embl.ebi.variation.eva.pipeline.steps.decider.OptionalDecider;
 import embl.ebi.variation.eva.pipeline.steps.VariantsAnnotGenerateInput;
 import embl.ebi.variation.eva.pipeline.steps.VariantsAnnotLoad;
+import embl.ebi.variation.eva.pipeline.steps.decider.OptionalDecider;
 import embl.ebi.variation.eva.pipeline.steps.tasklet.VariantsAnnotCreate;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
@@ -46,13 +46,11 @@ import org.springframework.context.annotation.Import;
  * To solve this we can implement the dynamic-workflow (https://github.com/EBIvariation/examples/tree/master/spring-batch-dynamic-workflow)
  * or we can create a new Job class for each possible scenario
  *
- * TODO:
- * - move variantsAnnotCreate and annotationCreate into a separate class to reuse across different jobs
  */
 
 @Configuration
 @EnableBatchProcessing
-@Import({VariantsAnnotGenerateInput.class, VariantsAnnotLoad.class})
+@Import({VariantsAnnotCreate.class, VariantsAnnotGenerateInput.class, VariantsAnnotLoad.class})
 public class VariantAnnotConfiguration extends CommonJobStepInitialization{
     public static final String jobName = "annotate-variants";
     public static final String SKIP_ANNOT = "annotation.skip";
@@ -71,9 +69,8 @@ public class VariantAnnotConfiguration extends CommonJobStepInitialization{
     @Autowired
     private Step variantAnnotLoadBatchStep;
 
-    @Qualifier("annotationCreate")
     @Autowired
-    private Step annotationCreate;
+    private VariantsAnnotCreate variantsAnnotCreate;
 
     @Bean
     public Job variantAnnotationBatchJob(){
@@ -98,15 +95,8 @@ public class VariantAnnotConfiguration extends CommonJobStepInitialization{
 
     }
 
-    @Bean
-    public VariantsAnnotCreate variantsAnnotCreate(){
-        return new VariantsAnnotCreate();
-    }
-
-    @Bean
-    @Qualifier("annotationCreate")
-    public Step annotationCreate() {
-        return generateStep(GENERATE_VEP_ANNOTATION, variantsAnnotCreate());
+    private Step annotationCreate() {
+        return generateStep(GENERATE_VEP_ANNOTATION, variantsAnnotCreate);
     }
 
 }

@@ -17,7 +17,6 @@
 package embl.ebi.variation.eva.pipeline.annotation.generateInput;
 
 import com.mongodb.DBObject;
-import embl.ebi.variation.eva.pipeline.steps.tasklet.VariantsAnnotCreate;
 import org.opencb.biodata.models.variant.Variant;
 import org.opencb.opencga.storage.mongodb.variant.DBObjectToVariantConverter;
 import org.slf4j.Logger;
