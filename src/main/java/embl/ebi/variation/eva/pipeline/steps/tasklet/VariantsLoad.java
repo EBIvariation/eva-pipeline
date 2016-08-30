@@ -22,8 +22,8 @@ import org.opencb.opencga.storage.core.StorageManagerFactory;
 import org.opencb.opencga.storage.core.variant.VariantStorageManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.batch.core.*;
-import org.springframework.batch.core.configuration.annotation.JobScope;
+import org.springframework.batch.core.StepContribution;
+import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
@@ -41,7 +41,7 @@ import java.nio.file.Paths;
  * @author Jose Miguel Mut Lopez &lt;jmmut@ebi.ac.uk&gt;
  */
 @Component
-@JobScope
+@StepScope
 @Import({VariantJobsArgs.class})
 public class VariantsLoad implements Tasklet {
     private static final Logger logger = LoggerFactory.getLogger(VariantsLoad.class);
