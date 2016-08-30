@@ -47,11 +47,11 @@ public class VariantStatsConfiguration extends CommonJobStepInitialization{
     private static final Logger logger = LoggerFactory.getLogger(VariantStatsConfiguration.class);
     public static final String jobName = "calculate-statistics";
     public static final String SKIP_STATS = "statistics.skip";
+    private static final String CALCULATE_STATISTICS = "Calculate statistics";
+    private static final String LOAD_STATISTICS = "Load statistics";
 
     @Autowired
     private JobBuilderFactory jobBuilderFactory;
-    @Autowired
-    private StepBuilderFactory stepBuilderFactory;
     @Autowired
     private JobLauncher jobLauncher;
     @Autowired
@@ -86,11 +86,8 @@ public class VariantStatsConfiguration extends CommonJobStepInitialization{
         return new VariantsStatsCreate();
     }
 
-    public Step statsCreate() {
-        StepBuilder step1 = stepBuilderFactory.get("Calculate statistics");
-        TaskletStepBuilder tasklet = step1.tasklet(variantsStatsCreate());
-        initStep(tasklet);
-        return tasklet.build();
+    private Step statsCreate() {
+        return generateStep(CALCULATE_STATISTICS,variantsStatsCreate());
     }
 
     @Bean
@@ -98,10 +95,7 @@ public class VariantStatsConfiguration extends CommonJobStepInitialization{
         return new VariantsStatsLoad();
     }
 
-    public Step statsLoad() {
-        StepBuilder step1 = stepBuilderFactory.get("Load statistics");
-        TaskletStepBuilder tasklet = step1.tasklet(variantsStatsLoad());
-        initStep(tasklet);
-        return tasklet.build();
+    private Step statsLoad() {
+        return generateStep(LOAD_STATISTICS, variantsStatsLoad());
     }
 }

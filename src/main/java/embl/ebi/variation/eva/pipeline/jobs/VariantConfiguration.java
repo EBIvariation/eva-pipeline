@@ -56,11 +56,12 @@ public class VariantConfiguration extends CommonJobStepInitialization{
 
     private static final Logger logger = LoggerFactory.getLogger(VariantConfiguration.class);
     public static final String jobName = "load-genotyped-vcf";
+    private static final String NORMALIZE_VARIANTS = "Normalize variants";
+    private static final String LOAD_VARIANTS = "Load variants";
+    private static final String PARALLEL_STATISTICS_AND_ANNOTATION = "Parallel statistics and annotation";
 
     @Autowired
     private JobBuilderFactory jobBuilderFactory;
-    @Autowired
-    private StepBuilderFactory stepBuilderFactory;
     @Autowired
     private Flow variantAnnotationFlow;
     @Autowired
@@ -78,7 +79,7 @@ public class VariantConfiguration extends CommonJobStepInitialization{
                 .get(jobName)
                 .incrementer(new RunIdIncrementer());
 
-        Flow parallelStatsAndAnnotation = new FlowBuilder<Flow>("Parallel statistics and annotation")
+        Flow parallelStatsAndAnnotation = new FlowBuilder<Flow>(PARALLEL_STATISTICS_AND_ANNOTATION)
                 .split(new SimpleAsyncTaskExecutor())
                 .add(variantStatsFlow, variantAnnotationFlow)
                 .build();
@@ -92,18 +93,12 @@ public class VariantConfiguration extends CommonJobStepInitialization{
         return builder.build();
     }
 
-    public Step transform() {
-        StepBuilder step1 = stepBuilderFactory.get("Normalize variants");
-        TaskletStepBuilder tasklet = step1.tasklet(variantsTransform);
-        initStep(tasklet);
-        return tasklet.build();
+    private Step transform() {
+        return generateStep(NORMALIZE_VARIANTS,variantsTransform);
     }
 
-    public Step load() {
-        StepBuilder step1 = stepBuilderFactory.get("Load variants");
-        TaskletStepBuilder tasklet = step1.tasklet(variantsLoad);
-        initStep(tasklet);
-        return tasklet.build();
+    private Step load() {
+        return generateStep(LOAD_VARIANTS, variantsLoad);
     }
 
 }

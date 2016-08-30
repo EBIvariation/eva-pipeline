@@ -39,11 +39,10 @@ public class VariantLoadConfiguration extends CommonJobStepInitialization{
 
     private static final Logger logger = LoggerFactory.getLogger(VariantLoadConfiguration.class);
     private static final String jobName = "variantLoadJob";
+    private static final String LOAD_VARIANTS = "Load variants";
 
     @Autowired
     private JobBuilderFactory jobBuilderFactory;
-    @Autowired
-    private StepBuilderFactory stepBuilderFactory;
 
     @Autowired
     private VariantsLoad variantsLoad;
@@ -60,10 +59,7 @@ public class VariantLoadConfiguration extends CommonJobStepInitialization{
     }
 
     private Step load() {
-        StepBuilder step1 = stepBuilderFactory.get("Load variants");
-        TaskletStepBuilder tasklet = step1.tasklet(variantsLoad);
-        initStep(tasklet);
-        return tasklet.build();
+        return generateStep(LOAD_VARIANTS,variantsLoad);
     }
 
 }

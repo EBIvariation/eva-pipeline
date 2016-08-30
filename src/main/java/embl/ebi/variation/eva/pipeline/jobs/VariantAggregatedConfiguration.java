@@ -17,28 +17,18 @@ package embl.ebi.variation.eva.pipeline.jobs;
 
 import embl.ebi.variation.eva.pipeline.steps.VariantsLoad;
 import embl.ebi.variation.eva.pipeline.steps.VariantsTransform;
-import org.opencb.datastore.core.ObjectMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
-import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.job.builder.JobBuilder;
-import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
-import org.springframework.batch.core.step.builder.StepBuilder;
-import org.springframework.batch.core.step.builder.TaskletStepBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.core.env.Environment;
-
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.nio.file.Paths;
 
 @Configuration
 @EnableBatchProcessing
@@ -47,11 +37,11 @@ public class VariantAggregatedConfiguration extends CommonJobStepInitialization{
 
     private static final Logger logger = LoggerFactory.getLogger(VariantAggregatedConfiguration.class);
     private static final String jobName = "load-aggregated-vcf";
+    private static final String NORMALIZE_VARIANTS = "Normalize variants";
+    private static final String LOAD_VARIANTS = "Load variants";
 
     @Autowired
     private JobBuilderFactory jobBuilderFactory;
-    @Autowired
-    private StepBuilderFactory stepBuilderFactory;
 
     @Autowired
     private VariantsLoad variantsLoad;
@@ -74,17 +64,11 @@ public class VariantAggregatedConfiguration extends CommonJobStepInitialization{
     }
 
     private Step transform() {
-        StepBuilder step1 = stepBuilderFactory.get("Normalize variants");
-        final TaskletStepBuilder tasklet = step1.tasklet(variantsTransform);
-        initStep(tasklet);
-        return tasklet.build();
+        return generateStep(NORMALIZE_VARIANTS,variantsTransform);
     }
 
     private Step load() {
-        StepBuilder step1 = stepBuilderFactory.get("Load variants");
-        TaskletStepBuilder tasklet = step1.tasklet(variantsLoad);
-        initStep(tasklet);
-        return tasklet.build();
+        return generateStep(LOAD_VARIANTS,variantsLoad);
     }
 
 /*

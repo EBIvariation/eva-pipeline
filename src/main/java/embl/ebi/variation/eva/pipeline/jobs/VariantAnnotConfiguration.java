@@ -20,18 +20,14 @@ import embl.ebi.variation.eva.pipeline.OptionalDecider;
 import embl.ebi.variation.eva.pipeline.steps.VariantsAnnotGenerateInput;
 import embl.ebi.variation.eva.pipeline.steps.VariantsAnnotLoad;
 import embl.ebi.variation.eva.pipeline.steps.VariantsAnnotCreate;
-import org.opencb.datastore.core.ObjectMap;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
-import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.job.builder.FlowBuilder;
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.job.flow.Flow;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
-import org.springframework.batch.core.step.builder.StepBuilder;
-import org.springframework.batch.core.step.builder.TaskletStepBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -60,10 +56,11 @@ import org.springframework.context.annotation.Import;
 public class VariantAnnotConfiguration extends CommonJobStepInitialization{
     public static final String jobName = "annotate-variants";
     public static final String SKIP_ANNOT = "annotation.skip";
+    private static final String GENERATE_VEP_ANNOTATION = "Generate VEP annotation";
+    private static final String VARIANT_VEP_ANNOTATION_FLOW = "Variant VEP annotation flow";
+    private static final String COMPLETED = "COMPLETED";
 
     @Autowired private JobBuilderFactory jobBuilderFactory;
-
-    @Autowired private StepBuilderFactory stepBuilderFactory;
 
     @Qualifier("variantsAnnotGenerateInput")
     @Autowired public Step variantsAnnotGenerateInputBatchStep;
@@ -87,12 +84,12 @@ public class VariantAnnotConfiguration extends CommonJobStepInitialization{
     public Flow variantAnnotationFlow(){
         OptionalDecider annotationOptionalDecider = new OptionalDecider(getPipelineOptions(), SKIP_ANNOT);
 
-        return new FlowBuilder<Flow>("Variant VEP annotation flow")
+        return new FlowBuilder<Flow>(VARIANT_VEP_ANNOTATION_FLOW)
                 .start(annotationOptionalDecider).on(OptionalDecider.DO_STEP)
                 .to(variantsAnnotGenerateInputBatchStep)
                 .next(annotationCreate())
                 .next(variantAnnotLoadBatchStep)
-                .from(annotationOptionalDecider).on(OptionalDecider.SKIP_STEP).end("COMPLETED")
+                .from(annotationOptionalDecider).on(OptionalDecider.SKIP_STEP).end(COMPLETED)
                 .build();
 
     }
@@ -105,10 +102,7 @@ public class VariantAnnotConfiguration extends CommonJobStepInitialization{
     @Bean
     @Qualifier("annotationCreate")
     public Step annotationCreate() {
-        StepBuilder step1 = stepBuilderFactory.get("Generate VEP annotation");
-        TaskletStepBuilder tasklet = step1.tasklet(variantsAnnotCreate());
-        initStep(tasklet);
-        return tasklet.build();
+        return generateStep(GENERATE_VEP_ANNOTATION, variantsAnnotCreate());
     }
 
 }
