@@ -16,6 +16,7 @@
 package embl.ebi.variation.eva.pipeline.jobs;
 
 import embl.ebi.variation.eva.VariantJobsArgs;
+import embl.ebi.variation.eva.pipeline.config.CommonConfig;
 import embl.ebi.variation.eva.pipeline.steps.VariantsLoad;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -38,19 +39,17 @@ import org.springframework.batch.core.repository.JobExecutionAlreadyRunningExcep
 import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
 import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import java.io.*;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.net.UnknownHostException;
 import java.nio.file.Paths;
 import java.util.zip.GZIPInputStream;
 
 import static embl.ebi.variation.eva.pipeline.jobs.JobTestUtils.*;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * Created by jmmut on 2015-10-14.
@@ -73,9 +72,6 @@ public class VariantAggregatedConfigurationTest {
     private static final String VALID_LOAD = "validAggLoad";
 //    private static final String INVALID_LOAD = "invalidAggLoad";
     private static final String VALID_LOAD_STATS = "validAggStatsLoad";
-
-    @Autowired
-    PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer;
 
     @Autowired
     private JobLauncher jobLauncher;

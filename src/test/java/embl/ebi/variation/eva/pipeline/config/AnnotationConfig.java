@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package embl.ebi.variation.eva.pipeline.jobs;
+package embl.ebi.variation.eva.pipeline.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -31,7 +31,7 @@ import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 public class AnnotationConfig {
 
     @Bean
-    public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
+    private static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
         return new PropertySourcesPlaceholderConfigurer();
     }
 

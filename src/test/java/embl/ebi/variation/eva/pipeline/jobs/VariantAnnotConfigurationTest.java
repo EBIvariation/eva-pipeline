@@ -18,12 +18,11 @@ package embl.ebi.variation.eva.pipeline.jobs;
 
 import com.mongodb.*;
 import embl.ebi.variation.eva.VariantJobsArgs;
+import embl.ebi.variation.eva.pipeline.config.AnnotationConfig;
 import junit.framework.TestCase;
-import org.apache.commons.io.FileUtils;
 import org.junit.*;
 import org.junit.runner.RunWith;
 import org.opencb.biodata.models.variant.annotation.VariantAnnotation;
-import org.opencb.opencga.storage.core.variant.VariantStorageManager;
 import org.opencb.opencga.storage.mongodb.variant.DBObjectToVariantAnnotationConverter;
 import org.springframework.batch.core.*;
 import org.springframework.batch.test.JobLauncherTestUtils;
