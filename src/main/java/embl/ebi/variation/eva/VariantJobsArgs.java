@@ -17,11 +17,16 @@ package embl.ebi.variation.eva;
 
 import embl.ebi.variation.eva.pipeline.jobs.VariantAnnotConfiguration;
 import embl.ebi.variation.eva.pipeline.jobs.VariantStatsConfiguration;
-import embl.ebi.variation.eva.pipeline.steps.*;
+
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URI;
+
+import embl.ebi.variation.eva.pipeline.steps.tasklet.VariantsAnnotCreate;
+import embl.ebi.variation.eva.pipeline.steps.tasklet.VariantsLoad;
+import embl.ebi.variation.eva.pipeline.steps.tasklet.VariantsStatsCreate;
+import embl.ebi.variation.eva.pipeline.steps.tasklet.VariantsStatsLoad;
 import org.opencb.biodata.models.variant.VariantSource;
 import org.opencb.biodata.models.variant.VariantStudy;
 import org.opencb.datastore.core.ObjectMap;

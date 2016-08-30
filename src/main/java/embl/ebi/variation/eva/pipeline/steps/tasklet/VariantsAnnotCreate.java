@@ -13,10 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package embl.ebi.variation.eva.pipeline.steps;
+package embl.ebi.variation.eva.pipeline.steps.tasklet;
 
 import embl.ebi.variation.eva.VariantJobsArgs;
-import org.opencb.biodata.models.variant.Variant;
 import org.opencb.datastore.core.ObjectMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

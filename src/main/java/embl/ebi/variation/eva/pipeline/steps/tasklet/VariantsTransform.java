@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package embl.ebi.variation.eva.pipeline.steps;
+package embl.ebi.variation.eva.pipeline.steps.tasklet;
 
 import embl.ebi.variation.eva.VariantJobsArgs;
 import embl.ebi.variation.eva.utils.URLHelper;
@@ -31,8 +31,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.net.URI;
-import java.net.URISyntaxException;
-import java.nio.file.Paths;
 
 /**
  * Created by jmmut on 2015-11-10.

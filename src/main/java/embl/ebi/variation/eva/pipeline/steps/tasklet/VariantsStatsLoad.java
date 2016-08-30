@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package embl.ebi.variation.eva.pipeline.steps;
+package embl.ebi.variation.eva.pipeline.steps.tasklet;
 
 import embl.ebi.variation.eva.VariantJobsArgs;
 import embl.ebi.variation.eva.utils.URLHelper;
@@ -32,6 +32,7 @@ import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Import;
 import org.springframework.stereotype.Component;
 
 import java.net.URI;
@@ -43,9 +44,10 @@ import java.net.URI;
  */
 @Component
 @StepScope
-public class VariantsStatsCreate implements Tasklet {
-    private static final Logger logger = LoggerFactory.getLogger(VariantsStatsCreate.class);
-    public static final String SKIP_STATS_CREATE = "statistics.create.skip";
+@Import({VariantJobsArgs.class})
+public class VariantsStatsLoad implements Tasklet {
+    private static final Logger logger = LoggerFactory.getLogger(VariantsStatsLoad.class);
+    public static final String SKIP_STATS_LOAD = "statistics.load.skip";
 
     @Autowired
     private VariantJobsArgs variantJobsArgs;
@@ -55,24 +57,19 @@ public class VariantsStatsCreate implements Tasklet {
         ObjectMap variantOptions = variantJobsArgs.getVariantOptions();
         ObjectMap pipelineOptions = variantJobsArgs.getPipelineOptions();
 
-//                HashMap<String, Set<String>> samples = new HashMap<>(); // TODO fill properly. if this is null overwrite will take on
-//                samples.put("SOME", new HashSet<>(Arrays.asList("HG00096", "HG00097")));
-        //JobParameters parameters = chunkContext.getStepContext().getStepExecution().getJobParameters();
-
-        if (pipelineOptions.getBoolean(SKIP_STATS_CREATE)) {
-            logger.info("skipping stats creation step, skipStatsCreate is set to {}", pipelineOptions.getBoolean(SKIP_STATS_CREATE));
+        if (pipelineOptions.getBoolean(SKIP_STATS_LOAD)) {
+            logger.info("skipping stats loading");
         } else {
             VariantStorageManager variantStorageManager = StorageManagerFactory.getVariantStorageManager();
-            VariantSource variantSource = variantOptions.get(VariantStorageManager.VARIANT_SOURCE, VariantSource.class);
+            QueryOptions statsOptions = new QueryOptions(variantOptions);
+            VariantStatisticsManager variantStatisticsManager = new VariantStatisticsManager();
             VariantDBAdaptor dbAdaptor = variantStorageManager.getDBAdaptor(variantOptions.getString("dbName"), variantOptions);
             URI outdirUri = URLHelper.createUri(pipelineOptions.getString("output.dir"));
+            VariantSource variantSource = variantOptions.get(VariantStorageManager.VARIANT_SOURCE, VariantSource.class);
             URI statsOutputUri = outdirUri.resolve(VariantStorageManager.buildFilename(variantSource));
 
-            VariantStatisticsManager variantStatisticsManager = new VariantStatisticsManager();
-            QueryOptions statsOptions = new QueryOptions(variantOptions);
-
-            // actual stats creation
-            variantStatisticsManager.createStats(dbAdaptor, statsOutputUri, null, statsOptions);    // TODO allow subset of samples
+            // actual stats load
+            variantStatisticsManager.loadStats(dbAdaptor, statsOutputUri, statsOptions);
         }
 
         return RepeatStatus.FINISHED;

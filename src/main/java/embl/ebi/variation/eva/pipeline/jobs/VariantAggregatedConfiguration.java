@@ -15,8 +15,8 @@
  */
 package embl.ebi.variation.eva.pipeline.jobs;
 
-import embl.ebi.variation.eva.pipeline.steps.VariantsLoad;
-import embl.ebi.variation.eva.pipeline.steps.VariantsTransform;
+import embl.ebi.variation.eva.pipeline.steps.tasklet.VariantsLoad;
+import embl.ebi.variation.eva.pipeline.steps.tasklet.VariantsTransform;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.Job;

@@ -15,7 +15,10 @@
  */
 package embl.ebi.variation.eva.pipeline.config;
 
-import embl.ebi.variation.eva.pipeline.steps.*;
+import embl.ebi.variation.eva.pipeline.steps.tasklet.VariantsAnnotCreate;
+import embl.ebi.variation.eva.pipeline.steps.tasklet.VariantsLoad;
+import embl.ebi.variation.eva.pipeline.steps.tasklet.VariantsStatsCreate;
+import embl.ebi.variation.eva.pipeline.steps.tasklet.VariantsStatsLoad;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;

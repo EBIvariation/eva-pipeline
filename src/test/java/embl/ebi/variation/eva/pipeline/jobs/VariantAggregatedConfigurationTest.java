@@ -17,7 +17,7 @@ package embl.ebi.variation.eva.pipeline.jobs;
 
 import embl.ebi.variation.eva.VariantJobsArgs;
 import embl.ebi.variation.eva.pipeline.config.CommonConfig;
-import embl.ebi.variation.eva.pipeline.steps.VariantsLoad;
+import embl.ebi.variation.eva.pipeline.steps.tasklet.VariantsLoad;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;

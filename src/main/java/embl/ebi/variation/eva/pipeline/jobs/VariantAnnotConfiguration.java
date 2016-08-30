@@ -16,10 +16,10 @@
 
 package embl.ebi.variation.eva.pipeline.jobs;
 
-import embl.ebi.variation.eva.pipeline.OptionalDecider;
+import embl.ebi.variation.eva.pipeline.steps.decider.OptionalDecider;
 import embl.ebi.variation.eva.pipeline.steps.VariantsAnnotGenerateInput;
 import embl.ebi.variation.eva.pipeline.steps.VariantsAnnotLoad;
-import embl.ebi.variation.eva.pipeline.steps.VariantsAnnotCreate;
+import embl.ebi.variation.eva.pipeline.steps.tasklet.VariantsAnnotCreate;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
