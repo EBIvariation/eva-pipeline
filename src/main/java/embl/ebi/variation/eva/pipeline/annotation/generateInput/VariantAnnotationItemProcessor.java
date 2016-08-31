@@ -17,7 +17,6 @@
 package embl.ebi.variation.eva.pipeline.annotation.generateInput;
 
 import com.mongodb.DBObject;
-import embl.ebi.variation.eva.pipeline.steps.VariantsAnnotCreate;
 import org.opencb.biodata.models.variant.Variant;
 import org.opencb.opencga.storage.mongodb.variant.DBObjectToVariantConverter;
 import org.slf4j.Logger;
@@ -32,7 +31,7 @@ import org.springframework.batch.item.ItemProcessor;
  *
  */
 public class VariantAnnotationItemProcessor implements ItemProcessor<DBObject, VariantWrapper> {
-    private static final Logger logger = LoggerFactory.getLogger(VariantsAnnotCreate.class);
+    private static final Logger logger = LoggerFactory.getLogger(VariantAnnotationItemProcessor.class);
 
     private DBObjectToVariantConverter converter;
 

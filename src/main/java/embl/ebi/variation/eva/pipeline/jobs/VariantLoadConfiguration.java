@@ -15,44 +15,34 @@
  */
 package embl.ebi.variation.eva.pipeline.jobs;
 
-import embl.ebi.variation.eva.pipeline.steps.VariantsLoad;
-import org.opencb.datastore.core.ObjectMap;
+import embl.ebi.variation.eva.pipeline.steps.tasklet.VariantsLoad;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
-import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.job.builder.JobBuilder;
-import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
-import org.springframework.batch.core.step.builder.StepBuilder;
-import org.springframework.batch.core.step.builder.TaskletStepBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.core.env.Environment;
 
 @Configuration
 @EnableBatchProcessing
-@Import(VariantJobArgsConfig.class)
-public class VariantLoadConfiguration {
+@Import({VariantsLoad.class})
+public class VariantLoadConfiguration extends CommonJobStepInitialization{
 
     private static final Logger logger = LoggerFactory.getLogger(VariantLoadConfiguration.class);
-    public static final String jobName = "variantLoadJob";
+    private static final String jobName = "variantLoadJob";
+    private static final String LOAD_VARIANTS = "Load variants";
 
     @Autowired
     private JobBuilderFactory jobBuilderFactory;
+
     @Autowired
-    private StepBuilderFactory stepBuilderFactory;
-    @Autowired
-    JobLauncher jobLauncher;
-    @Autowired
-    Environment environment;
-    @Autowired
-    private ObjectMap pipelineOptions;
+    private VariantsLoad variantsLoad;
 
     @Bean
     public Job variantLoadJob() {
@@ -65,29 +55,8 @@ public class VariantLoadConfiguration {
                 .build();
     }
 
-    @Bean
-    public VariantsLoad variantsLoad(){
-        return new VariantsLoad();
-    }
-
-    public Step load() {
-        StepBuilder step1 = stepBuilderFactory.get("Load variants");
-        TaskletStepBuilder tasklet = step1.tasklet(variantsLoad());
-        initStep(tasklet);
-        return tasklet.build();
-    }
-
-    /**
-     * Initialize a Step with common configuration
-     * @param tasklet to be initialized with common configuration
-     */
-    private void initStep(TaskletStepBuilder tasklet) {
-
-        boolean allowStartIfComplete  = pipelineOptions.getBoolean("config.restartability.allow");
-
-        // true: every job execution will do this step, even if this step is already COMPLETED
-        // false(default): if the job was aborted and is relaunched, this step will NOT be done again
-        tasklet.allowStartIfComplete(allowStartIfComplete);
+    private Step load() {
+        return generateStep(LOAD_VARIANTS,variantsLoad);
     }
 
 }

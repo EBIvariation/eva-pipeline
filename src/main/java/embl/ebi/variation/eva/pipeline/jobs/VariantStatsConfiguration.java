@@ -15,49 +15,45 @@
  */
 package embl.ebi.variation.eva.pipeline.jobs;
 
-import embl.ebi.variation.eva.pipeline.OptionalDecider;
-import embl.ebi.variation.eva.pipeline.steps.VariantsStatsCreate;
-import embl.ebi.variation.eva.pipeline.steps.VariantsStatsLoad;
-import org.opencb.datastore.core.ObjectMap;
+import embl.ebi.variation.eva.pipeline.steps.decider.OptionalDecider;
+import embl.ebi.variation.eva.pipeline.steps.tasklet.VariantsStatsCreate;
+import embl.ebi.variation.eva.pipeline.steps.tasklet.VariantsStatsLoad;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
-import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.job.builder.FlowBuilder;
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.job.flow.Flow;
-import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
-import org.springframework.batch.core.step.builder.StepBuilder;
-import org.springframework.batch.core.step.builder.TaskletStepBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.core.env.Environment;
 
 @Configuration
 @EnableBatchProcessing
-@Import(VariantJobArgsConfig.class)
-public class VariantStatsConfiguration {
+@Import({VariantsStatsCreate.class, VariantsStatsLoad.class})
+public class VariantStatsConfiguration extends CommonJobStepInitialization{
 
     private static final Logger logger = LoggerFactory.getLogger(VariantStatsConfiguration.class);
-    public static final String jobName = "calculate-statistics";
+    private static final String jobName = "calculate-statistics";
     public static final String SKIP_STATS = "statistics.skip";
+    private static final String CALCULATE_STATISTICS = "Calculate statistics";
+    private static final String LOAD_STATISTICS = "Load statistics";
+    private static final String STATS_FLOW = "statsFlow";
+    private static final String COMPLETED = "COMPLETED";
 
     @Autowired
     private JobBuilderFactory jobBuilderFactory;
+
     @Autowired
-    private StepBuilderFactory stepBuilderFactory;
+    private VariantsStatsCreate variantsStatsCreate;
+
     @Autowired
-    JobLauncher jobLauncher;
-    @Autowired
-    Environment environment;
-    @Autowired
-    private ObjectMap pipelineOptions;
+    private VariantsStatsLoad variantsStatsLoad;
 
     @Bean
     public Job variantStatsJob() {
@@ -73,49 +69,21 @@ public class VariantStatsConfiguration {
     @Bean
     public Flow variantStatsFlow(){
 
-        OptionalDecider statisticsOptionalDecider = new OptionalDecider(pipelineOptions, SKIP_STATS);
+        OptionalDecider statisticsOptionalDecider = new OptionalDecider(getPipelineOptions(), SKIP_STATS);
 
-        return new FlowBuilder<Flow>("statsFlow")
+        return new FlowBuilder<Flow>(STATS_FLOW)
                 .start(statisticsOptionalDecider).on(OptionalDecider.DO_STEP)
                 .to(statsCreate())
                 .next(statsLoad())
-                .from(statisticsOptionalDecider).on(OptionalDecider.SKIP_STEP).end("COMPLETED")
+                .from(statisticsOptionalDecider).on(OptionalDecider.SKIP_STEP).end(COMPLETED)
                 .build();
     }
 
-    @Bean
-    public VariantsStatsCreate variantsStatsCreate(){
-        return new VariantsStatsCreate();
+    private Step statsCreate() {
+        return generateStep(CALCULATE_STATISTICS,variantsStatsCreate);
     }
 
-    public Step statsCreate() {
-        StepBuilder step1 = stepBuilderFactory.get("Calculate statistics");
-        TaskletStepBuilder tasklet = step1.tasklet(variantsStatsCreate());
-        initStep(tasklet);
-        return tasklet.build();
-    }
-
-    @Bean
-    public VariantsStatsLoad variantsStatsLoad(){
-        return new VariantsStatsLoad();
-    }
-
-    public Step statsLoad() {
-        StepBuilder step1 = stepBuilderFactory.get("Load statistics");
-        TaskletStepBuilder tasklet = step1.tasklet(variantsStatsLoad());
-        initStep(tasklet);
-        return tasklet.build();
-    }
-
-    /**
-     * Initialize a Step with common configuration
-     * @param tasklet to be initialized with common configuration
-     */
-    private void initStep(TaskletStepBuilder tasklet) {
-        boolean allowStartIfComplete  = pipelineOptions.getBoolean("config.restartability.allow");
-
-        // true: every job execution will do this step, even if this step is already COMPLETED
-        // false(default): if the job was aborted and is relaunched, this step will NOT be done again
-        tasklet.allowStartIfComplete(allowStartIfComplete);
+    private Step statsLoad() {
+        return generateStep(LOAD_STATISTICS, variantsStatsLoad);
     }
 }

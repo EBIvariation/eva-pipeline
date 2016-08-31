@@ -13,9 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package embl.ebi.variation.eva.pipeline.jobs;
+package embl.ebi.variation.eva.pipeline.config;
 
-import embl.ebi.variation.eva.pipeline.steps.*;
+import embl.ebi.variation.eva.pipeline.steps.tasklet.VariantsAnnotCreate;
+import embl.ebi.variation.eva.pipeline.steps.tasklet.VariantsLoad;
+import embl.ebi.variation.eva.pipeline.steps.tasklet.VariantsStatsCreate;
+import embl.ebi.variation.eva.pipeline.steps.tasklet.VariantsStatsLoad;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
@@ -34,7 +37,7 @@ public class CommonConfig {
     private static String opencgaHome = System.getenv("OPENCGA_HOME") != null ? System.getenv("OPENCGA_HOME") : "/opt/opencga";
 
     @Bean
-    static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
+    private static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
         PropertySourcesPlaceholderConfigurer configurer = new PropertySourcesPlaceholderConfigurer();
 
         Properties properties = new Properties();

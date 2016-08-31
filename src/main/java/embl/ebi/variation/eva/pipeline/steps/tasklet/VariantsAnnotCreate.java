@@ -13,16 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package embl.ebi.variation.eva.pipeline.steps;
+package embl.ebi.variation.eva.pipeline.steps.tasklet;
 
+import embl.ebi.variation.eva.VariantJobsArgs;
 import org.opencb.datastore.core.ObjectMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.StepContribution;
+import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Import;
+import org.springframework.stereotype.Component;
 
 import java.io.*;
 import java.util.Arrays;
@@ -34,15 +38,19 @@ import java.util.zip.GZIPOutputStream;
  * @author Jose Miguel Mut Lopez &lt;jmmut@ebi.ac.uk&gt;
  * @author Cristina Yenyxe Gonzalez Garcia &lt;cyenyxe@ebi.ac.uk&gt;
  */
+@Component
+@StepScope
+@Import({VariantJobsArgs.class})
 public class VariantsAnnotCreate implements Tasklet {
     private static final Logger logger = LoggerFactory.getLogger(VariantsAnnotCreate.class);
     public static final String SKIP_ANNOT_CREATE = "annotation.create.skip";
 
     @Autowired
-    private ObjectMap pipelineOptions;
+    private VariantJobsArgs variantJobsArgs;
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
+        ObjectMap pipelineOptions = variantJobsArgs.getPipelineOptions();
 
         if (pipelineOptions.getBoolean(SKIP_ANNOT_CREATE)) {
             logger.info("skipping annotation creation step, skipAnnotCreate is set to {} ",

@@ -13,21 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package embl.ebi.variation.eva.pipeline.steps;
+package embl.ebi.variation.eva.pipeline.steps.tasklet;
 
+import embl.ebi.variation.eva.VariantJobsArgs;
+import embl.ebi.variation.eva.utils.URLHelper;
 import org.opencb.datastore.core.ObjectMap;
 import org.opencb.opencga.storage.core.StorageManagerFactory;
 import org.opencb.opencga.storage.core.variant.VariantStorageManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.batch.core.*;
+import org.springframework.batch.core.StepContribution;
+import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Import;
+import org.springframework.stereotype.Component;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -36,24 +40,27 @@ import java.nio.file.Paths;
  *
  * @author Jose Miguel Mut Lopez &lt;jmmut@ebi.ac.uk&gt;
  */
+@Component
+@StepScope
+@Import({VariantJobsArgs.class})
 public class VariantsLoad implements Tasklet {
     private static final Logger logger = LoggerFactory.getLogger(VariantsLoad.class);
     public static final String SKIP_LOAD = "load.skip";
 
     @Autowired
-    private ObjectMap variantOptions;
-    @Autowired
-    private ObjectMap pipelineOptions;
+    private VariantJobsArgs variantJobsArgs;
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
+        ObjectMap variantOptions = variantJobsArgs.getVariantOptions();
+        ObjectMap pipelineOptions = variantJobsArgs.getPipelineOptions();
 
         if (pipelineOptions.getBoolean(SKIP_LOAD)) {
             logger.info("skipping load step, skipLoad is set to {}", pipelineOptions.getBoolean(SKIP_LOAD));
         } else {
             VariantStorageManager variantStorageManager = StorageManagerFactory.getVariantStorageManager();// TODO add mongo
-            URI outdirUri = createUri(pipelineOptions.getString("output.dir"));
-            URI nextFileUri = createUri(pipelineOptions.getString("input.vcf"));
+            URI outdirUri = URLHelper.createUri(pipelineOptions.getString("output.dir"));
+            URI nextFileUri = URLHelper.createUri(pipelineOptions.getString("input.vcf"));
 
 //          URI pedigreeUri = pipelineOptions.getString("input.pedigree") != null ? createUri(pipelineOptions.getString("input.pedigree")) : null;
             Path output = Paths.get(outdirUri.getPath());
@@ -72,14 +79,6 @@ public class VariantsLoad implements Tasklet {
         }
 
         return RepeatStatus.FINISHED;
-    }
-
-    public static URI createUri(String input) throws URISyntaxException {
-        URI sourceUri = new URI(input);
-        if (sourceUri.getScheme() == null || sourceUri.getScheme().isEmpty()) {
-            sourceUri = Paths.get(input).toUri();
-        }
-        return sourceUri;
     }
 
 }

@@ -16,27 +16,21 @@
 
 package embl.ebi.variation.eva.pipeline.steps;
 
+import embl.ebi.variation.eva.VariantJobsArgs;
 import embl.ebi.variation.eva.pipeline.MongoDBHelper;
-import embl.ebi.variation.eva.pipeline.annotation.GzipLazyResource;
-import embl.ebi.variation.eva.pipeline.annotation.load.VariantAnnotationLineMapper;
-import embl.ebi.variation.eva.pipeline.annotation.load.VariantAnnotationMongoItemWriter;
-import embl.ebi.variation.eva.pipeline.jobs.VariantJobArgsConfig;
+import embl.ebi.variation.eva.pipeline.steps.writers.VariantAnnotationMongoItemWriter;
 import embl.ebi.variation.eva.pipeline.listener.SkipCheckingListener;
+import embl.ebi.variation.eva.pipeline.steps.readers.VariantAnnotationReader;
 import org.opencb.biodata.models.variant.annotation.VariantAnnotation;
-import org.opencb.datastore.core.ObjectMap;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
-import org.springframework.batch.item.ItemWriter;
-import org.springframework.batch.item.data.MongoItemWriter;
-import org.springframework.batch.item.file.FlatFileItemReader;
 import org.springframework.batch.item.file.FlatFileParseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.core.io.Resource;
 import org.springframework.data.mongodb.core.MongoOperations;
 
 import java.io.IOException;
@@ -52,47 +46,28 @@ import java.io.IOException;
 
 @Configuration
 @EnableBatchProcessing
-@Import(VariantJobArgsConfig.class)
+@Import({VariantJobsArgs.class})
 public class VariantsAnnotLoad {
 
     @Autowired
-    private StepBuilderFactory steps;
+    private StepBuilderFactory stepBuilderFactory;
 
     @Autowired
-    private ObjectMap pipelineOptions;
+    private VariantJobsArgs variantJobsArgs;
 
     @Bean
     @Qualifier("variantAnnotLoad")
     public Step variantAnnotLoadBatchStep() throws IOException {
-        return steps.get("Load VEP annotation").<VariantAnnotation, VariantAnnotation> chunk(10)
-                .reader(variantAnnotationReader())
-                .writer(variantAnnotationWriter())
+        MongoOperations mongoOperations = MongoDBHelper.getMongoOperationsFromPipelineOptions(variantJobsArgs.getPipelineOptions());
+        String collections = variantJobsArgs.getPipelineOptions().getString("db.collections.variants.name");
+        VariantAnnotationMongoItemWriter writer = new VariantAnnotationMongoItemWriter(mongoOperations, collections);
+
+        return stepBuilderFactory.get("Load VEP annotation").<VariantAnnotation, VariantAnnotation> chunk(10)
+                .reader(new VariantAnnotationReader(variantJobsArgs.getPipelineOptions()))
+                .writer(writer)
                 .faultTolerant().skipLimit(50).skip(FlatFileParseException.class)
-                .listener(skipCheckingListener())
+                .listener(new SkipCheckingListener())
                 .build();
-    }
-
-    @Bean
-    public FlatFileItemReader<VariantAnnotation> variantAnnotationReader() throws IOException {
-        Resource resource = new GzipLazyResource(pipelineOptions.getString("vep.output"));
-        FlatFileItemReader<VariantAnnotation> reader = new FlatFileItemReader<>();
-        reader.setResource(resource);
-        reader.setLineMapper(new VariantAnnotationLineMapper());
-        return reader;
-    }
-
-    @Bean
-    public ItemWriter<VariantAnnotation> variantAnnotationWriter(){
-        MongoOperations mongoOperations = MongoDBHelper.getMongoOperationsFromPipelineOptions(pipelineOptions);
-        MongoItemWriter<VariantAnnotation> writer = new VariantAnnotationMongoItemWriter(mongoOperations);
-        writer.setCollection(pipelineOptions.getString("db.collections.variants.name"));
-        writer.setTemplate(mongoOperations);
-        return writer;
-    }
-
-    @Bean
-    public SkipCheckingListener skipCheckingListener(){
-        return new SkipCheckingListener();
     }
 
 }

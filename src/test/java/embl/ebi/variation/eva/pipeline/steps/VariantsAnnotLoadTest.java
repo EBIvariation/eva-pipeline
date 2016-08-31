@@ -19,29 +19,31 @@ import com.mongodb.*;
 import embl.ebi.variation.eva.VariantJobsArgs;
 import embl.ebi.variation.eva.pipeline.MongoDBHelper;
 import embl.ebi.variation.eva.pipeline.annotation.load.VariantAnnotationLineMapper;
-import embl.ebi.variation.eva.pipeline.jobs.*;
+import embl.ebi.variation.eva.pipeline.steps.writers.VariantAnnotationMongoItemWriter;
+import embl.ebi.variation.eva.pipeline.config.AnnotationConfig;
+import embl.ebi.variation.eva.pipeline.jobs.JobTestUtils;
+import embl.ebi.variation.eva.pipeline.jobs.VariantAnnotConfiguration;
+import embl.ebi.variation.eva.pipeline.steps.readers.VariantAnnotationReader;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.opencb.biodata.models.variant.annotation.VariantAnnotation;
-import org.opencb.opencga.storage.core.variant.VariantStorageManager;
 import org.opencb.opencga.storage.mongodb.variant.DBObjectToVariantAnnotationConverter;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.item.ExecutionContext;
-import org.springframework.batch.item.ItemWriter;
-import org.springframework.batch.item.file.FlatFileItemReader;
 import org.springframework.batch.item.file.FlatFileParseException;
 import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.batch.test.MetaDataInstanceFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import java.io.*;
+import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -50,9 +52,7 @@ import java.util.zip.GZIPInputStream;
 
 import static embl.ebi.variation.eva.pipeline.jobs.JobTestUtils.makeGzipFile;
 import static embl.ebi.variation.eva.pipeline.jobs.JobTestUtils.restoreMongoDbFromDump;
-import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertNotNull;
-import static junit.framework.TestCase.assertTrue;
+import static junit.framework.TestCase.*;
 
 
 /**
@@ -66,10 +66,10 @@ import static junit.framework.TestCase.assertTrue;
 @ContextConfiguration(classes = { VariantAnnotConfiguration.class, AnnotationConfig.class, JobLauncherTestUtils.class})
 public class VariantsAnnotLoadTest {
 
-    @Autowired private JobLauncherTestUtils jobLauncherTestUtils;
-    @Autowired private FlatFileItemReader<VariantAnnotation> annotationReader;
-    @Autowired private ItemWriter<VariantAnnotation> annotationWriter;
-    @Autowired private VariantJobsArgs variantJobsArgs;
+    @Autowired
+    private JobLauncherTestUtils jobLauncherTestUtils;
+    @Autowired
+    private VariantJobsArgs variantJobsArgs;
 
     private ExecutionContext executionContext;
     private String dbName;
@@ -134,13 +134,14 @@ public class VariantsAnnotLoadTest {
         //simulate VEP output file
         makeGzipFile(vepOutputContent, vepOutput);
 
-        annotationReader.setSaveState(false);
-        annotationReader.open(executionContext);
+        VariantAnnotationReader variantAnnotationReader = new VariantAnnotationReader(variantJobsArgs.getPipelineOptions());
+        variantAnnotationReader.setSaveState(false);
+        variantAnnotationReader.open(executionContext);
 
         VariantAnnotation variantAnnotation;
         int consequenceTypeCount = 0;
         int count = 0;
-        while ((variantAnnotation = annotationReader.read()) != null) {
+        while ((variantAnnotation = variantAnnotationReader.read()) != null) {
             count++;
             if (variantAnnotation.getConsequenceTypes() != null && !variantAnnotation.getConsequenceTypes().isEmpty()) {
                 consequenceTypeCount++;
@@ -159,8 +160,9 @@ public class VariantsAnnotLoadTest {
     public void malformedVariantFieldsAnnotationLinesShouldBeSkipped() throws Exception {
         String vepOutput = variantJobsArgs.getPipelineOptions().getString("vep.output");
         makeGzipFile(vepOutputContentMalformedVariantFields, vepOutput);
-        annotationReader.open(executionContext);
-        annotationReader.read();
+        VariantAnnotationReader variantAnnotationReader = new VariantAnnotationReader(variantJobsArgs.getPipelineOptions());
+        variantAnnotationReader.open(executionContext);
+        variantAnnotationReader.read();
     }
 
     // Missing ':' in 20_63351 (should be 20:63351)
@@ -168,8 +170,9 @@ public class VariantsAnnotLoadTest {
     public void malformedCoordinatesAnnotationLinesShouldBeSkipped() throws Exception {
         String vepOutput = variantJobsArgs.getPipelineOptions().getString("vep.output");
         makeGzipFile(vepOutputContentMalformedCoordinates, vepOutput);
-        annotationReader.open(executionContext);
-        annotationReader.read();
+        VariantAnnotationReader variantAnnotationReader = new VariantAnnotationReader(variantJobsArgs.getPipelineOptions());
+        variantAnnotationReader.open(executionContext);
+        variantAnnotationReader.read();
     }
 
     @Test
@@ -204,6 +207,10 @@ public class VariantsAnnotLoadTest {
         }
 
         // now, load the annotation
+        MongoOperations mongoOperations = MongoDBHelper.getMongoOperationsFromPipelineOptions(variantJobsArgs.getPipelineOptions());
+        String collections = variantJobsArgs.getPipelineOptions().getString("db.collections.variants.name");
+        VariantAnnotationMongoItemWriter annotationWriter = new VariantAnnotationMongoItemWriter(mongoOperations, collections);
+
         annotationWriter.write(annotations);
 
         // and finally check that documents in DB have annotation (only consequence type)

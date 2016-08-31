@@ -13,8 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package embl.ebi.variation.eva.pipeline.steps;
+package embl.ebi.variation.eva.pipeline.steps.tasklet;
 
+import embl.ebi.variation.eva.VariantJobsArgs;
+import embl.ebi.variation.eva.utils.URLHelper;
 import org.opencb.biodata.models.variant.VariantSource;
 import org.opencb.datastore.core.ObjectMap;
 import org.opencb.datastore.core.QueryOptions;
@@ -25,32 +27,35 @@ import org.opencb.opencga.storage.core.variant.stats.VariantStatisticsManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.StepContribution;
+import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Import;
+import org.springframework.stereotype.Component;
 
 import java.net.URI;
-import java.net.URISyntaxException;
-import java.nio.file.Paths;
 
 /**
  * Created by jmmut on 2015-11-10.
  *
  * @author Jose Miguel Mut Lopez &lt;jmmut@ebi.ac.uk&gt;
  */
+@Component
+@StepScope
+@Import({VariantJobsArgs.class})
 public class VariantsStatsLoad implements Tasklet {
     private static final Logger logger = LoggerFactory.getLogger(VariantsStatsLoad.class);
     public static final String SKIP_STATS_LOAD = "statistics.load.skip";
 
     @Autowired
-    private ObjectMap variantOptions;
-
-    @Autowired
-    private ObjectMap pipelineOptions;
+    private VariantJobsArgs variantJobsArgs;
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
+        ObjectMap variantOptions = variantJobsArgs.getVariantOptions();
+        ObjectMap pipelineOptions = variantJobsArgs.getPipelineOptions();
 
         if (pipelineOptions.getBoolean(SKIP_STATS_LOAD)) {
             logger.info("skipping stats loading");
@@ -59,7 +64,7 @@ public class VariantsStatsLoad implements Tasklet {
             QueryOptions statsOptions = new QueryOptions(variantOptions);
             VariantStatisticsManager variantStatisticsManager = new VariantStatisticsManager();
             VariantDBAdaptor dbAdaptor = variantStorageManager.getDBAdaptor(variantOptions.getString("dbName"), variantOptions);
-            URI outdirUri = createUri(pipelineOptions.getString("output.dir"));
+            URI outdirUri = URLHelper.createUri(pipelineOptions.getString("output.dir"));
             VariantSource variantSource = variantOptions.get(VariantStorageManager.VARIANT_SOURCE, VariantSource.class);
             URI statsOutputUri = outdirUri.resolve(VariantStorageManager.buildFilename(variantSource));
 
@@ -68,13 +73,5 @@ public class VariantsStatsLoad implements Tasklet {
         }
 
         return RepeatStatus.FINISHED;
-    }
-
-    public static URI createUri(String input) throws URISyntaxException {
-        URI sourceUri = new URI(input);
-        if (sourceUri.getScheme() == null || sourceUri.getScheme().isEmpty()) {
-            sourceUri = Paths.get(input).toUri();
-        }
-        return sourceUri;
     }
 }

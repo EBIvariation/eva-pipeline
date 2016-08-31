@@ -17,6 +17,7 @@
 package embl.ebi.variation.eva.pipeline.jobs;
 
 import embl.ebi.variation.eva.VariantJobsArgs;
+import embl.ebi.variation.eva.pipeline.config.VariantConfig;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -72,14 +73,17 @@ import static org.junit.Assert.*;
  */
 @IntegrationTest
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = { VariantConfiguration.class, VariantConfig.class})
+@ContextConfiguration(classes = { VariantJobsArgs.class, VariantConfiguration.class, VariantConfig.class})
 public class VariantConfigurationTest {
 
     private JobLauncherTestUtils jobLauncherTestUtils;
 
-    @Autowired public VariantJobsArgs variantJobsArgs;
-    @Autowired private JobLauncher jobLauncher;
-    @Autowired private JobRepository jobRepository;
+    @Autowired
+    private VariantJobsArgs variantJobsArgs;
+    @Autowired
+    private JobLauncher jobLauncher;
+    @Autowired
+    private JobRepository jobRepository;
 
     @Autowired
     @Qualifier("variantJob")

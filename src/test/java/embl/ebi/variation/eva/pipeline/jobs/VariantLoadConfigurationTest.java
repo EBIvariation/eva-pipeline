@@ -16,7 +16,8 @@
 package embl.ebi.variation.eva.pipeline.jobs;
 
 import embl.ebi.variation.eva.VariantJobsArgs;
-import embl.ebi.variation.eva.pipeline.steps.VariantsLoad;
+import embl.ebi.variation.eva.pipeline.config.CommonConfig;
+import embl.ebi.variation.eva.pipeline.steps.tasklet.VariantsLoad;
 import org.apache.commons.io.FileUtils;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -32,19 +33,23 @@ import org.opencb.opencga.storage.core.StorageManagerFactory;
 import org.opencb.opencga.storage.core.variant.VariantStorageManager;
 import org.opencb.opencga.storage.core.variant.adaptors.VariantDBAdaptor;
 import org.opencb.opencga.storage.core.variant.adaptors.VariantDBIterator;
-import org.springframework.batch.core.*;
+import org.springframework.batch.core.BatchStatus;
+import org.springframework.batch.core.ExitStatus;
+import org.springframework.batch.core.JobExecution;
+import org.springframework.batch.core.JobExecutionException;
 import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
 import java.net.UnknownHostException;
 import java.util.zip.GZIPInputStream;
 
-import static embl.ebi.variation.eva.pipeline.jobs.JobTestUtils.*;
-import static org.junit.Assert.*;
+import static embl.ebi.variation.eva.pipeline.jobs.JobTestUtils.countRows;
+import static embl.ebi.variation.eva.pipeline.jobs.JobTestUtils.getLines;
+import static org.junit.Assert.assertEquals;
 import static org.opencb.opencga.storage.core.variant.VariantStorageManager.VARIANT_SOURCE;
 
 /**
@@ -53,7 +58,7 @@ import static org.opencb.opencga.storage.core.variant.VariantStorageManager.VARI
  * @author Jose Miguel Mut Lopez &lt;jmmut@ebi.ac.uk&gt;
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = {VariantLoadConfiguration.class, CommonConfig.class, JobLauncherTestUtils.class})
+@ContextConfiguration(classes = {VariantJobsArgs.class, VariantLoadConfiguration.class, CommonConfig.class, JobLauncherTestUtils.class})
 public class VariantLoadConfigurationTest {
 
     private static final String FILE_20 = "/small20.vcf.gz";
@@ -64,10 +69,7 @@ public class VariantLoadConfigurationTest {
     private JobLauncherTestUtils jobLauncherTestUtils;
 
     @Autowired
-    PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer;
-
-    @Autowired
-    public VariantJobsArgs variantJobsArgs;
+    private VariantJobsArgs variantJobsArgs;
 
     private ObjectMap variantOptions;
     private ObjectMap pipelineOptions;

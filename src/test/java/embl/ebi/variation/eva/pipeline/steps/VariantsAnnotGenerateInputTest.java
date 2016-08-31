@@ -20,16 +20,18 @@ import com.mongodb.util.JSON;
 import embl.ebi.variation.eva.VariantJobsArgs;
 import embl.ebi.variation.eva.pipeline.annotation.generateInput.VariantAnnotationItemProcessor;
 import embl.ebi.variation.eva.pipeline.annotation.generateInput.VariantWrapper;
-import embl.ebi.variation.eva.pipeline.jobs.AnnotationConfig;
+import embl.ebi.variation.eva.pipeline.config.AnnotationConfig;
+import embl.ebi.variation.eva.pipeline.jobs.JobTestUtils;
 import embl.ebi.variation.eva.pipeline.jobs.VariantAnnotConfiguration;
 import embl.ebi.variation.eva.pipeline.jobs.VariantAnnotConfigurationTest;
 import embl.ebi.variation.eva.pipeline.jobs.VariantStatsConfigurationTest;
+import embl.ebi.variation.eva.pipeline.steps.readers.VariantReader;
+import embl.ebi.variation.eva.pipeline.steps.writers.VepInputWriter;
 import org.apache.commons.io.FileUtils;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.opencb.opencga.storage.core.variant.VariantStorageManager;
 import org.opencb.opencga.storage.mongodb.variant.DBObjectToVariantConverter;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.ExitStatus;
@@ -37,7 +39,6 @@ import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.data.MongoItemReader;
-import org.springframework.batch.item.file.FlatFileItemWriter;
 import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.batch.test.MetaDataInstanceFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,10 +63,11 @@ import static junit.framework.TestCase.assertTrue;
 @ContextConfiguration(classes = { VariantAnnotConfiguration.class, AnnotationConfig.class, JobLauncherTestUtils.class})
 public class VariantsAnnotGenerateInputTest {
 
-    @Autowired private MongoItemReader<DBObject> mongoItemReader;
-    @Autowired private FlatFileItemWriter<VariantWrapper> writer;
-    @Autowired private VariantJobsArgs variantJobsArgs;
-    @Autowired private JobLauncherTestUtils jobLauncherTestUtils;
+    private static final String VARIANTS_ANNOT_GENERATE_VEP_INPUT_DB_NAME = "VariantStatsConfigurationTest_vl";
+    @Autowired
+    private VariantJobsArgs variantJobsArgs;
+    @Autowired
+    private JobLauncherTestUtils jobLauncherTestUtils;
 
     private MongoClient mongoClient;
     private String dbName;
@@ -112,12 +114,14 @@ public class VariantsAnnotGenerateInputTest {
         assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());
 
         assertTrue(vepInputFile.exists());
-        assertEquals("20\t61118\t61118\tA/G\t+", readFirstLine(vepInputFile));
+        assertEquals("20\t60343\t60343\tG/A\t+", readFirstLine(vepInputFile));
+        JobTestUtils.cleanDBs(VARIANTS_ANNOT_GENERATE_VEP_INPUT_DB_NAME);
     }
 
     @Test
     public void variantReaderShouldReadVariantsWithoutAnnotationField() throws Exception {
         insertDocuments();
+        VariantReader mongoItemReader = new VariantReader(variantJobsArgs.getPipelineOptions());
         mongoItemReader.open(executionContext);
 
         int itemCount = 0;
@@ -151,6 +155,7 @@ public class VariantsAnnotGenerateInputTest {
         File outputFile = new File(variantJobsArgs.getPipelineOptions().getString("vep.input"));
         VariantWrapper variant = new VariantWrapper(converter.convertToDataModelType(constructDbo(variantWithAnnotation)));
 
+        VepInputWriter writer = new VepInputWriter(variantJobsArgs.getPipelineOptions());
         writer.open(executionContext);
         writer.write(Collections.singletonList(variant));
         assertEquals("20\t60344\t60348\tG/A\t+", readFirstLine(outputFile));

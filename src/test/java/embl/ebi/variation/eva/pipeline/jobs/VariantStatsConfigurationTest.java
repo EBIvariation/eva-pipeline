@@ -16,9 +16,13 @@
 package embl.ebi.variation.eva.pipeline.jobs;
 
 import embl.ebi.variation.eva.VariantJobsArgs;
-import embl.ebi.variation.eva.pipeline.steps.*;
+import embl.ebi.variation.eva.pipeline.config.CommonConfig;
+import embl.ebi.variation.eva.pipeline.steps.tasklet.VariantsStatsCreate;
+import embl.ebi.variation.eva.pipeline.steps.tasklet.VariantsStatsLoad;
 import org.apache.commons.io.FileUtils;
-import org.junit.*;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.opencb.biodata.models.variant.VariantSource;
 import org.opencb.biodata.models.variant.VariantStudy;
@@ -29,20 +33,23 @@ import org.opencb.opencga.storage.core.StorageManagerFactory;
 import org.opencb.opencga.storage.core.variant.VariantStorageManager;
 import org.opencb.opencga.storage.core.variant.adaptors.VariantDBAdaptor;
 import org.opencb.opencga.storage.core.variant.adaptors.VariantDBIterator;
-import org.springframework.batch.core.*;
+import org.springframework.batch.core.BatchStatus;
+import org.springframework.batch.core.ExitStatus;
+import org.springframework.batch.core.JobExecution;
+import org.springframework.batch.core.JobExecutionException;
 import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 import java.nio.file.Paths;
 
 import static embl.ebi.variation.eva.pipeline.jobs.JobTestUtils.restoreMongoDbFromDump;
 import static junit.framework.TestCase.assertFalse;
 import static junit.framework.TestCase.assertTrue;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 import static org.opencb.opencga.storage.core.variant.VariantStorageManager.VARIANT_SOURCE;
 
 /**
@@ -53,7 +60,7 @@ import static org.opencb.opencga.storage.core.variant.VariantStorageManager.VARI
  * Test for {@link VariantStatsConfiguration}
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = {VariantStatsConfiguration.class, CommonConfig.class, JobLauncherTestUtils.class})
+@ContextConfiguration(classes = {VariantJobsArgs.class, VariantStatsConfiguration.class, CommonConfig.class, JobLauncherTestUtils.class})
 public class VariantStatsConfigurationTest {
 
     private static final String SMALL_VCF_FILE = "/small20.vcf.gz";
@@ -64,10 +71,7 @@ public class VariantStatsConfigurationTest {
     private JobLauncherTestUtils jobLauncherTestUtils;
 
     @Autowired
-    PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer;
-
-    @Autowired
-    public VariantJobsArgs variantJobsArgs;
+    private VariantJobsArgs variantJobsArgs;
 
     private ObjectMap variantOptions;
     private ObjectMap pipelineOptions;
