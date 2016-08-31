@@ -17,33 +17,20 @@ package embl.ebi.variation.eva.pipeline.steps;
 
 import com.mongodb.DBObject;
 import embl.ebi.variation.eva.VariantJobsArgs;
-import embl.ebi.variation.eva.pipeline.MongoDBHelper;
 import embl.ebi.variation.eva.pipeline.annotation.generateInput.VariantAnnotationItemProcessor;
 import embl.ebi.variation.eva.pipeline.annotation.generateInput.VariantWrapper;
-import embl.ebi.variation.eva.pipeline.jobs.VariantJobArgsConfig;
 import embl.ebi.variation.eva.pipeline.steps.readers.VariantReader;
 import embl.ebi.variation.eva.pipeline.steps.writers.VepInputWriter;
-import org.opencb.datastore.core.ObjectMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
-import org.springframework.batch.item.ItemProcessor;
-import org.springframework.batch.item.data.MongoItemReader;
-import org.springframework.batch.item.file.FlatFileItemWriter;
-import org.springframework.batch.item.file.transform.BeanWrapperFieldExtractor;
-import org.springframework.batch.item.file.transform.DelimitedLineAggregator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.core.io.FileSystemResource;
-import org.springframework.data.domain.Sort;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * @author Diego Poggioli

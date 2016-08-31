@@ -17,30 +17,20 @@
 package embl.ebi.variation.eva.pipeline.steps;
 
 import embl.ebi.variation.eva.VariantJobsArgs;
-import embl.ebi.variation.eva.pipeline.MongoDBHelper;
-import embl.ebi.variation.eva.pipeline.annotation.GzipLazyResource;
 import embl.ebi.variation.eva.pipeline.gene.GeneFilterProcessor;
-import embl.ebi.variation.eva.pipeline.gene.GeneLineMapper;
 import embl.ebi.variation.eva.pipeline.gene.FeatureCoordinates;
-import embl.ebi.variation.eva.pipeline.jobs.VariantJobArgsConfig;
 import embl.ebi.variation.eva.pipeline.listener.SkipCheckingListener;
 import embl.ebi.variation.eva.pipeline.steps.readers.GeneReader;
 import embl.ebi.variation.eva.pipeline.steps.writers.GeneWriter;
-import org.opencb.datastore.core.ObjectMap;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
-import org.springframework.batch.item.ItemWriter;
-import org.springframework.batch.item.data.MongoItemWriter;
-import org.springframework.batch.item.file.FlatFileItemReader;
 import org.springframework.batch.item.file.FlatFileParseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.core.io.Resource;
-import org.springframework.data.mongodb.core.MongoOperations;
 
 import java.io.IOException;
 
