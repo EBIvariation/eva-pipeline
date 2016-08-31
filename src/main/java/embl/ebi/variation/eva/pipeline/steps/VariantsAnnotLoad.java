@@ -17,9 +17,10 @@
 package embl.ebi.variation.eva.pipeline.steps;
 
 import embl.ebi.variation.eva.VariantJobsArgs;
+import embl.ebi.variation.eva.pipeline.MongoDBHelper;
+import embl.ebi.variation.eva.pipeline.steps.writers.VariantAnnotationMongoItemWriter;
 import embl.ebi.variation.eva.pipeline.listener.SkipCheckingListener;
 import embl.ebi.variation.eva.pipeline.steps.readers.VariantAnnotationReader;
-import embl.ebi.variation.eva.pipeline.steps.writers.VariantAnnotationWriter;
 import org.opencb.biodata.models.variant.annotation.VariantAnnotation;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
@@ -30,6 +31,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.mongodb.core.MongoOperations;
 
 import java.io.IOException;
 
@@ -56,9 +58,13 @@ public class VariantsAnnotLoad {
     @Bean
     @Qualifier("variantAnnotLoad")
     public Step variantAnnotLoadBatchStep() throws IOException {
+        MongoOperations mongoOperations = MongoDBHelper.getMongoOperationsFromPipelineOptions(variantJobsArgs.getPipelineOptions());
+        String collections = variantJobsArgs.getPipelineOptions().getString("db.collections.variants.name");
+        VariantAnnotationMongoItemWriter writer = new VariantAnnotationMongoItemWriter(mongoOperations, collections);
+
         return stepBuilderFactory.get("Load VEP annotation").<VariantAnnotation, VariantAnnotation> chunk(10)
                 .reader(new VariantAnnotationReader(variantJobsArgs.getPipelineOptions()))
-                .writer(new VariantAnnotationWriter(variantJobsArgs.getPipelineOptions()))
+                .writer(writer)
                 .faultTolerant().skipLimit(50).skip(FlatFileParseException.class)
                 .listener(new SkipCheckingListener())
                 .build();

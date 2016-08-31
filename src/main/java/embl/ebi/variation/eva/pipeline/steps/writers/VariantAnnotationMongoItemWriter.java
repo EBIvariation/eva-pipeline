@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package embl.ebi.variation.eva.pipeline.annotation.load;
+package embl.ebi.variation.eva.pipeline.steps.writers;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
@@ -30,7 +30,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * @author Diego Poggioli
@@ -66,6 +65,12 @@ public class VariantAnnotationMongoItemWriter extends MongoItemWriter<VariantAnn
     public VariantAnnotationMongoItemWriter(MongoOperations mongoOperations) {
         this.mongoOperations = mongoOperations;
         this.converter = new DBObjectToVariantAnnotationConverter();
+    }
+
+    public VariantAnnotationMongoItemWriter(MongoOperations mongoOperations, String collection){
+        this(mongoOperations);
+        setCollection(collection);
+        setTemplate(mongoOperations);
     }
 
     @Override

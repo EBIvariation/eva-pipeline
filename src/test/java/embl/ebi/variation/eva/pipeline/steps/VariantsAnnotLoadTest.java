@@ -19,10 +19,11 @@ import com.mongodb.*;
 import embl.ebi.variation.eva.VariantJobsArgs;
 import embl.ebi.variation.eva.pipeline.MongoDBHelper;
 import embl.ebi.variation.eva.pipeline.annotation.load.VariantAnnotationLineMapper;
+import embl.ebi.variation.eva.pipeline.steps.writers.VariantAnnotationMongoItemWriter;
 import embl.ebi.variation.eva.pipeline.config.AnnotationConfig;
-import embl.ebi.variation.eva.pipeline.jobs.*;
+import embl.ebi.variation.eva.pipeline.jobs.JobTestUtils;
+import embl.ebi.variation.eva.pipeline.jobs.VariantAnnotConfiguration;
 import embl.ebi.variation.eva.pipeline.steps.readers.VariantAnnotationReader;
-import embl.ebi.variation.eva.pipeline.steps.writers.VariantAnnotationWriter;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -38,10 +39,11 @@ import org.springframework.batch.item.file.FlatFileParseException;
 import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.batch.test.MetaDataInstanceFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import java.io.*;
+import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -50,9 +52,7 @@ import java.util.zip.GZIPInputStream;
 
 import static embl.ebi.variation.eva.pipeline.jobs.JobTestUtils.makeGzipFile;
 import static embl.ebi.variation.eva.pipeline.jobs.JobTestUtils.restoreMongoDbFromDump;
-import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertNotNull;
-import static junit.framework.TestCase.assertTrue;
+import static junit.framework.TestCase.*;
 
 
 /**
@@ -207,7 +207,10 @@ public class VariantsAnnotLoadTest {
         }
 
         // now, load the annotation
-        VariantAnnotationWriter annotationWriter = new VariantAnnotationWriter(variantJobsArgs.getPipelineOptions());
+        MongoOperations mongoOperations = MongoDBHelper.getMongoOperationsFromPipelineOptions(variantJobsArgs.getPipelineOptions());
+        String collections = variantJobsArgs.getPipelineOptions().getString("db.collections.variants.name");
+        VariantAnnotationMongoItemWriter annotationWriter = new VariantAnnotationMongoItemWriter(mongoOperations, collections);
+
         annotationWriter.write(annotations);
 
         // and finally check that documents in DB have annotation (only consequence type)
