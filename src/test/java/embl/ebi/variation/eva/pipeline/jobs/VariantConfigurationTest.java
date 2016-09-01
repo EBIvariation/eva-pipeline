@@ -25,6 +25,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.opencb.biodata.models.variant.Variant;
 import org.opencb.biodata.models.variant.VariantSource;
+import org.opencb.biodata.models.variant.VariantStudy;
 import org.opencb.datastore.core.QueryOptions;
 import org.opencb.opencga.lib.common.Config;
 import org.opencb.opencga.storage.core.StorageManagerException;
@@ -55,7 +56,9 @@ import java.util.zip.GZIPInputStream;
 
 import static embl.ebi.variation.eva.pipeline.jobs.JobTestUtils.*;
 import static junit.framework.TestCase.assertEquals;
+import org.apache.commons.io.FileUtils;
 import static org.junit.Assert.*;
+import static org.opencb.opencga.storage.core.variant.VariantStorageManager.VARIANT_SOURCE;
 
 /**
  * @author Diego Poggioli
@@ -77,9 +80,10 @@ import static org.junit.Assert.*;
 public class VariantConfigurationTest {
 
     private JobLauncherTestUtils jobLauncherTestUtils;
-
+    
     @Autowired
     private VariantJobsArgs variantJobsArgs;
+
     @Autowired
     private JobLauncher jobLauncher;
     @Autowired
@@ -147,6 +151,73 @@ public class VariantConfigurationTest {
 
         //When the execute method in variantsTransform is invoked then a StorageManagerException is thrown
         JobExecution jobExecution = jobLauncherTestUtils.launchStep("Normalize variants");
+        assertEquals(ExitStatus.FAILED.getExitCode(), jobExecution.getExitStatus().getExitCode());
+    }
+
+    @Test
+    public void loadStepShouldLoadAllVariants() throws Exception {
+        variantJobsArgs.getVariantOptions().put(VariantStorageManager.DB_NAME, dbName);
+
+        variantJobsArgs.getVariantOptions().put(VARIANT_SOURCE, new VariantSource(
+                input,
+                "1",
+                "1",
+                "studyName",
+                VariantStudy.StudyType.COLLECTION,
+                VariantSource.Aggregation.NONE));
+
+        //and a variants transform step already executed
+        File transformedVcfVariantsFile =
+                new File(VariantConfigurationTest.class.getResource("/small20.vcf.gz.variants.json.gz").getFile());
+        File tmpTransformedVcfVariantsFile = new File(outputDir, transformedVcfVariantsFile.getName());
+        FileUtils.copyFile(transformedVcfVariantsFile, tmpTransformedVcfVariantsFile);
+
+        File transformedVariantsFile =
+                new File(VariantConfigurationTest.class.getResource("/small20.vcf.gz.file.json.gz").getFile());
+        File tmpTransformedVariantsFile = new File(outputDir, transformedVariantsFile.getName());
+        FileUtils.copyFile(transformedVariantsFile, tmpTransformedVariantsFile);
+
+        // When the execute method in variantsLoad is executed
+        JobExecution jobExecution = jobLauncherTestUtils.launchStep("Load variants");
+
+        //Then variantsLoad step should complete correctly
+        assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
+        assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());
+
+        // And the number of documents in db should be the same number of line of the vcf transformed file
+        VariantStorageManager variantStorageManager = StorageManagerFactory.getVariantStorageManager();
+        VariantDBAdaptor variantDBAdaptor = variantStorageManager.getDBAdaptor(dbName, null);
+        VariantDBIterator iterator = variantDBAdaptor.iterator(new QueryOptions());
+        long lines = getLines(new GZIPInputStream(new FileInputStream(transformedVcfVariantsFile)));
+
+        assertEquals(countRows(iterator), lines);
+
+        tmpTransformedVcfVariantsFile.delete();
+        tmpTransformedVariantsFile.delete();
+    }
+
+    @Test
+    public void loadStepShouldFailBecauseOpenCGAHomeIsWrong() throws JobExecutionException {
+        String inputFile = VariantConfigurationTest.class.getResource(input).getFile();
+
+        Config.setOpenCGAHome("");
+
+        variantJobsArgs.getPipelineOptions().put("input.vcf", inputFile);
+        variantJobsArgs.getVariantOptions().put(VariantStorageManager.DB_NAME, dbName);
+
+        VariantSource source = (VariantSource) variantJobsArgs.getVariantOptions().get(VariantStorageManager.VARIANT_SOURCE);
+
+        variantJobsArgs.getVariantOptions().put(VariantStorageManager.VARIANT_SOURCE, new VariantSource(
+                input,
+                source.getFileId(),
+                source.getStudyId(),
+                source.getStudyName(),
+                source.getType(),
+                source.getAggregation()));
+
+        JobExecution jobExecution = jobLauncherTestUtils.launchStep("Load variants");
+
+        assertEquals(inputFile, variantJobsArgs.getPipelineOptions().getString("input.vcf"));
         assertEquals(ExitStatus.FAILED.getExitCode(), jobExecution.getExitStatus().getExitCode());
     }
 
