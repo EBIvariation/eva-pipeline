@@ -15,8 +15,10 @@
  */
 package embl.ebi.variation.eva.pipeline.steps;
 
+import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
 import com.mongodb.MongoClient;
+import com.mongodb.MongoException;
 import embl.ebi.variation.eva.VariantJobsArgs;
 import embl.ebi.variation.eva.pipeline.jobs.InitDBConfiguration;
 import embl.ebi.variation.eva.pipeline.config.InitDBConfig;
@@ -32,20 +34,19 @@ import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import embl.ebi.variation.eva.pipeline.steps.tasklet.IndicesCreate;
+import embl.ebi.variation.eva.pipeline.steps.tasklet.IndexesCreate;
 
 import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertTrue;
 
 /**
  * Created by jmmut on 2016-08-26.
  *
  * @author Jose Miguel Mut Lopez &lt;jmmut@ebi.ac.uk&gt;
- * Test {@link IndicesCreate}
+ * Test {@link IndexesCreate}
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = { InitDBConfiguration.class, InitDBConfig.class, JobLauncherTestUtils.class})
-public class IndicesCreateTest {
+public class IndexesCreateTest {
 
     @Autowired
     public VariantJobsArgs variantJobsArgs;
@@ -77,10 +78,26 @@ public class IndicesCreateTest {
 
         MongoClient mongoClient = new MongoClient();
         DBCollection genesCollection = mongoClient.getDB(dbName).getCollection(dbCollectionGenesName);
-        assertEquals(genesCollection.getIndexInfo().toString(),
-                "[{ \"v\" : 1 , \"key\" : { \"_id\" : 1} , \"name\" : \"_id_\" , \"ns\" : \"" + dbName +
+        assertEquals("[{ \"v\" : 1 , \"key\" : { \"_id\" : 1} , \"name\" : \"_id_\" , \"ns\" : \"" + dbName +
                         "." + dbCollectionGenesName +
                         "\"}, { \"v\" : 1 , \"key\" : { \"name\" : 1} , \"name\" : \"name_1\" , \"ns\" : \"" +
-                        dbName + "." + dbCollectionGenesName + "\" , \"sparse\" : true}]");
+                        dbName + "." + dbCollectionGenesName + "\" , \"sparse\" : true , \"background\" : true}]",
+                genesCollection.getIndexInfo().toString());
+    }
+
+    @Test(expected = MongoException.DuplicateKey.class)
+    public void testNoDuplicatesCanBeInserted() throws Exception {
+
+        String dbCollectionGenesName = variantJobsArgs.getPipelineOptions().getString("db.collections.features.name");
+        JobExecution jobExecution = jobLauncherTestUtils.launchStep(InitDBConfiguration.GENERATE_DATABASE_INDICES);
+
+        assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
+        assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());
+
+
+        MongoClient mongoClient = new MongoClient();
+        DBCollection genesCollection = mongoClient.getDB(dbName).getCollection(dbCollectionGenesName);
+        genesCollection.insert(new BasicDBObject("_id", "example_id"));
+        genesCollection.insert(new BasicDBObject("_id", "example_id"));
     }
 }

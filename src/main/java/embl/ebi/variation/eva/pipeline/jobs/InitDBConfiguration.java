@@ -16,7 +16,7 @@
 package embl.ebi.variation.eva.pipeline.jobs;
 
 import embl.ebi.variation.eva.pipeline.steps.GenesLoad;
-import embl.ebi.variation.eva.pipeline.steps.tasklet.IndicesCreate;
+import embl.ebi.variation.eva.pipeline.steps.tasklet.IndexesCreate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.Job;
@@ -33,7 +33,7 @@ import org.springframework.context.annotation.Import;
 
 @Configuration
 @EnableBatchProcessing
-@Import({IndicesCreate.class, GenesLoad.class})
+@Import({IndexesCreate.class, GenesLoad.class})
 public class InitDBConfiguration extends CommonJobStepInitialization {
 
     private static final Logger logger = LoggerFactory.getLogger(InitDBConfiguration.class);
@@ -48,7 +48,7 @@ public class InitDBConfiguration extends CommonJobStepInitialization {
     private Step genesLoadStep;
 
     @Autowired
-    private IndicesCreate indicesCreate;
+    private IndexesCreate indexesCreate;
 
     @Bean
     @Qualifier("initDBJob")
@@ -63,8 +63,7 @@ public class InitDBConfiguration extends CommonJobStepInitialization {
                 .build();
     }
 
-    @Bean
     public Step indicesCreate() {
-        return generateStep(GENERATE_DATABASE_INDICES, indicesCreate);
+        return generateStep(GENERATE_DATABASE_INDICES, indexesCreate);
     }
 }

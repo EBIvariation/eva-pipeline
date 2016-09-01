@@ -39,9 +39,8 @@ import org.springframework.stereotype.Component;
 @Component
 @StepScope
 @Import({VariantJobsArgs.class})
-public class IndicesCreate implements Tasklet {
-    private static final Logger logger = LoggerFactory.getLogger(IndicesCreate.class);
-    public static final String SKIP_INITIALIZE_INDICES = "initialize.indices.skip";
+public class IndexesCreate implements Tasklet {
+    private static final Logger logger = LoggerFactory.getLogger(IndexesCreate.class);
 
     @Autowired
     private VariantJobsArgs variantJobsArgs;
@@ -50,14 +49,9 @@ public class IndicesCreate implements Tasklet {
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
 
         ObjectMap pipelineOptions = variantJobsArgs.getPipelineOptions();
-        if (pipelineOptions.getBoolean(SKIP_INITIALIZE_INDICES)) {
-            logger.info("skipping indices creation step, initialize.indices.skip is set to {} ",
-                    pipelineOptions.getBoolean(SKIP_INITIALIZE_INDICES));
-        } else {
-            MongoOperations operations = MongoDBHelper.getMongoOperationsFromPipelineOptions(pipelineOptions);
-            operations.getCollection(pipelineOptions.getString("db.collections.features.name"))
-                    .createIndex(new BasicDBObject("name", 1), new BasicDBObject("sparse", true));
-        }
+        MongoOperations operations = MongoDBHelper.getMongoOperationsFromPipelineOptions(pipelineOptions);
+        operations.getCollection(pipelineOptions.getString("db.collections.features.name"))
+                .createIndex(new BasicDBObject("name", 1), new BasicDBObject("sparse", true).append("background", true));
 
         return RepeatStatus.FINISHED;
     }

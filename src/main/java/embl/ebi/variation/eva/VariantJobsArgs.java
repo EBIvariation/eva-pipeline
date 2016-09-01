@@ -27,7 +27,6 @@ import embl.ebi.variation.eva.pipeline.steps.tasklet.VariantsAnnotCreate;
 import embl.ebi.variation.eva.pipeline.steps.tasklet.VariantsLoad;
 import embl.ebi.variation.eva.pipeline.steps.tasklet.VariantsStatsCreate;
 import embl.ebi.variation.eva.pipeline.steps.tasklet.VariantsStatsLoad;
-import embl.ebi.variation.eva.pipeline.steps.tasklet.IndicesCreate;
 import org.opencb.biodata.models.variant.VariantSource;
 import org.opencb.biodata.models.variant.VariantStudy;
 import org.opencb.datastore.core.ObjectMap;
@@ -104,8 +103,6 @@ public class VariantJobsArgs {
 
     @Value("${statistics.skip:false}") private boolean skipStats;
     @Value("${annotation.skip:false}") private boolean skipAnnot;
-
-    @Value("${initialize.indices.skip:false}") private boolean skipInitializeIndices;
 
     //VEP
     @Value("${app.vep.path}") private String vepPath;
@@ -226,7 +223,6 @@ public class VariantJobsArgs {
         pipelineOptions.put(VariantsAnnotCreate.SKIP_ANNOT_CREATE, skipAnnotCreate);
         pipelineOptions.put(VariantAnnotConfiguration.SKIP_ANNOT, skipAnnot);
         pipelineOptions.put(VariantStatsConfiguration.SKIP_STATS, skipStats);
-        pipelineOptions.put(IndicesCreate.SKIP_INITIALIZE_INDICES, skipInitializeIndices);
 
         String annotationFilesPrefix = studyId + "_" + fileId;
         pipelineOptions.put("vep.input", URI.create(outputDirAnnotation + "/").resolve(annotationFilesPrefix + "_variants_to_annotate.tsv.gz").toString());
