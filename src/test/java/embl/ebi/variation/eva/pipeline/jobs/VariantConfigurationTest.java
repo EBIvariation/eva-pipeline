@@ -140,8 +140,8 @@ public class VariantConfigurationTest {
         Config.setOpenCGAHome(opencgaHome);
 
         //Given a malformed VCF input file
-        String input = VariantConfigurationTest.class.getResource(FILE_WRONG_NO_ALT).getFile();
-        variantJobsArgs.getPipelineOptions().put("input.vcf", input);
+        String inputFile = VariantConfigurationTest.class.getResource(FILE_WRONG_NO_ALT).getFile();
+        variantJobsArgs.getPipelineOptions().put("input.vcf", inputFile);
 
         String outputFilename = getTransformedOutputPath(Paths.get(FILE_WRONG_NO_ALT).getFileName(), ".gz", "/tmp");
 

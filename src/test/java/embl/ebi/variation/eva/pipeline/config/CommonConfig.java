@@ -70,9 +70,6 @@ public class CommonConfig {
         properties.put("app.vep.cache.species", "");
         properties.put("app.vep.num-forks", "3");
         
-        properties.put(VariantsLoad.SKIP_LOAD, "true");
-        properties.put(VariantsStatsCreate.SKIP_STATS_CREATE, "true");
-        properties.put(VariantsStatsLoad.SKIP_STATS_LOAD, "true");
         properties.put(VariantsAnnotCreate.SKIP_ANNOT_CREATE, "true");
         properties.put("config.restartability.allow", false);
 

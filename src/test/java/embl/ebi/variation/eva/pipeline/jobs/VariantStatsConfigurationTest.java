@@ -92,7 +92,6 @@ public class VariantStatsConfigurationTest {
 
         pipelineOptions.put("input.vcf", input);
         variantOptions.put(VariantStorageManager.DB_NAME, STATS_DB);
-        pipelineOptions.put(VariantsStatsCreate.SKIP_STATS_CREATE, false);
 
         VariantSource source = new VariantSource(
                 input,
@@ -137,7 +136,6 @@ public class VariantStatsConfigurationTest {
 
         pipelineOptions.put("input.vcf", input);
         variantOptions.put(VariantStorageManager.DB_NAME, STATS_DB);
-        pipelineOptions.put(VariantsStatsCreate.SKIP_STATS_CREATE, false);
 
         VariantSource source = new VariantSource(
                 input,
@@ -169,7 +167,6 @@ public class VariantStatsConfigurationTest {
         String dbName = STATS_DB;
 
         pipelineOptions.put("input.vcf", input);
-        pipelineOptions.put(VariantsStatsLoad.SKIP_STATS_LOAD, "false");
         variantOptions.put(VariantStorageManager.DB_NAME, dbName);
         variantOptions.put(VariantStorageManager.VARIANT_SOURCE, source);
 
@@ -228,7 +225,6 @@ public class VariantStatsConfigurationTest {
         VariantSource source = new VariantSource(input, "4", "1", "studyName");
 
         pipelineOptions.put("input.vcf", input);
-        pipelineOptions.put(VariantsStatsLoad.SKIP_STATS_LOAD, false);
         variantOptions.put(VariantStorageManager.DB_NAME, STATS_DB);
         variantOptions.put(VariantStorageManager.VARIANT_SOURCE, source);
 
@@ -245,8 +241,6 @@ public class VariantStatsConfigurationTest {
 
         pipelineOptions.put("input.vcf", input);
         variantOptions.put(VariantStorageManager.DB_NAME, STATS_DB);
-        pipelineOptions.put(VariantsStatsCreate.SKIP_STATS_CREATE, false);
-        pipelineOptions.put(VariantsStatsLoad.SKIP_STATS_LOAD, false);
 
         VariantSource source = new VariantSource(
                 input,

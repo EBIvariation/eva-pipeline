@@ -91,7 +91,6 @@ public class VariantAggregatedConfigurationTest {
         String dbName = VALID_TRANSFORM;
 
         pipelineOptions.put("input.vcf", input);
-        pipelineOptions.put(VariantsLoad.SKIP_LOAD, true);
         variantOptions.put(VariantStorageManager.DB_NAME, dbName);
 
         VariantSource source = (VariantSource) variantOptions.get(VariantStorageManager.VARIANT_SOURCE);
@@ -154,7 +153,6 @@ public class VariantAggregatedConfigurationTest {
 
         pipelineOptions.put("input.vcf", input);
         variantOptions.put(VariantStorageManager.DB_NAME, dbName);
-        pipelineOptions.put(VariantsLoad.SKIP_LOAD, false);
 
         VariantSource source = (VariantSource) variantOptions.get(VariantStorageManager.VARIANT_SOURCE);
 
@@ -233,7 +231,6 @@ public class VariantAggregatedConfigurationTest {
         variantOptions.put(VariantStorageManager.DB_NAME, dbName);
 
         variantOptions.put("includeStats", true);
-        pipelineOptions.put(VariantsLoad.SKIP_LOAD, false);
 
         VariantSource source = (VariantSource) variantOptions.get(VariantStorageManager.VARIANT_SOURCE);
 

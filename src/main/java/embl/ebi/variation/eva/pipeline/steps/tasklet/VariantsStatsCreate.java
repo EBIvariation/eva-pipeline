@@ -47,7 +47,6 @@ import java.net.URI;
 @Import({VariantJobsArgs.class})
 public class VariantsStatsCreate implements Tasklet {
     private static final Logger logger = LoggerFactory.getLogger(VariantsStatsCreate.class);
-    public static final String SKIP_STATS_CREATE = "statistics.create.skip";
 
     @Autowired
     private VariantJobsArgs variantJobsArgs;
@@ -59,23 +58,18 @@ public class VariantsStatsCreate implements Tasklet {
 
 //                HashMap<String, Set<String>> samples = new HashMap<>(); // TODO fill properly. if this is null overwrite will take on
 //                samples.put("SOME", new HashSet<>(Arrays.asList("HG00096", "HG00097")));
-        //JobParameters parameters = chunkContext.getStepContext().getStepExecution().getJobParameters();
 
-        if (pipelineOptions.getBoolean(SKIP_STATS_CREATE)) {
-            logger.info("skipping stats creation step, skipStatsCreate is set to {}", pipelineOptions.getBoolean(SKIP_STATS_CREATE));
-        } else {
-            VariantStorageManager variantStorageManager = StorageManagerFactory.getVariantStorageManager();
-            VariantSource variantSource = variantOptions.get(VariantStorageManager.VARIANT_SOURCE, VariantSource.class);
-            VariantDBAdaptor dbAdaptor = variantStorageManager.getDBAdaptor(variantOptions.getString("dbName"), variantOptions);
-            URI outdirUri = URLHelper.createUri(pipelineOptions.getString("output.dir"));
-            URI statsOutputUri = outdirUri.resolve(VariantStorageManager.buildFilename(variantSource));
+        VariantStorageManager variantStorageManager = StorageManagerFactory.getVariantStorageManager();
+        VariantSource variantSource = variantOptions.get(VariantStorageManager.VARIANT_SOURCE, VariantSource.class);
+        VariantDBAdaptor dbAdaptor = variantStorageManager.getDBAdaptor(variantOptions.getString("dbName"), variantOptions);
+        URI outdirUri = URLHelper.createUri(pipelineOptions.getString("output.dir"));
+        URI statsOutputUri = outdirUri.resolve(VariantStorageManager.buildFilename(variantSource));
 
-            VariantStatisticsManager variantStatisticsManager = new VariantStatisticsManager();
-            QueryOptions statsOptions = new QueryOptions(variantOptions);
+        VariantStatisticsManager variantStatisticsManager = new VariantStatisticsManager();
+        QueryOptions statsOptions = new QueryOptions(variantOptions);
 
-            // actual stats creation
-            variantStatisticsManager.createStats(dbAdaptor, statsOutputUri, null, statsOptions);    // TODO allow subset of samples
-        }
+        // actual stats creation
+        variantStatisticsManager.createStats(dbAdaptor, statsOutputUri, null, statsOptions);    // TODO allow subset of samples
 
         return RepeatStatus.FINISHED;
     }
