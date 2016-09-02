@@ -69,9 +69,9 @@ public class IndexesCreateTest {
     }
 
     @Test
-    public void testIndicesAreCreated() throws Exception {
+    public void testIndexesAreCreated() throws Exception {
         String dbCollectionGenesName = variantJobsArgs.getPipelineOptions().getString("db.collections.features.name");
-        JobExecution jobExecution = jobLauncherTestUtils.launchStep(InitDBConfiguration.GENERATE_DATABASE_INDICES);
+        JobExecution jobExecution = jobLauncherTestUtils.launchStep(InitDBConfiguration.CREATE_DATABASE_INDEXES);
 
         assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
         assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());
@@ -87,9 +87,8 @@ public class IndexesCreateTest {
 
     @Test(expected = MongoException.DuplicateKey.class)
     public void testNoDuplicatesCanBeInserted() throws Exception {
-
         String dbCollectionGenesName = variantJobsArgs.getPipelineOptions().getString("db.collections.features.name");
-        JobExecution jobExecution = jobLauncherTestUtils.launchStep(InitDBConfiguration.GENERATE_DATABASE_INDICES);
+        JobExecution jobExecution = jobLauncherTestUtils.launchStep(InitDBConfiguration.CREATE_DATABASE_INDEXES);
 
         assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
         assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());

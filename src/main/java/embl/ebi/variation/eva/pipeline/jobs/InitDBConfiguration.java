@@ -38,7 +38,7 @@ public class InitDBConfiguration extends CommonJobStepInitialization {
 
     private static final Logger logger = LoggerFactory.getLogger(InitDBConfiguration.class);
     public static final String jobName = "initialize-database";
-    public static final String GENERATE_DATABASE_INDICES = "Generate database indices";
+    public static final String CREATE_DATABASE_INDEXES = "Create database indexes";
 
     @Autowired
     JobBuilderFactory jobBuilderFactory;
@@ -58,12 +58,12 @@ public class InitDBConfiguration extends CommonJobStepInitialization {
                 .incrementer(new RunIdIncrementer());
 
         return jobBuilder
-                .start(indicesCreate())
+                .start(indexesCreate())
                 .next(genesLoadStep)
                 .build();
     }
 
-    public Step indicesCreate() {
-        return generateStep(GENERATE_DATABASE_INDICES, indexesCreate);
+    public Step indexesCreate() {
+        return generateStep(CREATE_DATABASE_INDEXES, indexesCreate);
     }
 }

@@ -47,7 +47,6 @@ public class IndexesCreate implements Tasklet {
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
-
         ObjectMap pipelineOptions = variantJobsArgs.getPipelineOptions();
         MongoOperations operations = MongoDBHelper.getMongoOperationsFromPipelineOptions(pipelineOptions);
         operations.getCollection(pipelineOptions.getString("db.collections.features.name"))
