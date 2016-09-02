@@ -59,7 +59,7 @@ public class GenesLoad {
     @Bean
     @Qualifier("genesLoadStep")
     public Step genesLoadStep() throws IOException {
-        return stepBuilderFactory.get("genesLoadStep").<FeatureCoordinates, FeatureCoordinates>chunk(10)
+        return stepBuilderFactory.get("Load features").<FeatureCoordinates, FeatureCoordinates>chunk(10)
                 .reader(new GeneReader(variantJobsArgs.getPipelineOptions()))
                 .processor(new GeneFilterProcessor())
                 .writer(new GeneWriter(variantJobsArgs.getPipelineOptions()))

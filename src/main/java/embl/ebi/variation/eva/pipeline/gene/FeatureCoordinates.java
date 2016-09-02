@@ -22,7 +22,7 @@ package embl.ebi.variation.eva.pipeline.gene;
  */
 public class FeatureCoordinates {
 
-    private String featureId;
+    private String id;
     private String name;
     private String feature;
     private String chromosome;
@@ -32,8 +32,8 @@ public class FeatureCoordinates {
     public FeatureCoordinates() {
     }
 
-    public FeatureCoordinates(String featureId, String name, String feature, String chromosome, int start, int end) {
-        this.featureId = featureId;
+    public FeatureCoordinates(String id, String name, String feature, String chromosome, int start, int end) {
+        this.id = id;
         this.name = name;
         this.feature = feature;
         this.chromosome = chromosome;
@@ -41,12 +41,12 @@ public class FeatureCoordinates {
         this.end = end;
     }
 
-    public String getFeatureId() {
-        return featureId;
+    public String getId() {
+        return id;
     }
 
-    public void setFeatureId(String featureId) {
-        this.featureId = featureId;
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getName() {

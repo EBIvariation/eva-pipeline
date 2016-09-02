@@ -223,7 +223,7 @@ public class VariantJobsArgs {
         pipelineOptions.put(VariantsAnnotCreate.SKIP_ANNOT_CREATE, skipAnnotCreate);
         pipelineOptions.put(VariantAnnotConfiguration.SKIP_ANNOT, skipAnnot);
         pipelineOptions.put(VariantStatsConfiguration.SKIP_STATS, skipStats);
-        
+
         String annotationFilesPrefix = studyId + "_" + fileId;
         pipelineOptions.put("vep.input", URI.create(outputDirAnnotation + "/").resolve(annotationFilesPrefix + "_variants_to_annotate.tsv.gz").toString());
         pipelineOptions.put("vep.output", URI.create(outputDirAnnotation + "/").resolve(annotationFilesPrefix + "_vep_annotation.tsv.gz").toString());
