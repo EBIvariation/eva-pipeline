@@ -81,12 +81,10 @@ Other parameters are:
 
 * `--spring.batch.job.names`: The name of the job to run. At the moment it can be `load-genotyped-vcf`, `load-aggregated-vcf`, `annotate-variants` or `calculate-statistics`
 
-Individual steps can be skipped using one of the following. This is not necessary unless some input data has been already generated in previous runs for the same job.
+Individual steps can be skipped using one of the following. This is not necessary unless they are irrelevant for the data to be processed, or some input data was generated in previous runs of the same job.
 
-* `load.skip`
-* `statistics.create.skip`
-* `statistics.load.skip`
-* `annotation.create.skip`
+* `statistics.skip`
+* `annotation.skip`
 
 Other parameters are:
 
