@@ -44,6 +44,7 @@ import java.util.zip.GZIPOutputStream;
 public class VariantsAnnotCreate implements Tasklet {
     private static final Logger logger = LoggerFactory.getLogger(VariantsAnnotCreate.class);
     public static final String SKIP_ANNOT_CREATE = "annotation.create.skip";
+    public static final String GENERATE_VEP_ANNOTATION = "Generate VEP annotation";
 
     @Autowired
     private VariantJobsArgs variantJobsArgs;

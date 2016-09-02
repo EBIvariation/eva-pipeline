@@ -18,7 +18,15 @@ package embl.ebi.variation.eva.pipeline.jobs;
 
 import embl.ebi.variation.eva.VariantJobsArgs;
 import embl.ebi.variation.eva.pipeline.config.VariantWorkflowConfig;
+import embl.ebi.variation.eva.pipeline.steps.VariantsAnnotGenerateInput;
+import embl.ebi.variation.eva.pipeline.steps.VariantsAnnotLoad;
+import embl.ebi.variation.eva.pipeline.steps.tasklet.VariantsAnnotCreate;
+import java.io.File;
+import java.nio.file.Paths;
+import java.util.*;
 import org.junit.After;
+
+import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -33,12 +41,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.IntegrationTest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-
-import java.io.File;
-import java.nio.file.Paths;
-import java.util.*;
-
-import static org.junit.Assert.*;
 
 /**
  * @author Diego Poggioli
@@ -77,7 +79,7 @@ public class VariantConfigurationWorkflowTest {
 
         JobExecution execution = jobLauncherTestUtils.launchJob();
 
-        assertEquals("COMPLETED", execution.getExitStatus().getExitCode());
+        assertEquals(ExitStatus.COMPLETED, execution.getExitStatus());
         assertEquals(7, execution.getStepExecutions().size());
 
         List<StepExecution> steps = new ArrayList<>(execution.getStepExecutions());
@@ -89,22 +91,152 @@ public class VariantConfigurationWorkflowTest {
             parallelStepsNameToStepExecution.put(steps.get(i).getStepName(), steps.get(i));
         }
 
-        assertEquals("Normalize variants", transformStep.getStepName());
-        assertEquals("Load variants", loadStep.getStepName());
+        assertEquals(VariantConfiguration.NORMALIZE_VARIANTS, transformStep.getStepName());
+        assertEquals(VariantConfiguration.LOAD_VARIANTS, loadStep.getStepName());
 
         Set<String> parallelStepNamesExecuted = parallelStepsNameToStepExecution.keySet();
-        Set<String> parallelStepNamesToCheck = new HashSet<>(Arrays.asList("Calculate statistics","Load statistics",
-                "Find variants to annotate", "Generate VEP annotation", "Load VEP annotation"));
+        Set<String> parallelStepNamesToCheck = new HashSet<>(Arrays.asList(
+                VariantStatsConfiguration.CALCULATE_STATISTICS,
+                VariantStatsConfiguration.LOAD_STATISTICS,
+                VariantsAnnotGenerateInput.FIND_VARIANTS_TO_ANNOTATE,
+                VariantsAnnotCreate.GENERATE_VEP_ANNOTATION,
+                VariantsAnnotLoad.LOAD_VEP_ANNOTATION));
 
-        assertTrue(parallelStepNamesExecuted.containsAll(parallelStepNamesToCheck) && parallelStepNamesToCheck.containsAll(parallelStepNamesExecuted));
+        assertEquals(parallelStepNamesToCheck, parallelStepNamesExecuted);
 
         assertTrue(transformStep.getEndTime().before(loadStep.getStartTime()));
-        assertTrue(loadStep.getEndTime().before(parallelStepsNameToStepExecution.get("Calculate statistics").getStartTime()));
-        assertTrue(loadStep.getEndTime().before(parallelStepsNameToStepExecution.get("Find variants to annotate").getStartTime()));
+        assertTrue(loadStep.getEndTime().before(parallelStepsNameToStepExecution.get(VariantStatsConfiguration.CALCULATE_STATISTICS).getStartTime()));
+        assertTrue(loadStep.getEndTime().before(parallelStepsNameToStepExecution.get(VariantsAnnotGenerateInput.FIND_VARIANTS_TO_ANNOTATE).getStartTime()));
 
-        assertTrue(parallelStepsNameToStepExecution.get("Calculate statistics").getEndTime().before(parallelStepsNameToStepExecution.get("Load statistics").getStartTime()));
-        assertTrue(parallelStepsNameToStepExecution.get("Find variants to annotate").getEndTime().before(parallelStepsNameToStepExecution.get("Generate VEP annotation").getStartTime()));
-        assertTrue(parallelStepsNameToStepExecution.get("Generate VEP annotation").getEndTime().before(parallelStepsNameToStepExecution.get("Load VEP annotation").getStartTime()));
+        assertTrue(parallelStepsNameToStepExecution.get(VariantStatsConfiguration.CALCULATE_STATISTICS).getEndTime()
+                .before(parallelStepsNameToStepExecution.get(VariantStatsConfiguration.LOAD_STATISTICS).getStartTime()));
+        assertTrue(parallelStepsNameToStepExecution.get(VariantsAnnotGenerateInput.FIND_VARIANTS_TO_ANNOTATE).getEndTime()
+                .before(parallelStepsNameToStepExecution.get(VariantsAnnotCreate.GENERATE_VEP_ANNOTATION).getStartTime()));
+        assertTrue(parallelStepsNameToStepExecution.get(VariantsAnnotCreate.GENERATE_VEP_ANNOTATION).getEndTime()
+                .before(parallelStepsNameToStepExecution.get(VariantsAnnotLoad.LOAD_VEP_ANNOTATION).getStartTime()));
+    }
+
+    @Test
+    public void optionalStepsShouldBeSkipped() throws Exception {
+        initVariantConfigurationJob();
+
+        variantJobsArgs.getPipelineOptions().put(VariantAnnotConfiguration.SKIP_ANNOT, true);
+        variantJobsArgs.getPipelineOptions().put(VariantStatsConfiguration.SKIP_STATS, true);
+
+        JobExecution execution = jobLauncherTestUtils.launchJob();
+
+        assertEquals(ExitStatus.COMPLETED, execution.getExitStatus());
+        assertEquals(2, execution.getStepExecutions().size());
+
+        List<StepExecution> steps = new ArrayList<>(execution.getStepExecutions());
+        StepExecution transformStep = steps.get(0);
+        StepExecution loadStep = steps.get(1);
+
+        assertEquals(VariantConfiguration.NORMALIZE_VARIANTS, transformStep.getStepName());
+        assertEquals(VariantConfiguration.LOAD_VARIANTS, loadStep.getStepName());
+
+        assertTrue(transformStep.getEndTime().before(loadStep.getStartTime()));
+    }
+
+    @Test
+    public void statsStepsShouldBeSkipped() throws Exception {
+        initVariantConfigurationJob();
+        variantJobsArgs.getPipelineOptions().put(VariantStatsConfiguration.SKIP_STATS, true);
+
+        JobExecution execution = jobLauncherTestUtils.launchJob();
+
+        assertEquals(ExitStatus.COMPLETED, execution.getExitStatus());
+        assertEquals(5, execution.getStepExecutions().size());
+
+        List<StepExecution> steps = new ArrayList<>(execution.getStepExecutions());
+        StepExecution transformStep = steps.get(0);
+        StepExecution loadStep = steps.get(1);
+
+        Map<String, StepExecution> parallelStepsNameToStepExecution = new HashMap<>();
+        for(int i=2; i<=steps.size()-1; i++){
+            parallelStepsNameToStepExecution.put(steps.get(i).getStepName(), steps.get(i));
+        }
+
+        assertEquals(VariantConfiguration.NORMALIZE_VARIANTS, transformStep.getStepName());
+        assertEquals(VariantConfiguration.LOAD_VARIANTS, loadStep.getStepName());
+
+        Set<String> parallelStepNamesExecuted = parallelStepsNameToStepExecution.keySet();
+        Set<String> parallelStepNamesToCheck = new HashSet<>(Arrays.asList(
+                VariantsAnnotGenerateInput.FIND_VARIANTS_TO_ANNOTATE,
+                VariantsAnnotCreate.GENERATE_VEP_ANNOTATION,
+                VariantsAnnotLoad.LOAD_VEP_ANNOTATION));
+
+        assertEquals(parallelStepNamesToCheck, parallelStepNamesExecuted);
+
+        assertTrue(transformStep.getEndTime().before(loadStep.getStartTime()));
+        assertTrue(loadStep.getEndTime().before(parallelStepsNameToStepExecution.get(VariantsAnnotGenerateInput.FIND_VARIANTS_TO_ANNOTATE).getStartTime()));
+
+        assertTrue(parallelStepsNameToStepExecution.get(VariantsAnnotGenerateInput.FIND_VARIANTS_TO_ANNOTATE).getEndTime()
+                .before(parallelStepsNameToStepExecution.get(VariantsAnnotCreate.GENERATE_VEP_ANNOTATION).getStartTime()));
+        assertTrue(parallelStepsNameToStepExecution.get(VariantsAnnotCreate.GENERATE_VEP_ANNOTATION).getEndTime()
+                .before(parallelStepsNameToStepExecution.get(VariantsAnnotLoad.LOAD_VEP_ANNOTATION).getStartTime()));
+    }
+
+    @Test
+    public void annotationStepsShouldBeSkipped() throws Exception {
+        initVariantConfigurationJob();
+        variantJobsArgs.getPipelineOptions().put(VariantAnnotConfiguration.SKIP_ANNOT, true);
+
+        JobExecution execution = jobLauncherTestUtils.launchJob();
+
+        assertEquals(ExitStatus.COMPLETED, execution.getExitStatus());
+        assertEquals(4, execution.getStepExecutions().size());
+
+        List<StepExecution> steps = new ArrayList<>(execution.getStepExecutions());
+        StepExecution transformStep = steps.get(0);
+        StepExecution loadStep = steps.get(1);
+
+        Map<String, StepExecution> parallelStepsNameToStepExecution = new HashMap<>();
+        for(int i=2; i<=steps.size()-1; i++){
+            parallelStepsNameToStepExecution.put(steps.get(i).getStepName(), steps.get(i));
+        }
+
+        assertEquals(VariantConfiguration.NORMALIZE_VARIANTS, transformStep.getStepName());
+        assertEquals(VariantConfiguration.LOAD_VARIANTS, loadStep.getStepName());
+
+        Set<String> parallelStepNamesExecuted = parallelStepsNameToStepExecution.keySet();
+        Set<String> parallelStepNamesToCheck = new HashSet<>(Arrays.asList(
+                VariantStatsConfiguration.CALCULATE_STATISTICS,
+                VariantStatsConfiguration.LOAD_STATISTICS));
+
+        assertEquals(parallelStepNamesToCheck, parallelStepNamesExecuted);
+
+        assertTrue(transformStep.getEndTime().before(loadStep.getStartTime()));
+        assertTrue(loadStep.getEndTime().before(parallelStepsNameToStepExecution.get(VariantStatsConfiguration.CALCULATE_STATISTICS).getStartTime()));
+
+        assertTrue(parallelStepsNameToStepExecution.get(VariantStatsConfiguration.CALCULATE_STATISTICS).getEndTime()
+                .before(parallelStepsNameToStepExecution.get(VariantStatsConfiguration.LOAD_STATISTICS).getStartTime()));
+    }
+
+    /**
+     * JobLauncherTestUtils is initialized here because in VariantConfiguration there are two Job beans
+     * in this way it is possible to specify the Job to run (and avoid NoUniqueBeanDefinitionException)
+     * @throws Exception
+     */
+    @Before
+    public void setUp() throws Exception {
+        variantJobsArgs.loadArgs();
+        jobLauncherTestUtils = new JobLauncherTestUtils();
+        jobLauncherTestUtils.setJob(job);
+        jobLauncherTestUtils.setJobLauncher(jobLauncher);
+
+        inputFileResouce = variantJobsArgs.getPipelineOptions().getString("input.vcf");
+        outputDir = variantJobsArgs.getPipelineOptions().getString("output.dir");
+        compressExtension = variantJobsArgs.getPipelineOptions().getString("compressExtension");
+        dbName = variantJobsArgs.getPipelineOptions().getString("db.name");
+        vepInput = variantJobsArgs.getPipelineOptions().getString("vep.input");
+        vepOutput = variantJobsArgs.getPipelineOptions().getString("vep.output");
+        JobTestUtils.cleanDBs(dbName);
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        JobTestUtils.cleanDBs(dbName);
     }
 
     private void initVariantConfigurationJob() {
@@ -137,127 +269,6 @@ public class VariantConfigurationWorkflowTest {
         File vepOutputFile = new File(vepOutput);
         vepOutputFile.delete();
         assertFalse(vepOutputFile.exists());
-    }
-
-    @Test
-    public void optionalStepsShouldBeSkipped() throws Exception {
-
-        initVariantConfigurationJob();
-
-        variantJobsArgs.getPipelineOptions().put("annotation.skip", true);
-        variantJobsArgs.getPipelineOptions().put("statistics.skip", true);
-
-        JobExecution execution = jobLauncherTestUtils.launchJob();
-
-        assertEquals("COMPLETED", execution.getExitStatus().getExitCode());
-        assertEquals(2, execution.getStepExecutions().size());
-
-        List<StepExecution> steps = new ArrayList<>(execution.getStepExecutions());
-        StepExecution transformStep = steps.get(0);
-        StepExecution loadStep = steps.get(1);
-
-        assertEquals("Normalize variants", transformStep.getStepName());
-        assertEquals("Load variants", loadStep.getStepName());
-
-        assertTrue(transformStep.getEndTime().before(loadStep.getStartTime()));
-    }
-
-    @Test
-    public void statsStepsShouldBeSkipped() throws Exception {
-
-        initVariantConfigurationJob();
-        variantJobsArgs.getPipelineOptions().put("statistics.skip", true);
-
-        JobExecution execution = jobLauncherTestUtils.launchJob();
-
-        assertEquals("COMPLETED", execution.getExitStatus().getExitCode());
-        assertEquals(5, execution.getStepExecutions().size());
-
-        List<StepExecution> steps = new ArrayList<>(execution.getStepExecutions());
-        StepExecution transformStep = steps.get(0);
-        StepExecution loadStep = steps.get(1);
-
-        Map<String, StepExecution> parallelStepsNameToStepExecution = new HashMap<>();
-        for(int i=2; i<=steps.size()-1; i++){
-            parallelStepsNameToStepExecution.put(steps.get(i).getStepName(), steps.get(i));
-        }
-
-        assertEquals("Normalize variants", transformStep.getStepName());
-        assertEquals("Load variants", loadStep.getStepName());
-
-        Set<String> parallelStepNamesExecuted = parallelStepsNameToStepExecution.keySet();
-        Set<String> parallelStepNamesToCheck = new HashSet<>(Arrays.asList("Find variants to annotate",
-                "Generate VEP annotation", "Load VEP annotation"));
-
-        assertTrue(parallelStepNamesExecuted.containsAll(parallelStepNamesToCheck)
-                && parallelStepNamesToCheck.containsAll(parallelStepNamesExecuted));
-
-        assertTrue(transformStep.getEndTime().before(loadStep.getStartTime()));
-        assertTrue(loadStep.getEndTime().before(parallelStepsNameToStepExecution.get("Find variants to annotate").getStartTime()));
-
-        assertTrue(parallelStepsNameToStepExecution.get("Find variants to annotate").getEndTime().before(parallelStepsNameToStepExecution.get("Generate VEP annotation").getStartTime()));
-        assertTrue(parallelStepsNameToStepExecution.get("Generate VEP annotation").getEndTime().before(parallelStepsNameToStepExecution.get("Load VEP annotation").getStartTime()));
-    }
-
-    @Test
-    public void annotationStepsShouldBeSkipped() throws Exception {
-        initVariantConfigurationJob();
-        variantJobsArgs.getPipelineOptions().put("annotation.skip", true);
-
-        JobExecution execution = jobLauncherTestUtils.launchJob();
-
-        assertEquals("COMPLETED", execution.getExitStatus().getExitCode());
-        assertEquals(4, execution.getStepExecutions().size());
-
-        List<StepExecution> steps = new ArrayList<>(execution.getStepExecutions());
-        StepExecution transformStep = steps.get(0);
-        StepExecution loadStep = steps.get(1);
-
-        Map<String, StepExecution> parallelStepsNameToStepExecution = new HashMap<>();
-        for(int i=2; i<=steps.size()-1; i++){
-            parallelStepsNameToStepExecution.put(steps.get(i).getStepName(), steps.get(i));
-        }
-
-        assertEquals("Normalize variants", transformStep.getStepName());
-        assertEquals("Load variants", loadStep.getStepName());
-
-        Set<String> parallelStepNamesExecuted = parallelStepsNameToStepExecution.keySet();
-        Set<String> parallelStepNamesToCheck = new HashSet<>(Arrays.asList("Calculate statistics","Load statistics"));
-
-        assertTrue(parallelStepNamesExecuted.containsAll(parallelStepNamesToCheck)
-                && parallelStepNamesToCheck.containsAll(parallelStepNamesExecuted));
-
-        assertTrue(transformStep.getEndTime().before(loadStep.getStartTime()));
-        assertTrue(loadStep.getEndTime().before(parallelStepsNameToStepExecution.get("Calculate statistics").getStartTime()));
-
-        assertTrue(parallelStepsNameToStepExecution.get("Calculate statistics").getEndTime().before(parallelStepsNameToStepExecution.get("Load statistics").getStartTime()));
-    }
-
-
-    /**
-     * JobLauncherTestUtils is initialized here because in VariantConfiguration there are two Job beans
-     * in this way it is possible to specify the Job to run (and avoid NoUniqueBeanDefinitionException)
-     * @throws Exception
-     */
-    @Before
-    public void setUp() throws Exception {
-        variantJobsArgs.loadArgs();
-        jobLauncherTestUtils = new JobLauncherTestUtils();
-        jobLauncherTestUtils.setJob(job);
-        jobLauncherTestUtils.setJobLauncher(jobLauncher);
-
-        inputFileResouce = variantJobsArgs.getPipelineOptions().getString("input.vcf");
-        outputDir = variantJobsArgs.getPipelineOptions().getString("output.dir");
-        compressExtension = variantJobsArgs.getPipelineOptions().getString("compressExtension");
-        dbName = variantJobsArgs.getPipelineOptions().getString("db.name");
-        vepInput = variantJobsArgs.getPipelineOptions().getString("vep.input");
-        vepOutput = variantJobsArgs.getPipelineOptions().getString("vep.output");
-        JobTestUtils.cleanDBs(dbName);
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        JobTestUtils.cleanDBs(dbName);
     }
 
 }

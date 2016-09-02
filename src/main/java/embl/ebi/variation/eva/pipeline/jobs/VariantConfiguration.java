@@ -51,9 +51,10 @@ public class VariantConfiguration extends CommonJobStepInitialization{
 
     private static final Logger logger = LoggerFactory.getLogger(VariantConfiguration.class);
     public static final String jobName = "load-genotyped-vcf";
-    private static final String NORMALIZE_VARIANTS = "Normalize variants";
-    private static final String LOAD_VARIANTS = "Load variants";
-    private static final String PARALLEL_STATISTICS_AND_ANNOTATION = "Parallel statistics and annotation";
+
+    public static final String NORMALIZE_VARIANTS = "Normalize variants";
+    public static final String LOAD_VARIANTS = "Load variants";
+    public static final String PARALLEL_STATISTICS_AND_ANNOTATION = "Parallel statistics and annotation";
 
     @Autowired
     private JobBuilderFactory jobBuilderFactory;
