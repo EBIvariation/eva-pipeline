@@ -117,7 +117,7 @@ public class VariantConfigurationTest {
         assertFalse(file.exists());
 
         // When the execute method in variantsTransform is executed
-        JobExecution jobExecution = jobLauncherTestUtils.launchStep("Normalize variants");
+        JobExecution jobExecution = jobLauncherTestUtils.launchStep(VariantConfiguration.NORMALIZE_VARIANTS);
 
         //Then variantsTransform should complete correctly
         assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
@@ -150,7 +150,7 @@ public class VariantConfigurationTest {
         assertFalse(file.exists());
 
         //When the execute method in variantsTransform is invoked then a StorageManagerException is thrown
-        JobExecution jobExecution = jobLauncherTestUtils.launchStep("Normalize variants");
+        JobExecution jobExecution = jobLauncherTestUtils.launchStep(VariantConfiguration.NORMALIZE_VARIANTS);
         assertEquals(ExitStatus.FAILED.getExitCode(), jobExecution.getExitStatus().getExitCode());
     }
 
@@ -178,7 +178,7 @@ public class VariantConfigurationTest {
         FileUtils.copyFile(transformedVariantsFile, tmpTransformedVariantsFile);
 
         // When the execute method in variantsLoad is executed
-        JobExecution jobExecution = jobLauncherTestUtils.launchStep("Load variants");
+        JobExecution jobExecution = jobLauncherTestUtils.launchStep(VariantConfiguration.LOAD_VARIANTS);
 
         //Then variantsLoad step should complete correctly
         assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
@@ -215,7 +215,7 @@ public class VariantConfigurationTest {
                 source.getType(),
                 source.getAggregation()));
 
-        JobExecution jobExecution = jobLauncherTestUtils.launchStep("Load variants");
+        JobExecution jobExecution = jobLauncherTestUtils.launchStep(VariantConfiguration.LOAD_VARIANTS);
 
         assertEquals(inputFile, variantJobsArgs.getPipelineOptions().getString("input.vcf"));
         assertEquals(ExitStatus.FAILED.getExitCode(), jobExecution.getExitStatus().getExitCode());

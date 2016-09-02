@@ -132,7 +132,7 @@ public class VariantAnnotConfigurationTest {
         TestCase.assertFalse(vepOutputFile.exists());  // ensure the annot file doesn't exist from previous executions
 
         // When the execute method in variantsAnnotCreate is executed
-        JobExecution jobExecution = jobLauncherTestUtils.launchStep("Generate VEP annotation");
+        JobExecution jobExecution = jobLauncherTestUtils.launchStep(VariantAnnotConfiguration.GENERATE_VEP_ANNOTATION);
 
         //Then variantsAnnotCreate step should complete correctly
         assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());

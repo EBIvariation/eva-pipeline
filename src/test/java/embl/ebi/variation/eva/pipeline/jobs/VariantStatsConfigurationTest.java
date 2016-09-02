@@ -109,7 +109,7 @@ public class VariantStatsConfigurationTest {
         assertFalse(statsFile.exists());  // ensure the stats file doesn't exist from previous executions
 
         // When the execute method in variantsStatsCreate is executed
-        JobExecution jobExecution = jobLauncherTestUtils.launchStep("Calculate statistics");
+        JobExecution jobExecution = jobLauncherTestUtils.launchStep(VariantStatsConfiguration.CALCULATE_STATISTICS);
 
         //Then variantsStatsCreate step should complete correctly
         assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
@@ -153,7 +153,7 @@ public class VariantStatsConfigurationTest {
         assertFalse(statsFile.exists());  // ensure the stats file doesn't exist from previous executions
 
         // When the execute method in variantsStatsCreate is executed
-        JobExecution jobExecution = jobLauncherTestUtils.launchStep("Calculate statistics");
+        JobExecution jobExecution = jobLauncherTestUtils.launchStep(VariantStatsConfiguration.CALCULATE_STATISTICS);
         assertEquals(ExitStatus.FAILED.getExitCode(), jobExecution.getExitStatus().getExitCode());
     }
 
@@ -173,7 +173,7 @@ public class VariantStatsConfigurationTest {
         initStatsLoadStepFiles();
 
         // When the execute method in variantsStatsLoad is executed
-        JobExecution jobExecution = jobLauncherTestUtils.launchStep("Load statistics");
+        JobExecution jobExecution = jobLauncherTestUtils.launchStep(VariantStatsConfiguration.LOAD_STATISTICS);
 
         // Then variantsStatsLoad step should complete correctly
         assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
@@ -228,7 +228,7 @@ public class VariantStatsConfigurationTest {
         variantOptions.put(VariantStorageManager.DB_NAME, STATS_DB);
         variantOptions.put(VariantStorageManager.VARIANT_SOURCE, source);
 
-        JobExecution jobExecution = jobLauncherTestUtils.launchStep("Load statistics");
+        JobExecution jobExecution = jobLauncherTestUtils.launchStep(VariantStatsConfiguration.LOAD_STATISTICS);
 
         assertEquals(input, pipelineOptions.getString("input.vcf"));
         assertEquals(ExitStatus.FAILED.getExitCode(), jobExecution.getExitStatus().getExitCode());
