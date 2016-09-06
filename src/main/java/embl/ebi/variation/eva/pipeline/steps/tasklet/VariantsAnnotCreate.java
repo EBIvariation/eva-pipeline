@@ -33,10 +33,24 @@ import java.util.Arrays;
 import java.util.zip.GZIPOutputStream;
 
 /**
- * Created by jmmut on 2015-12-09.
  *
  * @author Jose Miguel Mut Lopez &lt;jmmut@ebi.ac.uk&gt;
  * @author Cristina Yenyxe Gonzalez Garcia &lt;cyenyxe@ebi.ac.uk&gt;
+ *
+ * Tasklet that runs @see <a href="http://www.ensembl.org/info/docs/tools/vep/index.html">VEP</a> over a list of
+ * coordinates of variants and nucleotide changes to determines the effect of the mutations.
+ *
+ * Input: file listing all the coordinates of variants and nucleotide changes like:
+ *  20	60343	60343	G/A	+
+ *  20	60419	60419	A/G	+
+ *  20	60479	60479	C/T	+
+ *  ...
+ *
+ * Output: file containing the VEP output
+ *  20_60343_G/A	20:60343	A	-	-	-	intergenic_variant	-	-	-	-	-	-
+ *  20_60419_A/G	20:60419	G	-	-	-	intergenic_variant	-	-	-	-	-	-
+ *  20_60479_C/T	20:60479	T	-	-	-	intergenic_variant	-	-	-	-	-	rs149529999	GMAF=T:0.0018;AFR_MAF=T:0.01;AMR_MAF=T:0.0028
+ *  ..
  */
 @Component
 @StepScope

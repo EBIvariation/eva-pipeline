@@ -36,9 +36,13 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 /**
- * Created by jmmut on 2015-11-10.
  *
  * @author Jose Miguel Mut Lopez &lt;jmmut@ebi.ac.uk&gt;
+ *
+ * Tasklet that loads transformed variants into mongoDB
+ *
+ * Input: transformed variants file (variants.json.gz)
+ * Output: variants loaded into mongodb
  */
 @Component
 @StepScope

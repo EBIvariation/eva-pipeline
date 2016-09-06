@@ -38,9 +38,15 @@ import org.springframework.stereotype.Component;
 import java.net.URI;
 
 /**
- * Created by jmmut on 2015-11-10.
  *
  * @author Jose Miguel Mut Lopez &lt;jmmut@ebi.ac.uk&gt;
+ *
+ * Tasklet that calculates statistics. See {@link org.opencb.biodata.models.variant.stats.VariantStats} for a list of
+ * fields that are calculated for each subset of samples.
+ *
+ * Input: variants loaded into mongodb
+ * Output: file containing statistics (.variants.stats.json.gz)
+ *
  */
 @Component
 @StepScope
