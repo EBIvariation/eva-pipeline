@@ -34,9 +34,16 @@ import org.springframework.stereotype.Component;
 import java.net.URI;
 
 /**
- * Created by jmmut on 2015-11-10.
  *
  * @author Jose Miguel Mut Lopez &lt;jmmut@ebi.ac.uk&gt;
+ *
+ * Tasklet that normalizes variants. To see the applied rules please refer to:
+ *
+ * @see <a href="www.ebi.ac.uk/eva/?FAQ">www.ebi.ac.uk/eva/?FAQ</a>
+ * @see <a href="https://docs.google.com/presentation/d/1WqSiT5AEEQF9jdIewdYIp-I0G5ozkFP3IikfCJZO1dc/edit#slide=id.ge1548f905_0_592">EVA FAQ</a>
+ *
+ * Input: vcf file
+ * Output: transformed variants file (variants.json.gz)
  */
 @Component
 @StepScope
