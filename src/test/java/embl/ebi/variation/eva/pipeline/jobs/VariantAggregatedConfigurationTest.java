@@ -167,7 +167,7 @@ public class VariantAggregatedConfigurationTest {
         JobExecution execution = jobLauncher.run(job, getJobParameters());
 
         assertEquals(input, pipelineOptions.getString("input.vcf"));
-        assertEquals("COMPLETED", execution.getExitStatus().getExitCode());
+        assertEquals(ExitStatus.COMPLETED, execution.getExitStatus());
 
         // check ((documents in DB) == (lines in transformed file))
         VariantStorageManager variantStorageManager = StorageManagerFactory.getVariantStorageManager();
@@ -245,7 +245,7 @@ public class VariantAggregatedConfigurationTest {
         JobExecution execution = jobLauncher.run(job, getJobParameters());
 
         assertEquals(input, pipelineOptions.getString("input.vcf"));
-        assertEquals("COMPLETED", execution.getExitStatus().getExitCode());
+        assertEquals(ExitStatus.COMPLETED, execution.getExitStatus());
 
         // check ((documents in DB) == (lines in transformed file))
         VariantStorageManager variantStorageManager = StorageManagerFactory.getVariantStorageManager();

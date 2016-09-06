@@ -55,6 +55,7 @@ import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
 
 import static embl.ebi.variation.eva.pipeline.jobs.JobTestUtils.*;
+import embl.ebi.variation.eva.pipeline.steps.VariantsAnnotLoad;
 import static junit.framework.TestCase.assertEquals;
 import org.apache.commons.io.FileUtils;
 import static org.junit.Assert.*;
@@ -332,7 +333,7 @@ public class VariantConfigurationTest {
 
         //check that one line is skipped because malformed
         List<StepExecution> variantAnnotationLoadStepExecution = jobExecution.getStepExecutions().stream()
-                .filter(stepExecution -> stepExecution.getStepName().equals("Load VEP annotation"))
+                .filter(stepExecution -> stepExecution.getStepName().equals(VariantsAnnotLoad.LOAD_VEP_ANNOTATION))
                 .collect(Collectors.toList());
         assertEquals(1, variantAnnotationLoadStepExecution.get(0).getReadSkipCount());
 
