@@ -24,9 +24,6 @@ import java.io.InputStreamReader;
 import java.net.URI;
 
 import embl.ebi.variation.eva.pipeline.steps.tasklet.VariantsAnnotCreate;
-import embl.ebi.variation.eva.pipeline.steps.tasklet.VariantsLoad;
-import embl.ebi.variation.eva.pipeline.steps.tasklet.VariantsStatsCreate;
-import embl.ebi.variation.eva.pipeline.steps.tasklet.VariantsStatsLoad;
 import org.opencb.biodata.models.variant.VariantSource;
 import org.opencb.biodata.models.variant.VariantStudy;
 import org.opencb.datastore.core.ObjectMap;
@@ -95,14 +92,9 @@ public class VariantJobsArgs {
     @Value("${db.collections.features.name}") private String dbCollectionGenesName;
     @Value("${config.db.read-preference}") private String readPreference;
 
-    //steps
-    @Value("${load.skip:false}") private boolean skipLoad;
-    @Value("${statistics.create.skip:false}") private boolean skipStatsCreate;
-    @Value("${statistics.load.skip:false}") private boolean skipStatsLoad;
-    @Value("${annotation.create.skip:false}") private boolean skipAnnotCreate;
-
-    @Value("${statistics.skip:false}") private boolean skipStats;
+    // Skip steps
     @Value("${annotation.skip:false}") private boolean skipAnnot;
+    @Value("${statistics.skip:false}") private boolean skipStats;
 
     //VEP
     @Value("${app.vep.path}") private String vepPath;
@@ -217,10 +209,6 @@ public class VariantJobsArgs {
         pipelineOptions.put("config.db.user", dbUser);
         pipelineOptions.put("config.db.password", dbPassword);
         pipelineOptions.put("config.db.read-preference", readPreference);
-        pipelineOptions.put(VariantsLoad.SKIP_LOAD, skipLoad);
-        pipelineOptions.put(VariantsStatsCreate.SKIP_STATS_CREATE, skipStatsCreate);
-        pipelineOptions.put(VariantsStatsLoad.SKIP_STATS_LOAD, skipStatsLoad);
-        pipelineOptions.put(VariantsAnnotCreate.SKIP_ANNOT_CREATE, skipAnnotCreate);
         pipelineOptions.put(VariantAnnotConfiguration.SKIP_ANNOT, skipAnnot);
         pipelineOptions.put(VariantStatsConfiguration.SKIP_STATS, skipStats);
 

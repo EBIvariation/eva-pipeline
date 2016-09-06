@@ -20,6 +20,7 @@ import embl.ebi.variation.eva.pipeline.steps.VariantsAnnotGenerateInput;
 import embl.ebi.variation.eva.pipeline.steps.VariantsAnnotLoad;
 import embl.ebi.variation.eva.pipeline.steps.decider.OptionalDecider;
 import embl.ebi.variation.eva.pipeline.steps.tasklet.VariantsAnnotCreate;
+import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
@@ -54,9 +55,8 @@ import org.springframework.context.annotation.Import;
 public class VariantAnnotConfiguration extends CommonJobStepInitialization{
     public static final String jobName = "annotate-variants";
     public static final String SKIP_ANNOT = "annotation.skip";
-    private static final String GENERATE_VEP_ANNOTATION = "Generate VEP annotation";
+    public static final String GENERATE_VEP_ANNOTATION = "Generate VEP annotation";
     private static final String VARIANT_VEP_ANNOTATION_FLOW = "Variant VEP annotation flow";
-    private static final String COMPLETED = "COMPLETED";
 
     @Autowired
     private JobBuilderFactory jobBuilderFactory;
@@ -90,7 +90,7 @@ public class VariantAnnotConfiguration extends CommonJobStepInitialization{
                 .to(variantsAnnotGenerateInputBatchStep)
                 .next(annotationCreate())
                 .next(variantAnnotLoadBatchStep)
-                .from(annotationOptionalDecider).on(OptionalDecider.SKIP_STEP).end(COMPLETED)
+                .from(annotationOptionalDecider).on(OptionalDecider.SKIP_STEP).end(BatchStatus.COMPLETED.toString())
                 .build();
 
     }

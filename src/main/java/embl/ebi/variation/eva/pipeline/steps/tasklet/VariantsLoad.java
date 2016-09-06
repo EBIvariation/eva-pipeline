@@ -45,7 +45,6 @@ import java.nio.file.Paths;
 @Import({VariantJobsArgs.class})
 public class VariantsLoad implements Tasklet {
     private static final Logger logger = LoggerFactory.getLogger(VariantsLoad.class);
-    public static final String SKIP_LOAD = "load.skip";
 
     @Autowired
     private VariantJobsArgs variantJobsArgs;
@@ -55,28 +54,23 @@ public class VariantsLoad implements Tasklet {
         ObjectMap variantOptions = variantJobsArgs.getVariantOptions();
         ObjectMap pipelineOptions = variantJobsArgs.getPipelineOptions();
 
-        if (pipelineOptions.getBoolean(SKIP_LOAD)) {
-            logger.info("skipping load step, skipLoad is set to {}", pipelineOptions.getBoolean(SKIP_LOAD));
-        } else {
-            VariantStorageManager variantStorageManager = StorageManagerFactory.getVariantStorageManager();// TODO add mongo
-            URI outdirUri = URLHelper.createUri(pipelineOptions.getString("output.dir"));
-            URI nextFileUri = URLHelper.createUri(pipelineOptions.getString("input.vcf"));
+        VariantStorageManager variantStorageManager = StorageManagerFactory.getVariantStorageManager();// TODO add mongo
+        URI outdirUri = URLHelper.createUri(pipelineOptions.getString("output.dir"));
+        URI nextFileUri = URLHelper.createUri(pipelineOptions.getString("input.vcf"));
 
 //          URI pedigreeUri = pipelineOptions.getString("input.pedigree") != null ? createUri(pipelineOptions.getString("input.pedigree")) : null;
-            Path output = Paths.get(outdirUri.getPath());
-            Path input = Paths.get(nextFileUri.getPath());
-            Path outputVariantJsonFile = output.resolve(input.getFileName().toString() + ".variants.json" + pipelineOptions.getString("compressExtension"));
+        Path output = Paths.get(outdirUri.getPath());
+        Path input = Paths.get(nextFileUri.getPath());
+        Path outputVariantJsonFile = output.resolve(input.getFileName().toString() + ".variants.json" + pipelineOptions.getString("compressExtension"));
 //          outputFileJsonFile = output.resolve(input.getFileName().toString() + ".file.json" + config.compressExtension);
-            URI transformedVariantsUri = outdirUri.resolve(outputVariantJsonFile.getFileName().toString());
+        URI transformedVariantsUri = outdirUri.resolve(outputVariantJsonFile.getFileName().toString());
 
-
-            logger.info("-- PreLoad variants -- {}", nextFileUri);
-            variantStorageManager.preLoad(transformedVariantsUri, outdirUri, variantOptions);
-            logger.info("-- Load variants -- {}", nextFileUri);
-            variantStorageManager.load(transformedVariantsUri, variantOptions);
+        logger.info("-- PreLoad variants -- {}", nextFileUri);
+        variantStorageManager.preLoad(transformedVariantsUri, outdirUri, variantOptions);
+        logger.info("-- Load variants -- {}", nextFileUri);
+        variantStorageManager.load(transformedVariantsUri, variantOptions);
 //          logger.info("-- PostLoad variants -- {}", nextFileUri);
 //          variantStorageManager.postLoad(transformedVariantsUri, outdirUri, variantOptions);
-        }
 
         return RepeatStatus.FINISHED;
     }

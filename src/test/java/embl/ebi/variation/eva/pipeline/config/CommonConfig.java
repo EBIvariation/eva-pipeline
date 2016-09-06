@@ -15,10 +15,6 @@
  */
 package embl.ebi.variation.eva.pipeline.config;
 
-import embl.ebi.variation.eva.pipeline.steps.tasklet.VariantsAnnotCreate;
-import embl.ebi.variation.eva.pipeline.steps.tasklet.VariantsLoad;
-import embl.ebi.variation.eva.pipeline.steps.tasklet.VariantsStatsCreate;
-import embl.ebi.variation.eva.pipeline.steps.tasklet.VariantsStatsLoad;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
@@ -70,10 +66,6 @@ public class CommonConfig {
         properties.put("app.vep.cache.species", "");
         properties.put("app.vep.num-forks", "3");
         
-        properties.put(VariantsLoad.SKIP_LOAD, "true");
-        properties.put(VariantsStatsCreate.SKIP_STATS_CREATE, "true");
-        properties.put(VariantsStatsLoad.SKIP_STATS_LOAD, "true");
-        properties.put(VariantsAnnotCreate.SKIP_ANNOT_CREATE, "true");
         properties.put("config.restartability.allow", false);
 
         configurer.setProperties(properties);

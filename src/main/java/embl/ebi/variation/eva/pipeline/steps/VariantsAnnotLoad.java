@@ -49,6 +49,8 @@ import java.io.IOException;
 @Import({VariantJobsArgs.class})
 public class VariantsAnnotLoad {
 
+    public static final String LOAD_VEP_ANNOTATION = "Load VEP annotation";
+
     @Autowired
     private StepBuilderFactory stepBuilderFactory;
 
@@ -62,7 +64,7 @@ public class VariantsAnnotLoad {
         String collections = variantJobsArgs.getPipelineOptions().getString("db.collections.variants.name");
         VariantAnnotationMongoItemWriter writer = new VariantAnnotationMongoItemWriter(mongoOperations, collections);
 
-        return stepBuilderFactory.get("Load VEP annotation").<VariantAnnotation, VariantAnnotation> chunk(10)
+        return stepBuilderFactory.get(LOAD_VEP_ANNOTATION).<VariantAnnotation, VariantAnnotation> chunk(10)
                 .reader(new VariantAnnotationReader(variantJobsArgs.getPipelineOptions()))
                 .writer(writer)
                 .faultTolerant().skipLimit(50).skip(FlatFileParseException.class)

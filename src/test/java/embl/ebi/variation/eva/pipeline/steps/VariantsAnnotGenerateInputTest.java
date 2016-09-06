@@ -38,7 +38,6 @@ import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.item.ItemProcessor;
-import org.springframework.batch.item.data.MongoItemReader;
 import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.batch.test.MetaDataInstanceFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -108,7 +107,7 @@ public class VariantsAnnotGenerateInputTest {
 
         Assert.assertFalse(vepInputFile.exists());
 
-        JobExecution jobExecution = jobLauncherTestUtils.launchStep("Find variants to annotate");
+        JobExecution jobExecution = jobLauncherTestUtils.launchStep(VariantsAnnotGenerateInput.FIND_VARIANTS_TO_ANNOTATE);
 
         assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
         assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());

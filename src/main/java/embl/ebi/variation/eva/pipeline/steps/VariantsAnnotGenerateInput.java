@@ -59,6 +59,8 @@ public class VariantsAnnotGenerateInput {
 
     private static final Logger logger = LoggerFactory.getLogger(VariantsAnnotGenerateInput.class);
 
+    public static final String FIND_VARIANTS_TO_ANNOTATE = "Find variants to annotate";
+
     @Autowired
     private StepBuilderFactory stepBuilderFactory;
 
@@ -68,7 +70,7 @@ public class VariantsAnnotGenerateInput {
     @Bean
     @Qualifier("variantsAnnotGenerateInput")
     public Step variantsAnnotGenerateInputBatchStep() throws Exception {
-        return stepBuilderFactory.get("Find variants to annotate").<DBObject, VariantWrapper> chunk(10)
+        return stepBuilderFactory.get(FIND_VARIANTS_TO_ANNOTATE).<DBObject, VariantWrapper> chunk(10)
                 .reader(new VariantReader(variantJobsArgs.getPipelineOptions()))
                 .processor(new VariantAnnotationItemProcessor())
                 .writer(new VepInputWriter(variantJobsArgs.getPipelineOptions()))

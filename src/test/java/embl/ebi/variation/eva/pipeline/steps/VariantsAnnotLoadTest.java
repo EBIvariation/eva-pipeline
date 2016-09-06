@@ -93,7 +93,7 @@ public class VariantsAnnotLoadTest {
         String vepOutput = variantJobsArgs.getPipelineOptions().getString("vep.output");
         makeGzipFile(vepOutputContent, vepOutput);
 
-        JobExecution jobExecution = jobLauncherTestUtils.launchStep("Load VEP annotation");
+        JobExecution jobExecution = jobLauncherTestUtils.launchStep(VariantsAnnotLoad.LOAD_VEP_ANNOTATION);
 
         assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
         assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());

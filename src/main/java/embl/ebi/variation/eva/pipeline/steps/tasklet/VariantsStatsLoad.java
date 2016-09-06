@@ -47,7 +47,6 @@ import java.net.URI;
 @Import({VariantJobsArgs.class})
 public class VariantsStatsLoad implements Tasklet {
     private static final Logger logger = LoggerFactory.getLogger(VariantsStatsLoad.class);
-    public static final String SKIP_STATS_LOAD = "statistics.load.skip";
 
     @Autowired
     private VariantJobsArgs variantJobsArgs;
@@ -57,20 +56,16 @@ public class VariantsStatsLoad implements Tasklet {
         ObjectMap variantOptions = variantJobsArgs.getVariantOptions();
         ObjectMap pipelineOptions = variantJobsArgs.getPipelineOptions();
 
-        if (pipelineOptions.getBoolean(SKIP_STATS_LOAD)) {
-            logger.info("skipping stats loading");
-        } else {
-            VariantStorageManager variantStorageManager = StorageManagerFactory.getVariantStorageManager();
-            QueryOptions statsOptions = new QueryOptions(variantOptions);
-            VariantStatisticsManager variantStatisticsManager = new VariantStatisticsManager();
-            VariantDBAdaptor dbAdaptor = variantStorageManager.getDBAdaptor(variantOptions.getString("dbName"), variantOptions);
-            URI outdirUri = URLHelper.createUri(pipelineOptions.getString("output.dir"));
-            VariantSource variantSource = variantOptions.get(VariantStorageManager.VARIANT_SOURCE, VariantSource.class);
-            URI statsOutputUri = outdirUri.resolve(VariantStorageManager.buildFilename(variantSource));
+        VariantStorageManager variantStorageManager = StorageManagerFactory.getVariantStorageManager();
+        QueryOptions statsOptions = new QueryOptions(variantOptions);
+        VariantStatisticsManager variantStatisticsManager = new VariantStatisticsManager();
+        VariantDBAdaptor dbAdaptor = variantStorageManager.getDBAdaptor(variantOptions.getString("dbName"), variantOptions);
+        URI outdirUri = URLHelper.createUri(pipelineOptions.getString("output.dir"));
+        VariantSource variantSource = variantOptions.get(VariantStorageManager.VARIANT_SOURCE, VariantSource.class);
+        URI statsOutputUri = outdirUri.resolve(VariantStorageManager.buildFilename(variantSource));
 
-            // actual stats load
-            variantStatisticsManager.loadStats(dbAdaptor, statsOutputUri, statsOptions);
-        }
+        // actual stats load
+        variantStatisticsManager.loadStats(dbAdaptor, statsOutputUri, statsOptions);
 
         return RepeatStatus.FINISHED;
     }
