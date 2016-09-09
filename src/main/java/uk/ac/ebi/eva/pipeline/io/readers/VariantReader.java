@@ -1,4 +1,4 @@
-package uk.ac.ebi.eva.pipeline.steps.readers;
+package uk.ac.ebi.eva.pipeline.io.readers;
 
 import com.mongodb.DBObject;
 

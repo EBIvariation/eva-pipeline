@@ -1,4 +1,4 @@
-package uk.ac.ebi.eva.pipeline.steps.writers;
+package uk.ac.ebi.eva.pipeline.io.writers;
 
 import org.opencb.datastore.core.ObjectMap;
 import org.springframework.batch.item.data.MongoItemWriter;

@@ -13,9 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.ac.ebi.eva.pipeline.gene;
+package uk.ac.ebi.eva.pipeline.io.mappers;
 
 import org.springframework.batch.item.file.LineMapper;
+
+import uk.ac.ebi.eva.pipeline.gene.FeatureCoordinates;
 
 import java.util.Map;
 import java.util.TreeMap;

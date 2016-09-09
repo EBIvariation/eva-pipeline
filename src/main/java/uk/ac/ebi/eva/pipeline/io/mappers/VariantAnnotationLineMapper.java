@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.ac.ebi.eva.pipeline.annotation.load;
+package uk.ac.ebi.eva.pipeline.io.mappers;
 
 import org.apache.commons.lang.ArrayUtils;
 import org.opencb.biodata.models.variant.annotation.ConsequenceType;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.ac.ebi.eva.pipeline.steps.writers;
+package uk.ac.ebi.eva.pipeline.io.writers;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;

@@ -21,11 +21,11 @@ import uk.ac.ebi.eva.VariantJobsArgs;
 import uk.ac.ebi.eva.pipeline.config.InitDBConfig;
 import uk.ac.ebi.eva.pipeline.gene.FeatureCoordinates;
 import uk.ac.ebi.eva.pipeline.gene.GeneFilterProcessor;
-import uk.ac.ebi.eva.pipeline.gene.GeneLineMapper;
+import uk.ac.ebi.eva.pipeline.io.mappers.GeneLineMapper;
+import uk.ac.ebi.eva.pipeline.io.readers.GeneReader;
+import uk.ac.ebi.eva.pipeline.io.writers.GeneWriter;
 import uk.ac.ebi.eva.pipeline.jobs.JobTestUtils;
 import uk.ac.ebi.eva.pipeline.steps.GenesLoad;
-import uk.ac.ebi.eva.pipeline.steps.readers.GeneReader;
-import uk.ac.ebi.eva.pipeline.steps.writers.GeneWriter;
 
 import org.junit.Before;
 import org.junit.Test;

@@ -1,12 +1,12 @@
-package uk.ac.ebi.eva.pipeline.steps.readers;
+package uk.ac.ebi.eva.pipeline.io.readers;
 
 import org.opencb.datastore.core.ObjectMap;
 import org.springframework.batch.item.file.FlatFileItemReader;
 import org.springframework.core.io.Resource;
 
-import uk.ac.ebi.eva.pipeline.annotation.GzipLazyResource;
 import uk.ac.ebi.eva.pipeline.gene.FeatureCoordinates;
-import uk.ac.ebi.eva.pipeline.gene.GeneLineMapper;
+import uk.ac.ebi.eva.pipeline.io.GzipLazyResource;
+import uk.ac.ebi.eva.pipeline.io.mappers.GeneLineMapper;
 
 public class GeneReader extends FlatFileItemReader<FeatureCoordinates> {
 

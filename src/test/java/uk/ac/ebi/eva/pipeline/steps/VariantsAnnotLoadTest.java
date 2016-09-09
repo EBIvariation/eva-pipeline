@@ -19,13 +19,13 @@ import com.mongodb.*;
 
 import uk.ac.ebi.eva.VariantJobsArgs;
 import uk.ac.ebi.eva.pipeline.MongoDBHelper;
-import uk.ac.ebi.eva.pipeline.annotation.load.VariantAnnotationLineMapper;
 import uk.ac.ebi.eva.pipeline.config.AnnotationConfig;
+import uk.ac.ebi.eva.pipeline.io.mappers.VariantAnnotationLineMapper;
+import uk.ac.ebi.eva.pipeline.io.readers.VariantAnnotationReader;
+import uk.ac.ebi.eva.pipeline.io.writers.VariantAnnotationMongoItemWriter;
 import uk.ac.ebi.eva.pipeline.jobs.JobTestUtils;
 import uk.ac.ebi.eva.pipeline.jobs.VariantAnnotConfiguration;
 import uk.ac.ebi.eva.pipeline.steps.VariantsAnnotLoad;
-import uk.ac.ebi.eva.pipeline.steps.readers.VariantAnnotationReader;
-import uk.ac.ebi.eva.pipeline.steps.writers.VariantAnnotationMongoItemWriter;
 
 import org.junit.After;
 import org.junit.Assert;

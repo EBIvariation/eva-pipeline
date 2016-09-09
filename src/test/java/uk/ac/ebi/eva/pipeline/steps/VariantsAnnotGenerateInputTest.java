@@ -22,13 +22,13 @@ import uk.ac.ebi.eva.VariantJobsArgs;
 import uk.ac.ebi.eva.pipeline.annotation.generateInput.VariantAnnotationItemProcessor;
 import uk.ac.ebi.eva.pipeline.annotation.generateInput.VariantWrapper;
 import uk.ac.ebi.eva.pipeline.config.AnnotationConfig;
+import uk.ac.ebi.eva.pipeline.io.readers.VariantReader;
+import uk.ac.ebi.eva.pipeline.io.writers.VepInputWriter;
 import uk.ac.ebi.eva.pipeline.jobs.JobTestUtils;
 import uk.ac.ebi.eva.pipeline.jobs.VariantAnnotConfiguration;
 import uk.ac.ebi.eva.pipeline.jobs.VariantAnnotConfigurationTest;
 import uk.ac.ebi.eva.pipeline.jobs.VariantStatsConfigurationTest;
 import uk.ac.ebi.eva.pipeline.steps.VariantsAnnotGenerateInput;
-import uk.ac.ebi.eva.pipeline.steps.readers.VariantReader;
-import uk.ac.ebi.eva.pipeline.steps.writers.VepInputWriter;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.Assert;

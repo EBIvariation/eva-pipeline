@@ -30,9 +30,9 @@ import org.springframework.data.mongodb.core.MongoOperations;
 
 import uk.ac.ebi.eva.VariantJobsArgs;
 import uk.ac.ebi.eva.pipeline.MongoDBHelper;
+import uk.ac.ebi.eva.pipeline.io.readers.VariantAnnotationReader;
+import uk.ac.ebi.eva.pipeline.io.writers.VariantAnnotationMongoItemWriter;
 import uk.ac.ebi.eva.pipeline.listener.SkipCheckingListener;
-import uk.ac.ebi.eva.pipeline.steps.readers.VariantAnnotationReader;
-import uk.ac.ebi.eva.pipeline.steps.writers.VariantAnnotationMongoItemWriter;
 
 import java.io.IOException;
 

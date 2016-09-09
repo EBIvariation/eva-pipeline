@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.ac.ebi.eva.pipeline.annotation;
+package uk.ac.ebi.eva.pipeline.io;
 
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;

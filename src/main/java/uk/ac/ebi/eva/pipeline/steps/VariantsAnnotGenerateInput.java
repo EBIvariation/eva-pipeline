@@ -20,8 +20,8 @@ import com.mongodb.DBObject;
 import uk.ac.ebi.eva.VariantJobsArgs;
 import uk.ac.ebi.eva.pipeline.annotation.generateInput.VariantAnnotationItemProcessor;
 import uk.ac.ebi.eva.pipeline.annotation.generateInput.VariantWrapper;
-import uk.ac.ebi.eva.pipeline.steps.readers.VariantReader;
-import uk.ac.ebi.eva.pipeline.steps.writers.VepInputWriter;
+import uk.ac.ebi.eva.pipeline.io.readers.VariantReader;
+import uk.ac.ebi.eva.pipeline.io.writers.VepInputWriter;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
