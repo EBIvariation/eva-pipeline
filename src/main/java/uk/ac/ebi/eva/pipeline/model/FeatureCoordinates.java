@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.ac.ebi.eva.pipeline.gene;
+package uk.ac.ebi.eva.pipeline.model;
 
 /**
  * Created by jmmut on 2016-08-16.

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.ac.ebi.eva.pipeline.annotation.generateInput;
+package uk.ac.ebi.eva.pipeline.model;
 
 import org.opencb.biodata.models.variant.Variant;
 

@@ -5,7 +5,7 @@ import org.springframework.batch.item.data.MongoItemWriter;
 import org.springframework.data.mongodb.core.MongoOperations;
 
 import uk.ac.ebi.eva.pipeline.MongoDBHelper;
-import uk.ac.ebi.eva.pipeline.gene.FeatureCoordinates;
+import uk.ac.ebi.eva.pipeline.model.FeatureCoordinates;
 
 public class GeneWriter extends MongoItemWriter<FeatureCoordinates> {
 

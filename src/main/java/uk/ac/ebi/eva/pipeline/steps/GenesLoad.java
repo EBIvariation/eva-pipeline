@@ -27,11 +27,11 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 import uk.ac.ebi.eva.VariantJobsArgs;
-import uk.ac.ebi.eva.pipeline.gene.FeatureCoordinates;
 import uk.ac.ebi.eva.pipeline.gene.GeneFilterProcessor;
 import uk.ac.ebi.eva.pipeline.io.readers.GeneReader;
 import uk.ac.ebi.eva.pipeline.io.writers.GeneWriter;
 import uk.ac.ebi.eva.pipeline.listener.SkipCheckingListener;
+import uk.ac.ebi.eva.pipeline.model.FeatureCoordinates;
 
 import java.io.IOException;
 

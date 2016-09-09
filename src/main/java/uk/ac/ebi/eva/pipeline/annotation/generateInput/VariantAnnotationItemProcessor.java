@@ -17,6 +17,9 @@
 package uk.ac.ebi.eva.pipeline.annotation.generateInput;
 
 import com.mongodb.DBObject;
+
+import uk.ac.ebi.eva.pipeline.model.VariantWrapper;
+
 import org.opencb.biodata.models.variant.Variant;
 import org.opencb.opencga.storage.mongodb.variant.DBObjectToVariantConverter;
 import org.slf4j.Logger;

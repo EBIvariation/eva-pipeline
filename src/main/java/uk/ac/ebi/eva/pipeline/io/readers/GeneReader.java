@@ -4,9 +4,9 @@ import org.opencb.datastore.core.ObjectMap;
 import org.springframework.batch.item.file.FlatFileItemReader;
 import org.springframework.core.io.Resource;
 
-import uk.ac.ebi.eva.pipeline.gene.FeatureCoordinates;
 import uk.ac.ebi.eva.pipeline.io.GzipLazyResource;
 import uk.ac.ebi.eva.pipeline.io.mappers.GeneLineMapper;
+import uk.ac.ebi.eva.pipeline.model.FeatureCoordinates;
 
 public class GeneReader extends FlatFileItemReader<FeatureCoordinates> {
 

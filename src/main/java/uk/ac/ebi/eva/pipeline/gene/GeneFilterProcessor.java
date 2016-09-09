@@ -17,6 +17,8 @@ package uk.ac.ebi.eva.pipeline.gene;
 
 import org.springframework.batch.item.ItemProcessor;
 
+import uk.ac.ebi.eva.pipeline.model.FeatureCoordinates;
+
 /**
  * Created by jmmut on 2016-08-16.
  *

@@ -6,7 +6,7 @@ import org.springframework.batch.item.file.transform.BeanWrapperFieldExtractor;
 import org.springframework.batch.item.file.transform.DelimitedLineAggregator;
 import org.springframework.core.io.FileSystemResource;
 
-import uk.ac.ebi.eva.pipeline.annotation.generateInput.VariantWrapper;
+import uk.ac.ebi.eva.pipeline.model.VariantWrapper;
 
 public class VepInputWriter extends FlatFileItemWriter<VariantWrapper> {
 
