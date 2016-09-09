@@ -28,11 +28,11 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.mongodb.core.MongoOperations;
 
-import uk.ac.ebi.eva.pipeline.MongoDBHelper;
 import uk.ac.ebi.eva.pipeline.configuration.VariantJobsArgs;
 import uk.ac.ebi.eva.pipeline.io.readers.VariantAnnotationReader;
 import uk.ac.ebi.eva.pipeline.io.writers.VariantAnnotationMongoItemWriter;
 import uk.ac.ebi.eva.pipeline.listener.SkipCheckingListener;
+import uk.ac.ebi.eva.utils.MongoDBHelper;
 
 import java.io.IOException;
 

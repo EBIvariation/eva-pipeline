@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-package uk.ac.ebi.eva.pipeline;
+package uk.ac.ebi.eva.utils;
 
 import com.mongodb.ReadPreference;
-
-import uk.ac.ebi.eva.utils.ConnectionHelper;
 
 import org.opencb.commons.utils.CryptoUtils;
 import org.opencb.datastore.core.ObjectMap;

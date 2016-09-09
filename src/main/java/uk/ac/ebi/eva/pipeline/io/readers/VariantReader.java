@@ -2,7 +2,7 @@ package uk.ac.ebi.eva.pipeline.io.readers;
 
 import com.mongodb.DBObject;
 
-import uk.ac.ebi.eva.pipeline.MongoDBHelper;
+import uk.ac.ebi.eva.utils.MongoDBHelper;
 
 import org.opencb.datastore.core.ObjectMap;
 import org.springframework.batch.item.data.MongoItemReader;

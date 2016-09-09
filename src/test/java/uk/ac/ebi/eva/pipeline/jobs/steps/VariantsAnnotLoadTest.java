@@ -17,7 +17,6 @@ package uk.ac.ebi.eva.pipeline.jobs.steps;
 
 import com.mongodb.*;
 
-import uk.ac.ebi.eva.pipeline.MongoDBHelper;
 import uk.ac.ebi.eva.pipeline.configuration.AnnotationConfig;
 import uk.ac.ebi.eva.pipeline.configuration.VariantJobsArgs;
 import uk.ac.ebi.eva.pipeline.io.mappers.VariantAnnotationLineMapper;
@@ -25,6 +24,7 @@ import uk.ac.ebi.eva.pipeline.io.readers.VariantAnnotationReader;
 import uk.ac.ebi.eva.pipeline.io.writers.VariantAnnotationMongoItemWriter;
 import uk.ac.ebi.eva.pipeline.jobs.JobTestUtils;
 import uk.ac.ebi.eva.pipeline.jobs.VariantAnnotConfiguration;
+import uk.ac.ebi.eva.utils.MongoDBHelper;
 
 import org.junit.After;
 import org.junit.Assert;

@@ -19,7 +19,7 @@ package uk.ac.ebi.eva.pipeline.io.writers;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 
-import uk.ac.ebi.eva.pipeline.MongoDBHelper;
+import uk.ac.ebi.eva.utils.MongoDBHelper;
 
 import org.opencb.biodata.models.variant.annotation.VariantAnnotation;
 import org.opencb.opencga.storage.mongodb.variant.DBObjectToVariantAnnotationConverter;
