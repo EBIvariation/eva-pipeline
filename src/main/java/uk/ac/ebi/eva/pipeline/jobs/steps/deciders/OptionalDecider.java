@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.ac.ebi.eva.pipeline.jobs.steps.decider;
+package uk.ac.ebi.eva.pipeline.jobs.steps.deciders;
 
 import org.opencb.datastore.core.ObjectMap;
 import org.slf4j.Logger;
@@ -35,7 +35,7 @@ public class OptionalDecider implements JobExecutionDecider {
     private ObjectMap pipelineOptions;
 
     public static final String SKIP_STEP = "SKIP_STEP";
-    public static String DO_STEP = "DO_STEP";
+    public static final String DO_STEP = "DO_STEP";
 
     /**
      * @param pipelineOptions ObjectMap that will have a boolean for .get(skipStep), telling whether to skip or not
@@ -50,7 +50,6 @@ public class OptionalDecider implements JobExecutionDecider {
 
     @Override
     public FlowExecutionStatus decide(JobExecution jobExecution, StepExecution stepExecution) {
-
         if (Boolean.parseBoolean(pipelineOptions.getString(skipStep))) {
             logger.info("Skipping step because {} is enabled", skipStep);
             return new FlowExecutionStatus(SKIP_STEP);

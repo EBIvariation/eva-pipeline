@@ -30,7 +30,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 import uk.ac.ebi.eva.pipeline.jobs.steps.GenesLoad;
-import uk.ac.ebi.eva.pipeline.jobs.steps.tasklet.IndexesCreate;
+import uk.ac.ebi.eva.pipeline.jobs.steps.tasklets.IndexesCreate;
 
 @Configuration
 @EnableBatchProcessing

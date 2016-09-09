@@ -33,8 +33,8 @@ import org.springframework.context.annotation.Import;
 
 import uk.ac.ebi.eva.pipeline.jobs.steps.VariantsAnnotGenerateInput;
 import uk.ac.ebi.eva.pipeline.jobs.steps.VariantsAnnotLoad;
-import uk.ac.ebi.eva.pipeline.jobs.steps.decider.OptionalDecider;
-import uk.ac.ebi.eva.pipeline.jobs.steps.tasklet.VariantsAnnotCreate;
+import uk.ac.ebi.eva.pipeline.jobs.steps.deciders.OptionalDecider;
+import uk.ac.ebi.eva.pipeline.jobs.steps.tasklets.VariantsAnnotCreate;
 
 /**
  * @author Diego Poggioli

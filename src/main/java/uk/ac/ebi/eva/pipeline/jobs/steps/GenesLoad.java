@@ -30,7 +30,7 @@ import uk.ac.ebi.eva.pipeline.configuration.VariantJobsArgs;
 import uk.ac.ebi.eva.pipeline.io.readers.GeneReader;
 import uk.ac.ebi.eva.pipeline.io.writers.GeneWriter;
 import uk.ac.ebi.eva.pipeline.jobs.processors.GeneFilterProcessor;
-import uk.ac.ebi.eva.pipeline.listener.SkipCheckingListener;
+import uk.ac.ebi.eva.pipeline.listeners.SkipCheckingListener;
 import uk.ac.ebi.eva.pipeline.model.FeatureCoordinates;
 
 import java.io.IOException;

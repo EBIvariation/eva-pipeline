@@ -36,7 +36,7 @@ import uk.ac.ebi.eva.pipeline.configuration.InitDBConfig;
 import uk.ac.ebi.eva.pipeline.configuration.VariantJobsArgs;
 import uk.ac.ebi.eva.pipeline.jobs.InitDBConfiguration;
 import uk.ac.ebi.eva.pipeline.jobs.JobTestUtils;
-import uk.ac.ebi.eva.pipeline.jobs.steps.tasklet.IndexesCreate;
+import uk.ac.ebi.eva.pipeline.jobs.steps.tasklets.IndexesCreate;
 
 import static junit.framework.TestCase.assertEquals;
 

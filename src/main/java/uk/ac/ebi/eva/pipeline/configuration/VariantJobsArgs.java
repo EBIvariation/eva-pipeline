@@ -31,7 +31,7 @@ import org.springframework.stereotype.Component;
 
 import uk.ac.ebi.eva.pipeline.jobs.VariantAnnotConfiguration;
 import uk.ac.ebi.eva.pipeline.jobs.VariantStatsConfiguration;
-import uk.ac.ebi.eva.pipeline.jobs.steps.tasklet.VariantsAnnotCreate;
+import uk.ac.ebi.eva.pipeline.jobs.steps.tasklets.VariantsAnnotCreate;
 
 import java.nio.file.Paths;
 import java.util.Properties;

@@ -13,15 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.ac.ebi.eva.pipeline.jobs.steps.tasklet;
+package uk.ac.ebi.eva.pipeline.jobs.steps.tasklets;
 
-import org.opencb.biodata.models.variant.VariantSource;
 import org.opencb.datastore.core.ObjectMap;
-import org.opencb.datastore.core.QueryOptions;
 import org.opencb.opencga.storage.core.StorageManagerFactory;
 import org.opencb.opencga.storage.core.variant.VariantStorageManager;
-import org.opencb.opencga.storage.core.variant.adaptors.VariantDBAdaptor;
-import org.opencb.opencga.storage.core.variant.stats.VariantStatisticsManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.StepContribution;
@@ -46,8 +42,8 @@ import java.net.URI;
 @Component
 @StepScope
 @Import({VariantJobsArgs.class})
-public class VariantsStatsLoad implements Tasklet {
-    private static final Logger logger = LoggerFactory.getLogger(VariantsStatsLoad.class);
+public class VariantsTransform implements Tasklet {
+    private static final Logger logger = LoggerFactory.getLogger(VariantsTransform.class);
 
     @Autowired
     private VariantJobsArgs variantJobsArgs;
@@ -57,17 +53,23 @@ public class VariantsStatsLoad implements Tasklet {
         ObjectMap variantOptions = variantJobsArgs.getVariantOptions();
         ObjectMap pipelineOptions = variantJobsArgs.getPipelineOptions();
 
-        VariantStorageManager variantStorageManager = StorageManagerFactory.getVariantStorageManager();
-        QueryOptions statsOptions = new QueryOptions(variantOptions);
-        VariantStatisticsManager variantStatisticsManager = new VariantStatisticsManager();
-        VariantDBAdaptor dbAdaptor = variantStorageManager.getDBAdaptor(variantOptions.getString("dbName"), variantOptions);
         URI outdirUri = URLHelper.createUri(pipelineOptions.getString("output.dir"));
-        VariantSource variantSource = variantOptions.get(VariantStorageManager.VARIANT_SOURCE, VariantSource.class);
-        URI statsOutputUri = outdirUri.resolve(VariantStorageManager.buildFilename(variantSource));
+        URI nextFileUri = URLHelper.createUri(pipelineOptions.getString("input.vcf"));
+        URI pedigreeUri = pipelineOptions.getString("input.pedigree") != null ? URLHelper.createUri(pipelineOptions.getString("input.pedigree")) : null;
 
-        // actual stats load
-        variantStatisticsManager.loadStats(dbAdaptor, statsOutputUri, statsOptions);
+        logger.info("Transform file {} to {}", pipelineOptions.getString("input.vcf"), pipelineOptions.getString("output.dir"));
 
+        logger.info("Extract variants '{}'", nextFileUri);
+        VariantStorageManager variantStorageManager = StorageManagerFactory.getVariantStorageManager();
+        variantStorageManager.extract(nextFileUri, outdirUri, variantOptions);
+
+        logger.info("PreTransform variants '{}'", nextFileUri);
+        variantStorageManager.preTransform(nextFileUri, variantOptions);
+        logger.info("Transform variants '{}'", nextFileUri);
+        variantStorageManager.transform(nextFileUri, pedigreeUri, outdirUri, variantOptions);
+        logger.info("PostTransform variants '{}'", nextFileUri);
+        variantStorageManager.postTransform(nextFileUri, variantOptions);
         return RepeatStatus.FINISHED;
     }
+
 }

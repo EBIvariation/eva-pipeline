@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.ac.ebi.eva.pipeline.jobs.steps.tasklet;
+package uk.ac.ebi.eva.pipeline.jobs.steps.tasklets;
 
 import org.opencb.datastore.core.ObjectMap;
 import org.opencb.opencga.storage.core.StorageManagerFactory;
@@ -33,6 +33,8 @@ import uk.ac.ebi.eva.pipeline.configuration.VariantJobsArgs;
 import uk.ac.ebi.eva.utils.URLHelper;
 
 import java.net.URI;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 /**
  * Created by jmmut on 2015-11-10.
@@ -42,8 +44,8 @@ import java.net.URI;
 @Component
 @StepScope
 @Import({VariantJobsArgs.class})
-public class VariantsTransform implements Tasklet {
-    private static final Logger logger = LoggerFactory.getLogger(VariantsTransform.class);
+public class VariantsLoad implements Tasklet {
+    private static final Logger logger = LoggerFactory.getLogger(VariantsLoad.class);
 
     @Autowired
     private VariantJobsArgs variantJobsArgs;
@@ -53,22 +55,24 @@ public class VariantsTransform implements Tasklet {
         ObjectMap variantOptions = variantJobsArgs.getVariantOptions();
         ObjectMap pipelineOptions = variantJobsArgs.getPipelineOptions();
 
+        VariantStorageManager variantStorageManager = StorageManagerFactory.getVariantStorageManager();// TODO add mongo
         URI outdirUri = URLHelper.createUri(pipelineOptions.getString("output.dir"));
         URI nextFileUri = URLHelper.createUri(pipelineOptions.getString("input.vcf"));
-        URI pedigreeUri = pipelineOptions.getString("input.pedigree") != null ? URLHelper.createUri(pipelineOptions.getString("input.pedigree")) : null;
 
-        logger.info("Transform file {} to {}", pipelineOptions.getString("input.vcf"), pipelineOptions.getString("output.dir"));
+//          URI pedigreeUri = pipelineOptions.getString("input.pedigree") != null ? createUri(pipelineOptions.getString("input.pedigree")) : null;
+        Path output = Paths.get(outdirUri.getPath());
+        Path input = Paths.get(nextFileUri.getPath());
+        Path outputVariantJsonFile = output.resolve(input.getFileName().toString() + ".variants.json" + pipelineOptions.getString("compressExtension"));
+//          outputFileJsonFile = output.resolve(input.getFileName().toString() + ".file.json" + config.compressExtension);
+        URI transformedVariantsUri = outdirUri.resolve(outputVariantJsonFile.getFileName().toString());
 
-        logger.info("Extract variants '{}'", nextFileUri);
-        VariantStorageManager variantStorageManager = StorageManagerFactory.getVariantStorageManager();
-        variantStorageManager.extract(nextFileUri, outdirUri, variantOptions);
+        logger.info("-- PreLoad variants -- {}", nextFileUri);
+        variantStorageManager.preLoad(transformedVariantsUri, outdirUri, variantOptions);
+        logger.info("-- Load variants -- {}", nextFileUri);
+        variantStorageManager.load(transformedVariantsUri, variantOptions);
+//          logger.info("-- PostLoad variants -- {}", nextFileUri);
+//          variantStorageManager.postLoad(transformedVariantsUri, outdirUri, variantOptions);
 
-        logger.info("PreTransform variants '{}'", nextFileUri);
-        variantStorageManager.preTransform(nextFileUri, variantOptions);
-        logger.info("Transform variants '{}'", nextFileUri);
-        variantStorageManager.transform(nextFileUri, pedigreeUri, outdirUri, variantOptions);
-        logger.info("PostTransform variants '{}'", nextFileUri);
-        variantStorageManager.postTransform(nextFileUri, variantOptions);
         return RepeatStatus.FINISHED;
     }
 

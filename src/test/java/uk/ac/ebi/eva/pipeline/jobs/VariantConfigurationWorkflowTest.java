@@ -20,7 +20,7 @@ import uk.ac.ebi.eva.pipeline.configuration.VariantJobsArgs;
 import uk.ac.ebi.eva.pipeline.configuration.VariantWorkflowConfig;
 import uk.ac.ebi.eva.pipeline.jobs.steps.VariantsAnnotGenerateInput;
 import uk.ac.ebi.eva.pipeline.jobs.steps.VariantsAnnotLoad;
-import uk.ac.ebi.eva.pipeline.jobs.steps.tasklet.VariantsAnnotCreate;
+import uk.ac.ebi.eva.pipeline.jobs.steps.tasklets.VariantsAnnotCreate;
 
 import java.io.File;
 import java.nio.file.Paths;
