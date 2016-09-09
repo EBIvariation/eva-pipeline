@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.ac.ebi.eva.pipeline.steps;
+package uk.ac.ebi.eva.pipeline.jobs.steps;
 
 import org.opencb.biodata.models.variant.annotation.VariantAnnotation;
 import org.springframework.batch.core.Step;

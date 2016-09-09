@@ -31,10 +31,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
-import uk.ac.ebi.eva.pipeline.steps.VariantsAnnotGenerateInput;
-import uk.ac.ebi.eva.pipeline.steps.VariantsAnnotLoad;
-import uk.ac.ebi.eva.pipeline.steps.decider.OptionalDecider;
-import uk.ac.ebi.eva.pipeline.steps.tasklet.VariantsAnnotCreate;
+import uk.ac.ebi.eva.pipeline.jobs.steps.VariantsAnnotGenerateInput;
+import uk.ac.ebi.eva.pipeline.jobs.steps.VariantsAnnotLoad;
+import uk.ac.ebi.eva.pipeline.jobs.steps.decider.OptionalDecider;
+import uk.ac.ebi.eva.pipeline.jobs.steps.tasklet.VariantsAnnotCreate;
 
 /**
  * @author Diego Poggioli

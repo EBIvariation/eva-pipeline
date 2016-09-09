@@ -17,9 +17,6 @@ package uk.ac.ebi.eva.pipeline.jobs;
 
 import uk.ac.ebi.eva.VariantJobsArgs;
 import uk.ac.ebi.eva.pipeline.config.CommonConfig;
-import uk.ac.ebi.eva.pipeline.jobs.VariantStatsConfiguration;
-import uk.ac.ebi.eva.pipeline.steps.tasklet.VariantsStatsCreate;
-import uk.ac.ebi.eva.pipeline.steps.tasklet.VariantsStatsLoad;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.After;

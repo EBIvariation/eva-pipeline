@@ -28,8 +28,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
-import uk.ac.ebi.eva.pipeline.steps.tasklet.VariantsLoad;
-import uk.ac.ebi.eva.pipeline.steps.tasklet.VariantsTransform;
+import uk.ac.ebi.eva.pipeline.jobs.steps.tasklet.VariantsLoad;
+import uk.ac.ebi.eva.pipeline.jobs.steps.tasklet.VariantsTransform;
 
 @Configuration
 @EnableBatchProcessing

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.ac.ebi.eva.pipeline.steps;
+package uk.ac.ebi.eva.pipeline.jobs.steps;
 
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;

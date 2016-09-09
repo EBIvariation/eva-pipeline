@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.ac.ebi.eva.pipeline.steps;
+package uk.ac.ebi.eva.pipeline.jobs.steps;
 
 import com.mongodb.*;
 
@@ -25,7 +25,6 @@ import uk.ac.ebi.eva.pipeline.io.readers.GeneReader;
 import uk.ac.ebi.eva.pipeline.io.writers.GeneWriter;
 import uk.ac.ebi.eva.pipeline.jobs.JobTestUtils;
 import uk.ac.ebi.eva.pipeline.model.FeatureCoordinates;
-import uk.ac.ebi.eva.pipeline.steps.GenesLoad;
 
 import org.junit.Before;
 import org.junit.Test;

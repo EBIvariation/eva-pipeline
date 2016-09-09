@@ -21,8 +21,7 @@ import com.mongodb.*;
 import junit.framework.TestCase;
 import uk.ac.ebi.eva.VariantJobsArgs;
 import uk.ac.ebi.eva.pipeline.config.AnnotationConfig;
-import uk.ac.ebi.eva.pipeline.jobs.VariantAnnotConfiguration;
-import uk.ac.ebi.eva.pipeline.steps.VariantsAnnotLoad;
+import uk.ac.ebi.eva.pipeline.jobs.steps.VariantsAnnotLoad;
 
 import org.junit.*;
 import org.junit.runner.RunWith;

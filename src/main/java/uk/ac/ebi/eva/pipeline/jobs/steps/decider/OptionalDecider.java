@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.ac.ebi.eva.pipeline.steps.decider;
+package uk.ac.ebi.eva.pipeline.jobs.steps.decider;
 
 import org.opencb.datastore.core.ObjectMap;
 import org.slf4j.Logger;

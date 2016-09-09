@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.ac.ebi.eva.pipeline.steps;
+package uk.ac.ebi.eva.pipeline.jobs.steps;
 
 import com.mongodb.*;
 
@@ -25,7 +25,6 @@ import uk.ac.ebi.eva.pipeline.io.readers.VariantAnnotationReader;
 import uk.ac.ebi.eva.pipeline.io.writers.VariantAnnotationMongoItemWriter;
 import uk.ac.ebi.eva.pipeline.jobs.JobTestUtils;
 import uk.ac.ebi.eva.pipeline.jobs.VariantAnnotConfiguration;
-import uk.ac.ebi.eva.pipeline.steps.VariantsAnnotLoad;
 
 import org.junit.After;
 import org.junit.Assert;

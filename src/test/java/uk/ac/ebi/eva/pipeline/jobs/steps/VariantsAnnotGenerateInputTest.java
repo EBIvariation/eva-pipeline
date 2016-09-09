@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.ac.ebi.eva.pipeline.steps;
+package uk.ac.ebi.eva.pipeline.jobs.steps;
 
 import com.mongodb.*;
 import com.mongodb.util.JSON;
@@ -25,10 +25,7 @@ import uk.ac.ebi.eva.pipeline.io.readers.VariantReader;
 import uk.ac.ebi.eva.pipeline.io.writers.VepInputWriter;
 import uk.ac.ebi.eva.pipeline.jobs.JobTestUtils;
 import uk.ac.ebi.eva.pipeline.jobs.VariantAnnotConfiguration;
-import uk.ac.ebi.eva.pipeline.jobs.VariantAnnotConfigurationTest;
-import uk.ac.ebi.eva.pipeline.jobs.VariantStatsConfigurationTest;
 import uk.ac.ebi.eva.pipeline.model.VariantWrapper;
-import uk.ac.ebi.eva.pipeline.steps.VariantsAnnotGenerateInput;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.Assert;
@@ -85,11 +82,11 @@ public class VariantsAnnotGenerateInputTest {
         executionContext = MetaDataInstanceFactory.createStepExecution().getExecutionContext();
 
         URL variantWithNoAnnotationUrl =
-                VariantAnnotConfigurationTest.class.getResource("/annotation/VariantWithOutAnnotation");
+                VariantsAnnotGenerateInputTest.class.getResource("/annotation/VariantWithOutAnnotation");
         variantWithoutAnnotation = FileUtils.readFileToString(new File(variantWithNoAnnotationUrl.getFile()));
 
         URL variantWithAnnotationUrl =
-                VariantAnnotConfigurationTest.class.getResource("/annotation/VariantWithAnnotation");
+                VariantsAnnotGenerateInputTest.class.getResource("/annotation/VariantWithAnnotation");
         variantWithAnnotation = FileUtils.readFileToString(new File(variantWithAnnotationUrl.getFile()));
 
         variantJobsArgs.loadArgs();
@@ -101,7 +98,7 @@ public class VariantsAnnotGenerateInputTest {
 
     @Test
     public void variantsAnnotGenerateInputStepShouldGenerateVepInput() throws Exception {
-        String dump = VariantStatsConfigurationTest.class.getResource("/dump/").getFile();
+        String dump = VariantsAnnotGenerateInputTest.class.getResource("/dump/").getFile();
         restoreMongoDbFromDump(dump);
         File vepInputFile = new File(variantJobsArgs.getPipelineOptions().getString("vep.input"));
 

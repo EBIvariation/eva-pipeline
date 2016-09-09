@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.ac.ebi.eva.pipeline.steps;
+package uk.ac.ebi.eva.pipeline.jobs.steps;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
@@ -36,7 +36,7 @@ import uk.ac.ebi.eva.VariantJobsArgs;
 import uk.ac.ebi.eva.pipeline.config.InitDBConfig;
 import uk.ac.ebi.eva.pipeline.jobs.InitDBConfiguration;
 import uk.ac.ebi.eva.pipeline.jobs.JobTestUtils;
-import uk.ac.ebi.eva.pipeline.steps.tasklet.IndexesCreate;
+import uk.ac.ebi.eva.pipeline.jobs.steps.tasklet.IndexesCreate;
 
 import static junit.framework.TestCase.assertEquals;
 

@@ -31,9 +31,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
-import uk.ac.ebi.eva.pipeline.steps.decider.OptionalDecider;
-import uk.ac.ebi.eva.pipeline.steps.tasklet.VariantsStatsCreate;
-import uk.ac.ebi.eva.pipeline.steps.tasklet.VariantsStatsLoad;
+import uk.ac.ebi.eva.pipeline.jobs.steps.decider.OptionalDecider;
+import uk.ac.ebi.eva.pipeline.jobs.steps.tasklet.VariantsStatsCreate;
+import uk.ac.ebi.eva.pipeline.jobs.steps.tasklet.VariantsStatsLoad;
 
 @Configuration
 @EnableBatchProcessing

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.ac.ebi.eva.pipeline.steps.tasklet;
+package uk.ac.ebi.eva.pipeline.jobs.steps.tasklet;
 
 import com.mongodb.BasicDBObject;
 
