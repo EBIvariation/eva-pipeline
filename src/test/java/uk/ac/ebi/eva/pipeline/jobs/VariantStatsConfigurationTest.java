@@ -15,8 +15,8 @@
  */
 package uk.ac.ebi.eva.pipeline.jobs;
 
-import uk.ac.ebi.eva.VariantJobsArgs;
-import uk.ac.ebi.eva.pipeline.config.CommonConfig;
+import uk.ac.ebi.eva.pipeline.configuration.CommonConfig;
+import uk.ac.ebi.eva.pipeline.configuration.VariantJobsArgs;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.After;

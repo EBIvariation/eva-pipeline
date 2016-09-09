@@ -17,8 +17,8 @@ package uk.ac.ebi.eva.pipeline.jobs.steps;
 
 import com.mongodb.*;
 
-import uk.ac.ebi.eva.VariantJobsArgs;
-import uk.ac.ebi.eva.pipeline.config.InitDBConfig;
+import uk.ac.ebi.eva.pipeline.configuration.InitDBConfig;
+import uk.ac.ebi.eva.pipeline.configuration.VariantJobsArgs;
 import uk.ac.ebi.eva.pipeline.gene.GeneFilterProcessor;
 import uk.ac.ebi.eva.pipeline.io.mappers.GeneLineMapper;
 import uk.ac.ebi.eva.pipeline.io.readers.GeneReader;

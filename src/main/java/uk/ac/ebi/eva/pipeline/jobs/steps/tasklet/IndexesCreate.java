@@ -17,8 +17,8 @@ package uk.ac.ebi.eva.pipeline.jobs.steps.tasklet;
 
 import com.mongodb.BasicDBObject;
 
-import uk.ac.ebi.eva.VariantJobsArgs;
 import uk.ac.ebi.eva.pipeline.MongoDBHelper;
+import uk.ac.ebi.eva.pipeline.configuration.VariantJobsArgs;
 
 import org.opencb.datastore.core.ObjectMap;
 import org.slf4j.Logger;

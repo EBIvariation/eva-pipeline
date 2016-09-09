@@ -9,7 +9,7 @@ import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 
-import uk.ac.ebi.eva.VariantJobsArgs;
+import uk.ac.ebi.eva.pipeline.configuration.VariantJobsArgs;
 
 @Import({VariantJobsArgs.class})
 public class CommonJobStepInitialization {

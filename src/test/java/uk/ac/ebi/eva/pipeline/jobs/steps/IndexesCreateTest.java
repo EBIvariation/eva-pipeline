@@ -32,8 +32,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import uk.ac.ebi.eva.VariantJobsArgs;
-import uk.ac.ebi.eva.pipeline.config.InitDBConfig;
+import uk.ac.ebi.eva.pipeline.configuration.InitDBConfig;
+import uk.ac.ebi.eva.pipeline.configuration.VariantJobsArgs;
 import uk.ac.ebi.eva.pipeline.jobs.InitDBConfiguration;
 import uk.ac.ebi.eva.pipeline.jobs.JobTestUtils;
 import uk.ac.ebi.eva.pipeline.jobs.steps.tasklet.IndexesCreate;

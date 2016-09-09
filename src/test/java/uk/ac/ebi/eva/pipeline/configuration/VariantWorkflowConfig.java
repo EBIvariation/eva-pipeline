@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *          http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.ac.ebi.eva.pipeline.config;
+package uk.ac.ebi.eva.pipeline.configuration;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,13 +22,13 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 
 /**
- * @author Jose Miguel Mut Lopez &lt;jmmut@ebi.ac.uk&gt;
+ * @author Diego Poggioli
  *
- * Configuration init for initDB Job
+ * Configuration init for VariantConfiguration Job, from a workflow perspective
  */
 @Configuration
-@PropertySource({"initialize-database.properties"})
-public class InitDBConfig {
+@PropertySource({"variantConfigurationWorkflow.properties"})
+public class VariantWorkflowConfig {
 
     @Bean
     private static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {

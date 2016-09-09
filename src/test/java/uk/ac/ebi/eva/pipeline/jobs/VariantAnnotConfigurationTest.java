@@ -19,8 +19,8 @@ package uk.ac.ebi.eva.pipeline.jobs;
 import com.mongodb.*;
 
 import junit.framework.TestCase;
-import uk.ac.ebi.eva.VariantJobsArgs;
-import uk.ac.ebi.eva.pipeline.config.AnnotationConfig;
+import uk.ac.ebi.eva.pipeline.configuration.AnnotationConfig;
+import uk.ac.ebi.eva.pipeline.configuration.VariantJobsArgs;
 import uk.ac.ebi.eva.pipeline.jobs.steps.VariantsAnnotLoad;
 
 import org.junit.*;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.ac.ebi.eva.pipeline.config;
+package uk.ac.ebi.eva.pipeline.configuration;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,13 +22,13 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 
 /**
- * @author Diego Poggioli
+ * @author Jose Miguel Mut Lopez &lt;jmmut@ebi.ac.uk&gt;
  *
- * Configuration init for Annotation Job
+ * Configuration init for initDB Job
  */
 @Configuration
-@PropertySource({"annotation.properties"})
-public class AnnotationConfig {
+@PropertySource({"initialize-database.properties"})
+public class InitDBConfig {
 
     @Bean
     private static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {

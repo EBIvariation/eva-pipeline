@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.ac.ebi.eva.pipeline.config;
+package uk.ac.ebi.eva.pipeline.configuration;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -24,11 +24,11 @@ import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 /**
  * @author Diego Poggioli
  *
- * Configuration init for VariantConfiguration Job, from a workflow perspective
+ * Configuration init for VariantConfiguration Job
  */
 @Configuration
-@PropertySource({"variantConfigurationWorkflow.properties"})
-public class VariantWorkflowConfig {
+@PropertySource({"variantConfiguration.properties"})
+public class VariantConfig {
 
     @Bean
     private static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {

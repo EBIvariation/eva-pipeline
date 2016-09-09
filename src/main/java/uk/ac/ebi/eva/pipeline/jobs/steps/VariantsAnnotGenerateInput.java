@@ -17,8 +17,8 @@ package uk.ac.ebi.eva.pipeline.jobs.steps;
 
 import com.mongodb.DBObject;
 
-import uk.ac.ebi.eva.VariantJobsArgs;
 import uk.ac.ebi.eva.pipeline.annotation.generateInput.VariantAnnotationItemProcessor;
+import uk.ac.ebi.eva.pipeline.configuration.VariantJobsArgs;
 import uk.ac.ebi.eva.pipeline.io.readers.VariantReader;
 import uk.ac.ebi.eva.pipeline.io.writers.VepInputWriter;
 import uk.ac.ebi.eva.pipeline.model.VariantWrapper;
