@@ -18,13 +18,13 @@ package uk.ac.ebi.eva.pipeline.jobs.steps;
 import com.mongodb.*;
 import com.mongodb.util.JSON;
 
-import uk.ac.ebi.eva.pipeline.annotation.generateInput.VariantAnnotationItemProcessor;
 import uk.ac.ebi.eva.pipeline.configuration.AnnotationConfig;
 import uk.ac.ebi.eva.pipeline.configuration.VariantJobsArgs;
 import uk.ac.ebi.eva.pipeline.io.readers.VariantReader;
 import uk.ac.ebi.eva.pipeline.io.writers.VepInputWriter;
 import uk.ac.ebi.eva.pipeline.jobs.JobTestUtils;
 import uk.ac.ebi.eva.pipeline.jobs.VariantAnnotConfiguration;
+import uk.ac.ebi.eva.pipeline.jobs.processors.VariantAnnotationItemProcessor;
 import uk.ac.ebi.eva.pipeline.model.VariantWrapper;
 
 import org.apache.commons.io.FileUtils;

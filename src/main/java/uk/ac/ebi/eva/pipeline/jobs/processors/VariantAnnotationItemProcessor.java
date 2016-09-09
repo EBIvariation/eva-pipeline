@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.ac.ebi.eva.pipeline.annotation.generateInput;
+package uk.ac.ebi.eva.pipeline.jobs.processors;
 
 import com.mongodb.DBObject;
 

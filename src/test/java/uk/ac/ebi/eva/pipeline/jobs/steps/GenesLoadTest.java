@@ -19,11 +19,11 @@ import com.mongodb.*;
 
 import uk.ac.ebi.eva.pipeline.configuration.InitDBConfig;
 import uk.ac.ebi.eva.pipeline.configuration.VariantJobsArgs;
-import uk.ac.ebi.eva.pipeline.gene.GeneFilterProcessor;
 import uk.ac.ebi.eva.pipeline.io.mappers.GeneLineMapper;
 import uk.ac.ebi.eva.pipeline.io.readers.GeneReader;
 import uk.ac.ebi.eva.pipeline.io.writers.GeneWriter;
 import uk.ac.ebi.eva.pipeline.jobs.JobTestUtils;
+import uk.ac.ebi.eva.pipeline.jobs.processors.GeneFilterProcessor;
 import uk.ac.ebi.eva.pipeline.model.FeatureCoordinates;
 
 import org.junit.Before;
