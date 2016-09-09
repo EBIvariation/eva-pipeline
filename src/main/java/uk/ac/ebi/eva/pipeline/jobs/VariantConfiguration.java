@@ -33,8 +33,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 
-import uk.ac.ebi.eva.pipeline.jobs.steps.tasklets.VariantsLoad;
-import uk.ac.ebi.eva.pipeline.jobs.steps.tasklets.VariantsTransform;
+import uk.ac.ebi.eva.pipeline.jobs.steps.VariantsLoad;
+import uk.ac.ebi.eva.pipeline.jobs.steps.VariantsTransform;
 
 /**
  *  Complete pipeline workflow:
