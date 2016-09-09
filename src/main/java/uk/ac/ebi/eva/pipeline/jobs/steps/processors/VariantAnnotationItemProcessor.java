@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.ac.ebi.eva.pipeline.jobs.processors;
+package uk.ac.ebi.eva.pipeline.jobs.steps.processors;
 
 import com.mongodb.DBObject;
 

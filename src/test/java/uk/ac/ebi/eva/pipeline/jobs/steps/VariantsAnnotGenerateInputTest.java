@@ -24,7 +24,7 @@ import uk.ac.ebi.eva.pipeline.io.readers.VariantReader;
 import uk.ac.ebi.eva.pipeline.io.writers.VepInputWriter;
 import uk.ac.ebi.eva.pipeline.jobs.JobTestUtils;
 import uk.ac.ebi.eva.pipeline.jobs.VariantAnnotConfiguration;
-import uk.ac.ebi.eva.pipeline.jobs.processors.VariantAnnotationItemProcessor;
+import uk.ac.ebi.eva.pipeline.jobs.steps.processors.VariantAnnotationItemProcessor;
 import uk.ac.ebi.eva.pipeline.model.VariantWrapper;
 
 import org.apache.commons.io.FileUtils;

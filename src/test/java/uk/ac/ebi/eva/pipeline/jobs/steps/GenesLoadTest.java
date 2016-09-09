@@ -23,7 +23,7 @@ import uk.ac.ebi.eva.pipeline.io.mappers.GeneLineMapper;
 import uk.ac.ebi.eva.pipeline.io.readers.GeneReader;
 import uk.ac.ebi.eva.pipeline.io.writers.GeneWriter;
 import uk.ac.ebi.eva.pipeline.jobs.JobTestUtils;
-import uk.ac.ebi.eva.pipeline.jobs.processors.GeneFilterProcessor;
+import uk.ac.ebi.eva.pipeline.jobs.steps.processors.GeneFilterProcessor;
 import uk.ac.ebi.eva.pipeline.model.FeatureCoordinates;
 
 import org.junit.Before;
