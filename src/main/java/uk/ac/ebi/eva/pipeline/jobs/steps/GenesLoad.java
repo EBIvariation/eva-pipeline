@@ -63,9 +63,9 @@ public class GenesLoad {
     @Qualifier("genesLoadStep")
     public Step genesLoadStep() throws IOException {
         return stepBuilderFactory.get(LOAD_FEATURES).<FeatureCoordinates, FeatureCoordinates>chunk(10)
-                .reader(new GeneReader(variantJobsArgs.getPipelineOptions()))
+                .reader(new GeneReader(variantJobsArgs.getPipelineOptions().getString("input.gtf")))
                 .processor(new GeneFilterProcessor())
-                .writer(new GeneWriter(variantJobsArgs.getPipelineOptions()))
+                .writer(new GeneWriter(variantJobsArgs.getMongoOperations(), variantJobsArgs.getDbCollectionsFeaturesName()))
                 .faultTolerant().skipLimit(50).skip(FlatFileParseException.class)
                 .listener(new SkipCheckingListener())
                 .build();
