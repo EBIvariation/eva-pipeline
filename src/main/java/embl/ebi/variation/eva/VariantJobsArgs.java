@@ -15,6 +15,7 @@
  */
 package embl.ebi.variation.eva;
 
+import embl.ebi.variation.eva.pipeline.MongoDBHelper;
 import embl.ebi.variation.eva.pipeline.jobs.VariantAnnotConfiguration;
 import embl.ebi.variation.eva.pipeline.jobs.VariantStatsConfiguration;
 
@@ -31,6 +32,7 @@ import org.opencb.opencga.storage.core.variant.VariantStorageManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.stereotype.Component;
 
 import java.nio.file.Paths;
@@ -53,6 +55,7 @@ import javax.annotation.PostConstruct;
 @Component
 public class VariantJobsArgs {
     private static final Logger logger = LoggerFactory.getLogger(VariantJobsArgs.class);
+    private static final String DB_COLLECTIONS_FEATURES_NAME = "db.collections.features.name";
 
     // Input
     @Value("${input.vcf}") private String input;
@@ -89,7 +92,7 @@ public class VariantJobsArgs {
     @Value("${db.name:#{null}}") private String dbName;
     @Value("${db.collections.variants.name:#{null}}") private String dbCollectionVariantsName;
     @Value("${db.collections.files.name:#{null}}") private String dbCollectionFilesName;
-    @Value("${db.collections.features.name}") private String dbCollectionGenesName;
+    @Value("${"+DB_COLLECTIONS_FEATURES_NAME+"}") private String dbCollectionGenesName;
     @Value("${config.db.read-preference}") private String readPreference;
 
     // Skip steps
@@ -203,7 +206,7 @@ public class VariantJobsArgs {
         pipelineOptions.put("db.name", dbName);
         pipelineOptions.put("db.collections.variants.name", dbCollectionVariantsName);
         pipelineOptions.put("db.collections.files.name", dbCollectionFilesName);
-        pipelineOptions.put("db.collections.features.name", dbCollectionGenesName);
+        pipelineOptions.put(DB_COLLECTIONS_FEATURES_NAME, dbCollectionGenesName);
         pipelineOptions.put("config.db.hosts", dbHosts);
         pipelineOptions.put("config.db.authentication-db", dbAuthenticationDb);
         pipelineOptions.put("config.db.user", dbUser);
@@ -233,5 +236,13 @@ public class VariantJobsArgs {
 
     public ObjectMap getPipelineOptions() {
         return pipelineOptions;
+    }
+
+    public MongoOperations getMongoOperations() {
+        return MongoDBHelper.getMongoOperationsFromPipelineOptions(getPipelineOptions());
+    }
+
+    public String getDbCollectionsFeaturesName() {
+        return getPipelineOptions().getString(DB_COLLECTIONS_FEATURES_NAME);
     }
 }

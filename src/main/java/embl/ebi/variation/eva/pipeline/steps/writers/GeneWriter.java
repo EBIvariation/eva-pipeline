@@ -8,10 +8,9 @@ import org.springframework.data.mongodb.core.MongoOperations;
 
 public class GeneWriter extends MongoItemWriter<FeatureCoordinates> {
 
-    public GeneWriter(ObjectMap pipelineOptions) {
+    public GeneWriter(MongoOperations mongoOperations, String collectionName) {
         super();
-        MongoOperations mongoOperations = MongoDBHelper.getMongoOperationsFromPipelineOptions(pipelineOptions);
-        setCollection(pipelineOptions.getString("db.collections.features.name"));
+        setCollection(collectionName);
         setTemplate(mongoOperations);
     }
 }

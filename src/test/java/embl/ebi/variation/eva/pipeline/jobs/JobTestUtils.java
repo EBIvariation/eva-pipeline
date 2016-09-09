@@ -27,9 +27,7 @@ import java.io.*;
 import java.net.UnknownHostException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.Iterator;
-import java.util.List;
 import java.util.zip.GZIPOutputStream;
 
 /**
@@ -39,6 +37,8 @@ import java.util.zip.GZIPOutputStream;
  */
 public class JobTestUtils {
     private static final Logger logger = LoggerFactory.getLogger(JobTestUtils.class);
+    private static final String EVA_PIPELINE_TEMP_PREFIX = "eva-pipeline-test";
+    private static final java.lang.String EVA_PIPELINE_TEMP_POSTFIX = ".tmp";
 
     public static long getLines(InputStream in) throws IOException {
         BufferedReader file = new BufferedReader(new InputStreamReader(in));
@@ -82,6 +82,16 @@ public class JobTestUtils {
                         .addLong("time",System.currentTimeMillis()).toJobParameters();
     }
 
+    public static File makeGzipFile(String content) throws IOException {
+        File tempFile = createTempFile();
+        try(FileOutputStream output = new FileOutputStream(tempFile)) {
+            try(Writer writer = new OutputStreamWriter(new GZIPOutputStream(output), "UTF-8")) {
+                writer.write(content);
+            }
+        }
+        return tempFile;
+    }
+
     public static void makeGzipFile(String content, String file) throws IOException {
         try(FileOutputStream output = new FileOutputStream(file)) {
             try(Writer writer = new OutputStreamWriter(new GZIPOutputStream(output), "UTF-8")) {
@@ -108,6 +118,12 @@ public class JobTestUtils {
         bufferedReader.close();
 
         logger.info("mongorestore exit value: " + exec.exitValue());
+    }
+
+    public static File createTempFile() throws IOException {
+        File tempFile = File.createTempFile(EVA_PIPELINE_TEMP_PREFIX,EVA_PIPELINE_TEMP_POSTFIX);
+        tempFile.deleteOnExit();
+        return tempFile;
     }
 
 }
