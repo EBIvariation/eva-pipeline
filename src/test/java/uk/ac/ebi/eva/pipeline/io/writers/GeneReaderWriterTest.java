@@ -5,17 +5,30 @@ import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.mongodb.MongoClient;
+<<<<<<< HEAD
+=======
+import embl.ebi.variation.eva.VariantJobsArgs;
+import uk.ac.ebi.eva.pipeline.configuration.InitDBConfig;
+import embl.ebi.variation.eva.pipeline.gene.FeatureCoordinates;
+import embl.ebi.variation.eva.pipeline.gene.GeneLineMapper;
+import uk.ac.ebi.eva.test.utils.JobTestUtils;
+import embl.ebi.variation.eva.pipeline.steps.writers.GeneWriter;
+>>>>>>> 15d9dcd2d437c46bd24fc5e16ea5058ff22648b6
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+<<<<<<< HEAD
 import uk.ac.ebi.eva.pipeline.configuration.InitDBConfig;
 import uk.ac.ebi.eva.pipeline.configuration.VariantJobsArgs;
 import uk.ac.ebi.eva.pipeline.io.mappers.GeneLineMapper;
 import uk.ac.ebi.eva.pipeline.model.FeatureCoordinates;
 import uk.ac.ebi.eva.test.data.GtfStaticTestData;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
+=======
+import uk.ac.ebi.eva.test.data.GtfStaticTestData;
+>>>>>>> 15d9dcd2d437c46bd24fc5e16ea5058ff22648b6
 
 import java.util.ArrayList;
 import java.util.List;

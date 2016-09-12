@@ -52,10 +52,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
 
-import uk.ac.ebi.eva.pipeline.configuration.VariantConfig;
-import uk.ac.ebi.eva.pipeline.configuration.VariantJobsArgs;
-import uk.ac.ebi.eva.pipeline.jobs.steps.VariantsAnnotLoad;
-
+import static embl.ebi.variation.eva.pipeline.jobs.JobTestUtils.*;
+import embl.ebi.variation.eva.pipeline.steps.VariantsAnnotLoad;
 import static junit.framework.TestCase.assertEquals;
 import org.apache.commons.io.FileUtils;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;

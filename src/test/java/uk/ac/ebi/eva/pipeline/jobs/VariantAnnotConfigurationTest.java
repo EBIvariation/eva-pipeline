@@ -46,6 +46,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
 
+import static embl.ebi.variation.eva.pipeline.jobs.JobTestUtils.getLines;
+import static embl.ebi.variation.eva.pipeline.jobs.JobTestUtils.restoreMongoDbFromDump;
+import embl.ebi.variation.eva.pipeline.steps.VariantsAnnotLoad;
 import static junit.framework.TestCase.assertEquals;
 import static org.junit.Assert.*;
 

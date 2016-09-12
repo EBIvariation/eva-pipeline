@@ -19,6 +19,14 @@ import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.mongodb.MongoClient;
+<<<<<<< HEAD
+=======
+import embl.ebi.variation.eva.VariantJobsArgs;
+import uk.ac.ebi.eva.pipeline.configuration.AnnotationConfig;
+import uk.ac.ebi.eva.test.utils.JobTestUtils;
+import embl.ebi.variation.eva.pipeline.jobs.VariantAnnotConfiguration;
+import embl.ebi.variation.eva.pipeline.steps.VariantsAnnotLoad;
+>>>>>>> 15d9dcd2d437c46bd24fc5e16ea5058ff22648b6
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -33,6 +41,7 @@ import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+<<<<<<< HEAD
 import uk.ac.ebi.eva.pipeline.configuration.AnnotationConfig;
 import uk.ac.ebi.eva.pipeline.configuration.VariantJobsArgs;
 import uk.ac.ebi.eva.pipeline.jobs.VariantAnnotConfiguration;
@@ -43,6 +52,14 @@ import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertTrue;
 import static uk.ac.ebi.eva.test.utils.JobTestUtils.makeGzipFile;
 import static uk.ac.ebi.eva.test.utils.JobTestUtils.restoreMongoDbFromDump;
+=======
+import uk.ac.ebi.eva.test.data.VepOutputContent;
+
+import static uk.ac.ebi.eva.test.utils.JobTestUtils.makeGzipFile;
+import static uk.ac.ebi.eva.test.utils.JobTestUtils.restoreMongoDbFromDump;
+import static junit.framework.TestCase.assertEquals;
+import static junit.framework.TestCase.assertTrue;
+>>>>>>> 15d9dcd2d437c46bd24fc5e16ea5058ff22648b6
 
 
 /**
