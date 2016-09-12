@@ -1,6 +1,5 @@
 package uk.ac.ebi.eva.pipeline.io.mappers;
 
-import embl.ebi.variation.eva.pipeline.annotation.load.VariantAnnotationLineMapper;
 import org.junit.Test;
 import org.opencb.biodata.models.variant.annotation.VariantAnnotation;
 import uk.ac.ebi.eva.test.data.VepOutputContent;

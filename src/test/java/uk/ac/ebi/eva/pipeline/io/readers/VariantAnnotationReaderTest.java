@@ -1,20 +1,18 @@
 package uk.ac.ebi.eva.pipeline.io.readers;
 
-import embl.ebi.variation.eva.pipeline.steps.readers.VariantAnnotationReader;
 import org.junit.Test;
 import org.opencb.biodata.models.variant.annotation.VariantAnnotation;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.item.file.FlatFileParseException;
 import org.springframework.batch.test.MetaDataInstanceFactory;
-import uk.ac.ebi.eva.test.utils.JobTestUtils;
 import uk.ac.ebi.eva.test.data.VepOutputContent;
+import uk.ac.ebi.eva.test.utils.JobTestUtils;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.zip.GZIPInputStream;
 
 import static junit.framework.TestCase.assertEquals;
-import static uk.ac.ebi.eva.test.utils.JobTestUtils.makeGzipFile;
 
 public class VariantAnnotationReaderTest {
 

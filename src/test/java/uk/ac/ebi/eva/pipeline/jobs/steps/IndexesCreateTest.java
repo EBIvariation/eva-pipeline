@@ -17,9 +17,8 @@ package uk.ac.ebi.eva.pipeline.jobs.steps;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
+import com.mongodb.DuplicateKeyException;
 import com.mongodb.MongoClient;
-import com.mongodb.MongoException;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -31,7 +30,6 @@ import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-
 import uk.ac.ebi.eva.pipeline.configuration.InitDBConfig;
 import uk.ac.ebi.eva.pipeline.configuration.VariantJobsArgs;
 import uk.ac.ebi.eva.pipeline.jobs.InitDBConfiguration;

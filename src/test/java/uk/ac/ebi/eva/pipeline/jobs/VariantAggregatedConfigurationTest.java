@@ -15,14 +15,7 @@
  */
 package uk.ac.ebi.eva.pipeline.jobs;
 
-import uk.ac.ebi.eva.pipeline.configuration.CommonConfig;
-import uk.ac.ebi.eva.pipeline.configuration.VariantJobsArgs;
-import uk.ac.ebi.eva.pipeline.jobs.VariantAggregatedConfiguration;
-
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.runner.RunWith;
 import org.opencb.biodata.models.variant.VariantSource;
 import org.opencb.datastore.core.ObjectMap;
@@ -42,6 +35,8 @@ import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import uk.ac.ebi.eva.pipeline.configuration.CommonConfig;
+import uk.ac.ebi.eva.pipeline.configuration.VariantJobsArgs;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -50,7 +45,6 @@ import java.nio.file.Paths;
 import java.util.zip.GZIPInputStream;
 
 import static org.junit.Assert.*;
-import static uk.ac.ebi.eva.pipeline.jobs.JobTestUtils.*;
 
 /**
  * Created by jmmut on 2015-10-14.

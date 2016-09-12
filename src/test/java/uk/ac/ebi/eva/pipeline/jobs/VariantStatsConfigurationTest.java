@@ -15,9 +15,6 @@
  */
 package uk.ac.ebi.eva.pipeline.jobs;
 
-import uk.ac.ebi.eva.pipeline.configuration.CommonConfig;
-import uk.ac.ebi.eva.pipeline.configuration.VariantJobsArgs;
-
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Before;
@@ -40,13 +37,14 @@ import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import uk.ac.ebi.eva.pipeline.configuration.CommonConfig;
+import uk.ac.ebi.eva.pipeline.configuration.VariantJobsArgs;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
 
-import static embl.ebi.variation.eva.pipeline.jobs.JobTestUtils.restoreMongoDbFromDump;
 import static junit.framework.TestCase.assertFalse;
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertEquals;

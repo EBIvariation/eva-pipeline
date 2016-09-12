@@ -1,17 +1,16 @@
 package uk.ac.ebi.eva.pipeline.io.processor;
 
-import embl.ebi.variation.eva.pipeline.gene.FeatureCoordinates;
-import embl.ebi.variation.eva.pipeline.gene.GeneFilterProcessor;
-import embl.ebi.variation.eva.pipeline.steps.readers.GeneReader;
 import org.junit.Test;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.test.MetaDataInstanceFactory;
+import uk.ac.ebi.eva.pipeline.io.readers.GeneReader;
+import uk.ac.ebi.eva.pipeline.jobs.steps.processors.GeneFilterProcessor;
+import uk.ac.ebi.eva.pipeline.model.FeatureCoordinates;
 import uk.ac.ebi.eva.test.data.GtfStaticTestData;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
 
 import java.io.File;
 
-import static uk.ac.ebi.eva.test.utils.JobTestUtils.makeGzipFile;
 import static junit.framework.TestCase.assertEquals;
 
 public class GeneFilterProcessorTest {

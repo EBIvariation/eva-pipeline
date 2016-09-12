@@ -15,43 +15,29 @@
  */
 package uk.ac.ebi.eva.pipeline.jobs.steps;
 
-import com.mongodb.*;
-import com.mongodb.util.JSON;
-
-import uk.ac.ebi.eva.pipeline.configuration.AnnotationConfig;
-import uk.ac.ebi.eva.pipeline.configuration.VariantJobsArgs;
-import uk.ac.ebi.eva.pipeline.io.readers.VariantReader;
-import uk.ac.ebi.eva.pipeline.io.writers.VepInputWriter;
-import uk.ac.ebi.eva.pipeline.jobs.JobTestUtils;
-import uk.ac.ebi.eva.pipeline.jobs.VariantAnnotConfiguration;
-import uk.ac.ebi.eva.pipeline.jobs.steps.processors.VariantAnnotationItemProcessor;
-import uk.ac.ebi.eva.pipeline.model.VariantWrapper;
-
-import org.apache.commons.io.FileUtils;
+import junit.framework.TestCase;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.opencb.opencga.storage.mongodb.variant.DBObjectToVariantConverter;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.JobExecution;
-import org.springframework.batch.item.ExecutionContext;
-import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.test.JobLauncherTestUtils;
-import org.springframework.batch.test.MetaDataInstanceFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import uk.ac.ebi.eva.pipeline.configuration.AnnotationConfig;
+import uk.ac.ebi.eva.pipeline.configuration.VariantJobsArgs;
+import uk.ac.ebi.eva.pipeline.jobs.JobTestUtils;
+import uk.ac.ebi.eva.pipeline.jobs.VariantAnnotConfiguration;
+import uk.ac.ebi.eva.pipeline.jobs.VariantStatsConfigurationTest;
+import uk.ac.ebi.eva.test.utils.CommonUtils;
 
-import java.io.*;
-import java.net.URL;
-import java.util.Collections;
+import java.io.File;
 
 import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertFalse;
 import static junit.framework.TestCase.assertTrue;
-import static uk.ac.ebi.eva.pipeline.jobs.JobTestUtils.restoreMongoDbFromDump;
 
 /**
  * @author Diego Poggioli
@@ -63,44 +49,22 @@ import static uk.ac.ebi.eva.pipeline.jobs.JobTestUtils.restoreMongoDbFromDump;
 public class VariantsAnnotGenerateInputTest {
 
     private static final String VARIANTS_ANNOT_GENERATE_VEP_INPUT_DB_NAME = "VariantStatsConfigurationTest_vl";
-    @Autowired
-    private VariantJobsArgs variantJobsArgs;
+
     @Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
-
-    private MongoClient mongoClient;
-    private String dbName;
-    private String collectionName;
-    private String variantWithAnnotation;
-    private String variantWithoutAnnotation;
-    private ExecutionContext executionContext;
+    @Autowired
+    private VariantJobsArgs variantJobsArgs;
 
     @Before
     public void setUp() throws Exception {
-        mongoClient = new MongoClient();
-
-        executionContext = MetaDataInstanceFactory.createStepExecution().getExecutionContext();
-
-        URL variantWithNoAnnotationUrl =
-                VariantsAnnotGenerateInputTest.class.getResource("/annotation/VariantWithOutAnnotation");
-        variantWithoutAnnotation = FileUtils.readFileToString(new File(variantWithNoAnnotationUrl.getFile()));
-
-        URL variantWithAnnotationUrl =
-                VariantsAnnotGenerateInputTest.class.getResource("/annotation/VariantWithAnnotation");
-        variantWithAnnotation = FileUtils.readFileToString(new File(variantWithAnnotationUrl.getFile()));
-
         variantJobsArgs.loadArgs();
-        dbName = variantJobsArgs.getPipelineOptions().getString("db.name");
-        collectionName = variantJobsArgs.getPipelineOptions().getString("db.collections.variants.name");
-
-        collection().drop();
     }
 
     @Test
     public void variantsAnnotGenerateInputStepShouldGenerateVepInput() throws Exception {
-        String dump = VariantsAnnotGenerateInputTest.class.getResource("/dump/").getFile();
-        restoreMongoDbFromDump(dump);
-        File vepInputFile = new File(variantJobsArgs.getPipelineOptions().getString("vep.input"));
+        String dump = VariantStatsConfigurationTest.class.getResource("/dump/").getFile();
+        JobTestUtils.restoreMongoDbFromDump(dump);
+        File vepInputFile = new File(variantJobsArgs.getVepInput());
 
         if(vepInputFile.exists())
             vepInputFile.delete();
@@ -113,72 +77,7 @@ public class VariantsAnnotGenerateInputTest {
         assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());
 
         assertTrue(vepInputFile.exists());
-        assertEquals("20\t60343\t60343\tG/A\t+", readFirstLine(vepInputFile));
+        TestCase.assertEquals("20\t60343\t60343\tG/A\t+", CommonUtils.readFirstLine(vepInputFile));
         JobTestUtils.cleanDBs(VARIANTS_ANNOT_GENERATE_VEP_INPUT_DB_NAME);
     }
-
-    @Test
-    public void variantReaderShouldReadVariantsWithoutAnnotationField() throws Exception {
-        insertDocuments();
-        VariantReader mongoItemReader = new VariantReader(variantJobsArgs.getPipelineOptions());
-        mongoItemReader.open(executionContext);
-
-        int itemCount = 0;
-        DBObject doc;
-        while((doc = mongoItemReader.read()) != null) {
-            itemCount++;
-            assertTrue(doc.containsField("chr"));
-            assertTrue(doc.containsField("start"));
-            assertFalse(doc.containsField("annot"));
-        }
-        assertEquals(itemCount, 1);
-        mongoItemReader.close();
-    }
-
-    @Test
-    public void vepInputLineProcessorShouldConvertAllFieldsInVariant() throws Exception {
-        DBObject dbo = constructDbo(variantWithoutAnnotation);
-
-        ItemProcessor<DBObject, VariantWrapper> processor =  new VariantAnnotationItemProcessor();
-        VariantWrapper variant = processor.process(dbo);
-        assertEquals("+", variant.getStrand());
-        assertEquals("20", variant.getChr());
-        assertEquals("G/A", variant.getRefAlt());
-        assertEquals(60343, variant.getEnd());
-        assertEquals(60343, variant.getStart());
-    }
-
-    @Test
-    public void vepInputWriterShouldWriteAllFieldsToFile() throws Exception {
-        DBObjectToVariantConverter converter = new DBObjectToVariantConverter();
-        File outputFile = new File(variantJobsArgs.getPipelineOptions().getString("vep.input"));
-        VariantWrapper variant = new VariantWrapper(converter.convertToDataModelType(constructDbo(variantWithAnnotation)));
-
-        VepInputWriter writer = new VepInputWriter(variantJobsArgs.getPipelineOptions());
-        writer.open(executionContext);
-        writer.write(Collections.singletonList(variant));
-        assertEquals("20\t60344\t60348\tG/A\t+", readFirstLine(outputFile));
-        writer.close();
-        outputFile.delete();
-    }
-
-    private void insertDocuments() throws IOException {
-        collection().insert(constructDbo(variantWithAnnotation));
-        collection().insert(constructDbo(variantWithoutAnnotation));
-    }
-
-    private DBCollection collection() {
-        return mongoClient.getDB(dbName).getCollection(collectionName);
-    }
-
-    private DBObject constructDbo(String variant) {
-        return (DBObject) JSON.parse(variant);
-    }
-
-    private String readFirstLine(File file) throws IOException {
-        try(BufferedReader reader = new BufferedReader(new FileReader(file))){
-            return reader.readLine();
-        }
-    }
-
 }

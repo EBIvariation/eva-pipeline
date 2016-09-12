@@ -16,36 +16,38 @@
 
 package uk.ac.ebi.eva.pipeline.jobs;
 
-import com.mongodb.*;
-
+import com.mongodb.DBCollection;
+import com.mongodb.DBCursor;
+import com.mongodb.DBObject;
+import com.mongodb.MongoClient;
 import junit.framework.TestCase;
-import uk.ac.ebi.eva.pipeline.configuration.AnnotationConfig;
-import uk.ac.ebi.eva.pipeline.configuration.VariantJobsArgs;
-import uk.ac.ebi.eva.pipeline.jobs.steps.VariantsAnnotLoad;
-
-import org.junit.*;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.opencb.biodata.models.variant.annotation.VariantAnnotation;
 import org.opencb.opencga.storage.mongodb.variant.DBObjectToVariantAnnotationConverter;
-import org.springframework.batch.core.*;
+import org.springframework.batch.core.BatchStatus;
+import org.springframework.batch.core.ExitStatus;
+import org.springframework.batch.core.JobExecution;
+import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.IntegrationTest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import uk.ac.ebi.eva.pipeline.configuration.AnnotationConfig;
+import uk.ac.ebi.eva.pipeline.configuration.VariantJobsArgs;
+import uk.ac.ebi.eva.pipeline.jobs.steps.VariantsAnnotLoad;
 
 import java.io.*;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
 
-import embl.ebi.variation.eva.pipeline.steps.VariantsAnnotLoad;
 import static junit.framework.TestCase.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static uk.ac.ebi.eva.pipeline.jobs.JobTestUtils.getLines;
-import static uk.ac.ebi.eva.pipeline.jobs.JobTestUtils.restoreMongoDbFromDump;
+import static org.junit.Assert.*;
 
 /**
  * @author Diego Poggioli

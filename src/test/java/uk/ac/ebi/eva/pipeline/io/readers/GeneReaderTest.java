@@ -1,18 +1,16 @@
 package uk.ac.ebi.eva.pipeline.io.readers;
 
-import embl.ebi.variation.eva.pipeline.gene.FeatureCoordinates;
-import uk.ac.ebi.eva.test.data.GtfStaticTestData;
-import uk.ac.ebi.eva.test.utils.JobTestUtils;
-import embl.ebi.variation.eva.pipeline.steps.readers.GeneReader;
 import org.junit.Test;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.test.MetaDataInstanceFactory;
+import uk.ac.ebi.eva.pipeline.model.FeatureCoordinates;
+import uk.ac.ebi.eva.test.data.GtfStaticTestData;
+import uk.ac.ebi.eva.test.utils.JobTestUtils;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.zip.GZIPInputStream;
 
-import static uk.ac.ebi.eva.test.utils.JobTestUtils.makeGzipFile;
 import static junit.framework.TestCase.assertEquals;
 
 public class GeneReaderTest {

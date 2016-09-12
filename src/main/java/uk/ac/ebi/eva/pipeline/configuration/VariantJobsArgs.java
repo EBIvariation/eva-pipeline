@@ -39,6 +39,7 @@ import java.nio.file.Paths;
 import java.util.Properties;
 import org.opencb.opencga.lib.common.Config;
 import org.opencb.opencga.storage.mongodb.variant.MongoDBVariantStorageManager;
+import uk.ac.ebi.eva.utils.MongoDBHelper;
 
 import javax.annotation.PostConstruct;
 
