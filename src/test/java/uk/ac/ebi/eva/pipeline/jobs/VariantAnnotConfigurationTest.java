@@ -40,13 +40,13 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import uk.ac.ebi.eva.pipeline.configuration.AnnotationConfig;
 import uk.ac.ebi.eva.pipeline.configuration.VariantJobsArgs;
 import uk.ac.ebi.eva.pipeline.jobs.steps.VariantsAnnotLoad;
+import uk.ac.ebi.eva.test.utils.CommonUtils;
+import uk.ac.ebi.eva.test.utils.JobTestUtils;
 
 import java.io.*;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
-
-import uk.ac.ebi.eva.test.utils.JobTestUtils;
 
 import static junit.framework.TestCase.assertEquals;
 import static org.junit.Assert.*;
@@ -67,10 +67,9 @@ public class VariantAnnotConfigurationTest {
     @Autowired
     private VariantJobsArgs variantJobsArgs;
 
+    private File vepInputFile;
     private static String dbName;
     private static MongoClient mongoClient;
-    private File vepInputFile;
-    private File vepOutputFile;
     private DBObjectToVariantAnnotationConverter converter;
 
     @Test
@@ -78,15 +77,8 @@ public class VariantAnnotConfigurationTest {
         String dump = VariantStatsConfigurationTest.class.getResource("/dump/").getFile();
         JobTestUtils.restoreMongoDbFromDump(dump);
 
-        if(vepInputFile.exists())
-            vepInputFile.delete();
-
-        assertFalse(vepInputFile.exists());
-
-        File vepPathFile =
-                new File(VariantAnnotConfigurationTest.class.getResource("/mockvep.pl").getFile());
-
-        variantJobsArgs.getPipelineOptions().put("app.vep.path", vepPathFile);
+        File vepPathFile = new File(VariantAnnotConfigurationTest.class.getResource("/mockvep.pl").getFile());
+        variantJobsArgs.setAppVepPath(vepPathFile);
 
         JobExecution jobExecution = jobLauncherTestUtils.launchJob();
 
@@ -98,8 +90,7 @@ public class VariantAnnotConfigurationTest {
         assertEquals("20\t60343\t60343\tG/A\t+", readFirstLine(vepInputFile));
 
         //check that documents have the annotation
-        DBCursor cursor =
-                collection(dbName, variantJobsArgs.getPipelineOptions().getString("db.collections.variants.name")).find();
+        DBCursor cursor = collection(dbName, variantJobsArgs.getDbCollectionsVariantsName()).find();
 
         int cnt=0;
         int consequenceTypeCount = 0;
@@ -125,16 +116,11 @@ public class VariantAnnotConfigurationTest {
 
     @Test
     public void annotCreateStepShouldGenerateAnnotations() throws Exception {
+        File vepPathFile = new File(VariantAnnotConfigurationTest.class.getResource("/mockvep.pl").getFile());
+        variantJobsArgs.setAppVepPath(vepPathFile);
 
-        //String vepPath  = variantJobsArgs.getPipelineOptions().getString("app.vep.path");
-
-        File vepPathFile =
-                new File(VariantAnnotConfigurationTest.class.getResource("/mockvep.pl").getFile());
-        //File tmpVepPathFile = new File(variantJobsArgs.getPipelineOptions().getString("output.dir"), vepPathFile.getName());
-        //FileUtils.copyFile(vepPathFile, tmpVepPathFile);
-
-        variantJobsArgs.getPipelineOptions().put("app.vep.path", vepPathFile);
-
+        File vepOutputFile = JobTestUtils.createTempFile();
+        variantJobsArgs.setVepOutput(vepOutputFile.getAbsolutePath());
 
         vepOutputFile.delete();
         TestCase.assertFalse(vepOutputFile.exists());  // ensure the annot file doesn't exist from previous executions
@@ -161,11 +147,10 @@ public class VariantAnnotConfigurationTest {
     @Before
     public void setUp() throws Exception {
         variantJobsArgs.loadArgs();
-        vepInputFile = new File(variantJobsArgs.getPipelineOptions().getString("vep.input"));
-        vepOutputFile = new File(variantJobsArgs.getPipelineOptions().getString("vep.output"));
+        vepInputFile = new File(variantJobsArgs.getVepInput());
         converter = new DBObjectToVariantAnnotationConverter();
 
-        dbName = variantJobsArgs.getPipelineOptions().getString("db.name");
+        dbName = variantJobsArgs.getDbName();
         mongoClient = new MongoClient();
     }
 
@@ -177,7 +162,7 @@ public class VariantAnnotConfigurationTest {
         mongoClient.close();
 
         vepInputFile.delete();
-        new File(variantJobsArgs.getPipelineOptions().getString("vep.output")).delete();
+        new File(variantJobsArgs.getVepOutput()).delete();
 
         JobTestUtils.cleanDBs(dbName);
     }

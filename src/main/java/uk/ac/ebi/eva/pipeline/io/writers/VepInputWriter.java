@@ -12,7 +12,7 @@ import java.io.File;
 public class VepInputWriter extends FlatFileItemWriter<VariantWrapper> {
 
 
-    /**
+ /**
  * @return must return a {@link FlatFileItemWriter} and not a {@link org.springframework.batch.item.ItemWriter}
  * {@see https://jira.spring.io/browse/BATCH-2097
  *

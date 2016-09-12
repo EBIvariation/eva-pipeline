@@ -1,4 +1,4 @@
-package uk.ac.ebi.eva.pipeline.io.processor;
+package uk.ac.ebi.eva.pipeline.jobs.steps.processor;
 
 import com.mongodb.DBObject;
 import org.junit.Test;

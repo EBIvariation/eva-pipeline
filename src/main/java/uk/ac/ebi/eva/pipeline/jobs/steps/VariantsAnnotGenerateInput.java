@@ -17,6 +17,8 @@ package uk.ac.ebi.eva.pipeline.jobs.steps;
 
 import com.mongodb.DBObject;
 
+import org.springframework.batch.core.configuration.annotation.JobScope;
+import org.springframework.context.annotation.Scope;
 import uk.ac.ebi.eva.pipeline.configuration.VariantJobsArgs;
 import uk.ac.ebi.eva.pipeline.io.readers.VariantReader;
 import uk.ac.ebi.eva.pipeline.io.writers.VepInputWriter;

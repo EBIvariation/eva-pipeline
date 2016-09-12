@@ -1,4 +1,4 @@
-package uk.ac.ebi.eva.pipeline.io.processor;
+package uk.ac.ebi.eva.pipeline.jobs.steps.processor;
 
 import org.junit.Test;
 import org.springframework.batch.item.ExecutionContext;

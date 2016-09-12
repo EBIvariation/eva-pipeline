@@ -60,6 +60,8 @@ public class VariantJobsArgs {
     private static final String DB_COLLECTIONS_VARIANTS_NAME = "db.collections.variants.name";
     private static final String VEP_INPUT = "vep.input";
     private static final String DB_NAME = "db.name";
+    private static final String VEP_OUTPUT = "vep.output";
+    private static final String APP_VEP_PATH = "app.vep.path";
 
     // Input
     @Value("${input.vcf}") private String input;
@@ -104,7 +106,7 @@ public class VariantJobsArgs {
     @Value("${statistics.skip:false}") private boolean skipStats;
 
     //VEP
-    @Value("${app.vep.path}") private String vepPath;
+    @Value("${"+APP_VEP_PATH+"}") private String vepPath;
     @Value("${app.vep.cache.path}") private String vepCacheDirectory;
     @Value("${app.vep.cache.version}") private String vepCacheVersion;
     @Value("${app.vep.cache.species}") private String vepSpecies;
@@ -116,6 +118,7 @@ public class VariantJobsArgs {
     private ObjectMap variantOptions  = new ObjectMap();
     private ObjectMap pipelineOptions  = new ObjectMap();
     private File vepInput;
+    private File appVepPath;
 
     @PostConstruct
     public void loadArgs() throws IOException {
@@ -222,9 +225,9 @@ public class VariantJobsArgs {
 
         String annotationFilesPrefix = studyId + "_" + fileId;
         pipelineOptions.put(VEP_INPUT, URI.create(outputDirAnnotation + "/").resolve(annotationFilesPrefix + "_variants_to_annotate.tsv.gz").toString());
-        pipelineOptions.put("vep.output", URI.create(outputDirAnnotation + "/").resolve(annotationFilesPrefix + "_vep_annotation.tsv.gz").toString());
+        pipelineOptions.put(VEP_OUTPUT, URI.create(outputDirAnnotation + "/").resolve(annotationFilesPrefix + "_vep_annotation.tsv.gz").toString());
         
-        pipelineOptions.put("app.vep.path", vepPath);
+        pipelineOptions.put(APP_VEP_PATH, vepPath);
         pipelineOptions.put("app.vep.cache.path", vepCacheDirectory);
         pipelineOptions.put("app.vep.cache.version", vepCacheVersion);
         pipelineOptions.put("app.vep.cache.species", vepSpecies);
@@ -259,7 +262,24 @@ public class VariantJobsArgs {
         return getPipelineOptions().getString(VEP_INPUT);
     }
 
+    public void setVepInputFile(String vepInputFile) {
+        getPipelineOptions().put(VEP_INPUT, URI.create(vepInputFile));
+    }
+
     public String getDbName() {
         return getPipelineOptions().getString(DB_NAME);
     }
+
+    public String getVepOutput() {
+        return getPipelineOptions().getString(VEP_OUTPUT);
+    }
+
+    public void setVepOutput(String vepOutput){
+        getPipelineOptions().put(VEP_OUTPUT, URI.create(vepOutput));
+    }
+
+    public void setAppVepPath(File appVepPath) {
+        getPipelineOptions().put(APP_VEP_PATH, appVepPath);
+    }
+
 }
