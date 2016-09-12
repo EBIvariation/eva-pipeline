@@ -3,15 +3,7 @@ package uk.ac.ebi.eva.pipeline.io.readers;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 import com.mongodb.MongoClient;
-<<<<<<< HEAD
-=======
-import embl.ebi.variation.eva.VariantJobsArgs;
-import uk.ac.ebi.eva.test.data.VariantData;
-import uk.ac.ebi.eva.test.utils.CommonUtils;
-import uk.ac.ebi.eva.pipeline.configuration.AnnotationConfig;
-import embl.ebi.variation.eva.pipeline.jobs.VariantAnnotConfiguration;
-import embl.ebi.variation.eva.pipeline.steps.readers.VariantReader;
->>>>>>> 15d9dcd2d437c46bd24fc5e16ea5058ff22648b6
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -22,14 +14,11 @@ import org.springframework.batch.test.MetaDataInstanceFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-<<<<<<< HEAD
 import uk.ac.ebi.eva.pipeline.configuration.AnnotationConfig;
 import uk.ac.ebi.eva.pipeline.configuration.VariantJobsArgs;
 import uk.ac.ebi.eva.pipeline.jobs.VariantAnnotConfiguration;
 import uk.ac.ebi.eva.test.data.VariantData;
 import uk.ac.ebi.eva.test.utils.CommonUtils;
-=======
->>>>>>> 15d9dcd2d437c46bd24fc5e16ea5058ff22648b6
 
 import java.io.IOException;
 import java.net.UnknownHostException;

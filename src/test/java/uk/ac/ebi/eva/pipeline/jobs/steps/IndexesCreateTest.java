@@ -33,7 +33,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import uk.ac.ebi.eva.pipeline.configuration.InitDBConfig;
 import uk.ac.ebi.eva.pipeline.configuration.VariantJobsArgs;
 import uk.ac.ebi.eva.pipeline.jobs.InitDBConfiguration;
-import uk.ac.ebi.eva.pipeline.jobs.JobTestUtils;
+import uk.ac.ebi.eva.test.utils.JobTestUtils;
 
 import static junit.framework.TestCase.assertEquals;
 

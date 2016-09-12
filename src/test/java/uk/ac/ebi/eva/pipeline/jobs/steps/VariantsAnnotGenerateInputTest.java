@@ -15,18 +15,8 @@
  */
 package uk.ac.ebi.eva.pipeline.jobs.steps;
 
-<<<<<<< HEAD
+
 import junit.framework.TestCase;
-=======
-import embl.ebi.variation.eva.VariantJobsArgs;
-import junit.framework.TestCase;
-import uk.ac.ebi.eva.pipeline.jobs.VariantStatsConfigurationTest;
-import uk.ac.ebi.eva.test.utils.CommonUtils;
-import uk.ac.ebi.eva.test.utils.JobTestUtils;
-import uk.ac.ebi.eva.pipeline.configuration.AnnotationConfig;
-import embl.ebi.variation.eva.pipeline.steps.VariantsAnnotGenerateInput;
-import embl.ebi.variation.eva.pipeline.jobs.VariantAnnotConfiguration;
->>>>>>> 15d9dcd2d437c46bd24fc5e16ea5058ff22648b6
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -38,25 +28,14 @@ import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-<<<<<<< HEAD
 import uk.ac.ebi.eva.pipeline.configuration.AnnotationConfig;
 import uk.ac.ebi.eva.pipeline.configuration.VariantJobsArgs;
-import uk.ac.ebi.eva.pipeline.jobs.JobTestUtils;
 import uk.ac.ebi.eva.pipeline.jobs.VariantAnnotConfiguration;
 import uk.ac.ebi.eva.pipeline.jobs.VariantStatsConfigurationTest;
 import uk.ac.ebi.eva.test.utils.CommonUtils;
+import uk.ac.ebi.eva.test.utils.JobTestUtils;
 
 import java.io.File;
-
-import static junit.framework.TestCase.assertEquals;
-=======
-
-import java.io.*;
-
-import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertFalse;
->>>>>>> 15d9dcd2d437c46bd24fc5e16ea5058ff22648b6
-import static junit.framework.TestCase.assertTrue;
 
 /**
  * @author Diego Poggioli
@@ -92,15 +71,11 @@ public class VariantsAnnotGenerateInputTest {
 
         JobExecution jobExecution = jobLauncherTestUtils.launchStep(VariantsAnnotGenerateInput.FIND_VARIANTS_TO_ANNOTATE);
 
-        assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
-        assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());
+        Assert.assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
+        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());
 
-        assertTrue(vepInputFile.exists());
+        Assert.assertTrue(vepInputFile.exists());
         TestCase.assertEquals("20\t60343\t60343\tG/A\t+", CommonUtils.readFirstLine(vepInputFile));
         JobTestUtils.cleanDBs(VARIANTS_ANNOT_GENERATE_VEP_INPUT_DB_NAME);
     }
-<<<<<<< HEAD
-=======
-
->>>>>>> 15d9dcd2d437c46bd24fc5e16ea5058ff22648b6
 }

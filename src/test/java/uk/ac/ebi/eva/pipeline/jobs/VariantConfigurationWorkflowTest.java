@@ -16,25 +16,17 @@
 
 package uk.ac.ebi.eva.pipeline.jobs;
 
-import uk.ac.ebi.eva.pipeline.configuration.VariantJobsArgs;
-import uk.ac.ebi.eva.pipeline.configuration.VariantWorkflowConfig;
-import uk.ac.ebi.eva.pipeline.jobs.steps.VariantsAnnotCreate;
-import uk.ac.ebi.eva.pipeline.jobs.steps.VariantsAnnotGenerateInput;
-import uk.ac.ebi.eva.pipeline.jobs.steps.VariantsAnnotLoad;
-
-import java.io.File;
-import java.nio.file.Paths;
-import java.util.*;
 import org.junit.After;
-
-import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.opencb.biodata.models.variant.VariantSource;
 import org.opencb.opencga.lib.common.Config;
 import org.opencb.opencga.storage.core.variant.VariantStorageManager;
-import org.springframework.batch.core.*;
+import org.springframework.batch.core.ExitStatus;
+import org.springframework.batch.core.Job;
+import org.springframework.batch.core.JobExecution;
+import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +34,18 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.IntegrationTest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import uk.ac.ebi.eva.pipeline.configuration.VariantJobsArgs;
+import uk.ac.ebi.eva.pipeline.configuration.VariantWorkflowConfig;
+import uk.ac.ebi.eva.pipeline.jobs.steps.VariantsAnnotCreate;
+import uk.ac.ebi.eva.pipeline.jobs.steps.VariantsAnnotGenerateInput;
+import uk.ac.ebi.eva.pipeline.jobs.steps.VariantsAnnotLoad;
+import uk.ac.ebi.eva.test.utils.JobTestUtils;
+
+import java.io.File;
+import java.nio.file.Paths;
+import java.util.*;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Diego Poggioli

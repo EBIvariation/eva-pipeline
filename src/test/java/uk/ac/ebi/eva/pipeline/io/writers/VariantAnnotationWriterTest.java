@@ -1,16 +1,7 @@
 package uk.ac.ebi.eva.pipeline.io.writers;
 
 import com.mongodb.*;
-<<<<<<< HEAD
-=======
-import embl.ebi.variation.eva.VariantJobsArgs;
-import embl.ebi.variation.eva.pipeline.MongoDBHelper;
-import embl.ebi.variation.eva.pipeline.annotation.load.VariantAnnotationLineMapper;
-import uk.ac.ebi.eva.pipeline.configuration.AnnotationConfig;
-import uk.ac.ebi.eva.test.utils.JobTestUtils;
-import embl.ebi.variation.eva.pipeline.jobs.VariantAnnotConfiguration;
-import embl.ebi.variation.eva.pipeline.steps.writers.VariantAnnotationMongoItemWriter;
->>>>>>> 15d9dcd2d437c46bd24fc5e16ea5058ff22648b6
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.opencb.biodata.models.variant.annotation.VariantAnnotation;
@@ -19,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-<<<<<<< HEAD
 import uk.ac.ebi.eva.pipeline.configuration.AnnotationConfig;
 import uk.ac.ebi.eva.pipeline.configuration.VariantJobsArgs;
 import uk.ac.ebi.eva.pipeline.io.mappers.VariantAnnotationLineMapper;
@@ -27,9 +17,6 @@ import uk.ac.ebi.eva.pipeline.jobs.VariantAnnotConfiguration;
 import uk.ac.ebi.eva.test.data.VepOutputContent;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
 import uk.ac.ebi.eva.utils.MongoDBHelper;
-=======
-import uk.ac.ebi.eva.test.data.VepOutputContent;
->>>>>>> 15d9dcd2d437c46bd24fc5e16ea5058ff22648b6
 
 import java.util.ArrayList;
 import java.util.HashSet;
