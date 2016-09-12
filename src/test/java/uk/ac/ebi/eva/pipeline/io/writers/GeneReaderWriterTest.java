@@ -1,4 +1,4 @@
-package uk.ac.evi.eva.pipeline.io.writers;
+package uk.ac.ebi.eva.pipeline.io.writers;
 
 
 import com.mongodb.DBCollection;
@@ -6,18 +6,17 @@ import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.mongodb.MongoClient;
 import embl.ebi.variation.eva.VariantJobsArgs;
-import embl.ebi.variation.eva.pipeline.config.InitDBConfig;
+import uk.ac.ebi.eva.pipeline.configuration.InitDBConfig;
 import embl.ebi.variation.eva.pipeline.gene.FeatureCoordinates;
 import embl.ebi.variation.eva.pipeline.gene.GeneLineMapper;
-import embl.ebi.variation.eva.pipeline.jobs.JobTestUtils;
-import embl.ebi.variation.eva.pipeline.steps.GenesLoad;
+import uk.ac.ebi.eva.test.utils.JobTestUtils;
 import embl.ebi.variation.eva.pipeline.steps.writers.GeneWriter;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import uk.ac.evi.eva.test.data.GtfStaticTestData;
+import uk.ac.ebi.eva.test.data.GtfStaticTestData;
 
 import java.util.ArrayList;
 import java.util.List;

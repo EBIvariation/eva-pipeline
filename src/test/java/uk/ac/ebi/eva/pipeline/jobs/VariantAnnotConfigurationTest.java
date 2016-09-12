@@ -39,6 +39,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
 
+import embl.ebi.variation.eva.pipeline.steps.VariantsAnnotLoad;
 import static junit.framework.TestCase.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -71,7 +72,7 @@ public class VariantAnnotConfigurationTest {
     @Test
     public void fullAnnotationJob () throws Exception {
         String dump = VariantStatsConfigurationTest.class.getResource("/dump/").getFile();
-        restoreMongoDbFromDump(dump);
+        JobTestUtils.restoreMongoDbFromDump(dump);
 
         if(vepInputFile.exists())
             vepInputFile.delete();
@@ -143,7 +144,7 @@ public class VariantAnnotConfigurationTest {
 
         // And VEP output should exist and annotations should be in the file
         TestCase.assertTrue(vepOutputFile.exists());
-        Assert.assertEquals(537, getLines(new GZIPInputStream(new FileInputStream(vepOutputFile))));
+        Assert.assertEquals(537, JobTestUtils.getLines(new GZIPInputStream(new FileInputStream(vepOutputFile))));
         vepOutputFile.delete();
     }
 

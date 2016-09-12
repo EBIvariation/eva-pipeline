@@ -1,4 +1,4 @@
-package uk.ac.evi.eva.test.data;
+package uk.ac.ebi.eva.test.data;
 
 public class GtfStaticTestData {
 

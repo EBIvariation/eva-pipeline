@@ -58,6 +58,8 @@ import uk.ac.ebi.eva.pipeline.jobs.steps.VariantsAnnotLoad;
 
 import static junit.framework.TestCase.assertEquals;
 import org.apache.commons.io.FileUtils;
+import uk.ac.ebi.eva.test.utils.JobTestUtils;
+
 import static org.junit.Assert.*;
 import static org.opencb.opencga.storage.core.variant.VariantStorageManager.VARIANT_SOURCE;
 import static uk.ac.ebi.eva.pipeline.jobs.JobTestUtils.*;

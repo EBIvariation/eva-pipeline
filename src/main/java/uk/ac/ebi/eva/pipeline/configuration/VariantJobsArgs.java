@@ -15,6 +15,7 @@
  */
 package uk.ac.ebi.eva.pipeline.configuration;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -55,6 +56,9 @@ import javax.annotation.PostConstruct;
 public class VariantJobsArgs {
     private static final Logger logger = LoggerFactory.getLogger(VariantJobsArgs.class);
     private static final String DB_COLLECTIONS_FEATURES_NAME = "db.collections.features.name";
+    private static final String DB_COLLECTIONS_VARIANTS_NAME = "db.collections.variants.name";
+    private static final String VEP_INPUT = "vep.input";
+    private static final String DB_NAME = "db.name";
 
     // Input
     @Value("${input.vcf}") private String input;
@@ -88,8 +92,8 @@ public class VariantJobsArgs {
     @Value("${config.db.authentication-db:#{null}}") private String dbAuthenticationDb;
     @Value("${config.db.user:#{null}}") private String dbUser;
     @Value("${config.db.password:#{null}}") private String dbPassword;
-    @Value("${db.name:#{null}}") private String dbName;
-    @Value("${db.collections.variants.name:#{null}}") private String dbCollectionVariantsName;
+    @Value("${"+DB_NAME+":#{null}}") private String dbName;
+    @Value("${"+DB_COLLECTIONS_VARIANTS_NAME+":#{null}}") private String dbCollectionVariantsName;
     @Value("${db.collections.files.name:#{null}}") private String dbCollectionFilesName;
     @Value("${"+DB_COLLECTIONS_FEATURES_NAME+"}") private String dbCollectionGenesName;
     @Value("${config.db.read-preference}") private String readPreference;
@@ -110,6 +114,7 @@ public class VariantJobsArgs {
 
     private ObjectMap variantOptions  = new ObjectMap();
     private ObjectMap pipelineOptions  = new ObjectMap();
+    private File vepInput;
 
     @PostConstruct
     public void loadArgs() throws IOException {
@@ -202,8 +207,8 @@ public class VariantJobsArgs {
         pipelineOptions.put("output.dir", outputDir);
         pipelineOptions.put("input.pedigree", pedigree);
         pipelineOptions.put("input.gtf", gtf);
-        pipelineOptions.put("db.name", dbName);
-        pipelineOptions.put("db.collections.variants.name", dbCollectionVariantsName);
+        pipelineOptions.put(DB_NAME, dbName);
+        pipelineOptions.put(DB_COLLECTIONS_VARIANTS_NAME, dbCollectionVariantsName);
         pipelineOptions.put("db.collections.files.name", dbCollectionFilesName);
         pipelineOptions.put(DB_COLLECTIONS_FEATURES_NAME, dbCollectionGenesName);
         pipelineOptions.put("config.db.hosts", dbHosts);
@@ -215,7 +220,7 @@ public class VariantJobsArgs {
         pipelineOptions.put(VariantStatsConfiguration.SKIP_STATS, skipStats);
 
         String annotationFilesPrefix = studyId + "_" + fileId;
-        pipelineOptions.put("vep.input", URI.create(outputDirAnnotation + "/").resolve(annotationFilesPrefix + "_variants_to_annotate.tsv.gz").toString());
+        pipelineOptions.put(VEP_INPUT, URI.create(outputDirAnnotation + "/").resolve(annotationFilesPrefix + "_variants_to_annotate.tsv.gz").toString());
         pipelineOptions.put("vep.output", URI.create(outputDirAnnotation + "/").resolve(annotationFilesPrefix + "_vep_annotation.tsv.gz").toString());
         
         pipelineOptions.put("app.vep.path", vepPath);
@@ -243,5 +248,17 @@ public class VariantJobsArgs {
 
     public String getDbCollectionsFeaturesName() {
         return getPipelineOptions().getString(DB_COLLECTIONS_FEATURES_NAME);
+    }
+
+    public String getDbCollectionsVariantsName() {
+        return getPipelineOptions().getString(DB_COLLECTIONS_VARIANTS_NAME);
+    }
+
+    public String getVepInput() {
+        return getPipelineOptions().getString(VEP_INPUT);
+    }
+
+    public String getDbName() {
+        return getPipelineOptions().getString(DB_NAME);
     }
 }

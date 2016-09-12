@@ -1,9 +1,9 @@
-package uk.ac.evi.eva.pipeline.io.mappers;
+package uk.ac.ebi.eva.pipeline.io.mappers;
 
 import embl.ebi.variation.eva.pipeline.gene.FeatureCoordinates;
 import embl.ebi.variation.eva.pipeline.gene.GeneLineMapper;
 import org.junit.Test;
-import uk.ac.evi.eva.test.data.GtfStaticTestData;
+import uk.ac.ebi.eva.test.data.GtfStaticTestData;
 
 import static junit.framework.TestCase.assertNotNull;
 

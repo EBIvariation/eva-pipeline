@@ -1,4 +1,4 @@
-package uk.ac.evi.eva.pipeline.io.processor;
+package uk.ac.ebi.eva.pipeline.io.processor;
 
 import embl.ebi.variation.eva.pipeline.gene.FeatureCoordinates;
 import embl.ebi.variation.eva.pipeline.gene.GeneFilterProcessor;
@@ -6,11 +6,12 @@ import embl.ebi.variation.eva.pipeline.steps.readers.GeneReader;
 import org.junit.Test;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.test.MetaDataInstanceFactory;
-import uk.ac.evi.eva.test.data.GtfStaticTestData;
+import uk.ac.ebi.eva.test.data.GtfStaticTestData;
+import uk.ac.ebi.eva.test.utils.JobTestUtils;
 
 import java.io.File;
 
-import static embl.ebi.variation.eva.pipeline.jobs.JobTestUtils.makeGzipFile;
+import static uk.ac.ebi.eva.test.utils.JobTestUtils.makeGzipFile;
 import static junit.framework.TestCase.assertEquals;
 
 public class GeneFilterProcessorTest {
@@ -21,7 +22,7 @@ public class GeneFilterProcessorTest {
         GeneFilterProcessor geneFilterProcessor = new GeneFilterProcessor();
 
         //simulate VEP output file
-        File file = makeGzipFile(GtfStaticTestData.GTF_CONTENT);
+        File file = JobTestUtils.makeGzipFile(GtfStaticTestData.GTF_CONTENT);
 
         GeneReader geneReader = new GeneReader(file);
         geneReader.setSaveState(false);
