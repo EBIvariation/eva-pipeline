@@ -33,8 +33,6 @@ public class MongoDbCursorItemReader extends AbstractItemCountingItemStreamItemR
 
     private String databaseName;
 
-    private DBCollection collection;
-
     private String collectionName;
 
     private DBCursor cursor;
@@ -50,7 +48,7 @@ public class MongoDbCursorItemReader extends AbstractItemCountingItemStreamItemR
 
     @Override
     protected void doOpen() throws Exception {
-        collection = mongo.getDB(databaseName).getCollection(collectionName);
+        DBCollection collection = mongo.getDB(databaseName).getCollection(collectionName);
         cursor = collection.find(createDbObjectRef(), createDbObjectKeys());
     }
 
@@ -73,7 +71,7 @@ public class MongoDbCursorItemReader extends AbstractItemCountingItemStreamItemR
         cursor = cursor.skip(itemIndex);
     }
 
-    protected DBObject createDbObjectKeys() {
+    private DBObject createDbObjectKeys() {
         if(fields == null) {
             return new BasicDBObject();
         } else {
@@ -85,7 +83,7 @@ public class MongoDbCursorItemReader extends AbstractItemCountingItemStreamItemR
         }
     }
 
-    protected DBObject createDbObjectRef() {
+    private DBObject createDbObjectRef() {
         if(refDbObject == null) {
             return new BasicDBObject();
         } else {
