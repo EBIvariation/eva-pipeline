@@ -7,6 +7,8 @@ import org.springframework.batch.item.file.transform.BeanWrapperFieldExtractor;
 import org.springframework.batch.item.file.transform.DelimitedLineAggregator;
 import org.springframework.core.io.FileSystemResource;
 
+import java.io.File;
+
 public class VepInputWriter extends FlatFileItemWriter<VariantWrapper> {
 
 
@@ -18,7 +20,7 @@ public class VepInputWriter extends FlatFileItemWriter<VariantWrapper> {
      * @param pipelineOptions
  */
 
-    public VepInputWriter(ObjectMap pipelineOptions) {
+    public VepInputWriter(File file) {
         super();
 
         BeanWrapperFieldExtractor<VariantWrapper> fieldExtractor = new BeanWrapperFieldExtractor<>();
@@ -28,10 +30,14 @@ public class VepInputWriter extends FlatFileItemWriter<VariantWrapper> {
         delLineAgg.setDelimiter("\t");
         delLineAgg.setFieldExtractor(fieldExtractor);
 
-        setResource(new FileSystemResource(pipelineOptions.getString("vep.input")));
+        setResource(new FileSystemResource(file));
         setAppendAllowed(false);
         setShouldDeleteIfExists(true);
         setLineAggregator(delLineAgg);
+    }
+
+    public VepInputWriter(String filePath){
+        this(new File(filePath));
     }
 
 }

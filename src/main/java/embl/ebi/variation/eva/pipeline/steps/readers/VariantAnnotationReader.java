@@ -7,11 +7,17 @@ import org.opencb.datastore.core.ObjectMap;
 import org.springframework.batch.item.file.FlatFileItemReader;
 import org.springframework.core.io.Resource;
 
+import java.io.File;
+
 public class VariantAnnotationReader extends FlatFileItemReader<VariantAnnotation>{
 
-    public VariantAnnotationReader(ObjectMap pipelineOptions) {
-        Resource resource = new GzipLazyResource(pipelineOptions.getString("vep.output"));
+    public VariantAnnotationReader(File file) {
+        Resource resource = new GzipLazyResource(file);
         setResource(resource);
         setLineMapper(new VariantAnnotationLineMapper());
+    }
+
+    public VariantAnnotationReader(String string) {
+        this(new File(string));
     }
 }

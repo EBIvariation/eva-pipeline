@@ -65,7 +65,7 @@ public class VariantsAnnotLoad {
         VariantAnnotationMongoItemWriter writer = new VariantAnnotationMongoItemWriter(mongoOperations, collections);
 
         return stepBuilderFactory.get(LOAD_VEP_ANNOTATION).<VariantAnnotation, VariantAnnotation> chunk(10)
-                .reader(new VariantAnnotationReader(variantJobsArgs.getPipelineOptions()))
+                .reader(new VariantAnnotationReader(variantJobsArgs.getPipelineOptions().getString("vep.output")))
                 .writer(writer)
                 .faultTolerant().skipLimit(50).skip(FlatFileParseException.class)
                 .listener(new SkipCheckingListener())

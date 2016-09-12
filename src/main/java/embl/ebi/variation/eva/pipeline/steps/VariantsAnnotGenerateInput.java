@@ -73,7 +73,7 @@ public class VariantsAnnotGenerateInput {
         return stepBuilderFactory.get(FIND_VARIANTS_TO_ANNOTATE).<DBObject, VariantWrapper> chunk(10)
                 .reader(new VariantReader(variantJobsArgs.getPipelineOptions()))
                 .processor(new VariantAnnotationItemProcessor())
-                .writer(new VepInputWriter(variantJobsArgs.getPipelineOptions()))
+                .writer(new VepInputWriter(variantJobsArgs.getVepInput()))
                 .allowStartIfComplete(variantJobsArgs.getPipelineOptions().getBoolean("config.restartability.allow"))
                 .build();
     }
