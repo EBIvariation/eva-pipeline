@@ -32,6 +32,10 @@ import java.util.List;
  * @author Jose Miguel Mut Lopez &lt;jmmut@ebi.ac.uk&gt;
  */
 public class ConnectionHelper {
+
+    private static MongoClient mongoClientWithAuthentication;
+    private static MongoClient mongoClientWithOutAuthentication;
+
     public static List<ServerAddress> parseServerAddresses(String hosts) throws UnknownHostException {
         List<ServerAddress> serverAddresses = new LinkedList<>();
         for (String hostPort : hosts.split(",")) {
@@ -50,16 +54,7 @@ public class ConnectionHelper {
                                                  String user, char[] password) throws UnknownHostException {
         return new MongoTemplate(
                 new SimpleMongoDbFactory(
-                        new MongoClient(
-                                parseServerAddresses(hosts),
-                                Collections.singletonList(MongoCredential.createCredential(
-                                        user,
-                                        authenticationDB,
-                                        password
-                                        )
-                                )
-                        ),
-                        database
+                        getMongoClient(hosts, authenticationDB, user, password), database
                 )
         );
     }
@@ -67,8 +62,31 @@ public class ConnectionHelper {
     public static MongoTemplate getMongoTemplate(String database) throws UnknownHostException {
         return new MongoTemplate(
                 new SimpleMongoDbFactory(
-                        new MongoClient(), database
+                        getMongoClient(), database
                 )
         );
+    }
+
+    public static MongoClient getMongoClient(String hosts, String authenticationDB,
+                                             String user, char[] password) throws UnknownHostException {
+        if(mongoClientWithAuthentication == null){
+            mongoClientWithAuthentication = new MongoClient(
+                    parseServerAddresses(hosts),
+                    Collections.singletonList(MongoCredential.createCredential(
+                            user,
+                            authenticationDB,
+                            password
+                            )
+                    ));
+        }
+
+        return mongoClientWithAuthentication;
+    }
+
+    public static MongoClient getMongoClient() throws UnknownHostException {
+        if(mongoClientWithOutAuthentication == null)
+            mongoClientWithOutAuthentication = new MongoClient();
+
+        return mongoClientWithOutAuthentication;
     }
 }

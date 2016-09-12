@@ -16,6 +16,8 @@
 
 package uk.ac.ebi.eva.utils;
 
+import com.mongodb.Mongo;
+import com.mongodb.MongoClient;
 import com.mongodb.ReadPreference;
 
 import org.opencb.commons.utils.CryptoUtils;
@@ -38,7 +40,7 @@ public class MongoDBHelper {
         try {
             mongoTemplate = getMongoTemplate(pipelineOptions);
         } catch (UnknownHostException e) {
-            throw new RuntimeException("Unable to initialize MongoDB", e);
+            throw new RuntimeException("Unable to initialize mongo template", e);
         }
         return mongoTemplate;
     }
@@ -63,6 +65,37 @@ public class MongoDBHelper {
 
         return mongoTemplate;
     }
+
+    public static Mongo getMongoClientFromPipelineOptions(ObjectMap pipelineOptions) {
+        Mongo mongo;
+        try {
+            mongo = getMongoClient(pipelineOptions);
+        } catch (UnknownHostException e) {
+            throw new RuntimeException("Unable to initialize mongo client", e);
+        }
+
+        return mongo;
+    }
+
+    private static Mongo getMongoClient(ObjectMap pipelineOptions) throws UnknownHostException {
+        MongoClient mongoClient;
+
+        if(pipelineOptions.getString("config.db.authentication-db").isEmpty()){
+            mongoClient = ConnectionHelper.getMongoClient();
+        }else {
+            mongoClient = ConnectionHelper.getMongoClient(
+                    pipelineOptions.getString("config.db.hosts"),
+                    pipelineOptions.getString("config.db.authentication-db"),
+                    pipelineOptions.getString("config.db.user"),
+                    pipelineOptions.getString("config.db.password").toCharArray()
+            );
+        }
+
+        mongoClient.setReadPreference(getMongoTemplateReadPreferences(pipelineOptions.getString("config.db.read-preference")));
+
+        return mongoClient;
+    }
+
 
     private static ReadPreference getMongoTemplateReadPreferences(String readPreference){
         switch (readPreference){
