@@ -54,7 +54,7 @@ import static uk.ac.ebi.eva.test.utils.JobTestUtils.restoreMongoDbFromDump;
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = { VariantAnnotConfiguration.class, AnnotationConfig.class, JobLauncherTestUtils.class})
-public class VariantsAnnotationStepLoadTest {
+public class VariantsAnnotLoadTest {
 
     @Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
@@ -67,18 +67,18 @@ public class VariantsAnnotationStepLoadTest {
     @Before
     public void setUp() throws Exception {
         variantJobsArgs.loadArgs();
-        dbName = variantJobsArgs.getPipelineOptions().getString("db.name");
+        dbName = variantJobsArgs.getDbName();
         mongoClient = new MongoClient();
     }
 
     @Test
-    public void variantAnnotLoadStepShouldLoadAllAnnotations() throws Exception {
+    public void shouldLoadAllAnnotations() throws Exception {
         DBObjectToVariantAnnotationConverter converter = new DBObjectToVariantAnnotationConverter();
 
-        String dump = VariantsAnnotationStepLoadTest.class.getResource("/dump/").getFile();
+        String dump = VariantsAnnotLoadTest.class.getResource("/dump/").getFile();
         restoreMongoDbFromDump(dump);
 
-        String vepOutput = variantJobsArgs.getPipelineOptions().getString("vep.output");
+        String vepOutput = variantJobsArgs.getVepOutput();
         makeGzipFile(VepOutputContent.vepOutputContent, vepOutput);
 
         JobExecution jobExecution = jobLauncherTestUtils.launchStep(VariantsAnnotLoad.LOAD_VEP_ANNOTATION);

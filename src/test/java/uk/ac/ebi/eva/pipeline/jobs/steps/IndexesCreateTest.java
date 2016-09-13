@@ -58,7 +58,7 @@ public class IndexesCreateTest {
     @Before
     public void setUp() throws Exception {
         variantJobsArgs.loadArgs();
-        dbName = variantJobsArgs.getPipelineOptions().getString("db.name");
+        dbName = variantJobsArgs.getDbName();
         JobTestUtils.cleanDBs(dbName);
     }
 
@@ -86,7 +86,7 @@ public class IndexesCreateTest {
 
     @Test(expected = DuplicateKeyException.class)
     public void testNoDuplicatesCanBeInserted() throws Exception {
-        String dbCollectionGenesName = variantJobsArgs.getPipelineOptions().getString("db.collections.features.name");
+        String dbCollectionGenesName = variantJobsArgs.getDbCollectionsFeaturesName();
         JobExecution jobExecution = jobLauncherTestUtils.launchStep(InitDBConfiguration.CREATE_DATABASE_INDEXES);
 
         assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());

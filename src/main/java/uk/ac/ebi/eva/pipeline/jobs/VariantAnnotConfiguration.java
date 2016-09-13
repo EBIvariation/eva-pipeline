@@ -53,7 +53,6 @@ import uk.ac.ebi.eva.pipeline.jobs.steps.VariantsAnnotLoad;
 
 @Configuration
 @EnableBatchProcessing
-@Scope("prototype")
 @Import({VariantsAnnotCreate.class, VariantsAnnotGenerateInput.class, VariantsAnnotLoad.class})
 public class VariantAnnotConfiguration extends CommonJobStepInitialization{
     public static final String jobName = "annotate-variants";

@@ -59,7 +59,7 @@ public class VariantsAnnotGenerateInputTest {
     }
 
     @Test
-    public void variantsAnnotGenerateInputStepShouldGenerateVepInput() throws Exception {
+    public void shouldGenerateVepInput() throws Exception {
         String dump = VariantStatsConfigurationTest.class.getResource("/dump/").getFile();
         JobTestUtils.restoreMongoDbFromDump(dump);
         File vepInputFile = new File(variantJobsArgs.getVepInput());
