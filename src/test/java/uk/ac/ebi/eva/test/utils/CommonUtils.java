@@ -14,10 +14,4 @@ public class CommonUtils {
         return (DBObject) JSON.parse(variant);
     }
 
-    public static String readFirstLine(File file) throws IOException {
-        try(BufferedReader reader = new BufferedReader(new FileReader(file))){
-            return reader.readLine();
-        }
-    }
-
 }

@@ -14,6 +14,7 @@ import java.io.File;
 import java.util.Collections;
 
 import static org.junit.Assert.assertEquals;
+import static uk.ac.ebi.eva.test.utils.JobTestUtils.readFirstLine;
 
 public class VepInputWriterTest {
 
@@ -28,7 +29,7 @@ public class VepInputWriterTest {
         VepInputWriter writer = new VepInputWriter(tempFile);
         writer.open(executionContext);
         writer.write(Collections.singletonList(variant));
-        assertEquals("20\t60344\t60348\tG/A\t+", CommonUtils.readFirstLine(tempFile));
+        assertEquals("20\t60344\t60348\tG/A\t+", readFirstLine(tempFile));
         writer.close();
     }
 

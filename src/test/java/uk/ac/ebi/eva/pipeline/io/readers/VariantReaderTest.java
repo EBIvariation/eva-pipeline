@@ -52,7 +52,7 @@ public class VariantReaderTest {
         ExecutionContext executionContext = MetaDataInstanceFactory.createStepExecution().getExecutionContext();
         insertDocuments();
 
-        VariantReader mongoItemReader = new VariantReader(variantJobsArgs.getPipelineOptions());
+        VariantReaderCursor mongoItemReader = new VariantReaderCursor(variantJobsArgs.getPipelineOptions());
         mongoItemReader.open(executionContext);
 
         int itemCount = 0;

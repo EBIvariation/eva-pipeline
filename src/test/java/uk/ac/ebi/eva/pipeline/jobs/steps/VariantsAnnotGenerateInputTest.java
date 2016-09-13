@@ -37,6 +37,8 @@ import uk.ac.ebi.eva.test.utils.JobTestUtils;
 
 import java.io.File;
 
+import static uk.ac.ebi.eva.test.utils.JobTestUtils.readFirstLine;
+
 /**
  * @author Diego Poggioli
  *
@@ -75,7 +77,7 @@ public class VariantsAnnotGenerateInputTest {
         Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());
 
         Assert.assertTrue(vepInputFile.exists());
-        TestCase.assertEquals("20\t60343\t60343\tG/A\t+", CommonUtils.readFirstLine(vepInputFile));
+        TestCase.assertEquals("20\t60343\t60343\tG/A\t+", readFirstLine(vepInputFile));
         JobTestUtils.cleanDBs(VARIANTS_ANNOT_GENERATE_VEP_INPUT_DB_NAME);
     }
 }
