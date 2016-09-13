@@ -16,6 +16,7 @@
 
 package uk.ac.ebi.eva.pipeline.jobs;
 
+import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -40,6 +41,10 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.IntegrationTest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import uk.ac.ebi.eva.pipeline.configuration.VariantConfig;
+import uk.ac.ebi.eva.pipeline.configuration.VariantJobsArgs;
+import uk.ac.ebi.eva.pipeline.jobs.steps.VariantsAnnotLoad;
+import uk.ac.ebi.eva.test.utils.JobTestUtils;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -52,15 +57,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
 
-import uk.ac.ebi.eva.pipeline.configuration.VariantConfig;
-import uk.ac.ebi.eva.pipeline.configuration.VariantJobsArgs;
-import uk.ac.ebi.eva.pipeline.jobs.steps.VariantsAnnotLoad;
-
 import static junit.framework.TestCase.assertEquals;
-import org.apache.commons.io.FileUtils;
 import static org.junit.Assert.*;
 import static org.opencb.opencga.storage.core.variant.VariantStorageManager.VARIANT_SOURCE;
-import static uk.ac.ebi.eva.pipeline.jobs.JobTestUtils.*;
+import static uk.ac.ebi.eva.test.utils.JobTestUtils.*;
 
 /**
  * @author Diego Poggioli

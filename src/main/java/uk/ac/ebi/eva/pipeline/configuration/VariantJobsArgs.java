@@ -15,6 +15,7 @@
  */
 package uk.ac.ebi.eva.pipeline.configuration;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -27,6 +28,7 @@ import org.opencb.opencga.storage.core.variant.VariantStorageManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.stereotype.Component;
 
 import uk.ac.ebi.eva.pipeline.jobs.VariantAnnotConfiguration;
@@ -37,6 +39,7 @@ import java.nio.file.Paths;
 import java.util.Properties;
 import org.opencb.opencga.lib.common.Config;
 import org.opencb.opencga.storage.mongodb.variant.MongoDBVariantStorageManager;
+import uk.ac.ebi.eva.utils.MongoDBHelper;
 
 import javax.annotation.PostConstruct;
 
@@ -53,6 +56,12 @@ import javax.annotation.PostConstruct;
 @Component
 public class VariantJobsArgs {
     private static final Logger logger = LoggerFactory.getLogger(VariantJobsArgs.class);
+    private static final String DB_COLLECTIONS_FEATURES_NAME = "db.collections.features.name";
+    private static final String DB_COLLECTIONS_VARIANTS_NAME = "db.collections.variants.name";
+    private static final String VEP_INPUT = "vep.input";
+    private static final String DB_NAME = "db.name";
+    private static final String VEP_OUTPUT = "vep.output";
+    private static final String APP_VEP_PATH = "app.vep.path";
 
     // Input
     @Value("${input.vcf}") private String input;
@@ -86,10 +95,10 @@ public class VariantJobsArgs {
     @Value("${config.db.authentication-db:#{null}}") private String dbAuthenticationDb;
     @Value("${config.db.user:#{null}}") private String dbUser;
     @Value("${config.db.password:#{null}}") private String dbPassword;
-    @Value("${db.name:#{null}}") private String dbName;
-    @Value("${db.collections.variants.name:#{null}}") private String dbCollectionVariantsName;
+    @Value("${"+DB_NAME+":#{null}}") private String dbName;
+    @Value("${"+DB_COLLECTIONS_VARIANTS_NAME+":#{null}}") private String dbCollectionVariantsName;
     @Value("${db.collections.files.name:#{null}}") private String dbCollectionFilesName;
-    @Value("${db.collections.features.name}") private String dbCollectionGenesName;
+    @Value("${"+DB_COLLECTIONS_FEATURES_NAME+"}") private String dbCollectionGenesName;
     @Value("${config.db.read-preference}") private String readPreference;
 
     // Skip steps
@@ -97,7 +106,7 @@ public class VariantJobsArgs {
     @Value("${statistics.skip:false}") private boolean skipStats;
 
     //VEP
-    @Value("${app.vep.path}") private String vepPath;
+    @Value("${"+APP_VEP_PATH+"}") private String vepPath;
     @Value("${app.vep.cache.path}") private String vepCacheDirectory;
     @Value("${app.vep.cache.version}") private String vepCacheVersion;
     @Value("${app.vep.cache.species}") private String vepSpecies;
@@ -108,6 +117,8 @@ public class VariantJobsArgs {
 
     private ObjectMap variantOptions  = new ObjectMap();
     private ObjectMap pipelineOptions  = new ObjectMap();
+    private File vepInput;
+    private File appVepPath;
 
     @PostConstruct
     public void loadArgs() throws IOException {
@@ -200,10 +211,10 @@ public class VariantJobsArgs {
         pipelineOptions.put("output.dir", outputDir);
         pipelineOptions.put("input.pedigree", pedigree);
         pipelineOptions.put("input.gtf", gtf);
-        pipelineOptions.put("db.name", dbName);
-        pipelineOptions.put("db.collections.variants.name", dbCollectionVariantsName);
+        pipelineOptions.put(DB_NAME, dbName);
+        pipelineOptions.put(DB_COLLECTIONS_VARIANTS_NAME, dbCollectionVariantsName);
         pipelineOptions.put("db.collections.files.name", dbCollectionFilesName);
-        pipelineOptions.put("db.collections.features.name", dbCollectionGenesName);
+        pipelineOptions.put(DB_COLLECTIONS_FEATURES_NAME, dbCollectionGenesName);
         pipelineOptions.put("config.db.hosts", dbHosts);
         pipelineOptions.put("config.db.authentication-db", dbAuthenticationDb);
         pipelineOptions.put("config.db.user", dbUser);
@@ -213,10 +224,10 @@ public class VariantJobsArgs {
         pipelineOptions.put(VariantStatsConfiguration.SKIP_STATS, skipStats);
 
         String annotationFilesPrefix = studyId + "_" + fileId;
-        pipelineOptions.put("vep.input", URI.create(outputDirAnnotation + "/").resolve(annotationFilesPrefix + "_variants_to_annotate.tsv.gz").toString());
-        pipelineOptions.put("vep.output", URI.create(outputDirAnnotation + "/").resolve(annotationFilesPrefix + "_vep_annotation.tsv.gz").toString());
+        pipelineOptions.put(VEP_INPUT, URI.create(outputDirAnnotation + "/").resolve(annotationFilesPrefix + "_variants_to_annotate.tsv.gz").toString());
+        pipelineOptions.put(VEP_OUTPUT, URI.create(outputDirAnnotation + "/").resolve(annotationFilesPrefix + "_vep_annotation.tsv.gz").toString());
         
-        pipelineOptions.put("app.vep.path", vepPath);
+        pipelineOptions.put(APP_VEP_PATH, vepPath);
         pipelineOptions.put("app.vep.cache.path", vepCacheDirectory);
         pipelineOptions.put("app.vep.cache.version", vepCacheVersion);
         pipelineOptions.put("app.vep.cache.species", vepSpecies);
@@ -234,4 +245,41 @@ public class VariantJobsArgs {
     public ObjectMap getPipelineOptions() {
         return pipelineOptions;
     }
+
+    public MongoOperations getMongoOperations() {
+        return MongoDBHelper.getMongoOperationsFromPipelineOptions(getPipelineOptions());
+    }
+
+    public String getDbCollectionsFeaturesName() {
+        return getPipelineOptions().getString(DB_COLLECTIONS_FEATURES_NAME);
+    }
+
+    public String getDbCollectionsVariantsName() {
+        return getPipelineOptions().getString(DB_COLLECTIONS_VARIANTS_NAME);
+    }
+
+    public String getVepInput() {
+        return getPipelineOptions().getString(VEP_INPUT);
+    }
+
+    public void setVepInputFile(String vepInputFile) {
+        getPipelineOptions().put(VEP_INPUT, URI.create(vepInputFile));
+    }
+
+    public String getDbName() {
+        return getPipelineOptions().getString(DB_NAME);
+    }
+
+    public String getVepOutput() {
+        return getPipelineOptions().getString(VEP_OUTPUT);
+    }
+
+    public void setVepOutput(String vepOutput){
+        getPipelineOptions().put(VEP_OUTPUT, URI.create(vepOutput));
+    }
+
+    public void setAppVepPath(File appVepPath) {
+        getPipelineOptions().put(APP_VEP_PATH, appVepPath);
+    }
+
 }

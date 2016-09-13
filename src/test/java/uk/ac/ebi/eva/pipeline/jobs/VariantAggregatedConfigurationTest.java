@@ -15,14 +15,7 @@
  */
 package uk.ac.ebi.eva.pipeline.jobs;
 
-import uk.ac.ebi.eva.pipeline.configuration.CommonConfig;
-import uk.ac.ebi.eva.pipeline.configuration.VariantJobsArgs;
-import uk.ac.ebi.eva.pipeline.jobs.VariantAggregatedConfiguration;
-
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.runner.RunWith;
 import org.opencb.biodata.models.variant.VariantSource;
 import org.opencb.datastore.core.ObjectMap;
@@ -42,6 +35,9 @@ import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import uk.ac.ebi.eva.pipeline.configuration.CommonConfig;
+import uk.ac.ebi.eva.pipeline.configuration.VariantJobsArgs;
+import uk.ac.ebi.eva.test.utils.JobTestUtils;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -50,7 +46,6 @@ import java.nio.file.Paths;
 import java.util.zip.GZIPInputStream;
 
 import static org.junit.Assert.*;
-import static uk.ac.ebi.eva.pipeline.jobs.JobTestUtils.*;
 
 /**
  * Created by jmmut on 2015-10-14.
@@ -104,47 +99,19 @@ public class VariantAggregatedConfigurationTest {
                 source.getType(),
                 source.getAggregation()));
 
-        JobExecution execution = jobLauncher.run(job, getJobParameters());
+        JobExecution execution = jobLauncher.run(job, JobTestUtils.getJobParameters());
 
         assertEquals(input, pipelineOptions.getString("input.vcf"));
         assertEquals(ExitStatus.COMPLETED.getExitCode(), execution.getExitStatus().getExitCode());
 
         ////////// check transformed file
-        String outputFilename = getTransformedOutputPath(Paths.get(FILE_AGGREGATED).getFileName(),
+        String outputFilename = JobTestUtils.getTransformedOutputPath(Paths.get(FILE_AGGREGATED).getFileName(),
                 variantOptions.getString("compressExtension"), pipelineOptions.getString("output.dir"));
         logger.info("reading transformed output from: " + outputFilename);
 
-        long lines = getLines(new GZIPInputStream(new FileInputStream(outputFilename)));
+        long lines = JobTestUtils.getLines(new GZIPInputStream(new FileInputStream(outputFilename)));
         assertEquals(156, lines);
     }
-
-//    @Test
-//    public void invalidTransform() throws JobExecutionException {
-//        String input = VariantAggregatedConfigurationTest.class.getResource(FILE_WRONG_NO_ALT).getFile();
-//        String opencgaHome = System.getenv("OPENCGA_HOME") != null ? System.getenv("OPENCGA_HOME") : "/opt/opencga";
-//        String dbName = INVALID_TRANSFORM;
-//
-//        JobParameters parameters = new JobParametersBuilder()
-//                .addString("input.vcf", input)
-//                .addString("output.dir", "/tmp")
-//                .addString("dbName", dbName)
-//                .addString("compressExtension", ".gz")
-//                .addString("compressGenotypes", "true")
-//                .addString("includeSrc", "FIRST_8_COLUMNS")
-//                .addString("input.vcf.aggregation", "NONE")
-//                .addString("input.study.type", "COLLECTION")
-//                .addString("input.study.name", "studyName")
-//                .addString("input.study.id", "2")
-//                .addString("input.vcf.id", "2")
-//                .addString("app.opencga.path", opencgaHome)
-//                .addString(VariantsLoad.SKIP_LOAD, "true")
-//                .toJobParameters();
-//
-//        JobExecution execution = jobLauncher.run(job, parameters);
-//
-//        assertEquals(input, execution.getJobParameters().getString("input.vcf"));
-//        assertEquals("FAILED", execution.getExitStatus().getExitCode());
-//    }
 
     @Test
     public void validLoad() throws JobExecutionException, IllegalAccessException, ClassNotFoundException,
@@ -165,7 +132,7 @@ public class VariantAggregatedConfigurationTest {
                 source.getType(),
                 source.getAggregation()));
 
-        JobExecution execution = jobLauncher.run(job, getJobParameters());
+        JobExecution execution = jobLauncher.run(job, JobTestUtils.getJobParameters());
 
         assertEquals(input, pipelineOptions.getString("input.vcf"));
         assertEquals(ExitStatus.COMPLETED, execution.getExitStatus());
@@ -175,51 +142,15 @@ public class VariantAggregatedConfigurationTest {
         VariantDBAdaptor variantDBAdaptor = variantStorageManager.getDBAdaptor(dbName, null);
         VariantDBIterator iterator = variantDBAdaptor.iterator(new QueryOptions());
 
-        String outputFilename = getTransformedOutputPath(Paths.get(FILE_AGGREGATED).getFileName(),
+        String outputFilename = JobTestUtils.getTransformedOutputPath(Paths.get(FILE_AGGREGATED).getFileName(),
                 variantOptions.getString("compressExtension"), pipelineOptions.getString("output.dir"));
-        long lines = getLines(new GZIPInputStream(new FileInputStream(outputFilename)));
+        long lines = JobTestUtils.getLines(new GZIPInputStream(new FileInputStream(outputFilename)));
 
-        assertEquals(countRows(iterator), lines);
+        Assert.assertEquals(JobTestUtils.countRows(iterator), lines);
 
         // check stats aren't loaded
         assertTrue(variantDBAdaptor.iterator(new QueryOptions()).next().getSourceEntries().values().iterator().next().getCohortStats().isEmpty());
     }
-
-//    @Test
-//    public void invalidLoad() throws JobExecutionException {
-//        String input = VariantAggregatedConfigurationTest.class.getResource(FILE_20).getFile();
-//        String outdir = input;
-//        String dbName = INVALID_LOAD;
-////        String opencgaHome = System.getenv("OPENCGA_HOME") != null ? System.getenv("OPENCGA_HOME") : "/opt/opencga";  // TODO make it fail better
-//
-//        JobParameters parameters = new JobParametersBuilder()
-//                .addString("input.vcf", input)
-//                .addString("output.dir", outdir)
-//                .addString("dbName", dbName)
-//                .addString("compressExtension", ".gz")
-//                .addString("compressGenotypes", "true")
-//                .addString("includeSrc", "FIRST_8_COLUMNS")
-//                .addString("input.vcf.aggregation", "NONE")
-//                .addString("input.study.type", "COLLECTION")
-//                .addString("input.study.name", "studyName")
-//                .addString("input.study.id", "1")
-//                .addString("input.vcf.id", "1")
-//                .addString("app.opencga.path", null)
-//                .toJobParameters();
-//
-//        Job listenedJob = jobBuilderFactory
-//                .get("listenedjob")
-//                .incrementer(new RunIdIncrementer())
-//                .listener(listener)
-//                .start(variantConfiguration.load())
-//                .build();
-//
-//        System.out.println("parameters in load tests" + parameters.toString());
-//        JobExecution execution = jobLauncher.run(listenedJob, parameters);
-//
-//        assertEquals(input, execution.getJobParameters().getString("input.vcf"));
-//        assertEquals("FAILED", execution.getExitStatus().getExitCode());
-//    }
 
     @Test
     public void validLoadStats() throws JobParametersInvalidException, JobExecutionAlreadyRunningException,
@@ -243,7 +174,7 @@ public class VariantAggregatedConfigurationTest {
                 source.getType(),
                 VariantSource.Aggregation.BASIC));
 
-        JobExecution execution = jobLauncher.run(job, getJobParameters());
+        JobExecution execution = jobLauncher.run(job, JobTestUtils.getJobParameters());
 
         assertEquals(input, pipelineOptions.getString("input.vcf"));
         assertEquals(ExitStatus.COMPLETED, execution.getExitStatus());
@@ -253,11 +184,11 @@ public class VariantAggregatedConfigurationTest {
         VariantDBAdaptor variantDBAdaptor = variantStorageManager.getDBAdaptor(dbName, null);
         VariantDBIterator iterator = variantDBAdaptor.iterator(new QueryOptions());
 
-        String outputFilename = getTransformedOutputPath(Paths.get(FILE_AGGREGATED).getFileName(),
+        String outputFilename = JobTestUtils.getTransformedOutputPath(Paths.get(FILE_AGGREGATED).getFileName(),
                 variantOptions.getString("compressExtension"), pipelineOptions.getString("output.dir"));
-        long lines = getLines(new GZIPInputStream(new FileInputStream(outputFilename)));
+        long lines = JobTestUtils.getLines(new GZIPInputStream(new FileInputStream(outputFilename)));
 
-        assertEquals(countRows(iterator), lines);
+        Assert.assertEquals(JobTestUtils.countRows(iterator), lines);
 
         // check stats are loaded
         assertFalse(variantDBAdaptor.iterator(new QueryOptions()).next().getSourceEntries().values().iterator().next().getCohortStats().isEmpty());

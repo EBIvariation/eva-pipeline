@@ -17,9 +17,8 @@ package uk.ac.ebi.eva.pipeline.jobs.steps;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
+import com.mongodb.DuplicateKeyException;
 import com.mongodb.MongoClient;
-import com.mongodb.MongoException;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -31,11 +30,10 @@ import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-
 import uk.ac.ebi.eva.pipeline.configuration.InitDBConfig;
 import uk.ac.ebi.eva.pipeline.configuration.VariantJobsArgs;
 import uk.ac.ebi.eva.pipeline.jobs.InitDBConfiguration;
-import uk.ac.ebi.eva.pipeline.jobs.JobTestUtils;
+import uk.ac.ebi.eva.test.utils.JobTestUtils;
 
 import static junit.framework.TestCase.assertEquals;
 
@@ -60,7 +58,7 @@ public class IndexesCreateTest {
     @Before
     public void setUp() throws Exception {
         variantJobsArgs.loadArgs();
-        dbName = variantJobsArgs.getPipelineOptions().getString("db.name");
+        dbName = variantJobsArgs.getDbName();
         JobTestUtils.cleanDBs(dbName);
     }
 
@@ -71,7 +69,7 @@ public class IndexesCreateTest {
 
     @Test
     public void testIndexesAreCreated() throws Exception {
-        String dbCollectionGenesName = variantJobsArgs.getPipelineOptions().getString("db.collections.features.name");
+        String dbCollectionGenesName = variantJobsArgs.getDbCollectionsFeaturesName();
         JobExecution jobExecution = jobLauncherTestUtils.launchStep(InitDBConfiguration.CREATE_DATABASE_INDEXES);
 
         assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
@@ -86,9 +84,9 @@ public class IndexesCreateTest {
                 genesCollection.getIndexInfo().toString());
     }
 
-    @Test(expected = MongoException.DuplicateKey.class)
+    @Test(expected = DuplicateKeyException.class)
     public void testNoDuplicatesCanBeInserted() throws Exception {
-        String dbCollectionGenesName = variantJobsArgs.getPipelineOptions().getString("db.collections.features.name");
+        String dbCollectionGenesName = variantJobsArgs.getDbCollectionsFeaturesName();
         JobExecution jobExecution = jobLauncherTestUtils.launchStep(InitDBConfiguration.CREATE_DATABASE_INDEXES);
 
         assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());

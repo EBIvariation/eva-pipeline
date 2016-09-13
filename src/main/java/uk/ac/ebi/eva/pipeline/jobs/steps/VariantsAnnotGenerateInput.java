@@ -17,6 +17,8 @@ package uk.ac.ebi.eva.pipeline.jobs.steps;
 
 import com.mongodb.DBObject;
 
+import org.springframework.batch.core.configuration.annotation.JobScope;
+import org.springframework.context.annotation.Scope;
 import uk.ac.ebi.eva.pipeline.configuration.VariantJobsArgs;
 import uk.ac.ebi.eva.pipeline.io.readers.VariantReader;
 import uk.ac.ebi.eva.pipeline.io.writers.VepInputWriter;
@@ -75,7 +77,7 @@ public class VariantsAnnotGenerateInput {
         return stepBuilderFactory.get(FIND_VARIANTS_TO_ANNOTATE).<DBObject, VariantWrapper> chunk(10)
                 .reader(new VariantReader(variantJobsArgs.getPipelineOptions()))
                 .processor(new VariantAnnotationItemProcessor())
-                .writer(new VepInputWriter(variantJobsArgs.getPipelineOptions()))
+                .writer(new VepInputWriter(variantJobsArgs.getVepInput()))
                 .allowStartIfComplete(variantJobsArgs.getPipelineOptions().getBoolean("config.restartability.allow"))
                 .build();
     }
