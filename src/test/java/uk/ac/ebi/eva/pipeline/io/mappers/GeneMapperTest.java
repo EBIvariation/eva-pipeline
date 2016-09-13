@@ -14,7 +14,10 @@ public class GeneMapperTest {
         for (String gtfLine : GtfStaticTestData.GTF_CONTENT.split(GtfStaticTestData.GTF_LINE_SPLIT)) {
             if (!gtfLine.startsWith(GtfStaticTestData.GTF_COMMENT_LINE)) {
                 FeatureCoordinates gene = lineMapper.mapLine(gtfLine, 0);
+                assertNotNull(gene.getId());
                 assertNotNull(gene.getChromosome());
+                assertNotNull(gene.getStart());
+                assertNotNull(gene.getEnd());
             }
         }
     }

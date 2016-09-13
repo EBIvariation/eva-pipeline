@@ -32,7 +32,7 @@ public class GeneReaderWriterTest {
 
     @Test
     public void shouldWriteAllFieldsIntoMongoDb() throws Exception {
-        String dbName = variantJobsArgs.getPipelineOptions().getString("db.name");
+        String dbName = variantJobsArgs.getDbName();
         JobTestUtils.cleanDBs(dbName);
 
         GeneWriter geneWriter = new GeneWriter(variantJobsArgs.getMongoOperations(), variantJobsArgs.getDbCollectionsFeaturesName());
