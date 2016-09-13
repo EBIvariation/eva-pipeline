@@ -24,9 +24,10 @@ import org.springframework.batch.core.job.flow.FlowExecutionStatus;
 import org.springframework.batch.core.job.flow.JobExecutionDecider;
 
 /**
- * Created by jmmut on 2016-07-21.
- *
  * @author Jose Miguel Mut Lopez &lt;jmmut@ebi.ac.uk&gt;
+ *
+ * Decider used in the pipeline to skip steps/tasklets
+ *
  */
 public class OptionalDecider implements JobExecutionDecider {
     private static final Logger logger = LoggerFactory.getLogger(OptionalDecider.class);

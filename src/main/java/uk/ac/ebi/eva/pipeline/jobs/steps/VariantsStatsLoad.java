@@ -38,9 +38,45 @@ import uk.ac.ebi.eva.utils.URLHelper;
 import java.net.URI;
 
 /**
- * Created by jmmut on 2015-11-10.
  *
  * @author Jose Miguel Mut Lopez &lt;jmmut@ebi.ac.uk&gt;
+ *
+ * Tasklet that load statistics into mongoDB.
+ *
+ * Input: file containing statistics (.variants.stats.json.gz)
+ * Output: stats loaded into mongodb
+ *
+ * Example:
+ * {
+ * "chromosome":"20",
+ * "position":67765,
+ * "cohortStats":{
+ *  "ALL":{
+ *      "refAllele":"C",
+ *      "altAllele":"T",
+ *      "variantType":"SNV",
+ *      "refAlleleCount":4996,
+ *      "altAlleleCount":12,
+ *      "genotypesCount":{"0|0":2492,"0|1":12},
+ *      "missingAlleles":0,
+ *      "missingGenotypes":0,
+ *      "refAlleleFreq":0.99760383,
+ *      "altAlleleFreq":0.002396166,
+ *      "genotypesFreq":{"0/0":0.0,"0/1":0.0,"1/1":0.0,"0|0":0.99520767,"0|1":0.004792332},
+ *      "maf":0.002396166,
+ *      "mgf":0.0,
+ *      "mafAllele":"T",
+ *      "mgfGenotype":"0/0",
+ *      "mendelianErrors":-1,
+ *      "casesPercentDominant":-1.0,
+ *      "controlsPercentDominant":-1.0,
+ *      "casesPercentRecessive":-1.0,
+ *      "controlsPercentRecessive":-1.0,
+ *      "quality":100.0,
+ *      "numSamples":2504
+ *      }
+ *  }
+ * }
  */
 @Component
 @StepScope

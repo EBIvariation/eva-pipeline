@@ -41,6 +41,13 @@ import java.io.IOException;
  *
  * Step class that:
  * - READ: read a list of VEP {@link VariantAnnotation} from flat file
+ *
+ *  Example file content:
+ *  20_60343_G/A	20:60343	A	-	-	-	intergenic_variant	-	-	-	-	-	-
+ *  20_60419_A/G	20:60419	G	-	-	-	intergenic_variant	-	-	-	-	-	-
+ *  20_60479_C/T	20:60479	T	-	-	-	intergenic_variant	-	-	-	-	-	rs149529999	GMAF=T:0.0018;AFR_MAF=T:0.01;AMR_MAF=T:0.0028
+ *
+ *
  * - LOAD: write the {@link VariantAnnotation} into Mongo db
  *
  */

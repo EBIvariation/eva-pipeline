@@ -35,6 +35,10 @@ import uk.ac.ebi.eva.pipeline.jobs.deciders.OptionalDecider;
 import uk.ac.ebi.eva.pipeline.jobs.steps.VariantsStatsCreate;
 import uk.ac.ebi.eva.pipeline.jobs.steps.VariantsStatsLoad;
 
+/**
+ * Configuration to run a full Statistics job: variantStatsFlow: statsCreate --> statsLoad
+ *
+ */
 @Configuration
 @EnableBatchProcessing
 @Import({VariantsStatsCreate.class, VariantsStatsLoad.class})
