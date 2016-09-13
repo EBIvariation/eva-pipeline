@@ -17,7 +17,7 @@ import static junit.framework.TestCase.assertEquals;
 public class VariantAnnotationReaderTest {
 
     @Test
-    public void variantAnnotationReaderShouldReadAllLinesInVepOutput() throws Exception {
+    public void shouldReadAllLinesInVepOutput() throws Exception {
         ExecutionContext executionContext = MetaDataInstanceFactory.createStepExecution().getExecutionContext();
 
         //simulate VEP output file

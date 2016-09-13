@@ -48,7 +48,7 @@ public class VariantReaderTest {
     }
 
     @Test
-    public void variantReaderShouldReadVariantsWithoutAnnotationField() throws Exception {
+    public void shouldReadVariantsWithoutAnnotationField() throws Exception {
         ExecutionContext executionContext = MetaDataInstanceFactory.createStepExecution().getExecutionContext();
         insertDocuments();
 

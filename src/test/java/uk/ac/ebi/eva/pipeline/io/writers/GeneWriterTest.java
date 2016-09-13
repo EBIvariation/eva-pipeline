@@ -25,7 +25,7 @@ import static junit.framework.TestCase.assertTrue;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = { VariantJobsArgs.class, InitDBConfig.class,})
-public class GeneReaderWriterTest {
+public class GeneWriterTest {
 
     @Autowired
     public VariantJobsArgs variantJobsArgs;

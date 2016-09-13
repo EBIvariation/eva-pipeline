@@ -18,7 +18,7 @@ import static org.junit.Assert.assertEquals;
 public class VepInputWriterTest {
 
     @Test
-    public void vepInputWriterShouldWriteAllFieldsToFile() throws Exception {
+    public void shouldWriteAllFieldsToFile() throws Exception {
         ExecutionContext executionContext = MetaDataInstanceFactory.createStepExecution().getExecutionContext();
 
         DBObjectToVariantConverter converter = new DBObjectToVariantConverter();

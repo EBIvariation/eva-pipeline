@@ -34,7 +34,7 @@ public class VariantAnnotationWriterTest {
     private VariantJobsArgs variantJobsArgs;
 
     @Test
-    public void variantAnnotationWriterShouldWriteAllFieldsIntoMongoDb() throws Exception {
+    public void shouldWriteAllFieldsIntoMongoDb() throws Exception {
         String dbName = variantJobsArgs.getDbName();
         String dbCollectionVariantsName = variantJobsArgs.getDbCollectionsVariantsName();
         JobTestUtils.cleanDBs(dbName);
