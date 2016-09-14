@@ -87,7 +87,7 @@ public class VariantAnnotConfigurationTest {
 
         //check list of variants without annotation output file
         assertTrue(vepInputFile.exists());
-        assertEquals("20\t60343\t60343\tG/A\t+", readFirstLine(vepInputFile));
+        assertEquals("20\t60343\t60343\tG/A\t+", JobTestUtils.readFirstLine(vepInputFile));
 
         //check that documents have the annotation
         DBCursor cursor = collection(dbName, variantJobsArgs.getDbCollectionsVariantsName()).find();
@@ -136,12 +136,6 @@ public class VariantAnnotConfigurationTest {
         TestCase.assertTrue(vepOutputFile.exists());
         Assert.assertEquals(537, JobTestUtils.getLines(new GZIPInputStream(new FileInputStream(vepOutputFile))));
         vepOutputFile.delete();
-    }
-
-    private String readFirstLine(File file) throws IOException {
-        try(BufferedReader reader = new BufferedReader(new FileReader(file))){
-            return reader.readLine();
-        }
     }
 
     @Before

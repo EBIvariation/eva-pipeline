@@ -28,6 +28,8 @@ import java.net.UnknownHostException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Iterator;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.zip.GZIPOutputStream;
 
 /**
@@ -39,6 +41,25 @@ public class JobTestUtils {
     private static final Logger logger = LoggerFactory.getLogger(JobTestUtils.class);
     private static final String EVA_PIPELINE_TEMP_PREFIX = "eva-pipeline-test";
     private static final java.lang.String EVA_PIPELINE_TEMP_POSTFIX = ".tmp";
+
+    /**
+     * reads the file and sorts it in memory to return the first ordered line. Don't use for big files!
+     * @param file to be sorted
+     * @return String, the first orderec line
+     * @throws IOException
+     */
+    public static String readFirstLine(File file) throws IOException {
+        Set<String> lines = new TreeSet<>();
+        try(BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            String line = reader.readLine();
+            while (line != null) {
+                lines.add(line);
+                line = reader.readLine();
+            }
+        }
+        return lines.iterator().next();
+    }
+
 
     public static long getLines(InputStream in) throws IOException {
         BufferedReader file = new BufferedReader(new InputStreamReader(in));
@@ -79,7 +100,7 @@ public class JobTestUtils {
 
     public static JobParameters getJobParameters(){
         return new JobParametersBuilder()
-                        .addLong("time",System.currentTimeMillis()).toJobParameters();
+                .addLong("time",System.currentTimeMillis()).toJobParameters();
     }
 
     public static File makeGzipFile(String content) throws IOException {
