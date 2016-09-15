@@ -224,7 +224,7 @@ public class VariantJobsArgs {
         pipelineOptions.put(VariantStatsConfiguration.SKIP_STATS, skipStats);
 
         String annotationFilesPrefix = studyId + "_" + fileId;
-        pipelineOptions.put(VEP_INPUT, URI.create(outputDirAnnotation + "/").resolve(annotationFilesPrefix + "_variants_to_annotate.tsv.gz").toString());
+        pipelineOptions.put(VEP_INPUT, URI.create(outputDirAnnotation + "/").resolve(annotationFilesPrefix + "_variants_to_annotate.tsv").toString());
         pipelineOptions.put(VEP_OUTPUT, URI.create(outputDirAnnotation + "/").resolve(annotationFilesPrefix + "_vep_annotation.tsv.gz").toString());
         
         pipelineOptions.put(APP_VEP_PATH, vepPath);
