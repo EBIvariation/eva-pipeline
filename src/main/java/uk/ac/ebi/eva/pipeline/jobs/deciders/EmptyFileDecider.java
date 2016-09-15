@@ -29,7 +29,7 @@ import java.nio.file.Paths;
 /**
  * @author Diego Poggioli
  *
- *
+ * Decider used to skip step(s) in case a previous step is generating an empty file
  */
 public class EmptyFileDecider implements JobExecutionDecider {
     private static final Logger logger = LoggerFactory.getLogger(EmptyFileDecider.class);

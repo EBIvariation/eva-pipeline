@@ -45,6 +45,10 @@ import uk.ac.ebi.eva.pipeline.jobs.steps.VariantsAnnotLoad;
  * 2) annotationCreate - run VEP
  * 3) variantAnnotLoadBatchStep - Load VEP annotations into mongo
  *
+ * Optional flow: variantsAnnotGenerateInput --> (annotationCreate --> variantAnnotLoad)
+ * annotationCreate and variantAnnotLoad steps are only executed if variantsAnnotGenerateInput is generating a
+ * non-empty VEP input file
+ *
  */
 
 @Configuration

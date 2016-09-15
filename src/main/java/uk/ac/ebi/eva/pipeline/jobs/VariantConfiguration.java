@@ -41,7 +41,7 @@ import uk.ac.ebi.eva.pipeline.jobs.steps.VariantsTransform;
  *
  *                       |--> (optionalVariantStatsFlow: statsCreate --> statsLoad)
  *  transform ---> load -+
- *                       |--> (optionalVariantAnnotationFlow: variantsAnnotGenerateInput --> annotationCreate --> variantAnnotLoad)
+ *                       |--> (optionalVariantAnnotationFlow: variantsAnnotGenerateInput --> (annotationCreate --> variantAnnotLoad))
  *
  *  Steps in () are optional
  */
