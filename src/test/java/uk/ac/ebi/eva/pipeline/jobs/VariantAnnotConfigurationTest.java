@@ -20,7 +20,6 @@ import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.mongodb.MongoClient;
-import junit.framework.TestCase;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -39,17 +38,19 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import uk.ac.ebi.eva.pipeline.configuration.AnnotationConfig;
 import uk.ac.ebi.eva.pipeline.configuration.VariantJobsArgs;
-import uk.ac.ebi.eva.pipeline.jobs.steps.VariantsAnnotLoad;
-import uk.ac.ebi.eva.test.utils.CommonUtils;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
 
 import java.io.*;
-import java.util.List;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.*;
 import java.util.stream.Collectors;
-import java.util.zip.GZIPInputStream;
 
 import static junit.framework.TestCase.assertEquals;
 import static org.junit.Assert.*;
+import static uk.ac.ebi.eva.pipeline.jobs.steps.VariantsAnnotCreate.GENERATE_VEP_ANNOTATION;
+import static uk.ac.ebi.eva.pipeline.jobs.steps.VariantsAnnotGenerateInput.FIND_VARIANTS_TO_ANNOTATE;
+import static uk.ac.ebi.eva.pipeline.jobs.steps.VariantsAnnotLoad.LOAD_VEP_ANNOTATION;
 
 /**
  * @author Diego Poggioli
@@ -68,22 +69,29 @@ public class VariantAnnotConfigurationTest {
     private VariantJobsArgs variantJobsArgs;
 
     private File vepInputFile;
-    private static String dbName;
-    private static MongoClient mongoClient;
+    private String dbName;
+    private MongoClient mongoClient;
     private DBObjectToVariantAnnotationConverter converter;
 
     @Test
-    public void fullAnnotationJob () throws Exception {
+    public void allAnnotationStepsShouldBeExecuted () throws Exception {
         String dump = VariantStatsConfigurationTest.class.getResource("/dump/").getFile();
         JobTestUtils.restoreMongoDbFromDump(dump);
-
-        File vepPathFile = new File(VariantAnnotConfigurationTest.class.getResource("/mockvep.pl").getFile());
-        variantJobsArgs.setAppVepPath(vepPathFile);
 
         JobExecution jobExecution = jobLauncherTestUtils.launchJob();
 
         assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
         assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());
+
+        Assert.assertEquals(3, jobExecution.getStepExecutions().size());
+        List<StepExecution> steps = new ArrayList<>(jobExecution.getStepExecutions());
+        StepExecution findVariantsToAnnotateStep = steps.get(0);
+        StepExecution generateVepAnnotationsStep = steps.get(1);
+        StepExecution loadVepAnnotationsStep = steps.get(2);
+
+        Assert.assertEquals(FIND_VARIANTS_TO_ANNOTATE, findVariantsToAnnotateStep.getStepName());
+        Assert.assertEquals(GENERATE_VEP_ANNOTATION, generateVepAnnotationsStep.getStepName());
+        Assert.assertEquals(LOAD_VEP_ANNOTATION, loadVepAnnotationsStep.getStepName());
 
         //check list of variants without annotation output file
         assertTrue(vepInputFile.exists());
@@ -109,43 +117,40 @@ public class VariantAnnotConfigurationTest {
 
         //check that one line is skipped because malformed
         List<StepExecution> variantAnnotationLoadStepExecution = jobExecution.getStepExecutions().stream()
-                .filter(stepExecution -> stepExecution.getStepName().equals(VariantsAnnotLoad.LOAD_VEP_ANNOTATION))
+                .filter(stepExecution -> stepExecution.getStepName().equals(LOAD_VEP_ANNOTATION))
                 .collect(Collectors.toList());
         assertEquals(1, variantAnnotationLoadStepExecution.get(0).getReadSkipCount());
     }
 
     @Test
-    public void annotCreateStepShouldGenerateAnnotations() throws Exception {
-        File vepPathFile = new File(VariantAnnotConfigurationTest.class.getResource("/mockvep.pl").getFile());
-        variantJobsArgs.setAppVepPath(vepPathFile);
+    public void noVariantsToAnnotateOnlyFindVariantsToAnnotateStepShouldRun() throws Exception {
 
-        File vepOutputFile = JobTestUtils.createTempFile();
-        variantJobsArgs.setVepOutput(vepOutputFile.getAbsolutePath());
+        JobExecution jobExecution = jobLauncherTestUtils.launchJob();
 
-        vepOutputFile.delete();
-        TestCase.assertFalse(vepOutputFile.exists());  // ensure the annot file doesn't exist from previous executions
-
-        // When the execute method in variantsAnnotCreate is executed
-        JobExecution jobExecution = jobLauncherTestUtils.launchStep(VariantAnnotConfiguration.GENERATE_VEP_ANNOTATION);
-
-        //Then variantsAnnotCreate step should complete correctly
         assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
         assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());
 
-        // And VEP output should exist and annotations should be in the file
-        TestCase.assertTrue(vepOutputFile.exists());
-        Assert.assertEquals(537, JobTestUtils.getLines(new GZIPInputStream(new FileInputStream(vepOutputFile))));
-        vepOutputFile.delete();
+        Assert.assertEquals(1, jobExecution.getStepExecutions().size());
+        StepExecution findVariantsToAnnotateStep = new ArrayList<>(jobExecution.getStepExecutions()).get(0);
+
+        assertEquals(FIND_VARIANTS_TO_ANNOTATE, findVariantsToAnnotateStep.getStepName());
+
+        assertTrue(vepInputFile.exists());
+        assertTrue(Files.size(Paths.get(vepInputFile.toPath().toUri()))==0);
     }
 
     @Before
     public void setUp() throws Exception {
         variantJobsArgs.loadArgs();
         vepInputFile = new File(variantJobsArgs.getVepInput());
+
+        File vepPathFile = new File(VariantAnnotConfigurationTest.class.getResource("/mockvep.pl").getFile());
+        variantJobsArgs.setAppVepPath(vepPathFile);
+
         converter = new DBObjectToVariantAnnotationConverter();
+        mongoClient = new MongoClient();
 
         dbName = variantJobsArgs.getDbName();
-        mongoClient = new MongoClient();
     }
 
     /**

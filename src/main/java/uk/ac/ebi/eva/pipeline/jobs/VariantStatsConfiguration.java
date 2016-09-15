@@ -63,12 +63,12 @@ public class VariantStatsConfiguration extends CommonJobStepInitialization{
                 .incrementer(new RunIdIncrementer());
 
         return jobBuilder
-                .start(variantStatsFlow())
+                .start(optionalVariantStatsFlow())
                 .build().build();
     }
 
     @Bean
-    public Flow variantStatsFlow(){
+    public Flow optionalVariantStatsFlow(){
         OptionalDecider statisticsOptionalDecider = new OptionalDecider(getPipelineOptions(), SKIP_STATS);
 
         return new FlowBuilder<Flow>(STATS_FLOW)

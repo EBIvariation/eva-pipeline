@@ -31,7 +31,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
-import org.springframework.context.annotation.Scope;
+import uk.ac.ebi.eva.pipeline.jobs.deciders.EmptyFileDecider;
 import uk.ac.ebi.eva.pipeline.jobs.deciders.OptionalDecider;
 import uk.ac.ebi.eva.pipeline.jobs.steps.VariantsAnnotCreate;
 import uk.ac.ebi.eva.pipeline.jobs.steps.VariantsAnnotGenerateInput;
@@ -45,10 +45,6 @@ import uk.ac.ebi.eva.pipeline.jobs.steps.VariantsAnnotLoad;
  * 2) annotationCreate - run VEP
  * 3) variantAnnotLoadBatchStep - Load VEP annotations into mongo
  *
- * At the moment is no longer possible to skip a single step like skipAnnotGenerateInput=true in the property
- * To solve this we can implement the dynamic-workflow (https://github.com/EBIvariation/examples/tree/master/spring-batch-dynamic-workflow)
- * or we can create a new Job class for each possible scenario
- *
  */
 
 @Configuration
@@ -58,6 +54,7 @@ public class VariantAnnotConfiguration extends CommonJobStepInitialization{
     public static final String jobName = "annotate-variants";
     public static final String SKIP_ANNOT = "annotation.skip";
     public static final String GENERATE_VEP_ANNOTATION = "Generate VEP annotation";
+    private static final String OPTIONAL_VARIANT_VEP_ANNOTATION_FLOW = "Optional variant VEP annotation flow";
     private static final String VARIANT_VEP_ANNOTATION_FLOW = "Variant VEP annotation flow";
 
     @Autowired
@@ -80,21 +77,33 @@ public class VariantAnnotConfiguration extends CommonJobStepInitialization{
                 .get(jobName)
                 .incrementer(new RunIdIncrementer());
 
-        return jobBuilder.start(variantAnnotationFlow()).build().build();
+        return jobBuilder.start(optionalVariantAnnotationFlow()).build().build();
     }
 
     @Bean
     public Flow variantAnnotationFlow(){
-        OptionalDecider annotationOptionalDecider = new OptionalDecider(getPipelineOptions(), SKIP_ANNOT);
+        EmptyFileDecider emptyFileDecider = new EmptyFileDecider(getPipelineOptions().getString("vep.input"));
 
         return new FlowBuilder<Flow>(VARIANT_VEP_ANNOTATION_FLOW)
-                .start(annotationOptionalDecider).on(OptionalDecider.DO_STEP)
-                .to(variantsAnnotGenerateInputBatchStep)
-                .next(annotationCreate())
+                .start(variantsAnnotGenerateInputBatchStep)
+                .next(emptyFileDecider).on(EmptyFileDecider.CONTINUE_FLOW)
+                .to(annotationCreate())
                 .next(variantAnnotLoadBatchStep)
-                .from(annotationOptionalDecider).on(OptionalDecider.SKIP_STEP).end(BatchStatus.COMPLETED.toString())
+                .from(emptyFileDecider).on(EmptyFileDecider.STOP_FLOW)
+                .end(BatchStatus.COMPLETED.toString())
                 .build();
+    }
 
+    @Bean
+    public Flow optionalVariantAnnotationFlow(){
+        OptionalDecider annotationOptionalDecider = new OptionalDecider(getPipelineOptions(), SKIP_ANNOT);
+
+        return new FlowBuilder<Flow>(OPTIONAL_VARIANT_VEP_ANNOTATION_FLOW)
+                .start(annotationOptionalDecider).on(OptionalDecider.DO_STEP)
+                .to(variantAnnotationFlow())
+                .from(annotationOptionalDecider).on(OptionalDecider.SKIP_STEP)
+                .end(BatchStatus.COMPLETED.toString())
+                .build();
     }
 
     private Step annotationCreate() {
