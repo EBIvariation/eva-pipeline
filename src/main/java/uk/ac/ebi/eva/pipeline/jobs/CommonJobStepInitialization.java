@@ -26,6 +26,11 @@ import org.springframework.context.annotation.Import;
 
 import uk.ac.ebi.eva.pipeline.configuration.VariantJobsArgs;
 
+/**
+ * Helper class to build jobs.
+ *
+ * This is not intended to be used as an actual job, but to be extended in those actual job classes.
+ */
 @Import({VariantJobsArgs.class})
 public class CommonJobStepInitialization {
 

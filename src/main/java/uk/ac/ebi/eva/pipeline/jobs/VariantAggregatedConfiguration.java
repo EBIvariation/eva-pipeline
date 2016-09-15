@@ -31,6 +31,13 @@ import org.springframework.context.annotation.Import;
 import uk.ac.ebi.eva.pipeline.jobs.steps.VariantsLoad;
 import uk.ac.ebi.eva.pipeline.jobs.steps.VariantsTransform;
 
+/**
+ * Job similar to VariantConfiguration, but it takes an aggregated VCF,
+ * which has no sample information (e.g. no genotypes).
+ *
+ * 1. transform the VCF into a json intermediate file
+ * 2. load it into mongo.
+ */
 @Configuration
 @EnableBatchProcessing
 @Import({VariantsLoad.class, VariantsTransform.class})
@@ -58,9 +65,6 @@ public class VariantAggregatedConfiguration extends CommonJobStepInitialization{
         return jobBuilder
                 .start(transform())
                 .next(load())
-//                .next(statsCreate())
-//                .next(statsLoad())
-//                .next(annotation(stepBuilderFactory));
                 .build();
     }
 

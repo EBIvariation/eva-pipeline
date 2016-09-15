@@ -34,9 +34,11 @@ import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.stereotype.Component;
 
 /**
- * Created by jmmut on 2016-08-26.
- *
  * @author Jose Miguel Mut Lopez &lt;jmmut@ebi.ac.uk&gt;
+ *
+ * This step initializes the indexes in the databases.
+ *
+ * Currently it only has indexes for the features collection.
  */
 @Component
 @StepScope

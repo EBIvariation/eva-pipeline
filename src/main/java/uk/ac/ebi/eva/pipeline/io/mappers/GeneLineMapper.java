@@ -23,9 +23,21 @@ import java.util.Map;
 import java.util.TreeMap;
 
 /**
- * Created by jmmut on 2016-08-16.
- *
  * @author Jose Miguel Mut Lopez &lt;jmmut@ebi.ac.uk&gt;
+ *
+ * Maps a line in a GTF file to a FeatureCoordinates. example line:
+ *
+ * 8	ensembl	gene	183180	246703	.	+	.	gene_id "ENSCSAG00000017073"; gene_version "1"; gene_name "FBXO25"; gene_source "ensembl"; gene_biotype "protein_coding";
+ *
+ * from which it extracts a FeatureCoordinates:
+ *  {
+ *      String id = "ENSCSAG00000017073"
+ *      String name = "FBXO25"
+ *      String feature = "gene"
+ *      String chromosome = "8"
+ *      int start = 183180
+ *      int end = 246703
+ *  }
  */
 public class GeneLineMapper implements LineMapper<FeatureCoordinates> {
     @Override
@@ -45,9 +57,6 @@ public class GeneLineMapper implements LineMapper<FeatureCoordinates> {
         String feature = lineSplit[2];
         return new FeatureCoordinates(attributes.get(feature + "_id"), attributes.get(feature + "_name"), feature,
                 lineSplit[0], Integer.parseInt(lineSplit[3]), Integer.parseInt(lineSplit[4]));
-//        return new Gene(attributes.get("gene_id"), attributes.get("gene_name"), attributes.get("gene_biotype"),
-//                null, lineSplit[0], Integer.parseInt(lineSplit[3]), Integer.parseInt(lineSplit[4]), lineSplit[6],
-//                lineSplit[1], null, null, null);
     }
 
 }

@@ -20,9 +20,9 @@ import org.springframework.batch.item.ItemProcessor;
 import uk.ac.ebi.eva.pipeline.model.FeatureCoordinates;
 
 /**
- * Created by jmmut on 2016-08-16.
- *
  * @author Jose Miguel Mut Lopez &lt;jmmut@ebi.ac.uk&gt;
+ *
+ * Keeps only genomic features that are genes or transcripts.
  */
 public class GeneFilterProcessor implements ItemProcessor<FeatureCoordinates, FeatureCoordinates> {
     @Override

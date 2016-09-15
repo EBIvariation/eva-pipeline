@@ -36,9 +36,10 @@ import uk.ac.ebi.eva.pipeline.model.FeatureCoordinates;
 import java.io.IOException;
 
 /**
- * Created by jmmut on 2016-08-16.
- *
  * @author Jose Miguel Mut Lopez &lt;jmmut@ebi.ac.uk&gt;
+ *
+ * This step loads a list of genomic features from a species into a DB. This is intended to be used as a mapping
+ * for feature names into feature coordinates (chromosome, start, end).
  *
  * Step class that:
  * - READ: read a list of {@link FeatureCoordinates} from flat file
