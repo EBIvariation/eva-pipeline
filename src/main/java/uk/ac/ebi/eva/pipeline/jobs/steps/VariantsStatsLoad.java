@@ -61,7 +61,7 @@ public class VariantsStatsLoad implements Tasklet {
         QueryOptions statsOptions = new QueryOptions(variantOptions);
         VariantStatisticsManager variantStatisticsManager = new VariantStatisticsManager();
         VariantDBAdaptor dbAdaptor = variantStorageManager.getDBAdaptor(variantOptions.getString("dbName"), variantOptions);
-        URI outdirUri = URLHelper.createUri(pipelineOptions.getString("output.dir"));
+        URI outdirUri = URLHelper.createUri(pipelineOptions.getString("output.dir.statistics"));
         VariantSource variantSource = variantOptions.get(VariantStorageManager.VARIANT_SOURCE, VariantSource.class);
         URI statsOutputUri = outdirUri.resolve(VariantStorageManager.buildFilename(variantSource));
 

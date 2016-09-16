@@ -76,7 +76,8 @@ public class VariantJobsArgs {
     // Output
     @Value("${output.dir}") private String outputDir;
     @Value("${output.dir.annotation}") private String outputDirAnnotation;
-    
+    @Value("${output.dir.statistics}") private String outputDirStatistics;
+
     @Value("${statistics.overwrite:false}") private boolean overwriteStats;
 
     @Value("${app.opencga.path}") private String opencgaAppHome;
@@ -174,7 +175,7 @@ public class VariantJobsArgs {
             throw new IllegalArgumentException("Please provide a name for the collection to store the file information into");
         }
     }
-            
+
     private void loadOpencgaOptions() {
         VariantSource source = new VariantSource(
                 Paths.get(input).getFileName().toString(),
@@ -209,6 +210,7 @@ public class VariantJobsArgs {
         pipelineOptions.put("input.vcf", input);
         pipelineOptions.put("compressExtension", compressExtension);
         pipelineOptions.put("output.dir", outputDir);
+        pipelineOptions.put("output.dir.statistics", outputDirStatistics);
         pipelineOptions.put("input.pedigree", pedigree);
         pipelineOptions.put("input.gtf", gtf);
         pipelineOptions.put(DB_NAME, dbName);
