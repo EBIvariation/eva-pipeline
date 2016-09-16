@@ -38,9 +38,8 @@ import uk.ac.ebi.eva.test.utils.JobTestUtils;
 import static junit.framework.TestCase.assertEquals;
 
 /**
- * Created by jmmut on 2016-08-26.
- *
  * @author Jose Miguel Mut Lopez &lt;jmmut@ebi.ac.uk&gt;
+ *
  * Test {@link IndexesCreate}
  */
 @RunWith(SpringJUnit4ClassRunner.class)

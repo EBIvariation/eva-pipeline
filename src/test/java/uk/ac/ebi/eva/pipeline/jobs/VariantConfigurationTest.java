@@ -192,7 +192,7 @@ public class VariantConfigurationTest {
         VariantDBIterator iterator = variantDBAdaptor.iterator(new QueryOptions());
         long lines = getLines(new GZIPInputStream(new FileInputStream(transformedVcfVariantsFile)));
 
-        assertEquals(countRows(iterator), lines);
+        assertEquals(count(iterator), lines);
 
         tmpTransformedVcfVariantsFile.delete();
         tmpTransformedVariantsFile.delete();
@@ -271,7 +271,7 @@ public class VariantConfigurationTest {
         //variantStorageManager = StorageManagerFactory.getVariantStorageManager();
         //variantDBAdaptor = variantStorageManager.getDBAdaptor(dbName, null);
         iterator = getVariantDBIterator();
-        assertEquals(transformedLinesCount, countRows(iterator));
+        assertEquals(transformedLinesCount, count(iterator));
 
         // 3 create stats step
         assertTrue(statsFile.exists());
@@ -280,7 +280,7 @@ public class VariantConfigurationTest {
         //variantStorageManager = StorageManagerFactory.getVariantStorageManager();
         //variantDBAdaptor = variantStorageManager.getDBAdaptor(dbName, null);
         iterator = getVariantDBIterator();
-        assertEquals(transformedLinesCount, countRows(iterator));
+        assertEquals(transformedLinesCount, count(iterator));
 
         // check the DB docs have the field "st"
         iterator = getVariantDBIterator();

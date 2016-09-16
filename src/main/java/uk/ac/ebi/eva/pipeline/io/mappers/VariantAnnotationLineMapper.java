@@ -66,7 +66,7 @@ public class VariantAnnotationLineMapper implements LineMapper<VariantAnnotation
      *  - The logic to move around the file (read line) and reference to previous line (currentVariantString) are removed;
      */
     @Override
-    public VariantAnnotation mapLine(String line, int lineNumber) throws Exception {
+    public VariantAnnotation mapLine(String line, int lineNumber) {
         //logger.debug("Mapping line {} to VariantAnnotation", line);
         ConsequenceType consequenceType = new ConsequenceType();
         String[] lineFields = line.split("\t");

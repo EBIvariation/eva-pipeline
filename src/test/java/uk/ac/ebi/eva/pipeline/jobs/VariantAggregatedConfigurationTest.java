@@ -48,9 +48,9 @@ import java.util.zip.GZIPInputStream;
 import static org.junit.Assert.*;
 
 /**
- * Created by jmmut on 2015-10-14.
- *
  * @author Jose Miguel Mut Lopez &lt;jmmut@ebi.ac.uk&gt;
+ *
+ * Test for {@link VariantAggregatedConfiguration}
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {VariantJobsArgs.class, VariantAggregatedConfiguration.class, CommonConfig.class})
@@ -146,7 +146,7 @@ public class VariantAggregatedConfigurationTest {
                 variantOptions.getString("compressExtension"), pipelineOptions.getString("output.dir"));
         long lines = JobTestUtils.getLines(new GZIPInputStream(new FileInputStream(outputFilename)));
 
-        Assert.assertEquals(JobTestUtils.countRows(iterator), lines);
+        Assert.assertEquals(JobTestUtils.count(iterator), lines);
 
         // check stats aren't loaded
         assertTrue(variantDBAdaptor.iterator(new QueryOptions()).next().getSourceEntries().values().iterator().next().getCohortStats().isEmpty());
@@ -188,7 +188,7 @@ public class VariantAggregatedConfigurationTest {
                 variantOptions.getString("compressExtension"), pipelineOptions.getString("output.dir"));
         long lines = JobTestUtils.getLines(new GZIPInputStream(new FileInputStream(outputFilename)));
 
-        Assert.assertEquals(JobTestUtils.countRows(iterator), lines);
+        Assert.assertEquals(JobTestUtils.count(iterator), lines);
 
         // check stats are loaded
         assertFalse(variantDBAdaptor.iterator(new QueryOptions()).next().getSourceEntries().values().iterator().next().getCohortStats().isEmpty());

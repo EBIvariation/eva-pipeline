@@ -1,3 +1,18 @@
+/*
+ * Copyright 2016 EMBL - European Bioinformatics Institute
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package uk.ac.ebi.eva.pipeline.io.writers;
 
 import com.mongodb.*;
@@ -18,12 +33,19 @@ import uk.ac.ebi.eva.pipeline.jobs.VariantAnnotConfiguration;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
 import uk.ac.ebi.eva.utils.MongoDBHelper;
 
+import java.net.UnknownHostException;
 import java.util.*;
 
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertTrue;
 import static uk.ac.ebi.eva.test.data.VepOutputContent.vepOutputContent;
 
+/**
+ * {@link VariantAnnotationMongoItemWriter}
+ * input: a List of VariantAnnotation to each call of `.write()`
+ * output: all the VariantAnnotations get written in mongo, with at least the
+ *      "consequence types" annotations set
+ */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = { VariantAnnotConfiguration.class, AnnotationConfig.class})
 public class VariantAnnotationWriterTest {
@@ -72,6 +94,11 @@ public class VariantAnnotationWriterTest {
         assertEquals(annotations.size(), consequenceTypeCount);
     }
 
+    /**
+     * Test that every VariantAnnotation gets written, even if the same variant receives different annotation from
+     * different batches.
+     * @throws Exception if the annotationWriter.write fails, or the DBs cleaning fails
+     */
     @Test
     public void shouldWriteAllFieldsIntoMongoDbMultipleSetsAnnotations() throws Exception {
         String dbName = variantJobsArgs.getDbName();
@@ -139,7 +166,7 @@ public class VariantAnnotationWriterTest {
         variantAnnotationLineMapper = new VariantAnnotationLineMapper();
     }
 
-    private void writeIdsIntoMongo(List<VariantAnnotation> annotations, DBCollection variants) throws Exception {
+    private void writeIdsIntoMongo(List<VariantAnnotation> annotations, DBCollection variants) {
         Set<String> uniqueIdsLoaded = new HashSet<>();
         for (VariantAnnotation annotation : annotations) {
             String id = MongoDBHelper.buildStorageId(

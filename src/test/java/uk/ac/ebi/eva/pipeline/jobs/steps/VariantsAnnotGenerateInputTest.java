@@ -32,7 +32,6 @@ import uk.ac.ebi.eva.pipeline.configuration.AnnotationConfig;
 import uk.ac.ebi.eva.pipeline.configuration.VariantJobsArgs;
 import uk.ac.ebi.eva.pipeline.jobs.VariantAnnotConfiguration;
 import uk.ac.ebi.eva.pipeline.jobs.VariantStatsConfigurationTest;
-import uk.ac.ebi.eva.test.utils.CommonUtils;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
 
 import java.io.File;
