@@ -330,7 +330,7 @@ public class VariantConfigurationTest {
         }
 
         assertEquals(300, cnt);
-        assertEquals(533, consequenceTypeCount);
+        assertEquals(536, consequenceTypeCount);
 
         //check that one line is skipped because malformed
         List<StepExecution> variantAnnotationLoadStepExecution = jobExecution.getStepExecutions().stream()
