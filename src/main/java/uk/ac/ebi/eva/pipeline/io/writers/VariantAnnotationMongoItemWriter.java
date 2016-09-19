@@ -41,8 +41,8 @@ import java.util.Map;
  * A new annotation is added in the existing document.
  * In case of two annotations (or more) in the same variant the other annotations are appended:
  *
- * 20_63963_G/A	20:63963	A	ENSG00000178591	ENST00000382410	Transcript	upstream_gene_variant	-	-	-	-	-	-	DISTANCE=4388;STRAND=1;SYMBOL=DEFB125;SYMBOL_SOURCE=HGNC;HGNC_ID=18105;BIOTYPE=protein_coding;CANONICAL=YES;CCDS=CCDS12989.2;ENSP=ENSP00000371847;SWISSPROT=DB125_HUMAN;TREMBL=B2R4E8_HUMAN;UNIPARC=UPI00001A36DE
- * 20_63963_G/A	20:63963	A	ENSG00000178591	ENST00000608838	Transcript	upstream_gene_variant	-	-	-	-	-	-	DISTANCE=3928;STRAND=1;SYMBOL=DEFB125;SYMBOL_SOURCE=HGNC;HGNC_ID=18105;BIOTYPE=processed_transcript
+ * 20_63963_G/A    20:63963   A  ENSG00000178591    ENST00000382410    Transcript upstream_gene_variant  -  -  -  -  -  -  DISTANCE=4388;STRAND=1;SYMBOL=DEFB125;SYMBOL_SOURCE=HGNC;HGNC_ID=18105;BIOTYPE=protein_coding;CANONICAL=YES;CCDS=CCDS12989.2;ENSP=ENSP00000371847;SWISSPROT=DB125_HUMAN;TREMBL=B2R4E8_HUMAN;UNIPARC=UPI00001A36DE
+ * 20_63963_G/A    20:63963   A  ENSG00000178591    ENST00000608838    Transcript upstream_gene_variant  -  -  -  -  -  -  DISTANCE=3928;STRAND=1;SYMBOL=DEFB125;SYMBOL_SOURCE=HGNC;HGNC_ID=18105;BIOTYPE=processed_transcript
  *
  * Will be:
  *
@@ -81,11 +81,7 @@ public class VariantAnnotationMongoItemWriter extends MongoItemWriter<VariantAnn
         this.collection = collection;
     }
 
-    @Override
-    protected void doWrite(List<? extends VariantAnnotation> variantAnnotations) {
-
-        //group variant annotations by Id
-
+    private Map<String, List<VariantAnnotation>> groupVariantAnnotationById(List<? extends VariantAnnotation> variantAnnotations){
         // The following method is not working with java8 .<40. Should be resuscitated when travis is updated to a
         // more recent java version (1.8.0_31 atm)
         // http://stackoverflow.com/questions/37368060/why-this-code-compiles-with-jdk8u45-and-above-but-not-with-jdk8u25
@@ -100,6 +96,14 @@ public class VariantAnnotationMongoItemWriter extends MongoItemWriter<VariantAnn
             variantAnnotationsByStorageId.get(id).add(variantAnnotation);
         }
 
+        return variantAnnotationsByStorageId;
+    }
+
+    @Override
+    protected void doWrite(List<? extends VariantAnnotation> variantAnnotations) {
+
+        Map<String, List<VariantAnnotation>> variantAnnotationsByStorageId = groupVariantAnnotationById(variantAnnotations);
+
         for (Map.Entry<String, List<VariantAnnotation>> annotationsIn : variantAnnotationsByStorageId.entrySet()){
             String storageId = annotationsIn.getKey();
             List<VariantAnnotation> annotations = annotationsIn.getValue();
@@ -111,8 +115,7 @@ public class VariantAnnotationMongoItemWriter extends MongoItemWriter<VariantAnn
                         variantAnnotation, annotations.subList(1, annotations.size()));
             }
 
-            logger.debug("Writing into mongo annotations for {}", storageId);
-            writeVariantAnnotationInMongoDb(new BasicDBObject("_id", storageId), variantAnnotation);
+            writeVariantAnnotationInMongoDb(storageId, variantAnnotation);
         }
 
     }
@@ -147,11 +150,25 @@ public class VariantAnnotationMongoItemWriter extends MongoItemWriter<VariantAnn
         return variantAnnotation;
     }
 
+    private void writeVariantAnnotationInMongoDb(String storageId, VariantAnnotation variantAnnotation){
+        logger.debug("Writing annotations into mongo id: {}", storageId);
 
-    private void writeVariantAnnotationInMongoDb(BasicDBObject find, VariantAnnotation variantAnnotation){
         DBObject storageVariantAnnotation = converter.convertToStorageType(variantAnnotation);
-        BasicDBObject update = new BasicDBObject("$set", new BasicDBObject("annot", storageVariantAnnotation));
-        mongoOperations.getCollection(collection).update(find, update);
+
+        BasicDBObject find = new BasicDBObject("_id", storageId);
+
+        if(storageVariantAnnotation.get("ct") != null){
+            BasicDBObject updateCt = new BasicDBObject("$addToSet", new BasicDBObject("annot.ct",
+                    new BasicDBObject("$each", storageVariantAnnotation.get("ct")) ));
+            mongoOperations.getCollection(collection).update(find, updateCt);
+        }
+
+        if(storageVariantAnnotation.get("xrefs") != null){
+            BasicDBObject updateXrefs = new BasicDBObject("$addToSet", new BasicDBObject("annot.xrefs",
+                    new BasicDBObject("$each", storageVariantAnnotation.get("xrefs"))));
+            mongoOperations.getCollection(collection).update(find, updateXrefs);
+        }
+
     }
 
     private String buildStorageIdFromVariantAnnotation(VariantAnnotation variantAnnotation){
