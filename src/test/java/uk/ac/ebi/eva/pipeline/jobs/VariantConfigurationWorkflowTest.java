@@ -148,6 +148,9 @@ public class VariantConfigurationWorkflowTest {
         initVariantConfigurationJob();
         variantJobsArgs.getPipelineOptions().put(VariantStatsConfiguration.SKIP_STATS, true);
 
+        variantJobsArgs.getPipelineOptions().put("db.name", "diegoTest");
+
+
         JobExecution execution = jobLauncherTestUtils.launchJob();
 
         assertEquals(ExitStatus.COMPLETED, execution.getExitStatus());

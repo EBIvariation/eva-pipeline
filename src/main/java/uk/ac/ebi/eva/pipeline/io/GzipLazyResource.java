@@ -49,5 +49,6 @@ public class GzipLazyResource extends FileSystemResource {
     public InputStream getInputStream() throws IOException {
         return new GZIPInputStream(super.getInputStream());
     }
+
 }
 

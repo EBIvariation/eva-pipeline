@@ -39,9 +39,9 @@ import uk.ac.ebi.eva.pipeline.jobs.steps.VariantsTransform;
 /**
  *  Complete pipeline workflow:
  *
- *                       |--> (variantStatsFlow: statsCreate --> statsLoad)
+ *                       |--> (optionalVariantStatsFlow: statsCreate --> statsLoad)
  *  transform ---> load -+
- *                       |--> (variantAnnotationFlow: variantsAnnotGenerateInput --> annotationCreate --> variantAnnotLoad)
+ *                       |--> (optionalVariantAnnotationFlow: variantsAnnotGenerateInput --> (annotationCreate --> variantAnnotLoad))
  *
  *  Steps in () are optional
  */
@@ -60,9 +60,9 @@ public class VariantConfiguration extends CommonJobStepInitialization{
     @Autowired
     private JobBuilderFactory jobBuilderFactory;
     @Autowired
-    private Flow variantAnnotationFlow;
+    private Flow optionalVariantAnnotationFlow;
     @Autowired
-    private Flow variantStatsFlow;
+    private Flow optionalVariantStatsFlow;
 
     @Autowired
     private VariantsLoad variantsLoad;
@@ -78,7 +78,7 @@ public class VariantConfiguration extends CommonJobStepInitialization{
 
         Flow parallelStatsAndAnnotation = new FlowBuilder<Flow>(PARALLEL_STATISTICS_AND_ANNOTATION)
                 .split(new SimpleAsyncTaskExecutor())
-                .add(variantStatsFlow, variantAnnotationFlow)
+                .add(optionalVariantStatsFlow, optionalVariantAnnotationFlow)
                 .build();
 
         FlowJobBuilder builder = jobBuilder
