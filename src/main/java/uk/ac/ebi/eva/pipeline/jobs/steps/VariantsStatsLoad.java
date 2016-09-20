@@ -32,7 +32,6 @@ import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 import org.springframework.stereotype.Component;
-
 import uk.ac.ebi.eva.pipeline.configuration.VariantJobsArgs;
 import uk.ac.ebi.eva.utils.URLHelper;
 
@@ -58,12 +57,14 @@ public class VariantsStatsLoad implements Tasklet {
         ObjectMap pipelineOptions = variantJobsArgs.getPipelineOptions();
 
         VariantStorageManager variantStorageManager = StorageManagerFactory.getVariantStorageManager();
-        QueryOptions statsOptions = new QueryOptions(variantOptions);
-        VariantStatisticsManager variantStatisticsManager = new VariantStatisticsManager();
-        VariantDBAdaptor dbAdaptor = variantStorageManager.getDBAdaptor(variantOptions.getString("dbName"), variantOptions);
-        URI outdirUri = URLHelper.createUri(pipelineOptions.getString("output.dir.statistics"));
         VariantSource variantSource = variantOptions.get(VariantStorageManager.VARIANT_SOURCE, VariantSource.class);
+        VariantDBAdaptor dbAdaptor = variantStorageManager.getDBAdaptor(
+                variantOptions.getString(VariantStorageManager.DB_NAME), variantOptions);
+        URI outdirUri = URLHelper.createUri(pipelineOptions.getString("output.dir.statistics"));
         URI statsOutputUri = outdirUri.resolve(VariantStorageManager.buildFilename(variantSource));
+
+        VariantStatisticsManager variantStatisticsManager = new VariantStatisticsManager();
+        QueryOptions statsOptions = new QueryOptions(variantOptions);
 
         // actual stats load
         variantStatisticsManager.loadStats(dbAdaptor, statsOutputUri, statsOptions);
