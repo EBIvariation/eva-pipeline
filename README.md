@@ -106,6 +106,7 @@ Other parameters are:
 
 * `output.dir`: Already existing folder to store the transformed VCF and statistics files.
 * `output.dir.annotation`: Already existing folder to store VEP output files.
+* `output.dir.statistics`: Already existing folder to store statistics output files.
 
 * `app.vep.cache.path`: Path to the VEP cache root folder.
 * `app.vep.version`: Version of the VEP cache.
