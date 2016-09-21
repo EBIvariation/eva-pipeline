@@ -35,7 +35,7 @@ import uk.ac.ebi.eva.pipeline.jobs.steps.VariantsTransform;
  * Job similar to VariantConfiguration, but it takes an aggregated VCF,
  * which has no sample information (e.g. no genotypes).
  *
- * 1. transform the VCF into a json intermediate file
+ * 1. transform the VCF into an intermediate json file
  * 2. load it into mongo.
  */
 @Configuration
