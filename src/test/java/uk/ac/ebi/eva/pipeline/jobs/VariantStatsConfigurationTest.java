@@ -52,8 +52,6 @@ import static org.opencb.opencga.storage.core.variant.VariantStorageManager.VARI
 import static uk.ac.ebi.eva.test.utils.JobTestUtils.restoreMongoDbFromDump;
 
 /**
- * Created by jmmut on 2015-10-14.
- *
  * @author Jose Miguel Mut Lopez &lt;jmmut@ebi.ac.uk&gt;
  *
  * Test for {@link VariantStatsConfiguration}

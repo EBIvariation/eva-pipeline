@@ -27,9 +27,10 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * Created by jmmut on 2016-07-19.
  *
  * @author Jose Miguel Mut Lopez &lt;jmmut@ebi.ac.uk&gt;
+ *
+ * Utility class dealing with MongoDB connections
  */
 public class ConnectionHelper {
 

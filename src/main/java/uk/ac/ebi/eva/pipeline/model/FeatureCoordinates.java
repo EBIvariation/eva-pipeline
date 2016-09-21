@@ -16,9 +16,9 @@
 package uk.ac.ebi.eva.pipeline.model;
 
 /**
- * Created by jmmut on 2016-08-16.
- *
  * @author Jose Miguel Mut Lopez &lt;jmmut@ebi.ac.uk&gt;
+ *
+ * TODO: use the version in variation commons
  */
 public class FeatureCoordinates {
 

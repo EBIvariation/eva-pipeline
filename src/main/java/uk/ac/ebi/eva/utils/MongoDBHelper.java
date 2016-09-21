@@ -31,7 +31,7 @@ import java.net.UnknownHostException;
 /**
  * @author Diego Poggioli
  *
- *
+ * Utility class dealing with MongoDB connections using pipeline options
  */
 public class MongoDBHelper {
 

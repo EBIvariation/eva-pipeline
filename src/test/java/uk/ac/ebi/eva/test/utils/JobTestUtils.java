@@ -16,8 +16,9 @@
 package uk.ac.ebi.eva.test.utils;
 
 import com.mongodb.DB;
+import com.mongodb.DBObject;
 import com.mongodb.MongoClient;
-import org.opencb.biodata.models.variant.Variant;
+import com.mongodb.util.JSON;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.JobParameters;
@@ -33,8 +34,6 @@ import java.util.TreeSet;
 import java.util.zip.GZIPOutputStream;
 
 /**
- * Created by jmmut on 2015-11-10.
- *
  * @author Jose Miguel Mut Lopez &lt;jmmut@ebi.ac.uk&gt;
  */
 public class JobTestUtils {
@@ -61,6 +60,9 @@ public class JobTestUtils {
     }
 
 
+    /**
+     * counts non-comment lines in an InputStream
+     */
     public static long getLines(InputStream in) throws IOException {
         BufferedReader file = new BufferedReader(new InputStreamReader(in));
         long lines = 0;
@@ -74,13 +76,13 @@ public class JobTestUtils {
         return lines;
     }
 
-    public static long countRows(Iterator<Variant> iterator) {
-        int variantRows = 0;
+    public static <T> long count(Iterator<T> iterator) {
+        int rows = 0;
         while(iterator.hasNext()) {
             iterator.next();
-            variantRows++;
+            rows++;
         }
-        return variantRows;
+        return rows;
     }
 
     public static String getTransformedOutputPath(Path input, String compressExtension, String outputDir) {
@@ -147,4 +149,12 @@ public class JobTestUtils {
         return tempFile;
     }
 
+    /**
+     * Returns a DBObject obtained by parsing a given string
+     * @param variant string in JSON format
+     * @return DBObject
+     */
+    public static DBObject constructDbo(String variant) {
+        return (DBObject) JSON.parse(variant);
+    }
 }

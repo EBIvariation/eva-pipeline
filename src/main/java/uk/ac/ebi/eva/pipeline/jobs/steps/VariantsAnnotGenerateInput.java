@@ -39,12 +39,11 @@ import org.springframework.context.annotation.Import;
 /**
  * @author Diego Poggioli
  *
- * Dump a list of variants without annotations from mongo
+ * This step dumps a list of variants without annotations from mongo.
  *
- * Step class that:
- * - READ: read the variants without annotations from mongo
- * - PROCESS convert, filter, validate... the {@link VariantWrapper}
- * - LOAD: write the {@link VariantWrapper} into a flatfile
+ * input: mongo collection with the variants.
+ * output: file with the list of variants, in a format to feed VEP ({@link VepInputWriter})
+ *
  *
  * TODO:
  * - Handle the overwrite

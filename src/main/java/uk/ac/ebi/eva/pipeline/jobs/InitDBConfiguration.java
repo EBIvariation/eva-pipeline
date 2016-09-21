@@ -32,6 +32,13 @@ import org.springframework.context.annotation.Import;
 import uk.ac.ebi.eva.pipeline.jobs.steps.GenesLoad;
 import uk.ac.ebi.eva.pipeline.jobs.steps.IndexesCreate;
 
+/**
+ * Job to initialize the databases that will be used in later jobs.
+ *
+ * 1. create the needed indexes in the DBs
+ * 2. load genomic features for the species
+ *
+ */
 @Configuration
 @EnableBatchProcessing
 @Import({IndexesCreate.class, GenesLoad.class})

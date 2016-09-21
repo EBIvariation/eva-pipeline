@@ -29,6 +29,7 @@ import org.springframework.context.annotation.Import;
 import uk.ac.ebi.eva.pipeline.configuration.VariantJobsArgs;
 import uk.ac.ebi.eva.pipeline.io.readers.GeneReader;
 import uk.ac.ebi.eva.pipeline.io.writers.GeneWriter;
+import uk.ac.ebi.eva.pipeline.io.mappers.GeneLineMapper;
 import uk.ac.ebi.eva.pipeline.jobs.steps.processors.GeneFilterProcessor;
 import uk.ac.ebi.eva.pipeline.listeners.SkipCheckingListener;
 import uk.ac.ebi.eva.pipeline.model.FeatureCoordinates;
@@ -36,14 +37,18 @@ import uk.ac.ebi.eva.pipeline.model.FeatureCoordinates;
 import java.io.IOException;
 
 /**
- * Created by jmmut on 2016-08-16.
- *
  * @author Jose Miguel Mut Lopez &lt;jmmut@ebi.ac.uk&gt;
  *
- * Step class that:
- * - READ: read a list of {@link FeatureCoordinates} from flat file
- * - LOAD: write the {@link FeatureCoordinates} into Mongo db
+ * This step loads a list of genomic features from a species into a DB. This DB is intended to be used as a mapping
+ * from feature names into feature coordinates (chromosome, start, end).
  *
+ * input: GTF file with a list of genomic features.
+ * output: writes the features into MongoDB
+ *
+ * To do so, this step performs the next stages:
+ * - reader: To read the file, uses a {@link GeneReader} that fills a {@link FeatureCoordinates} for each line, using a {@link GeneLineMapper}.
+ * - processor: Then, filters some, keeping only transcripts and genes.
+ * - writer: And later uses a {@link GeneWriter} to load them into mongo.
  */
 
 @Configuration
