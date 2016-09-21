@@ -32,6 +32,8 @@ import java.io.File;
  *  20	60419	60419	A/G	+
  *  20	60479	60479	C/T	+
  *  ...
+ *
+ *  further format description: {@see http://www.ensembl.org/info/docs/tools/vep/vep_formats.html#input}
  */
 
 public class VepInputWriter extends FlatFileItemWriter<VariantWrapper> {

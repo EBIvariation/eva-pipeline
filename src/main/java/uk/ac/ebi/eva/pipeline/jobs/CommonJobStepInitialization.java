@@ -32,7 +32,7 @@ import uk.ac.ebi.eva.pipeline.configuration.VariantJobsArgs;
  * This is not intended to be used as an actual job, but to be extended in those actual job classes.
  */
 @Import({VariantJobsArgs.class})
-public class CommonJobStepInitialization {
+public abstract class CommonJobStepInitialization {
 
     @Autowired
     private VariantJobsArgs variantJobsArgs;

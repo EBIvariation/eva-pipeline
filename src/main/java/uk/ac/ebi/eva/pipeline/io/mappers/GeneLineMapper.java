@@ -25,12 +25,13 @@ import java.util.TreeMap;
 /**
  * @author Jose Miguel Mut Lopez &lt;jmmut@ebi.ac.uk&gt;
  *
- * Maps a line in a GTF file to a FeatureCoordinates. example line:
+ * Maps a line in a GTF file to a FeatureCoordinates.
  *
+ * input: GTF line. example:
  * 8	ensembl	gene	183180	246703	.	+	.	gene_id "ENSCSAG00000017073"; gene_version "1"; gene_name "FBXO25"; gene_source "ensembl"; gene_biotype "protein_coding";
  *
- * from which it extracts a FeatureCoordinates:
- *  {
+ * output: a FeatureCoordinates bean properly filled:
+ *  class FeatureCoordinates {
  *      String id = "ENSCSAG00000017073"
  *      String name = "FBXO25"
  *      String feature = "gene"
