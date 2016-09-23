@@ -114,7 +114,6 @@ public class VariantAggregatedConfigurationTest {
         VariantStorageManager variantStorageManager = StorageManagerFactory.getVariantStorageManager();
         VariantDBAdaptor variantDBAdaptor = variantStorageManager.getDBAdaptor(dbName, null);
         VariantDBIterator iterator = variantDBAdaptor.iterator(new QueryOptions());
-        Assert.assertEquals(JobTestUtils.countRows(iterator), lines);
 
         Assert.assertEquals(JobTestUtils.count(iterator), lines);
 
