@@ -33,7 +33,6 @@ import org.springframework.stereotype.Component;
 
 import uk.ac.ebi.eva.pipeline.jobs.VariantAnnotConfiguration;
 import uk.ac.ebi.eva.pipeline.jobs.VariantStatsConfiguration;
-import uk.ac.ebi.eva.pipeline.jobs.steps.VariantsAnnotCreate;
 
 import java.nio.file.Paths;
 import java.util.Properties;
@@ -84,10 +83,6 @@ public class VariantJobsArgs {
     
     //// OpenCGA options with default values (non-customizable)
     private String compressExtension = ".gz";
-    private boolean includeSamples = true;
-    private boolean compressGenotypes = true;
-    private boolean calculateStats = false;
-    private boolean includeStats = false;
     private boolean annotate = false;
     private VariantStorageManager.IncludeSrc includeSourceLine = VariantStorageManager.IncludeSrc.FIRST_8_COLUMNS;
 
@@ -189,10 +184,6 @@ public class VariantJobsArgs {
         variantOptions.put(VariantStorageManager.OVERWRITE_STATS, overwriteStats);
         variantOptions.put(VariantStorageManager.INCLUDE_SRC, includeSourceLine);
         variantOptions.put("compressExtension", compressExtension);
-        variantOptions.put(VariantStorageManager.INCLUDE_SAMPLES, includeSamples);   // TODO rename samples to genotypes
-        variantOptions.put(VariantStorageManager.COMPRESS_GENOTYPES, compressGenotypes);
-        variantOptions.put(VariantStorageManager.CALCULATE_STATS, calculateStats);   // this is tested by hand
-        variantOptions.put(VariantStorageManager.INCLUDE_STATS, includeStats);
         variantOptions.put(VariantStorageManager.ANNOTATE, annotate);
         
         variantOptions.put(VariantStorageManager.DB_NAME, dbName);

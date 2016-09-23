@@ -28,9 +28,7 @@ import org.springframework.batch.core.job.flow.Flow;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.*;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 
 import uk.ac.ebi.eva.pipeline.jobs.steps.VariantsLoad;
@@ -47,15 +45,23 @@ import uk.ac.ebi.eva.pipeline.jobs.steps.VariantsTransform;
  */
 @Configuration
 @EnableBatchProcessing
-@Import({VariantAnnotConfiguration.class, VariantStatsConfiguration.class, VariantsLoad.class, VariantsTransform.class})
+@Import({VariantAnnotConfiguration.class, VariantStatsConfiguration.class, VariantsLoad.class})
 public class VariantConfiguration extends CommonJobStepInitialization{
 
     private static final Logger logger = LoggerFactory.getLogger(VariantConfiguration.class);
-    public static final String jobName = "load-genotyped-vcf";
 
+    public static final String jobName = "load-genotyped-vcf";
     public static final String NORMALIZE_VARIANTS = "Normalize variants";
     public static final String LOAD_VARIANTS = "Load variants";
     public static final String PARALLEL_STATISTICS_AND_ANNOTATION = "Parallel statistics and annotation";
+
+    //Job default values
+    {
+        includeSamples = true;
+        compressGenotypes = true;
+        calculateStats = false;
+        includeStats = false;
+    }
 
     @Autowired
     private JobBuilderFactory jobBuilderFactory;
@@ -63,15 +69,14 @@ public class VariantConfiguration extends CommonJobStepInitialization{
     private Flow optionalVariantAnnotationFlow;
     @Autowired
     private Flow optionalVariantStatsFlow;
-
     @Autowired
     private VariantsLoad variantsLoad;
-    @Autowired
-    private VariantsTransform variantsTransform;
 
     @Bean
     @Qualifier("variantJob")
     public Job variantJob() {
+        logger.debug("Building variant genotyped job");
+
         JobBuilder jobBuilder = jobBuilderFactory
                 .get(jobName)
                 .incrementer(new RunIdIncrementer());
@@ -90,8 +95,11 @@ public class VariantConfiguration extends CommonJobStepInitialization{
         return builder.build();
     }
 
-    private Step transform() {
-        return generateStep(NORMALIZE_VARIANTS,variantsTransform);
+    @Bean
+    @Scope("prototype")
+    protected Step transform() {
+        return generateStep(NORMALIZE_VARIANTS,
+                new VariantsTransform(updateVariantOptionsWithJobSpecificValues(getVariantOptions()), getPipelineOptions()));
     }
 
     private Step load() {
