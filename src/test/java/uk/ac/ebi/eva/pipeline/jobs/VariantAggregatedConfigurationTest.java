@@ -123,7 +123,7 @@ public class VariantAggregatedConfigurationTest {
     }
 
     @Test
-    public void aggregationNoneShouldNotLoadStats() throws Exception {
+    public void aggregationNoneOptionShouldNotLoadStats() throws Exception {
         VariantSource source =
                 (VariantSource) variantJobsArgs.getVariantOptions().get(VariantStorageManager.VARIANT_SOURCE);
         variantJobsArgs.getVariantOptions().put(
