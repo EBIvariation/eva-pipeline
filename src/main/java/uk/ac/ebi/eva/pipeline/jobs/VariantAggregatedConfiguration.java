@@ -35,8 +35,10 @@ import org.springframework.context.annotation.Scope;
 import uk.ac.ebi.eva.pipeline.jobs.steps.VariantsLoad;
 import uk.ac.ebi.eva.pipeline.jobs.steps.VariantsTransform;
 
+import javax.annotation.PostConstruct;
+
 /**
- *  Complete pipeline workflow for aggregated Vcf.
+ *  Complete pipeline workflow for aggregated VCF.
  *  Aggregated statistics are provided in the VCF instead of the genotypes.
  *
  *  transform ---> load --> (optionalVariantAnnotationFlow: variantsAnnotGenerateInput --> (annotationCreate --> variantAnnotLoad))
@@ -54,12 +56,9 @@ public class VariantAggregatedConfiguration extends CommonJobStepInitialization{
     public static final String NORMALIZE_VARIANTS = "Normalize variants";
     public static final String LOAD_VARIANTS = "Load variants";
 
-    //Job default values
-    {
-        includeSamples = false;
-        compressGenotypes = false;
-        calculateStats = true;
-        includeStats = true;
+    @PostConstruct
+    public void configureDefaultVariantOptions() {
+        getVariantJobsArgs().configureStatisticsStorage();
     }
 
     @Autowired
@@ -90,8 +89,7 @@ public class VariantAggregatedConfiguration extends CommonJobStepInitialization{
     @Bean
     @Scope("prototype")
     protected Step transform() {
-        return generateStep(NORMALIZE_VARIANTS,
-                new VariantsTransform(updateVariantOptionsWithJobSpecificValues(getVariantOptions()), getPipelineOptions()));
+        return generateStep(NORMALIZE_VARIANTS, new VariantsTransform(getVariantOptions(), getPipelineOptions()));
     }
 
     private Step load() {

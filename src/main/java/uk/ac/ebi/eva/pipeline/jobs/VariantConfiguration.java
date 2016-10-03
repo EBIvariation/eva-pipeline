@@ -34,6 +34,8 @@ import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import uk.ac.ebi.eva.pipeline.jobs.steps.VariantsLoad;
 import uk.ac.ebi.eva.pipeline.jobs.steps.VariantsTransform;
 
+import javax.annotation.PostConstruct;
+
 /**
  *  Complete pipeline workflow:
  *
@@ -55,12 +57,9 @@ public class VariantConfiguration extends CommonJobStepInitialization{
     public static final String LOAD_VARIANTS = "Load variants";
     public static final String PARALLEL_STATISTICS_AND_ANNOTATION = "Parallel statistics and annotation";
 
-    //Job default values
-    {
-        includeSamples = true;
-        compressGenotypes = true;
-        calculateStats = false;
-        includeStats = false;
+    @PostConstruct
+    public void configureDefaultVariantOptions() {
+        getVariantJobsArgs().configureGenotypesStorage();
     }
 
     @Autowired
@@ -98,8 +97,7 @@ public class VariantConfiguration extends CommonJobStepInitialization{
     @Bean
     @Scope("prototype")
     protected Step transform() {
-        return generateStep(NORMALIZE_VARIANTS,
-                new VariantsTransform(updateVariantOptionsWithJobSpecificValues(getVariantOptions()), getPipelineOptions()));
+        return generateStep(NORMALIZE_VARIANTS, new VariantsTransform(getVariantOptions(), getPipelineOptions()));
     }
 
     private Step load() {
