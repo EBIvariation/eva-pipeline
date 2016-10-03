@@ -15,7 +15,7 @@
  */
 package uk.ac.ebi.eva.test.data;
 
-import uk.ac.ebi.eva.pipeline.jobs.VariantAnnotConfigurationTest;
+import uk.ac.ebi.eva.pipeline.jobs.AnnotationJobTest;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
@@ -34,7 +34,7 @@ public class VariantData {
 
 
     public static String getVariantWithAnnotation() throws IOException {
-        URL variantWithAnnotationUrl = VariantAnnotConfigurationTest.class.getResource(VARIANT_WITH_ANNOTATION_PATH);
+        URL variantWithAnnotationUrl = AnnotationJobTest.class.getResource(VARIANT_WITH_ANNOTATION_PATH);
         return FileUtils.readFileToString(new File(variantWithAnnotationUrl.getFile()));
     }
 }

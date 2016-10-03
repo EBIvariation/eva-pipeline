@@ -22,7 +22,6 @@ import com.mongodb.ReadPreference;
 
 import org.opencb.commons.utils.CryptoUtils;
 import org.opencb.datastore.core.ObjectMap;
-import org.opencb.opencga.storage.core.variant.VariantStorageManager;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.data.mongodb.core.MongoTemplate;
 

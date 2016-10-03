@@ -25,18 +25,18 @@ import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 
-import uk.ac.ebi.eva.pipeline.configuration.VariantJobsArgs;
+import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
 
 /**
  * Helper class to build jobs.
  *
  * This is not intended to be used as an actual job, but to be extended in those actual job classes.
  */
-@Import({VariantJobsArgs.class})
+@Import({JobOptions.class})
 public abstract class CommonJobStepInitialization {
 
     @Autowired
-    private VariantJobsArgs variantJobsArgs;
+    private JobOptions jobOptions;
 
     @Autowired
     private StepBuilderFactory stepBuilderFactory;
@@ -62,7 +62,7 @@ public abstract class CommonJobStepInitialization {
     }
 
     public ObjectMap getPipelineOptions() {
-        return variantJobsArgs.getPipelineOptions();
+        return jobOptions.getPipelineOptions();
     }
 
     public ObjectMap getVariantOptions() {

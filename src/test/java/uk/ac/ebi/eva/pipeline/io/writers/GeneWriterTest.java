@@ -25,8 +25,8 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import uk.ac.ebi.eva.pipeline.configuration.InitDBConfig;
-import uk.ac.ebi.eva.pipeline.configuration.VariantJobsArgs;
+import uk.ac.ebi.eva.pipeline.configuration.DatabaseInitializationConfiguration;
+import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
 import uk.ac.ebi.eva.pipeline.io.mappers.GeneLineMapper;
 import uk.ac.ebi.eva.pipeline.model.FeatureCoordinates;
 import uk.ac.ebi.eva.test.data.GtfStaticTestData;
@@ -44,18 +44,18 @@ import static junit.framework.TestCase.assertTrue;
  * output: the FeatureCoordinates get written in mongo, with at least: chromosome, start and end.
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = { VariantJobsArgs.class, InitDBConfig.class,})
+@ContextConfiguration(classes = { JobOptions.class, DatabaseInitializationConfiguration.class,})
 public class GeneWriterTest {
 
     @Autowired
-    public VariantJobsArgs variantJobsArgs;
+    public JobOptions jobOptions;
 
     @Test
     public void shouldWriteAllFieldsIntoMongoDb() throws Exception {
-        String dbName = variantJobsArgs.getDbName();
+        String dbName = jobOptions.getDbName();
         JobTestUtils.cleanDBs(dbName);
 
-        GeneWriter geneWriter = new GeneWriter(variantJobsArgs.getMongoOperations(), variantJobsArgs.getDbCollectionsFeaturesName());
+        GeneWriter geneWriter = new GeneWriter(jobOptions.getMongoOperations(), jobOptions.getDbCollectionsFeaturesName());
 
         GeneLineMapper lineMapper = new GeneLineMapper();
         List<FeatureCoordinates> genes = new ArrayList<>();
@@ -67,7 +67,7 @@ public class GeneWriterTest {
         geneWriter.write(genes);
 
         MongoClient mongoClient = new MongoClient();
-        DBCollection genesCollection = mongoClient.getDB(dbName).getCollection(variantJobsArgs.getDbCollectionsFeaturesName());
+        DBCollection genesCollection = mongoClient.getDB(dbName).getCollection(jobOptions.getDbCollectionsFeaturesName());
 
         // count documents in DB and check they have region (chr + start + end)
         DBCursor cursor = genesCollection.find();
