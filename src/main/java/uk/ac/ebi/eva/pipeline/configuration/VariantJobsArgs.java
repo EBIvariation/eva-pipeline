@@ -231,6 +231,24 @@ public class VariantJobsArgs {
         logger.debug("Using as pipelineOptions: {}", pipelineOptions.entrySet().toString());
     }
 
+    public ObjectMap configureGenotypesStorage (){
+        variantOptions.put(VariantStorageManager.INCLUDE_SAMPLES, true);
+        variantOptions.put(VariantStorageManager.COMPRESS_GENOTYPES, true);
+        variantOptions.put(VariantStorageManager.CALCULATE_STATS, false);   // this is tested by hand
+        variantOptions.put(VariantStorageManager.INCLUDE_STATS, false);
+
+        return variantOptions;
+    }
+
+    public ObjectMap configureStatisticsStorage (){
+        variantOptions.put(VariantStorageManager.INCLUDE_SAMPLES, false);
+        variantOptions.put(VariantStorageManager.COMPRESS_GENOTYPES, false);
+        variantOptions.put(VariantStorageManager.CALCULATE_STATS, true);   // this is tested by hand
+        variantOptions.put(VariantStorageManager.INCLUDE_STATS, true);
+
+        return variantOptions;
+    }
+
     public ObjectMap getVariantOptions() {
         return variantOptions;
     }
