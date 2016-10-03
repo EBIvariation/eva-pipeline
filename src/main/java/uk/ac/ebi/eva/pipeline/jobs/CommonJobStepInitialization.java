@@ -41,11 +41,6 @@ public abstract class CommonJobStepInitialization {
     @Autowired
     private StepBuilderFactory stepBuilderFactory;
 
-    protected boolean includeSamples;
-    protected boolean compressGenotypes;
-    protected boolean calculateStats;
-    protected boolean includeStats;
-
     /**
      * Initialize a Step with common configuration
      * @param tasklet to be initialized with common configuration
@@ -66,15 +61,6 @@ public abstract class CommonJobStepInitialization {
         return taskletBuilder.build();
     }
 
-    protected ObjectMap updateVariantOptionsWithJobSpecificValues (ObjectMap variantOptions){
-        variantOptions.put(VariantStorageManager.INCLUDE_SAMPLES, includeSamples);
-        variantOptions.put(VariantStorageManager.COMPRESS_GENOTYPES, compressGenotypes);
-        variantOptions.put(VariantStorageManager.CALCULATE_STATS, calculateStats);   // this is tested by hand
-        variantOptions.put(VariantStorageManager.INCLUDE_STATS, includeStats);
-
-        return variantOptions;
-    }
-
     public ObjectMap getPipelineOptions() {
         return variantJobsArgs.getPipelineOptions();
     }
@@ -83,5 +69,7 @@ public abstract class CommonJobStepInitialization {
         return variantJobsArgs.getVariantOptions();
     }
 
-
+    public VariantJobsArgs getVariantJobsArgs() {
+        return variantJobsArgs;
+    }
 }
