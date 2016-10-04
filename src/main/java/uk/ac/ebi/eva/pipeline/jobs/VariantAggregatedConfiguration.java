@@ -56,9 +56,16 @@ public class VariantAggregatedConfiguration extends CommonJobStepInitialization{
     public static final String NORMALIZE_VARIANTS = "Normalize variants";
     public static final String LOAD_VARIANTS = "Load variants";
 
+    //job default settings
+    private static final boolean INCLUDE_SAMPLES = false;
+    private static final boolean COMPRESS_GENOTYPES = false;
+    private static final boolean CALCULATE_STATS = true;
+    private static final boolean INCLUDE_STATS = true;
+
     @PostConstruct
     public void configureDefaultVariantOptions() {
-        getVariantJobsArgs().configureStatisticsStorage();
+        getVariantJobsArgs().configureGenotypesStorage(INCLUDE_SAMPLES, COMPRESS_GENOTYPES);
+        getVariantJobsArgs().configureStatisticsStorage(CALCULATE_STATS, INCLUDE_STATS);
     }
 
     @Autowired

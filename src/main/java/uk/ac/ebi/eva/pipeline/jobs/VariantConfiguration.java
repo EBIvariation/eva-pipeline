@@ -57,9 +57,16 @@ public class VariantConfiguration extends CommonJobStepInitialization{
     public static final String LOAD_VARIANTS = "Load variants";
     public static final String PARALLEL_STATISTICS_AND_ANNOTATION = "Parallel statistics and annotation";
 
+    //job default settings
+    private static final boolean INCLUDE_SAMPLES = true;
+    private static final boolean COMPRESS_GENOTYPES = true;
+    private static final boolean CALCULATE_STATS = false;
+    private static final boolean INCLUDE_STATS = false;
+
     @PostConstruct
     public void configureDefaultVariantOptions() {
-        getVariantJobsArgs().configureGenotypesStorage();
+        getVariantJobsArgs().configureGenotypesStorage(INCLUDE_SAMPLES, COMPRESS_GENOTYPES);
+        getVariantJobsArgs().configureStatisticsStorage(CALCULATE_STATS, INCLUDE_STATS);
     }
 
     @Autowired
