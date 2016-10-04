@@ -37,7 +37,6 @@ import uk.ac.ebi.eva.pipeline.configuration.VariantAggregatedConfig;
 import uk.ac.ebi.eva.pipeline.configuration.VariantJobsArgs;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.net.UnknownHostException;
 import java.nio.file.Paths;
@@ -81,12 +80,6 @@ public class VariantAggregatedConfigurationTest {
     @Test
     public void aggregatedTransformAndLoadShouldBeExecuted() throws Exception {
         Config.setOpenCGAHome(opencgaHome);
-
-        // transformedVcf file init
-        String transformedVcf = outputDir + input + ".variants.json" + compressExtension;
-        File transformedVcfFile = new File(transformedVcf);
-        transformedVcfFile.delete();
-        assertFalse(transformedVcfFile.exists());
 
         JobExecution jobExecution = jobLauncherTestUtils.launchJob();
 
@@ -137,12 +130,6 @@ public class VariantAggregatedConfigurationTest {
 
         Config.setOpenCGAHome(opencgaHome);
 
-        // transformedVcf file init
-        String transformedVcf = outputDir + input + ".variants.json" + compressExtension;
-        File transformedVcfFile = new File(transformedVcf);
-        transformedVcfFile.delete();
-        assertFalse(transformedVcfFile.exists());
-
         JobExecution jobExecution = jobLauncherTestUtils.launchJob();
 
         assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
@@ -174,7 +161,6 @@ public class VariantAggregatedConfigurationTest {
     @Before
     public void setUp() throws Exception {
         variantJobsArgs.loadArgs();
-
 
         jobLauncherTestUtils = new JobLauncherTestUtils();
         jobLauncherTestUtils.setJob(job);
