@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 EMBL - European Bioinformatics Institute
+ * Copyright 2015-2016 EMBL - European Bioinformatics Institute
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,59 +21,86 @@ import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
+import org.springframework.batch.core.job.builder.FlowJobBuilder;
 import org.springframework.batch.core.job.builder.JobBuilder;
+import org.springframework.batch.core.job.flow.Flow;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
+import org.springframework.context.annotation.Scope;
 import uk.ac.ebi.eva.pipeline.jobs.steps.VariantsLoad;
 import uk.ac.ebi.eva.pipeline.jobs.steps.VariantsTransform;
 
+import javax.annotation.PostConstruct;
+
 /**
- * Job similar to VariantConfiguration, but it takes an aggregated VCF,
- * which has no sample information (e.g. no genotypes).
+ *  Complete pipeline workflow for aggregated VCF.
+ *  Aggregated statistics are provided in the VCF instead of the genotypes.
  *
- * 1. transform the VCF into an intermediate json file
- * 2. load it into mongo.
+ *  transform ---> load --> (optionalVariantAnnotationFlow: variantsAnnotGenerateInput --> (annotationCreate --> variantAnnotLoad))
+ *
+ *  Steps in () are optional
  */
 @Configuration
 @EnableBatchProcessing
-@Import({VariantsLoad.class, VariantsTransform.class})
+@Import({VariantsLoad.class, VariantAnnotConfiguration.class})
 public class VariantAggregatedConfiguration extends CommonJobStepInitialization{
 
     private static final Logger logger = LoggerFactory.getLogger(VariantAggregatedConfiguration.class);
+
     private static final String jobName = "load-aggregated-vcf";
-    private static final String NORMALIZE_VARIANTS = "Normalize variants";
-    private static final String LOAD_VARIANTS = "Load variants";
+    public static final String NORMALIZE_VARIANTS = "Normalize variants";
+    public static final String LOAD_VARIANTS = "Load variants";
+
+    //job default settings
+    private static final boolean INCLUDE_SAMPLES = false;
+    private static final boolean COMPRESS_GENOTYPES = false;
+    private static final boolean CALCULATE_STATS = true;
+    private static final boolean INCLUDE_STATS = true;
+
+    @PostConstruct
+    public void configureDefaultVariantOptions() {
+        getVariantJobsArgs().configureGenotypesStorage(INCLUDE_SAMPLES, COMPRESS_GENOTYPES);
+        getVariantJobsArgs().configureStatisticsStorage(CALCULATE_STATS, INCLUDE_STATS);
+    }
 
     @Autowired
     private JobBuilderFactory jobBuilderFactory;
-
+    @Autowired
+    private Flow optionalVariantAnnotationFlow;
     @Autowired
     private VariantsLoad variantsLoad;
-    @Autowired
-    private VariantsTransform variantsTransform;
 
     @Bean
-    public Job aggregatedVariantJob() {
+    @Qualifier("variantJobAggregated")
+    public Job variantJob() {
+        logger.debug("Building variant aggregated job");
+
         JobBuilder jobBuilder = jobBuilderFactory
                 .get(jobName)
                 .incrementer(new RunIdIncrementer());
 
-        return jobBuilder
-                .start(transform())
+        FlowJobBuilder builder = jobBuilder
+                .flow(transform())
                 .next(load())
-                .build();
+                .next(optionalVariantAnnotationFlow)
+                .end();
+
+        return builder.build();
     }
 
-    private Step transform() {
-        return generateStep(NORMALIZE_VARIANTS,variantsTransform);
+    @Bean
+    @Scope("prototype")
+    protected Step transform() {
+        return generateStep(NORMALIZE_VARIANTS, new VariantsTransform(getVariantOptions(), getPipelineOptions()));
     }
 
     private Step load() {
-        return generateStep(LOAD_VARIANTS,variantsLoad);
+        return generateStep(LOAD_VARIANTS, variantsLoad);
     }
 
 }

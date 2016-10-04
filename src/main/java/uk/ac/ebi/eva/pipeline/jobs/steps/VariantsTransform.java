@@ -46,19 +46,19 @@ import java.net.URI;
  * Input: vcf file
  * Output: transformed variants file (variants.json.gz)
  */
-@Component
-@StepScope
-@Import({VariantJobsArgs.class})
 public class VariantsTransform implements Tasklet {
     private static final Logger logger = LoggerFactory.getLogger(VariantsTransform.class);
 
-    @Autowired
-    private VariantJobsArgs variantJobsArgs;
+    private final ObjectMap variantOptions;
+    private final ObjectMap pipelineOptions;
+
+    public VariantsTransform(ObjectMap variantOptions, ObjectMap pipelineOptions) {
+        this.variantOptions = variantOptions;
+        this.pipelineOptions = pipelineOptions;
+    }
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
-        ObjectMap variantOptions = variantJobsArgs.getVariantOptions();
-        ObjectMap pipelineOptions = variantJobsArgs.getPipelineOptions();
 
         URI outdirUri = URLHelper.createUri(pipelineOptions.getString("output.dir"));
         URI nextFileUri = URLHelper.createUri(pipelineOptions.getString("input.vcf"));
