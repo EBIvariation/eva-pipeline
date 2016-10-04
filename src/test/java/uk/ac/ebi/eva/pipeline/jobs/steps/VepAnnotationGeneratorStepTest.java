@@ -62,7 +62,7 @@ public class VepAnnotationGeneratorStepTest {
     }
 
     @Test
-    public void shouldGenerateAnnotations() throws Exception {
+    public void shouldGenerateVepAnnotations() throws Exception {
         makeGzipFile("20\t60343\t60343\tG/A\t+", jobOptions.getVepInput());
 
         File vepOutputFile = JobTestUtils.createTempFile();
