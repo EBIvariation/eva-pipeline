@@ -58,7 +58,7 @@ import static uk.ac.ebi.eva.test.utils.JobTestUtils.getLines;
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {VariantConfiguration.class, VariantJobsArgs.class, VariantConfig.class})
-public class VariantLoadTest {
+public class VariantLoaderStepTest {
     private JobLauncherTestUtils jobLauncherTestUtils;
 
     @Autowired
@@ -79,7 +79,7 @@ public class VariantLoadTest {
     private static String opencgaHome = System.getenv("OPENCGA_HOME") != null ? System.getenv("OPENCGA_HOME") : "/opt/opencga";
 
     @Test
-    public void loadStepShouldLoadAllVariants() throws Exception {
+    public void loaderStepShouldLoadAllVariants() throws Exception {
         Config.setOpenCGAHome(opencgaHome);
 
         variantJobsArgs.getVariantOptions().put(VariantStorageManager.DB_NAME, dbName);
@@ -122,7 +122,7 @@ public class VariantLoadTest {
     }
 
     @Test
-    public void loadStepShouldFailBecauseOpenCGAHomeIsWrong() throws JobExecutionException {
+    public void loaderStepShouldFailBecauseOpenCGAHomeIsWrong() throws JobExecutionException {
         String inputFile = VariantConfigurationTest.class.getResource(input).getFile();
 
         Config.setOpenCGAHome("");

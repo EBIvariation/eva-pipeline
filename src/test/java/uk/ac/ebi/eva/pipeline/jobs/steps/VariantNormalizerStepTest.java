@@ -56,7 +56,7 @@ import static uk.ac.ebi.eva.test.utils.JobTestUtils.getTransformedOutputPath;
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {VariantConfiguration.class, VariantJobsArgs.class, VariantConfig.class})
-public class VariantsTransformTest extends CommonJobStepInitialization {
+public class VariantNormalizerStepTest extends CommonJobStepInitialization {
 
     private JobLauncherTestUtils jobLauncherTestUtils;
 
@@ -78,7 +78,7 @@ public class VariantsTransformTest extends CommonJobStepInitialization {
     private static String opencgaHome = System.getenv("OPENCGA_HOME") != null ? System.getenv("OPENCGA_HOME") : "/opt/opencga";
 
     @Test
-    public void transformStepShouldTransformAllVariants() throws Exception {
+    public void normalizerStepShouldTransformAllVariants() throws Exception {
         Config.setOpenCGAHome(opencgaHome);
 
         String inputFile = VariantConfigurationTest.class.getResource(input).getFile();
@@ -110,7 +110,7 @@ public class VariantsTransformTest extends CommonJobStepInitialization {
      * in a variant a reference and a alternate allele are the same
      */
     @Test
-    public void transformStepShouldFailIfVariantsAreMalformed(){
+    public void normalizerStepShouldFailIfVariantsAreMalformed(){
         final String FILE_WRONG_NO_ALT = "/wrong_no_alt.vcf.gz";
         Config.setOpenCGAHome(opencgaHome);
 

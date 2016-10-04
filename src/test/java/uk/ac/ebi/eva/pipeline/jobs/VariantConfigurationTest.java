@@ -101,7 +101,7 @@ public class VariantConfigurationTest {
     private static String opencgaHome = System.getenv("OPENCGA_HOME") != null ? System.getenv("OPENCGA_HOME") : "/opt/opencga";
 
     @Test
-    public void fullVariantConfigurationPipelineAllStepsShouldBeExecuted() throws Exception {
+    public void fullGenotypedVcfJob() throws Exception {
         String inputFile = VariantConfigurationTest.class.getResource(input).getFile();
         String mockVep = VariantConfigurationTest.class.getResource("/mockvep.pl").getFile();
 
