@@ -47,12 +47,10 @@ import javax.annotation.PostConstruct;
  */
 @Configuration
 @EnableBatchProcessing
-@Import({AnnotationJob.class, PopulationStatisticsJob.class, VariantLoaderStep.class, VariantNormalizerStep.class})
+@Import({AnnotationJob.class, PopulationStatisticsJob.class, VariantLoaderStep.class})
 public class GenotypedVcfJob extends CommonJobStepInitialization{
-
-    private static final Logger logger = LoggerFactory.getLogger(VariantConfiguration.class);
-
     private static final Logger logger = LoggerFactory.getLogger(GenotypedVcfJob.class);
+
     public static final String jobName = "load-genotyped-vcf";
     public static final String NORMALIZE_VARIANTS = "Normalize variants";
     public static final String LOAD_VARIANTS = "Load variants";
@@ -66,8 +64,8 @@ public class GenotypedVcfJob extends CommonJobStepInitialization{
 
     @PostConstruct
     public void configureDefaultVariantOptions() {
-        getVariantJobsArgs().configureGenotypesStorage(INCLUDE_SAMPLES, COMPRESS_GENOTYPES);
-        getVariantJobsArgs().configureStatisticsStorage(CALCULATE_STATS, INCLUDE_STATS);
+        getJobOptions().configureGenotypesStorage(INCLUDE_SAMPLES, COMPRESS_GENOTYPES);
+        getJobOptions().configureStatisticsStorage(CALCULATE_STATS, INCLUDE_STATS);
     }
 
     @Autowired

@@ -33,10 +33,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.IntegrationTest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import uk.ac.ebi.eva.pipeline.configuration.VariantAggregatedConfig;
-import uk.ac.ebi.eva.pipeline.configuration.VariantJobsArgs;
-import uk.ac.ebi.eva.pipeline.configuration.CommonConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
+import uk.ac.ebi.eva.pipeline.configuration.VariantAggregatedConfig;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
 
 import java.io.FileInputStream;
@@ -58,7 +56,7 @@ import static uk.ac.ebi.eva.test.utils.JobTestUtils.getTransformedOutputPath;
  */
 @IntegrationTest
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = {JobOptions.class, AggregatedVcfJob.class, CommonConfiguration.class})
+@ContextConfiguration(classes = {JobOptions.class, AggregatedVcfJob.class, VariantAggregatedConfig.class})
 public class AggregatedVcfJobTest {
 
     @Autowired
@@ -94,8 +92,8 @@ public class AggregatedVcfJobTest {
         StepExecution transformStep = steps.get(0);
         StepExecution loadStep = steps.get(1);
 
-        Assert.assertEquals(VariantAggregatedConfiguration.NORMALIZE_VARIANTS, transformStep.getStepName());
-        Assert.assertEquals(VariantAggregatedConfiguration.LOAD_VARIANTS, loadStep.getStepName());
+        Assert.assertEquals(AggregatedVcfJob.NORMALIZE_VARIANTS, transformStep.getStepName());
+        Assert.assertEquals(AggregatedVcfJob.LOAD_VARIANTS, loadStep.getStepName());
 
         assertTrue(transformStep.getEndTime().before(loadStep.getStartTime()));
 
@@ -169,13 +167,13 @@ public class AggregatedVcfJobTest {
         jobLauncherTestUtils.setJobLauncher(jobLauncher);
         jobLauncherTestUtils.setJobRepository(jobRepository);
 
-        input = variantJobsArgs.getPipelineOptions().getString("input.vcf");
-        outputDir = variantJobsArgs.getPipelineOptions().getString("output.dir");
-        compressExtension = variantJobsArgs.getPipelineOptions().getString("compressExtension");
-        dbName = variantJobsArgs.getPipelineOptions().getString("db.name");
+        input = jobOptions.getPipelineOptions().getString("input.vcf");
+        outputDir = jobOptions.getPipelineOptions().getString("output.dir");
+        compressExtension = jobOptions.getPipelineOptions().getString("compressExtension");
+        dbName = jobOptions.getPipelineOptions().getString("db.name");
 
-        String inputFile = VariantConfigurationTest.class.getResource(input).getFile();
-        variantJobsArgs.getPipelineOptions().put("input.vcf", inputFile);
+        String inputFile = AggregatedVcfJobTest.class.getResource(input).getFile();
+        jobOptions.getPipelineOptions().put("input.vcf", inputFile);
     }
 
     @After

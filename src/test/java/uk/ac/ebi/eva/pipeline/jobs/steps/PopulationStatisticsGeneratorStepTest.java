@@ -30,10 +30,9 @@ import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import uk.ac.ebi.eva.pipeline.configuration.CommonConfig;
-import uk.ac.ebi.eva.pipeline.configuration.VariantJobsArgs;
-import uk.ac.ebi.eva.pipeline.jobs.VariantStatsConfiguration;
-import uk.ac.ebi.eva.pipeline.jobs.VariantStatsConfigurationTest;
+import uk.ac.ebi.eva.pipeline.configuration.CommonConfiguration;
+import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
+import uk.ac.ebi.eva.pipeline.jobs.PopulationStatisticsJob;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
 
 import java.io.File;
@@ -49,10 +48,10 @@ import static uk.ac.ebi.eva.test.utils.JobTestUtils.restoreMongoDbFromDump;
 /**
  * @author Diego Poggioli
  *
- * Test for {@link VariantsStatsCreate}
+ * Test for {@link PopulationStatisticsGeneratorStep}
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = {VariantJobsArgs.class, VariantStatsConfiguration.class, CommonConfig.class, JobLauncherTestUtils.class})
+@ContextConfiguration(classes = {JobOptions.class, PopulationStatisticsJob.class, CommonConfiguration.class, JobLauncherTestUtils.class})
 public class PopulationStatisticsGeneratorStepTest {
 
     private static final String SMALL_VCF_FILE = "/small20.vcf.gz";
@@ -61,7 +60,7 @@ public class PopulationStatisticsGeneratorStepTest {
     @Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
     @Autowired
-    private VariantJobsArgs variantJobsArgs;
+    private JobOptions jobOptions;
 
     private ObjectMap variantOptions;
     private ObjectMap pipelineOptions;
@@ -70,7 +69,7 @@ public class PopulationStatisticsGeneratorStepTest {
     @Test
     public void statisticsGeneratorStepShouldCalculateStats() throws IOException, InterruptedException {
         //and a valid variants load step already completed
-        String dump = VariantStatsConfigurationTest.class.getResource("/dump/").getFile();
+        String dump = PopulationStatisticsGeneratorStepTest.class.getResource("/dump/").getFile();
         restoreMongoDbFromDump(dump);
 
         //Given a valid VCF input file
@@ -95,7 +94,7 @@ public class PopulationStatisticsGeneratorStepTest {
         assertFalse(statsFile.exists());  // ensure the stats file doesn't exist from previous executions
 
         // When the execute method in variantsStatsCreate is executed
-        JobExecution jobExecution = jobLauncherTestUtils.launchStep(VariantStatsConfiguration.CALCULATE_STATISTICS);
+        JobExecution jobExecution = jobLauncherTestUtils.launchStep(PopulationStatisticsJob.CALCULATE_STATISTICS);
 
         //Then variantsStatsCreate step should complete correctly
         assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
@@ -139,15 +138,15 @@ public class PopulationStatisticsGeneratorStepTest {
         assertFalse(statsFile.exists());  // ensure the stats file doesn't exist from previous executions
 
         // When the execute method in variantsStatsCreate is executed
-        JobExecution jobExecution = jobLauncherTestUtils.launchStep(VariantStatsConfiguration.CALCULATE_STATISTICS);
+        JobExecution jobExecution = jobLauncherTestUtils.launchStep(PopulationStatisticsJob.CALCULATE_STATISTICS);
         assertEquals(ExitStatus.FAILED.getExitCode(), jobExecution.getExitStatus().getExitCode());
     }
 
     @Before
     public void setUp() throws Exception {
-        variantJobsArgs.loadArgs();
-        pipelineOptions = variantJobsArgs.getPipelineOptions();
-        variantOptions = variantJobsArgs.getVariantOptions();
+        jobOptions.loadArgs();
+        pipelineOptions = jobOptions.getPipelineOptions();
+        variantOptions = jobOptions.getVariantOptions();
     }
 
     @After

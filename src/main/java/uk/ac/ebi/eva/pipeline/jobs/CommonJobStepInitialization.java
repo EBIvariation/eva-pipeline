@@ -16,7 +16,6 @@
 package uk.ac.ebi.eva.pipeline.jobs;
 
 import org.opencb.datastore.core.ObjectMap;
-import org.opencb.opencga.storage.core.variant.VariantStorageManager;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.step.builder.StepBuilder;
@@ -66,10 +65,10 @@ public abstract class CommonJobStepInitialization {
     }
 
     public ObjectMap getVariantOptions() {
-        return variantJobsArgs.getVariantOptions();
+        return jobOptions.getVariantOptions();
     }
 
-    public VariantJobsArgs getVariantJobsArgs() {
-        return variantJobsArgs;
+    public JobOptions getJobOptions() {
+        return jobOptions;
     }
 }

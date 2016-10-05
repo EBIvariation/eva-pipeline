@@ -31,8 +31,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.stereotype.Component;
 
-import uk.ac.ebi.eva.pipeline.jobs.VariantAnnotConfiguration;
-import uk.ac.ebi.eva.pipeline.jobs.VariantStatsConfiguration;
 import uk.ac.ebi.eva.pipeline.jobs.AnnotationJob;
 import uk.ac.ebi.eva.pipeline.jobs.PopulationStatisticsJob;
 

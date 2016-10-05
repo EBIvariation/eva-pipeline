@@ -32,8 +32,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 import org.springframework.context.annotation.Scope;
-import uk.ac.ebi.eva.pipeline.jobs.steps.VariantsLoad;
-import uk.ac.ebi.eva.pipeline.jobs.steps.VariantsTransform;
+import uk.ac.ebi.eva.pipeline.jobs.steps.VariantLoaderStep;
+import uk.ac.ebi.eva.pipeline.jobs.steps.VariantNormalizerStep;
 
 import javax.annotation.PostConstruct;
 
@@ -47,10 +47,10 @@ import javax.annotation.PostConstruct;
  */
 @Configuration
 @EnableBatchProcessing
-@Import({VariantLoaderStep.class, VariantNormalizerStep.class})
+@Import({VariantLoaderStep.class, AnnotationJob.class})
 public class AggregatedVcfJob extends CommonJobStepInitialization{
 
-    private static final Logger logger = LoggerFactory.getLogger(VariantAggregatedConfiguration.class);
+    private static final Logger logger = LoggerFactory.getLogger(AggregatedVcfJob.class);
 
     private static final String jobName = "load-aggregated-vcf";
     public static final String NORMALIZE_VARIANTS = "Normalize variants";
@@ -64,8 +64,8 @@ public class AggregatedVcfJob extends CommonJobStepInitialization{
 
     @PostConstruct
     public void configureDefaultVariantOptions() {
-        getVariantJobsArgs().configureGenotypesStorage(INCLUDE_SAMPLES, COMPRESS_GENOTYPES);
-        getVariantJobsArgs().configureStatisticsStorage(CALCULATE_STATS, INCLUDE_STATS);
+        getJobOptions().configureGenotypesStorage(INCLUDE_SAMPLES, COMPRESS_GENOTYPES);
+        getJobOptions().configureStatisticsStorage(CALCULATE_STATS, INCLUDE_STATS);
     }
 
     @Autowired

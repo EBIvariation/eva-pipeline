@@ -102,8 +102,8 @@ public class GenotypedVcfJobTest {
 
     @Test
     public void fullGenotypedVcfJob() throws Exception {
-        String inputFile = VariantConfigurationTest.class.getResource(input).getFile();
-        String mockVep = VariantConfigurationTest.class.getResource("/mockvep.pl").getFile();
+        String inputFile = GenotypedVcfJobTest.class.getResource(input).getFile();
+        String mockVep = GenotypedVcfJobTest.class.getResource("/mockvep.pl").getFile();
 
         jobOptions.getPipelineOptions().put("input.vcf", inputFile);
         jobOptions.getPipelineOptions().put("app.vep.path", mockVep);
