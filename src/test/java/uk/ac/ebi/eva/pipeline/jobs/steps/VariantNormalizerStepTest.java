@@ -29,11 +29,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import uk.ac.ebi.eva.pipeline.configuration.VariantConfig;
-import uk.ac.ebi.eva.pipeline.configuration.VariantJobsArgs;
+import uk.ac.ebi.eva.pipeline.configuration.GenotypedVcfConfiguration;
+import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
 import uk.ac.ebi.eva.pipeline.jobs.CommonJobStepInitialization;
-import uk.ac.ebi.eva.pipeline.jobs.VariantConfiguration;
-import uk.ac.ebi.eva.pipeline.jobs.VariantConfigurationTest;
+import uk.ac.ebi.eva.pipeline.jobs.GenotypedVcfJob;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
 
 import java.io.File;
@@ -49,19 +48,19 @@ import static uk.ac.ebi.eva.test.utils.JobTestUtils.getTransformedOutputPath;
 /**
  * @author Diego Poggioli
  *
- * Test for {@link VariantsTransform}
+ * Test for {@link VariantNormalizerStep}
  *
  * TODO:
  * FILE_WRONG_NO_ALT should be renamed because the alt allele is not missing but is the same as the reference
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = {VariantConfiguration.class, VariantJobsArgs.class, VariantConfig.class})
+@ContextConfiguration(classes = {GenotypedVcfJob.class, JobOptions.class, GenotypedVcfConfiguration.class})
 public class VariantNormalizerStepTest extends CommonJobStepInitialization {
 
     private JobLauncherTestUtils jobLauncherTestUtils;
 
     @Autowired
-    private VariantJobsArgs variantJobsArgs;
+    private JobOptions jobOptions;
     @Autowired
     private JobLauncher jobLauncher;
     @Autowired
@@ -81,8 +80,8 @@ public class VariantNormalizerStepTest extends CommonJobStepInitialization {
     public void normalizerStepShouldTransformAllVariants() throws Exception {
         Config.setOpenCGAHome(opencgaHome);
 
-        String inputFile = VariantConfigurationTest.class.getResource(input).getFile();
-        variantJobsArgs.getPipelineOptions().put("input.vcf", inputFile);
+        String inputFile = VariantNormalizerStepTest.class.getResource(input).getFile();
+        jobOptions.getPipelineOptions().put("input.vcf", inputFile);
 
         String outputFilename = getTransformedOutputPath(Paths.get(input).getFileName(), ".gz", "/tmp");
 
@@ -92,7 +91,7 @@ public class VariantNormalizerStepTest extends CommonJobStepInitialization {
         assertFalse(file.exists());
 
         // When the execute method in variantsTransform is executed
-        JobExecution jobExecution = jobLauncherTestUtils.launchStep(VariantConfiguration.NORMALIZE_VARIANTS);
+        JobExecution jobExecution = jobLauncherTestUtils.launchStep(GenotypedVcfJob.NORMALIZE_VARIANTS);
 
         //Then variantsTransform should complete correctly
         assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
@@ -115,8 +114,8 @@ public class VariantNormalizerStepTest extends CommonJobStepInitialization {
         Config.setOpenCGAHome(opencgaHome);
 
         //Given a malformed VCF input file
-        String inputFile = VariantConfigurationTest.class.getResource(FILE_WRONG_NO_ALT).getFile();
-        variantJobsArgs.getPipelineOptions().put("input.vcf", inputFile);
+        String inputFile = VariantNormalizerStepTest.class.getResource(FILE_WRONG_NO_ALT).getFile();
+        jobOptions.getPipelineOptions().put("input.vcf", inputFile);
 
         String outputFilename = getTransformedOutputPath(Paths.get(FILE_WRONG_NO_ALT).getFileName(), ".gz", "/tmp");
 
@@ -125,21 +124,21 @@ public class VariantNormalizerStepTest extends CommonJobStepInitialization {
         assertFalse(file.exists());
 
         //When the execute method in variantsTransform is invoked then a StorageManagerException is thrown
-        JobExecution jobExecution = jobLauncherTestUtils.launchStep(VariantConfiguration.NORMALIZE_VARIANTS);
+        JobExecution jobExecution = jobLauncherTestUtils.launchStep(GenotypedVcfJob.NORMALIZE_VARIANTS);
         assertEquals(ExitStatus.FAILED.getExitCode(), jobExecution.getExitStatus().getExitCode());
     }
 
     @Before
     public void setUp() throws Exception {
-        variantJobsArgs.loadArgs();
+        jobOptions.loadArgs();
         jobLauncherTestUtils = new JobLauncherTestUtils();
         jobLauncherTestUtils.setJob(job);
         jobLauncherTestUtils.setJobLauncher(jobLauncher);
         jobLauncherTestUtils.setJobRepository(jobRepository);
 
-        input = variantJobsArgs.getPipelineOptions().getString("input.vcf");
-        outputDir = variantJobsArgs.getPipelineOptions().getString("output.dir");
-        dbName = variantJobsArgs.getPipelineOptions().getString("db.name");
+        input = jobOptions.getPipelineOptions().getString("input.vcf");
+        outputDir = jobOptions.getPipelineOptions().getString("output.dir");
+        dbName = jobOptions.getPipelineOptions().getString("db.name");
     }
 
     @After

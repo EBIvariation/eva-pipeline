@@ -16,7 +16,6 @@
 package uk.ac.ebi.eva.pipeline.jobs;
 
 import org.opencb.datastore.core.ObjectMap;
-import org.opencb.opencga.storage.core.variant.VariantStorageManager;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.step.builder.StepBuilder;
@@ -25,18 +24,18 @@ import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 
-import uk.ac.ebi.eva.pipeline.configuration.VariantJobsArgs;
+import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
 
 /**
  * Helper class to build jobs.
  *
  * This is not intended to be used as an actual job, but to be extended in those actual job classes.
  */
-@Import({VariantJobsArgs.class})
+@Import({JobOptions.class})
 public abstract class CommonJobStepInitialization {
 
     @Autowired
-    private VariantJobsArgs variantJobsArgs;
+    private JobOptions jobOptions;
 
     @Autowired
     private StepBuilderFactory stepBuilderFactory;
@@ -62,14 +61,14 @@ public abstract class CommonJobStepInitialization {
     }
 
     public ObjectMap getPipelineOptions() {
-        return variantJobsArgs.getPipelineOptions();
+        return jobOptions.getPipelineOptions();
     }
 
     public ObjectMap getVariantOptions() {
-        return variantJobsArgs.getVariantOptions();
+        return jobOptions.getVariantOptions();
     }
 
-    public VariantJobsArgs getVariantJobsArgs() {
-        return variantJobsArgs;
+    public JobOptions getJobOptions() {
+        return jobOptions;
     }
 }

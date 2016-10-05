@@ -36,10 +36,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import uk.ac.ebi.eva.pipeline.configuration.VariantConfig;
-import uk.ac.ebi.eva.pipeline.configuration.VariantJobsArgs;
-import uk.ac.ebi.eva.pipeline.jobs.VariantConfiguration;
-import uk.ac.ebi.eva.pipeline.jobs.VariantConfigurationTest;
+import uk.ac.ebi.eva.pipeline.configuration.GenotypedVcfConfiguration;
+import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
+import uk.ac.ebi.eva.pipeline.jobs.GenotypedVcfJob;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
 
 import java.io.File;
@@ -54,15 +53,15 @@ import static uk.ac.ebi.eva.test.utils.JobTestUtils.getLines;
 /**
  * @author Diego Poggioli
  *
- * Test for {@link VariantsLoad}
+ * Test for {@link VariantLoaderStep}
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = {VariantConfiguration.class, VariantJobsArgs.class, VariantConfig.class})
+@ContextConfiguration(classes = {GenotypedVcfJob.class, JobOptions.class, GenotypedVcfConfiguration.class})
 public class VariantLoaderStepTest {
     private JobLauncherTestUtils jobLauncherTestUtils;
 
     @Autowired
-    private VariantJobsArgs variantJobsArgs;
+    private JobOptions jobOptions;
     @Autowired
     private JobLauncher jobLauncher;
     @Autowired
@@ -82,8 +81,8 @@ public class VariantLoaderStepTest {
     public void loaderStepShouldLoadAllVariants() throws Exception {
         Config.setOpenCGAHome(opencgaHome);
 
-        variantJobsArgs.getVariantOptions().put(VariantStorageManager.DB_NAME, dbName);
-        variantJobsArgs.getVariantOptions().put(VARIANT_SOURCE, new VariantSource(
+        jobOptions.getVariantOptions().put(VariantStorageManager.DB_NAME, dbName);
+        jobOptions.getVariantOptions().put(VARIANT_SOURCE, new VariantSource(
                 input,
                 "1",
                 "1",
@@ -93,17 +92,17 @@ public class VariantLoaderStepTest {
 
         //and a variants transform step already executed
         File transformedVcfVariantsFile =
-                new File(VariantConfigurationTest.class.getResource("/small20.vcf.gz.variants.json.gz").getFile());
+                new File(VariantLoaderStepTest.class.getResource("/small20.vcf.gz.variants.json.gz").getFile());
         File tmpTransformedVcfVariantsFile = new File(outputDir, transformedVcfVariantsFile.getName());
         FileUtils.copyFile(transformedVcfVariantsFile, tmpTransformedVcfVariantsFile);
 
         File transformedVariantsFile =
-                new File(VariantConfigurationTest.class.getResource("/small20.vcf.gz.file.json.gz").getFile());
+                new File(VariantLoaderStepTest.class.getResource("/small20.vcf.gz.file.json.gz").getFile());
         File tmpTransformedVariantsFile = new File(outputDir, transformedVariantsFile.getName());
         FileUtils.copyFile(transformedVariantsFile, tmpTransformedVariantsFile);
 
         // When the execute method in variantsLoad is executed
-        JobExecution jobExecution = jobLauncherTestUtils.launchStep(VariantConfiguration.LOAD_VARIANTS);
+        JobExecution jobExecution = jobLauncherTestUtils.launchStep(GenotypedVcfJob.LOAD_VARIANTS);
 
         //Then variantsLoad step should complete correctly
         assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
@@ -123,16 +122,16 @@ public class VariantLoaderStepTest {
 
     @Test
     public void loaderStepShouldFailBecauseOpenCGAHomeIsWrong() throws JobExecutionException {
-        String inputFile = VariantConfigurationTest.class.getResource(input).getFile();
+        String inputFile = VariantLoaderStepTest.class.getResource(input).getFile();
 
         Config.setOpenCGAHome("");
 
-        variantJobsArgs.getPipelineOptions().put("input.vcf", inputFile);
-        variantJobsArgs.getVariantOptions().put(VariantStorageManager.DB_NAME, dbName);
+        jobOptions.getPipelineOptions().put("input.vcf", inputFile);
+        jobOptions.getVariantOptions().put(VariantStorageManager.DB_NAME, dbName);
 
-        VariantSource source = (VariantSource) variantJobsArgs.getVariantOptions().get(VariantStorageManager.VARIANT_SOURCE);
+        VariantSource source = (VariantSource) jobOptions.getVariantOptions().get(VariantStorageManager.VARIANT_SOURCE);
 
-        variantJobsArgs.getVariantOptions().put(VariantStorageManager.VARIANT_SOURCE, new VariantSource(
+        jobOptions.getVariantOptions().put(VariantStorageManager.VARIANT_SOURCE, new VariantSource(
                 input,
                 source.getFileId(),
                 source.getStudyId(),
@@ -140,23 +139,23 @@ public class VariantLoaderStepTest {
                 source.getType(),
                 source.getAggregation()));
 
-        JobExecution jobExecution = jobLauncherTestUtils.launchStep(VariantConfiguration.LOAD_VARIANTS);
+        JobExecution jobExecution = jobLauncherTestUtils.launchStep(GenotypedVcfJob.LOAD_VARIANTS);
 
-        assertEquals(inputFile, variantJobsArgs.getPipelineOptions().getString("input.vcf"));
+        assertEquals(inputFile, jobOptions.getPipelineOptions().getString("input.vcf"));
         assertEquals(ExitStatus.FAILED.getExitCode(), jobExecution.getExitStatus().getExitCode());
     }
 
     @Before
     public void setUp() throws Exception {
-        variantJobsArgs.loadArgs();
+        jobOptions.loadArgs();
         jobLauncherTestUtils = new JobLauncherTestUtils();
         jobLauncherTestUtils.setJob(job);
         jobLauncherTestUtils.setJobLauncher(jobLauncher);
         jobLauncherTestUtils.setJobRepository(jobRepository);
 
-        input = variantJobsArgs.getPipelineOptions().getString("input.vcf");
-        outputDir = variantJobsArgs.getPipelineOptions().getString("output.dir");
-        dbName = variantJobsArgs.getPipelineOptions().getString("db.name");
+        input = jobOptions.getPipelineOptions().getString("input.vcf");
+        outputDir = jobOptions.getPipelineOptions().getString("output.dir");
+        dbName = jobOptions.getPipelineOptions().getString("db.name");
     }
 
     @After

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 EMBL - European Bioinformatics Institute
+ * Copyright 2015-2016 EMBL - European Bioinformatics Institute
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.ac.ebi.eva.pipeline.jobs.steps;
+package uk.ac.ebi.eva.pipeline.jobs;
 
+import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -22,7 +23,11 @@ import org.junit.runner.RunWith;
 import org.opencb.biodata.models.variant.VariantSource;
 import org.opencb.biodata.models.variant.VariantStudy;
 import org.opencb.datastore.core.ObjectMap;
+import org.opencb.datastore.core.QueryOptions;
+import org.opencb.opencga.storage.core.StorageManagerFactory;
 import org.opencb.opencga.storage.core.variant.VariantStorageManager;
+import org.opencb.opencga.storage.core.variant.adaptors.VariantDBAdaptor;
+import org.opencb.opencga.storage.core.variant.adaptors.VariantDBIterator;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.JobExecution;
@@ -32,7 +37,6 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import uk.ac.ebi.eva.pipeline.configuration.CommonConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
-import uk.ac.ebi.eva.pipeline.jobs.PopulationStatisticsJob;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
 
 import java.io.File;
@@ -46,13 +50,13 @@ import static org.opencb.opencga.storage.core.variant.VariantStorageManager.VARI
 import static uk.ac.ebi.eva.test.utils.JobTestUtils.restoreMongoDbFromDump;
 
 /**
- * @author Diego Poggioli
+ * @author Jose Miguel Mut Lopez &lt;jmmut@ebi.ac.uk&gt;
  *
- * Test for {@link PopulationStatisticsGeneratorStep}
+ * Test for {@link PopulationStatisticsJob}
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {JobOptions.class, PopulationStatisticsJob.class, CommonConfiguration.class, JobLauncherTestUtils.class})
-public class PopulationStatisticsGeneratorStepTest {
+public class PopulationStatisticsJobTest {
 
     private static final String SMALL_VCF_FILE = "/small20.vcf.gz";
     private static final String STATS_DB = "VariantStatsConfigurationTest_vl"; //this name should be the same of the dump DB in /dump
@@ -64,14 +68,14 @@ public class PopulationStatisticsGeneratorStepTest {
 
     private ObjectMap variantOptions;
     private ObjectMap pipelineOptions;
+
     private File statsFile;
+    private File statsFileToLoad;
+    private File sourceFileToLoad;
+    private File vcfFileToLoad;
 
     @Test
-    public void statisticsGeneratorStepShouldCalculateStats() throws IOException, InterruptedException {
-        //and a valid variants load step already completed
-        String dump = PopulationStatisticsGeneratorStepTest.class.getResource("/dump/").getFile();
-        restoreMongoDbFromDump(dump);
-
+    public void fullPopulationStatisticsJob() throws Exception {
         //Given a valid VCF input file
         String input = SMALL_VCF_FILE;
 
@@ -93,10 +97,9 @@ public class PopulationStatisticsGeneratorStepTest {
         statsFile.delete();
         assertFalse(statsFile.exists());  // ensure the stats file doesn't exist from previous executions
 
-        // When the execute method in variantsStatsCreate is executed
-        JobExecution jobExecution = jobLauncherTestUtils.launchStep(PopulationStatisticsJob.CALCULATE_STATISTICS);
+        initStatsLoadStepFiles();
 
-        //Then variantsStatsCreate step should complete correctly
+        JobExecution jobExecution = jobLauncherTestUtils.launchJob();
         assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
         assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());
 
@@ -108,42 +111,46 @@ public class PopulationStatisticsGeneratorStepTest {
         new File(Paths.get(pipelineOptions.getString("output.dir.statistics")).resolve(VariantStorageManager.buildFilename(source))
                 + ".source.stats.json.gz").delete();
 
+        // The DB docs should have the field "st"
+        VariantStorageManager variantStorageManager = StorageManagerFactory.getVariantStorageManager();
+        VariantDBAdaptor variantDBAdaptor = variantStorageManager.getDBAdaptor(STATS_DB, null);
+        VariantDBIterator iterator = variantDBAdaptor.iterator(new QueryOptions());
+        assertEquals(1, iterator.next().getSourceEntries().values().iterator().next().getCohortStats().size());
+
+        statsFileToLoad.delete();
+        sourceFileToLoad.delete();
+        vcfFileToLoad.delete();
     }
 
-    /**
-     * This test has to fail because it will try to extract variants from a non-existent DB.
-     * Variants not loaded.. so nothing to query!
-     */
-    @Test
-    public void statisticsGeneratorStepShouldFailIfVariantLoadStepIsNotCompleted() throws Exception {
-        //Given a valid VCF input file
-        String input = SMALL_VCF_FILE;
+    private void initStatsLoadStepFiles() throws IOException, InterruptedException {
+        //and a valid variants load and stats create steps already completed
+        String dump = PopulationStatisticsJobTest.class.getResource("/dump/").getFile();
+        restoreMongoDbFromDump(dump);
 
-        pipelineOptions.put("input.vcf", input);
-        variantOptions.put(VariantStorageManager.DB_NAME, STATS_DB);
+        String outputDir = pipelineOptions.getString("output.dir.statistics");
 
-        VariantSource source = new VariantSource(
-                input,
-                "1",
-                "1",
-                "studyName",
-                VariantStudy.StudyType.COLLECTION,
-                VariantSource.Aggregation.NONE);
+        // copy stat file to load
+        String variantsFileName = "/1_1.variants.stats.json.gz";
+        statsFileToLoad = new File(outputDir, variantsFileName);
+        File variantStatsFile = new File(PopulationStatisticsJobTest.class.getResource(variantsFileName).getFile());
+        FileUtils.copyFile(variantStatsFile, statsFileToLoad);
 
-        variantOptions.put(VARIANT_SOURCE, source);
+        // copy source file to load
+        String sourceFileName = "/1_1.source.stats.json.gz";
+        sourceFileToLoad = new File(outputDir, sourceFileName);
+        File sourceStatsFile = new File(PopulationStatisticsJobTest.class.getResource(sourceFileName).getFile());
+        FileUtils.copyFile(sourceStatsFile, sourceFileToLoad);
 
-        statsFile = new File(Paths.get(pipelineOptions.getString("output.dir.statistics")).resolve(VariantStorageManager.buildFilename(source))
-                + ".variants.stats.json.gz");
-        statsFile.delete();
-        assertFalse(statsFile.exists());  // ensure the stats file doesn't exist from previous executions
-
-        // When the execute method in variantsStatsCreate is executed
-        JobExecution jobExecution = jobLauncherTestUtils.launchStep(PopulationStatisticsJob.CALCULATE_STATISTICS);
-        assertEquals(ExitStatus.FAILED.getExitCode(), jobExecution.getExitStatus().getExitCode());
+        // copy transformed vcf
+        String vcfFileName = "/small20.vcf.gz.variants.json.gz";
+        vcfFileToLoad = new File(outputDir, vcfFileName);
+        File vcfFile = new File(PopulationStatisticsJobTest.class.getResource(vcfFileName).getFile());
+        FileUtils.copyFile(vcfFile, vcfFileToLoad);
     }
 
     @Before
     public void setUp() throws Exception {
+        //re-initialize common config before each test
         jobOptions.loadArgs();
         pipelineOptions = jobOptions.getPipelineOptions();
         variantOptions = jobOptions.getVariantOptions();
