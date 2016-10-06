@@ -77,7 +77,7 @@ public class AggregatedVcfJob extends CommonJobStepInitialization{
 
     @Bean
     @Qualifier("variantJobAggregated")
-    public Job variantJob() {
+    public Job variantJobAggregated() {
         logger.debug("Building variant aggregated job");
 
         JobBuilder jobBuilder = jobBuilderFactory
