@@ -26,6 +26,7 @@ public class VariantData {
 
     private static final String VARIANT_WITHOUT_ANNOTATION_PATH = "/annotation/VariantWithOutAnnotation";
     private static final String VARIANT_WITH_ANNOTATION_PATH = "/annotation/VariantWithAnnotation";
+    private static final String POPULATION_STATS_PATH = "/statistics/PopulationStats.json";
 
     public static String getVariantWithoutAnnotation() throws IOException {
         URL variantWithNoAnnotationUrl = VariantData.class.getResource(VARIANT_WITHOUT_ANNOTATION_PATH);
@@ -36,5 +37,10 @@ public class VariantData {
     public static String getVariantWithAnnotation() throws IOException {
         URL variantWithAnnotationUrl = AnnotationJobTest.class.getResource(VARIANT_WITH_ANNOTATION_PATH);
         return FileUtils.readFileToString(new File(variantWithAnnotationUrl.getFile()));
+    }
+
+    public static String getPopulationStatsPath() throws IOException {
+        URL stats = AnnotationJobTest.class.getResource(POPULATION_STATS_PATH);
+        return FileUtils.readFileToString(new File(stats.getFile()));
     }
 }

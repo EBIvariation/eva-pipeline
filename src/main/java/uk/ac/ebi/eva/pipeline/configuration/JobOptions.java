@@ -57,6 +57,7 @@ public class JobOptions {
     private static final Logger logger = LoggerFactory.getLogger(JobOptions.class);
     private static final String DB_COLLECTIONS_FEATURES_NAME = "db.collections.features.name";
     private static final String DB_COLLECTIONS_VARIANTS_NAME = "db.collections.variants.name";
+    private static final String DB_COLLECTIONS_STATS_NAME = "db.collections.stats.name";
     private static final String VEP_INPUT = "vep.input";
     private static final String DB_NAME = "db.name";
     private static final String VEP_OUTPUT = "vep.output";
@@ -95,6 +96,7 @@ public class JobOptions {
     @Value("${"+DB_COLLECTIONS_VARIANTS_NAME+":#{null}}") private String dbCollectionVariantsName;
     @Value("${db.collections.files.name:#{null}}") private String dbCollectionFilesName;
     @Value("${"+DB_COLLECTIONS_FEATURES_NAME+"}") private String dbCollectionGenesName;
+    @Value("${"+DB_COLLECTIONS_STATS_NAME+"}") private String dbCollectionStatsName;
     @Value("${config.db.read-preference}") private String readPreference;
 
     // Skip steps
@@ -208,6 +210,7 @@ public class JobOptions {
         pipelineOptions.put(DB_COLLECTIONS_VARIANTS_NAME, dbCollectionVariantsName);
         pipelineOptions.put("db.collections.files.name", dbCollectionFilesName);
         pipelineOptions.put(DB_COLLECTIONS_FEATURES_NAME, dbCollectionGenesName);
+        pipelineOptions.put(DB_COLLECTIONS_STATS_NAME, dbCollectionStatsName);
         pipelineOptions.put("config.db.hosts", dbHosts);
         pipelineOptions.put("config.db.authentication-db", dbAuthenticationDb);
         pipelineOptions.put("config.db.user", dbUser);
@@ -259,6 +262,9 @@ public class JobOptions {
 
     public String getDbCollectionsVariantsName() {
         return getPipelineOptions().getString(DB_COLLECTIONS_VARIANTS_NAME);
+    }
+    public String getDbCollectionsStatsName() {
+        return getPipelineOptions().getString(DB_COLLECTIONS_STATS_NAME);
     }
 
     public String getVepInput() {

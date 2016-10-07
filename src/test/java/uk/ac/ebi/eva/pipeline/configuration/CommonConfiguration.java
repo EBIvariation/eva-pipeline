@@ -58,6 +58,7 @@ public class CommonConfiguration {
         properties.put("db.collection.variants.name", "variants");
         properties.put("db.collection.files.name", "files");
         properties.put("db.collections.features.name", "features");
+        properties.put("db.collections.stats.name", "populationStats");
         properties.put("config.db.read-preference", "primary");
         
         properties.put("app.opencga.path", opencgaHome);
