@@ -66,7 +66,7 @@ public class GenotypedVcfJobWorkflowTest {
     private JobLauncher jobLauncher;
 
     @Autowired
-    @Qualifier("variantJob")
+    @Qualifier("genotypedJob")
     public Job job;
 
     private String inputFileResouce;

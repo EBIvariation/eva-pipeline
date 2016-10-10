@@ -43,10 +43,10 @@ import uk.ac.ebi.eva.pipeline.jobs.steps.AnnotationLoaderStep;
  * Batch class to wire together:
  * 1) variantsAnnotGenerateInputBatchStep - Dump a list of variants without annotations to be used as input for VEP
  * 2) annotationCreate - run VEP
- * 3) variantAnnotLoadBatchStep - Load VEP annotations into mongo
+ * 3) annotationLoadBatchStep - Load VEP annotations into mongo
  *
- * Optional flow: variantsAnnotGenerateInput --> (annotationCreate --> variantAnnotLoad)
- * annotationCreate and variantAnnotLoad steps are only executed if variantsAnnotGenerateInput is generating a
+ * Optional flow: variantsAnnotGenerateInput --> (annotationCreate --> annotationLoad)
+ * annotationCreate and annotationLoad steps are only executed if variantsAnnotGenerateInput is generating a
  * non-empty VEP input file
  *
  */
@@ -68,9 +68,9 @@ public class AnnotationJob extends CommonJobStepInitialization{
     @Autowired
     public Step variantsAnnotGenerateInputBatchStep;
 
-    @Qualifier("variantAnnotLoad")
+    @Qualifier("annotationLoad")
     @Autowired
-    private Step variantAnnotLoadBatchStep;
+    private Step annotationLoadBatchStep;
 
     @Autowired
     private VepAnnotationGeneratorStep vepAnnotationGeneratorStep;
@@ -81,30 +81,30 @@ public class AnnotationJob extends CommonJobStepInitialization{
                 .get(jobName)
                 .incrementer(new RunIdIncrementer());
 
-        return jobBuilder.start(optionalVariantAnnotationFlow()).build().build();
+        return jobBuilder.start(optionalAnnotationFlow()).build().build();
     }
 
     @Bean
-    public Flow variantAnnotationFlow(){
+    public Flow annotationFlow(){
         EmptyFileDecider emptyFileDecider = new EmptyFileDecider(getPipelineOptions().getString("vep.input"));
 
         return new FlowBuilder<Flow>(VARIANT_VEP_ANNOTATION_FLOW)
                 .start(variantsAnnotGenerateInputBatchStep)
                 .next(emptyFileDecider).on(EmptyFileDecider.CONTINUE_FLOW)
                 .to(annotationCreate())
-                .next(variantAnnotLoadBatchStep)
+                .next(annotationLoadBatchStep)
                 .from(emptyFileDecider).on(EmptyFileDecider.STOP_FLOW)
                 .end(BatchStatus.COMPLETED.toString())
                 .build();
     }
 
     @Bean
-    public Flow optionalVariantAnnotationFlow(){
+    public Flow optionalAnnotationFlow(){
         SkipStepDecider annotationSkipStepDecider = new SkipStepDecider(getPipelineOptions(), SKIP_ANNOT);
 
         return new FlowBuilder<Flow>(OPTIONAL_VARIANT_VEP_ANNOTATION_FLOW)
                 .start(annotationSkipStepDecider).on(SkipStepDecider.DO_STEP)
-                .to(variantAnnotationFlow())
+                .to(annotationFlow())
                 .from(annotationSkipStepDecider).on(SkipStepDecider.SKIP_STEP)
                 .end(BatchStatus.COMPLETED.toString())
                 .build();

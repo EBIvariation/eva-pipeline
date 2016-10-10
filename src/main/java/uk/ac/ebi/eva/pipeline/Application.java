@@ -25,9 +25,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * Main entry point. spring boot takes care of autowiring everything with the JobLauncherCommandLineRunner.
  * By default, no job will be run on startup. Use this to launch any job:
  *
- *     java -jar target/gs-batch-processing-0.1.0.jar --spring.batch.job.names=variantJob
+ *     java -jar target/eva-pipeline-0.1.jar --spring.batch.job.names=load-genotyped-vcf
  *
- * append any parameter needed. See VariantJobParametersListener to know some of them.
+ * append any parameter needed.
  * TODO document all parameters
  *
  */

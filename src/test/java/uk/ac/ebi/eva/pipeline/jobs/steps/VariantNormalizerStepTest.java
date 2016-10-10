@@ -67,7 +67,7 @@ public class VariantNormalizerStepTest extends CommonJobStepInitialization {
     private JobRepository jobRepository;
 
     @Autowired
-    @Qualifier("variantJob")
+    @Qualifier("genotypedJob")
     public Job job;
 
     private String input;

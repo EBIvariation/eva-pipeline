@@ -67,8 +67,8 @@ public class AnnotationLoaderStep {
     private JobOptions jobOptions;
 
     @Bean
-    @Qualifier("variantAnnotLoad")
-    public Step variantAnnotLoadBatchStep() throws IOException {
+    @Qualifier("annotationLoad")
+    public Step annotationLoadBatchStep() throws IOException {
         MongoOperations mongoOperations = MongoDBHelper.getMongoOperationsFromPipelineOptions(jobOptions.getPipelineOptions());
         String collections = jobOptions.getPipelineOptions().getString("db.collections.variants.name");
         VepAnnotationMongoWriter writer = new VepAnnotationMongoWriter(mongoOperations, collections);
