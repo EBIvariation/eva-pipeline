@@ -68,7 +68,7 @@ public class VariantLoaderStepTest {
     private JobRepository jobRepository;
 
     @Autowired
-    @Qualifier("variantJob")
+    @Qualifier("genotypedJob")
     public Job job;
 
     private String input;

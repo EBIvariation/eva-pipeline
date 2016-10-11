@@ -18,7 +18,6 @@ package uk.ac.ebi.eva.pipeline.jobs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.Job;
-import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.job.builder.FlowJobBuilder;
@@ -31,9 +30,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
-import org.springframework.context.annotation.Scope;
 import uk.ac.ebi.eva.pipeline.jobs.steps.VariantLoaderStep;
-import uk.ac.ebi.eva.pipeline.jobs.steps.VariantNormalizerStep;
 
 import javax.annotation.PostConstruct;
 
@@ -41,7 +38,7 @@ import javax.annotation.PostConstruct;
  *  Complete pipeline workflow for aggregated VCF.
  *  Aggregated statistics are provided in the VCF instead of the genotypes.
  *
- *  transform ---> load --> (optionalVariantAnnotationFlow: variantsAnnotGenerateInput --> (annotationCreate --> variantAnnotLoad))
+ *  transform ---> load --> (optionalAnnotationFlow: variantsAnnotGenerateInput --> (annotationCreate --> annotationLoad))
  *
  *  Steps in () are optional
  */
@@ -53,8 +50,6 @@ public class AggregatedVcfJob extends CommonJobStepInitialization{
     private static final Logger logger = LoggerFactory.getLogger(AggregatedVcfJob.class);
 
     private static final String jobName = "load-aggregated-vcf";
-    public static final String NORMALIZE_VARIANTS = "Normalize variants";
-    public static final String LOAD_VARIANTS = "Load variants";
 
     //job default settings
     private static final boolean INCLUDE_SAMPLES = false;
@@ -71,13 +66,13 @@ public class AggregatedVcfJob extends CommonJobStepInitialization{
     @Autowired
     private JobBuilderFactory jobBuilderFactory;
     @Autowired
-    private Flow optionalVariantAnnotationFlow;
+    private Flow optionalAnnotationFlow;
     @Autowired
     private VariantLoaderStep variantLoaderStep;
 
     @Bean
-    @Qualifier("variantJobAggregated")
-    public Job variantJob() {
+    @Qualifier("aggregatedJob")
+    public Job aggregatedJob() {
         logger.debug("Building variant aggregated job");
 
         JobBuilder jobBuilder = jobBuilderFactory
@@ -85,22 +80,12 @@ public class AggregatedVcfJob extends CommonJobStepInitialization{
                 .incrementer(new RunIdIncrementer());
 
         FlowJobBuilder builder = jobBuilder
-                .flow(transform())
-                .next(load())
-                .next(optionalVariantAnnotationFlow)
+                .flow(normalize())
+                .next(load(variantLoaderStep))
+                .next(optionalAnnotationFlow)
                 .end();
 
         return builder.build();
-    }
-
-    @Bean
-    @Scope("prototype")
-    protected Step transform() {
-        return generateStep(NORMALIZE_VARIANTS, new VariantNormalizerStep(getVariantOptions(), getPipelineOptions()));
-    }
-
-    private Step load() {
-        return generateStep(LOAD_VARIANTS, variantLoaderStep);
     }
 
 }

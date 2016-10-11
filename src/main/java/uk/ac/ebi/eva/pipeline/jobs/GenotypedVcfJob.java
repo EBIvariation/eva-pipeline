@@ -18,7 +18,6 @@ package uk.ac.ebi.eva.pipeline.jobs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.Job;
-import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.job.builder.FlowBuilder;
@@ -32,16 +31,15 @@ import org.springframework.context.annotation.*;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 
 import uk.ac.ebi.eva.pipeline.jobs.steps.VariantLoaderStep;
-import uk.ac.ebi.eva.pipeline.jobs.steps.VariantNormalizerStep;
 
 import javax.annotation.PostConstruct;
 
 /**
  *  Complete pipeline workflow:
  *
- *                       |--> (optionalVariantStatsFlow: statsCreate --> statsLoad)
+ *                       |--> (optionalStatisticsFlow: statsCreate --> statsLoad)
  *  transform ---> load -+
- *                       |--> (optionalVariantAnnotationFlow: variantsAnnotGenerateInput --> (annotationCreate --> variantAnnotLoad))
+ *                       |--> (optionalAnnotationFlow: variantsAnnotGenerateInput --> (annotationCreate --> annotationLoad))
  *
  *  Steps in () are optional
  */
@@ -52,8 +50,6 @@ public class GenotypedVcfJob extends CommonJobStepInitialization{
     private static final Logger logger = LoggerFactory.getLogger(GenotypedVcfJob.class);
 
     public static final String jobName = "load-genotyped-vcf";
-    public static final String NORMALIZE_VARIANTS = "Normalize variants";
-    public static final String LOAD_VARIANTS = "Load variants";
     public static final String PARALLEL_STATISTICS_AND_ANNOTATION = "Parallel statistics and annotation";
 
     //job default settings
@@ -71,43 +67,33 @@ public class GenotypedVcfJob extends CommonJobStepInitialization{
     @Autowired
     private JobBuilderFactory jobBuilderFactory;
     @Autowired
-    private Flow optionalVariantAnnotationFlow;
+    private Flow optionalAnnotationFlow;
     @Autowired
-    private Flow optionalVariantStatsFlow;
+    private Flow optionalStatisticsFlow;
     @Autowired
     private VariantLoaderStep variantLoaderStep;
 
     @Bean
-    @Qualifier("variantJob")
-    public Job variantJob() {
+    @Qualifier("genotypedJob")
+    public Job genotypedJob() {
         logger.debug("Building variant genotyped job");
 
         JobBuilder jobBuilder = jobBuilderFactory
                 .get(jobName)
                 .incrementer(new RunIdIncrementer());
 
-        Flow parallelStatsAndAnnotation = new FlowBuilder<Flow>(PARALLEL_STATISTICS_AND_ANNOTATION)
+        Flow parallelStatisticsAndAnnotation = new FlowBuilder<Flow>(PARALLEL_STATISTICS_AND_ANNOTATION)
                 .split(new SimpleAsyncTaskExecutor())
-                .add(optionalVariantStatsFlow, optionalVariantAnnotationFlow)
+                .add(optionalStatisticsFlow, optionalAnnotationFlow)
                 .build();
 
         FlowJobBuilder builder = jobBuilder
-                .flow(transform())
-                .next(load())
-                .next(parallelStatsAndAnnotation)
+                .flow(normalize())
+                .next(load(variantLoaderStep))
+                .next(parallelStatisticsAndAnnotation)
                 .end();
 
         return builder.build();
-    }
-
-    @Bean
-    @Scope("prototype")
-    protected Step transform() {
-        return generateStep(NORMALIZE_VARIANTS, new VariantNormalizerStep(getVariantOptions(), getPipelineOptions()));
-    }
-
-    private Step load() {
-        return generateStep(LOAD_VARIANTS, variantLoaderStep);
     }
 
 }

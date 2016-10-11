@@ -60,7 +60,7 @@ import static uk.ac.ebi.eva.test.utils.JobTestUtils.getTransformedOutputPath;
 public class AggregatedVcfJobTest {
 
     @Autowired
-    @Qualifier("variantJobAggregated")
+    @Qualifier("aggregatedJob")
     public Job job;
     @Autowired
     private JobOptions jobOptions;

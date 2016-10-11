@@ -64,7 +64,7 @@ import static uk.ac.ebi.eva.test.utils.JobTestUtils.*;
  * Test for {@link GenotypedVcfJob}
  *
  * JobLauncherTestUtils is initialized in @Before because in GenotypedVcfJob there are two Job beans:
- * variantJob and variantAnnotationBatchJob (used by test). In this way it is possible to specify the Job to run
+ * genotypedJob and variantAnnotationBatchJob (used by test). In this way it is possible to specify the Job to run
  * and avoid NoUniqueBeanDefinitionException. There are also other solutions like:
  *  - http://stackoverflow.com/questions/29655796/how-can-i-qualify-an-autowired-setter-that-i-dont-own
  *  - https://jira.spring.io/browse/BATCH-2366
@@ -88,7 +88,7 @@ public class GenotypedVcfJobTest {
     private JobRepository jobRepository;
 
     @Autowired
-    @Qualifier("variantJob")
+    @Qualifier("genotypedJob")
     public Job job;
 
     private String input;

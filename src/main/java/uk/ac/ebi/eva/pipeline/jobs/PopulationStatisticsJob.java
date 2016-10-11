@@ -61,18 +61,18 @@ public class PopulationStatisticsJob extends CommonJobStepInitialization{
     private PopulationStatisticsLoaderStep populationStatisticsLoaderStep;
 
     @Bean
-    public Job variantStatsJob() {
+    public Job variantStatisticsJob() {
         JobBuilder jobBuilder = jobBuilderFactory
                 .get(jobName)
                 .incrementer(new RunIdIncrementer());
 
         return jobBuilder
-                .start(optionalVariantStatsFlow())
+                .start(optionalStatisticsFlow())
                 .build().build();
     }
 
     @Bean
-    public Flow optionalVariantStatsFlow(){
+    public Flow optionalStatisticsFlow(){
         SkipStepDecider statisticsSkipStepDecider = new SkipStepDecider(getPipelineOptions(), SKIP_STATS);
 
         return new FlowBuilder<Flow>(STATS_FLOW)
