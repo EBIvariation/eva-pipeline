@@ -123,10 +123,13 @@ public class JobTestUtils {
         }
     }
 
-    public static void restoreMongoDbFromDump(String dumpLocation) throws IOException, InterruptedException {
-        logger.info("restoring DB from " + dumpLocation);
+    public static void restoreMongoDbFromDump(String dumpLocation, String databaseName) throws IOException, InterruptedException {
+    	assert(dumpLocation != null && !dumpLocation.isEmpty());
+    	assert(databaseName != null && !databaseName.isEmpty());
+    	
+        logger.info("restoring DB from " + dumpLocation + " into database " + databaseName);
 
-        Process exec = Runtime.getRuntime().exec("mongorestore " + dumpLocation);
+        Process exec = Runtime.getRuntime().exec(String.format("mongorestore -d {} {}", databaseName, dumpLocation));
         exec.waitFor();
         String line;
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(exec.getInputStream()));

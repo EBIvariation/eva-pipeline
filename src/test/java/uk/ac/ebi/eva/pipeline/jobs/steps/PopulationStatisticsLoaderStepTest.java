@@ -72,7 +72,7 @@ public class PopulationStatisticsLoaderStepTest {
 
         //and a valid variants load and stats create steps already completed
         String dump = PopulationStatisticsLoaderStepTest.class.getResource("/dump/").getFile();
-        restoreMongoDbFromDump(dump);
+        restoreMongoDbFromDump(dump, getClass().getSimpleName());
 
         String outputDir = pipelineOptions.getString("output.dir.statistics");
 

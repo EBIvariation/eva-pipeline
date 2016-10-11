@@ -76,7 +76,7 @@ public class AnnotationLoaderStepTest {
         DBObjectToVariantAnnotationConverter converter = new DBObjectToVariantAnnotationConverter();
 
         String dump = AnnotationLoaderStepTest.class.getResource("/dump/").getFile();
-        restoreMongoDbFromDump(dump);
+        restoreMongoDbFromDump(dump, getClass().getSimpleName());
 
         String vepOutput = jobOptions.getVepOutput();
         makeGzipFile(VepOutputContent.vepOutputContent, vepOutput);

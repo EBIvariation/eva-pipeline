@@ -76,7 +76,7 @@ public class AnnotationJobTest {
     @Test
     public void allAnnotationStepsShouldBeExecuted () throws Exception {
         String dump = PopulationStatisticsJobTest.class.getResource("/dump/").getFile();
-        JobTestUtils.restoreMongoDbFromDump(dump);
+        JobTestUtils.restoreMongoDbFromDump(dump, getClass().getSimpleName());
 
         JobExecution jobExecution = jobLauncherTestUtils.launchJob();
 

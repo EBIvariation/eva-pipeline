@@ -71,7 +71,7 @@ public class PopulationStatisticsGeneratorStepTest {
     public void statisticsGeneratorStepShouldCalculateStats() throws IOException, InterruptedException {
         //and a valid variants load step already completed
         String dump = PopulationStatisticsGeneratorStepTest.class.getResource("/dump/").getFile();
-        restoreMongoDbFromDump(dump);
+        restoreMongoDbFromDump(dump, getClass().getSimpleName());
 
         //Given a valid VCF input file
         String input = SMALL_VCF_FILE;

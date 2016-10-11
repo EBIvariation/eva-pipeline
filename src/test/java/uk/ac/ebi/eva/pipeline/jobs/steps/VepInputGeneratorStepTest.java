@@ -62,7 +62,7 @@ public class VepInputGeneratorStepTest {
     @Test
     public void shouldGenerateVepInput() throws Exception {
         String dump = PopulationStatisticsJobTest.class.getResource("/dump/").getFile();
-        JobTestUtils.restoreMongoDbFromDump(dump);
+        JobTestUtils.restoreMongoDbFromDump(dump, getClass().getSimpleName());
         File vepInputFile = new File(jobOptions.getVepInput());
 
         if(vepInputFile.exists())
