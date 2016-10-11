@@ -30,11 +30,8 @@ import org.opencb.opencga.storage.core.variant.VariantStorageManager;
 import org.opencb.opencga.storage.core.variant.adaptors.VariantDBAdaptor;
 import org.opencb.opencga.storage.core.variant.adaptors.VariantDBIterator;
 import org.springframework.batch.core.*;
-import org.springframework.batch.core.launch.JobLauncher;
-import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.IntegrationTest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -74,22 +71,14 @@ import static uk.ac.ebi.eva.test.utils.JobTestUtils.*;
  */
 @IntegrationTest
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = { JobOptions.class, GenotypedVcfJob.class, GenotypedVcfConfiguration.class})
+@ContextConfiguration(classes = { JobOptions.class, GenotypedVcfJob.class, GenotypedVcfConfiguration.class, JobLauncherTestUtils.class})
 public class GenotypedVcfJobTest {
 
+	@Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
     
     @Autowired
     private JobOptions jobOptions;
-
-    @Autowired
-    private JobLauncher jobLauncher;
-    @Autowired
-    private JobRepository jobRepository;
-
-    @Autowired
-    @Qualifier("genotypedJob")
-    public Job job;
 
     private String input;
     private String outputDir;
@@ -220,10 +209,6 @@ public class GenotypedVcfJobTest {
     @Before
     public void setUp() throws Exception {
         jobOptions.loadArgs();
-        jobLauncherTestUtils = new JobLauncherTestUtils();
-        jobLauncherTestUtils.setJob(job);
-        jobLauncherTestUtils.setJobLauncher(jobLauncher);
-        jobLauncherTestUtils.setJobRepository(jobRepository);
 
         input = jobOptions.getPipelineOptions().getString("input.vcf");
         outputDir = jobOptions.getPipelineOptions().getString("output.dir");

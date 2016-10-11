@@ -24,6 +24,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import uk.ac.ebi.eva.pipeline.configuration.CommonConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
 import uk.ac.ebi.eva.pipeline.jobs.PopulationStatisticsJob;
+import uk.ac.ebi.eva.pipeline.jobs.flows.PopulationStatisticsFlow;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
 
 import java.io.File;
@@ -94,7 +95,7 @@ public class PopulationStatisticsLoaderStepTest {
         FileUtils.copyFile(vcfFile, vcfFileToLoad);
 
         // When the execute method in variantsStatsLoad is executed
-        JobExecution jobExecution = jobLauncherTestUtils.launchStep(PopulationStatisticsJob.LOAD_STATISTICS);
+        JobExecution jobExecution = jobLauncherTestUtils.launchStep(PopulationStatisticsFlow.LOAD_STATISTICS);
 
         // Then variantsStatsLoad step should complete correctly
         assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
@@ -120,7 +121,7 @@ public class PopulationStatisticsLoaderStepTest {
         variantOptions.put(VariantStorageManager.DB_NAME, STATS_DB);
         variantOptions.put(VariantStorageManager.VARIANT_SOURCE, source);
 
-        JobExecution jobExecution = jobLauncherTestUtils.launchStep(PopulationStatisticsJob.LOAD_STATISTICS);
+        JobExecution jobExecution = jobLauncherTestUtils.launchStep(PopulationStatisticsFlow.LOAD_STATISTICS);
 
         assertEquals(input, pipelineOptions.getString("input.vcf"));
         assertEquals(ExitStatus.FAILED.getExitCode(), jobExecution.getExitStatus().getExitCode());

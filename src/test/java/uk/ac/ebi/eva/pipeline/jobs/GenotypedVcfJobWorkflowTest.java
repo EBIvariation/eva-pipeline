@@ -16,6 +16,20 @@
 
 package uk.ac.ebi.eva.pipeline.jobs;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+import java.io.File;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -34,19 +48,15 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.IntegrationTest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
+
 import uk.ac.ebi.eva.pipeline.configuration.GenotypedVcfWorkflowConfiguration;
+import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
+import uk.ac.ebi.eva.pipeline.jobs.flows.AnnotationFlow;
+import uk.ac.ebi.eva.pipeline.jobs.flows.PopulationStatisticsFlow;
+import uk.ac.ebi.eva.pipeline.jobs.steps.AnnotationLoaderStep;
 import uk.ac.ebi.eva.pipeline.jobs.steps.VepAnnotationGeneratorStep;
 import uk.ac.ebi.eva.pipeline.jobs.steps.VepInputGeneratorStep;
-import uk.ac.ebi.eva.pipeline.jobs.flows.AnnotationFlow;
-import uk.ac.ebi.eva.pipeline.jobs.steps.AnnotationLoaderStep;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
-
-import java.io.File;
-import java.nio.file.Paths;
-import java.util.*;
-
-import static org.junit.Assert.*;
 
 /**
  * @author Diego Poggioli
@@ -55,20 +65,14 @@ import static org.junit.Assert.*;
  */
 @IntegrationTest
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = { JobOptions.class, GenotypedVcfJob.class, GenotypedVcfWorkflowConfiguration.class})
+@ContextConfiguration(classes = { JobOptions.class, GenotypedVcfJob.class, GenotypedVcfWorkflowConfiguration.class, JobLauncherTestUtils.class})
 public class GenotypedVcfJobWorkflowTest {
 
+    @Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
 
     @Autowired
     private JobOptions jobOptions;
-
-    @Autowired
-    private JobLauncher jobLauncher;
-
-    @Autowired
-    @Qualifier("genotypedJob")
-    public Job job;
 
     private String inputFileResouce;
     private String outputDir;
@@ -102,8 +106,8 @@ public class GenotypedVcfJobWorkflowTest {
 
         Set<String> parallelStepNamesExecuted = parallelStepsNameToStepExecution.keySet();
         Set<String> parallelStepNamesToCheck = new HashSet<>(Arrays.asList(
-                PopulationStatisticsJob.CALCULATE_STATISTICS,
-                PopulationStatisticsJob.LOAD_STATISTICS,
+                PopulationStatisticsFlow.CALCULATE_STATISTICS,
+                PopulationStatisticsFlow.LOAD_STATISTICS,
                 VepInputGeneratorStep.FIND_VARIANTS_TO_ANNOTATE,
                 VepAnnotationGeneratorStep.GENERATE_VEP_ANNOTATION,
                 AnnotationLoaderStep.LOAD_VEP_ANNOTATION));
@@ -111,11 +115,11 @@ public class GenotypedVcfJobWorkflowTest {
         assertEquals(parallelStepNamesToCheck, parallelStepNamesExecuted);
 
         assertTrue(transformStep.getEndTime().before(loadStep.getStartTime()));
-        assertTrue(loadStep.getEndTime().before(parallelStepsNameToStepExecution.get(PopulationStatisticsJob.CALCULATE_STATISTICS).getStartTime()));
+        assertTrue(loadStep.getEndTime().before(parallelStepsNameToStepExecution.get(PopulationStatisticsFlow.CALCULATE_STATISTICS).getStartTime()));
         assertTrue(loadStep.getEndTime().before(parallelStepsNameToStepExecution.get(VepInputGeneratorStep.FIND_VARIANTS_TO_ANNOTATE).getStartTime()));
 
-        assertTrue(parallelStepsNameToStepExecution.get(PopulationStatisticsJob.CALCULATE_STATISTICS).getEndTime()
-                .before(parallelStepsNameToStepExecution.get(PopulationStatisticsJob.LOAD_STATISTICS).getStartTime()));
+        assertTrue(parallelStepsNameToStepExecution.get(PopulationStatisticsFlow.CALCULATE_STATISTICS).getEndTime()
+                .before(parallelStepsNameToStepExecution.get(PopulationStatisticsFlow.LOAD_STATISTICS).getStartTime()));
         assertTrue(parallelStepsNameToStepExecution.get(VepInputGeneratorStep.FIND_VARIANTS_TO_ANNOTATE).getEndTime()
                 .before(parallelStepsNameToStepExecution.get(VepAnnotationGeneratorStep.GENERATE_VEP_ANNOTATION).getStartTime()));
         assertTrue(parallelStepsNameToStepExecution.get(VepAnnotationGeneratorStep.GENERATE_VEP_ANNOTATION).getEndTime()
@@ -127,7 +131,7 @@ public class GenotypedVcfJobWorkflowTest {
         initVariantConfigurationJob();
 
         jobOptions.getPipelineOptions().put(AnnotationFlow.SKIP_ANNOT, true);
-        jobOptions.getPipelineOptions().put(PopulationStatisticsJob.SKIP_STATS, true);
+        jobOptions.getPipelineOptions().put(PopulationStatisticsFlow.SKIP_STATS, true);
 
         JobExecution execution = jobLauncherTestUtils.launchJob();
 
@@ -147,7 +151,7 @@ public class GenotypedVcfJobWorkflowTest {
     @Test
     public void statsStepsShouldBeSkipped() throws Exception {
         initVariantConfigurationJob();
-        jobOptions.getPipelineOptions().put(PopulationStatisticsJob.SKIP_STATS, true);
+        jobOptions.getPipelineOptions().put(PopulationStatisticsFlow.SKIP_STATS, true);
 
         jobOptions.getPipelineOptions().put("db.name", "diegoTest");
 
@@ -210,16 +214,16 @@ public class GenotypedVcfJobWorkflowTest {
 
         Set<String> parallelStepNamesExecuted = parallelStepsNameToStepExecution.keySet();
         Set<String> parallelStepNamesToCheck = new HashSet<>(Arrays.asList(
-                PopulationStatisticsJob.CALCULATE_STATISTICS,
-                PopulationStatisticsJob.LOAD_STATISTICS));
+        		PopulationStatisticsFlow.CALCULATE_STATISTICS,
+        		PopulationStatisticsFlow.LOAD_STATISTICS));
 
         assertEquals(parallelStepNamesToCheck, parallelStepNamesExecuted);
 
         assertTrue(transformStep.getEndTime().before(loadStep.getStartTime()));
-        assertTrue(loadStep.getEndTime().before(parallelStepsNameToStepExecution.get(PopulationStatisticsJob.CALCULATE_STATISTICS).getStartTime()));
+        assertTrue(loadStep.getEndTime().before(parallelStepsNameToStepExecution.get(PopulationStatisticsFlow.CALCULATE_STATISTICS).getStartTime()));
 
-        assertTrue(parallelStepsNameToStepExecution.get(PopulationStatisticsJob.CALCULATE_STATISTICS).getEndTime()
-                .before(parallelStepsNameToStepExecution.get(PopulationStatisticsJob.LOAD_STATISTICS).getStartTime()));
+        assertTrue(parallelStepsNameToStepExecution.get(PopulationStatisticsFlow.CALCULATE_STATISTICS).getEndTime()
+                .before(parallelStepsNameToStepExecution.get(PopulationStatisticsFlow.LOAD_STATISTICS).getStartTime()));
     }
 
     /**
@@ -230,9 +234,6 @@ public class GenotypedVcfJobWorkflowTest {
     @Before
     public void setUp() throws Exception {
         jobOptions.loadArgs();
-        jobLauncherTestUtils = new JobLauncherTestUtils();
-        jobLauncherTestUtils.setJob(job);
-        jobLauncherTestUtils.setJobLauncher(jobLauncher);
 
         inputFileResouce = jobOptions.getPipelineOptions().getString("input.vcf");
         outputDir = jobOptions.getPipelineOptions().getString("output.dir");

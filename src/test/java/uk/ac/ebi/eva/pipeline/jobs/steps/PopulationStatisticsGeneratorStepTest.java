@@ -33,6 +33,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import uk.ac.ebi.eva.pipeline.configuration.CommonConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
 import uk.ac.ebi.eva.pipeline.jobs.PopulationStatisticsJob;
+import uk.ac.ebi.eva.pipeline.jobs.flows.PopulationStatisticsFlow;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
 
 import java.io.File;
@@ -94,7 +95,7 @@ public class PopulationStatisticsGeneratorStepTest {
         assertFalse(statsFile.exists());  // ensure the stats file doesn't exist from previous executions
 
         // When the execute method in variantsStatsCreate is executed
-        JobExecution jobExecution = jobLauncherTestUtils.launchStep(PopulationStatisticsJob.CALCULATE_STATISTICS);
+        JobExecution jobExecution = jobLauncherTestUtils.launchStep(PopulationStatisticsFlow.CALCULATE_STATISTICS);
 
         //Then variantsStatsCreate step should complete correctly
         assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
@@ -138,7 +139,7 @@ public class PopulationStatisticsGeneratorStepTest {
         assertFalse(statsFile.exists());  // ensure the stats file doesn't exist from previous executions
 
         // When the execute method in variantsStatsCreate is executed
-        JobExecution jobExecution = jobLauncherTestUtils.launchStep(PopulationStatisticsJob.CALCULATE_STATISTICS);
+        JobExecution jobExecution = jobLauncherTestUtils.launchStep(PopulationStatisticsFlow.CALCULATE_STATISTICS);
         assertEquals(ExitStatus.FAILED.getExitCode(), jobExecution.getExitStatus().getExitCode());
     }
 
