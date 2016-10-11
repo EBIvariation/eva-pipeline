@@ -34,9 +34,6 @@ import java.util.List;
  */
 public class ConnectionHelper {
 
-    private static MongoClient mongoClientWithAuthentication;
-    private static MongoClient mongoClientWithOutAuthentication;
-
     public static List<ServerAddress> parseServerAddresses(String hosts) throws UnknownHostException {
         List<ServerAddress> serverAddresses = new LinkedList<>();
         for (String hostPort : hosts.split(",")) {
@@ -70,8 +67,7 @@ public class ConnectionHelper {
 
     public static MongoClient getMongoClient(String hosts, String authenticationDB,
                                              String user, char[] password) throws UnknownHostException {
-        if(mongoClientWithAuthentication == null){
-            mongoClientWithAuthentication = new MongoClient(
+    	return new MongoClient(
                     parseServerAddresses(hosts),
                     Collections.singletonList(MongoCredential.createCredential(
                             user,
@@ -79,15 +75,9 @@ public class ConnectionHelper {
                             password
                             )
                     ));
-        }
-
-        return mongoClientWithAuthentication;
     }
 
     public static MongoClient getMongoClient() throws UnknownHostException {
-        if(mongoClientWithOutAuthentication == null)
-            mongoClientWithOutAuthentication = new MongoClient();
-
-        return mongoClientWithOutAuthentication;
+    	return new MongoClient();
     }
 }
