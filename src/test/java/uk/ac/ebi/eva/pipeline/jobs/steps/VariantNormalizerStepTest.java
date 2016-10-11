@@ -22,11 +22,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.opencb.opencga.lib.common.Config;
 import org.springframework.batch.core.*;
-import org.springframework.batch.core.launch.JobLauncher;
-import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import uk.ac.ebi.eva.pipeline.configuration.GenotypedVcfConfiguration;
@@ -54,21 +51,14 @@ import static uk.ac.ebi.eva.test.utils.JobTestUtils.getTransformedOutputPath;
  * FILE_WRONG_NO_ALT should be renamed because the alt allele is not missing but is the same as the reference
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = {GenotypedVcfJob.class, JobOptions.class, GenotypedVcfConfiguration.class})
+@ContextConfiguration(classes = {GenotypedVcfJob.class, JobOptions.class, GenotypedVcfConfiguration.class, JobLauncherTestUtils.class})
 public class VariantNormalizerStepTest extends CommonJobStepInitialization {
 
+    @Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
 
     @Autowired
     private JobOptions jobOptions;
-    @Autowired
-    private JobLauncher jobLauncher;
-    @Autowired
-    private JobRepository jobRepository;
-
-    @Autowired
-    @Qualifier("genotypedJob")
-    public Job job;
 
     private String input;
     private String outputDir;
@@ -131,10 +121,6 @@ public class VariantNormalizerStepTest extends CommonJobStepInitialization {
     @Before
     public void setUp() throws Exception {
         jobOptions.loadArgs();
-        jobLauncherTestUtils = new JobLauncherTestUtils();
-        jobLauncherTestUtils.setJob(job);
-        jobLauncherTestUtils.setJobLauncher(jobLauncher);
-        jobLauncherTestUtils.setJobRepository(jobRepository);
 
         input = jobOptions.getPipelineOptions().getString("input.vcf");
         outputDir = jobOptions.getPipelineOptions().getString("output.dir");
