@@ -61,13 +61,12 @@ public class AnnotationLoaderStepTest {
     @Autowired
     private JobOptions jobOptions;
 
-    private String dbName;
     private MongoClient mongoClient;
 
     @Before
     public void setUp() throws Exception {
         jobOptions.loadArgs();
-        dbName = jobOptions.getDbName();
+        jobOptions.setDbName(getClass().getSimpleName());
         mongoClient = new MongoClient();
     }
 
@@ -75,8 +74,8 @@ public class AnnotationLoaderStepTest {
     public void shouldLoadAllAnnotations() throws Exception {
         DBObjectToVariantAnnotationConverter converter = new DBObjectToVariantAnnotationConverter();
 
-        String dump = AnnotationLoaderStepTest.class.getResource("/dump/").getFile();
-        restoreMongoDbFromDump(dump, getClass().getSimpleName());
+        String dump = AnnotationLoaderStepTest.class.getResource("/dump/VariantStatsConfigurationTest_vl").getFile();
+        restoreMongoDbFromDump(dump, jobOptions.getDbName());
 
         String vepOutput = jobOptions.getVepOutput();
         makeGzipFile(VepOutputContent.vepOutputContent, vepOutput);
@@ -87,7 +86,7 @@ public class AnnotationLoaderStepTest {
         assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());
 
         //check that documents have the annotation
-        DBCursor cursor = collection(dbName, jobOptions.getDbCollectionsVariantsName()).find();
+        DBCursor cursor = collection(jobOptions.getDbName(), jobOptions.getDbCollectionsVariantsName()).find();
 
         int cnt=0;
         int consequenceTypeCount = 0;
@@ -110,7 +109,7 @@ public class AnnotationLoaderStepTest {
      */
     @After
     public void tearDown() throws Exception {
-        JobTestUtils.cleanDBs(dbName);
+        JobTestUtils.cleanDBs(jobOptions.getDbName());
         mongoClient.close();
     }
 

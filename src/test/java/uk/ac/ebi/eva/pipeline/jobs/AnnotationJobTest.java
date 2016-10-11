@@ -46,7 +46,6 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static junit.framework.TestCase.assertEquals;
 import static org.junit.Assert.*;
 import static uk.ac.ebi.eva.pipeline.jobs.steps.VepAnnotationGeneratorStep.GENERATE_VEP_ANNOTATION;
 import static uk.ac.ebi.eva.pipeline.jobs.steps.VepInputGeneratorStep.FIND_VARIANTS_TO_ANNOTATE;
@@ -69,36 +68,35 @@ public class AnnotationJobTest {
     private JobOptions jobOptions;
 
     private File vepInputFile;
-    private String dbName;
     private MongoClient mongoClient;
     private DBObjectToVariantAnnotationConverter converter;
 
     @Test
     public void allAnnotationStepsShouldBeExecuted () throws Exception {
-        String dump = PopulationStatisticsJobTest.class.getResource("/dump/").getFile();
-        JobTestUtils.restoreMongoDbFromDump(dump, getClass().getSimpleName());
+        String dump = PopulationStatisticsJobTest.class.getResource("/dump/VariantStatsConfigurationTest_vl").getFile();
+        JobTestUtils.restoreMongoDbFromDump(dump, jobOptions.getDbName());
 
         JobExecution jobExecution = jobLauncherTestUtils.launchJob();
 
         assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
         assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());
 
-        Assert.assertEquals(3, jobExecution.getStepExecutions().size());
+        assertEquals(3, jobExecution.getStepExecutions().size());
         List<StepExecution> steps = new ArrayList<>(jobExecution.getStepExecutions());
         StepExecution findVariantsToAnnotateStep = steps.get(0);
         StepExecution generateVepAnnotationsStep = steps.get(1);
         StepExecution loadVepAnnotationsStep = steps.get(2);
 
-        Assert.assertEquals(FIND_VARIANTS_TO_ANNOTATE, findVariantsToAnnotateStep.getStepName());
-        Assert.assertEquals(GENERATE_VEP_ANNOTATION, generateVepAnnotationsStep.getStepName());
-        Assert.assertEquals(LOAD_VEP_ANNOTATION, loadVepAnnotationsStep.getStepName());
+        assertEquals(FIND_VARIANTS_TO_ANNOTATE, findVariantsToAnnotateStep.getStepName());
+        assertEquals(GENERATE_VEP_ANNOTATION, generateVepAnnotationsStep.getStepName());
+        assertEquals(LOAD_VEP_ANNOTATION, loadVepAnnotationsStep.getStepName());
 
         //check list of variants without annotation output file
         assertTrue(vepInputFile.exists());
         assertEquals("20\t60343\t60343\tG/A\t+", JobTestUtils.readFirstLine(vepInputFile));
 
         //check that documents have the annotation
-        DBCursor cursor = collection(dbName, jobOptions.getDbCollectionsVariantsName()).find();
+        DBCursor cursor = collection(jobOptions.getDbName(), jobOptions.getDbCollectionsVariantsName()).find();
 
         int cnt=0;
         int consequenceTypeCount = 0;
@@ -124,7 +122,6 @@ public class AnnotationJobTest {
 
     @Test
     public void noVariantsToAnnotateOnlyFindVariantsToAnnotateStepShouldRun() throws Exception {
-
         JobExecution jobExecution = jobLauncherTestUtils.launchJob();
 
         assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
@@ -142,6 +139,7 @@ public class AnnotationJobTest {
     @Before
     public void setUp() throws Exception {
         jobOptions.loadArgs();
+        jobOptions.setDbName(getClass().getSimpleName());
         vepInputFile = new File(jobOptions.getVepInput());
 
         File vepPathFile = new File(AnnotationJobTest.class.getResource("/mockvep.pl").getFile());
@@ -149,8 +147,6 @@ public class AnnotationJobTest {
 
         converter = new DBObjectToVariantAnnotationConverter();
         mongoClient = new MongoClient();
-
-        dbName = jobOptions.getDbName();
     }
 
     /**
@@ -163,7 +159,7 @@ public class AnnotationJobTest {
         vepInputFile.delete();
         new File(jobOptions.getVepOutput()).delete();
 
-        JobTestUtils.cleanDBs(dbName);
+        JobTestUtils.cleanDBs(jobOptions.getDbName());
     }
 
     private DBCollection collection(String databaseName, String collectionName) {

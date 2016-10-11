@@ -59,7 +59,6 @@ import static uk.ac.ebi.eva.test.utils.JobTestUtils.restoreMongoDbFromDump;
 public class PopulationStatisticsJobTest {
 
     private static final String SMALL_VCF_FILE = "/small20.vcf.gz";
-    private static final String STATS_DB = "VariantStatsConfigurationTest_vl"; //this name should be the same of the dump DB in /dump
 
     @Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
@@ -80,7 +79,6 @@ public class PopulationStatisticsJobTest {
         String input = SMALL_VCF_FILE;
 
         pipelineOptions.put("input.vcf", input);
-        variantOptions.put(VariantStorageManager.DB_NAME, STATS_DB);
 
         VariantSource source = new VariantSource(
                 input,
@@ -113,7 +111,7 @@ public class PopulationStatisticsJobTest {
 
         // The DB docs should have the field "st"
         VariantStorageManager variantStorageManager = StorageManagerFactory.getVariantStorageManager();
-        VariantDBAdaptor variantDBAdaptor = variantStorageManager.getDBAdaptor(STATS_DB, null);
+        VariantDBAdaptor variantDBAdaptor = variantStorageManager.getDBAdaptor(jobOptions.getDbName(), null);
         VariantDBIterator iterator = variantDBAdaptor.iterator(new QueryOptions());
         assertEquals(1, iterator.next().getSourceEntries().values().iterator().next().getCohortStats().size());
 
@@ -125,7 +123,7 @@ public class PopulationStatisticsJobTest {
     private void initStatsLoadStepFiles() throws IOException, InterruptedException {
         //and a valid variants load and stats create steps already completed
         String dump = PopulationStatisticsJobTest.class.getResource("/dump/").getFile();
-        restoreMongoDbFromDump(dump, getClass().getSimpleName());
+        restoreMongoDbFromDump(dump, jobOptions.getDbName());
 
         String outputDir = pipelineOptions.getString("output.dir.statistics");
 
@@ -152,13 +150,14 @@ public class PopulationStatisticsJobTest {
     public void setUp() throws Exception {
         //re-initialize common config before each test
         jobOptions.loadArgs();
+        jobOptions.setDbName(getClass().getSimpleName());
         pipelineOptions = jobOptions.getPipelineOptions();
         variantOptions = jobOptions.getVariantOptions();
     }
 
     @After
     public void tearDown() throws Exception {
-        JobTestUtils.cleanDBs(STATS_DB);
+        JobTestUtils.cleanDBs(jobOptions.getDbName());
     }
 
 }

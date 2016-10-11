@@ -129,7 +129,7 @@ public class JobTestUtils {
     	
         logger.info("restoring DB from " + dumpLocation + " into database " + databaseName);
 
-        Process exec = Runtime.getRuntime().exec(String.format("mongorestore -d {} {}", databaseName, dumpLocation));
+        Process exec = Runtime.getRuntime().exec(String.format("mongorestore -d %s %s", databaseName, dumpLocation));
         exec.waitFor();
         String line;
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(exec.getInputStream()));

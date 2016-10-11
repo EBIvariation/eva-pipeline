@@ -17,6 +17,7 @@ package uk.ac.ebi.eva.pipeline.jobs.steps;
 
 
 import junit.framework.TestCase;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -47,8 +48,6 @@ import static uk.ac.ebi.eva.test.utils.JobTestUtils.readFirstLine;
 @ContextConfiguration(classes = { AnnotationJob.class, AnnotationConfiguration.class, JobLauncherTestUtils.class})
 public class VepInputGeneratorStepTest {
 
-    private static final String VARIANTS_ANNOT_GENERATE_VEP_INPUT_DB_NAME = "VariantStatsConfigurationTest_vl";
-
     @Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
     @Autowired
@@ -57,12 +56,18 @@ public class VepInputGeneratorStepTest {
     @Before
     public void setUp() throws Exception {
         jobOptions.loadArgs();
+        jobOptions.setDbName(getClass().getSimpleName());
+    }
+    
+    @After
+    public void tearDown() throws Exception {
+        JobTestUtils.cleanDBs(jobOptions.getDbName());
     }
 
     @Test
     public void shouldGenerateVepInput() throws Exception {
-        String dump = PopulationStatisticsJobTest.class.getResource("/dump/").getFile();
-        JobTestUtils.restoreMongoDbFromDump(dump, getClass().getSimpleName());
+        String dump = PopulationStatisticsJobTest.class.getResource("/dump/VariantStatsConfigurationTest_vl").getFile();
+        JobTestUtils.restoreMongoDbFromDump(dump, jobOptions.getDbName());
         File vepInputFile = new File(jobOptions.getVepInput());
 
         if(vepInputFile.exists())
@@ -77,6 +82,5 @@ public class VepInputGeneratorStepTest {
 
         Assert.assertTrue(vepInputFile.exists());
         TestCase.assertEquals("20\t60343\t60343\tG/A\t+", readFirstLine(vepInputFile));
-        JobTestUtils.cleanDBs(VARIANTS_ANNOT_GENERATE_VEP_INPUT_DB_NAME);
     }
 }

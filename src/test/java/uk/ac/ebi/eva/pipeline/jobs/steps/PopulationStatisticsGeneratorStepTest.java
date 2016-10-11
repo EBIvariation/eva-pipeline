@@ -56,7 +56,6 @@ import static uk.ac.ebi.eva.test.utils.JobTestUtils.restoreMongoDbFromDump;
 public class PopulationStatisticsGeneratorStepTest {
 
     private static final String SMALL_VCF_FILE = "/small20.vcf.gz";
-    private static final String STATS_DB = "VariantStatsConfigurationTest_vl"; //this name should be the same of the dump DB in /dump
 
     @Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
@@ -70,14 +69,13 @@ public class PopulationStatisticsGeneratorStepTest {
     @Test
     public void statisticsGeneratorStepShouldCalculateStats() throws IOException, InterruptedException {
         //and a valid variants load step already completed
-        String dump = PopulationStatisticsGeneratorStepTest.class.getResource("/dump/").getFile();
-        restoreMongoDbFromDump(dump, getClass().getSimpleName());
+        String dump = PopulationStatisticsGeneratorStepTest.class.getResource("/dump/VariantStatsConfigurationTest_vl").getFile();
+        restoreMongoDbFromDump(dump, jobOptions.getDbName());
 
         //Given a valid VCF input file
         String input = SMALL_VCF_FILE;
 
         pipelineOptions.put("input.vcf", input);
-        variantOptions.put(VariantStorageManager.DB_NAME, STATS_DB);
 
         VariantSource source = new VariantSource(
                 input,
@@ -121,7 +119,6 @@ public class PopulationStatisticsGeneratorStepTest {
         String input = SMALL_VCF_FILE;
 
         pipelineOptions.put("input.vcf", input);
-        variantOptions.put(VariantStorageManager.DB_NAME, STATS_DB);
 
         VariantSource source = new VariantSource(
                 input,
@@ -146,13 +143,14 @@ public class PopulationStatisticsGeneratorStepTest {
     @Before
     public void setUp() throws Exception {
         jobOptions.loadArgs();
+        jobOptions.setDbName(getClass().getSimpleName());
         pipelineOptions = jobOptions.getPipelineOptions();
         variantOptions = jobOptions.getVariantOptions();
     }
 
     @After
     public void tearDown() throws Exception {
-        JobTestUtils.cleanDBs(STATS_DB);
+        JobTestUtils.cleanDBs(jobOptions.getDbName());
     }
 
 }
