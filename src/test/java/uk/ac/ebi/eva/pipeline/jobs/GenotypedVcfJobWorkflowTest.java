@@ -38,6 +38,7 @@ import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
 import uk.ac.ebi.eva.pipeline.configuration.GenotypedVcfWorkflowConfiguration;
 import uk.ac.ebi.eva.pipeline.jobs.steps.VepAnnotationGeneratorStep;
 import uk.ac.ebi.eva.pipeline.jobs.steps.VepInputGeneratorStep;
+import uk.ac.ebi.eva.pipeline.jobs.flows.AnnotationFlow;
 import uk.ac.ebi.eva.pipeline.jobs.steps.AnnotationLoaderStep;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
 
@@ -125,7 +126,7 @@ public class GenotypedVcfJobWorkflowTest {
     public void optionalStepsShouldBeSkipped() throws Exception {
         initVariantConfigurationJob();
 
-        jobOptions.getPipelineOptions().put(AnnotationJob.SKIP_ANNOT, true);
+        jobOptions.getPipelineOptions().put(AnnotationFlow.SKIP_ANNOT, true);
         jobOptions.getPipelineOptions().put(PopulationStatisticsJob.SKIP_STATS, true);
 
         JobExecution execution = jobLauncherTestUtils.launchJob();
@@ -188,7 +189,7 @@ public class GenotypedVcfJobWorkflowTest {
     @Test
     public void annotationStepsShouldBeSkipped() throws Exception {
         initVariantConfigurationJob();
-        jobOptions.getPipelineOptions().put(AnnotationJob.SKIP_ANNOT, true);
+        jobOptions.getPipelineOptions().put(AnnotationFlow.SKIP_ANNOT, true);
 
         JobExecution execution = jobLauncherTestUtils.launchJob();
 

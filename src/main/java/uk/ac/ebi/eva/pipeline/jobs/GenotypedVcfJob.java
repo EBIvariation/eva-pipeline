@@ -63,7 +63,7 @@ public class GenotypedVcfJob extends CommonJobStepInitialization{
     @Autowired
     private JobBuilderFactory jobBuilderFactory;
     @Autowired
-    private Flow optionalAnnotationFlow;
+    private Flow annotationFlowOptional;
     @Autowired
     private Flow optionalStatisticsFlow;
     @Autowired
@@ -81,7 +81,7 @@ public class GenotypedVcfJob extends CommonJobStepInitialization{
 
         Flow parallelStatisticsAndAnnotation = new FlowBuilder<Flow>(PARALLEL_STATISTICS_AND_ANNOTATION)
                 .split(new SimpleAsyncTaskExecutor())
-                .add(optionalStatisticsFlow, optionalAnnotationFlow)
+                .add(optionalStatisticsFlow, annotationFlowOptional)
                 .build();
 
         FlowJobBuilder builder = jobBuilder

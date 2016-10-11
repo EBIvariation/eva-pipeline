@@ -33,6 +33,7 @@ import org.springframework.stereotype.Component;
 
 import uk.ac.ebi.eva.pipeline.jobs.AnnotationJob;
 import uk.ac.ebi.eva.pipeline.jobs.PopulationStatisticsJob;
+import uk.ac.ebi.eva.pipeline.jobs.flows.AnnotationFlow;
 
 import java.nio.file.Paths;
 import java.util.Properties;
@@ -216,7 +217,7 @@ public class JobOptions {
         pipelineOptions.put("config.db.user", dbUser);
         pipelineOptions.put("config.db.password", dbPassword);
         pipelineOptions.put("config.db.read-preference", readPreference);
-        pipelineOptions.put(AnnotationJob.SKIP_ANNOT, skipAnnot);
+        pipelineOptions.put(AnnotationFlow.SKIP_ANNOT, skipAnnot);
         pipelineOptions.put(PopulationStatisticsJob.SKIP_STATS, skipStats);
 
         String annotationFilesPrefix = studyId + "_" + fileId;
