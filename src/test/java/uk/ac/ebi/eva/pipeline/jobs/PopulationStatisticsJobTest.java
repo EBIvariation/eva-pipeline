@@ -75,6 +75,9 @@ public class PopulationStatisticsJobTest {
 
     @Test
     public void fullPopulationStatisticsJob() throws Exception {
+        String dump = PopulationStatisticsJobTest.class.getResource("/dump/VariantStatsConfigurationTest_vl").getFile();
+        JobTestUtils.restoreMongoDbFromDump(dump, jobOptions.getDbName());
+        
         //Given a valid VCF input file
         String input = SMALL_VCF_FILE;
 
@@ -90,8 +93,8 @@ public class PopulationStatisticsJobTest {
 
         variantOptions.put(VARIANT_SOURCE, source);
 
-        statsFile = new File(Paths.get(pipelineOptions.getString("output.dir.statistics")).resolve(VariantStorageManager.buildFilename(source))
-                + ".variants.stats.json.gz");
+        statsFile = new File(Paths.get(pipelineOptions.getString("output.dir.statistics"))
+                .resolve(VariantStorageManager.buildFilename(source)) + ".variants.stats.json.gz");
         statsFile.delete();
         assertFalse(statsFile.exists());  // ensure the stats file doesn't exist from previous executions
 
