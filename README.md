@@ -72,7 +72,7 @@ If using a persistent (not in-memory database), the following information needs 
 Other parameters are:
 
 * `config.db.read-preference`: In a distributed Mongo environment, replica to connect to (primary or secondary, default primary).
-* `--logging.level.embl.ebi.variation.eva`: DEBUG, INFO, WARN, ERROR supported among others. Recommended DEBUG.
+* `--logging.level.uk.ac.ebi.eva`: DEBUG, INFO, WARN, ERROR supported among others. Recommended DEBUG.
 * `--logging.level.org.opencb.opencga`: Recommended DEBUG.
 * `--logging.level.org.springframework`: Recommended INFO or WARN.
 
