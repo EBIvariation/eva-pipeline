@@ -15,13 +15,24 @@
  */
 package uk.ac.ebi.eva.pipeline.model;
 
+import org.springframework.data.annotation.PersistenceConstructor;
+import org.springframework.data.mongodb.core.index.CompoundIndex;
+import org.springframework.data.mongodb.core.index.CompoundIndexes;
+import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.util.Map;
 
 /**
  * @author Jose Miguel Mut Lopez &lt;jmmut@ebi.ac.uk&gt;
+ *
+ * setters have package visibility, the user should use the constructor.
  */
+@Document
+@CompoundIndexes({
+    @CompoundIndex(name = "vscid", def = "{'vid': 1, 'sid': 1, 'cid': 1}", unique = true)
+})
 public class PopulationStats {
 
     @Field(value = "vid") private String variantId;
@@ -36,11 +47,41 @@ public class PopulationStats {
     @Field(value = "missGt") private int missingGenotypes;
     @Field(value = "numGt") private Map<String, Integer> genotypeCount;
 
+    @PersistenceConstructor
+    public PopulationStats(String variantId,
+                           String cohortId,
+                           String studyId,
+                           double maf,
+                           double mgf,
+                           String mafAllele,
+                           String mgfGenotype,
+                           int missingAlleles,
+                           int missingGenotypes,
+                           Map<String, Integer> genotypeCount) {
+
+        setVariantId(variantId);
+        setCohortId(cohortId);
+        setStudyId(studyId);
+
+        setMaf(maf);
+        setMgf(mgf);
+        setMafAllele(mafAllele);
+        setMgfGenotype(mgfGenotype);
+
+        setMissingAlleles(missingAlleles);
+        setMissingGenotypes(missingGenotypes);
+        setGenotypeCount(genotypeCount);
+
+    }
+
     public String getVariantId() {
         return variantId;
     }
 
-    public void setVariantId(String variantId) {
+    void setVariantId(String variantId) {
+        if ("".equals(variantId)) {
+            throw new IllegalArgumentException("variantId (vid) should not be null");
+        }
         this.variantId = variantId;
     }
 
@@ -48,7 +89,10 @@ public class PopulationStats {
         return cohortId;
     }
 
-    public void setCohortId(String cohortId) {
+    void setCohortId(String cohortId) {
+        if ("".equals(cohortId)) {
+            throw new IllegalArgumentException("cohortId (cid) should not be null");
+        }
         this.cohortId = cohortId;
     }
 
@@ -56,7 +100,10 @@ public class PopulationStats {
         return studyId;
     }
 
-    public void setStudyId(String studyId) {
+    void setStudyId(String studyId) {
+        if ("".equals(studyId)) {
+            throw new IllegalArgumentException("studyId (sid) should not be null");
+        }
         this.studyId = studyId;
     }
 
@@ -64,7 +111,10 @@ public class PopulationStats {
         return maf;
     }
 
-    public void setMaf(double maf) {
+    void setMaf(double maf) {
+        if ((maf < 0.0 || maf > 1.0) && maf != -1.0) {
+            throw new IllegalArgumentException("minimum allele frequency (maf=" + maf + ") should be in range [0.0, 1.0] or -1.0 if undefined");
+        }
         this.maf = maf;
     }
 
@@ -72,7 +122,10 @@ public class PopulationStats {
         return mgf;
     }
 
-    public void setMgf(double mgf) {
+    void setMgf(double mgf) {
+        if ((mgf < 0.0 || mgf > 1.0) && mgf != -1.0) {
+            throw new IllegalArgumentException("minimum genotype frequency (mgf=" + mgf + ") should be in range [0.0, 1.0] or -1.0 if undefined");
+        }
         this.mgf = mgf;
     }
 
@@ -80,7 +133,7 @@ public class PopulationStats {
         return mafAllele;
     }
 
-    public void setMafAllele(String mafAllele) {
+    void setMafAllele(String mafAllele) {
         this.mafAllele = mafAllele;
     }
 
@@ -88,7 +141,7 @@ public class PopulationStats {
         return mgfGenotype;
     }
 
-    public void setMgfGenotype(String mgfGenotype) {
+    void setMgfGenotype(String mgfGenotype) {
         this.mgfGenotype = mgfGenotype;
     }
 
@@ -96,7 +149,10 @@ public class PopulationStats {
         return missingAlleles;
     }
 
-    public void setMissingAlleles(int missingAlleles) {
+    void setMissingAlleles(int missingAlleles) {
+        if (missingAlleles < 0 && missingAlleles != -1) {
+            throw new IllegalArgumentException("missing alleles (missAl = " + missingAlleles + ") should be in range [0, inf) or -1 if undefined");
+        }
         this.missingAlleles = missingAlleles;
     }
 
@@ -104,7 +160,10 @@ public class PopulationStats {
         return missingGenotypes;
     }
 
-    public void setMissingGenotypes(int missingGenotypes) {
+    void setMissingGenotypes(int missingGenotypes) {
+        if (missingGenotypes < 0 && missingGenotypes != -1) {
+            throw new IllegalArgumentException("missing genotypes (missGt = " + missingGenotypes + ") should be in range [0, inf) or -1 if undefined");
+        }
         this.missingGenotypes = missingGenotypes;
     }
 
@@ -112,7 +171,13 @@ public class PopulationStats {
         return genotypeCount;
     }
 
-    public void setGenotypeCount(Map<String, Integer> genotypeCount) {
+    void setGenotypeCount(Map<String, Integer> genotypeCount) {
+        for (Map.Entry<String, Integer> entry : genotypeCount.entrySet()) {
+            if (entry.getValue() < 0) {
+                throw new IllegalArgumentException("genotype count(numGT[" + entry.getKey() + "] = "
+                        + entry.getValue() + ") should be in range [0, inf) or -1 if undefined");
+            }
+        }
         this.genotypeCount = genotypeCount;
     }
 }

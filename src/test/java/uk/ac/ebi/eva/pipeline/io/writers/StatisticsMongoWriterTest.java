@@ -16,10 +16,9 @@
 package uk.ac.ebi.eva.pipeline.io.writers;
 
 
-import com.mongodb.DBCollection;
-import com.mongodb.DBCursor;
-import com.mongodb.DBObject;
-import com.mongodb.MongoClient;
+import com.mongodb.*;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.batch.item.file.mapping.JsonLineMapper;
@@ -36,7 +35,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import static junit.framework.TestCase.assertTrue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 
 /**
  * {@link StatisticsMongoWriter}
@@ -50,28 +52,20 @@ public class StatisticsMongoWriterTest {
     @Autowired
     public JobOptions jobOptions;
 
+    @Before
+    public void setUp() throws Exception {
+        JobTestUtils.cleanDBs(jobOptions.getDbName());
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        JobTestUtils.cleanDBs(jobOptions.getDbName());
+    }
+
     @Test
     public void shouldWriteAllFieldsIntoMongoDb() throws Exception {
-        String dbName = jobOptions.getDbName();
-        JobTestUtils.cleanDBs(dbName);
 
-        String statsPath = VariantData.getPopulationStatsPath();
-        JsonLineMapper mapper = new JsonLineMapper();
-        Map<String, Object> map = mapper.mapLine(statsPath, 0);
-        PopulationStats populationStats = new PopulationStats();
-        populationStats.setCohortId((String)map.get("cid"));
-        populationStats.setVariantId((String)map.get("vid"));
-        populationStats.setStudyId((String)map.get("sid"));
-        populationStats.setMaf((Double)map.get("maf"));
-        populationStats.setMgf((Double)map.get("mgf"));
-        populationStats.setMafAllele((String)map.get("mafAl"));
-        populationStats.setMgfGenotype((String)map.get("mgfGt"));
-        populationStats.setMissingAlleles((Integer) map.get("missAl"));
-        populationStats.setMissingGenotypes((Integer) map.get("missGt"));
-        populationStats.setGenotypeCount((Map<String, Integer>) map.get("numGt"));
-
-
-        List<PopulationStats> populationStatsList = Arrays.asList(populationStats);
+        List<PopulationStats> populationStatsList = buildPopulationStatsList();
 
         // do the actual writing
         StatisticsMongoWriter statisticsMongoWriter = new StatisticsMongoWriter(
@@ -81,23 +75,77 @@ public class StatisticsMongoWriterTest {
 
 
         // do the checks
-        MongoClient mongoClient = new MongoClient();
-        DBCollection statsCollection = mongoClient.getDB(dbName).getCollection(jobOptions.getDbCollectionsStatsName());
+        DB db = new MongoClient().getDB(jobOptions.getDbName());
+        DBCollection statsCollection = db.getCollection(jobOptions.getDbCollectionsStatsName());
 
-        // count documents in DB and check they have region (chr + start + end)
+        // count documents in DB and check they have at least the index fields (vid, sid, cid) and maf and genotypeCount
         DBCursor cursor = statsCollection.find();
 
         int count = 0;
         while (cursor.hasNext()) {
             count++;
             DBObject next = cursor.next();
-            assertTrue(next.get("cid") != null);
-            assertTrue(next.get("sid") != null);
-            assertTrue(next.get("vid") != null);
-            assertTrue(next.get("maf") != null);
-            assertTrue(next.get("numGt") != null);
+            assertNotNull(next.get("cid"));
+            assertNotNull(next.get("sid"));
+            assertNotNull(next.get("vid"));
+            assertNotNull(next.get("maf"));
+            assertNotNull(next.get("numGt"));
         }
         assertTrue(count > 0);
     }
 
+    @Test
+    public void shouldCreateIndexesInCollection() throws Exception {
+
+        List<PopulationStats> populationStatsList = buildPopulationStatsList();
+
+        // do the actual writing
+        StatisticsMongoWriter statisticsMongoWriter = new StatisticsMongoWriter(
+                jobOptions.getMongoOperations(), jobOptions.getDbCollectionsStatsName());
+
+        statisticsMongoWriter.write(populationStatsList);
+
+
+        // do the checks
+        DB db = new MongoClient().getDB(jobOptions.getDbName());
+        DBCollection statsCollection = db.getCollection(jobOptions.getDbCollectionsStatsName());
+
+        // check vid has an index
+        assertEquals("[{ \"v\" : 1 , \"key\" : { \"_id\" : 1} , \"name\" : \"_id_\" , \"ns\" : " +
+                        "\"variants.populationStats\"}, { \"v\" : 1 , \"unique\" : true , \"key\" : { \"vid\" : 1 , \"sid\" : 1 , \"cid\" : 1}" +
+                        " , \"name\" : \"vscid\" , \"ns\" : \"variants.populationStats\"}]",
+                statsCollection.getIndexInfo().toString());
+    }
+
+    @Test(expected = org.springframework.dao.DuplicateKeyException.class)
+    public void shouldFailIfduplicatedVidSidCid() throws Exception {
+
+        List<PopulationStats> populationStatsList = buildPopulationStatsList();
+
+        // do the actual writing
+        StatisticsMongoWriter statisticsMongoWriter = new StatisticsMongoWriter(
+                jobOptions.getMongoOperations(), jobOptions.getDbCollectionsStatsName());
+
+        statisticsMongoWriter.write(populationStatsList);
+        statisticsMongoWriter.write(populationStatsList);   // should throw
+    }
+
+    private List<PopulationStats> buildPopulationStatsList() throws Exception {
+        String statsPath = VariantData.getPopulationStatsPath();
+        JsonLineMapper mapper = new JsonLineMapper();
+        Map<String, Object> map = mapper.mapLine(statsPath, 0);
+        PopulationStats populationStats = new PopulationStats(
+                (String) map.get("vid"),
+                (String) map.get("cid"),
+                (String) map.get("sid"),
+                (Double) map.get("maf"),
+                (Double) map.get("mgf"),
+                (String) map.get("mafAl"),
+                (String) map.get("mgfGt"),
+                (Integer) map.get("missAl"),
+                (Integer) map.get("missGt"),
+                (Map<String, Integer>) map.get("numGt"));
+
+        return Arrays.asList(populationStats);
+    }
 }
