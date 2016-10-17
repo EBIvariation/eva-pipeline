@@ -37,17 +37,20 @@ public class PedLoaderStep implements Tasklet {
     @Autowired
     private JobOptions jobOptions;
 
+    private Pedigree pedigree;
+
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
-
         PedigreeReader pedigreeReader = new PedigreePedReader(jobOptions.getPipelineOptions().getString("input.pedigree"));
         pedigreeReader.open();
-        List<Pedigree> pedigrees = pedigreeReader.read();
+        pedigree = pedigreeReader.read().get(0);
         pedigreeReader.close();
 
-        //and then load pedigrees into mongo
-
         return RepeatStatus.FINISHED;
+    }
+
+    public Pedigree getPedigree() {
+        return pedigree;
     }
 
 }
