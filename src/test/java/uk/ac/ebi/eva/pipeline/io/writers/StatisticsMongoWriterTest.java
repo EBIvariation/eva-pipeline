@@ -27,7 +27,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import uk.ac.ebi.eva.pipeline.configuration.CommonConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
-import uk.ac.ebi.eva.pipeline.model.PopulationStats;
+import uk.ac.ebi.eva.pipeline.model.PopulationStatistics;
 import uk.ac.ebi.eva.test.data.VariantData;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
 
@@ -42,7 +42,7 @@ import static org.junit.Assert.assertTrue;
 
 /**
  * {@link StatisticsMongoWriter}
- * input: a List of {@link PopulationStats} to each call of `.write()`
+ * input: a List of {@link PopulationStatistics} to each call of `.write()`
  * output: the FeatureCoordinates get written in mongo, with at least: chromosome, start and end.
  */
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -68,13 +68,13 @@ public class StatisticsMongoWriterTest {
     @Test
     public void shouldWriteAllFieldsIntoMongoDb() throws Exception {
 
-        List<PopulationStats> populationStatsList = buildPopulationStatsList();
+        List<PopulationStatistics> populationStatisticsList = buildPopulationStatsList();
 
         // do the actual writing
         StatisticsMongoWriter statisticsMongoWriter = new StatisticsMongoWriter(
                 jobOptions.getMongoOperations(), jobOptions.getDbCollectionsStatsName());
 
-        statisticsMongoWriter.write(populationStatsList);
+        statisticsMongoWriter.write(populationStatisticsList);
 
 
         // do the checks
@@ -100,13 +100,13 @@ public class StatisticsMongoWriterTest {
     @Test
     public void shouldCreateIndexesInCollection() throws Exception {
 
-        List<PopulationStats> populationStatsList = buildPopulationStatsList();
+        List<PopulationStatistics> populationStatisticsList = buildPopulationStatsList();
 
         // do the actual writing
         StatisticsMongoWriter statisticsMongoWriter = new StatisticsMongoWriter(
                 jobOptions.getMongoOperations(), jobOptions.getDbCollectionsStatsName());
 
-        statisticsMongoWriter.write(populationStatsList);
+        statisticsMongoWriter.write(populationStatisticsList);
 
 
         // do the checks
@@ -115,29 +115,29 @@ public class StatisticsMongoWriterTest {
 
         // check vid has an index
         assertEquals("[{ \"v\" : 1 , \"key\" : { \"_id\" : 1} , \"name\" : \"_id_\" , \"ns\" : \"" + dbName +
-                ".populationStats\"}, { \"v\" : 1 , \"unique\" : true , \"key\" : { \"vid\" : 1 , \"sid\" : 1 , " +
-                "\"cid\" : 1} , \"name\" : \"vscid\" , \"ns\" : \"" + dbName + ".populationStats\"}]",
+                ".populationStatistics\"}, { \"v\" : 1 , \"unique\" : true , \"key\" : { \"vid\" : 1 , \"sid\" : 1 , " +
+                "\"cid\" : 1} , \"name\" : \"vscid\" , \"ns\" : \"" + dbName + ".populationStatistics\"}]",
                 statsCollection.getIndexInfo().toString());
     }
 
     @Test(expected = org.springframework.dao.DuplicateKeyException.class)
     public void shouldFailIfduplicatedVidSidCid() throws Exception {
 
-        List<PopulationStats> populationStatsList = buildPopulationStatsList();
+        List<PopulationStatistics> populationStatisticsList = buildPopulationStatsList();
 
         // do the actual writing
         StatisticsMongoWriter statisticsMongoWriter = new StatisticsMongoWriter(
                 jobOptions.getMongoOperations(), jobOptions.getDbCollectionsStatsName());
 
-        statisticsMongoWriter.write(populationStatsList);
-        statisticsMongoWriter.write(populationStatsList);   // should throw
+        statisticsMongoWriter.write(populationStatisticsList);
+        statisticsMongoWriter.write(populationStatisticsList);   // should throw
     }
 
-    private List<PopulationStats> buildPopulationStatsList() throws Exception {
+    private List<PopulationStatistics> buildPopulationStatsList() throws Exception {
         String statsPath = VariantData.getPopulationStatsPath();
         JsonLineMapper mapper = new JsonLineMapper();
         Map<String, Object> map = mapper.mapLine(statsPath, 0);
-        PopulationStats populationStats = new PopulationStats(
+        PopulationStatistics populationStatistics = new PopulationStatistics(
                 (String) map.get("vid"),
                 (String) map.get("cid"),
                 (String) map.get("sid"),
@@ -149,6 +149,6 @@ public class StatisticsMongoWriterTest {
                 (Integer) map.get("missGt"),
                 (Map<String, Integer>) map.get("numGt"));
 
-        return Arrays.asList(populationStats);
+        return Arrays.asList(populationStatistics);
     }
 }

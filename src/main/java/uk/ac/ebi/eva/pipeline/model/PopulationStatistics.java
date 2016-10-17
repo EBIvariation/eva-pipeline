@@ -33,7 +33,7 @@ import java.util.Map;
 @CompoundIndexes({
     @CompoundIndex(name = "vscid", def = "{'vid': 1, 'sid': 1, 'cid': 1}", unique = true)
 })
-public class PopulationStats {
+public class PopulationStatistics {
 
     @Field(value = "vid") private String variantId;
     @Field(value = "cid") private String cohortId;
@@ -48,16 +48,16 @@ public class PopulationStats {
     @Field(value = "numGt") private Map<String, Integer> genotypeCount;
 
     @PersistenceConstructor
-    public PopulationStats(String variantId,
-                           String cohortId,
-                           String studyId,
-                           double maf,
-                           double mgf,
-                           String mafAllele,
-                           String mgfGenotype,
-                           int missingAlleles,
-                           int missingGenotypes,
-                           Map<String, Integer> genotypeCount) {
+    public PopulationStatistics(String variantId,
+                                String cohortId,
+                                String studyId,
+                                double maf,
+                                double mgf,
+                                String mafAllele,
+                                String mgfGenotype,
+                                int missingAlleles,
+                                int missingGenotypes,
+                                Map<String, Integer> genotypeCount) {
 
         setVariantId(variantId);
         setCohortId(cohortId);

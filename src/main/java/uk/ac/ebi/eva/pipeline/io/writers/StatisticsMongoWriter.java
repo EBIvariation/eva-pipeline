@@ -18,15 +18,15 @@ package uk.ac.ebi.eva.pipeline.io.writers;
 
 import org.springframework.batch.item.data.MongoItemWriter;
 import org.springframework.data.mongodb.core.MongoOperations;
-import uk.ac.ebi.eva.pipeline.model.PopulationStats;
+import uk.ac.ebi.eva.pipeline.model.PopulationStatistics;
 
 /**
  * @author Jose Miguel Mut Lopez &lt;jmmut@ebi.ac.uk&gt;
  *
- * Write a list of {@link PopulationStats} into MongoDB
+ * Write a list of {@link PopulationStatistics} into MongoDB
  *
  */
-public class StatisticsMongoWriter extends MongoItemWriter<PopulationStats> {
+public class StatisticsMongoWriter extends MongoItemWriter<PopulationStatistics> {
 
     public StatisticsMongoWriter(MongoOperations mongoOperations, String collection) {
         super();

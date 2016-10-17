@@ -26,7 +26,7 @@ public class VariantData {
 
     private static final String VARIANT_WITHOUT_ANNOTATION_PATH = "/annotation/VariantWithOutAnnotation";
     private static final String VARIANT_WITH_ANNOTATION_PATH = "/annotation/VariantWithAnnotation";
-    private static final String POPULATION_STATS_PATH = "/statistics/PopulationStats.json";
+    private static final String POPULATION_STATS_PATH = "/statistics/PopulationStatistics.json";
 
     public static String getVariantWithoutAnnotation() throws IOException {
         URL variantWithNoAnnotationUrl = VariantData.class.getResource(VARIANT_WITHOUT_ANNOTATION_PATH);
