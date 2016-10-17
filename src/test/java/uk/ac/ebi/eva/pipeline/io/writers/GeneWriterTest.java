@@ -48,7 +48,7 @@ import static junit.framework.TestCase.assertTrue;
 public class GeneWriterTest {
 
     @Autowired
-    public JobOptions jobOptions;
+    private JobOptions jobOptions;
 
     @Test
     public void shouldWriteAllFieldsIntoMongoDb() throws Exception {

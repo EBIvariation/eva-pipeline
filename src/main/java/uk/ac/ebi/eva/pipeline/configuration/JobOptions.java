@@ -279,6 +279,13 @@ public class JobOptions {
         return getPipelineOptions().getString(DB_NAME);
     }
 
+    public void setDbName(String dbName) {
+        this.dbName = dbName;
+        getVariantOptions().put(VariantStorageManager.DB_NAME, dbName);
+        getVariantOptions().put(MongoDBVariantStorageManager.OPENCGA_STORAGE_MONGODB_VARIANT_DB_NAME, dbName);
+        getPipelineOptions().put(DB_NAME, dbName);
+    }
+
     public String getVepOutput() {
         return getPipelineOptions().getString(VEP_OUTPUT);
     }

@@ -50,16 +50,19 @@ import static org.junit.Assert.assertTrue;
 public class StatisticsMongoWriterTest {
 
     @Autowired
-    public JobOptions jobOptions;
+    private JobOptions jobOptions;
+    private String dbName;
 
     @Before
     public void setUp() throws Exception {
-        JobTestUtils.cleanDBs(jobOptions.getDbName());
+        dbName = getClass().getSimpleName();
+        jobOptions.setDbName(dbName);
+        JobTestUtils.cleanDBs(dbName);
     }
 
     @After
     public void tearDown() throws Exception {
-        JobTestUtils.cleanDBs(jobOptions.getDbName());
+        JobTestUtils.cleanDBs(dbName);
     }
 
     @Test
@@ -75,7 +78,7 @@ public class StatisticsMongoWriterTest {
 
 
         // do the checks
-        DB db = new MongoClient().getDB(jobOptions.getDbName());
+        DB db = new MongoClient().getDB(dbName);
         DBCollection statsCollection = db.getCollection(jobOptions.getDbCollectionsStatsName());
 
         // count documents in DB and check they have at least the index fields (vid, sid, cid) and maf and genotypeCount
@@ -107,13 +110,13 @@ public class StatisticsMongoWriterTest {
 
 
         // do the checks
-        DB db = new MongoClient().getDB(jobOptions.getDbName());
+        DB db = new MongoClient().getDB(dbName);
         DBCollection statsCollection = db.getCollection(jobOptions.getDbCollectionsStatsName());
 
         // check vid has an index
-        assertEquals("[{ \"v\" : 1 , \"key\" : { \"_id\" : 1} , \"name\" : \"_id_\" , \"ns\" : " +
-                        "\"variants.populationStats\"}, { \"v\" : 1 , \"unique\" : true , \"key\" : { \"vid\" : 1 , \"sid\" : 1 , \"cid\" : 1}" +
-                        " , \"name\" : \"vscid\" , \"ns\" : \"variants.populationStats\"}]",
+        assertEquals("[{ \"v\" : 1 , \"key\" : { \"_id\" : 1} , \"name\" : \"_id_\" , \"ns\" : \"" + dbName +
+                ".populationStats\"}, { \"v\" : 1 , \"unique\" : true , \"key\" : { \"vid\" : 1 , \"sid\" : 1 , " +
+                "\"cid\" : 1} , \"name\" : \"vscid\" , \"ns\" : \"" + dbName + ".populationStats\"}]",
                 statsCollection.getIndexInfo().toString());
     }
 
