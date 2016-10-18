@@ -39,7 +39,7 @@ public class VariantData {
         return FileUtils.readFileToString(new File(variantWithAnnotationUrl.getFile()));
     }
 
-    public static String getPopulationStatsPath() throws IOException {
+    public static String getPopulationStatistics() throws IOException {
         URL stats = AnnotationJobTest.class.getResource(POPULATION_STATS_PATH);
         return FileUtils.readFileToString(new File(stats.getFile()));
     }

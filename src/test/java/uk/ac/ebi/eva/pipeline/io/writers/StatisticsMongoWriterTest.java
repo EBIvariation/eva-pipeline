@@ -67,15 +67,16 @@ public class StatisticsMongoWriterTest {
 
     @Test
     public void shouldWriteAllFieldsIntoMongoDb() throws Exception {
-
         List<PopulationStatistics> populationStatisticsList = buildPopulationStatsList();
 
         // do the actual writing
         StatisticsMongoWriter statisticsMongoWriter = new StatisticsMongoWriter(
                 jobOptions.getMongoOperations(), jobOptions.getDbCollectionsStatsName());
 
-        statisticsMongoWriter.write(populationStatisticsList);
-
+        int n = 1;
+        for (int i = 0; i < n; i++) {
+            statisticsMongoWriter.write(populationStatisticsList);
+        }
 
         // do the checks
         DB db = new MongoClient().getDB(dbName);
@@ -94,12 +95,11 @@ public class StatisticsMongoWriterTest {
             assertNotNull(next.get("maf"));
             assertNotNull(next.get("numGt"));
         }
-        assertTrue(count > 0);
+        assertEquals(n, count);
     }
 
     @Test
     public void shouldCreateIndexesInCollection() throws Exception {
-
         List<PopulationStatistics> populationStatisticsList = buildPopulationStatsList();
 
         // do the actual writing
@@ -122,7 +122,6 @@ public class StatisticsMongoWriterTest {
 
     @Test(expected = org.springframework.dao.DuplicateKeyException.class)
     public void shouldFailIfduplicatedVidSidCid() throws Exception {
-
         List<PopulationStatistics> populationStatisticsList = buildPopulationStatsList();
 
         // do the actual writing
@@ -134,7 +133,7 @@ public class StatisticsMongoWriterTest {
     }
 
     private List<PopulationStatistics> buildPopulationStatsList() throws Exception {
-        String statsPath = VariantData.getPopulationStatsPath();
+        String statsPath = VariantData.getPopulationStatistics();
         JsonLineMapper mapper = new JsonLineMapper();
         Map<String, Object> map = mapper.mapLine(statsPath, 0);
         PopulationStatistics populationStatistics = new PopulationStatistics(

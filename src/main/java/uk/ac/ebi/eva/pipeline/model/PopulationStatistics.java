@@ -79,7 +79,7 @@ public class PopulationStatistics {
     }
 
     void setVariantId(String variantId) {
-        if ("".equals(variantId)) {
+        if (variantId == null || variantId.isEmpty()) {
             throw new IllegalArgumentException("variantId (vid) should not be null");
         }
         this.variantId = variantId;
@@ -90,7 +90,7 @@ public class PopulationStatistics {
     }
 
     void setCohortId(String cohortId) {
-        if ("".equals(cohortId)) {
+        if (cohortId == null || cohortId.isEmpty()) {
             throw new IllegalArgumentException("cohortId (cid) should not be null");
         }
         this.cohortId = cohortId;
@@ -101,7 +101,7 @@ public class PopulationStatistics {
     }
 
     void setStudyId(String studyId) {
-        if ("".equals(studyId)) {
+        if (studyId == null || studyId.isEmpty()) {
             throw new IllegalArgumentException("studyId (sid) should not be null");
         }
         this.studyId = studyId;
@@ -113,7 +113,7 @@ public class PopulationStatistics {
 
     void setMaf(double maf) {
         if ((maf < 0.0 || maf > 1.0) && maf != -1.0) {
-            throw new IllegalArgumentException("minimum allele frequency (maf=" + maf + ") should be in range [0.0, 1.0] or -1.0 if undefined");
+            throw new IllegalArgumentException("Minimum allele frequency (maf=" + maf + ") should be in range [0.0, 1.0] or -1.0 if undefined");
         }
         this.maf = maf;
     }
@@ -124,7 +124,7 @@ public class PopulationStatistics {
 
     void setMgf(double mgf) {
         if ((mgf < 0.0 || mgf > 1.0) && mgf != -1.0) {
-            throw new IllegalArgumentException("minimum genotype frequency (mgf=" + mgf + ") should be in range [0.0, 1.0] or -1.0 if undefined");
+            throw new IllegalArgumentException("Minimum genotype frequency (mgf=" + mgf + ") should be in range [0.0, 1.0] or -1.0 if undefined");
         }
         this.mgf = mgf;
     }
@@ -151,7 +151,7 @@ public class PopulationStatistics {
 
     void setMissingAlleles(int missingAlleles) {
         if (missingAlleles < 0 && missingAlleles != -1) {
-            throw new IllegalArgumentException("missing alleles (missAl = " + missingAlleles + ") should be in range [0, inf) or -1 if undefined");
+            throw new IllegalArgumentException("Missing alleles (missAl = " + missingAlleles + ") should be in range [0, inf) or -1 if undefined");
         }
         this.missingAlleles = missingAlleles;
     }
@@ -162,7 +162,7 @@ public class PopulationStatistics {
 
     void setMissingGenotypes(int missingGenotypes) {
         if (missingGenotypes < 0 && missingGenotypes != -1) {
-            throw new IllegalArgumentException("missing genotypes (missGt = " + missingGenotypes + ") should be in range [0, inf) or -1 if undefined");
+            throw new IllegalArgumentException("Missing genotypes (missGt = " + missingGenotypes + ") should be in range [0, inf) or -1 if undefined");
         }
         this.missingGenotypes = missingGenotypes;
     }
@@ -174,7 +174,7 @@ public class PopulationStatistics {
     void setGenotypeCount(Map<String, Integer> genotypeCount) {
         for (Map.Entry<String, Integer> entry : genotypeCount.entrySet()) {
             if (entry.getValue() < 0) {
-                throw new IllegalArgumentException("genotype count(numGT[" + entry.getKey() + "] = "
+                throw new IllegalArgumentException("Genotype count (numGT[" + entry.getKey() + "] = "
                         + entry.getValue() + ") should be in range [0, inf) or -1 if undefined");
             }
         }
