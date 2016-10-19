@@ -18,6 +18,7 @@ package uk.ac.ebi.eva.pipeline.jobs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.Job;
+import org.springframework.batch.core.JobExecutionListener;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.job.builder.FlowJobBuilder;
@@ -29,10 +30,9 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-
+import org.springframework.context.annotation.Scope;
 import uk.ac.ebi.eva.pipeline.jobs.steps.VariantLoaderStep;
-
-import javax.annotation.PostConstruct;
+import uk.ac.ebi.eva.pipeline.listeners.VariantOptionsConfigurerListener;
 
 /**
  *  Complete pipeline workflow for aggregated VCF.
@@ -57,12 +57,6 @@ public class AggregatedVcfJob extends CommonJobStepInitialization{
     private static final boolean CALCULATE_STATS = true;
     private static final boolean INCLUDE_STATS = true;
 
-    @PostConstruct
-    public void configureDefaultVariantOptions() {
-        getJobOptions().configureGenotypesStorage(INCLUDE_SAMPLES, COMPRESS_GENOTYPES);
-        getJobOptions().configureStatisticsStorage(CALCULATE_STATS, INCLUDE_STATS);
-    }
-
     @Autowired
     private JobBuilderFactory jobBuilderFactory;
     @Autowired
@@ -77,7 +71,8 @@ public class AggregatedVcfJob extends CommonJobStepInitialization{
 
         JobBuilder jobBuilder = jobBuilderFactory
                 .get(jobName)
-                .incrementer(new RunIdIncrementer());
+                .incrementer(new RunIdIncrementer())
+                .listener(aggregatedJobListener());
 
         FlowJobBuilder builder = jobBuilder
                 .flow(normalize())
@@ -88,4 +83,12 @@ public class AggregatedVcfJob extends CommonJobStepInitialization{
         return builder.build();
     }
 
+    @Bean
+    @Scope("prototype")
+    public JobExecutionListener aggregatedJobListener() {
+        return new VariantOptionsConfigurerListener(INCLUDE_SAMPLES,
+                COMPRESS_GENOTYPES,
+                CALCULATE_STATS,
+                INCLUDE_STATS);
+    }
 }
