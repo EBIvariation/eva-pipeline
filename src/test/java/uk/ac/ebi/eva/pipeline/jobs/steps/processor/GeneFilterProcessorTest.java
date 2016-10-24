@@ -18,9 +18,9 @@ package uk.ac.ebi.eva.pipeline.jobs.steps.processor;
 import org.junit.Test;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.test.MetaDataInstanceFactory;
+import uk.ac.ebi.eva.commons.models.data.FeatureCoordinates;
 import uk.ac.ebi.eva.pipeline.io.readers.GeneReader;
 import uk.ac.ebi.eva.pipeline.jobs.steps.processors.GeneFilterProcessor;
-import uk.ac.ebi.eva.pipeline.model.FeatureCoordinates;
 import uk.ac.ebi.eva.test.data.GtfStaticTestData;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
 

@@ -32,7 +32,7 @@ import uk.ac.ebi.eva.pipeline.io.writers.GeneWriter;
 import uk.ac.ebi.eva.pipeline.io.mappers.GeneLineMapper;
 import uk.ac.ebi.eva.pipeline.jobs.steps.processors.GeneFilterProcessor;
 import uk.ac.ebi.eva.pipeline.listeners.SkippedItemListener;
-import uk.ac.ebi.eva.pipeline.model.FeatureCoordinates;
+import uk.ac.ebi.eva.commons.models.data.FeatureCoordinates;
 
 import java.io.IOException;
 

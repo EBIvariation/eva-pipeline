@@ -21,8 +21,13 @@
         <biodata.version>0.4.5</biodata.version>
         <cellbase.version>3.1.3</cellbase.version>
     </properties>
-    
+
     <dependencies>
+        <dependency>
+            <groupId>uk.ac.ebi.eva</groupId>
+            <artifactId>variation-commons</artifactId>
+            <version>0.1</version>
+        </dependency>
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>

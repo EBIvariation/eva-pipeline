@@ -25,10 +25,10 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import uk.ac.ebi.eva.commons.models.data.FeatureCoordinates;
 import uk.ac.ebi.eva.pipeline.configuration.DatabaseInitializationConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
 import uk.ac.ebi.eva.pipeline.io.mappers.GeneLineMapper;
-import uk.ac.ebi.eva.pipeline.model.FeatureCoordinates;
 import uk.ac.ebi.eva.test.data.GtfStaticTestData;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
 

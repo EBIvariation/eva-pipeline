@@ -17,7 +17,7 @@ package uk.ac.ebi.eva.pipeline.io.writers;
 
 import org.springframework.batch.item.data.MongoItemWriter;
 import org.springframework.data.mongodb.core.MongoOperations;
-import uk.ac.ebi.eva.pipeline.model.FeatureCoordinates;
+import uk.ac.ebi.eva.commons.models.data.FeatureCoordinates;
 
 /**
  * @author Jose Miguel Mut Lopez &lt;jmmut@ebi.ac.uk&gt;
