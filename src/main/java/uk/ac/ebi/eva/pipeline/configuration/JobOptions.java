@@ -300,4 +300,8 @@ public class JobOptions {
         getPipelineOptions().put(APP_VEP_PATH, appVepPath);
     }
 
+    public String getCompressExtension() {
+        return compressExtension;
+    }
+
 }

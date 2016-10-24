@@ -36,7 +36,9 @@ import java.util.zip.GZIPInputStream;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.opencb.biodata.models.variant.Variant;
 import org.opencb.biodata.models.variant.VariantSource;
@@ -49,11 +51,10 @@ import org.opencb.opencga.storage.core.variant.adaptors.VariantDBAdaptor;
 import org.opencb.opencga.storage.core.variant.adaptors.VariantDBIterator;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.ExitStatus;
-import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecution;
+import org.springframework.batch.core.JobParameters;
+import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.StepExecution;
-import org.springframework.batch.core.launch.JobLauncher;
-import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.IntegrationTest;
@@ -75,9 +76,6 @@ import uk.ac.ebi.eva.test.utils.JobTestUtils;
  * and avoid NoUniqueBeanDefinitionException. There are also other solutions like:
  *  - http://stackoverflow.com/questions/29655796/how-can-i-qualify-an-autowired-setter-that-i-dont-own
  *  - https://jira.spring.io/browse/BATCH-2366
- *
- * TODO:
- * FILE_WRONG_NO_ALT should be renamed because the alt allele is not missing but is the same as the reference
  */
 @IntegrationTest
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -90,39 +88,29 @@ public class GenotypedVcfJobTest {
     @Autowired
     private JobOptions jobOptions;
 
-    private String input;
-    private String outputDir;
-    private String compressExtension;
     private String dbName;
     private String vepInput;
     private String vepOutput;
 
+    @Rule
+    public TemporaryFolder outputFolder = new TemporaryFolder();
+    
     private static String opencgaHome = System.getenv("OPENCGA_HOME") != null ? System.getenv("OPENCGA_HOME") : "/opt/opencga";
 
     @Test
     public void fullGenotypedVcfJob() throws Exception {
-        String inputFile = GenotypedVcfJobTest.class.getResource(input).getFile();
+        final String inputFilePath = "/job-genotyped/small20.vcf.gz";
+        String inputFile = GenotypedVcfJobTest.class.getResource(inputFilePath).getFile();
         String mockVep = GenotypedVcfJobTest.class.getResource("/mockvep.pl").getFile();
 
-        jobOptions.getPipelineOptions().put("input.vcf", inputFile);
+        jobOptions.getPipelineOptions().put("output.dir", outputFolder.getRoot().getCanonicalPath());
+        jobOptions.getPipelineOptions().put("output.dir.statistics", outputFolder.getRoot().getCanonicalPath());
         jobOptions.getPipelineOptions().put("app.vep.path", mockVep);
 
         Config.setOpenCGAHome(opencgaHome);
 
-        // transformedVcf file init
-        String transformedVcf = outputDir + input + ".variants.json" + compressExtension;
-        File transformedVcfFile = new File(transformedVcf);
-        transformedVcfFile.delete();
-        assertFalse(transformedVcfFile.exists());
-
-        //stats file init
-        VariantSource source = (VariantSource) jobOptions.getVariantOptions().get(VariantStorageManager.VARIANT_SOURCE);
-        File statsFile = new File(Paths.get(outputDir).resolve(VariantStorageManager.buildFilename(source))
-                + ".variants.stats.json.gz");
-        statsFile.delete();
-        assertFalse(statsFile.exists());  // ensure the stats file doesn't exist from previous executions
-
-        // annotation files init
+        // Annotation files initialization / clean-up
+        // TODO Write these to the temporary folder after fixing AnnotationFlatItemReader
         File vepInputFile = new File(vepInput);
         vepInputFile.delete();
         assertFalse(vepInputFile.exists());
@@ -131,36 +119,40 @@ public class GenotypedVcfJobTest {
         vepOutputFile.delete();
         assertFalse(vepOutputFile.exists());
 
-        VariantDBIterator iterator;
-
         // Run the Job
-        JobExecution jobExecution = jobLauncherTestUtils.launchJob();
+        JobParameters jobParameters = new JobParametersBuilder()
+                .addString("input.vcf", inputFile)
+                .addString("output.dir", outputFolder.getRoot().getCanonicalPath())
+                .toJobParameters();
+        JobExecution jobExecution = jobLauncherTestUtils.launchJob(jobParameters);
 
         assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
         assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());
 
+        VariantDBIterator iterator;
+        
         // 1 transform step: check transformed file
+        String transformedVcf = JobTestUtils.getTransformedOutputPath(
+                Paths.get(inputFile).getFileName(), jobOptions.getCompressExtension(), outputFolder.getRoot().getCanonicalPath());
         long transformedLinesCount = getLines(new GZIPInputStream(new FileInputStream(transformedVcf)));
         assertEquals(300, transformedLinesCount);
 
         // 2 load step: check ((documents in DB) == (lines in transformed file))
-        //variantStorageManager = StorageManagerFactory.getVariantStorageManager();
-        //variantDBAdaptor = variantStorageManager.getDBAdaptor(dbName, null);
         iterator = getVariantDBIterator();
         assertEquals(transformedLinesCount, count(iterator));
 
         // 3 create stats step
+        VariantSource source = (VariantSource) jobOptions.getVariantOptions().get(VariantStorageManager.VARIANT_SOURCE);
+        File statsFile = new File(Paths.get(outputFolder.getRoot().getCanonicalPath())
+                .resolve(VariantStorageManager.buildFilename(source)) + ".variants.stats.json.gz");
         assertTrue(statsFile.exists());
 
         // 4 load stats step: check ((documents in DB) == (lines in transformed file))
-        //variantStorageManager = StorageManagerFactory.getVariantStorageManager();
-        //variantDBAdaptor = variantStorageManager.getDBAdaptor(dbName, null);
         iterator = getVariantDBIterator();
         assertEquals(transformedLinesCount, count(iterator));
 
         // check the DB docs have the field "st"
         iterator = getVariantDBIterator();
-
         assertEquals(1, iterator.next().getSourceEntries().values().iterator().next().getCohortStats().size());
 
         // 5 annotation flow
@@ -185,6 +177,9 @@ public class GenotypedVcfJobTest {
         }
         assertNull(testLine); // if both files have the same length testReader should be after the last line
 
+        testReader.close();
+        actualReader.close();
+        
         // 6 annotation create step
         assertTrue(vepInputFile.exists());
         assertTrue(vepOutputFile.exists());
@@ -195,7 +190,7 @@ public class GenotypedVcfJobTest {
         // 8 Annotation load step: check documents in DB have annotation (only consequence type)
         iterator = getVariantDBIterator();
 
-        int cnt=0;
+        int cnt = 0;
         int consequenceTypeCount = 0;
         while (iterator.hasNext()) {
             cnt++;
@@ -220,9 +215,6 @@ public class GenotypedVcfJobTest {
     public void setUp() throws Exception {
         jobOptions.loadArgs();
 
-        input = jobOptions.getPipelineOptions().getString("input.vcf");
-        outputDir = jobOptions.getPipelineOptions().getString("output.dir");
-        compressExtension = jobOptions.getPipelineOptions().getString("compressExtension");
         dbName = jobOptions.getPipelineOptions().getString("db.name");
         vepInput = jobOptions.getPipelineOptions().getString("vep.input");
         vepOutput = jobOptions.getPipelineOptions().getString("vep.output");

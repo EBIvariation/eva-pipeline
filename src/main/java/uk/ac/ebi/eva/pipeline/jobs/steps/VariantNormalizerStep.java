@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 EMBL - European Bioinformatics Institute
+ * Copyright 2015-2016 EMBL - European Bioinformatics Institute
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,9 @@
  */
 package uk.ac.ebi.eva.pipeline.jobs.steps;
 
+import java.net.URI;
+import java.util.Map;
+
 import org.opencb.datastore.core.ObjectMap;
 import org.opencb.opencga.storage.core.StorageManagerFactory;
 import org.opencb.opencga.storage.core.variant.VariantStorageManager;
@@ -27,50 +30,41 @@ import org.springframework.batch.repeat.RepeatStatus;
 
 import uk.ac.ebi.eva.utils.URLHelper;
 
-import java.net.URI;
-
 /**
  *
- * @author Jose Miguel Mut Lopez &lt;jmmut@ebi.ac.uk&gt;
+ * @author Jose Miguel Mut Lopez
+ * @author Cristina Yenyxe Gonzalez Garcia
  *
  * Tasklet that normalizes variants. To see the applied rules please refer to:
  *
  * @see <a href="www.ebi.ac.uk/eva/?FAQ">www.ebi.ac.uk/eva/?FAQ</a>
  * @see <a href="https://docs.google.com/presentation/d/1WqSiT5AEEQF9jdIewdYIp-I0G5ozkFP3IikfCJZO1dc/edit#slide=id.ge1548f905_0_592">EVA FAQ</a>
  *
- * Input: vcf file
- * Output: transformed variants file (variants.json.gz)
+ * Input: VCF file
+ * Output: transformed variants JSON file (variants.json.gz)
  */
 public class VariantNormalizerStep implements Tasklet {
+
     private static final Logger logger = LoggerFactory.getLogger(VariantNormalizerStep.class);
 
     private final ObjectMap variantOptions;
-    private final ObjectMap pipelineOptions;
 
-    public VariantNormalizerStep(ObjectMap variantOptions, ObjectMap pipelineOptions) {
-        this.variantOptions = variantOptions;
-        this.pipelineOptions = pipelineOptions;
+    public VariantNormalizerStep(ObjectMap variantOptions) {
+      this.variantOptions = variantOptions;
     }
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
+        Map<String, Object> jobParameters = chunkContext.getStepContext().getJobParameters();
 
-        URI outdirUri = URLHelper.createUri(pipelineOptions.getString("output.dir"));
-        URI nextFileUri = URLHelper.createUri(pipelineOptions.getString("input.vcf"));
-        URI pedigreeUri = pipelineOptions.getString("input.pedigree") != null ? URLHelper.createUri(pipelineOptions.getString("input.pedigree")) : null;
+        URI outdirUri = URLHelper.createUri(String.valueOf(jobParameters.get("output.dir")));
+        URI inputFileUri = URLHelper.createUri(String.valueOf(jobParameters.get("input.vcf")));
+        URI pedigreeUri = jobParameters.get("input.pedigree") != null ? URLHelper.createUri(String.valueOf(jobParameters.get("input.pedigree"))) : null;
 
-        logger.info("Transform file {} to {}", pipelineOptions.getString("input.vcf"), pipelineOptions.getString("output.dir"));
+        logger.info("Normalizing file {} into folder {}", inputFileUri.toString(), outdirUri.toString());
 
-        logger.info("Extract variants '{}'", nextFileUri);
         VariantStorageManager variantStorageManager = StorageManagerFactory.getVariantStorageManager();
-        variantStorageManager.extract(nextFileUri, outdirUri, variantOptions);
-
-        logger.info("PreTransform variants '{}'", nextFileUri);
-        variantStorageManager.preTransform(nextFileUri, variantOptions);
-        logger.info("Transform variants '{}'", nextFileUri);
-        variantStorageManager.transform(nextFileUri, pedigreeUri, outdirUri, variantOptions);
-        logger.info("PostTransform variants '{}'", nextFileUri);
-        variantStorageManager.postTransform(nextFileUri, variantOptions);
+        variantStorageManager.transform(inputFileUri, pedigreeUri, outdirUri, variantOptions);
         return RepeatStatus.FINISHED;
     }
 

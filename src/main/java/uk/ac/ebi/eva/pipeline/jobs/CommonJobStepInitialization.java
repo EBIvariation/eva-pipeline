@@ -52,7 +52,6 @@ public abstract class CommonJobStepInitialization {
      * @param tasklet to be initialized with common configuration
      */
     protected void initStep(final TaskletStepBuilder tasklet) {
-
         boolean allowStartIfComplete  = getPipelineOptions().getBoolean("config.restartability.allow");
 
         // true: every job execution will do this step, even if this step is already COMPLETED
@@ -70,9 +69,11 @@ public abstract class CommonJobStepInitialization {
     @Bean
     @Scope("prototype")
     protected Step normalize() {
-        return generateStep(NORMALIZE_VARIANTS, new VariantNormalizerStep(getVariantOptions(), getPipelineOptions()));
+        return generateStep(NORMALIZE_VARIANTS, new VariantNormalizerStep(getVariantOptions()));
     }
 
+    @Bean
+    @Scope("prototype")
     protected Step load(VariantLoaderStep variantLoaderStep) {
         return generateStep(LOAD_VARIANTS, variantLoaderStep);
     }
