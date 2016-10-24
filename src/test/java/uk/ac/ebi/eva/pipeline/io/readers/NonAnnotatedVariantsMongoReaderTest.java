@@ -15,9 +15,12 @@
  */
 package uk.ac.ebi.eva.pipeline.io.readers;
 
-import com.mongodb.DBCollection;
-import com.mongodb.DBObject;
-import com.mongodb.MongoClient;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+import java.io.IOException;
+import java.net.UnknownHostException;
 
 import org.junit.After;
 import org.junit.Before;
@@ -29,16 +32,16 @@ import org.springframework.batch.test.MetaDataInstanceFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+
+import com.mongodb.DBCollection;
+import com.mongodb.DBObject;
+import com.mongodb.MongoClient;
+
 import uk.ac.ebi.eva.pipeline.configuration.AnnotationConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
 import uk.ac.ebi.eva.pipeline.jobs.AnnotationJob;
 import uk.ac.ebi.eva.test.data.VariantData;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
-
-import java.io.IOException;
-import java.net.UnknownHostException;
-
-import static junit.framework.TestCase.*;
 
 /**
  * {@link NonAnnotatedVariantsMongoReader}

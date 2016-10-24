@@ -15,7 +15,15 @@
  */
 package uk.ac.ebi.eva.pipeline.jobs.steps;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static uk.ac.ebi.eva.test.utils.JobTestUtils.makeGzipFile;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.util.zip.GZIPInputStream;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -27,19 +35,13 @@ import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+
 import uk.ac.ebi.eva.pipeline.configuration.AnnotationConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
 import uk.ac.ebi.eva.pipeline.jobs.AnnotationJob;
 import uk.ac.ebi.eva.pipeline.jobs.AnnotationJobTest;
 import uk.ac.ebi.eva.pipeline.jobs.flows.AnnotationFlow;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.util.zip.GZIPInputStream;
-
-import static junit.framework.TestCase.assertEquals;
-import static uk.ac.ebi.eva.test.utils.JobTestUtils.makeGzipFile;
 
 /**
  * @author Diego Poggioli
@@ -70,7 +72,7 @@ public class VepAnnotationGeneratorStepTest {
         jobOptions.setVepOutput(vepOutputFile.getAbsolutePath());
 
         vepOutputFile.delete();
-        TestCase.assertFalse(vepOutputFile.exists());  // ensure the annot file doesn't exist from previous executions
+        assertFalse(vepOutputFile.exists());  // ensure the annot file doesn't exist from previous executions
 
         // When the execute method in variantsAnnotCreate is executed
         JobExecution jobExecution = jobLauncherTestUtils.launchStep(AnnotationFlow.GENERATE_VEP_ANNOTATION);
@@ -80,7 +82,7 @@ public class VepAnnotationGeneratorStepTest {
         assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());
 
         // And VEP output should exist and annotations should be in the file
-        TestCase.assertTrue(vepOutputFile.exists());
+        assertTrue(vepOutputFile.exists());
         Assert.assertEquals(537, JobTestUtils.getLines(new GZIPInputStream(new FileInputStream(vepOutputFile))));
         vepOutputFile.delete();
     }

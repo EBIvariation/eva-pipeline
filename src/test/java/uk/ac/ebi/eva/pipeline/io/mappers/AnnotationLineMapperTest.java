@@ -15,11 +15,12 @@
  */
 package uk.ac.ebi.eva.pipeline.io.mappers;
 
+import static org.junit.Assert.assertNotNull;
+
 import org.junit.Test;
 import org.opencb.biodata.models.variant.annotation.VariantAnnotation;
-import uk.ac.ebi.eva.test.data.VepOutputContent;
 
-import static junit.framework.TestCase.assertNotNull;
+import uk.ac.ebi.eva.test.data.VepOutputContent;
 
 /**
  * {@link AnnotationLineMapper}
