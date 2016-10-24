@@ -15,9 +15,16 @@
  */
 package uk.ac.ebi.eva.pipeline.io.writers;
 
-import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertTrue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static uk.ac.ebi.eva.test.data.VepOutputContent.vepOutputContent;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -95,10 +102,10 @@ public class VepAnnotationMongoWriterTest {
         while (cursor.hasNext()) {
             cnt++;
             VariantAnnotation annot = converter.convertToDataModelType((DBObject)cursor.next().get("annot"));
-            assertTrue(annot.getConsequenceTypes() != null);
+            assertNotNull(annot.getConsequenceTypes());
             consequenceTypeCount += annot.getConsequenceTypes().size();
         }
-        assertTrue(cnt>0);
+        assertTrue(cnt > 0);
         assertEquals(annotations.size(), consequenceTypeCount);
     }
 

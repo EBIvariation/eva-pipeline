@@ -15,7 +15,11 @@
  */
 package uk.ac.ebi.eva.pipeline.jobs.steps;
 
-import com.google.common.collect.Sets;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+import java.util.stream.Collectors;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -31,13 +35,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.util.ReflectionTestUtils;
+
+import com.google.common.collect.Sets;
+
 import uk.ac.ebi.eva.pipeline.configuration.CommonConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
-
-import java.util.stream.Collectors;
-
-import static junit.framework.TestCase.assertTrue;
-import static org.junit.Assert.assertEquals;
 
 /**
  * @author Diego Poggioli

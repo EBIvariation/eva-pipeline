@@ -15,32 +15,38 @@
  */
 package uk.ac.ebi.eva.pipeline.jobs.steps;
 
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.opencb.opencga.lib.common.Config;
-import org.springframework.batch.core.*;
-import org.springframework.batch.test.JobLauncherTestUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import uk.ac.ebi.eva.pipeline.configuration.GenotypedVcfConfiguration;
-import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
-import uk.ac.ebi.eva.pipeline.jobs.CommonJobStepInitialization;
-import uk.ac.ebi.eva.pipeline.jobs.GenotypedVcfJob;
-import uk.ac.ebi.eva.test.utils.JobTestUtils;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static uk.ac.ebi.eva.test.utils.JobTestUtils.getLines;
+import static uk.ac.ebi.eva.test.utils.JobTestUtils.getTransformedOutputPath;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.nio.file.Paths;
 import java.util.zip.GZIPInputStream;
 
-import static junit.framework.TestCase.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static uk.ac.ebi.eva.test.utils.JobTestUtils.getLines;
-import static uk.ac.ebi.eva.test.utils.JobTestUtils.getTransformedOutputPath;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.opencb.opencga.lib.common.Config;
+import org.springframework.batch.core.BatchStatus;
+import org.springframework.batch.core.ExitStatus;
+import org.springframework.batch.core.Job;
+import org.springframework.batch.core.JobExecution;
+import org.springframework.batch.core.launch.JobLauncher;
+import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.test.JobLauncherTestUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+
+import uk.ac.ebi.eva.pipeline.configuration.GenotypedVcfConfiguration;
+import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
+import uk.ac.ebi.eva.pipeline.jobs.CommonJobStepInitialization;
+import uk.ac.ebi.eva.pipeline.jobs.GenotypedVcfJob;
+import uk.ac.ebi.eva.test.utils.JobTestUtils;
 
 /**
  * @author Diego Poggioli

@@ -15,10 +15,14 @@
  */
 package uk.ac.ebi.eva.pipeline.jobs.steps;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static uk.ac.ebi.eva.test.utils.JobTestUtils.readFirstLine;
 
-import junit.framework.TestCase;
+import java.io.File;
+
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -29,15 +33,12 @@ import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+
 import uk.ac.ebi.eva.pipeline.configuration.VepInputGeneratorStepConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
 import uk.ac.ebi.eva.pipeline.jobs.AnnotationJob;
 import uk.ac.ebi.eva.pipeline.jobs.PopulationStatisticsJobTest;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
-
-import java.io.File;
-
-import static uk.ac.ebi.eva.test.utils.JobTestUtils.readFirstLine;
 
 /**
  * @author Diego Poggioli
@@ -72,14 +73,14 @@ public class VepInputGeneratorStepTest {
         if(vepInputFile.exists())
             vepInputFile.delete();
 
-        Assert.assertFalse(vepInputFile.exists());
+        assertFalse(vepInputFile.exists());
 
         JobExecution jobExecution = jobLauncherTestUtils.launchStep(VepInputGeneratorStep.FIND_VARIANTS_TO_ANNOTATE);
 
-        Assert.assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
-        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());
+        assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
+        assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());
 
-        Assert.assertTrue(vepInputFile.exists());
-        TestCase.assertEquals("20\t60343\t60343\tG/A\t+", readFirstLine(vepInputFile));
+        assertTrue(vepInputFile.exists());
+        assertEquals("20\t60343\t60343\tG/A\t+", readFirstLine(vepInputFile));
     }
 }

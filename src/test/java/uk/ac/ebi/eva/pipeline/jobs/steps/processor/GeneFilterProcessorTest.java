@@ -15,18 +15,19 @@
  */
 package uk.ac.ebi.eva.pipeline.jobs.steps.processor;
 
+import static org.junit.Assert.assertEquals;
+
+import java.io.File;
+
 import org.junit.Test;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.test.MetaDataInstanceFactory;
+
 import uk.ac.ebi.eva.pipeline.io.readers.GeneReader;
 import uk.ac.ebi.eva.pipeline.jobs.steps.processors.GeneFilterProcessor;
 import uk.ac.ebi.eva.pipeline.model.FeatureCoordinates;
 import uk.ac.ebi.eva.test.data.GtfStaticTestData;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
-
-import java.io.File;
-
-import static junit.framework.TestCase.assertEquals;
 
 /**
  * {@link GeneFilterProcessor}
