@@ -31,6 +31,7 @@ import uk.ac.ebi.eva.pipeline.configuration.AnnotationConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
 import uk.ac.ebi.eva.pipeline.jobs.AnnotationJob;
 import uk.ac.ebi.eva.pipeline.jobs.AnnotationJobTest;
+import uk.ac.ebi.eva.pipeline.jobs.flows.AnnotationFlow;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
 
 import java.io.File;
@@ -72,7 +73,7 @@ public class VepAnnotationGeneratorStepTest {
         TestCase.assertFalse(vepOutputFile.exists());  // ensure the annot file doesn't exist from previous executions
 
         // When the execute method in variantsAnnotCreate is executed
-        JobExecution jobExecution = jobLauncherTestUtils.launchStep(AnnotationJob.GENERATE_VEP_ANNOTATION);
+        JobExecution jobExecution = jobLauncherTestUtils.launchStep(AnnotationFlow.GENERATE_VEP_ANNOTATION);
 
         //Then variantsAnnotCreate step should complete correctly
         assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());

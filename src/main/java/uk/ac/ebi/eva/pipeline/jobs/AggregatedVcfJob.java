@@ -31,6 +31,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
+
+import uk.ac.ebi.eva.pipeline.jobs.flows.AnnotationFlow;
 import uk.ac.ebi.eva.pipeline.jobs.steps.VariantLoaderStep;
 import uk.ac.ebi.eva.pipeline.listeners.VariantOptionsConfigurerListener;
 
@@ -44,7 +46,7 @@ import uk.ac.ebi.eva.pipeline.listeners.VariantOptionsConfigurerListener;
  */
 @Configuration
 @EnableBatchProcessing
-@Import({VariantLoaderStep.class, AnnotationJob.class})
+@Import({VariantLoaderStep.class, AnnotationFlow.class})
 public class AggregatedVcfJob extends CommonJobStepInitialization{
 
     private static final Logger logger = LoggerFactory.getLogger(AggregatedVcfJob.class);
@@ -60,7 +62,7 @@ public class AggregatedVcfJob extends CommonJobStepInitialization{
     @Autowired
     private JobBuilderFactory jobBuilderFactory;
     @Autowired
-    private Flow optionalAnnotationFlow;
+    private Flow annotationFlowOptional;
     @Autowired
     private VariantLoaderStep variantLoaderStep;
 
@@ -77,7 +79,7 @@ public class AggregatedVcfJob extends CommonJobStepInitialization{
         FlowJobBuilder builder = jobBuilder
                 .flow(normalize())
                 .next(load(variantLoaderStep))
-                .next(optionalAnnotationFlow)
+                .next(annotationFlowOptional)
                 .end();
 
         return builder.build();

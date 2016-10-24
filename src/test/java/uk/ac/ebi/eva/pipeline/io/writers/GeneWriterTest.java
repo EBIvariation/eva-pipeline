@@ -20,6 +20,8 @@ import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.mongodb.MongoClient;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,11 +52,18 @@ public class GeneWriterTest {
     @Autowired
     private JobOptions jobOptions;
 
+    @Before
+    public void setUp() throws Exception {
+        jobOptions.setDbName(getClass().getSimpleName());
+    }
+    
+    @After
+    public void tearDown() throws Exception {
+        JobTestUtils.cleanDBs(jobOptions.getDbName());
+    }
+    
     @Test
     public void shouldWriteAllFieldsIntoMongoDb() throws Exception {
-        String dbName = jobOptions.getDbName();
-        JobTestUtils.cleanDBs(dbName);
-
         GeneWriter geneWriter = new GeneWriter(jobOptions.getMongoOperations(), jobOptions.getDbCollectionsFeaturesName());
 
         GeneLineMapper lineMapper = new GeneLineMapper();
@@ -67,7 +76,7 @@ public class GeneWriterTest {
         geneWriter.write(genes);
 
         MongoClient mongoClient = new MongoClient();
-        DBCollection genesCollection = mongoClient.getDB(dbName).getCollection(jobOptions.getDbCollectionsFeaturesName());
+        DBCollection genesCollection = mongoClient.getDB(jobOptions.getDbName()).getCollection(jobOptions.getDbCollectionsFeaturesName());
 
         // count documents in DB and check they have region (chr + start + end)
         DBCursor cursor = genesCollection.find();

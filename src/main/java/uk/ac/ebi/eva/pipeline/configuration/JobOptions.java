@@ -33,6 +33,8 @@ import org.springframework.stereotype.Component;
 
 import uk.ac.ebi.eva.pipeline.jobs.AnnotationJob;
 import uk.ac.ebi.eva.pipeline.jobs.PopulationStatisticsJob;
+import uk.ac.ebi.eva.pipeline.jobs.flows.AnnotationFlow;
+import uk.ac.ebi.eva.pipeline.jobs.flows.PopulationStatisticsFlow;
 
 import java.nio.file.Paths;
 import java.util.Properties;
@@ -216,8 +218,8 @@ public class JobOptions {
         pipelineOptions.put("config.db.user", dbUser);
         pipelineOptions.put("config.db.password", dbPassword);
         pipelineOptions.put("config.db.read-preference", readPreference);
-        pipelineOptions.put(AnnotationJob.SKIP_ANNOT, skipAnnot);
-        pipelineOptions.put(PopulationStatisticsJob.SKIP_STATS, skipStats);
+        pipelineOptions.put(AnnotationFlow.SKIP_ANNOT, skipAnnot);
+        pipelineOptions.put(PopulationStatisticsFlow.SKIP_STATS, skipStats);
 
         String annotationFilesPrefix = studyId + "_" + fileId;
         pipelineOptions.put(VEP_INPUT, URI.create(outputDirAnnotation + "/").resolve(annotationFilesPrefix + "_variants_to_annotate.tsv").toString());

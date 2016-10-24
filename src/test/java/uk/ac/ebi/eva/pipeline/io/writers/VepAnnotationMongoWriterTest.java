@@ -15,8 +15,17 @@
  */
 package uk.ac.ebi.eva.pipeline.io.writers;
 
-import com.mongodb.*;
+import static junit.framework.TestCase.assertEquals;
+import static junit.framework.TestCase.assertTrue;
+import static uk.ac.ebi.eva.test.data.VepOutputContent.vepOutputContent;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -26,18 +35,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+
+import com.mongodb.BasicDBObject;
+import com.mongodb.DBCollection;
+import com.mongodb.DBCursor;
+import com.mongodb.DBObject;
+import com.mongodb.MongoClient;
+
 import uk.ac.ebi.eva.pipeline.configuration.AnnotationConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
 import uk.ac.ebi.eva.pipeline.io.mappers.AnnotationLineMapper;
 import uk.ac.ebi.eva.pipeline.jobs.AnnotationJob;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
 import uk.ac.ebi.eva.utils.MongoDBHelper;
-
-import java.util.*;
-
-import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertTrue;
-import static uk.ac.ebi.eva.test.data.VepOutputContent.vepOutputContent;
 
 /**
  * {@link VepAnnotationMongoWriter}
@@ -62,7 +72,6 @@ public class VepAnnotationMongoWriterTest {
     public void shouldWriteAllFieldsIntoMongoDb() throws Exception {
         String dbName = jobOptions.getDbName();
         String dbCollectionVariantsName = jobOptions.getDbCollectionsVariantsName();
-        JobTestUtils.cleanDBs(dbName);
 
         List<VariantAnnotation> annotations = new ArrayList<>();
         for (String annotLine : vepOutputContent.split("\n")) {
@@ -102,7 +111,6 @@ public class VepAnnotationMongoWriterTest {
     public void shouldWriteAllFieldsIntoMongoDbMultipleSetsAnnotations() throws Exception {
         String dbName = jobOptions.getDbName();
         String dbCollectionVariantsName = jobOptions.getPipelineOptions().getString("db.collections.variants.name");
-        JobTestUtils.cleanDBs(dbName);
 
         List<VariantAnnotation> annotations = new ArrayList<>();
         for (String annotLine : vepOutputContent.split("\n")) {
@@ -163,6 +171,15 @@ public class VepAnnotationMongoWriterTest {
         mongoOperations = MongoDBHelper.getMongoOperationsFromPipelineOptions(jobOptions.getPipelineOptions());
         mongoClient = new MongoClient();
         AnnotationLineMapper = new AnnotationLineMapper();
+
+        String dbName = jobOptions.getDbName();
+        JobTestUtils.cleanDBs(dbName);
+    }
+    
+    @After
+    public void tearDown() throws Exception {
+        String dbName = jobOptions.getDbName();
+        JobTestUtils.cleanDBs(dbName);
     }
 
     private void writeIdsIntoMongo(List<VariantAnnotation> annotations, DBCollection variants) {

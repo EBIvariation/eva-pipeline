@@ -65,6 +65,7 @@ public class NonAnnotatedVariantsMongoReaderTest {
     @Before
     public void setUp() throws Exception {
         jobOptions.loadArgs();
+        jobOptions.setDbName(getClass().getSimpleName());
     }
 
     @Test
@@ -88,8 +89,8 @@ public class NonAnnotatedVariantsMongoReaderTest {
     }
 
     @After
-    public void setDown(){
-        collection().drop();
+    public void tearDown() throws Exception {
+        JobTestUtils.cleanDBs(jobOptions.getDbName());
     }
 
     private DBCollection collection() {
