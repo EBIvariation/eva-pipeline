@@ -67,7 +67,7 @@ public class ConnectionHelper {
 
     public static MongoClient getMongoClient(String hosts, String authenticationDB,
                                              String user, char[] password) throws UnknownHostException {
-    	return new MongoClient(
+        return new MongoClient(
                     parseServerAddresses(hosts),
                     Collections.singletonList(MongoCredential.createCredential(
                             user,
@@ -78,6 +78,6 @@ public class ConnectionHelper {
     }
 
     public static MongoClient getMongoClient() throws UnknownHostException {
-    	return new MongoClient();
+        return new MongoClient();
     }
 }

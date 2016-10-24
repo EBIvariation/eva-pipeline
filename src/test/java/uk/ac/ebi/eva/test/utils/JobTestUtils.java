@@ -124,8 +124,8 @@ public class JobTestUtils {
     }
 
     public static void restoreMongoDbFromDump(String dumpLocation, String databaseName) throws IOException, InterruptedException {
-    	assert(dumpLocation != null && !dumpLocation.isEmpty());
-    	assert(databaseName != null && !databaseName.isEmpty());
+        assert(dumpLocation != null && !dumpLocation.isEmpty());
+        assert(databaseName != null && !databaseName.isEmpty());
     	
         logger.info("restoring DB from " + dumpLocation + " into database " + databaseName);
 

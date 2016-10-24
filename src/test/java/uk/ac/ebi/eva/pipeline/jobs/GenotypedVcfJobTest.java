@@ -74,7 +74,7 @@ import static uk.ac.ebi.eva.test.utils.JobTestUtils.*;
 @ContextConfiguration(classes = { JobOptions.class, GenotypedVcfJob.class, GenotypedVcfConfiguration.class, JobLauncherTestUtils.class})
 public class GenotypedVcfJobTest {
 
-	@Autowired
+    @Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
     
     @Autowired

@@ -55,7 +55,7 @@ import static uk.ac.ebi.eva.test.utils.JobTestUtils.getLines;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {GenotypedVcfJob.class, JobOptions.class, GenotypedVcfConfiguration.class, JobLauncherTestUtils.class})
 public class VariantLoaderStepTest {
-	
+
     @Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
 
