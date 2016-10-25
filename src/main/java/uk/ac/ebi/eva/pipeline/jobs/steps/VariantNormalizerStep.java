@@ -18,7 +18,6 @@ package uk.ac.ebi.eva.pipeline.jobs.steps;
 import java.net.URI;
 import java.util.Map;
 
-import org.opencb.datastore.core.ObjectMap;
 import org.opencb.opencga.storage.core.StorageManagerFactory;
 import org.opencb.opencga.storage.core.variant.VariantStorageManager;
 import org.slf4j.Logger;
@@ -27,7 +26,11 @@ import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Import;
+import org.springframework.stereotype.Component;
 
+import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
 import uk.ac.ebi.eva.utils.URLHelper;
 
 /**
@@ -43,15 +46,14 @@ import uk.ac.ebi.eva.utils.URLHelper;
  * Input: VCF file
  * Output: transformed variants JSON file (variants.json.gz)
  */
+@Component
+@Import({JobOptions.class})
 public class VariantNormalizerStep implements Tasklet {
 
     private static final Logger logger = LoggerFactory.getLogger(VariantNormalizerStep.class);
 
-    private final ObjectMap variantOptions;
-
-    public VariantNormalizerStep(ObjectMap variantOptions) {
-      this.variantOptions = variantOptions;
-    }
+    @Autowired
+    private JobOptions jobOptions;
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
@@ -64,7 +66,7 @@ public class VariantNormalizerStep implements Tasklet {
         logger.info("Normalizing file {} into folder {}", inputFileUri.toString(), outdirUri.toString());
 
         VariantStorageManager variantStorageManager = StorageManagerFactory.getVariantStorageManager();
-        variantStorageManager.transform(inputFileUri, pedigreeUri, outdirUri, variantOptions);
+        variantStorageManager.transform(inputFileUri, pedigreeUri, outdirUri, jobOptions.getVariantOptions());
         return RepeatStatus.FINISHED;
     }
 

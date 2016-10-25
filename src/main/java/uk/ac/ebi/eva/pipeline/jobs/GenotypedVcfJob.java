@@ -37,6 +37,7 @@ import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import uk.ac.ebi.eva.pipeline.jobs.flows.AnnotationFlow;
 import uk.ac.ebi.eva.pipeline.jobs.flows.PopulationStatisticsFlow;
 import uk.ac.ebi.eva.pipeline.jobs.steps.VariantLoaderStep;
+import uk.ac.ebi.eva.pipeline.jobs.steps.VariantNormalizerStep;
 import uk.ac.ebi.eva.pipeline.listeners.VariantOptionsConfigurerListener;
 
 /**
@@ -50,7 +51,7 @@ import uk.ac.ebi.eva.pipeline.listeners.VariantOptionsConfigurerListener;
  */
 @Configuration
 @EnableBatchProcessing
-@Import({VariantLoaderStep.class, PopulationStatisticsFlow.class, AnnotationFlow.class})
+@Import({VariantNormalizerStep.class, VariantLoaderStep.class, PopulationStatisticsFlow.class, AnnotationFlow.class})
 public class GenotypedVcfJob extends CommonJobStepInitialization{
     private static final Logger logger = LoggerFactory.getLogger(GenotypedVcfJob.class);
 
@@ -69,6 +70,9 @@ public class GenotypedVcfJob extends CommonJobStepInitialization{
     private Flow annotationFlowOptional;
     @Autowired
     private Flow optionalStatisticsFlow;
+    
+    @Autowired
+    private VariantNormalizerStep variantNormalizerStep;
     @Autowired
     private VariantLoaderStep variantLoaderStep;
 
@@ -88,7 +92,7 @@ public class GenotypedVcfJob extends CommonJobStepInitialization{
                 .build();
 
         FlowJobBuilder builder = jobBuilder
-                .flow(normalize())
+                .flow(normalize(variantNormalizerStep))
                 .next(load(variantLoaderStep))
                 .next(parallelStatisticsAndAnnotation)
                 .end();

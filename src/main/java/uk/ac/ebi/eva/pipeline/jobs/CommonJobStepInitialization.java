@@ -68,8 +68,8 @@ public abstract class CommonJobStepInitialization {
 
     @Bean
     @Scope("prototype")
-    protected Step normalize() {
-        return generateStep(NORMALIZE_VARIANTS, new VariantNormalizerStep(getVariantOptions()));
+    protected Step normalize(VariantNormalizerStep variantNormalizerStep) {
+        return generateStep(NORMALIZE_VARIANTS, variantNormalizerStep);
     }
 
     @Bean
