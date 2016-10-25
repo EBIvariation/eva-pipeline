@@ -15,13 +15,11 @@
  */
 package uk.ac.ebi.eva.pipeline.jobs.steps;
 
-import org.opencb.datastore.core.ObjectMap;
 import org.opencb.opencga.storage.core.StorageManagerFactory;
 import org.opencb.opencga.storage.core.variant.VariantStorageManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.StepContribution;
-import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
@@ -35,6 +33,7 @@ import uk.ac.ebi.eva.utils.URLHelper;
 import java.net.URI;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Map;
 
 /**
  *
@@ -46,7 +45,6 @@ import java.nio.file.Paths;
  * Output: variants loaded into mongodb
  */
 @Component
-@StepScope
 @Import({JobOptions.class})
 public class VariantLoaderStep implements Tasklet {
     private static final Logger logger = LoggerFactory.getLogger(VariantLoaderStep.class);
@@ -56,26 +54,19 @@ public class VariantLoaderStep implements Tasklet {
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
-        ObjectMap variantOptions = jobOptions.getVariantOptions();
-        ObjectMap pipelineOptions = jobOptions.getPipelineOptions();
+        Map<String, Object> jobParameters = chunkContext.getStepContext().getJobParameters();
 
-        VariantStorageManager variantStorageManager = StorageManagerFactory.getVariantStorageManager();// TODO add mongo
-        URI outdirUri = URLHelper.createUri(pipelineOptions.getString("output.dir"));
-        URI nextFileUri = URLHelper.createUri(pipelineOptions.getString("input.vcf"));
+        VariantStorageManager variantStorageManager = StorageManagerFactory.getVariantStorageManager();
+        URI outdirUri = URLHelper.createUri(String.valueOf(jobParameters.get("output.dir")));
+        URI inputFileUri = URLHelper.createUri(String.valueOf(jobParameters.get("input.vcf")));
 
-//          URI pedigreeUri = pipelineOptions.getString("input.pedigree") != null ? createUri(pipelineOptions.getString("input.pedigree")) : null;
+        Path input = Paths.get(inputFileUri.getPath());
         Path output = Paths.get(outdirUri.getPath());
-        Path input = Paths.get(nextFileUri.getPath());
-        Path outputVariantJsonFile = output.resolve(input.getFileName().toString() + ".variants.json" + pipelineOptions.getString("compressExtension"));
-//          outputFileJsonFile = output.resolve(input.getFileName().toString() + ".file.json" + config.compressExtension);
+        Path outputVariantJsonFile = output.resolve(input.getFileName().toString() + ".variants.json" + jobOptions.getCompressExtension());
         URI transformedVariantsUri = outdirUri.resolve(outputVariantJsonFile.getFileName().toString());
 
-        logger.info("-- PreLoad variants -- {}", nextFileUri);
-        variantStorageManager.preLoad(transformedVariantsUri, outdirUri, variantOptions);
-        logger.info("-- Load variants -- {}", nextFileUri);
-        variantStorageManager.load(transformedVariantsUri, variantOptions);
-//          logger.info("-- PostLoad variants -- {}", nextFileUri);
-//          variantStorageManager.postLoad(transformedVariantsUri, outdirUri, variantOptions);
+        logger.info("Loading variants from file {}", inputFileUri);
+        variantStorageManager.load(transformedVariantsUri, jobOptions.getVariantOptions());
 
         return RepeatStatus.FINISHED;
     }
