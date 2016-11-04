@@ -31,6 +31,7 @@ import java.nio.file.Paths;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 public class JobTestUtils {
@@ -158,5 +159,20 @@ public class JobTestUtils {
      */
     public static DBObject constructDbo(String variant) {
         return (DBObject) JSON.parse(variant);
+    }
+
+    public static void uncompress(String inputCompressedFile, File outputFile) throws IOException {
+
+        GZIPInputStream gzis = new GZIPInputStream(new FileInputStream(inputCompressedFile));
+        FileOutputStream out = new FileOutputStream(outputFile);
+
+        byte[] buffer = new byte[1024];
+        int len;
+        while ((len = gzis.read(buffer)) > 0) {
+            out.write(buffer, 0, len);
+        }
+
+        gzis.close();
+        out.close();
     }
 }

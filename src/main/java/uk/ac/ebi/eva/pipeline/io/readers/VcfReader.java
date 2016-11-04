@@ -19,11 +19,14 @@ import org.opencb.biodata.formats.variant.vcf4.io.VariantVcfReader;
 import org.opencb.biodata.models.variant.Variant;
 import org.opencb.biodata.models.variant.VariantSource;
 import org.springframework.batch.item.file.FlatFileItemReader;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import uk.ac.ebi.eva.pipeline.io.GzipLazyResource;
 import uk.ac.ebi.eva.pipeline.io.mappers.VcfLineMapper;
+import uk.ac.ebi.eva.utils.CompressionHelper;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -31,21 +34,28 @@ import java.util.List;
  *
  * This Reader uses a {@link VcfLineMapper} to parse each line, and {@link VariantVcfReader} to fill the VariantSource.
  *
+ * It doesn't matter if the file is compressed or not.
+ *
  * @author Jose Miguel Mut Lopez &lt;jmmut@ebi.ac.uk&gt;
  */
 public class VcfReader extends FlatFileItemReader<List<Variant>> {
     private final VariantSource source;
     private final File file;
 
-    public VcfReader(VariantSource source, File file) {
+    public VcfReader(VariantSource source, File file) throws IOException {
         this.source = source;
         this.file = file;
-        Resource resource = new GzipLazyResource(file);
+        Resource resource;
+        if (CompressionHelper.isGzip(file)) {
+            resource = new GzipLazyResource(file);
+        } else {
+            resource = new FileSystemResource(file);
+        }
         setResource(resource);
         setLineMapper(new VcfLineMapper(source));
     }
 
-    public VcfReader(VariantSource source, String file) {
+    public VcfReader(VariantSource source, String file) throws IOException {
         this(source, new File(file));
     }
 
