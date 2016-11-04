@@ -15,6 +15,9 @@
  */
 package uk.ac.ebi.eva.pipeline.io.readers;
 
+import htsjdk.variant.vcf.VCFFileReader;
+import htsjdk.variant.vcf.VCFHeader;
+import htsjdk.variant.vcf.VCFHeaderLine;
 import org.opencb.biodata.formats.variant.vcf4.io.VariantVcfReader;
 import org.opencb.biodata.models.variant.Variant;
 import org.opencb.biodata.models.variant.VariantSource;
@@ -60,17 +63,23 @@ public class VcfReader extends FlatFileItemReader<List<Variant>> {
     }
 
     /**
-     * We need to fill the samples in the VariantSource, parsing the header before calling the factory
+     * We need to fill the samples in the VariantSource, parsing the header before using the factory inside the mapper
      */
     @Override
     protected void doOpen() throws Exception {
-        VariantVcfReader reader = new VariantVcfReader(source, file.getAbsolutePath());
-        reader.open();
-        reader.pre();
-        source.addMetadata("variantFileHeader", reader.getHeader());
-        reader.post();
-        reader.close();
+        VCFFileReader reader = new VCFFileReader(file, false);
+        VCFHeader fileHeader = reader.getFileHeader();
 
+//        source.addMetadata("fileformat", fileHeader.get); // TODO: not in fileHeader??
+        source.addMetadata("INFO", fileHeader.getInfoHeaderLines()); // TODO: extract the fields? like id, number, type, description...
+        source.addMetadata("FILTER", fileHeader.getFilterLines());
+        source.addMetadata("FORMAT", fileHeader.getFormatHeaderLines());
+        source.addMetadata("contig", fileHeader.getContigLines());
+        for (VCFHeaderLine vcfHeaderLine : fileHeader.getOtherHeaderLines()) {
+            source.addMetadata(vcfHeaderLine.getKey(), vcfHeaderLine.getValue());
+        }
+
+        source.setSamples(fileHeader.getGenotypeSamples());
         super.doOpen();
     }
 }
