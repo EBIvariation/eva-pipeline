@@ -51,7 +51,6 @@ public class VariantMongoWriterTest {
     private DBObjectToVariantSourceEntryConverter sourceEntryConverter;
 
     private Map<String, Integer> samplesIds;
-    private int bulkSize = 1;
 
     private final String fileId = "fileId";
     private final String studyId = "studyId";
@@ -71,7 +70,7 @@ public class VariantMongoWriterTest {
 
         DBCollection dbCollection = ConnectionHelper.getMongoTemplate(dbName).getCollection(collectionName);
 
-        variantMongoWriter = new VariantMongoWriter(includeStats, fileId, bulkSize, variantConverter, statsConverter,
+        variantMongoWriter = new VariantMongoWriter(includeStats, fileId, variantConverter, statsConverter,
                 sourceEntryConverter, dbCollection);
         variantMongoWriter.doWrite(Collections.EMPTY_LIST);
 
@@ -94,7 +93,7 @@ public class VariantMongoWriterTest {
 
         DBCollection dbCollection = ConnectionHelper.getMongoTemplate(dbName).getCollection(collectionName);
 
-        variantMongoWriter = new VariantMongoWriter(includeStats, fileId, bulkSize, variantConverter, statsConverter,
+        variantMongoWriter = new VariantMongoWriter(includeStats, fileId, variantConverter, statsConverter,
                 sourceEntryConverter, dbCollection);
         variantMongoWriter.doWrite(Collections.singletonList(variant));
 
@@ -125,7 +124,7 @@ public class VariantMongoWriterTest {
 
         DBCollection dbCollection = ConnectionHelper.getMongoTemplate(dbName).getCollection(collectionName);
 
-        variantMongoWriter = new VariantMongoWriter(includeStats, fileId, bulkSize, variantConverter, statsConverter,
+        variantMongoWriter = new VariantMongoWriter(includeStats, fileId, variantConverter, statsConverter,
                 sourceEntryConverter, dbCollection);
         variantMongoWriter.doWrite(Arrays.asList(variant1, variant2, variant3));
 
@@ -144,7 +143,7 @@ public class VariantMongoWriterTest {
 
         DBCollection dbCollection = ConnectionHelper.getMongoTemplate(dbName).getCollection(collectionName);
 
-        variantMongoWriter = new VariantMongoWriter(includeStats, fileId, bulkSize, variantConverter, statsConverter,
+        variantMongoWriter = new VariantMongoWriter(includeStats, fileId, variantConverter, statsConverter,
                 sourceEntryConverter, dbCollection);
         variantMongoWriter.doWrite(Collections.singletonList(variant));
 
@@ -165,7 +164,7 @@ public class VariantMongoWriterTest {
 
         DBCollection dbCollection = ConnectionHelper.getMongoTemplate(dbName).getCollection(collectionName);
 
-        variantMongoWriter = new VariantMongoWriter(includeStats, fileId, bulkSize, variantConverter, statsConverter,
+        variantMongoWriter = new VariantMongoWriter(includeStats, fileId, variantConverter, statsConverter,
                 sourceEntryConverter, dbCollection);
         variantMongoWriter.doWrite(Collections.singletonList(variant));
 
@@ -186,7 +185,7 @@ public class VariantMongoWriterTest {
 
         DBCollection dbCollection = ConnectionHelper.getMongoTemplate(dbName).getCollection(collectionName);
 
-        variantMongoWriter = new VariantMongoWriter(includeStats, fileId, bulkSize, variantConverter, statsConverter,
+        variantMongoWriter = new VariantMongoWriter(includeStats, fileId, variantConverter, statsConverter,
                 sourceEntryConverter, dbCollection);
         variantMongoWriter.doWrite(Collections.singletonList(variant));
 
@@ -194,30 +193,6 @@ public class VariantMongoWriterTest {
         Variant writtenVariant = variantConverter.convertToDataModelType(dbCollection.findOne());
 
         assertFalse(writtenVariant.getIds().isEmpty());
-
-        JobTestUtils.cleanDBs(dbName);
-    }
-
-    @Test
-    public void variantSetSmallerThanBulkSizeShouldBeWritten() throws UnknownHostException {
-        int bulkSize = 4;
-
-        String fileId = "fileId";
-        String studyId = "studyId";
-        String collectionName = "variants";
-        String dbName = "VariantMongoWriterTestSmallBulks";
-
-        Variant variant = buildVariant("12", 3, 4, "A", "T", fileId, studyId);
-
-        setConverters(samplesPosition, calculateStats, includeSample, includeSrc);
-
-        DBCollection dbCollection = ConnectionHelper.getMongoTemplate(dbName).getCollection(collectionName);
-
-        variantMongoWriter = new VariantMongoWriter(includeStats, fileId, bulkSize, variantConverter, statsConverter,
-                sourceEntryConverter, dbCollection);
-        variantMongoWriter.doWrite(Collections.singletonList(variant));
-
-        assertEquals(1, dbCollection.count());
 
         JobTestUtils.cleanDBs(dbName);
     }

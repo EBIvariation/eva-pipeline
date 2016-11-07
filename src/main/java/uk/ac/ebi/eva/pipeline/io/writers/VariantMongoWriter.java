@@ -42,7 +42,6 @@ public class VariantMongoWriter extends MongoItemWriter<Variant> {
 
     private boolean includeStats;
     private String fileId;
-    private int bulkSize = 0;
     private DBCollection variantsCollection;
 
     private BulkWriteOperation bulk;
@@ -53,12 +52,11 @@ public class VariantMongoWriter extends MongoItemWriter<Variant> {
     private DBObjectToVariantStatsConverter statsConverter;
     private DBObjectToVariantSourceEntryConverter sourceEntryConverter;
 
-    public VariantMongoWriter(boolean includeStats, String fileId, int bulkSize,
+    public VariantMongoWriter(boolean includeStats, String fileId,
                               DBObjectToVariantConverter variantConverter, DBObjectToVariantStatsConverter statsConverter,
                               DBObjectToVariantSourceEntryConverter sourceEntryConverter, DBCollection variantsCollection) {
         this.includeStats = includeStats;
         this.fileId = fileId;
-        this.bulkSize = bulkSize;
         this.variantConverter = variantConverter;
         this.statsConverter = statsConverter;
         this.sourceEntryConverter = sourceEntryConverter;
@@ -111,16 +109,8 @@ public class VariantMongoWriter extends MongoItemWriter<Variant> {
                 currentBulkSize++;
             }
 
-            if (currentBulkSize >= bulkSize) {
-                executeBulk();
-            }
-        }
-
-        //cover small variant set with size < bulk size
-        if(currentBulkSize<bulkSize){
             executeBulk();
         }
-
     }
 
     private void executeBulk() {
@@ -129,7 +119,6 @@ public class VariantMongoWriter extends MongoItemWriter<Variant> {
             bulk.execute();
             resetBulk();
         }
-
     }
 
     private void resetBulk() {
