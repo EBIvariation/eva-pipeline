@@ -38,37 +38,23 @@ public class VcfReaderTest {
 
         // input vcf
         final String inputFilePath = "/small20.vcf.gz";
-        String inputFile = VcfReaderTest.class.getResource(inputFilePath).getFile();
+        String input = VcfReaderTest.class.getResource(inputFilePath).getFile();
 
         String fileId = "5";
         String studyId = "7";
         String studyName = "study name";
-        VariantSource source = new VariantSource(inputFile,
+        VariantSource source = new VariantSource(input,
                 fileId,
                 studyId,
                 studyName,
                 VariantStudy.StudyType.COLLECTION,
                 VariantSource.Aggregation.NONE);
 
-        VcfReader vcfReader = new VcfReader(source, inputFile);
+        VcfReader vcfReader = new VcfReader(source, input);
         vcfReader.setSaveState(false);
         vcfReader.open(executionContext);
 
-        List<Variant> variants;
-        int count = 0;
-
-        // consume the reader and check that the variants have meaningful data
-        while ((variants = vcfReader.read()) != null) {
-            assertTrue(variants.size() > 0);
-            assertTrue(variants.get(0).getSourceEntries().size() > 0);
-            VariantSourceEntry sourceEntry = variants.get(0).getSourceEntries().entrySet().iterator().next().getValue();
-            assertTrue(sourceEntry.getSamplesData().size() > 0);
-            count++;
-        }
-
-        // VcfReader should get all the lines from the file
-        long expectedCount = JobTestUtils.getLines(new GZIPInputStream(new FileInputStream(inputFile)));
-        assertEquals(expectedCount, count);
+        consumeReader(input, source, vcfReader);
     }
 
     @Test
@@ -124,21 +110,27 @@ public class VcfReaderTest {
         vcfReader.setSaveState(false);
         vcfReader.open(executionContext);
 
+        consumeReader(inputFile, source, vcfReader);
+    }
+
+    private void consumeReader(String inputFile, VariantSource source, VcfReader vcfReader) throws Exception {
         List<Variant> variants;
         int count = 0;
 
-        // consume the reader and check that the variants have meaningful data
+        // consume the reader and check that the variants and the VariantSource have meaningful data
         while ((variants = vcfReader.read()) != null) {
             assertTrue(variants.size() > 0);
             assertTrue(variants.get(0).getSourceEntries().size() > 0);
             VariantSourceEntry sourceEntry = variants.get(0).getSourceEntries().entrySet().iterator().next().getValue();
             assertTrue(sourceEntry.getSamplesData().size() > 0);
+
+            assertTrue(source.getMetadata().containsKey(VcfReader.VARIANT_FILE_HEADER_KEY));
+
             count++;
         }
 
         // VcfReader should get all the lines from the file
         long expectedCount = JobTestUtils.getLines(new GZIPInputStream(new FileInputStream(inputFile)));
         assertEquals(expectedCount, count);
-
     }
 }
