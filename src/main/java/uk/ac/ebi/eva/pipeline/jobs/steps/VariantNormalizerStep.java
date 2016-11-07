@@ -21,12 +21,19 @@ import org.opencb.opencga.storage.core.variant.VariantStorageManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.StepContribution;
+import org.springframework.batch.core.launch.JobOperator;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
+
+import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
+import uk.ac.ebi.eva.utils.FileUtils;
 import uk.ac.ebi.eva.utils.URLHelper;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.net.URI;
+import java.nio.file.Path;
 
 /**
  * Tasklet that normalizes variants. To see the applied rules please refer to:
@@ -50,12 +57,15 @@ public class VariantNormalizerStep implements Tasklet {
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
+        String outputDirPath = pipelineOptions.getString(JobOptions.OUTPUT_DIR);
+        String inputVcf = pipelineOptions.getString("input.vcf");
+        String inputPedigree = pipelineOptions.getString("input.pedigree");
 
-        URI outdirUri = URLHelper.createUri(pipelineOptions.getString("output.dir"));
-        URI nextFileUri = URLHelper.createUri(pipelineOptions.getString("input.vcf"));
-        URI pedigreeUri = pipelineOptions.getString("input.pedigree") != null ? URLHelper.createUri(pipelineOptions.getString("input.pedigree")) : null;
+        URI outdirUri = FileUtils.getPathUri(outputDirPath,true);
+        URI nextFileUri = URLHelper.createUri(inputVcf);
+        URI pedigreeUri =  inputPedigree!= null ? URLHelper.createUri(inputPedigree) : null;
 
-        logger.info("Transform file {} to {}", pipelineOptions.getString("input.vcf"), pipelineOptions.getString("output.dir"));
+        logger.info("Transform file {} to {}", inputVcf, outputDirPath);
 
         logger.info("Extract variants '{}'", nextFileUri);
         VariantStorageManager variantStorageManager = StorageManagerFactory.getVariantStorageManager();
