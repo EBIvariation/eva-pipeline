@@ -22,12 +22,12 @@ import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 
 /**
  * @author Diego Poggioli
- *
- * Configuration init for VariantAggregatedConfiguration Job
+ *         <p>
+ *         Configuration init for VariantAggregatedConfiguration Job
  */
 @Configuration
-@PropertySource({"variantAggregatedConfiguration.properties"})
-public class VariantAggregatedConfig {
+@PropertySource({"variant-aggregated.properties"})
+public class VariantAggregatedConfiguration {
     @Bean
     private static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
         return new PropertySourcesPlaceholderConfigurer();

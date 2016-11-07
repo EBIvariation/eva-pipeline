@@ -23,11 +23,11 @@ import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 
 /**
  * @author Diego Poggioli
- *
- * Configuration init for GenotypedVcfJob
+ *         <p>
+ *         Configuration init for GenotypedVcfJob
  */
 @Configuration
-@PropertySource({"variantConfiguration.properties"})
+@PropertySource({"genotyped-vcf.properties"})
 public class GenotypedVcfConfiguration {
 
     @Bean

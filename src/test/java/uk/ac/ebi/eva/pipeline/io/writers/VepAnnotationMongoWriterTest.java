@@ -15,23 +15,7 @@
  */
 package uk.ac.ebi.eva.pipeline.io.writers;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static uk.ac.ebi.eva.test.data.VepOutputContent.vepOutputContent;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
+import com.mongodb.*;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -41,14 +25,7 @@ import org.opencb.opencga.storage.mongodb.variant.DBObjectToVariantAnnotationCon
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-
-import com.mongodb.BasicDBObject;
-import com.mongodb.DBCollection;
-import com.mongodb.DBCursor;
-import com.mongodb.DBObject;
-import com.mongodb.MongoClient;
-
+import org.springframework.test.context.junit4.SpringRunner;
 import uk.ac.ebi.eva.pipeline.configuration.AnnotationConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
 import uk.ac.ebi.eva.pipeline.io.mappers.AnnotationLineMapper;
@@ -56,14 +33,19 @@ import uk.ac.ebi.eva.pipeline.jobs.AnnotationJob;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
 import uk.ac.ebi.eva.utils.MongoDBHelper;
 
+import java.util.*;
+
+import static org.junit.Assert.*;
+import static uk.ac.ebi.eva.test.data.VepOutputContent.vepOutputContent;
+
 /**
  * {@link VepAnnotationMongoWriter}
  * input: a List of VariantAnnotation to each call of `.write()`
  * output: all the VariantAnnotations get written in mongo, with at least the
- *      "consequence types" annotations set
+ * "consequence types" annotations set
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = { AnnotationJob.class, AnnotationConfiguration.class})
+@RunWith(SpringRunner.class)
+@ContextConfiguration(classes = {AnnotationJob.class, AnnotationConfiguration.class})
 public class VepAnnotationMongoWriterTest {
 
     @Autowired
@@ -97,11 +79,11 @@ public class VepAnnotationMongoWriterTest {
         // and finally check that documents in DB have annotation (only consequence type)
         DBCursor cursor = variants.find();
 
-        int cnt=0;
+        int cnt = 0;
         int consequenceTypeCount = 0;
         while (cursor.hasNext()) {
             cnt++;
-            VariantAnnotation annot = converter.convertToDataModelType((DBObject)cursor.next().get("annot"));
+            VariantAnnotation annot = converter.convertToDataModelType((DBObject) cursor.next().get("annot"));
             assertNotNull(annot.getConsequenceTypes());
             consequenceTypeCount += annot.getConsequenceTypes().size();
         }
@@ -112,6 +94,7 @@ public class VepAnnotationMongoWriterTest {
     /**
      * Test that every VariantAnnotation gets written, even if the same variant receives different annotation from
      * different batches.
+     *
      * @throws Exception if the annotationWriter.write fails, or the DBs cleaning fails
      */
     @Test
@@ -164,7 +147,7 @@ public class VepAnnotationMongoWriterTest {
 
             VariantAnnotation annot = converter.convertToDataModelType((DBObject) dbObject.get("annot"));
 
-            if(id.equals("20_63360_C_T") || id.equals("20_63399_G_A") || id.equals("20_63426_G_T")){
+            if (id.equals("20_63360_C_T") || id.equals("20_63399_G_A") || id.equals("20_63426_G_T")) {
                 assertEquals(2, annot.getConsequenceTypes().size());
                 assertEquals(4, annot.getXrefs().size());
             }
@@ -182,7 +165,7 @@ public class VepAnnotationMongoWriterTest {
         String dbName = jobOptions.getDbName();
         JobTestUtils.cleanDBs(dbName);
     }
-    
+
     @After
     public void tearDown() throws Exception {
         String dbName = jobOptions.getDbName();
@@ -198,7 +181,7 @@ public class VepAnnotationMongoWriterTest {
                     annotation.getReferenceAllele(),
                     annotation.getAlternativeAllele());
 
-            if (!uniqueIdsLoaded.contains(id)){
+            if (!uniqueIdsLoaded.contains(id)) {
                 variants.insert(new BasicDBObject("_id", id));
                 uniqueIdsLoaded.add(id);
             }

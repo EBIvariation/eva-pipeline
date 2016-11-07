@@ -23,8 +23,8 @@ import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 
 /**
  * @author Cristina Yenyxe Gonzalez Garcia
- *
- * Configuration init for AnnotationLoaderStep tests
+ *         <p>
+ *         Configuration init for AnnotationLoaderStep tests
  */
 @Configuration
 @PropertySource({"annotation-loader-step.properties"})

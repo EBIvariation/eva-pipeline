@@ -15,8 +15,10 @@
  */
 package uk.ac.ebi.eva.pipeline.jobs.steps;
 
-import static org.junit.Assert.assertEquals;
-
+import com.mongodb.BasicDBObject;
+import com.mongodb.DBCollection;
+import com.mongodb.DuplicateKeyException;
+import com.mongodb.MongoClient;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -27,26 +29,22 @@ import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-
-import com.mongodb.BasicDBObject;
-import com.mongodb.DBCollection;
-import com.mongodb.DuplicateKeyException;
-import com.mongodb.MongoClient;
-
+import org.springframework.test.context.junit4.SpringRunner;
 import uk.ac.ebi.eva.pipeline.configuration.DatabaseInitializationConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
 import uk.ac.ebi.eva.pipeline.jobs.DatabaseInitializationJob;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
 
+import static org.junit.Assert.assertEquals;
+
 
 /**
  * @author Jose Miguel Mut Lopez &lt;jmmut@ebi.ac.uk&gt;
- *
- * Test {@link IndexesGeneratorStep}
+ *         <p>
+ *         Test {@link IndexesGeneratorStep}
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = { DatabaseInitializationJob.class, DatabaseInitializationConfiguration.class, JobLauncherTestUtils.class})
+@RunWith(SpringRunner.class)
+@ContextConfiguration(classes = {DatabaseInitializationJob.class, DatabaseInitializationConfiguration.class, JobLauncherTestUtils.class})
 public class IndexesGeneratorStepTest {
 
     @Autowired

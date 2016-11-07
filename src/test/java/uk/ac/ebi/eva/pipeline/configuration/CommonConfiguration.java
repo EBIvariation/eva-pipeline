@@ -24,9 +24,9 @@ import java.util.Properties;
 /**
  * @author Diego Poggioli
  * @author Cristina Yenyxe Gonzalez
- *
- * Common configuration used to test different job scenario
- * Test must change the property based on the job configuration and the step that it's running
+ *         <p>
+ *         Common configuration used to test different job scenario
+ *         Test must change the property based on the job configuration and the step that it's running
  */
 @Configuration
 public class CommonConfiguration {
@@ -46,13 +46,13 @@ public class CommonConfiguration {
         properties.put("input.pedigree", "");
         properties.put("input.gtf", "");
         properties.put("input.fasta", "");
-        
+
         properties.put("output.dir", "/tmp");
         properties.put("output.dir.annotation", "");
         properties.put("output.dir.statistics", "/tmp");
 
         properties.put("statistics.overwrite", "false");
-        
+
         properties.put("db.hosts", "localhost:27017");
 //        properties.put("dbName", null);
         properties.put("db.collection.variants.name", "variants");
@@ -60,14 +60,14 @@ public class CommonConfiguration {
         properties.put("db.collections.features.name", "features");
         properties.put("db.collections.stats.name", "populationStatistics");
         properties.put("config.db.read-preference", "primary");
-        
+
         properties.put("app.opencga.path", opencgaHome);
         properties.put("app.vep.path", "");
         properties.put("app.vep.cache.path", "");
         properties.put("app.vep.cache.version", "");
         properties.put("app.vep.cache.species", "");
         properties.put("app.vep.num-forks", "3");
-        
+
         properties.put("config.restartability.allow", false);
 
         configurer.setProperties(properties);

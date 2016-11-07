@@ -15,16 +15,6 @@
  */
 package uk.ac.ebi.eva.pipeline.jobs.steps;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static uk.ac.ebi.eva.test.utils.JobTestUtils.getLines;
-import static uk.ac.ebi.eva.test.utils.JobTestUtils.getTransformedOutputPath;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.nio.file.Paths;
-import java.util.zip.GZIPInputStream;
-
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -33,32 +23,37 @@ import org.junit.runner.RunWith;
 import org.opencb.opencga.lib.common.Config;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.ExitStatus;
-import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecution;
-import org.springframework.batch.core.launch.JobLauncher;
-import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-
+import org.springframework.test.context.junit4.SpringRunner;
 import uk.ac.ebi.eva.pipeline.configuration.GenotypedVcfConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
-import uk.ac.ebi.eva.pipeline.jobs.CommonJobStepInitialization;
 import uk.ac.ebi.eva.pipeline.jobs.GenotypedVcfJob;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.nio.file.Paths;
+import java.util.zip.GZIPInputStream;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static uk.ac.ebi.eva.test.utils.JobTestUtils.getLines;
+import static uk.ac.ebi.eva.test.utils.JobTestUtils.getTransformedOutputPath;
+
 /**
  * @author Diego Poggioli
- *
- * Test for {@link VariantNormalizerStep}
- *
- * TODO:
- * FILE_WRONG_NO_ALT should be renamed because the alt allele is not missing but is the same as the reference
+ *         <p>
+ *         Test for {@link VariantNormalizerStep}
+ *         <p>
+ *         TODO:
+ *         FILE_WRONG_NO_ALT should be renamed because the alt allele is not missing but is the same as the reference
  */
-@RunWith(SpringJUnit4ClassRunner.class)
+@RunWith(SpringRunner.class)
 @ContextConfiguration(classes = {GenotypedVcfJob.class, JobOptions.class, GenotypedVcfConfiguration.class, JobLauncherTestUtils.class})
-public class VariantNormalizerStepTest extends CommonJobStepInitialization {
+public class VariantNormalizerStepTest {
 
     @Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
@@ -82,7 +77,7 @@ public class VariantNormalizerStepTest extends CommonJobStepInitialization {
         String outputFilename = getTransformedOutputPath(Paths.get(input).getFileName(), ".gz", "/tmp");
 
         File file = new File(outputFilename);
-        if(file.exists())
+        if (file.exists())
             file.delete();
         assertFalse(file.exists());
 
@@ -105,7 +100,7 @@ public class VariantNormalizerStepTest extends CommonJobStepInitialization {
      * in a variant a reference and a alternate allele are the same
      */
     @Test
-    public void normalizerStepShouldFailIfVariantsAreMalformed(){
+    public void normalizerStepShouldFailIfVariantsAreMalformed() {
         final String FILE_WRONG_NO_ALT = "/wrong_no_alt.vcf.gz";
         Config.setOpenCGAHome(opencgaHome);
 

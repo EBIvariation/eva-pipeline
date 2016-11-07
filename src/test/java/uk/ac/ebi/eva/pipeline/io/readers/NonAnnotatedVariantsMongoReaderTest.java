@@ -15,13 +15,9 @@
  */
 package uk.ac.ebi.eva.pipeline.io.readers;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
-import java.io.IOException;
-import java.net.UnknownHostException;
-
+import com.mongodb.DBCollection;
+import com.mongodb.DBObject;
+import com.mongodb.MongoClient;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -31,25 +27,25 @@ import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.test.MetaDataInstanceFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-
-import com.mongodb.DBCollection;
-import com.mongodb.DBObject;
-import com.mongodb.MongoClient;
-
+import org.springframework.test.context.junit4.SpringRunner;
 import uk.ac.ebi.eva.pipeline.configuration.AnnotationConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
 import uk.ac.ebi.eva.pipeline.jobs.AnnotationJob;
 import uk.ac.ebi.eva.test.data.VariantData;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
 
+import java.io.IOException;
+import java.net.UnknownHostException;
+
+import static org.junit.Assert.*;
+
 /**
  * {@link NonAnnotatedVariantsMongoReader}
  * input: a variants collection address
  * output: a DBObject each time `.read()` is called, with at least: chr, start, annot
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = { AnnotationJob.class, AnnotationConfiguration.class})
+@RunWith(SpringRunner.class)
+@ContextConfiguration(classes = {AnnotationJob.class, AnnotationConfiguration.class})
 public class NonAnnotatedVariantsMongoReaderTest {
 
     private static final String DOC_CHR = "chr";
@@ -81,7 +77,7 @@ public class NonAnnotatedVariantsMongoReaderTest {
 
         int itemCount = 0;
         DBObject doc;
-        while((doc = mongoItemReader.read()) != null) {
+        while ((doc = mongoItemReader.read()) != null) {
             itemCount++;
             assertTrue(doc.containsField(DOC_CHR));
             assertTrue(doc.containsField(DOC_START));

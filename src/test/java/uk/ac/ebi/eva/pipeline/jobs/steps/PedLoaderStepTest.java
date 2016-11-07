@@ -15,11 +15,7 @@
  */
 package uk.ac.ebi.eva.pipeline.jobs.steps;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
-import java.util.stream.Collectors;
-
+import com.google.common.collect.Sets;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -33,25 +29,27 @@ import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
-
-import com.google.common.collect.Sets;
-
 import uk.ac.ebi.eva.pipeline.configuration.CommonConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
 
+import java.util.stream.Collectors;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 /**
  * @author Diego Poggioli
- *
- * Test for {@link PedLoaderStep}
- *
- * Using reflections to inject jobOptions into the tasklet. There are other ways to do this but a been is required.
- *
- * TODO: This could be simplified by using StepRunner. That requires using JobParametersinstead of our ownJobOptions
- * http://docs.spring.io/spring-batch/apidocs/org/springframework/batch/test/StepRunner.html
+ *         <p>
+ *         Test for {@link PedLoaderStep}
+ *         <p>
+ *         Using reflections to inject jobOptions into the tasklet. There are other ways to do this but a been is required.
+ *         <p>
+ *         TODO: This could be simplified by using StepRunner. That requires using JobParametersinstead of our ownJobOptions
+ *         http://docs.spring.io/spring-batch/apidocs/org/springframework/batch/test/StepRunner.html
  */
-@RunWith(SpringJUnit4ClassRunner.class)
+@RunWith(SpringRunner.class)
 @ContextConfiguration(classes = {JobOptions.class, CommonConfiguration.class})
 public class PedLoaderStepTest {
 

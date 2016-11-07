@@ -15,16 +15,6 @@
  */
 package uk.ac.ebi.eva.pipeline.jobs;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.opencb.opencga.storage.core.variant.VariantStorageManager.VARIANT_SOURCE;
-import static uk.ac.ebi.eva.test.utils.JobTestUtils.restoreMongoDbFromDump;
-
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Paths;
-
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Before;
@@ -44,18 +34,25 @@ import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-
+import org.springframework.test.context.junit4.SpringRunner;
 import uk.ac.ebi.eva.pipeline.configuration.CommonConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Paths;
+
+import static org.junit.Assert.*;
+import static org.opencb.opencga.storage.core.variant.VariantStorageManager.VARIANT_SOURCE;
+import static uk.ac.ebi.eva.test.utils.JobTestUtils.restoreMongoDbFromDump;
+
 /**
  * @author Jose Miguel Mut Lopez &lt;jmmut@ebi.ac.uk&gt;
- *
- * Test for {@link PopulationStatisticsJob}
+ *         <p>
+ *         Test for {@link PopulationStatisticsJob}
  */
-@RunWith(SpringJUnit4ClassRunner.class)
+@RunWith(SpringRunner.class)
 @ContextConfiguration(classes = {JobOptions.class, PopulationStatisticsJob.class, CommonConfiguration.class, JobLauncherTestUtils.class})
 public class PopulationStatisticsJobTest {
 
@@ -78,7 +75,7 @@ public class PopulationStatisticsJobTest {
     public void fullPopulationStatisticsJob() throws Exception {
         String dump = PopulationStatisticsJobTest.class.getResource("/dump/VariantStatsConfigurationTest_vl").getFile();
         JobTestUtils.restoreMongoDbFromDump(dump, jobOptions.getDbName());
-        
+
         //Given a valid VCF input file
         String input = SMALL_VCF_FILE;
 

@@ -23,8 +23,8 @@ import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 
 /**
  * @author Cristina Yenyxe Gonzalez Garcia
- *
- * Configuration init for VepInputGeneratorStep tests
+ *         <p>
+ *         Configuration init for VepInputGeneratorStep tests
  */
 @Configuration
 @PropertySource({"vep-input-generator-step.properties"})
