@@ -15,22 +15,22 @@
  */
 package uk.ac.ebi.eva.pipeline.io.readers;
 
-import com.mongodb.*;
+import com.mongodb.BasicDBObject;
+import com.mongodb.BasicDBObjectBuilder;
+import com.mongodb.DBObject;
 import org.opencb.datastore.core.ObjectMap;
 import uk.ac.ebi.eva.utils.MongoDBHelper;
 
 import javax.annotation.PostConstruct;
 
 /**
- * @author Diego Poggioli
- *
  * Mongo variant reader using an ItemReader cursor based. This is speeding up the reading of the variant in big
  * collections. The {@link org.springframework.batch.item.data.MongoItemReader} is using pagination and it is slow with
  * large collections
  */
 public class NonAnnotatedVariantsMongoReader extends MongoDbCursorItemReader {
 
-    public NonAnnotatedVariantsMongoReader(ObjectMap pipelineOptions){
+    public NonAnnotatedVariantsMongoReader(ObjectMap pipelineOptions) {
         super();
 
         setMongo(MongoDBHelper.getMongoClientFromPipelineOptions(pipelineOptions));

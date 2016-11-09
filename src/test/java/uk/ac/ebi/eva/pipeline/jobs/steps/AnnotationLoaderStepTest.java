@@ -15,11 +15,10 @@
  */
 package uk.ac.ebi.eva.pipeline.jobs.steps;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static uk.ac.ebi.eva.test.utils.JobTestUtils.makeGzipFile;
-import static uk.ac.ebi.eva.test.utils.JobTestUtils.restoreMongoDbFromDump;
-
+import com.mongodb.DBCollection;
+import com.mongodb.DBCursor;
+import com.mongodb.DBObject;
+import com.mongodb.MongoClient;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -33,29 +32,26 @@ import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-
-import com.mongodb.DBCollection;
-import com.mongodb.DBCursor;
-import com.mongodb.DBObject;
-import com.mongodb.MongoClient;
-
+import org.springframework.test.context.junit4.SpringRunner;
 import uk.ac.ebi.eva.pipeline.configuration.AnnotationLoaderStepConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
 import uk.ac.ebi.eva.pipeline.jobs.AnnotationJob;
 import uk.ac.ebi.eva.test.data.VepOutputContent;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static uk.ac.ebi.eva.test.utils.JobTestUtils.makeGzipFile;
+import static uk.ac.ebi.eva.test.utils.JobTestUtils.restoreMongoDbFromDump;
+
 
 /**
- * @author Diego Poggioli
- *
  * Test for {@link AnnotationLoaderStep}. In the context it is loaded {@link AnnotationJob}
  * because {@link JobLauncherTestUtils} require one {@link org.springframework.batch.core.Job} to be present in order
  * to run properly.
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = { AnnotationJob.class, AnnotationLoaderStepConfiguration.class, JobLauncherTestUtils.class})
+@RunWith(SpringRunner.class)
+@ContextConfiguration(classes = {AnnotationJob.class, AnnotationLoaderStepConfiguration.class, JobLauncherTestUtils.class})
 public class AnnotationLoaderStepTest {
 
     @Autowired
@@ -89,12 +85,12 @@ public class AnnotationLoaderStepTest {
         //check that documents have the annotation
         DBCursor cursor = collection(jobOptions.getDbName(), jobOptions.getDbCollectionsVariantsName()).find();
 
-        int cnt=0;
+        int cnt = 0;
         int consequenceTypeCount = 0;
         while (cursor.hasNext()) {
             cnt++;
-            DBObject dbObject = (DBObject)cursor.next().get("annot");
-            if(dbObject != null){
+            DBObject dbObject = (DBObject) cursor.next().get("annot");
+            if (dbObject != null) {
                 VariantAnnotation annot = converter.convertToDataModelType(dbObject);
                 Assert.assertNotNull(annot.getConsequenceTypes());
                 consequenceTypeCount += annot.getConsequenceTypes().size();

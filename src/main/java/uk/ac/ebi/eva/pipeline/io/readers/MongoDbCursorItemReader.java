@@ -22,13 +22,12 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 /**
- * @author Diego Poggioli
- *
  * @see <a href="https://github.com/acogoluegnes/Spring-Batch-MongoDB/blob/master/src/main/java/com/zenika/batch/item/database/mongo/MongoDbCursorItemReader.java</a>
- *
+ * <p>
  * Mongo item reader cursor based
  */
 public class MongoDbCursorItemReader extends AbstractItemCountingItemStreamItemReader<DBObject> implements InitializingBean {
+
     private Mongo mongo;
 
     private String databaseName;
@@ -37,7 +36,7 @@ public class MongoDbCursorItemReader extends AbstractItemCountingItemStreamItemR
 
     private DBCursor cursor;
 
-    private String [] fields;
+    private String[] fields;
 
     private DBObject refDbObject;
 
@@ -54,7 +53,7 @@ public class MongoDbCursorItemReader extends AbstractItemCountingItemStreamItemR
 
     @Override
     protected DBObject doRead() throws Exception {
-        if(!cursor.hasNext()) {
+        if (!cursor.hasNext()) {
             return null;
         } else {
             return cursor.next();
@@ -72,19 +71,19 @@ public class MongoDbCursorItemReader extends AbstractItemCountingItemStreamItemR
     }
 
     private DBObject createDbObjectKeys() {
-        if(fields == null) {
+        if (fields == null) {
             return new BasicDBObject();
         } else {
             BasicDBObjectBuilder builder = BasicDBObjectBuilder.start();
-            for(String field : fields) {
-                builder.add(field,1);
+            for (String field : fields) {
+                builder.add(field, 1);
             }
             return builder.get();
         }
     }
 
     private DBObject createDbObjectRef() {
-        if(refDbObject == null) {
+        if (refDbObject == null) {
             return new BasicDBObject();
         } else {
             return refDbObject;
@@ -93,9 +92,9 @@ public class MongoDbCursorItemReader extends AbstractItemCountingItemStreamItemR
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        Assert.notNull(mongo,"Mongo must be specified");
-        Assert.notNull(databaseName,"Mongo AND database must be set");
-        Assert.notNull(collectionName,"collectionName must be set");
+        Assert.notNull(mongo, "Mongo must be specified");
+        Assert.notNull(databaseName, "Mongo AND database must be set");
+        Assert.notNull(collectionName, "collectionName must be set");
     }
 
     public void setRefDbObject(DBObject refDbObject) {

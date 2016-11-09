@@ -15,15 +15,6 @@
  */
 package uk.ac.ebi.eva.pipeline.jobs.steps;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static uk.ac.ebi.eva.test.utils.JobTestUtils.makeGzipFile;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.util.zip.GZIPInputStream;
-
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -34,8 +25,7 @@ import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-
+import org.springframework.test.context.junit4.SpringRunner;
 import uk.ac.ebi.eva.pipeline.configuration.AnnotationConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
 import uk.ac.ebi.eva.pipeline.jobs.AnnotationJob;
@@ -43,13 +33,18 @@ import uk.ac.ebi.eva.pipeline.jobs.AnnotationJobTest;
 import uk.ac.ebi.eva.pipeline.jobs.flows.AnnotationFlow;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.util.zip.GZIPInputStream;
+
+import static org.junit.Assert.*;
+import static uk.ac.ebi.eva.test.utils.JobTestUtils.makeGzipFile;
+
 /**
- * @author Diego Poggioli
- *
  * Test for {@link VepAnnotationGeneratorStep}
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = { JobOptions.class, AnnotationJob.class, AnnotationConfiguration.class, JobLauncherTestUtils.class})
+@RunWith(SpringRunner.class)
+@ContextConfiguration(classes = {JobOptions.class, AnnotationJob.class, AnnotationConfiguration.class, JobLauncherTestUtils.class})
 public class VepAnnotationGeneratorStepTest {
 
     @Autowired

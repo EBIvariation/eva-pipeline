@@ -16,24 +16,6 @@
 
 package uk.ac.ebi.eva.pipeline.jobs;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static uk.ac.ebi.eva.test.utils.JobTestUtils.count;
-import static uk.ac.ebi.eva.test.utils.JobTestUtils.getLines;
-
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStreamReader;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.zip.GZIPInputStream;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -49,44 +31,53 @@ import org.opencb.opencga.storage.core.variant.adaptors.VariantDBAdaptor;
 import org.opencb.opencga.storage.core.variant.adaptors.VariantDBIterator;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.ExitStatus;
-import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.StepExecution;
-import org.springframework.batch.core.launch.JobLauncher;
-import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.IntegrationTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-
+import org.springframework.test.context.junit4.SpringRunner;
 import uk.ac.ebi.eva.pipeline.configuration.GenotypedVcfConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
 import uk.ac.ebi.eva.pipeline.jobs.steps.AnnotationLoaderStep;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.zip.GZIPInputStream;
+
+import static org.junit.Assert.*;
+import static uk.ac.ebi.eva.test.utils.JobTestUtils.count;
+import static uk.ac.ebi.eva.test.utils.JobTestUtils.getLines;
+
 /**
- * @author Diego Poggioli
- *
  * Test for {@link GenotypedVcfJob}
- *
+ * <p>
  * JobLauncherTestUtils is initialized in @Before because in GenotypedVcfJob there are two Job beans:
  * genotypedJob and variantAnnotationBatchJob (used by test). In this way it is possible to specify the Job to run
  * and avoid NoUniqueBeanDefinitionException. There are also other solutions like:
- *  - http://stackoverflow.com/questions/29655796/how-can-i-qualify-an-autowired-setter-that-i-dont-own
- *  - https://jira.spring.io/browse/BATCH-2366
- *
+ * - http://stackoverflow.com/questions/29655796/how-can-i-qualify-an-autowired-setter-that-i-dont-own
+ * - https://jira.spring.io/browse/BATCH-2366
+ * <p>
  * TODO:
  * FILE_WRONG_NO_ALT should be renamed because the alt allele is not missing but is the same as the reference
  */
-@IntegrationTest
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = { JobOptions.class, GenotypedVcfJob.class, GenotypedVcfConfiguration.class, JobLauncherTestUtils.class})
+@RunWith(SpringRunner.class)
+@SpringBootTest
+@ContextConfiguration(classes = {JobOptions.class, GenotypedVcfJob.class, GenotypedVcfConfiguration.class, JobLauncherTestUtils.class})
 public class GenotypedVcfJobTest {
 
     @Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
-    
+
     @Autowired
     private JobOptions jobOptions;
 
@@ -173,7 +164,7 @@ public class GenotypedVcfJobTest {
         ArrayList<String> rows = new ArrayList<>();
 
         String s;
-        while((s = actualReader.readLine()) != null) {
+        while ((s = actualReader.readLine()) != null) {
             rows.add(s);
         }
         Collections.sort(rows);
@@ -190,17 +181,17 @@ public class GenotypedVcfJobTest {
         assertTrue(vepOutputFile.exists());
 
         // Check output file length
-        assertEquals(537, getLines(new GZIPInputStream(new FileInputStream(vepOutput))) );
+        assertEquals(537, getLines(new GZIPInputStream(new FileInputStream(vepOutput))));
 
         // 8 Annotation load step: check documents in DB have annotation (only consequence type)
         iterator = getVariantDBIterator();
 
-        int cnt=0;
+        int cnt = 0;
         int consequenceTypeCount = 0;
         while (iterator.hasNext()) {
             cnt++;
             Variant next = iterator.next();
-            if(next.getAnnotation().getConsequenceTypes() != null){
+            if (next.getAnnotation().getConsequenceTypes() != null) {
                 consequenceTypeCount += next.getAnnotation().getConsequenceTypes().size();
             }
         }

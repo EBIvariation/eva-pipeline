@@ -15,19 +15,18 @@
  */
 package uk.ac.ebi.eva.pipeline.io.readers;
 
-import static org.junit.Assert.assertEquals;
+import org.junit.Test;
+import org.springframework.batch.item.ExecutionContext;
+import org.springframework.batch.test.MetaDataInstanceFactory;
+import uk.ac.ebi.eva.pipeline.model.FeatureCoordinates;
+import uk.ac.ebi.eva.test.data.GtfStaticTestData;
+import uk.ac.ebi.eva.test.utils.JobTestUtils;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.zip.GZIPInputStream;
 
-import org.junit.Test;
-import org.springframework.batch.item.ExecutionContext;
-import org.springframework.batch.test.MetaDataInstanceFactory;
-
-import uk.ac.ebi.eva.pipeline.model.FeatureCoordinates;
-import uk.ac.ebi.eva.test.data.GtfStaticTestData;
-import uk.ac.ebi.eva.test.utils.JobTestUtils;
+import static org.junit.Assert.assertEquals;
 
 /**
  * {@link GeneReader}

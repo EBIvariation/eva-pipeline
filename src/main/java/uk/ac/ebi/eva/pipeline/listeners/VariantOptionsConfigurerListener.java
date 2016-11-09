@@ -24,8 +24,6 @@ import org.springframework.context.annotation.Import;
 import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
 
 /**
- * @author Jose Miguel Mut Lopez &lt;jmmut@ebi.ac.uk&gt;
- *
  * Modifies the JobOptions instance with job-specific configuration, where only the configuration for the
  * running job should be set. This avoids setting incompatible settings for jobs that won't even be executed.
  * This is achieved with a `beforeJob` listener, which only gets called when a job is going to be executed.

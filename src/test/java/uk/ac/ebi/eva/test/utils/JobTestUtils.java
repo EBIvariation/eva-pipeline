@@ -33,9 +33,6 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.zip.GZIPOutputStream;
 
-/**
- * @author Jose Miguel Mut Lopez &lt;jmmut@ebi.ac.uk&gt;
- */
 public class JobTestUtils {
     private static final Logger logger = LoggerFactory.getLogger(JobTestUtils.class);
     private static final String EVA_PIPELINE_TEMP_PREFIX = "eva-pipeline-test";
@@ -43,13 +40,14 @@ public class JobTestUtils {
 
     /**
      * reads the file and sorts it in memory to return the first ordered line. Don't use for big files!
+     *
      * @param file to be sorted
      * @return String, the first orderec line
      * @throws IOException
      */
     public static String readFirstLine(File file) throws IOException {
         Set<String> lines = new TreeSet<>();
-        try(BufferedReader reader = new BufferedReader(new FileReader(file))) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
             String line = reader.readLine();
             while (line != null) {
                 lines.add(line);
@@ -78,7 +76,7 @@ public class JobTestUtils {
 
     public static <T> long count(Iterator<T> iterator) {
         int rows = 0;
-        while(iterator.hasNext()) {
+        while (iterator.hasNext()) {
             iterator.next();
             rows++;
         }
@@ -100,15 +98,15 @@ public class JobTestUtils {
         mongoClient.close();
     }
 
-    public static JobParameters getJobParameters(){
+    public static JobParameters getJobParameters() {
         return new JobParametersBuilder()
-                .addLong("time",System.currentTimeMillis()).toJobParameters();
+                .addLong("time", System.currentTimeMillis()).toJobParameters();
     }
 
     public static File makeGzipFile(String content) throws IOException {
         File tempFile = createTempFile();
-        try(FileOutputStream output = new FileOutputStream(tempFile)) {
-            try(Writer writer = new OutputStreamWriter(new GZIPOutputStream(output), "UTF-8")) {
+        try (FileOutputStream output = new FileOutputStream(tempFile)) {
+            try (Writer writer = new OutputStreamWriter(new GZIPOutputStream(output), "UTF-8")) {
                 writer.write(content);
             }
         }
@@ -116,17 +114,17 @@ public class JobTestUtils {
     }
 
     public static void makeGzipFile(String content, String file) throws IOException {
-        try(FileOutputStream output = new FileOutputStream(file)) {
-            try(Writer writer = new OutputStreamWriter(new GZIPOutputStream(output), "UTF-8")) {
+        try (FileOutputStream output = new FileOutputStream(file)) {
+            try (Writer writer = new OutputStreamWriter(new GZIPOutputStream(output), "UTF-8")) {
                 writer.write(content);
             }
         }
     }
 
     public static void restoreMongoDbFromDump(String dumpLocation, String databaseName) throws IOException, InterruptedException {
-        assert(dumpLocation != null && !dumpLocation.isEmpty());
-        assert(databaseName != null && !databaseName.isEmpty());
-    	
+        assert (dumpLocation != null && !dumpLocation.isEmpty());
+        assert (databaseName != null && !databaseName.isEmpty());
+
         logger.info("restoring DB from " + dumpLocation + " into database " + databaseName);
 
         Process exec = Runtime.getRuntime().exec(String.format("mongorestore -d %s %s", databaseName, dumpLocation));
@@ -147,13 +145,14 @@ public class JobTestUtils {
     }
 
     public static File createTempFile() throws IOException {
-        File tempFile = File.createTempFile(EVA_PIPELINE_TEMP_PREFIX,EVA_PIPELINE_TEMP_POSTFIX);
+        File tempFile = File.createTempFile(EVA_PIPELINE_TEMP_PREFIX, EVA_PIPELINE_TEMP_POSTFIX);
         tempFile.deleteOnExit();
         return tempFile;
     }
 
     /**
      * Returns a DBObject obtained by parsing a given string
+     *
      * @param variant string in JSON format
      * @return DBObject
      */

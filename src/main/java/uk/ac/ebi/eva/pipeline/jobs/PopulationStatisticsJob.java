@@ -27,17 +27,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-
 import uk.ac.ebi.eva.pipeline.jobs.flows.PopulationStatisticsFlow;
 
 /**
  * Configuration to run a full Statistics job: variantStatsFlow: statsCreate --> statsLoad
- *
  */
 @Configuration
 @EnableBatchProcessing
 @Import({PopulationStatisticsFlow.class})
-public class PopulationStatisticsJob extends CommonJobStepInitialization{
+public class PopulationStatisticsJob extends CommonJobStepInitialization {
 
     private static final Logger logger = LoggerFactory.getLogger(PopulationStatisticsJob.class);
     private static final String jobName = "calculate-statistics";
@@ -47,7 +45,7 @@ public class PopulationStatisticsJob extends CommonJobStepInitialization{
 
     @Autowired
     private Flow optionalStatisticsFlow;
-    
+
     @Bean
     public Job variantStatisticsJob() {
         JobBuilder jobBuilder = jobBuilderFactory

@@ -21,8 +21,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.SkipListener;
 
 /**
- * @author Diego Poggioli
- *
  * Just logs skipped items into a differnt file (different logger)
  */
 public class SkippedItemListener implements SkipListener {

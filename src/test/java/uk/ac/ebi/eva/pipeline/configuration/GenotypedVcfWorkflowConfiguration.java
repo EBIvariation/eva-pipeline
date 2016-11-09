@@ -22,12 +22,10 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 
 /**
- * @author Diego Poggioli
- *
  * Configuration init for GenotypedVcfJob, from a workflow perspective
  */
 @Configuration
-@PropertySource({"variantConfigurationWorkflow.properties"})
+@PropertySource({"genotyped-vcf-workflow.properties"})
 public class GenotypedVcfWorkflowConfiguration {
 
     @Bean

@@ -28,16 +28,14 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-
 import uk.ac.ebi.eva.pipeline.jobs.steps.GeneLoaderStep;
 import uk.ac.ebi.eva.pipeline.jobs.steps.IndexesGeneratorStep;
 
 /**
  * Job to initialize the databases that will be used in later jobs.
- *
+ * <p>
  * 1. create the needed indexes in the DBs
  * 2. load genomic features for the species
- *
  */
 @Configuration
 @EnableBatchProcessing

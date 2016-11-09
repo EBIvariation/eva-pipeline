@@ -38,9 +38,6 @@ import uk.ac.ebi.eva.utils.URLHelper;
 import java.net.URI;
 
 /**
- *
- * @author Jose Miguel Mut Lopez &lt;jmmut@ebi.ac.uk&gt;
- *
  * Tasklet that loads statistics into mongoDB.
  *
  * Input: file containing statistics (.variants.stats.json.gz)

@@ -15,13 +15,6 @@
  */
 package uk.ac.ebi.eva.pipeline.jobs.steps;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static uk.ac.ebi.eva.test.utils.JobTestUtils.readFirstLine;
-
-import java.io.File;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -32,21 +25,23 @@ import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-
-import uk.ac.ebi.eva.pipeline.configuration.VepInputGeneratorStepConfiguration;
+import org.springframework.test.context.junit4.SpringRunner;
 import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
+import uk.ac.ebi.eva.pipeline.configuration.VepInputGeneratorStepConfiguration;
 import uk.ac.ebi.eva.pipeline.jobs.AnnotationJob;
 import uk.ac.ebi.eva.pipeline.jobs.PopulationStatisticsJobTest;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
 
+import java.io.File;
+
+import static org.junit.Assert.*;
+import static uk.ac.ebi.eva.test.utils.JobTestUtils.readFirstLine;
+
 /**
- * @author Diego Poggioli
- *
  * Test {@link VepInputGeneratorStep}
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = { AnnotationJob.class, VepInputGeneratorStepConfiguration.class, JobLauncherTestUtils.class})
+@RunWith(SpringRunner.class)
+@ContextConfiguration(classes = {AnnotationJob.class, VepInputGeneratorStepConfiguration.class, JobLauncherTestUtils.class})
 public class VepInputGeneratorStepTest {
 
     @Autowired
@@ -58,7 +53,7 @@ public class VepInputGeneratorStepTest {
     public void setUp() throws Exception {
         jobOptions.loadArgs();
     }
-    
+
     @After
     public void tearDown() throws Exception {
         JobTestUtils.cleanDBs(jobOptions.getDbName());
@@ -70,7 +65,7 @@ public class VepInputGeneratorStepTest {
         JobTestUtils.restoreMongoDbFromDump(dump, jobOptions.getDbName());
         File vepInputFile = new File(jobOptions.getVepInput());
 
-        if(vepInputFile.exists())
+        if (vepInputFile.exists())
             vepInputFile.delete();
 
         assertFalse(vepInputFile.exists());

@@ -26,7 +26,6 @@ import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 import org.springframework.stereotype.Component;
-
 import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
 
 import java.io.*;
@@ -34,24 +33,20 @@ import java.util.Arrays;
 import java.util.zip.GZIPOutputStream;
 
 /**
- *
- * @author Jose Miguel Mut Lopez &lt;jmmut@ebi.ac.uk&gt;
- * @author Cristina Yenyxe Gonzalez Garcia &lt;cyenyxe@ebi.ac.uk&gt;
- *
  * Tasklet that runs @see <a href="http://www.ensembl.org/info/docs/tools/vep/index.html">VEP</a> over a list of
  * coordinates of variants and nucleotide changes to determines the effect of the mutations.
- *
+ * <p>
  * Input: file listing all the coordinates of variants and nucleotide changes like:
- *  20	60343	60343	G/A	+
- *  20	60419	60419	A/G	+
- *  20	60479	60479	C/T	+
- *  ...
- *
+ * 20	60343	60343	G/A	+
+ * 20	60419	60419	A/G	+
+ * 20	60479	60479	C/T	+
+ * ...
+ * <p>
  * Output: file containing the VEP output
- *  20_60343_G/A	20:60343	A	-	-	-	intergenic_variant	-	-	-	-	-	-
- *  20_60419_A/G	20:60419	G	-	-	-	intergenic_variant	-	-	-	-	-	-
- *  20_60479_C/T	20:60479	T	-	-	-	intergenic_variant	-	-	-	-	-	rs149529999	GMAF=T:0.0018;AFR_MAF=T:0.01;AMR_MAF=T:0.0028
- *  ..
+ * 20_60343_G/A	20:60343	A	-	-	-	intergenic_variant	-	-	-	-	-	-
+ * 20_60419_A/G	20:60419	G	-	-	-	intergenic_variant	-	-	-	-	-	-
+ * 20_60479_C/T	20:60479	T	-	-	-	intergenic_variant	-	-	-	-	-	rs149529999	GMAF=T:0.0018;AFR_MAF=T:0.01;AMR_MAF=T:0.0028
+ * ..
  */
 @Component
 @StepScope
@@ -98,7 +93,7 @@ public class VepAnnotationGeneratorStep implements Tasklet {
             String errorLog = pipelineOptions.getString("vep.output") + ".errors.txt";
             connectStreams(new BufferedInputStream(process.getErrorStream()), new FileOutputStream(errorLog));
             throw new Exception("Error while running VEP (exit status " + exitValue + "). See "
-                    + errorLog  + " for the errors description from VEP.");
+                    + errorLog + " for the errors description from VEP.");
         }
 
         return RepeatStatus.FINISHED;
@@ -106,8 +101,9 @@ public class VepAnnotationGeneratorStep implements Tasklet {
 
     /**
      * read all the inputStream and write it into the outputStream
-     *
+     * <p>
      * TODO: optimize with buffers?
+     *
      * @throws IOException
      */
     private long connectStreams(InputStream inputStream, OutputStream outputStream) throws IOException {

@@ -24,7 +24,7 @@ import org.junit.runner.RunWith;
 import org.springframework.batch.item.file.mapping.JsonLineMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit4.SpringRunner;
 import uk.ac.ebi.eva.pipeline.configuration.CommonConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
 import uk.ac.ebi.eva.pipeline.model.PopulationStatistics;
@@ -37,7 +37,6 @@ import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 
 /**
@@ -45,8 +44,8 @@ import static org.junit.Assert.assertTrue;
  * input: a List of {@link PopulationStatistics} to each call of `.write()`
  * output: the FeatureCoordinates get written in mongo, with at least: chromosome, start and end.
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = { JobOptions.class, CommonConfiguration.class})
+@RunWith(SpringRunner.class)
+@ContextConfiguration(classes = {JobOptions.class, CommonConfiguration.class})
 public class StatisticsMongoWriterTest {
 
     @Autowired
@@ -115,8 +114,8 @@ public class StatisticsMongoWriterTest {
 
         // check vid has an index
         assertEquals("[{ \"v\" : 1 , \"key\" : { \"_id\" : 1} , \"name\" : \"_id_\" , \"ns\" : \"" + dbName +
-                ".populationStatistics\"}, { \"v\" : 1 , \"unique\" : true , \"key\" : { \"vid\" : 1 , \"sid\" : 1 , " +
-                "\"cid\" : 1} , \"name\" : \"vscid\" , \"ns\" : \"" + dbName + ".populationStatistics\"}]",
+                        ".populationStatistics\"}, { \"v\" : 1 , \"unique\" : true , \"key\" : { \"vid\" : 1 , \"sid\" : 1 , " +
+                        "\"cid\" : 1} , \"name\" : \"vscid\" , \"ns\" : \"" + dbName + ".populationStatistics\"}]",
                 statsCollection.getIndexInfo().toString());
     }
 

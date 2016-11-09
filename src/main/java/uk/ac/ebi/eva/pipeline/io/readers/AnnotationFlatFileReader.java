@@ -18,23 +18,22 @@ package uk.ac.ebi.eva.pipeline.io.readers;
 import org.opencb.biodata.models.variant.annotation.VariantAnnotation;
 import org.springframework.batch.item.file.FlatFileItemReader;
 import org.springframework.core.io.Resource;
-
 import uk.ac.ebi.eva.pipeline.io.GzipLazyResource;
 import uk.ac.ebi.eva.pipeline.io.mappers.AnnotationLineMapper;
+
 import java.io.File;
 
 /**
  * Reader of VEP output annotation flat file. The file should be zipped.
- *
+ * <p>
  * VEP output format:
- *
- *  20_60343_G/A	20:60343	A	-	-	-	intergenic_variant	-	-	-	-	-	-
- *  20_60419_A/G	20:60419	G	-	-	-	intergenic_variant	-	-	-	-	-	-
- *  20_60479_C/T	20:60479	T	-	-	-	intergenic_variant	-	-	-	-	-	rs149529999	GMAF=T:0.0018;AFR_MAF=T:0.01;AMR_MAF=T:0.0028
- *  ...
- *
+ * <p>
+ * 20_60343_G/A	20:60343	A	-	-	-	intergenic_variant	-	-	-	-	-	-
+ * 20_60419_A/G	20:60419	G	-	-	-	intergenic_variant	-	-	-	-	-	-
+ * 20_60479_C/T	20:60479	T	-	-	-	intergenic_variant	-	-	-	-	-	rs149529999	GMAF=T:0.0018;AFR_MAF=T:0.01;AMR_MAF=T:0.0028
+ * ...
  */
-public class AnnotationFlatFileReader extends FlatFileItemReader<VariantAnnotation>{
+public class AnnotationFlatFileReader extends FlatFileItemReader<VariantAnnotation> {
 
     public AnnotationFlatFileReader(File file) {
         Resource resource = new GzipLazyResource(file);

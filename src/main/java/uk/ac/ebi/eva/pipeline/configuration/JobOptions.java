@@ -15,41 +15,34 @@
  */
 package uk.ac.ebi.eva.pipeline.configuration;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.URI;
-
 import org.opencb.biodata.models.variant.VariantSource;
 import org.opencb.biodata.models.variant.VariantStudy;
 import org.opencb.datastore.core.ObjectMap;
+import org.opencb.opencga.lib.common.Config;
 import org.opencb.opencga.storage.core.variant.VariantStorageManager;
+import org.opencb.opencga.storage.mongodb.variant.MongoDBVariantStorageManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.stereotype.Component;
-
-import uk.ac.ebi.eva.pipeline.jobs.AnnotationJob;
-import uk.ac.ebi.eva.pipeline.jobs.PopulationStatisticsJob;
 import uk.ac.ebi.eva.pipeline.jobs.flows.AnnotationFlow;
 import uk.ac.ebi.eva.pipeline.jobs.flows.PopulationStatisticsFlow;
-
-import java.nio.file.Paths;
-import java.util.Properties;
-import org.opencb.opencga.lib.common.Config;
-import org.opencb.opencga.storage.mongodb.variant.MongoDBVariantStorageManager;
 import uk.ac.ebi.eva.utils.MongoDBHelper;
 
 import javax.annotation.PostConstruct;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.URI;
+import java.nio.file.Paths;
+import java.util.Properties;
 
 /**
  *
  * Class to extract configuration from properties files and from command line.
  * Default values are in resources/application.properties
- *
- * @author Diego Poggioli &lt;diego@ebi.ac.uk&gt;
  *
  * TODO: 20/05/2016 add type/null/file/dir validators
  * TODO validation checks for all the parameters
@@ -74,7 +67,7 @@ public class JobOptions {
     @Value("${input.study.id}") private String studyId;
     @Value("${input.pedigree:}") private String pedigree;
     @Value("${input.gtf}") private String gtf;
-    
+
     // Output
     @Value("${output.dir}") private String outputDir;
     @Value("${output.dir.annotation}") private String outputDirAnnotation;
@@ -83,7 +76,7 @@ public class JobOptions {
     @Value("${statistics.overwrite:false}") private boolean overwriteStats;
 
     @Value("${app.opencga.path}") private String opencgaAppHome;
-    
+
     //// OpenCGA options with default values (non-customizable)
     private String compressExtension = ".gz";
     private boolean annotate = false;
@@ -123,7 +116,7 @@ public class JobOptions {
     @PostConstruct
     public void loadArgs() throws IOException {
         logger.info("Loading job arguments");
-        
+
         if (opencgaAppHome == null || opencgaAppHome.isEmpty()) {
             opencgaAppHome = System.getenv("OPENCGA_HOME") != null ? System.getenv("OPENCGA_HOME") : "/opt/opencga";
         }
@@ -138,7 +131,7 @@ public class JobOptions {
         URI configUri = URI.create(Config.getOpenCGAHome() + "/").resolve("conf/").resolve("storage-mongodb.properties");
         Properties properties = new Properties();
         properties.load(new InputStreamReader(new FileInputStream(configUri.getPath())));
-        
+
         if (dbHosts == null) {
             dbHosts = properties.getProperty("OPENCGA.STORAGE.MONGODB.VARIANT.DB.HOSTS");
         }
@@ -160,7 +153,7 @@ public class JobOptions {
         if (dbCollectionFilesName == null) {
             dbCollectionFilesName = properties.getProperty("OPENCGA.STORAGE.MONGODB.VARIANT.DB.COLLECTION.FILES", "files");
         }
-        
+
         if (dbHosts == null || dbHosts.isEmpty()) {
             throw new IllegalArgumentException("Please provide a database hostname");
         }
@@ -189,7 +182,7 @@ public class JobOptions {
         variantOptions.put(VariantStorageManager.INCLUDE_SRC, includeSourceLine);
         variantOptions.put("compressExtension", compressExtension);
         variantOptions.put(VariantStorageManager.ANNOTATE, annotate);
-        
+
         variantOptions.put(VariantStorageManager.DB_NAME, dbName);
         variantOptions.put(MongoDBVariantStorageManager.OPENCGA_STORAGE_MONGODB_VARIANT_DB_NAME, dbName);
         variantOptions.put(MongoDBVariantStorageManager.OPENCGA_STORAGE_MONGODB_VARIANT_DB_HOSTS, dbHosts);
@@ -224,7 +217,7 @@ public class JobOptions {
         String annotationFilesPrefix = studyId + "_" + fileId;
         pipelineOptions.put(VEP_INPUT, URI.create(outputDirAnnotation + "/").resolve(annotationFilesPrefix + "_variants_to_annotate.tsv").toString());
         pipelineOptions.put(VEP_OUTPUT, URI.create(outputDirAnnotation + "/").resolve(annotationFilesPrefix + "_vep_annotation.tsv.gz").toString());
-        
+
         pipelineOptions.put(APP_VEP_PATH, vepPath);
         pipelineOptions.put("app.vep.cache.path", vepCacheDirectory);
         pipelineOptions.put("app.vep.cache.version", vepCacheVersion);

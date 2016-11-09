@@ -15,15 +15,6 @@
  */
 package uk.ac.ebi.eva.pipeline.jobs.steps;
 
-import static org.junit.Assert.assertEquals;
-import static org.opencb.opencga.storage.core.variant.VariantStorageManager.VARIANT_SOURCE;
-import static uk.ac.ebi.eva.test.utils.JobTestUtils.count;
-import static uk.ac.ebi.eva.test.utils.JobTestUtils.getLines;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.util.zip.GZIPInputStream;
-
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Before;
@@ -39,27 +30,30 @@ import org.opencb.opencga.storage.core.variant.adaptors.VariantDBAdaptor;
 import org.opencb.opencga.storage.core.variant.adaptors.VariantDBIterator;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.ExitStatus;
-import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobExecutionException;
-import org.springframework.batch.core.launch.JobLauncher;
-import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-
+import org.springframework.test.context.junit4.SpringRunner;
 import uk.ac.ebi.eva.pipeline.configuration.GenotypedVcfConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
 import uk.ac.ebi.eva.pipeline.jobs.GenotypedVcfJob;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.util.zip.GZIPInputStream;
+
+import static org.junit.Assert.assertEquals;
+import static org.opencb.opencga.storage.core.variant.VariantStorageManager.VARIANT_SOURCE;
+import static uk.ac.ebi.eva.test.utils.JobTestUtils.count;
+import static uk.ac.ebi.eva.test.utils.JobTestUtils.getLines;
+
 /**
- * @author Diego Poggioli
- *
  * Test for {@link VariantLoaderStep}
  */
-@RunWith(SpringJUnit4ClassRunner.class)
+@RunWith(SpringRunner.class)
 @ContextConfiguration(classes = {GenotypedVcfJob.class, JobOptions.class, GenotypedVcfConfiguration.class, JobLauncherTestUtils.class})
 public class VariantLoaderStepTest {
 

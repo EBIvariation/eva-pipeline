@@ -16,8 +16,6 @@
 package uk.ac.ebi.eva.pipeline.model;
 
 /**
- * @author Jose Miguel Mut Lopez &lt;jmmut@ebi.ac.uk&gt;
- *
  * TODO: use the version in variation commons
  */
 public class FeatureCoordinates {

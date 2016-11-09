@@ -16,20 +16,10 @@
 
 package uk.ac.ebi.eva.pipeline.jobs;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static uk.ac.ebi.eva.pipeline.jobs.steps.AnnotationLoaderStep.LOAD_VEP_ANNOTATION;
-import static uk.ac.ebi.eva.pipeline.jobs.steps.VepAnnotationGeneratorStep.GENERATE_VEP_ANNOTATION;
-import static uk.ac.ebi.eva.pipeline.jobs.steps.VepInputGeneratorStep.FIND_VARIANTS_TO_ANNOTATE;
-
-import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
+import com.mongodb.DBCollection;
+import com.mongodb.DBCursor;
+import com.mongodb.DBObject;
+import com.mongodb.MongoClient;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -42,27 +32,31 @@ import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.IntegrationTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-
-import com.mongodb.DBCollection;
-import com.mongodb.DBCursor;
-import com.mongodb.DBObject;
-import com.mongodb.MongoClient;
-
+import org.springframework.test.context.junit4.SpringRunner;
 import uk.ac.ebi.eva.pipeline.configuration.AnnotationJobConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
 
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static org.junit.Assert.*;
+import static uk.ac.ebi.eva.pipeline.jobs.steps.AnnotationLoaderStep.LOAD_VEP_ANNOTATION;
+import static uk.ac.ebi.eva.pipeline.jobs.steps.VepAnnotationGeneratorStep.GENERATE_VEP_ANNOTATION;
+import static uk.ac.ebi.eva.pipeline.jobs.steps.VepInputGeneratorStep.FIND_VARIANTS_TO_ANNOTATE;
+
 /**
- * @author Diego Poggioli
- *
  * Test for {@link AnnotationJob}
  */
-@IntegrationTest
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = { JobOptions.class, AnnotationJob.class, AnnotationJobConfiguration.class, JobLauncherTestUtils.class})
+@RunWith(SpringRunner.class)
+@SpringBootTest
+@ContextConfiguration(classes = {JobOptions.class, AnnotationJob.class, AnnotationJobConfiguration.class, JobLauncherTestUtils.class})
 public class AnnotationJobTest {
 
     @Autowired
@@ -76,7 +70,7 @@ public class AnnotationJobTest {
     private DBObjectToVariantAnnotationConverter converter;
 
     @Test
-    public void allAnnotationStepsShouldBeExecuted () throws Exception {
+    public void allAnnotationStepsShouldBeExecuted() throws Exception {
         String dump = PopulationStatisticsJobTest.class.getResource("/dump/VariantStatsConfigurationTest_vl").getFile();
         JobTestUtils.restoreMongoDbFromDump(dump, jobOptions.getDbName());
 
@@ -102,12 +96,12 @@ public class AnnotationJobTest {
         //check that documents have the annotation
         DBCursor cursor = collection(jobOptions.getDbName(), jobOptions.getDbCollectionsVariantsName()).find();
 
-        int cnt=0;
+        int cnt = 0;
         int consequenceTypeCount = 0;
         while (cursor.hasNext()) {
             cnt++;
-            DBObject dbObject = (DBObject)cursor.next().get("annot");
-            if(dbObject != null){
+            DBObject dbObject = (DBObject) cursor.next().get("annot");
+            if (dbObject != null) {
                 VariantAnnotation annot = converter.convertToDataModelType(dbObject);
                 assertNotNull(annot.getConsequenceTypes());
                 consequenceTypeCount += annot.getConsequenceTypes().size();
@@ -137,7 +131,7 @@ public class AnnotationJobTest {
         assertEquals(FIND_VARIANTS_TO_ANNOTATE, findVariantsToAnnotateStep.getStepName());
 
         assertTrue(vepInputFile.exists());
-        assertTrue(Files.size(Paths.get(vepInputFile.toPath().toUri()))==0);
+        assertTrue(Files.size(Paths.get(vepInputFile.toPath().toUri())) == 0);
     }
 
     @Before

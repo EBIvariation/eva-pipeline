@@ -16,26 +16,17 @@
 package uk.ac.ebi.eva.pipeline.io.writers;
 
 
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
-import java.util.ArrayList;
-import java.util.List;
-
+import com.mongodb.DBCollection;
+import com.mongodb.DBCursor;
+import com.mongodb.DBObject;
+import com.mongodb.MongoClient;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-
-import com.mongodb.DBCollection;
-import com.mongodb.DBCursor;
-import com.mongodb.DBObject;
-import com.mongodb.MongoClient;
-
+import org.springframework.test.context.junit4.SpringRunner;
 import uk.ac.ebi.eva.pipeline.configuration.DatabaseInitializationConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
 import uk.ac.ebi.eva.pipeline.io.mappers.GeneLineMapper;
@@ -43,13 +34,19 @@ import uk.ac.ebi.eva.pipeline.model.FeatureCoordinates;
 import uk.ac.ebi.eva.test.data.GtfStaticTestData;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 /**
  * {@link GeneWriter}
  * input: a List of FeatureCoordinates to each call of `.write()`
  * output: the FeatureCoordinates get written in mongo, with at least: chromosome, start and end.
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = { JobOptions.class, DatabaseInitializationConfiguration.class,})
+@RunWith(SpringRunner.class)
+@ContextConfiguration(classes = {JobOptions.class, DatabaseInitializationConfiguration.class,})
 public class GeneWriterTest {
 
     @Autowired
@@ -59,12 +56,12 @@ public class GeneWriterTest {
     public void setUp() throws Exception {
         jobOptions.setDbName(getClass().getSimpleName());
     }
-    
+
     @After
     public void tearDown() throws Exception {
         JobTestUtils.cleanDBs(jobOptions.getDbName());
     }
-    
+
     @Test
     public void shouldWriteAllFieldsIntoMongoDb() throws Exception {
         GeneWriter geneWriter = new GeneWriter(jobOptions.getMongoOperations(), jobOptions.getDbCollectionsFeaturesName());

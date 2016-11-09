@@ -37,18 +37,16 @@ import uk.ac.ebi.eva.utils.MongoDBHelper;
 import java.io.IOException;
 
 /**
- * @author Diego Poggioli
- *
  * This step loads annotations into MongoDB.
- *
+ * <p>
  * input: file written by VEP listing annotated variants
  * output: write the annotations into a given variant MongoDB collection.
- *
- *  Example file content:
- *  20_60343_G/A	20:60343	A	-	-	-	intergenic_variant	-	-	-	-	-	-
- *  20_60419_A/G	20:60419	G	-	-	-	intergenic_variant	-	-	-	-	-	-
- *  20_60479_C/T	20:60479	T	-	-	-	intergenic_variant	-	-	-	-	-	rs149529999	GMAF=T:0.0018;AFR_MAF=T:0.01;AMR_MAF=T:0.0028
- *
+ * <p>
+ * Example file content:
+ * 20_60343_G/A	20:60343	A	-	-	-	intergenic_variant	-	-	-	-	-	-
+ * 20_60419_A/G	20:60419	G	-	-	-	intergenic_variant	-	-	-	-	-	-
+ * 20_60479_C/T	20:60479	T	-	-	-	intergenic_variant	-	-	-	-	-	rs149529999	GMAF=T:0.0018;AFR_MAF=T:0.01;AMR_MAF=T:0.0028
+ * <p>
  * each line of the file is loaded with {@link AnnotationFlatFileReader} into a {@link VariantAnnotation} and then sent
  * to mongo with {@link VepAnnotationMongoWriter}.
  */
@@ -73,7 +71,7 @@ public class AnnotationLoaderStep {
         String collections = jobOptions.getPipelineOptions().getString("db.collections.variants.name");
         VepAnnotationMongoWriter writer = new VepAnnotationMongoWriter(mongoOperations, collections);
 
-        return stepBuilderFactory.get(LOAD_VEP_ANNOTATION).<VariantAnnotation, VariantAnnotation> chunk(10)
+        return stepBuilderFactory.get(LOAD_VEP_ANNOTATION).<VariantAnnotation, VariantAnnotation>chunk(10)
                 .reader(new AnnotationFlatFileReader(jobOptions.getPipelineOptions().getString("vep.output")))
                 .writer(writer)
                 .faultTolerant().skipLimit(50).skip(FlatFileParseException.class)

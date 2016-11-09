@@ -20,10 +20,8 @@ import org.springframework.data.mongodb.core.MongoOperations;
 import uk.ac.ebi.eva.pipeline.model.FeatureCoordinates;
 
 /**
- * @author Jose Miguel Mut Lopez &lt;jmmut@ebi.ac.uk&gt;
- *
  * Write a list of {@link FeatureCoordinates} into MongoDB.
- *
+ * <p>
  * This is a thin helper wrapper over MongoItemWriter, which automatically converts beans into DBObjects, given
  * a MongoOperations and a collection name.
  */
