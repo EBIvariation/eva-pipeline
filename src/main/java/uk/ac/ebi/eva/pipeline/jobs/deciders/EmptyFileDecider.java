@@ -27,8 +27,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 /**
- * @author Diego Poggioli
- *
  * Decider used to skip step(s) in case a previous step is generating an empty file
  */
 public class EmptyFileDecider implements JobExecutionDecider {
@@ -40,7 +38,7 @@ public class EmptyFileDecider implements JobExecutionDecider {
     public static final String CONTINUE_FLOW = "CONTINUE_FLOW";
 
     public EmptyFileDecider(String file) {
-        this.file =file;
+        this.file = file;
     }
 
     @Override
@@ -54,7 +52,7 @@ public class EmptyFileDecider implements JobExecutionDecider {
         return new FlowExecutionStatus(CONTINUE_FLOW);
     }
 
-    private long getFileSize(){
+    private long getFileSize() {
         long fileSize;
 
         try {

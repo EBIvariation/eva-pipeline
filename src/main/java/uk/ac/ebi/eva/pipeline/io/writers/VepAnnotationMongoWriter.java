@@ -18,15 +18,13 @@ package uk.ac.ebi.eva.pipeline.io.writers;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
-
-import uk.ac.ebi.eva.utils.MongoDBHelper;
-
 import org.opencb.biodata.models.variant.annotation.VariantAnnotation;
 import org.opencb.opencga.storage.mongodb.variant.DBObjectToVariantAnnotationConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.item.data.MongoItemWriter;
 import org.springframework.data.mongodb.core.MongoOperations;
+import uk.ac.ebi.eva.utils.MongoDBHelper;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -34,8 +32,6 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * @author Diego Poggioli
- *
  * Write a list of {@link VariantAnnotation} into MongoDB
  *
  * A new annotation is added in the existing document.

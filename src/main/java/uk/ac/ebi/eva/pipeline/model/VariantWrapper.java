@@ -18,14 +18,12 @@ package uk.ac.ebi.eva.pipeline.model;
 import org.opencb.biodata.models.variant.Variant;
 
 /**
- * @author Diego Poggioli
- *
  * Container for {@link Variant} including strand. By default strand in VCF is always '+'
  */
 public class VariantWrapper {
 
     private Variant variant;
-    private String strand="+";
+    private String strand = "+";
 
     public VariantWrapper(Variant variant) {
         this.variant = variant.copyInEnsemblFormat();

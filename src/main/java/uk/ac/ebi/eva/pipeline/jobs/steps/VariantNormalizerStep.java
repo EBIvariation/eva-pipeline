@@ -24,15 +24,11 @@ import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
-
 import uk.ac.ebi.eva.utils.URLHelper;
 
 import java.net.URI;
 
 /**
- *
- * @author Jose Miguel Mut Lopez &lt;jmmut@ebi.ac.uk&gt;
- *
  * Tasklet that normalizes variants. To see the applied rules please refer to:
  *
  * @see <a href="www.ebi.ac.uk/eva/?FAQ">www.ebi.ac.uk/eva/?FAQ</a>

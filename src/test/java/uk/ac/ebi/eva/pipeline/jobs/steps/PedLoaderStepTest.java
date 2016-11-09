@@ -40,14 +40,12 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 /**
- * @author Diego Poggioli
- *         <p>
- *         Test for {@link PedLoaderStep}
- *         <p>
- *         Using reflections to inject jobOptions into the tasklet. There are other ways to do this but a been is required.
- *         <p>
- *         TODO: This could be simplified by using StepRunner. That requires using JobParametersinstead of our ownJobOptions
- *         http://docs.spring.io/spring-batch/apidocs/org/springframework/batch/test/StepRunner.html
+ * Test for {@link PedLoaderStep}
+ * <p>
+ * Using reflections to inject jobOptions into the tasklet. There are other ways to do this but a been is required.
+ * <p>
+ * TODO: This could be simplified by using StepRunner. That requires using JobParametersinstead of our ownJobOptions
+ * http://docs.spring.io/spring-batch/apidocs/org/springframework/batch/test/StepRunner.html
  */
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = {JobOptions.class, CommonConfiguration.class})

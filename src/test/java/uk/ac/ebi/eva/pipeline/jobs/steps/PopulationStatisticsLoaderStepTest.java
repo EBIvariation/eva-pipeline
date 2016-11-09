@@ -34,9 +34,7 @@ import static org.junit.Assert.assertEquals;
 import static uk.ac.ebi.eva.test.utils.JobTestUtils.restoreMongoDbFromDump;
 
 /**
- * @author Diego Poggioli
- *         <p>
- *         Test for {@link PopulationStatisticsLoaderStep}
+ * Test for {@link PopulationStatisticsLoaderStep}
  */
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = {JobOptions.class, PopulationStatisticsJob.class, CommonConfiguration.class, JobLauncherTestUtils.class})

@@ -44,12 +44,10 @@ import static uk.ac.ebi.eva.test.utils.JobTestUtils.getLines;
 import static uk.ac.ebi.eva.test.utils.JobTestUtils.getTransformedOutputPath;
 
 /**
- * @author Diego Poggioli
- *         <p>
- *         Test for {@link VariantNormalizerStep}
- *         <p>
- *         TODO:
- *         FILE_WRONG_NO_ALT should be renamed because the alt allele is not missing but is the same as the reference
+ * Test for {@link VariantNormalizerStep}
+ * <p>
+ * TODO:
+ * FILE_WRONG_NO_ALT should be renamed because the alt allele is not missing but is the same as the reference
  */
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = {GenotypedVcfJob.class, JobOptions.class, GenotypedVcfConfiguration.class, JobLauncherTestUtils.class})

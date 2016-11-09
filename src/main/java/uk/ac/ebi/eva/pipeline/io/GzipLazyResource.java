@@ -16,7 +16,6 @@
 package uk.ac.ebi.eva.pipeline.io;
 
 import org.springframework.core.io.FileSystemResource;
-import org.springframework.core.io.Resource;
 
 import java.io.File;
 import java.io.IOException;
@@ -24,16 +23,12 @@ import java.io.InputStream;
 import java.util.zip.GZIPInputStream;
 
 /**
- * Created by jmmut on 2016-07-19.
- *
  * There's no way to read a compressed file with Spring classes.
  * reference: https://jira.spring.io/browse/BATCH-1750
- *
+ * <p>
  * It's lazy because otherwise it will try to open the file on creation. The creation may be at the start of the
  * runtime if this class is used to create beans for autowiring, and at the start of the application it's
  * possible that the file doesn't exist yet.
- *
- * @author Jose Miguel Mut Lopez &lt;jmmut@ebi.ac.uk&gt;
  */
 public class GzipLazyResource extends FileSystemResource {
 

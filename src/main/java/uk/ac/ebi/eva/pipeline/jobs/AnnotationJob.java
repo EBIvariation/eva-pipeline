@@ -26,21 +26,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-
 import uk.ac.ebi.eva.pipeline.jobs.flows.AnnotationFlow;
 
 /**
- * @author Diego Poggioli
- *
  * Batch class to wire together:
  * 1) variantsAnnotGenerateInputBatchStep - Dump a list of variants without annotations to be used as input for VEP
  * 2) annotationCreate - run VEP
  * 3) annotationLoadBatchStep - Load VEP annotations into mongo
- *
+ * <p>
  * Optional flow: variantsAnnotGenerateInput --> (annotationCreate --> annotationLoad)
  * annotationCreate and annotationLoad steps are only executed if variantsAnnotGenerateInput is generating a
  * non-empty VEP input file
- *
  */
 
 @Configuration
@@ -54,9 +50,9 @@ public class AnnotationJob extends CommonJobStepInitialization {
 
     @Autowired
     private Flow annotationFlowBasic;
-    
+
     @Bean
-    public Job variantAnnotationBatchJob(){
+    public Job variantAnnotationBatchJob() {
         JobBuilder jobBuilder = jobBuilderFactory
                 .get(jobName)
                 .incrementer(new RunIdIncrementer());

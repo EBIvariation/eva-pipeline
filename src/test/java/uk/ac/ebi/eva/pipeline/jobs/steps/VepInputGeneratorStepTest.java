@@ -38,9 +38,7 @@ import static org.junit.Assert.*;
 import static uk.ac.ebi.eva.test.utils.JobTestUtils.readFirstLine;
 
 /**
- * @author Diego Poggioli
- *         <p>
- *         Test {@link VepInputGeneratorStep}
+ * Test {@link VepInputGeneratorStep}
  */
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = {AnnotationJob.class, VepInputGeneratorStepConfiguration.class, JobLauncherTestUtils.class})

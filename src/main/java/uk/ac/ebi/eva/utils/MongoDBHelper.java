@@ -19,7 +19,6 @@ package uk.ac.ebi.eva.utils;
 import com.mongodb.Mongo;
 import com.mongodb.MongoClient;
 import com.mongodb.ReadPreference;
-
 import org.opencb.commons.utils.CryptoUtils;
 import org.opencb.datastore.core.ObjectMap;
 import org.springframework.data.mongodb.core.MongoOperations;
@@ -28,8 +27,6 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import java.net.UnknownHostException;
 
 /**
- * @author Diego Poggioli
- *
  * Utility class dealing with MongoDB connections using pipeline options
  */
 public class MongoDBHelper {
@@ -46,11 +43,11 @@ public class MongoDBHelper {
 
     private static MongoTemplate getMongoTemplate(ObjectMap pipelineOptions) throws UnknownHostException {
         MongoTemplate mongoTemplate;
-        if(pipelineOptions.getString("config.db.authentication-db").isEmpty()){
+        if (pipelineOptions.getString("config.db.authentication-db").isEmpty()) {
             mongoTemplate = ConnectionHelper.getMongoTemplate(
                     pipelineOptions.getString("db.name")
             );
-        }else {
+        } else {
             mongoTemplate = ConnectionHelper.getMongoTemplate(
                     pipelineOptions.getString("db.name"),
                     pipelineOptions.getString("config.db.hosts"),
@@ -79,9 +76,9 @@ public class MongoDBHelper {
     private static Mongo getMongoClient(ObjectMap pipelineOptions) throws UnknownHostException {
         MongoClient mongoClient;
 
-        if(pipelineOptions.getString("config.db.authentication-db").isEmpty()){
+        if (pipelineOptions.getString("config.db.authentication-db").isEmpty()) {
             mongoClient = ConnectionHelper.getMongoClient();
-        }else {
+        } else {
             mongoClient = ConnectionHelper.getMongoClient(
                     pipelineOptions.getString("config.db.hosts"),
                     pipelineOptions.getString("config.db.authentication-db"),
@@ -96,8 +93,8 @@ public class MongoDBHelper {
     }
 
 
-    private static ReadPreference getMongoTemplateReadPreferences(String readPreference){
-        switch (readPreference){
+    private static ReadPreference getMongoTemplateReadPreferences(String readPreference) {
+        switch (readPreference) {
             case "primary":
                 return ReadPreference.primary();
             case "secondary":
@@ -113,19 +110,18 @@ public class MongoDBHelper {
     /**
      * From org.opencb.opencga.storage.mongodb.variant.DBObjectToVariantConverter
      * #buildStorageId(java.lang.String, int, java.lang.String, java.lang.String)
-     *
+     * <p>
      * To avoid the initialization of:
      * - DBObjectToVariantSourceEntryConverter
      * - DBObjectToVariantConverter
-     *
      */
     public static String buildStorageId(String chromosome, int start, String reference, String alternate) {
         StringBuilder builder = new StringBuilder(chromosome);
         builder.append("_");
         builder.append(start);
         builder.append("_");
-        if(!reference.equals("-")) {
-            if(reference.length() < 50) {
+        if (!reference.equals("-")) {
+            if (reference.length() < 50) {
                 builder.append(reference);
             } else {
                 builder.append(new String(CryptoUtils.encryptSha1(reference)));
@@ -133,8 +129,8 @@ public class MongoDBHelper {
         }
 
         builder.append("_");
-        if(!alternate.equals("-")) {
-            if(alternate.length() < 50) {
+        if (!alternate.equals("-")) {
+            if (alternate.length() < 50) {
                 builder.append(alternate);
             } else {
                 builder.append(new String(CryptoUtils.encryptSha1(alternate)));

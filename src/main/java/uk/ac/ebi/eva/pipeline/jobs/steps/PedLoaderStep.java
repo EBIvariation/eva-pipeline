@@ -31,15 +31,12 @@ import org.springframework.stereotype.Component;
 import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
 
 /**
- * @author Diego Poggioli
- *
  * Tasklet that parse and load a PED file into Mongo
- *
+ * <p>
  * PED specs
  * http://pngu.mgh.harvard.edu/~purcell/plink/data.shtml#ped
- *
+ * <p>
  * TODO: only reading for now, to be completed..
- *
  */
 @Component
 @StepScope

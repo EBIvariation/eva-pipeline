@@ -31,8 +31,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * @author Diego Poggioli
- *
  * Map a line in VEP output file to {@link VariantAnnotation}
  *
  * Example of VEP output line

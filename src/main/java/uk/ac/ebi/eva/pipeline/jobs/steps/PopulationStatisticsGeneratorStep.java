@@ -32,22 +32,17 @@ import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 import org.springframework.stereotype.Component;
-
 import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
 import uk.ac.ebi.eva.utils.URLHelper;
 
 import java.net.URI;
 
 /**
- *
- * @author Jose Miguel Mut Lopez &lt;jmmut@ebi.ac.uk&gt;
- *
  * Tasklet that calculates statistics. See {@link org.opencb.biodata.models.variant.stats.VariantStats} for a list of
  * fields that are calculated for each subset of samples.
- *
+ * <p>
  * Input: variants loaded into mongodb
  * Output: file containing statistics (.variants.stats.json.gz)
- *
  */
 @Component
 @StepScope

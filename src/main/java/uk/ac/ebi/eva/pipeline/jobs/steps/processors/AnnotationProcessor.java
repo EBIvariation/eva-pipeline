@@ -17,21 +17,16 @@
 package uk.ac.ebi.eva.pipeline.jobs.steps.processors;
 
 import com.mongodb.DBObject;
-
-import uk.ac.ebi.eva.pipeline.model.VariantWrapper;
-
 import org.opencb.biodata.models.variant.Variant;
 import org.opencb.opencga.storage.mongodb.variant.DBObjectToVariantConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.item.ItemProcessor;
+import uk.ac.ebi.eva.pipeline.model.VariantWrapper;
 
 /**
- * @author Diego Poggioli
- *
  * Convert a {@link DBObject} into {@link VariantWrapper}
  * Any extra filter, check, validation... should be placed here
- *
  */
 public class AnnotationProcessor implements ItemProcessor<DBObject, VariantWrapper> {
     private static final Logger logger = LoggerFactory.getLogger(AnnotationProcessor.class);

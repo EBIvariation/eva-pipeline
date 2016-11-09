@@ -22,9 +22,7 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 
 /**
- * @author Jose Miguel Mut Lopez &lt;jmmut@ebi.ac.uk&gt;
- *         <p>
- *         Configuration init for initialize-database Job
+ * Configuration init for initialize-database Job
  */
 @Configuration
 @PropertySource({"initialize-database.properties"})

@@ -24,10 +24,7 @@ import org.springframework.batch.core.job.flow.FlowExecutionStatus;
 import org.springframework.batch.core.job.flow.JobExecutionDecider;
 
 /**
- * @author Jose Miguel Mut Lopez &lt;jmmut@ebi.ac.uk&gt;
- *
  * Decider used in the pipeline to skip steps/tasklets
- *
  */
 public class SkipStepDecider implements JobExecutionDecider {
     private static final Logger logger = LoggerFactory.getLogger(SkipStepDecider.class);
@@ -40,9 +37,9 @@ public class SkipStepDecider implements JobExecutionDecider {
 
     /**
      * @param pipelineOptions ObjectMap that will have a boolean for .get(skipStep), telling whether to skip or not
-     * @param skipStep name of the key that the user sets to skip a step, e.g. "annotation.create.skip"
-     * It's recommended to use pre-defined constants, such as AnnotationJob.SKIP_ANNOT to avoid
-     * misspelling mistakes.
+     * @param skipStep        name of the key that the user sets to skip a step, e.g. "annotation.create.skip"
+     *                        It's recommended to use pre-defined constants, such as AnnotationJob.SKIP_ANNOT to avoid
+     *                        misspelling mistakes.
      */
     public SkipStepDecider(ObjectMap pipelineOptions, String skipStep) {
         this.skipStep = skipStep;

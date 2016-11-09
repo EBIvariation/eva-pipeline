@@ -48,9 +48,7 @@ import static org.opencb.opencga.storage.core.variant.VariantStorageManager.VARI
 import static uk.ac.ebi.eva.test.utils.JobTestUtils.restoreMongoDbFromDump;
 
 /**
- * @author Jose Miguel Mut Lopez &lt;jmmut@ebi.ac.uk&gt;
- *         <p>
- *         Test for {@link PopulationStatisticsJob}
+ * Test for {@link PopulationStatisticsJob}
  */
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = {JobOptions.class, PopulationStatisticsJob.class, CommonConfiguration.class, JobLauncherTestUtils.class})

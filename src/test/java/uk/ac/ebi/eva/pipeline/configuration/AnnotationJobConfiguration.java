@@ -22,9 +22,7 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 
 /**
- * @author Cristina Yenyxe Gonzalez Garcia
- *         <p>
- *         Configuration init for AnnotationJob tests
+ * Configuration init for AnnotationJob tests
  */
 @Configuration
 @PropertySource({"annotation-job.properties"})

@@ -41,9 +41,7 @@ import static org.junit.Assert.*;
 import static uk.ac.ebi.eva.test.utils.JobTestUtils.makeGzipFile;
 
 /**
- * @author Diego Poggioli
- *         <p>
- *         Test for {@link VepAnnotationGeneratorStep}
+ * Test for {@link VepAnnotationGeneratorStep}
  */
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = {JobOptions.class, AnnotationJob.class, AnnotationConfiguration.class, JobLauncherTestUtils.class})

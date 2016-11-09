@@ -51,9 +51,7 @@ import static uk.ac.ebi.eva.test.utils.JobTestUtils.count;
 import static uk.ac.ebi.eva.test.utils.JobTestUtils.getLines;
 
 /**
- * @author Diego Poggioli
- *         <p>
- *         Test for {@link VariantLoaderStep}
+ * Test for {@link VariantLoaderStep}
  */
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = {GenotypedVcfJob.class, JobOptions.class, GenotypedVcfConfiguration.class, JobLauncherTestUtils.class})

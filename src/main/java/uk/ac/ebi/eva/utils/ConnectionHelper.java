@@ -27,9 +27,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- *
- * @author Jose Miguel Mut Lopez &lt;jmmut@ebi.ac.uk&gt;
- *
  * Utility class dealing with MongoDB connections
  */
 public class ConnectionHelper {
@@ -68,13 +65,13 @@ public class ConnectionHelper {
     public static MongoClient getMongoClient(String hosts, String authenticationDB,
                                              String user, char[] password) throws UnknownHostException {
         return new MongoClient(
-                    parseServerAddresses(hosts),
-                    Collections.singletonList(MongoCredential.createCredential(
-                            user,
-                            authenticationDB,
-                            password
-                            )
-                    ));
+                parseServerAddresses(hosts),
+                Collections.singletonList(MongoCredential.createCredential(
+                        user,
+                        authenticationDB,
+                        password
+                        )
+                ));
     }
 
     public static MongoClient getMongoClient() throws UnknownHostException {

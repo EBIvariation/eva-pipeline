@@ -16,12 +16,9 @@
 package uk.ac.ebi.eva.pipeline.jobs.steps.processors;
 
 import org.springframework.batch.item.ItemProcessor;
-
 import uk.ac.ebi.eva.pipeline.model.FeatureCoordinates;
 
 /**
- * @author Jose Miguel Mut Lopez &lt;jmmut@ebi.ac.uk&gt;
- *
  * Keeps only genomic features that are genes or transcripts.
  */
 public class GeneFilterProcessor implements ItemProcessor<FeatureCoordinates, FeatureCoordinates> {

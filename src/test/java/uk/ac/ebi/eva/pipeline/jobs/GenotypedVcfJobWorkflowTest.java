@@ -47,13 +47,12 @@ import java.util.*;
 import static org.junit.Assert.*;
 
 /**
- * @author Diego Poggioli
- *         <p>
- *         Workflow test for {@link GenotypedVcfJob}
+ * Workflow test for {@link GenotypedVcfJob}
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest
-@ContextConfiguration(classes = {JobOptions.class, GenotypedVcfJob.class, GenotypedVcfWorkflowConfiguration.class, JobLauncherTestUtils.class})
+@ContextConfiguration(classes = {JobOptions.class, GenotypedVcfJob.class, GenotypedVcfWorkflowConfiguration.class,
+        JobLauncherTestUtils.class})
 public class GenotypedVcfJobWorkflowTest {
 
     @Autowired
@@ -69,7 +68,8 @@ public class GenotypedVcfJobWorkflowTest {
     private String vepInput;
     private String vepOutput;
 
-    private static String opencgaHome = System.getenv("OPENCGA_HOME") != null ? System.getenv("OPENCGA_HOME") : "/opt/opencga";
+    private static String opencgaHome = System.getenv("OPENCGA_HOME") != null ? System.getenv("OPENCGA_HOME") :
+            "/opt/opencga";
 
     @Test
     public void allStepsShouldBeExecuted() throws Exception {
@@ -103,13 +103,16 @@ public class GenotypedVcfJobWorkflowTest {
         assertEquals(parallelStepNamesToCheck, parallelStepNamesExecuted);
 
         assertTrue(transformStep.getEndTime().before(loadStep.getStartTime()));
-        assertTrue(loadStep.getEndTime().before(parallelStepsNameToStepExecution.get(PopulationStatisticsFlow.CALCULATE_STATISTICS).getStartTime()));
-        assertTrue(loadStep.getEndTime().before(parallelStepsNameToStepExecution.get(VepInputGeneratorStep.FIND_VARIANTS_TO_ANNOTATE).getStartTime()));
+        assertTrue(loadStep.getEndTime().before(parallelStepsNameToStepExecution.get(PopulationStatisticsFlow
+                .CALCULATE_STATISTICS).getStartTime()));
+        assertTrue(loadStep.getEndTime().before(parallelStepsNameToStepExecution.get(VepInputGeneratorStep
+                .FIND_VARIANTS_TO_ANNOTATE).getStartTime()));
 
         assertTrue(parallelStepsNameToStepExecution.get(PopulationStatisticsFlow.CALCULATE_STATISTICS).getEndTime()
                 .before(parallelStepsNameToStepExecution.get(PopulationStatisticsFlow.LOAD_STATISTICS).getStartTime()));
         assertTrue(parallelStepsNameToStepExecution.get(VepInputGeneratorStep.FIND_VARIANTS_TO_ANNOTATE).getEndTime()
-                .before(parallelStepsNameToStepExecution.get(VepAnnotationGeneratorStep.GENERATE_VEP_ANNOTATION).getStartTime()));
+                .before(parallelStepsNameToStepExecution.get(VepAnnotationGeneratorStep.GENERATE_VEP_ANNOTATION)
+                        .getStartTime()));
         assertTrue(parallelStepsNameToStepExecution.get(VepAnnotationGeneratorStep.GENERATE_VEP_ANNOTATION).getEndTime()
                 .before(parallelStepsNameToStepExecution.get(AnnotationLoaderStep.LOAD_VEP_ANNOTATION).getStartTime()));
     }
@@ -170,10 +173,12 @@ public class GenotypedVcfJobWorkflowTest {
         assertEquals(parallelStepNamesToCheck, parallelStepNamesExecuted);
 
         assertTrue(transformStep.getEndTime().before(loadStep.getStartTime()));
-        assertTrue(loadStep.getEndTime().before(parallelStepsNameToStepExecution.get(VepInputGeneratorStep.FIND_VARIANTS_TO_ANNOTATE).getStartTime()));
+        assertTrue(loadStep.getEndTime().before(parallelStepsNameToStepExecution.get(VepInputGeneratorStep
+                .FIND_VARIANTS_TO_ANNOTATE).getStartTime()));
 
         assertTrue(parallelStepsNameToStepExecution.get(VepInputGeneratorStep.FIND_VARIANTS_TO_ANNOTATE).getEndTime()
-                .before(parallelStepsNameToStepExecution.get(VepAnnotationGeneratorStep.GENERATE_VEP_ANNOTATION).getStartTime()));
+                .before(parallelStepsNameToStepExecution.get(VepAnnotationGeneratorStep.GENERATE_VEP_ANNOTATION)
+                        .getStartTime()));
         assertTrue(parallelStepsNameToStepExecution.get(VepAnnotationGeneratorStep.GENERATE_VEP_ANNOTATION).getEndTime()
                 .before(parallelStepsNameToStepExecution.get(AnnotationLoaderStep.LOAD_VEP_ANNOTATION).getStartTime()));
     }
@@ -208,7 +213,8 @@ public class GenotypedVcfJobWorkflowTest {
         assertEquals(parallelStepNamesToCheck, parallelStepNamesExecuted);
 
         assertTrue(transformStep.getEndTime().before(loadStep.getStartTime()));
-        assertTrue(loadStep.getEndTime().before(parallelStepsNameToStepExecution.get(PopulationStatisticsFlow.CALCULATE_STATISTICS).getStartTime()));
+        assertTrue(loadStep.getEndTime().before(parallelStepsNameToStepExecution.get(PopulationStatisticsFlow
+                .CALCULATE_STATISTICS).getStartTime()));
 
         assertTrue(parallelStepsNameToStepExecution.get(PopulationStatisticsFlow.CALCULATE_STATISTICS).getEndTime()
                 .before(parallelStepsNameToStepExecution.get(PopulationStatisticsFlow.LOAD_STATISTICS).getStartTime()));

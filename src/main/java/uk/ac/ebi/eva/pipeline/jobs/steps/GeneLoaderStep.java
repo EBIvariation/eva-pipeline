@@ -37,14 +37,12 @@ import uk.ac.ebi.eva.pipeline.model.FeatureCoordinates;
 import java.io.IOException;
 
 /**
- * @author Jose Miguel Mut Lopez &lt;jmmut@ebi.ac.uk&gt;
- *
  * This step loads a list of genomic features from a species into a DB. This DB is intended to be used as a mapping
  * from feature names into feature coordinates (chromosome, start, end).
- *
+ * <p>
  * input: GTF file with a list of genomic features.
  * output: writes the features into MongoDB
- *
+ * <p>
  * To do so, this step performs the next stages:
  * - reader: To read the file, uses a {@link GeneReader} that fills a {@link FeatureCoordinates} for each line, using a {@link GeneLineMapper}.
  * - processor: Then, filters some, keeping only transcripts and genes.
@@ -57,7 +55,7 @@ import java.io.IOException;
 public class GeneLoaderStep {
 
     public static final String LOAD_FEATURES = "Load features";
-    
+
     @Autowired
     private StepBuilderFactory stepBuilderFactory;
 

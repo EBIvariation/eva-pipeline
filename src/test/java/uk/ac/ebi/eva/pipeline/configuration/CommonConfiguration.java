@@ -22,11 +22,8 @@ import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import java.util.Properties;
 
 /**
- * @author Diego Poggioli
- * @author Cristina Yenyxe Gonzalez
- *         <p>
- *         Common configuration used to test different job scenario
- *         Test must change the property based on the job configuration and the step that it's running
+ * Common configuration used to test different job scenario
+ * Test must change the property based on the job configuration and the step that it's running
  */
 @Configuration
 public class CommonConfiguration {

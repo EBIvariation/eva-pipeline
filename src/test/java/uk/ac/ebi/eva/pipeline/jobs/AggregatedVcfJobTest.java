@@ -49,9 +49,7 @@ import static uk.ac.ebi.eva.test.utils.JobTestUtils.cleanDBs;
 import static uk.ac.ebi.eva.test.utils.JobTestUtils.getTransformedOutputPath;
 
 /**
- * @author Jose Miguel Mut Lopez &lt;jmmut@ebi.ac.uk&gt;
- *         <p>
- *         Test for {@link AggregatedVcfJob}
+ * Test for {@link AggregatedVcfJob}
  */
 
 @RunWith(SpringRunner.class)

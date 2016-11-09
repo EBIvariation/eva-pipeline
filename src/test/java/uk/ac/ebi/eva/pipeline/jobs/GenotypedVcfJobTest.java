@@ -59,18 +59,16 @@ import static uk.ac.ebi.eva.test.utils.JobTestUtils.count;
 import static uk.ac.ebi.eva.test.utils.JobTestUtils.getLines;
 
 /**
- * @author Diego Poggioli
- *         <p>
- *         Test for {@link GenotypedVcfJob}
- *         <p>
- *         JobLauncherTestUtils is initialized in @Before because in GenotypedVcfJob there are two Job beans:
- *         genotypedJob and variantAnnotationBatchJob (used by test). In this way it is possible to specify the Job to run
- *         and avoid NoUniqueBeanDefinitionException. There are also other solutions like:
- *         - http://stackoverflow.com/questions/29655796/how-can-i-qualify-an-autowired-setter-that-i-dont-own
- *         - https://jira.spring.io/browse/BATCH-2366
- *         <p>
- *         TODO:
- *         FILE_WRONG_NO_ALT should be renamed because the alt allele is not missing but is the same as the reference
+ * Test for {@link GenotypedVcfJob}
+ * <p>
+ * JobLauncherTestUtils is initialized in @Before because in GenotypedVcfJob there are two Job beans:
+ * genotypedJob and variantAnnotationBatchJob (used by test). In this way it is possible to specify the Job to run
+ * and avoid NoUniqueBeanDefinitionException. There are also other solutions like:
+ * - http://stackoverflow.com/questions/29655796/how-can-i-qualify-an-autowired-setter-that-i-dont-own
+ * - https://jira.spring.io/browse/BATCH-2366
+ * <p>
+ * TODO:
+ * FILE_WRONG_NO_ALT should be renamed because the alt allele is not missing but is the same as the reference
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest

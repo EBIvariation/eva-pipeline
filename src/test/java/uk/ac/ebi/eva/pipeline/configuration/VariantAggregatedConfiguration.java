@@ -21,9 +21,7 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 
 /**
- * @author Diego Poggioli
- *         <p>
- *         Configuration init for VariantAggregatedConfiguration Job
+ * Configuration init for VariantAggregatedConfiguration Job
  */
 @Configuration
 @PropertySource({"variant-aggregated.properties"})

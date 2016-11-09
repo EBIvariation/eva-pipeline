@@ -46,11 +46,9 @@ import static uk.ac.ebi.eva.test.utils.JobTestUtils.restoreMongoDbFromDump;
 
 
 /**
- * @author Diego Poggioli
- *         <p>
- *         Test for {@link AnnotationLoaderStep}. In the context it is loaded {@link AnnotationJob}
- *         because {@link JobLauncherTestUtils} require one {@link org.springframework.batch.core.Job} to be present in order
- *         to run properly.
+ * Test for {@link AnnotationLoaderStep}. In the context it is loaded {@link AnnotationJob}
+ * because {@link JobLauncherTestUtils} require one {@link org.springframework.batch.core.Job} to be present in order
+ * to run properly.
  */
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = {AnnotationJob.class, AnnotationLoaderStepConfiguration.class, JobLauncherTestUtils.class})

@@ -24,7 +24,6 @@ import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
-
 import org.springframework.context.annotation.Scope;
 import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
 import uk.ac.ebi.eva.pipeline.jobs.steps.VariantLoaderStep;
@@ -32,7 +31,7 @@ import uk.ac.ebi.eva.pipeline.jobs.steps.VariantNormalizerStep;
 
 /**
  * Helper class to build jobs.
- *
+ * <p>
  * This is not intended to be used as an actual job, but to be extended in those actual job classes.
  */
 @Import({JobOptions.class})
@@ -49,11 +48,12 @@ public abstract class CommonJobStepInitialization {
 
     /**
      * Initialize a Step with common configuration
+     *
      * @param tasklet to be initialized with common configuration
      */
     protected void initStep(final TaskletStepBuilder tasklet) {
 
-        boolean allowStartIfComplete  = getPipelineOptions().getBoolean("config.restartability.allow");
+        boolean allowStartIfComplete = getPipelineOptions().getBoolean("config.restartability.allow");
 
         // true: every job execution will do this step, even if this step is already COMPLETED
         // false(default): if the job was aborted and is relaunched, this step will NOT be done again

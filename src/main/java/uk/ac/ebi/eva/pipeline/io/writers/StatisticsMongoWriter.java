@@ -21,10 +21,7 @@ import org.springframework.data.mongodb.core.MongoOperations;
 import uk.ac.ebi.eva.pipeline.model.PopulationStatistics;
 
 /**
- * @author Jose Miguel Mut Lopez &lt;jmmut@ebi.ac.uk&gt;
- *
  * Write a list of {@link PopulationStatistics} into MongoDB
- *
  */
 public class StatisticsMongoWriter extends MongoItemWriter<PopulationStatistics> {
 

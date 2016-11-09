@@ -52,9 +52,7 @@ import static uk.ac.ebi.eva.pipeline.jobs.steps.VepAnnotationGeneratorStep.GENER
 import static uk.ac.ebi.eva.pipeline.jobs.steps.VepInputGeneratorStep.FIND_VARIANTS_TO_ANNOTATE;
 
 /**
- * @author Diego Poggioli
- *         <p>
- *         Test for {@link AnnotationJob}
+ * Test for {@link AnnotationJob}
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest

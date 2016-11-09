@@ -31,23 +31,22 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
-
 import uk.ac.ebi.eva.pipeline.jobs.flows.AnnotationFlow;
 import uk.ac.ebi.eva.pipeline.jobs.steps.VariantLoaderStep;
 import uk.ac.ebi.eva.pipeline.listeners.VariantOptionsConfigurerListener;
 
 /**
- *  Complete pipeline workflow for aggregated VCF.
- *  Aggregated statistics are provided in the VCF instead of the genotypes.
- *
- *  transform ---> load --> (optionalAnnotationFlow: variantsAnnotGenerateInput --> (annotationCreate --> annotationLoad))
- *
- *  Steps in () are optional
+ * Complete pipeline workflow for aggregated VCF.
+ * Aggregated statistics are provided in the VCF instead of the genotypes.
+ * <p>
+ * transform ---> load --> (optionalAnnotationFlow: variantsAnnotGenerateInput --> (annotationCreate --> annotationLoad))
+ * <p>
+ * Steps in () are optional
  */
 @Configuration
 @EnableBatchProcessing
 @Import({VariantLoaderStep.class, AnnotationFlow.class})
-public class AggregatedVcfJob extends CommonJobStepInitialization{
+public class AggregatedVcfJob extends CommonJobStepInitialization {
 
     private static final Logger logger = LoggerFactory.getLogger(AggregatedVcfJob.class);
 

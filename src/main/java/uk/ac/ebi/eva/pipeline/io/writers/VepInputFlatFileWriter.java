@@ -19,20 +19,20 @@ import org.springframework.batch.item.file.FlatFileItemWriter;
 import org.springframework.batch.item.file.transform.BeanWrapperFieldExtractor;
 import org.springframework.batch.item.file.transform.DelimitedLineAggregator;
 import org.springframework.core.io.FileSystemResource;
-
 import uk.ac.ebi.eva.pipeline.model.VariantWrapper;
+
 import java.io.File;
 
 /**
  * Flat file writer of the input file used by VEP
- *
+ * <p>
  * The file is listing all the coordinates of variants and nucleotide changes like:
- *  20	60343	60343	G/A	+
- *  20	60419	60419	A/G	+
- *  20	60479	60479	C/T	+
- *  ...
- *
- *  further format description: {@see http://www.ensembl.org/info/docs/tools/vep/vep_formats.html#input}
+ * 20	60343	60343	G/A	+
+ * 20	60419	60419	A/G	+
+ * 20	60479	60479	C/T	+
+ * ...
+ * <p>
+ * further format description: {@see http://www.ensembl.org/info/docs/tools/vep/vep_formats.html#input}
  */
 
 public class VepInputFlatFileWriter extends FlatFileItemWriter<VariantWrapper> {
@@ -40,14 +40,14 @@ public class VepInputFlatFileWriter extends FlatFileItemWriter<VariantWrapper> {
     /**
      * @return must return a {@link FlatFileItemWriter} and not a {@link org.springframework.batch.item.ItemWriter}
      * {@see https://jira.spring.io/browse/BATCH-2097
-     *
+     * <p>
      * TODO: The variant list should be compressed
      */
     public VepInputFlatFileWriter(File file) {
         super();
 
         BeanWrapperFieldExtractor<VariantWrapper> fieldExtractor = new BeanWrapperFieldExtractor<>();
-        fieldExtractor.setNames(new String[] {"chr", "start", "end", "refAlt", "strand"});
+        fieldExtractor.setNames(new String[]{"chr", "start", "end", "refAlt", "strand"});
 
         DelimitedLineAggregator<VariantWrapper> delLineAgg = new DelimitedLineAggregator<>();
         delLineAgg.setDelimiter("\t");
@@ -59,7 +59,7 @@ public class VepInputFlatFileWriter extends FlatFileItemWriter<VariantWrapper> {
         setLineAggregator(delLineAgg);
     }
 
-    public VepInputFlatFileWriter(String filePath){
+    public VepInputFlatFileWriter(String filePath) {
         this(new File(filePath));
     }
 

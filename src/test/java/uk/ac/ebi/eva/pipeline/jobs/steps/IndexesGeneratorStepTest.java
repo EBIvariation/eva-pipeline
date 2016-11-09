@@ -39,9 +39,7 @@ import static org.junit.Assert.assertEquals;
 
 
 /**
- * @author Jose Miguel Mut Lopez &lt;jmmut@ebi.ac.uk&gt;
- *         <p>
- *         Test {@link IndexesGeneratorStep}
+ * Test {@link IndexesGeneratorStep}
  */
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = {DatabaseInitializationJob.class, DatabaseInitializationConfiguration.class, JobLauncherTestUtils.class})

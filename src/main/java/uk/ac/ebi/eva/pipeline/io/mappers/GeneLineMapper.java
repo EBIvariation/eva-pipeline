@@ -16,15 +16,12 @@
 package uk.ac.ebi.eva.pipeline.io.mappers;
 
 import org.springframework.batch.item.file.LineMapper;
-
 import uk.ac.ebi.eva.pipeline.model.FeatureCoordinates;
 
 import java.util.Map;
 import java.util.TreeMap;
 
 /**
- * @author Jose Miguel Mut Lopez &lt;jmmut@ebi.ac.uk&gt;
- *
  * Maps a line in a GTF file to a FeatureCoordinates.
  *
  * input: GTF line. example:
