@@ -17,7 +17,6 @@ package uk.ac.ebi.eva.pipeline.io.writers;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.BulkWriteOperation;
-import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 import org.opencb.biodata.models.variant.Variant;
 import org.opencb.biodata.models.variant.VariantSourceEntry;
@@ -27,6 +26,7 @@ import org.opencb.opencga.storage.mongodb.variant.DBObjectToVariantStatsConverte
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.item.data.MongoItemWriter;
+import org.springframework.data.mongodb.core.MongoOperations;
 
 import java.util.List;
 
@@ -42,36 +42,32 @@ public class VariantMongoWriter extends MongoItemWriter<Variant> {
 
     private boolean includeStats;
     private String fileId;
-    private DBCollection variantsCollection;
+    private MongoOperations mongoOperations;
+    private String collection;
 
     private BulkWriteOperation bulk;
-    private long numVariantsWritten;
     private int currentBulkSize = 0;
 
     private DBObjectToVariantConverter variantConverter;
     private DBObjectToVariantStatsConverter statsConverter;
     private DBObjectToVariantSourceEntryConverter sourceEntryConverter;
 
-    public VariantMongoWriter(boolean includeStats, String fileId,
+    public VariantMongoWriter(boolean includeStats, String fileId, String collection,
                               DBObjectToVariantConverter variantConverter, DBObjectToVariantStatsConverter statsConverter,
-                              DBObjectToVariantSourceEntryConverter sourceEntryConverter, DBCollection variantsCollection) {
+                              DBObjectToVariantSourceEntryConverter sourceEntryConverter, MongoOperations mongoOperations) {
         this.includeStats = includeStats;
         this.fileId = fileId;
+        this.collection = collection;
         this.variantConverter = variantConverter;
         this.statsConverter = statsConverter;
         this.sourceEntryConverter = sourceEntryConverter;
-        this.variantsCollection = variantsCollection;
+        this.mongoOperations = mongoOperations;
 
         resetBulk();
     }
 
     @Override
     protected void doWrite(List<? extends Variant> variants) {
-        numVariantsWritten += variants.size();
-        if(numVariantsWritten % 1000 == 0) {
-            logger.info("Num variants written " + numVariantsWritten);
-        }
-
         for (Variant variant : variants) {
             variant.setAnnotation(null);
             String id = variantConverter.buildStorageId(variant);
@@ -122,7 +118,7 @@ public class VariantMongoWriter extends MongoItemWriter<Variant> {
     }
 
     private void resetBulk() {
-        bulk = variantsCollection.initializeUnorderedBulkOperation();
+        bulk = mongoOperations.getCollection(collection).initializeUnorderedBulkOperation();
         currentBulkSize = 0;
     }
 

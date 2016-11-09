@@ -18,15 +18,19 @@ package uk.ac.ebi.eva.pipeline.io.writers;
 import com.google.common.collect.Sets;
 import com.googlecode.junittoolbox.ParallelRunner;
 import com.mongodb.DBCollection;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.opencb.biodata.models.variant.Variant;
 import org.opencb.biodata.models.variant.VariantSourceEntry;
 import org.opencb.biodata.models.variant.stats.VariantStats;
+import org.opencb.datastore.core.ObjectMap;
 import org.opencb.opencga.storage.core.variant.VariantStorageManager;
 import org.opencb.opencga.storage.mongodb.variant.*;
+import org.springframework.data.mongodb.core.MongoOperations;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
 import uk.ac.ebi.eva.utils.ConnectionHelper;
+import uk.ac.ebi.eva.utils.MongoDBHelper;
 
 import java.net.UnknownHostException;
 import java.util.Arrays;
@@ -51,6 +55,7 @@ public class VariantMongoWriterTest {
     private DBObjectToVariantSourceEntryConverter sourceEntryConverter;
 
     private Map<String, Integer> samplesIds;
+    private ObjectMap objectMap = new ObjectMap();
 
     private final String fileId = "fileId";
     private final String studyId = "studyId";
@@ -62,16 +67,23 @@ public class VariantMongoWriterTest {
     private boolean calculateStats = false;
     private boolean includeSample = true;
 
+    @Before
+    public void setUp() throws Exception {
+        objectMap.put("config.db.read-preference", "primary");
+    }
+
     @Test
     public void noVariantsNothingShouldBeWritten() throws UnknownHostException {
         String dbName = "VariantMongoWriterNoVariant";
 
         setConverters(samplesPosition, calculateStats, includeSample, includeSrc);
 
-        DBCollection dbCollection = ConnectionHelper.getMongoTemplate(dbName).getCollection(collectionName);
+        objectMap.put("db.name", dbName);
+        MongoOperations mongoOperations = MongoDBHelper.getMongoOperationsFromPipelineOptions(objectMap);
+        DBCollection dbCollection = mongoOperations.getCollection(collectionName);
 
-        variantMongoWriter = new VariantMongoWriter(includeStats, fileId, variantConverter, statsConverter,
-                sourceEntryConverter, dbCollection);
+        variantMongoWriter = new VariantMongoWriter(includeStats, fileId, collectionName, variantConverter,
+                statsConverter, sourceEntryConverter, mongoOperations);
         variantMongoWriter.doWrite(Collections.EMPTY_LIST);
 
         assertEquals(0, dbCollection.count());
@@ -91,10 +103,12 @@ public class VariantMongoWriterTest {
 
         setConverters(samplesPosition, calculateStats, includeSample, includeSrc);
 
-        DBCollection dbCollection = ConnectionHelper.getMongoTemplate(dbName).getCollection(collectionName);
+        objectMap.put("db.name", dbName);
+        MongoOperations mongoOperations = MongoDBHelper.getMongoOperationsFromPipelineOptions(objectMap);
+        DBCollection dbCollection = mongoOperations.getCollection(collectionName);
 
-        variantMongoWriter = new VariantMongoWriter(includeStats, fileId, variantConverter, statsConverter,
-                sourceEntryConverter, dbCollection);
+        variantMongoWriter = new VariantMongoWriter(includeStats, fileId, collectionName, variantConverter,
+                statsConverter, sourceEntryConverter, mongoOperations);
         variantMongoWriter.doWrite(Collections.singletonList(variant));
 
         assertEquals(1, dbCollection.count());
@@ -112,6 +126,7 @@ public class VariantMongoWriterTest {
         JobTestUtils.cleanDBs(dbName);
     }
 
+
     @Test
     public void multipleVariantsShouldBeWrittenIntoMongoDb() throws UnknownHostException {
         String dbName = "VariantMongoWriterTestMultipleVariants";
@@ -122,10 +137,12 @@ public class VariantMongoWriterTest {
 
         setConverters(samplesPosition, calculateStats, includeSample, includeSrc);
 
-        DBCollection dbCollection = ConnectionHelper.getMongoTemplate(dbName).getCollection(collectionName);
+        objectMap.put("db.name", dbName);
+        MongoOperations mongoOperations = MongoDBHelper.getMongoOperationsFromPipelineOptions(objectMap);
+        DBCollection dbCollection = mongoOperations.getCollection(collectionName);
 
-        variantMongoWriter = new VariantMongoWriter(includeStats, fileId, variantConverter, statsConverter,
-                sourceEntryConverter, dbCollection);
+        variantMongoWriter = new VariantMongoWriter(includeStats, fileId, collectionName, variantConverter,
+                statsConverter, sourceEntryConverter, mongoOperations);
         variantMongoWriter.doWrite(Arrays.asList(variant1, variant2, variant3));
 
         assertEquals(3, dbCollection.count());
@@ -141,10 +158,12 @@ public class VariantMongoWriterTest {
 
         setConverters(samplesPosition, calculateStats, includeSample, includeSrc);
 
-        DBCollection dbCollection = ConnectionHelper.getMongoTemplate(dbName).getCollection(collectionName);
+        objectMap.put("db.name", dbName);
+        MongoOperations mongoOperations = MongoDBHelper.getMongoOperationsFromPipelineOptions(objectMap);
+        DBCollection dbCollection = mongoOperations.getCollection(collectionName);
 
-        variantMongoWriter = new VariantMongoWriter(includeStats, fileId, variantConverter, statsConverter,
-                sourceEntryConverter, dbCollection);
+        variantMongoWriter = new VariantMongoWriter(includeStats, fileId, collectionName, variantConverter,
+                statsConverter, sourceEntryConverter, mongoOperations);
         variantMongoWriter.doWrite(Collections.singletonList(variant));
 
         assertEquals(0, dbCollection.count());
@@ -162,10 +181,12 @@ public class VariantMongoWriterTest {
 
         setConverters(samplesPosition, calculateStats, includeSample, includeSrc);
 
-        DBCollection dbCollection = ConnectionHelper.getMongoTemplate(dbName).getCollection(collectionName);
+        objectMap.put("db.name", dbName);
+        MongoOperations mongoOperations = MongoDBHelper.getMongoOperationsFromPipelineOptions(objectMap);
+        DBCollection dbCollection = mongoOperations.getCollection(collectionName);
 
-        variantMongoWriter = new VariantMongoWriter(includeStats, fileId, variantConverter, statsConverter,
-                sourceEntryConverter, dbCollection);
+        variantMongoWriter = new VariantMongoWriter(includeStats, fileId, collectionName, variantConverter,
+                statsConverter, sourceEntryConverter, mongoOperations);
         variantMongoWriter.doWrite(Collections.singletonList(variant));
 
         assertEquals(1, dbCollection.count());
@@ -183,10 +204,12 @@ public class VariantMongoWriterTest {
 
         setConverters(samplesPosition, calculateStats, includeSample, includeSrc);
 
-        DBCollection dbCollection = ConnectionHelper.getMongoTemplate(dbName).getCollection(collectionName);
+        objectMap.put("db.name", dbName);
+        MongoOperations mongoOperations = MongoDBHelper.getMongoOperationsFromPipelineOptions(objectMap);
+        DBCollection dbCollection = mongoOperations.getCollection(collectionName);
 
-        variantMongoWriter = new VariantMongoWriter(includeStats, fileId, variantConverter, statsConverter,
-                sourceEntryConverter, dbCollection);
+        variantMongoWriter = new VariantMongoWriter(includeStats, fileId, collectionName, variantConverter,
+                statsConverter, sourceEntryConverter, mongoOperations);
         variantMongoWriter.doWrite(Collections.singletonList(variant));
 
         assertEquals(1, dbCollection.count());
