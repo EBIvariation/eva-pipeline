@@ -3,6 +3,7 @@ package uk.ac.ebi.eva.pipeline.jobs.steps;
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.opencb.biodata.models.variant.VariantSource;
@@ -19,6 +20,7 @@ import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobExecutionException;
 import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.rule.OutputCapture;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.ac.ebi.eva.pipeline.configuration.CommonConfiguration;
@@ -30,7 +32,9 @@ import uk.ac.ebi.eva.test.utils.JobTestUtils;
 import java.io.File;
 import java.io.IOException;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 import static uk.ac.ebi.eva.test.utils.JobTestUtils.restoreMongoDbFromDump;
 
 /**
@@ -53,6 +57,10 @@ public class PopulationStatisticsLoaderStepTest {
     private File statsFileToLoad;
     private File sourceFileToLoad;
     private File vcfFileToLoad;
+
+    //Capture error output
+    @Rule
+    public OutputCapture capture = new OutputCapture();
 
     @Test
     public void statisticsLoaderStepShouldLoadStatsIntoDb() throws StorageManagerException, IllegalAccessException,
@@ -116,6 +124,7 @@ public class PopulationStatisticsLoaderStepTest {
         variantOptions.put(VariantStorageManager.VARIANT_SOURCE, source);
 
         JobExecution jobExecution = jobLauncherTestUtils.launchStep(PopulationStatisticsFlow.LOAD_STATISTICS);
+        assertThat(capture.toString(), containsString("java.io.FileNotFoundException:"));
 
         assertEquals(input, pipelineOptions.getString("input.vcf"));
         assertEquals(ExitStatus.FAILED.getExitCode(), jobExecution.getExitStatus().getExitCode());

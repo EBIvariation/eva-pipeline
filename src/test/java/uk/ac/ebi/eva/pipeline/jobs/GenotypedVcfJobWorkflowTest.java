@@ -231,7 +231,7 @@ public class GenotypedVcfJobWorkflowTest {
         jobOptions.loadArgs();
 
         inputFileResouce = jobOptions.getPipelineOptions().getString("input.vcf");
-        outputDir = jobOptions.getPipelineOptions().getString("output.dir");
+        outputDir = jobOptions.getOutputDir();
         compressExtension = jobOptions.getPipelineOptions().getString("compressExtension");
         dbName = jobOptions.getPipelineOptions().getString("db.name");
         vepInput = jobOptions.getPipelineOptions().getString("vep.input");

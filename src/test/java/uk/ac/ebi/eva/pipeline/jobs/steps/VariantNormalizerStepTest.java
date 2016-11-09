@@ -122,7 +122,7 @@ public class VariantNormalizerStepTest {
         jobOptions.loadArgs();
 
         input = jobOptions.getPipelineOptions().getString("input.vcf");
-        outputDir = jobOptions.getPipelineOptions().getString("output.dir");
+        outputDir = jobOptions.getOutputDir();
         dbName = jobOptions.getPipelineOptions().getString("db.name");
     }
 

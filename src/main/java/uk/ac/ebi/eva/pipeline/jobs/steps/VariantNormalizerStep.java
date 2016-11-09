@@ -24,6 +24,8 @@ import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
+import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
+import uk.ac.ebi.eva.utils.FileUtils;
 import uk.ac.ebi.eva.utils.URLHelper;
 
 import java.net.URI;
@@ -50,12 +52,15 @@ public class VariantNormalizerStep implements Tasklet {
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
+        String outputDirPath = pipelineOptions.getString(JobOptions.OUTPUT_DIR);
+        String inputVcf = pipelineOptions.getString("input.vcf");
+        String inputPedigree = pipelineOptions.getString("input.pedigree");
 
-        URI outdirUri = URLHelper.createUri(pipelineOptions.getString("output.dir"));
-        URI nextFileUri = URLHelper.createUri(pipelineOptions.getString("input.vcf"));
-        URI pedigreeUri = pipelineOptions.getString("input.pedigree") != null ? URLHelper.createUri(pipelineOptions.getString("input.pedigree")) : null;
+        URI outdirUri = FileUtils.getPathUri(outputDirPath,true);
+        URI nextFileUri = URLHelper.createUri(inputVcf);
+        URI pedigreeUri =  inputPedigree!= null ? URLHelper.createUri(inputPedigree) : null;
 
-        logger.info("Transform file {} to {}", pipelineOptions.getString("input.vcf"), pipelineOptions.getString("output.dir"));
+        logger.info("Transform file {} to {}", inputVcf, outputDirPath);
 
         logger.info("Extract variants '{}'", nextFileUri);
         VariantStorageManager variantStorageManager = StorageManagerFactory.getVariantStorageManager();

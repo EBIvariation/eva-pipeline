@@ -29,6 +29,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 import org.springframework.stereotype.Component;
 import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
+import uk.ac.ebi.eva.utils.FileUtils;
 import uk.ac.ebi.eva.utils.URLHelper;
 
 import java.net.URI;
@@ -56,7 +57,8 @@ public class VariantLoaderStep implements Tasklet {
         ObjectMap pipelineOptions = jobOptions.getPipelineOptions();
 
         VariantStorageManager variantStorageManager = StorageManagerFactory.getVariantStorageManager();// TODO add mongo
-        URI outdirUri = URLHelper.createUri(pipelineOptions.getString("output.dir"));
+
+        URI outdirUri = FileUtils.getPathUri(pipelineOptions.getString(JobOptions.OUTPUT_DIR),true);
         URI nextFileUri = URLHelper.createUri(pipelineOptions.getString("input.vcf"));
 
 //          URI pedigreeUri = pipelineOptions.getString("input.pedigree") != null ? createUri(pipelineOptions.getString("input.pedigree")) : null;

@@ -57,6 +57,7 @@ public class JobOptions {
     private static final String DB_NAME = "db.name";
     private static final String VEP_OUTPUT = "vep.output";
     private static final String APP_VEP_PATH = "app.vep.path";
+    public static final String OUTPUT_DIR = "output.dir";
 
     // Input
     @Value("${input.vcf}") private String input;
@@ -69,7 +70,7 @@ public class JobOptions {
     @Value("${input.gtf}") private String gtf;
 
     // Output
-    @Value("${output.dir}") private String outputDir;
+    @Value("${"+OUTPUT_DIR+"}") private String outputDir;
     @Value("${output.dir.annotation}") private String outputDirAnnotation;
     @Value("${output.dir.statistics}") private String outputDirStatistics;
 
@@ -293,4 +294,7 @@ public class JobOptions {
         getPipelineOptions().put(APP_VEP_PATH, appVepPath);
     }
 
+    public String getOutputDir() {
+        return getPipelineOptions().getString("output.dir");
+    }
 }
