@@ -38,7 +38,6 @@ import uk.ac.ebi.eva.pipeline.model.VariantWrapper;
  * input: mongo collection with the variants.
  * output: file with the list of variants, in a format to feed VEP ({@link VepInputFlatFileWriter})
  * <p>
- * <p>
  * TODO:
  * - Handle the overwrite
  * - The variant list should be compressed. It is not possible to write into a zipped file with FlatFile item writer
