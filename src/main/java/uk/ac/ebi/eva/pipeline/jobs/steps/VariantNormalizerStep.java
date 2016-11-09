@@ -21,19 +21,14 @@ import org.opencb.opencga.storage.core.variant.VariantStorageManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.StepContribution;
-import org.springframework.batch.core.launch.JobOperator;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
-
 import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
 import uk.ac.ebi.eva.utils.FileUtils;
 import uk.ac.ebi.eva.utils.URLHelper;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.net.URI;
-import java.nio.file.Path;
 
 /**
  * Tasklet that normalizes variants. To see the applied rules please refer to:
