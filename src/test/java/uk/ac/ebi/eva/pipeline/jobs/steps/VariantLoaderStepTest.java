@@ -145,7 +145,7 @@ public class VariantLoaderStepTest {
 
         input = jobOptions.getPipelineOptions().getString(JobParametersNames.INPUT_VCF);
         outputDir = jobOptions.getOutputDir();
-        dbName = jobOptions.getPipelineOptions().getString("db.name");
+        dbName = jobOptions.getPipelineOptions().getString(JobParametersNames.DB_NAME);
     }
 
     @After

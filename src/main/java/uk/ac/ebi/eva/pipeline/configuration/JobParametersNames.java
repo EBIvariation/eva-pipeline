@@ -62,7 +62,7 @@ public class JobParametersNames {
     
     public static final String DB_COLLECTIONS_FEATURES_NAME = "db.collections.features.name";
     
-    public static final String DB_COLLECTIONS_STATS_NAME = "db.collections.stats.name";
+    public static final String DB_COLLECTIONS_STATISTICS_NAME = "db.collections.stats.name";
     
     
     /*

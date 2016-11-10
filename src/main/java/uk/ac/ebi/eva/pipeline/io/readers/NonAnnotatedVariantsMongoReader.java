@@ -19,6 +19,8 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.BasicDBObjectBuilder;
 import com.mongodb.DBObject;
 import org.opencb.datastore.core.ObjectMap;
+
+import uk.ac.ebi.eva.pipeline.configuration.JobParametersNames;
 import uk.ac.ebi.eva.utils.MongoDBHelper;
 
 import javax.annotation.PostConstruct;
@@ -35,8 +37,8 @@ public class NonAnnotatedVariantsMongoReader extends MongoDbCursorItemReader {
 
         setMongo(MongoDBHelper.getMongoClientFromPipelineOptions(pipelineOptions));
 
-        setDatabaseName(pipelineOptions.getString("db.name"));
-        setCollectionName(pipelineOptions.getString("db.collections.variants.name"));
+        setDatabaseName(pipelineOptions.getString(JobParametersNames.DB_NAME));
+        setCollectionName(pipelineOptions.getString(JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME));
 
         DBObject refDbObject = BasicDBObjectBuilder.start().add("annot.ct.so", new BasicDBObject("$exists", false)).get();
         setRefDbObject(refDbObject);

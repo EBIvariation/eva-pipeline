@@ -86,7 +86,7 @@ public class JobOptions {
     @Value("${" + JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME + ":#{null}}") private String dbCollectionVariantsName;
     @Value("${" + JobParametersNames.DB_COLLECTIONS_FILES_NAME + ":#{null}}") private String dbCollectionFilesName;
     @Value("${" + JobParametersNames.DB_COLLECTIONS_FEATURES_NAME +"}") private String dbCollectionGenesName;
-    @Value("${" + JobParametersNames.DB_COLLECTIONS_STATS_NAME + "}") private String dbCollectionStatsName;
+    @Value("${" + JobParametersNames.DB_COLLECTIONS_STATISTICS_NAME + "}") private String dbCollectionStatsName;
     @Value("${" + JobParametersNames.CONFIG_DB_READPREFERENCE + "}") private String readPreference;
 
     // Skip steps
@@ -198,7 +198,7 @@ public class JobOptions {
         pipelineOptions.put(JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME, dbCollectionVariantsName);
         pipelineOptions.put(JobParametersNames.DB_COLLECTIONS_FILES_NAME, dbCollectionFilesName);
         pipelineOptions.put(JobParametersNames.DB_COLLECTIONS_FEATURES_NAME, dbCollectionGenesName);
-        pipelineOptions.put(JobParametersNames.DB_COLLECTIONS_STATS_NAME, dbCollectionStatsName);
+        pipelineOptions.put(JobParametersNames.DB_COLLECTIONS_STATISTICS_NAME, dbCollectionStatsName);
         pipelineOptions.put(JobParametersNames.CONFIG_DB_HOSTS, dbHosts);
         pipelineOptions.put(JobParametersNames.CONFIG_DB_AUTHENTICATIONDB, dbAuthenticationDb);
         pipelineOptions.put(JobParametersNames.CONFIG_DB_USER, dbUser);
@@ -252,7 +252,7 @@ public class JobOptions {
         return getPipelineOptions().getString(JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME);
     }
     public String getDbCollectionsStatsName() {
-        return getPipelineOptions().getString(JobParametersNames.DB_COLLECTIONS_STATS_NAME);
+        return getPipelineOptions().getString(JobParametersNames.DB_COLLECTIONS_STATISTICS_NAME);
     }
 
     public String getVepInput() {

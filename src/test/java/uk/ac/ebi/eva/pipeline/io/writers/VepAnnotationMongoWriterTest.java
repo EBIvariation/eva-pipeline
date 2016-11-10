@@ -15,7 +15,11 @@
  */
 package uk.ac.ebi.eva.pipeline.io.writers;
 
-import com.mongodb.*;
+import com.mongodb.BasicDBObject;
+import com.mongodb.DBCollection;
+import com.mongodb.DBCursor;
+import com.mongodb.DBObject;
+import com.mongodb.MongoClient;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -26,16 +30,24 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
+
 import uk.ac.ebi.eva.pipeline.configuration.AnnotationConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
+import uk.ac.ebi.eva.pipeline.configuration.JobParametersNames;
 import uk.ac.ebi.eva.pipeline.io.mappers.AnnotationLineMapper;
 import uk.ac.ebi.eva.pipeline.jobs.AnnotationJob;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
 import uk.ac.ebi.eva.utils.MongoDBHelper;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static uk.ac.ebi.eva.test.data.VepOutputContent.vepOutputContent;
 
 /**
@@ -100,7 +112,7 @@ public class VepAnnotationMongoWriterTest {
     @Test
     public void shouldWriteAllFieldsIntoMongoDbMultipleSetsAnnotations() throws Exception {
         String dbName = jobOptions.getDbName();
-        String dbCollectionVariantsName = jobOptions.getPipelineOptions().getString("db.collections.variants.name");
+        String dbCollectionVariantsName = jobOptions.getPipelineOptions().getString(JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME);
 
         List<VariantAnnotation> annotations = new ArrayList<>();
         for (String annotLine : vepOutputContent.split("\n")) {
@@ -131,7 +143,7 @@ public class VepAnnotationMongoWriterTest {
         }
 
         // now, load the annotation
-        String collections = jobOptions.getPipelineOptions().getString("db.collections.variants.name");
+        String collections = jobOptions.getPipelineOptions().getString(JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME);
         annotationWriter = new VepAnnotationMongoWriter(mongoOperations, collections);
 
         annotationWriter.write(annotationSet1);

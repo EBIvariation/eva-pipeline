@@ -166,7 +166,7 @@ public class AggregatedVcfJobTest {
         input = jobOptions.getPipelineOptions().getString(JobParametersNames.INPUT_VCF);
         outputDir = jobOptions.getOutputDir();
         compressExtension = jobOptions.getPipelineOptions().getString("compressExtension");
-        dbName = jobOptions.getPipelineOptions().getString("db.name");
+        dbName = jobOptions.getPipelineOptions().getString(JobParametersNames.DB_NAME);
 
         String inputFile = AggregatedVcfJobTest.class.getResource(input).getFile();
         jobOptions.getPipelineOptions().put(JobParametersNames.INPUT_VCF, inputFile);

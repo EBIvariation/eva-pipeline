@@ -47,11 +47,11 @@ public class MongoDBHelper {
         MongoTemplate mongoTemplate;
         if (pipelineOptions.getString(JobParametersNames.CONFIG_DB_AUTHENTICATIONDB).isEmpty()) {
             mongoTemplate = ConnectionHelper.getMongoTemplate(
-                    pipelineOptions.getString("db.name")
+                    pipelineOptions.getString(JobParametersNames.DB_NAME)
             );
         } else {
             mongoTemplate = ConnectionHelper.getMongoTemplate(
-                    pipelineOptions.getString("db.name"),
+                    pipelineOptions.getString(JobParametersNames.DB_NAME),
                     pipelineOptions.getString(JobParametersNames.CONFIG_DB_HOSTS),
                     pipelineOptions.getString(JobParametersNames.CONFIG_DB_AUTHENTICATIONDB),
                     pipelineOptions.getString(JobParametersNames.CONFIG_DB_USER),

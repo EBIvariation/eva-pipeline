@@ -16,10 +16,6 @@
 package uk.ac.ebi.eva.pipeline.jobs.steps;
 
 import com.mongodb.BasicDBObject;
-
-import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
-import uk.ac.ebi.eva.utils.MongoDBHelper;
-
 import org.opencb.datastore.core.ObjectMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,6 +28,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.stereotype.Component;
+
+import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
+import uk.ac.ebi.eva.pipeline.configuration.JobParametersNames;
+import uk.ac.ebi.eva.utils.MongoDBHelper;
 
 /**
  * This step initializes the indexes in the databases.
@@ -51,7 +51,7 @@ public class IndexesGeneratorStep implements Tasklet {
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
         ObjectMap pipelineOptions = jobOptions.getPipelineOptions();
         MongoOperations operations = MongoDBHelper.getMongoOperationsFromPipelineOptions(pipelineOptions);
-        operations.getCollection(pipelineOptions.getString("db.collections.features.name"))
+        operations.getCollection(pipelineOptions.getString(JobParametersNames.DB_COLLECTIONS_FEATURES_NAME))
                 .createIndex(new BasicDBObject("name", 1), new BasicDBObject("sparse", true).append("background", true));
 
         return RepeatStatus.FINISHED;

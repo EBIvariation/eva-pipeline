@@ -153,7 +153,7 @@ public class GenotypedVcfJobWorkflowTest {
         initVariantConfigurationJob();
         jobOptions.getPipelineOptions().put(JobParametersNames.STATISTICS_SKIP, true);
 
-        jobOptions.getPipelineOptions().put("db.name", "diegoTest");
+        jobOptions.getPipelineOptions().put(JobParametersNames.DB_NAME, "diegoTest");
 
 
         JobExecution execution = jobLauncherTestUtils.launchJob();
@@ -242,7 +242,7 @@ public class GenotypedVcfJobWorkflowTest {
         inputFileResouce = jobOptions.getPipelineOptions().getString(JobParametersNames.INPUT_VCF);
         outputDir = jobOptions.getOutputDir();
         compressExtension = jobOptions.getPipelineOptions().getString("compressExtension");
-        dbName = jobOptions.getPipelineOptions().getString("db.name");
+        dbName = jobOptions.getPipelineOptions().getString(JobParametersNames.DB_NAME);
         vepInput = jobOptions.getPipelineOptions().getString("vep.input");
         vepOutput = jobOptions.getPipelineOptions().getString("vep.output");
         JobTestUtils.cleanDBs(dbName);
