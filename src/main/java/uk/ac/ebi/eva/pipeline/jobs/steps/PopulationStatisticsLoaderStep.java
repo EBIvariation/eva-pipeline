@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 EMBL - European Bioinformatics Institute
+ * Copyright 2015-2016 EMBL - European Bioinformatics Institute
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,9 @@ import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 import org.springframework.stereotype.Component;
+
 import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
+import uk.ac.ebi.eva.pipeline.configuration.JobParametersNames;
 import uk.ac.ebi.eva.utils.URLHelper;
 
 import java.net.URI;
@@ -93,7 +95,7 @@ public class PopulationStatisticsLoaderStep implements Tasklet {
         VariantSource variantSource = variantOptions.get(VariantStorageManager.VARIANT_SOURCE, VariantSource.class);
         VariantDBAdaptor dbAdaptor = variantStorageManager.getDBAdaptor(
                 variantOptions.getString(VariantStorageManager.DB_NAME), variantOptions);
-        URI outdirUri = URLHelper.createUri(pipelineOptions.getString("output.dir.statistics"));
+        URI outdirUri = URLHelper.createUri(pipelineOptions.getString(JobParametersNames.OUTPUT_DIR_STATISTICS));
         URI statsOutputUri = outdirUri.resolve(VariantStorageManager.buildFilename(variantSource));
 
         VariantStatisticsManager variantStatisticsManager = new VariantStatisticsManager();

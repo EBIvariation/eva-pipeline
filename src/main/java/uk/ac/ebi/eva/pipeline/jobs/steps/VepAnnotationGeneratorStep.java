@@ -26,9 +26,15 @@ import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 import org.springframework.stereotype.Component;
-import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
 
-import java.io.*;
+import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
+import uk.ac.ebi.eva.pipeline.configuration.JobParametersNames;
+
+import java.io.BufferedInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.zip.GZIPOutputStream;
 
@@ -68,7 +74,7 @@ public class VepAnnotationGeneratorStep implements Tasklet {
                 "--cache_version", pipelineOptions.getString("app.vep.cache.version"),
                 "-dir", pipelineOptions.getString("app.vep.cache.path"),
                 "--species", pipelineOptions.getString("app.vep.cache.species"),
-                "--fasta", pipelineOptions.getString("input.fasta"),
+                "--fasta", pipelineOptions.getString(JobParametersNames.INPUT_FASTA),
                 "--fork", pipelineOptions.getString("app.vep.num-forks"),
                 "-i", pipelineOptions.getString("vep.input"),
                 "-o", "STDOUT",

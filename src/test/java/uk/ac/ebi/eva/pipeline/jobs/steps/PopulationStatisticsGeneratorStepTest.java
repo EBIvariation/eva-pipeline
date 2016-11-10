@@ -87,7 +87,7 @@ public class PopulationStatisticsGeneratorStepTest {
 
         variantOptions.put(VARIANT_SOURCE, source);
 
-        statsFile = new File(Paths.get(pipelineOptions.getString("output.dir.statistics")).resolve(VariantStorageManager.buildFilename(source))
+        statsFile = new File(Paths.get(pipelineOptions.getString(JobParametersNames.OUTPUT_DIR_STATISTICS)).resolve(VariantStorageManager.buildFilename(source))
                 + ".variants.stats.json.gz");
         statsFile.delete();
         assertFalse(statsFile.exists());  // ensure the stats file doesn't exist from previous executions
@@ -104,7 +104,7 @@ public class PopulationStatisticsGeneratorStepTest {
 
         //delete created files
         statsFile.delete();
-        new File(Paths.get(pipelineOptions.getString("output.dir.statistics")).resolve(VariantStorageManager.buildFilename(source))
+        new File(Paths.get(pipelineOptions.getString(JobParametersNames.OUTPUT_DIR_STATISTICS)).resolve(VariantStorageManager.buildFilename(source))
                 + ".source.stats.json.gz").delete();
 
     }
@@ -130,7 +130,7 @@ public class PopulationStatisticsGeneratorStepTest {
 
         variantOptions.put(VARIANT_SOURCE, source);
 
-        statsFile = new File(Paths.get(pipelineOptions.getString("output.dir.statistics")).resolve(VariantStorageManager.buildFilename(source))
+        statsFile = new File(Paths.get(pipelineOptions.getString(JobParametersNames.OUTPUT_DIR_STATISTICS)).resolve(VariantStorageManager.buildFilename(source))
                 + ".variants.stats.json.gz");
         statsFile.delete();
         assertFalse(statsFile.exists());  // ensure the stats file doesn't exist from previous executions

@@ -47,7 +47,7 @@ public class JobParametersNames {
     
     public static final String CONFIG_DB_PASSWORD = "config.db.password";
     
-    public static final String CONFIG_DB_READ_PREFERENCE = "config.db.read-preference";
+    public static final String CONFIG_DB_READPREFERENCE = "config.db.read-preference";
     
     
     /*

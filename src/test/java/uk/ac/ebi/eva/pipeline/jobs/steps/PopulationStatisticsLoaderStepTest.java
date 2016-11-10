@@ -78,7 +78,7 @@ public class PopulationStatisticsLoaderStepTest {
         String dump = PopulationStatisticsLoaderStepTest.class.getResource("/dump/VariantStatsConfigurationTest_vl").getFile();
         restoreMongoDbFromDump(dump, jobOptions.getDbName());
 
-        String outputDir = pipelineOptions.getString("output.dir.statistics");
+        String outputDir = pipelineOptions.getString(JobParametersNames.OUTPUT_DIR_STATISTICS);
 
         // copy stat file to load
         String variantsFileName = "/1_1.variants.stats.json.gz";

@@ -87,7 +87,7 @@ public class JobOptions {
     @Value("${" + JobParametersNames.DB_COLLECTIONS_FILES_NAME + ":#{null}}") private String dbCollectionFilesName;
     @Value("${" + JobParametersNames.DB_COLLECTIONS_FEATURES_NAME +"}") private String dbCollectionGenesName;
     @Value("${" + JobParametersNames.DB_COLLECTIONS_STATS_NAME + "}") private String dbCollectionStatsName;
-    @Value("${" + JobParametersNames.CONFIG_DB_READ_PREFERENCE + "}") private String readPreference;
+    @Value("${" + JobParametersNames.CONFIG_DB_READPREFERENCE + "}") private String readPreference;
 
     // Skip steps
     @Value("${" + JobParametersNames.ANNOTATION_SKIP + ":false}") private boolean skipAnnot;
@@ -203,7 +203,7 @@ public class JobOptions {
         pipelineOptions.put(JobParametersNames.CONFIG_DB_AUTHENTICATIONDB, dbAuthenticationDb);
         pipelineOptions.put(JobParametersNames.CONFIG_DB_USER, dbUser);
         pipelineOptions.put(JobParametersNames.CONFIG_DB_PASSWORD, dbPassword);
-        pipelineOptions.put(JobParametersNames.CONFIG_DB_READ_PREFERENCE, readPreference);
+        pipelineOptions.put(JobParametersNames.CONFIG_DB_READPREFERENCE, readPreference);
         pipelineOptions.put(JobParametersNames.ANNOTATION_SKIP, skipAnnot);
         pipelineOptions.put(JobParametersNames.STATISTICS_SKIP, skipStats);
 
@@ -287,6 +287,6 @@ public class JobOptions {
     }
 
     public String getOutputDir() {
-        return getPipelineOptions().getString("output.dir");
+        return getPipelineOptions().getString(JobParametersNames.OUTPUT_DIR);
     }
 }

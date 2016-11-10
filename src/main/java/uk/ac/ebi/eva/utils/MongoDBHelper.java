@@ -24,6 +24,8 @@ import org.opencb.datastore.core.ObjectMap;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.data.mongodb.core.MongoTemplate;
 
+import uk.ac.ebi.eva.pipeline.configuration.JobParametersNames;
+
 import java.net.UnknownHostException;
 
 /**
@@ -43,21 +45,21 @@ public class MongoDBHelper {
 
     private static MongoTemplate getMongoTemplate(ObjectMap pipelineOptions) throws UnknownHostException {
         MongoTemplate mongoTemplate;
-        if (pipelineOptions.getString("config.db.authentication-db").isEmpty()) {
+        if (pipelineOptions.getString(JobParametersNames.CONFIG_DB_AUTHENTICATIONDB).isEmpty()) {
             mongoTemplate = ConnectionHelper.getMongoTemplate(
                     pipelineOptions.getString("db.name")
             );
         } else {
             mongoTemplate = ConnectionHelper.getMongoTemplate(
                     pipelineOptions.getString("db.name"),
-                    pipelineOptions.getString("config.db.hosts"),
-                    pipelineOptions.getString("config.db.authentication-db"),
-                    pipelineOptions.getString("config.db.user"),
-                    pipelineOptions.getString("config.db.password").toCharArray()
+                    pipelineOptions.getString(JobParametersNames.CONFIG_DB_HOSTS),
+                    pipelineOptions.getString(JobParametersNames.CONFIG_DB_AUTHENTICATIONDB),
+                    pipelineOptions.getString(JobParametersNames.CONFIG_DB_USER),
+                    pipelineOptions.getString(JobParametersNames.CONFIG_DB_PASSWORD).toCharArray()
             );
         }
 
-        mongoTemplate.setReadPreference(getMongoTemplateReadPreferences(pipelineOptions.getString("config.db.read-preference")));
+        mongoTemplate.setReadPreference(getMongoTemplateReadPreferences(pipelineOptions.getString(JobParametersNames.CONFIG_DB_READPREFERENCE)));
 
         return mongoTemplate;
     }
@@ -76,18 +78,18 @@ public class MongoDBHelper {
     private static Mongo getMongoClient(ObjectMap pipelineOptions) throws UnknownHostException {
         MongoClient mongoClient;
 
-        if (pipelineOptions.getString("config.db.authentication-db").isEmpty()) {
+        if (pipelineOptions.getString(JobParametersNames.CONFIG_DB_AUTHENTICATIONDB).isEmpty()) {
             mongoClient = ConnectionHelper.getMongoClient();
         } else {
             mongoClient = ConnectionHelper.getMongoClient(
-                    pipelineOptions.getString("config.db.hosts"),
-                    pipelineOptions.getString("config.db.authentication-db"),
-                    pipelineOptions.getString("config.db.user"),
-                    pipelineOptions.getString("config.db.password").toCharArray()
+                    pipelineOptions.getString(JobParametersNames.CONFIG_DB_HOSTS),
+                    pipelineOptions.getString(JobParametersNames.CONFIG_DB_AUTHENTICATIONDB),
+                    pipelineOptions.getString(JobParametersNames.CONFIG_DB_USER),
+                    pipelineOptions.getString(JobParametersNames.CONFIG_DB_PASSWORD).toCharArray()
             );
         }
 
-        mongoClient.setReadPreference(getMongoTemplateReadPreferences(pipelineOptions.getString("config.db.read-preference")));
+        mongoClient.setReadPreference(getMongoTemplateReadPreferences(pipelineOptions.getString(JobParametersNames.CONFIG_DB_READPREFERENCE)));
 
         return mongoClient;
     }

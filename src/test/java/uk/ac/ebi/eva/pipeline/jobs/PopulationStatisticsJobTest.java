@@ -93,7 +93,7 @@ public class PopulationStatisticsJobTest {
 
         variantOptions.put(VARIANT_SOURCE, source);
 
-        statsFile = new File(Paths.get(pipelineOptions.getString("output.dir.statistics"))
+        statsFile = new File(Paths.get(pipelineOptions.getString(JobParametersNames.OUTPUT_DIR_STATISTICS))
                 .resolve(VariantStorageManager.buildFilename(source)) + ".variants.stats.json.gz");
         statsFile.delete();
         assertFalse(statsFile.exists());  // ensure the stats file doesn't exist from previous executions
@@ -109,7 +109,7 @@ public class PopulationStatisticsJobTest {
 
         //delete created files
         statsFile.delete();
-        new File(Paths.get(pipelineOptions.getString("output.dir.statistics")).resolve(VariantStorageManager.buildFilename(source))
+        new File(Paths.get(pipelineOptions.getString(JobParametersNames.OUTPUT_DIR_STATISTICS)).resolve(VariantStorageManager.buildFilename(source))
                 + ".source.stats.json.gz").delete();
 
         // The DB docs should have the field "st"
@@ -128,7 +128,7 @@ public class PopulationStatisticsJobTest {
         String dump = PopulationStatisticsJobTest.class.getResource("/dump/").getFile();
         restoreMongoDbFromDump(dump, jobOptions.getDbName());
 
-        String outputDir = pipelineOptions.getString("output.dir.statistics");
+        String outputDir = pipelineOptions.getString(JobParametersNames.OUTPUT_DIR_STATISTICS);
 
         // copy stat file to load
         String variantsFileName = "/1_1.variants.stats.json.gz";

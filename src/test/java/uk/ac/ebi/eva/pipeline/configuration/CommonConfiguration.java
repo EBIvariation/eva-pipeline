@@ -42,11 +42,11 @@ public class CommonConfiguration {
         properties.put(JobParametersNames.INPUT_STUDY_ID, "1");
         properties.put(JobParametersNames.INPUT_PEDIGREE, "");
         properties.put(JobParametersNames.INPUT_GTF, "");
-        properties.put("input.fasta", "");
+        properties.put(JobParametersNames.INPUT_FASTA, "");
 
         properties.put(JobParametersNames.OUTPUT_DIR, "/tmp");
-        properties.put("output.dir.annotation", "");
-        properties.put("output.dir.statistics", "/tmp");
+        properties.put(JobParametersNames.OUTPUT_DIR_ANNOTATION, "");
+        properties.put(JobParametersNames.OUTPUT_DIR_STATISTICS, "/tmp");
 
         properties.put("statistics.overwrite", "false");
 
@@ -56,7 +56,7 @@ public class CommonConfiguration {
         properties.put("db.collection.files.name", "files");
         properties.put("db.collections.features.name", "features");
         properties.put("db.collections.stats.name", "populationStatistics");
-        properties.put("config.db.read-preference", "primary");
+        properties.put(JobParametersNames.CONFIG_DB_READPREFERENCE, "primary");
 
         properties.put("app.opencga.path", opencgaHome);
         properties.put("app.vep.path", "");
