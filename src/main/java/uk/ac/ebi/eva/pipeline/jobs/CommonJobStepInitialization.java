@@ -25,7 +25,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
+
 import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
+import uk.ac.ebi.eva.pipeline.configuration.JobParametersNames;
 import uk.ac.ebi.eva.pipeline.jobs.steps.VariantLoaderStep;
 import uk.ac.ebi.eva.pipeline.jobs.steps.VariantNormalizerStep;
 
@@ -53,7 +55,7 @@ public abstract class CommonJobStepInitialization {
      */
     protected void initStep(final TaskletStepBuilder tasklet) {
 
-        boolean allowStartIfComplete = getPipelineOptions().getBoolean("config.restartability.allow");
+        boolean allowStartIfComplete = getPipelineOptions().getBoolean(JobParametersNames.CONFIG_RESTARTABILITY_ALLOW);
 
         // true: every job execution will do this step, even if this step is already COMPLETED
         // false(default): if the job was aborted and is relaunched, this step will NOT be done again

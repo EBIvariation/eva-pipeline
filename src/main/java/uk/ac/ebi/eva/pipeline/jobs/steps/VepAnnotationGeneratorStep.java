@@ -69,13 +69,13 @@ public class VepAnnotationGeneratorStep implements Tasklet {
         ObjectMap pipelineOptions = jobOptions.getPipelineOptions();
 
         ProcessBuilder processBuilder = new ProcessBuilder("perl",
-                pipelineOptions.getString("app.vep.path"),
+                pipelineOptions.getString(JobParametersNames.APP_VEP_PATH),
                 "--cache",
-                "--cache_version", pipelineOptions.getString("app.vep.cache.version"),
-                "-dir", pipelineOptions.getString("app.vep.cache.path"),
-                "--species", pipelineOptions.getString("app.vep.cache.species"),
+                "--cache_version", pipelineOptions.getString(JobParametersNames.APP_VEP_CACHE_VERSION),
+                "-dir", pipelineOptions.getString(JobParametersNames.APP_VEP_CACHE_PATH),
+                "--species", pipelineOptions.getString(JobParametersNames.APP_VEP_CACHE_SPECIES),
                 "--fasta", pipelineOptions.getString(JobParametersNames.INPUT_FASTA),
-                "--fork", pipelineOptions.getString("app.vep.num-forks"),
+                "--fork", pipelineOptions.getString(JobParametersNames.APP_VEP_NUMFORKS),
                 "-i", pipelineOptions.getString("vep.input"),
                 "-o", "STDOUT",
                 "--force_overwrite",

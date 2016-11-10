@@ -58,14 +58,14 @@ public class CommonConfiguration {
         properties.put(JobParametersNames.DB_COLLECTIONS_STATISTICS_NAME, "populationStatistics");
         properties.put(JobParametersNames.CONFIG_DB_READPREFERENCE, "primary");
 
-        properties.put("app.opencga.path", opencgaHome);
-        properties.put("app.vep.path", "");
-        properties.put("app.vep.cache.path", "");
-        properties.put("app.vep.cache.version", "");
-        properties.put("app.vep.cache.species", "");
-        properties.put("app.vep.num-forks", "3");
+        properties.put(JobParametersNames.APP_OPENCGA_PATH, opencgaHome);
+        properties.put(JobParametersNames.APP_VEP_PATH, "");
+        properties.put(JobParametersNames.APP_VEP_CACHE_PATH, "");
+        properties.put(JobParametersNames.APP_VEP_CACHE_VERSION, "");
+        properties.put(JobParametersNames.APP_VEP_CACHE_SPECIES, "");
+        properties.put(JobParametersNames.APP_VEP_NUMFORKS, "3");
 
-        properties.put("config.restartability.allow", false);
+        properties.put(JobParametersNames.CONFIG_RESTARTABILITY_ALLOW, false);
 
         configurer.setProperties(properties);
 

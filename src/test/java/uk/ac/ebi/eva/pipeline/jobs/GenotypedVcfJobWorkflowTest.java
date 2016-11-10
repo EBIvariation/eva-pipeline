@@ -258,7 +258,7 @@ public class GenotypedVcfJobWorkflowTest {
         String mockVep = GenotypedVcfJobTest.class.getResource("/mockvep.pl").getFile();
 
         jobOptions.getPipelineOptions().put(JobParametersNames.INPUT_VCF, inputFile);
-        jobOptions.getPipelineOptions().put("app.vep.path", mockVep);
+        jobOptions.getPipelineOptions().put(JobParametersNames.APP_VEP_PATH, mockVep);
 
         Config.setOpenCGAHome(opencgaHome);
 
