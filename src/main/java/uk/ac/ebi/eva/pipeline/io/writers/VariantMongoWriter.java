@@ -33,10 +33,9 @@ import java.util.List;
 
 /**
  * @author Diego Poggioli
- *
- * Write a list of {@link Variant} into MongoDB
- * See also {@link org.opencb.opencga.storage.mongodb.variant.VariantMongoDBWriter}
- *
+ *         <p>
+ *         Write a list of {@link Variant} into MongoDB
+ *         See also {@link org.opencb.opencga.storage.mongodb.variant.VariantMongoDBWriter}
  */
 public class VariantMongoWriter extends MongoItemWriter<Variant> {
     private static final Logger logger = LoggerFactory.getLogger(VariantMongoWriter.class);
@@ -71,42 +70,41 @@ public class VariantMongoWriter extends MongoItemWriter<Variant> {
             variant.setAnnotation(null);
             String id = variantConverter.buildStorageId(variant);
 
-            for (VariantSourceEntry variantSourceEntry : variant.getSourceEntries().values()) {
+            VariantSourceEntry variantSourceEntry = variant.getSourceEntries().entrySet().iterator().next().getValue();
 
-                // the chromosome and start appear just as shard keys, in an unsharded cluster they wouldn't be needed
-                BasicDBObject query = new BasicDBObject("_id", id)
-                        .append(DBObjectToVariantConverter.CHROMOSOME_FIELD, variant.getChromosome())
-                        .append(DBObjectToVariantConverter.START_FIELD, variant.getStart());
+            // the chromosome and start appear just as shard keys, in an unsharded cluster they wouldn't be needed
+            BasicDBObject query = new BasicDBObject("_id", id)
+                    .append(DBObjectToVariantConverter.CHROMOSOME_FIELD, variant.getChromosome())
+                    .append(DBObjectToVariantConverter.START_FIELD, variant.getStart());
 
-                BasicDBObject addToSet = new BasicDBObject()
-                        .append(DBObjectToVariantConverter.FILES_FIELD,
-                                sourceEntryConverter.convertToStorageType(variantSourceEntry));
+            BasicDBObject addToSet = new BasicDBObject()
+                    .append(DBObjectToVariantConverter.FILES_FIELD,
+                            sourceEntryConverter.convertToStorageType(variantSourceEntry));
 
-                if (includeStats) {
-                    List<DBObject> sourceEntryStats = statsConverter.convertCohortsToStorageType(variantSourceEntry.getCohortStats(),
-                            variantSourceEntry.getStudyId(), variantSourceEntry.getFileId());
-                    addToSet.put(DBObjectToVariantConverter.STATS_FIELD, new BasicDBObject("$each", sourceEntryStats));
-                }
-
-                if (variant.getIds() != null && !variant.getIds().isEmpty()) {
-                    addToSet.put(DBObjectToVariantConverter.IDS_FIELD, new BasicDBObject("$each", variant.getIds()));
-                }
-
-                BasicDBObject update = new BasicDBObject()
-                        .append("$addToSet", addToSet)
-                        .append("$setOnInsert", variantConverter.convertToStorageType(variant));    // assuming variantConverter.statsConverter == null
-
-                bulk.find(query).upsert().updateOne(update);
-
-                currentBulkSize++;
+            if (includeStats) {
+                List<DBObject> sourceEntryStats = statsConverter.convertCohortsToStorageType(variantSourceEntry.getCohortStats(),
+                        variantSourceEntry.getStudyId(), variantSourceEntry.getFileId());
+                addToSet.put(DBObjectToVariantConverter.STATS_FIELD, new BasicDBObject("$each", sourceEntryStats));
             }
+
+            if (variant.getIds() != null && !variant.getIds().isEmpty()) {
+                addToSet.put(DBObjectToVariantConverter.IDS_FIELD, new BasicDBObject("$each", variant.getIds()));
+            }
+
+            BasicDBObject update = new BasicDBObject()
+                    .append("$addToSet", addToSet)
+                    .append("$setOnInsert", variantConverter.convertToStorageType(variant));    // assuming variantConverter.statsConverter == null
+
+            bulk.find(query).upsert().updateOne(update);
+
+            currentBulkSize++;
 
             executeBulk();
         }
     }
 
     private void executeBulk() {
-        if(currentBulkSize != 0){
+        if (currentBulkSize != 0) {
             logger.debug("Execute bulk. BulkSize : " + currentBulkSize);
             bulk.execute();
             resetBulk();
@@ -121,7 +119,7 @@ public class VariantMongoWriter extends MongoItemWriter<Variant> {
     @Override
     public void afterPropertiesSet() throws Exception {
         Assert.notNull(mongoOperations, "A Mongo instance is required");
-        Assert.hasText(collection, "A collection name is required" );
+        Assert.hasText(collection, "A collection name is required");
     }
 
 }

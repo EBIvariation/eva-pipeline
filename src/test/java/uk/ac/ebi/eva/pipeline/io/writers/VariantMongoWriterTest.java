@@ -17,7 +17,10 @@ package uk.ac.ebi.eva.pipeline.io.writers;
 
 import com.google.common.collect.Sets;
 import com.googlecode.junittoolbox.ParallelRunner;
+import com.mongodb.BasicDBList;
+import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
+import org.apache.commons.collections.CollectionUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -29,21 +32,14 @@ import org.opencb.opencga.storage.core.variant.VariantStorageManager;
 import org.opencb.opencga.storage.mongodb.variant.*;
 import org.springframework.data.mongodb.core.MongoOperations;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
-import uk.ac.ebi.eva.utils.ConnectionHelper;
 import uk.ac.ebi.eva.utils.MongoDBHelper;
-
 import java.net.UnknownHostException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.Map;
-
+import java.util.*;
 import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 /**
- * @author Diego Poggioli
- *
- * {@link VariantMongoWriter}
+ * Testing {@link VariantMongoWriter}
  */
 @RunWith(ParallelRunner.class)
 public class VariantMongoWriterTest {
@@ -126,7 +122,6 @@ public class VariantMongoWriterTest {
         JobTestUtils.cleanDBs(dbName);
     }
 
-
     @Test
     public void multipleVariantsShouldBeWrittenIntoMongoDb() throws UnknownHostException {
         String dbName = "VariantMongoWriterTestMultipleVariants";
@@ -146,6 +141,39 @@ public class VariantMongoWriterTest {
         variantMongoWriter.doWrite(Arrays.asList(variant1, variant2, variant3));
 
         assertEquals(3, dbCollection.count());
+
+        JobTestUtils.cleanDBs(dbName);
+    }
+
+    @Test
+    public void multipleVariantsWithDifferentFileIdStatsShouldBeReferenced() throws UnknownHostException {
+        boolean calculateStats = true;
+
+        String dbName = "multipleVariantsWithDifferentFileId";
+
+        Variant variant1 = buildVariant("12", 3, 5, "A", "T", fileId, studyId);
+        Variant variant2 = buildVariant("12", 3, 5, "A", "T", "fileId2", "studyId2");
+
+        setConverters(samplesPosition, calculateStats, includeSample, includeSrc);
+
+        objectMap.put("db.name", dbName);
+        MongoOperations mongoOperations = MongoDBHelper.getMongoOperationsFromPipelineOptions(objectMap);
+        DBCollection dbCollection = mongoOperations.getCollection(collectionName);
+
+        variantMongoWriter = new VariantMongoWriter(true, collectionName, variantConverter,
+                statsConverter, sourceEntryConverter, mongoOperations);
+        variantMongoWriter.doWrite(Collections.singletonList(variant1));
+        variantMongoWriter.doWrite(Collections.singletonList(variant2));
+
+        assertEquals(1, dbCollection.count());
+        assertNotNull(dbCollection.findOne().get("st"));
+        BasicDBList basicDBList = (BasicDBList) dbCollection.findOne().get("st");
+
+        Set<String> fileIds = new HashSet<>();
+        for (Object o : basicDBList) {
+            fileIds.add((String) ((BasicDBObject) o).get("fid"));
+        }
+        assertTrue(CollectionUtils.isEqualCollection(new HashSet<>(Arrays.asList(fileId, "fileId2")), fileIds));
 
         JobTestUtils.cleanDBs(dbName);
     }
