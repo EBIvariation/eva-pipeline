@@ -162,7 +162,6 @@ public class JobTestUtils {
     }
 
     public static void uncompress(String inputCompressedFile, File outputFile) throws IOException {
-
         GZIPInputStream gzis = new GZIPInputStream(new FileInputStream(inputCompressedFile));
         FileOutputStream out = new FileOutputStream(outputFile);
 

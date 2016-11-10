@@ -84,7 +84,6 @@ public class VcfReaderTest {
 
     @Test
     public void testUncompressedVcf() throws Exception {
-
         ExecutionContext executionContext = MetaDataInstanceFactory.createStepExecution().getExecutionContext();
 
         // uncompress the input VCF into a temporal file

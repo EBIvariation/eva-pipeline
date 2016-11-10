@@ -34,7 +34,7 @@ public class VcfLineMapper implements LineMapper<List<Variant>> {
 
     public VcfLineMapper(VariantSource source) {
         this.source = source;
-        factory = new VariantVcfFactory();
+        this.factory = new VariantVcfFactory();
     }
 
     @Override

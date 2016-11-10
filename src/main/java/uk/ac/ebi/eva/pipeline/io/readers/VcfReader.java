@@ -18,12 +18,10 @@ package uk.ac.ebi.eva.pipeline.io.readers;
 import org.opencb.biodata.models.variant.Variant;
 import org.opencb.biodata.models.variant.VariantSource;
 import org.springframework.batch.item.file.FlatFileItemReader;
-import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 
-import uk.ac.ebi.eva.pipeline.io.GzipLazyResource;
 import uk.ac.ebi.eva.pipeline.io.mappers.VcfLineMapper;
-import uk.ac.ebi.eva.utils.CompressionHelper;
+import uk.ac.ebi.eva.utils.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -41,11 +39,7 @@ public class VcfReader extends FlatFileItemReader<List<Variant>> {
 
     public VcfReader(VariantSource source, File file) throws IOException {
         Resource resource;
-        if (CompressionHelper.isGzip(file)) {
-            resource = new GzipLazyResource(file);
-        } else {
-            resource = new FileSystemResource(file);
-        }
+        resource = FileUtils.getResource(file);
         setResource(resource);
         setLineMapper(new VcfLineMapper(source));
     }

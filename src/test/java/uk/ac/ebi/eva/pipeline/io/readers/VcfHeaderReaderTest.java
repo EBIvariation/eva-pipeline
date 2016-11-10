@@ -35,7 +35,6 @@ public class VcfHeaderReaderTest {
 
     @Test
     public void testRead() throws Exception {
-
         final String inputFilePath = "/small20.vcf.gz";
         String inputFile = VcfHeaderReaderTest.class.getResource(inputFilePath).getFile();
 
@@ -76,7 +75,6 @@ public class VcfHeaderReaderTest {
      */
     @Test
     public void testConversion() throws Exception {
-
         final String inputFilePath = "/small20.vcf.gz";
         String inputFile = VcfHeaderReaderTest.class.getResource(inputFilePath).getFile();
 
