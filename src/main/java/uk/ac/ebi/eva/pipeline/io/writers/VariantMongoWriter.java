@@ -27,6 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.item.data.MongoItemWriter;
 import org.springframework.data.mongodb.core.MongoOperations;
+import org.springframework.util.Assert;
 
 import java.util.List;
 
@@ -41,7 +42,6 @@ public class VariantMongoWriter extends MongoItemWriter<Variant> {
     private static final Logger logger = LoggerFactory.getLogger(VariantMongoWriter.class);
 
     private boolean includeStats;
-    private String fileId;
     private MongoOperations mongoOperations;
     private String collection;
 
@@ -52,11 +52,10 @@ public class VariantMongoWriter extends MongoItemWriter<Variant> {
     private DBObjectToVariantStatsConverter statsConverter;
     private DBObjectToVariantSourceEntryConverter sourceEntryConverter;
 
-    public VariantMongoWriter(boolean includeStats, String fileId, String collection,
+    public VariantMongoWriter(boolean includeStats, String collection,
                               DBObjectToVariantConverter variantConverter, DBObjectToVariantStatsConverter statsConverter,
                               DBObjectToVariantSourceEntryConverter sourceEntryConverter, MongoOperations mongoOperations) {
         this.includeStats = includeStats;
-        this.fileId = fileId;
         this.collection = collection;
         this.variantConverter = variantConverter;
         this.statsConverter = statsConverter;
@@ -73,9 +72,6 @@ public class VariantMongoWriter extends MongoItemWriter<Variant> {
             String id = variantConverter.buildStorageId(variant);
 
             for (VariantSourceEntry variantSourceEntry : variant.getSourceEntries().values()) {
-                if (!variantSourceEntry.getFileId().equals(fileId)) {
-                    continue;
-                }
 
                 // the chromosome and start appear just as shard keys, in an unsharded cluster they wouldn't be needed
                 BasicDBObject query = new BasicDBObject("_id", id)
@@ -120,6 +116,12 @@ public class VariantMongoWriter extends MongoItemWriter<Variant> {
     private void resetBulk() {
         bulk = mongoOperations.getCollection(collection).initializeUnorderedBulkOperation();
         currentBulkSize = 0;
+    }
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        Assert.notNull(mongoOperations, "A Mongo instance is required");
+        Assert.hasText(collection, "A collection name is required" );
     }
 
 }
