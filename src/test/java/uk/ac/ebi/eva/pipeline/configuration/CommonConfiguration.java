@@ -44,7 +44,7 @@ public class CommonConfiguration {
         properties.put("input.gtf", "");
         properties.put("input.fasta", "");
 
-        properties.put(JobOptions.OUTPUT_DIR, "/tmp");
+        properties.put(JobParametersNames.OUTPUT_DIR, "/tmp");
         properties.put("output.dir.annotation", "");
         properties.put("output.dir.statistics", "/tmp");
 

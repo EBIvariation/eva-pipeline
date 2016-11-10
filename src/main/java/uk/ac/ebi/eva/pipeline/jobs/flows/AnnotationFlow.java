@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+
+import uk.ac.ebi.eva.pipeline.configuration.JobParametersNames;
 import uk.ac.ebi.eva.pipeline.jobs.CommonJobStepInitialization;
 import uk.ac.ebi.eva.pipeline.jobs.deciders.EmptyFileDecider;
 import uk.ac.ebi.eva.pipeline.jobs.deciders.SkipStepDecider;
@@ -22,7 +24,6 @@ import uk.ac.ebi.eva.pipeline.jobs.steps.VepInputGeneratorStep;
 @Import({VepAnnotationGeneratorStep.class, VepInputGeneratorStep.class, AnnotationLoaderStep.class})
 public class AnnotationFlow extends CommonJobStepInitialization {
 
-    public static final String SKIP_ANNOT = "annotation.skip";
     public static final String GENERATE_VEP_ANNOTATION = "Generate VEP annotation";
     private static final String OPTIONAL_VARIANT_VEP_ANNOTATION_FLOW = "Optional variant VEP annotation flow";
     private static final String VARIANT_VEP_ANNOTATION_FLOW = "Variant VEP annotation flow";
@@ -40,7 +41,7 @@ public class AnnotationFlow extends CommonJobStepInitialization {
 
     @Bean
     Flow annotationFlowOptional() {
-        SkipStepDecider annotationSkipStepDecider = new SkipStepDecider(getPipelineOptions(), SKIP_ANNOT);
+        SkipStepDecider annotationSkipStepDecider = new SkipStepDecider(getPipelineOptions(), JobParametersNames.ANNOTATION_SKIP);
 
         return new FlowBuilder<Flow>(OPTIONAL_VARIANT_VEP_ANNOTATION_FLOW)
                 .start(annotationSkipStepDecider).on(SkipStepDecider.DO_STEP)

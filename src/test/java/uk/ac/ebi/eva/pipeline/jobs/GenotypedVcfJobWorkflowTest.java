@@ -31,9 +31,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
+
 import uk.ac.ebi.eva.pipeline.configuration.GenotypedVcfWorkflowConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
-import uk.ac.ebi.eva.pipeline.jobs.flows.AnnotationFlow;
+import uk.ac.ebi.eva.pipeline.configuration.JobParametersNames;
 import uk.ac.ebi.eva.pipeline.jobs.flows.PopulationStatisticsFlow;
 import uk.ac.ebi.eva.pipeline.jobs.steps.AnnotationLoaderStep;
 import uk.ac.ebi.eva.pipeline.jobs.steps.VepAnnotationGeneratorStep;
@@ -42,9 +43,17 @@ import uk.ac.ebi.eva.test.utils.JobTestUtils;
 
 import java.io.File;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Workflow test for {@link GenotypedVcfJob}
@@ -121,8 +130,8 @@ public class GenotypedVcfJobWorkflowTest {
     public void optionalStepsShouldBeSkipped() throws Exception {
         initVariantConfigurationJob();
 
-        jobOptions.getPipelineOptions().put(AnnotationFlow.SKIP_ANNOT, true);
-        jobOptions.getPipelineOptions().put(PopulationStatisticsFlow.SKIP_STATS, true);
+        jobOptions.getPipelineOptions().put(JobParametersNames.ANNOTATION_SKIP, true);
+        jobOptions.getPipelineOptions().put(JobParametersNames.STATISTICS_SKIP, true);
 
         JobExecution execution = jobLauncherTestUtils.launchJob();
 
@@ -142,7 +151,7 @@ public class GenotypedVcfJobWorkflowTest {
     @Test
     public void statsStepsShouldBeSkipped() throws Exception {
         initVariantConfigurationJob();
-        jobOptions.getPipelineOptions().put(PopulationStatisticsFlow.SKIP_STATS, true);
+        jobOptions.getPipelineOptions().put(JobParametersNames.STATISTICS_SKIP, true);
 
         jobOptions.getPipelineOptions().put("db.name", "diegoTest");
 
@@ -186,7 +195,7 @@ public class GenotypedVcfJobWorkflowTest {
     @Test
     public void annotationStepsShouldBeSkipped() throws Exception {
         initVariantConfigurationJob();
-        jobOptions.getPipelineOptions().put(AnnotationFlow.SKIP_ANNOT, true);
+        jobOptions.getPipelineOptions().put(JobParametersNames.ANNOTATION_SKIP, true);
 
         JobExecution execution = jobLauncherTestUtils.launchJob();
 

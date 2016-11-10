@@ -26,11 +26,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.stereotype.Component;
-import uk.ac.ebi.eva.pipeline.jobs.flows.AnnotationFlow;
-import uk.ac.ebi.eva.pipeline.jobs.flows.PopulationStatisticsFlow;
+
 import uk.ac.ebi.eva.utils.MongoDBHelper;
 
-import javax.annotation.PostConstruct;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -38,6 +36,7 @@ import java.io.InputStreamReader;
 import java.net.URI;
 import java.nio.file.Paths;
 import java.util.Properties;
+import javax.annotation.PostConstruct;
 
 /**
  *
@@ -50,33 +49,28 @@ import java.util.Properties;
 @Component
 public class JobOptions {
     private static final Logger logger = LoggerFactory.getLogger(JobOptions.class);
-    private static final String DB_COLLECTIONS_FEATURES_NAME = "db.collections.features.name";
-    private static final String DB_COLLECTIONS_VARIANTS_NAME = "db.collections.variants.name";
-    private static final String DB_COLLECTIONS_STATS_NAME = "db.collections.stats.name";
-    private static final String VEP_INPUT = "vep.input";
-    private static final String DB_NAME = "db.name";
-    private static final String VEP_OUTPUT = "vep.output";
-    private static final String APP_VEP_PATH = "app.vep.path";
-    public static final String OUTPUT_DIR = "output.dir";
+
+    public static final String VEP_INPUT = "vep.input";
+    public static final String VEP_OUTPUT = "vep.output";
 
     // Input
-    @Value("${input.vcf}") private String input;
-    @Value("${input.vcf.id}") private String fileId;
-    @Value("${input.vcf.aggregation}") private String aggregated;
-    @Value("${input.study.type}") private String studyType;
-    @Value("${input.study.name}") private String studyName;
-    @Value("${input.study.id}") private String studyId;
-    @Value("${input.pedigree:}") private String pedigree;
-    @Value("${input.gtf}") private String gtf;
+    @Value("${" + JobParametersNames.INPUT_VCF + "}") private String input;
+    @Value("${" + JobParametersNames.INPUT_VCF_ID + "}") private String fileId;
+    @Value("${" + JobParametersNames.INPUT_VCF_AGGREGATION + "}") private String aggregated;
+    @Value("${" + JobParametersNames.INPUT_STUDY_TYPE + "}") private String studyType;
+    @Value("${" + JobParametersNames.INPUT_STUDY_NAME + "}") private String studyName;
+    @Value("${" + JobParametersNames.INPUT_STUDY_ID + "}") private String studyId;
+    @Value("${" + JobParametersNames.INPUT_PEDIGREE + ":}") private String pedigree;
+    @Value("${" + JobParametersNames.INPUT_GTF + "}") private String gtf;
 
     // Output
-    @Value("${"+OUTPUT_DIR+"}") private String outputDir;
-    @Value("${output.dir.annotation}") private String outputDirAnnotation;
-    @Value("${output.dir.statistics}") private String outputDirStatistics;
+    @Value("${" + JobParametersNames.OUTPUT_DIR + "}") private String outputDir;
+    @Value("${" + JobParametersNames.OUTPUT_DIR_ANNOTATION + "}") private String outputDirAnnotation;
+    @Value("${" + JobParametersNames.OUTPUT_DIR_STATISTICS + "}") private String outputDirStatistics;
 
-    @Value("${statistics.overwrite:false}") private boolean overwriteStats;
+    @Value("${" + JobParametersNames.STATISTICS_OVERWRITE + ":false}") private boolean overwriteStats;
 
-    @Value("${app.opencga.path}") private String opencgaAppHome;
+    @Value("${" + JobParametersNames.APP_OPENCGA_PATH + "}") private String opencgaAppHome;
 
     //// OpenCGA options with default values (non-customizable)
     private String compressExtension = ".gz";
@@ -84,35 +78,33 @@ public class JobOptions {
     private VariantStorageManager.IncludeSrc includeSourceLine = VariantStorageManager.IncludeSrc.FIRST_8_COLUMNS;
 
     /// DB connection (most parameters read from OpenCGA "conf" folder)
-    @Value("${config.db.hosts:#{null}}") private String dbHosts;
-    @Value("${config.db.authentication-db:#{null}}") private String dbAuthenticationDb;
-    @Value("${config.db.user:#{null}}") private String dbUser;
-    @Value("${config.db.password:#{null}}") private String dbPassword;
-    @Value("${"+DB_NAME+":#{null}}") private String dbName;
-    @Value("${"+DB_COLLECTIONS_VARIANTS_NAME+":#{null}}") private String dbCollectionVariantsName;
-    @Value("${db.collections.files.name:#{null}}") private String dbCollectionFilesName;
-    @Value("${"+DB_COLLECTIONS_FEATURES_NAME+"}") private String dbCollectionGenesName;
-    @Value("${"+DB_COLLECTIONS_STATS_NAME+"}") private String dbCollectionStatsName;
-    @Value("${config.db.read-preference}") private String readPreference;
+    @Value("${" + JobParametersNames.CONFIG_DB_HOSTS + ":#{null}}") private String dbHosts;
+    @Value("${" + JobParametersNames.CONFIG_DB_AUTHENTICATIONDB + ":#{null}}") private String dbAuthenticationDb;
+    @Value("${" + JobParametersNames.CONFIG_DB_USER + ":#{null}}") private String dbUser;
+    @Value("${" + JobParametersNames.CONFIG_DB_PASSWORD + ":#{null}}") private String dbPassword;
+    @Value("${" + JobParametersNames.DB_NAME + ":#{null}}") private String dbName;
+    @Value("${" + JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME + ":#{null}}") private String dbCollectionVariantsName;
+    @Value("${" + JobParametersNames.DB_COLLECTIONS_FILES_NAME + ":#{null}}") private String dbCollectionFilesName;
+    @Value("${" + JobParametersNames.DB_COLLECTIONS_FEATURES_NAME +"}") private String dbCollectionGenesName;
+    @Value("${" + JobParametersNames.DB_COLLECTIONS_STATS_NAME + "}") private String dbCollectionStatsName;
+    @Value("${" + JobParametersNames.CONFIG_DB_READ_PREFERENCE + "}") private String readPreference;
 
     // Skip steps
-    @Value("${annotation.skip:false}") private boolean skipAnnot;
-    @Value("${statistics.skip:false}") private boolean skipStats;
+    @Value("${" + JobParametersNames.ANNOTATION_SKIP + ":false}") private boolean skipAnnot;
+    @Value("${" + JobParametersNames.STATISTICS_SKIP + ":false}") private boolean skipStats;
 
     //VEP
-    @Value("${"+APP_VEP_PATH+"}") private String vepPath;
-    @Value("${app.vep.cache.path}") private String vepCacheDirectory;
-    @Value("${app.vep.cache.version}") private String vepCacheVersion;
-    @Value("${app.vep.cache.species}") private String vepSpecies;
-    @Value("${input.fasta}") private String vepFasta;
-    @Value("${app.vep.num-forks}") private String vepNumForks;
+    @Value("${" + JobParametersNames.APP_VEP_PATH +"}") private String vepPath;
+    @Value("${" + JobParametersNames.APP_VEP_CACHE_PATH + "}") private String vepCacheDirectory;
+    @Value("${" + JobParametersNames.APP_VEP_CACHE_VERSION + "}") private String vepCacheVersion;
+    @Value("${" + JobParametersNames.APP_VEP_CACHE_SPECIES + "}") private String vepSpecies;
+    @Value("${" + JobParametersNames.INPUT_FASTA + "}") private String vepFasta;
+    @Value("${" + JobParametersNames.APP_VEP_NUMFORKS + "}") private String vepNumForks;
 
-    @Value("${config.restartability.allow:false}") private boolean allowStartIfComplete;
+    @Value("${" + JobParametersNames.CONFIG_RESTARTABILITY_ALLOW + ":false}") private boolean allowStartIfComplete;
 
     private ObjectMap variantOptions  = new ObjectMap();
     private ObjectMap pipelineOptions  = new ObjectMap();
-    private File vepInput;
-    private File appVepPath;
 
     @PostConstruct
     public void loadArgs() throws IOException {
@@ -196,36 +188,36 @@ public class JobOptions {
     }
 
     private void loadPipelineOptions() {
-        pipelineOptions.put("input.vcf", input);
+        pipelineOptions.put(JobParametersNames.INPUT_VCF, input);
         pipelineOptions.put("compressExtension", compressExtension);
-        pipelineOptions.put("output.dir", outputDir);
-        pipelineOptions.put("output.dir.statistics", outputDirStatistics);
-        pipelineOptions.put("input.pedigree", pedigree);
-        pipelineOptions.put("input.gtf", gtf);
-        pipelineOptions.put(DB_NAME, dbName);
-        pipelineOptions.put(DB_COLLECTIONS_VARIANTS_NAME, dbCollectionVariantsName);
-        pipelineOptions.put("db.collections.files.name", dbCollectionFilesName);
-        pipelineOptions.put(DB_COLLECTIONS_FEATURES_NAME, dbCollectionGenesName);
-        pipelineOptions.put(DB_COLLECTIONS_STATS_NAME, dbCollectionStatsName);
-        pipelineOptions.put("config.db.hosts", dbHosts);
-        pipelineOptions.put("config.db.authentication-db", dbAuthenticationDb);
-        pipelineOptions.put("config.db.user", dbUser);
-        pipelineOptions.put("config.db.password", dbPassword);
-        pipelineOptions.put("config.db.read-preference", readPreference);
-        pipelineOptions.put(AnnotationFlow.SKIP_ANNOT, skipAnnot);
-        pipelineOptions.put(PopulationStatisticsFlow.SKIP_STATS, skipStats);
+        pipelineOptions.put(JobParametersNames.OUTPUT_DIR, outputDir);
+        pipelineOptions.put(JobParametersNames.OUTPUT_DIR_STATISTICS, outputDirStatistics);
+        pipelineOptions.put(JobParametersNames.INPUT_PEDIGREE, pedigree);
+        pipelineOptions.put(JobParametersNames.INPUT_GTF, gtf);
+        pipelineOptions.put(JobParametersNames.DB_NAME, dbName);
+        pipelineOptions.put(JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME, dbCollectionVariantsName);
+        pipelineOptions.put(JobParametersNames.DB_COLLECTIONS_FILES_NAME, dbCollectionFilesName);
+        pipelineOptions.put(JobParametersNames.DB_COLLECTIONS_FEATURES_NAME, dbCollectionGenesName);
+        pipelineOptions.put(JobParametersNames.DB_COLLECTIONS_STATS_NAME, dbCollectionStatsName);
+        pipelineOptions.put(JobParametersNames.CONFIG_DB_HOSTS, dbHosts);
+        pipelineOptions.put(JobParametersNames.CONFIG_DB_AUTHENTICATIONDB, dbAuthenticationDb);
+        pipelineOptions.put(JobParametersNames.CONFIG_DB_USER, dbUser);
+        pipelineOptions.put(JobParametersNames.CONFIG_DB_PASSWORD, dbPassword);
+        pipelineOptions.put(JobParametersNames.CONFIG_DB_READ_PREFERENCE, readPreference);
+        pipelineOptions.put(JobParametersNames.ANNOTATION_SKIP, skipAnnot);
+        pipelineOptions.put(JobParametersNames.STATISTICS_SKIP, skipStats);
 
         String annotationFilesPrefix = studyId + "_" + fileId;
         pipelineOptions.put(VEP_INPUT, URI.create(outputDirAnnotation + "/").resolve(annotationFilesPrefix + "_variants_to_annotate.tsv").toString());
         pipelineOptions.put(VEP_OUTPUT, URI.create(outputDirAnnotation + "/").resolve(annotationFilesPrefix + "_vep_annotation.tsv.gz").toString());
 
-        pipelineOptions.put(APP_VEP_PATH, vepPath);
-        pipelineOptions.put("app.vep.cache.path", vepCacheDirectory);
-        pipelineOptions.put("app.vep.cache.version", vepCacheVersion);
-        pipelineOptions.put("app.vep.cache.species", vepSpecies);
-        pipelineOptions.put("input.fasta", vepFasta);
-        pipelineOptions.put("app.vep.num-forks", vepNumForks);
-        pipelineOptions.put("config.restartability.allow", allowStartIfComplete);
+        pipelineOptions.put(JobParametersNames.APP_VEP_PATH, vepPath);
+        pipelineOptions.put(JobParametersNames.APP_VEP_CACHE_PATH, vepCacheDirectory);
+        pipelineOptions.put(JobParametersNames.APP_VEP_CACHE_VERSION, vepCacheVersion);
+        pipelineOptions.put(JobParametersNames.APP_VEP_CACHE_SPECIES, vepSpecies);
+        pipelineOptions.put(JobParametersNames.INPUT_FASTA, vepFasta);
+        pipelineOptions.put(JobParametersNames.APP_VEP_NUMFORKS, vepNumForks);
+        pipelineOptions.put(JobParametersNames.CONFIG_RESTARTABILITY_ALLOW, allowStartIfComplete);
 
         logger.debug("Using as pipelineOptions: {}", pipelineOptions.entrySet().toString());
     }
@@ -253,14 +245,14 @@ public class JobOptions {
     }
 
     public String getDbCollectionsFeaturesName() {
-        return getPipelineOptions().getString(DB_COLLECTIONS_FEATURES_NAME);
+        return getPipelineOptions().getString(JobParametersNames.DB_COLLECTIONS_FEATURES_NAME);
     }
 
     public String getDbCollectionsVariantsName() {
-        return getPipelineOptions().getString(DB_COLLECTIONS_VARIANTS_NAME);
+        return getPipelineOptions().getString(JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME);
     }
     public String getDbCollectionsStatsName() {
-        return getPipelineOptions().getString(DB_COLLECTIONS_STATS_NAME);
+        return getPipelineOptions().getString(JobParametersNames.DB_COLLECTIONS_STATS_NAME);
     }
 
     public String getVepInput() {
@@ -272,14 +264,14 @@ public class JobOptions {
     }
 
     public String getDbName() {
-        return getPipelineOptions().getString(DB_NAME);
+        return getPipelineOptions().getString(JobParametersNames.DB_NAME);
     }
 
     public void setDbName(String dbName) {
         this.dbName = dbName;
         getVariantOptions().put(VariantStorageManager.DB_NAME, dbName);
         getVariantOptions().put(MongoDBVariantStorageManager.OPENCGA_STORAGE_MONGODB_VARIANT_DB_NAME, dbName);
-        getPipelineOptions().put(DB_NAME, dbName);
+        getPipelineOptions().put(JobParametersNames.DB_NAME, dbName);
     }
 
     public String getVepOutput() {
@@ -291,7 +283,7 @@ public class JobOptions {
     }
 
     public void setAppVepPath(File appVepPath) {
-        getPipelineOptions().put(APP_VEP_PATH, appVepPath);
+        getPipelineOptions().put(JobParametersNames.APP_VEP_PATH, appVepPath);
     }
 
     public String getOutputDir() {
