@@ -24,13 +24,12 @@ import java.util.List;
 
 /**
  * Maps a String (in VCF format) to a list of variants.
- *
+ * <p>
  * The actual implementation is reused from {@link VariantVcfFactory}.
- *
- * @author Jose Miguel Mut Lopez &lt;jmmut@ebi.ac.uk&gt;
  */
 public class VcfLineMapper implements LineMapper<List<Variant>> {
     private VariantSource source;
+
     private VariantVcfFactory factory;
 
     public VcfLineMapper(VariantSource source) {
