@@ -15,7 +15,11 @@
  */
 package uk.ac.ebi.eva.pipeline.jobs;
 
-import org.junit.*;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.opencb.biodata.models.variant.VariantSource;
 import org.opencb.datastore.core.QueryOptions;
@@ -33,7 +37,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
+
 import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
+import uk.ac.ebi.eva.pipeline.configuration.JobParametersNames;
 import uk.ac.ebi.eva.pipeline.configuration.VariantAggregatedConfiguration;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
 
@@ -44,7 +50,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static uk.ac.ebi.eva.test.utils.JobTestUtils.cleanDBs;
 import static uk.ac.ebi.eva.test.utils.JobTestUtils.getTransformedOutputPath;
 
@@ -155,13 +163,13 @@ public class AggregatedVcfJobTest {
     public void setUp() throws Exception {
         jobOptions.loadArgs();
 
-        input = jobOptions.getPipelineOptions().getString("input.vcf");
+        input = jobOptions.getPipelineOptions().getString(JobParametersNames.INPUT_VCF);
         outputDir = jobOptions.getOutputDir();
         compressExtension = jobOptions.getPipelineOptions().getString("compressExtension");
         dbName = jobOptions.getPipelineOptions().getString("db.name");
 
         String inputFile = AggregatedVcfJobTest.class.getResource(input).getFile();
-        jobOptions.getPipelineOptions().put("input.vcf", inputFile);
+        jobOptions.getPipelineOptions().put(JobParametersNames.INPUT_VCF, inputFile);
     }
 
     @After

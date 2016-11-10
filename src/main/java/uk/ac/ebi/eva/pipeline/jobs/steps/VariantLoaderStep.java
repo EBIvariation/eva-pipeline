@@ -60,9 +60,9 @@ public class VariantLoaderStep implements Tasklet {
         VariantStorageManager variantStorageManager = StorageManagerFactory.getVariantStorageManager();// TODO add mongo
 
         URI outdirUri = FileUtils.getPathUri(pipelineOptions.getString(JobParametersNames.OUTPUT_DIR),true);
-        URI nextFileUri = URLHelper.createUri(pipelineOptions.getString("input.vcf"));
+        URI nextFileUri = URLHelper.createUri(pipelineOptions.getString(JobParametersNames.INPUT_VCF));
 
-//          URI pedigreeUri = pipelineOptions.getString("input.pedigree") != null ? createUri(pipelineOptions.getString("input.pedigree")) : null;
+//          URI pedigreeUri = pipelineOptions.getString(JobParametersNames.INPUT_PEDIGREE) != null ? createUri(pipelineOptions.getString(JobParametersNames.INPUT_PEDIGREE)) : null;
         Path output = Paths.get(outdirUri.getPath());
         Path input = Paths.get(nextFileUri.getPath());
         Path outputVariantJsonFile = output.resolve(input.getFileName().toString() + ".variants.json" + pipelineOptions.getString("compressExtension"));

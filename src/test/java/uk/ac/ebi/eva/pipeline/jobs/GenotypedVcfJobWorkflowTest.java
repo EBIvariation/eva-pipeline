@@ -239,7 +239,7 @@ public class GenotypedVcfJobWorkflowTest {
     public void setUp() throws Exception {
         jobOptions.loadArgs();
 
-        inputFileResouce = jobOptions.getPipelineOptions().getString("input.vcf");
+        inputFileResouce = jobOptions.getPipelineOptions().getString(JobParametersNames.INPUT_VCF);
         outputDir = jobOptions.getOutputDir();
         compressExtension = jobOptions.getPipelineOptions().getString("compressExtension");
         dbName = jobOptions.getPipelineOptions().getString("db.name");
@@ -257,7 +257,7 @@ public class GenotypedVcfJobWorkflowTest {
         String inputFile = GenotypedVcfJobTest.class.getResource(inputFileResouce).getFile();
         String mockVep = GenotypedVcfJobTest.class.getResource("/mockvep.pl").getFile();
 
-        jobOptions.getPipelineOptions().put("input.vcf", inputFile);
+        jobOptions.getPipelineOptions().put(JobParametersNames.INPUT_VCF, inputFile);
         jobOptions.getPipelineOptions().put("app.vep.path", mockVep);
 
         Config.setOpenCGAHome(opencgaHome);

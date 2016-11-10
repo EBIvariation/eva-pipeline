@@ -31,8 +31,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
+
 import uk.ac.ebi.eva.pipeline.configuration.CommonConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
+import uk.ac.ebi.eva.pipeline.configuration.JobParametersNames;
 
 import java.util.stream.Collectors;
 
@@ -61,7 +63,7 @@ public class PedLoaderStepTest {
     @Test
     public void allPedFileShouldBeParsedIntoPedigree() throws Exception {
         String pedigreeFile = PedLoaderStepTest.class.getResource("/ped/pedigree-test-file.ped").getFile();
-        jobOptions.getPipelineOptions().put("input.pedigree", pedigreeFile);
+        jobOptions.getPipelineOptions().put(JobParametersNames.INPUT_PEDIGREE, pedigreeFile);
 
         ReflectionTestUtils.setField(pedLoaderStep, "jobOptions", jobOptions);
         RepeatStatus status = pedLoaderStep.execute(stepContribution, chunkContext);
@@ -91,7 +93,7 @@ public class PedLoaderStepTest {
     @Test(expected = IllegalArgumentException.class)
     public void missingLastColumnInPedFileShouldThrowsException() throws Exception {
         String pedigreeFile = PedLoaderStepTest.class.getResource("/ped/malformed-pedigree-test-file.ped").getFile();
-        jobOptions.getPipelineOptions().put("input.pedigree", pedigreeFile);
+        jobOptions.getPipelineOptions().put(JobParametersNames.INPUT_PEDIGREE, pedigreeFile);
 
         ReflectionTestUtils.setField(pedLoaderStep, "jobOptions", jobOptions);
         pedLoaderStep.execute(stepContribution, chunkContext);

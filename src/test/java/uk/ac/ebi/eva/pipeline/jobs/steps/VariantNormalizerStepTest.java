@@ -28,8 +28,10 @@ import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
+
 import uk.ac.ebi.eva.pipeline.configuration.GenotypedVcfConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
+import uk.ac.ebi.eva.pipeline.configuration.JobParametersNames;
 import uk.ac.ebi.eva.pipeline.jobs.GenotypedVcfJob;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
 
@@ -70,7 +72,7 @@ public class VariantNormalizerStepTest {
         Config.setOpenCGAHome(opencgaHome);
 
         String inputFile = VariantNormalizerStepTest.class.getResource(input).getFile();
-        jobOptions.getPipelineOptions().put("input.vcf", inputFile);
+        jobOptions.getPipelineOptions().put(JobParametersNames.INPUT_VCF, inputFile);
 
         String outputFilename = getTransformedOutputPath(Paths.get(input).getFileName(), ".gz", "/tmp");
 
@@ -104,7 +106,7 @@ public class VariantNormalizerStepTest {
 
         //Given a malformed VCF input file
         String inputFile = VariantNormalizerStepTest.class.getResource(FILE_WRONG_NO_ALT).getFile();
-        jobOptions.getPipelineOptions().put("input.vcf", inputFile);
+        jobOptions.getPipelineOptions().put(JobParametersNames.INPUT_VCF, inputFile);
 
         String outputFilename = getTransformedOutputPath(Paths.get(FILE_WRONG_NO_ALT).getFileName(), ".gz", "/tmp");
 
@@ -121,7 +123,7 @@ public class VariantNormalizerStepTest {
     public void setUp() throws Exception {
         jobOptions.loadArgs();
 
-        input = jobOptions.getPipelineOptions().getString("input.vcf");
+        input = jobOptions.getPipelineOptions().getString(JobParametersNames.INPUT_VCF);
         outputDir = jobOptions.getOutputDir();
         dbName = jobOptions.getPipelineOptions().getString("db.name");
     }

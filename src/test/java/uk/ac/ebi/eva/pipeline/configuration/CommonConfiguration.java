@@ -34,14 +34,14 @@ public class CommonConfiguration {
         PropertySourcesPlaceholderConfigurer configurer = new PropertySourcesPlaceholderConfigurer();
 
         Properties properties = new Properties();
-        properties.put("input.vcf", "");
-        properties.put("input.vcf.id", "1");
-        properties.put("input.vcf.aggregation", "NONE");
-        properties.put("input.study.type", "COLLECTION");
-        properties.put("input.study.name", "input.study.name");
-        properties.put("input.study.id", "1");
-        properties.put("input.pedigree", "");
-        properties.put("input.gtf", "");
+        properties.put(JobParametersNames.INPUT_VCF, "");
+        properties.put(JobParametersNames.INPUT_VCF_ID, "1");
+        properties.put(JobParametersNames.INPUT_VCF_AGGREGATION, "NONE");
+        properties.put(JobParametersNames.INPUT_STUDY_TYPE, "COLLECTION");
+        properties.put(JobParametersNames.INPUT_STUDY_NAME, JobParametersNames.INPUT_STUDY_NAME);
+        properties.put(JobParametersNames.INPUT_STUDY_ID, "1");
+        properties.put(JobParametersNames.INPUT_PEDIGREE, "");
+        properties.put(JobParametersNames.INPUT_GTF, "");
         properties.put("input.fasta", "");
 
         properties.put(JobParametersNames.OUTPUT_DIR, "/tmp");

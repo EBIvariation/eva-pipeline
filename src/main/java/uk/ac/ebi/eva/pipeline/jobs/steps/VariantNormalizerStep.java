@@ -54,8 +54,8 @@ public class VariantNormalizerStep implements Tasklet {
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
         String outputDirPath = pipelineOptions.getString(JobParametersNames.OUTPUT_DIR);
-        String inputVcf = pipelineOptions.getString("input.vcf");
-        String inputPedigree = pipelineOptions.getString("input.pedigree");
+        String inputVcf = pipelineOptions.getString(JobParametersNames.INPUT_VCF);
+        String inputPedigree = pipelineOptions.getString(JobParametersNames.INPUT_PEDIGREE);
 
         URI outdirUri = FileUtils.getPathUri(outputDirPath,true);
         URI nextFileUri = URLHelper.createUri(inputVcf);
