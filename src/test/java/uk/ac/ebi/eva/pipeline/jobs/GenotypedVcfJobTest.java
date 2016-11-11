@@ -38,8 +38,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
+
 import uk.ac.ebi.eva.pipeline.configuration.GenotypedVcfConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
+import uk.ac.ebi.eva.pipeline.configuration.JobParametersNames;
 import uk.ac.ebi.eva.pipeline.jobs.steps.AnnotationLoaderStep;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
 
@@ -54,7 +56,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static uk.ac.ebi.eva.test.utils.JobTestUtils.count;
 import static uk.ac.ebi.eva.test.utils.JobTestUtils.getLines;
 
@@ -95,8 +100,8 @@ public class GenotypedVcfJobTest {
         String inputFile = GenotypedVcfJobTest.class.getResource(input).getFile();
         String mockVep = GenotypedVcfJobTest.class.getResource("/mockvep.pl").getFile();
 
-        jobOptions.getPipelineOptions().put("input.vcf", inputFile);
-        jobOptions.getPipelineOptions().put("app.vep.path", mockVep);
+        jobOptions.getPipelineOptions().put(JobParametersNames.INPUT_VCF, inputFile);
+        jobOptions.getPipelineOptions().put(JobParametersNames.APP_VEP_PATH, mockVep);
 
         Config.setOpenCGAHome(opencgaHome);
 
@@ -211,12 +216,12 @@ public class GenotypedVcfJobTest {
     public void setUp() throws Exception {
         jobOptions.loadArgs();
 
-        input = jobOptions.getPipelineOptions().getString("input.vcf");
+        input = jobOptions.getPipelineOptions().getString(JobParametersNames.INPUT_VCF);
         outputDir = jobOptions.getOutputDir();
         compressExtension = jobOptions.getPipelineOptions().getString("compressExtension");
-        dbName = jobOptions.getPipelineOptions().getString("db.name");
-        vepInput = jobOptions.getPipelineOptions().getString("vep.input");
-        vepOutput = jobOptions.getPipelineOptions().getString("vep.output");
+        dbName = jobOptions.getPipelineOptions().getString(JobParametersNames.DB_NAME);
+        vepInput = jobOptions.getPipelineOptions().getString(JobOptions.VEP_INPUT);
+        vepOutput = jobOptions.getPipelineOptions().getString(JobOptions.VEP_OUTPUT);
         JobTestUtils.cleanDBs(dbName);
     }
 

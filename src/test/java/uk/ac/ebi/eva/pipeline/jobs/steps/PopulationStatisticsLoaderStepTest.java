@@ -23,8 +23,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.rule.OutputCapture;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
+
 import uk.ac.ebi.eva.pipeline.configuration.CommonConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
+import uk.ac.ebi.eva.pipeline.configuration.JobParametersNames;
 import uk.ac.ebi.eva.pipeline.jobs.PopulationStatisticsJob;
 import uk.ac.ebi.eva.pipeline.jobs.flows.PopulationStatisticsFlow;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
@@ -69,14 +71,14 @@ public class PopulationStatisticsLoaderStepTest {
         String input = PopulationStatisticsLoaderStepTest.class.getResource(SMALL_VCF_FILE).getFile();
         VariantSource source = new VariantSource(input, "1", "1", "studyName");
 
-        pipelineOptions.put("input.vcf", input);
+        pipelineOptions.put(JobParametersNames.INPUT_VCF, input);
         variantOptions.put(VariantStorageManager.VARIANT_SOURCE, source);
 
         //and a valid variants load and stats create steps already completed
         String dump = PopulationStatisticsLoaderStepTest.class.getResource("/dump/VariantStatsConfigurationTest_vl").getFile();
         restoreMongoDbFromDump(dump, jobOptions.getDbName());
 
-        String outputDir = pipelineOptions.getString("output.dir.statistics");
+        String outputDir = pipelineOptions.getString(JobParametersNames.OUTPUT_DIR_STATISTICS);
 
         // copy stat file to load
         String variantsFileName = "/1_1.variants.stats.json.gz";
@@ -119,14 +121,14 @@ public class PopulationStatisticsLoaderStepTest {
         String input = PopulationStatisticsLoaderStepTest.class.getResource(SMALL_VCF_FILE).getFile();
         VariantSource source = new VariantSource(input, "4", "1", "studyName");
 
-        pipelineOptions.put("input.vcf", input);
+        pipelineOptions.put(JobParametersNames.INPUT_VCF, input);
         variantOptions.put(VariantStorageManager.DB_NAME, jobOptions.getDbName());
         variantOptions.put(VariantStorageManager.VARIANT_SOURCE, source);
 
         JobExecution jobExecution = jobLauncherTestUtils.launchStep(PopulationStatisticsFlow.LOAD_STATISTICS);
         assertThat(capture.toString(), containsString("java.io.FileNotFoundException:"));
 
-        assertEquals(input, pipelineOptions.getString("input.vcf"));
+        assertEquals(input, pipelineOptions.getString(JobParametersNames.INPUT_VCF));
         assertEquals(ExitStatus.FAILED.getExitCode(), jobExecution.getExitStatus().getExitCode());
     }
 

@@ -28,7 +28,9 @@ import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 import org.springframework.stereotype.Component;
+
 import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
+import uk.ac.ebi.eva.pipeline.configuration.JobParametersNames;
 
 /**
  * Tasklet that parse and load a PED file into Mongo
@@ -51,7 +53,7 @@ public class PedLoaderStep implements Tasklet {
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
-        PedigreeReader pedigreeReader = new PedigreePedReader(jobOptions.getPipelineOptions().getString("input.pedigree"));
+        PedigreeReader pedigreeReader = new PedigreePedReader(jobOptions.getPipelineOptions().getString(JobParametersNames.INPUT_PEDIGREE));
         pedigreeReader.open();
         pedigree = pedigreeReader.read().get(0);
         pedigreeReader.close();

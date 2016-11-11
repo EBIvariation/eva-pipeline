@@ -34,38 +34,38 @@ public class CommonConfiguration {
         PropertySourcesPlaceholderConfigurer configurer = new PropertySourcesPlaceholderConfigurer();
 
         Properties properties = new Properties();
-        properties.put("input.vcf", "");
-        properties.put("input.vcf.id", "1");
-        properties.put("input.vcf.aggregation", "NONE");
-        properties.put("input.study.type", "COLLECTION");
-        properties.put("input.study.name", "input.study.name");
-        properties.put("input.study.id", "1");
-        properties.put("input.pedigree", "");
-        properties.put("input.gtf", "");
-        properties.put("input.fasta", "");
+        properties.put(JobParametersNames.INPUT_VCF, "");
+        properties.put(JobParametersNames.INPUT_VCF_ID, "1");
+        properties.put(JobParametersNames.INPUT_VCF_AGGREGATION, "NONE");
+        properties.put(JobParametersNames.INPUT_STUDY_TYPE, "COLLECTION");
+        properties.put(JobParametersNames.INPUT_STUDY_NAME, JobParametersNames.INPUT_STUDY_NAME);
+        properties.put(JobParametersNames.INPUT_STUDY_ID, "1");
+        properties.put(JobParametersNames.INPUT_PEDIGREE, "");
+        properties.put(JobParametersNames.INPUT_GTF, "");
+        properties.put(JobParametersNames.INPUT_FASTA, "");
 
-        properties.put(JobOptions.OUTPUT_DIR, "/tmp");
-        properties.put("output.dir.annotation", "");
-        properties.put("output.dir.statistics", "/tmp");
+        properties.put(JobParametersNames.OUTPUT_DIR, "/tmp");
+        properties.put(JobParametersNames.OUTPUT_DIR_ANNOTATION, "");
+        properties.put(JobParametersNames.OUTPUT_DIR_STATISTICS, "/tmp");
 
-        properties.put("statistics.overwrite", "false");
+        properties.put(JobParametersNames.STATISTICS_OVERWRITE, "false");
 
         properties.put("db.hosts", "localhost:27017");
 //        properties.put("dbName", null);
         properties.put("db.collection.variants.name", "variants");
         properties.put("db.collection.files.name", "files");
-        properties.put("db.collections.features.name", "features");
-        properties.put("db.collections.stats.name", "populationStatistics");
-        properties.put("config.db.read-preference", "primary");
+        properties.put(JobParametersNames.DB_COLLECTIONS_FEATURES_NAME, "features");
+        properties.put(JobParametersNames.DB_COLLECTIONS_STATISTICS_NAME, "populationStatistics");
+        properties.put(JobParametersNames.CONFIG_DB_READPREFERENCE, "primary");
 
-        properties.put("app.opencga.path", opencgaHome);
-        properties.put("app.vep.path", "");
-        properties.put("app.vep.cache.path", "");
-        properties.put("app.vep.cache.version", "");
-        properties.put("app.vep.cache.species", "");
-        properties.put("app.vep.num-forks", "3");
+        properties.put(JobParametersNames.APP_OPENCGA_PATH, opencgaHome);
+        properties.put(JobParametersNames.APP_VEP_PATH, "");
+        properties.put(JobParametersNames.APP_VEP_CACHE_PATH, "");
+        properties.put(JobParametersNames.APP_VEP_CACHE_VERSION, "");
+        properties.put(JobParametersNames.APP_VEP_CACHE_SPECIES, "");
+        properties.put(JobParametersNames.APP_VEP_NUMFORKS, "3");
 
-        properties.put("config.restartability.allow", false);
+        properties.put(JobParametersNames.CONFIG_RESTARTABILITY_ALLOW, false);
 
         configurer.setProperties(properties);
 

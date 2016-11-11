@@ -27,9 +27,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
+import uk.ac.ebi.eva.pipeline.configuration.JobParametersNames;
+import uk.ac.ebi.eva.pipeline.io.mappers.GeneLineMapper;
 import uk.ac.ebi.eva.pipeline.io.readers.GeneReader;
 import uk.ac.ebi.eva.pipeline.io.writers.GeneWriter;
-import uk.ac.ebi.eva.pipeline.io.mappers.GeneLineMapper;
 import uk.ac.ebi.eva.pipeline.jobs.steps.processors.GeneFilterProcessor;
 import uk.ac.ebi.eva.pipeline.listeners.SkippedItemListener;
 import uk.ac.ebi.eva.pipeline.model.FeatureCoordinates;
@@ -66,7 +67,7 @@ public class GeneLoaderStep {
     @Qualifier("genesLoadStep")
     public Step genesLoadStep() throws IOException {
         return stepBuilderFactory.get(LOAD_FEATURES).<FeatureCoordinates, FeatureCoordinates>chunk(10)
-                .reader(new GeneReader(jobOptions.getPipelineOptions().getString("input.gtf")))
+                .reader(new GeneReader(jobOptions.getPipelineOptions().getString(JobParametersNames.INPUT_GTF)))
                 .processor(new GeneFilterProcessor())
                 .writer(new GeneWriter(jobOptions.getMongoOperations(), jobOptions.getDbCollectionsFeaturesName()))
                 .faultTolerant().skipLimit(50).skip(FlatFileParseException.class)

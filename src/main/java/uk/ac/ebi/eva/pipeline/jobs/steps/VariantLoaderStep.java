@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 EMBL - European Bioinformatics Institute
+ * Copyright 2015-2016 EMBL - European Bioinformatics Institute
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 import org.springframework.stereotype.Component;
 import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
+import uk.ac.ebi.eva.pipeline.configuration.JobParametersNames;
 import uk.ac.ebi.eva.utils.FileUtils;
 import uk.ac.ebi.eva.utils.URLHelper;
 
@@ -58,10 +59,10 @@ public class VariantLoaderStep implements Tasklet {
 
         VariantStorageManager variantStorageManager = StorageManagerFactory.getVariantStorageManager();// TODO add mongo
 
-        URI outdirUri = FileUtils.getPathUri(pipelineOptions.getString(JobOptions.OUTPUT_DIR),true);
-        URI nextFileUri = URLHelper.createUri(pipelineOptions.getString("input.vcf"));
+        URI outdirUri = FileUtils.getPathUri(pipelineOptions.getString(JobParametersNames.OUTPUT_DIR),true);
+        URI nextFileUri = URLHelper.createUri(pipelineOptions.getString(JobParametersNames.INPUT_VCF));
 
-//          URI pedigreeUri = pipelineOptions.getString("input.pedigree") != null ? createUri(pipelineOptions.getString("input.pedigree")) : null;
+//          URI pedigreeUri = pipelineOptions.getString(JobParametersNames.INPUT_PEDIGREE) != null ? createUri(pipelineOptions.getString(JobParametersNames.INPUT_PEDIGREE)) : null;
         Path output = Paths.get(outdirUri.getPath());
         Path input = Paths.get(nextFileUri.getPath());
         Path outputVariantJsonFile = output.resolve(input.getFileName().toString() + ".variants.json" + pipelineOptions.getString("compressExtension"));

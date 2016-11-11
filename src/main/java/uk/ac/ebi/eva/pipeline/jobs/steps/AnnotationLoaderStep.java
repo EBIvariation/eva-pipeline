@@ -29,6 +29,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.mongodb.core.MongoOperations;
 
 import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
+import uk.ac.ebi.eva.pipeline.configuration.JobParametersNames;
 import uk.ac.ebi.eva.pipeline.io.readers.AnnotationFlatFileReader;
 import uk.ac.ebi.eva.pipeline.io.writers.VepAnnotationMongoWriter;
 import uk.ac.ebi.eva.pipeline.listeners.SkippedItemListener;
@@ -68,11 +69,11 @@ public class AnnotationLoaderStep {
     @Qualifier("annotationLoad")
     public Step annotationLoadBatchStep() throws IOException {
         MongoOperations mongoOperations = MongoDBHelper.getMongoOperationsFromPipelineOptions(jobOptions.getPipelineOptions());
-        String collections = jobOptions.getPipelineOptions().getString("db.collections.variants.name");
+        String collections = jobOptions.getPipelineOptions().getString(JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME);
         VepAnnotationMongoWriter writer = new VepAnnotationMongoWriter(mongoOperations, collections);
 
         return stepBuilderFactory.get(LOAD_VEP_ANNOTATION).<VariantAnnotation, VariantAnnotation>chunk(10)
-                .reader(new AnnotationFlatFileReader(jobOptions.getPipelineOptions().getString("vep.output")))
+                .reader(new AnnotationFlatFileReader(jobOptions.getPipelineOptions().getString(JobOptions.VEP_OUTPUT)))
                 .writer(writer)
                 .faultTolerant().skipLimit(50).skip(FlatFileParseException.class)
                 .listener(new SkippedItemListener())

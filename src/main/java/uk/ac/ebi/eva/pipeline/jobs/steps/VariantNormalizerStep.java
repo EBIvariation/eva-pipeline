@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 EMBL - European Bioinformatics Institute
+ * Copyright 2015-2016 EMBL - European Bioinformatics Institute
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,8 @@ import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
-import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
+
+import uk.ac.ebi.eva.pipeline.configuration.JobParametersNames;
 import uk.ac.ebi.eva.utils.FileUtils;
 import uk.ac.ebi.eva.utils.URLHelper;
 
@@ -52,13 +53,13 @@ public class VariantNormalizerStep implements Tasklet {
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
-        String outputDirPath = pipelineOptions.getString(JobOptions.OUTPUT_DIR);
-        String inputVcf = pipelineOptions.getString("input.vcf");
-        String inputPedigree = pipelineOptions.getString("input.pedigree");
+        String outputDirPath = pipelineOptions.getString(JobParametersNames.OUTPUT_DIR);
+        String inputVcf = pipelineOptions.getString(JobParametersNames.INPUT_VCF);
+        String inputPedigree = pipelineOptions.getString(JobParametersNames.INPUT_PEDIGREE);
 
         URI outdirUri = FileUtils.getPathUri(outputDirPath,true);
         URI nextFileUri = URLHelper.createUri(inputVcf);
-        URI pedigreeUri =  inputPedigree!= null ? URLHelper.createUri(inputPedigree) : null;
+        URI pedigreeUri =  inputPedigree != null ? URLHelper.createUri(inputPedigree) : null;
 
         logger.info("Transform file {} to {}", inputVcf, outputDirPath);
 

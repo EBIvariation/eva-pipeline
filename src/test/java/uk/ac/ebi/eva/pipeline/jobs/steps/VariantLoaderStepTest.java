@@ -36,8 +36,10 @@ import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
+
 import uk.ac.ebi.eva.pipeline.configuration.GenotypedVcfConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
+import uk.ac.ebi.eva.pipeline.configuration.JobParametersNames;
 import uk.ac.ebi.eva.pipeline.jobs.GenotypedVcfJob;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
 
@@ -118,7 +120,7 @@ public class VariantLoaderStepTest {
 
         Config.setOpenCGAHome("");
 
-        jobOptions.getPipelineOptions().put("input.vcf", inputFile);
+        jobOptions.getPipelineOptions().put(JobParametersNames.INPUT_VCF, inputFile);
         jobOptions.getVariantOptions().put(VariantStorageManager.DB_NAME, dbName);
 
         VariantSource source = (VariantSource) jobOptions.getVariantOptions().get(VariantStorageManager.VARIANT_SOURCE);
@@ -133,7 +135,7 @@ public class VariantLoaderStepTest {
 
         JobExecution jobExecution = jobLauncherTestUtils.launchStep(GenotypedVcfJob.LOAD_VARIANTS);
 
-        assertEquals(inputFile, jobOptions.getPipelineOptions().getString("input.vcf"));
+        assertEquals(inputFile, jobOptions.getPipelineOptions().getString(JobParametersNames.INPUT_VCF));
         assertEquals(ExitStatus.FAILED.getExitCode(), jobExecution.getExitStatus().getExitCode());
     }
 
@@ -141,9 +143,9 @@ public class VariantLoaderStepTest {
     public void setUp() throws Exception {
         jobOptions.loadArgs();
 
-        input = jobOptions.getPipelineOptions().getString("input.vcf");
+        input = jobOptions.getPipelineOptions().getString(JobParametersNames.INPUT_VCF);
         outputDir = jobOptions.getOutputDir();
-        dbName = jobOptions.getPipelineOptions().getString("db.name");
+        dbName = jobOptions.getPipelineOptions().getString(JobParametersNames.DB_NAME);
     }
 
     @After

@@ -26,7 +26,9 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+
 import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
+import uk.ac.ebi.eva.pipeline.configuration.JobParametersNames;
 import uk.ac.ebi.eva.pipeline.io.readers.NonAnnotatedVariantsMongoReader;
 import uk.ac.ebi.eva.pipeline.io.writers.VepInputFlatFileWriter;
 import uk.ac.ebi.eva.pipeline.jobs.steps.processors.AnnotationProcessor;
@@ -70,7 +72,7 @@ public class VepInputGeneratorStep {
                 .reader(new NonAnnotatedVariantsMongoReader(jobOptions.getPipelineOptions()))
                 .processor(new AnnotationProcessor())
                 .writer(new VepInputFlatFileWriter(jobOptions.getVepInput()))
-                .allowStartIfComplete(jobOptions.getPipelineOptions().getBoolean("config.restartability.allow"))
+                .allowStartIfComplete(jobOptions.getPipelineOptions().getBoolean(JobParametersNames.CONFIG_RESTARTABILITY_ALLOW))
                 .build();
     }
 }
