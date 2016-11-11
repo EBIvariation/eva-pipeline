@@ -29,6 +29,7 @@ import org.springframework.stereotype.Component;
 
 import uk.ac.ebi.eva.utils.MongoDBHelper;
 
+import javax.annotation.PostConstruct;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -36,7 +37,6 @@ import java.io.InputStreamReader;
 import java.net.URI;
 import java.nio.file.Paths;
 import java.util.Properties;
-import javax.annotation.PostConstruct;
 
 /**
  *
