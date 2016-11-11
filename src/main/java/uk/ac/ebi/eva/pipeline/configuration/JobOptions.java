@@ -126,25 +126,25 @@ public class JobOptions {
         properties.load(new InputStreamReader(new FileInputStream(configUri.getPath())));
 
         if (dbHosts == null) {
-            dbHosts = properties.getProperty("OPENCGA.STORAGE.MONGODB.VARIANT.DB.HOSTS");
+            dbHosts = properties.getProperty(JobParametersNames.OPENCGA_DB_HOSTS);
         }
         if (dbAuthenticationDb == null) {
-            dbAuthenticationDb = properties.getProperty("OPENCGA.STORAGE.MONGODB.VARIANT.DB.AUTHENTICATION.DB", "");
+            dbAuthenticationDb = properties.getProperty(JobParametersNames.OPENCGA_DB_AUTHENTICATIONDB, "");
         }
         if (dbUser == null) {
-            dbUser = properties.getProperty("OPENCGA.STORAGE.MONGODB.VARIANT.DB.USER", "");
+            dbUser = properties.getProperty(JobParametersNames.OPENCGA_DB_USER, "");
         }
         if (dbPassword == null) {
-            dbPassword = properties.getProperty("OPENCGA.STORAGE.MONGODB.VARIANT.DB.PASS", "");
+            dbPassword = properties.getProperty(JobParametersNames.OPENCGA_DB_PASSWORD, "");
         }
         if (dbName == null) {
-            dbName = properties.getProperty("OPENCGA.STORAGE.MONGODB.VARIANT.DB.NAME");
+            dbName = properties.getProperty(JobParametersNames.OPENCGA_DB_NAME);
         }
         if (dbCollectionVariantsName == null) {
-            dbCollectionVariantsName = properties.getProperty("OPENCGA.STORAGE.MONGODB.VARIANT.DB.COLLECTION.VARIANTS", "variants");
+            dbCollectionVariantsName = properties.getProperty(JobParametersNames.OPENCGA_DB_COLLECTIONS_VARIANTS_NAME, "variants");
         }
         if (dbCollectionFilesName == null) {
-            dbCollectionFilesName = properties.getProperty("OPENCGA.STORAGE.MONGODB.VARIANT.DB.COLLECTION.FILES", "files");
+            dbCollectionFilesName = properties.getProperty(JobParametersNames.OPENCGA_DB_COLLECTIONS_FILES_NAME, "files");
         }
 
         if (dbHosts == null || dbHosts.isEmpty()) {
