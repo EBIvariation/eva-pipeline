@@ -59,7 +59,7 @@ public class VariantNormalizerStep implements Tasklet {
 
         URI outdirUri = FileUtils.getPathUri(outputDirPath,true);
         URI nextFileUri = URLHelper.createUri(inputVcf);
-        URI pedigreeUri =  inputPedigree!= null ? URLHelper.createUri(inputPedigree) : null;
+        URI pedigreeUri =  inputPedigree != null ? URLHelper.createUri(inputPedigree) : null;
 
         logger.info("Transform file {} to {}", inputVcf, outputDirPath);
 

@@ -220,8 +220,8 @@ public class GenotypedVcfJobTest {
         outputDir = jobOptions.getOutputDir();
         compressExtension = jobOptions.getPipelineOptions().getString("compressExtension");
         dbName = jobOptions.getPipelineOptions().getString(JobParametersNames.DB_NAME);
-        vepInput = jobOptions.getPipelineOptions().getString("vep.input");
-        vepOutput = jobOptions.getPipelineOptions().getString("vep.output");
+        vepInput = jobOptions.getPipelineOptions().getString(JobOptions.VEP_INPUT);
+        vepOutput = jobOptions.getPipelineOptions().getString(JobOptions.VEP_OUTPUT);
         JobTestUtils.cleanDBs(dbName);
     }
 

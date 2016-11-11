@@ -76,7 +76,7 @@ public class VepAnnotationGeneratorStep implements Tasklet {
                 "--species", pipelineOptions.getString(JobParametersNames.APP_VEP_CACHE_SPECIES),
                 "--fasta", pipelineOptions.getString(JobParametersNames.INPUT_FASTA),
                 "--fork", pipelineOptions.getString(JobParametersNames.APP_VEP_NUMFORKS),
-                "-i", pipelineOptions.getString("vep.input"),
+                "-i", pipelineOptions.getString(JobOptions.VEP_INPUT),
                 "-o", "STDOUT",
                 "--force_overwrite",
                 "--offline",
@@ -90,13 +90,13 @@ public class VepAnnotationGeneratorStep implements Tasklet {
 
         long written = connectStreams(
                 new BufferedInputStream(process.getInputStream()),
-                new GZIPOutputStream(new FileOutputStream(pipelineOptions.getString("vep.output"))));
+                new GZIPOutputStream(new FileOutputStream(pipelineOptions.getString(JobOptions.VEP_OUTPUT))));
 
         int exitValue = process.waitFor();
         logger.info("Finishing read from VEP output, bytes written: " + written);
 
         if (exitValue > 0) {
-            String errorLog = pipelineOptions.getString("vep.output") + ".errors.txt";
+            String errorLog = pipelineOptions.getString(JobOptions.VEP_OUTPUT) + ".errors.txt";
             connectStreams(new BufferedInputStream(process.getErrorStream()), new FileOutputStream(errorLog));
             throw new Exception("Error while running VEP (exit status " + exitValue + "). See "
                     + errorLog + " for the errors description from VEP.");

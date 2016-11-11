@@ -73,7 +73,7 @@ public class AnnotationLoaderStep {
         VepAnnotationMongoWriter writer = new VepAnnotationMongoWriter(mongoOperations, collections);
 
         return stepBuilderFactory.get(LOAD_VEP_ANNOTATION).<VariantAnnotation, VariantAnnotation>chunk(10)
-                .reader(new AnnotationFlatFileReader(jobOptions.getPipelineOptions().getString("vep.output")))
+                .reader(new AnnotationFlatFileReader(jobOptions.getPipelineOptions().getString(JobOptions.VEP_OUTPUT)))
                 .writer(writer)
                 .faultTolerant().skipLimit(50).skip(FlatFileParseException.class)
                 .listener(new SkippedItemListener())

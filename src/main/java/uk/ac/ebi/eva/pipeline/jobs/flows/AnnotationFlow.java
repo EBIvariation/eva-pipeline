@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
+import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
 import uk.ac.ebi.eva.pipeline.configuration.JobParametersNames;
 import uk.ac.ebi.eva.pipeline.jobs.CommonJobStepInitialization;
 import uk.ac.ebi.eva.pipeline.jobs.deciders.EmptyFileDecider;
@@ -53,7 +54,7 @@ public class AnnotationFlow extends CommonJobStepInitialization {
 
     @Bean
     Flow annotationFlowBasic() {
-        EmptyFileDecider emptyFileDecider = new EmptyFileDecider(getPipelineOptions().getString("vep.input"));
+        EmptyFileDecider emptyFileDecider = new EmptyFileDecider(getPipelineOptions().getString(JobOptions.VEP_INPUT));
 
         return new FlowBuilder<Flow>(VARIANT_VEP_ANNOTATION_FLOW)
                 .start(variantsAnnotGenerateInputBatchStep)
