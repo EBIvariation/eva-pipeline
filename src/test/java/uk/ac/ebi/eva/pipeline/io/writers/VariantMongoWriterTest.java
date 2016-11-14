@@ -52,7 +52,7 @@ public class VariantMongoWriterTest {
     public void noVariantsNothingShouldBeWritten() throws UnknownHostException {
         String dbName = "VariantMongoWriterNoVariant";
 
-        objectMap.put("db.name", dbName);
+        objectMap.put(JobParametersNames.DB_NAME, dbName);
         MongoOperations mongoOperations = MongoDBHelper.getMongoOperationsFromPipelineOptions(objectMap);
         DBCollection dbCollection = mongoOperations.getCollection(collectionName);
 
@@ -72,7 +72,7 @@ public class VariantMongoWriterTest {
         when(variant.getReference()).thenReturn("A").thenReturn("B");
         when(variant.getAlternate()).thenReturn("B").thenReturn("C");
 
-        objectMap.put("db.name", dbName);
+        objectMap.put(JobParametersNames.DB_NAME, dbName);
         MongoOperations mongoOperations = MongoDBHelper.getMongoOperationsFromPipelineOptions(objectMap);
         DBCollection dbCollection = mongoOperations.getCollection(collectionName);
 
