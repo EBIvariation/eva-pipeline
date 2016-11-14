@@ -15,31 +15,13 @@
  */
 package uk.ac.ebi.eva.pipeline.io.readers;
 
-import htsjdk.variant.vcf.VCFCompoundHeaderLine;
-import htsjdk.variant.vcf.VCFConstants;
-import htsjdk.variant.vcf.VCFContigHeaderLine;
-import htsjdk.variant.vcf.VCFFileReader;
-import htsjdk.variant.vcf.VCFFilterHeaderLine;
-import htsjdk.variant.vcf.VCFFormatHeaderLine;
-import htsjdk.variant.vcf.VCFHeader;
-import htsjdk.variant.vcf.VCFHeaderLine;
-import htsjdk.variant.vcf.VCFInfoHeaderLine;
-import htsjdk.variant.vcf.VCFSimpleHeaderLine;
-import org.opencb.biodata.formats.variant.vcf4.VcfAlternateHeader;
-import org.opencb.biodata.formats.variant.vcf4.VcfFilterHeader;
-import org.opencb.biodata.formats.variant.vcf4.VcfFormatHeader;
-import org.opencb.biodata.formats.variant.vcf4.VcfInfoHeader;
+import org.opencb.biodata.formats.variant.vcf4.io.VariantVcfReader;
 import org.opencb.biodata.models.variant.VariantSource;
 import org.opencb.biodata.models.variant.VariantStudy;
 import org.springframework.batch.item.ItemReader;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
 
 public class VcfHeaderReader implements ItemReader<VariantSource> {
 
@@ -93,146 +75,13 @@ public class VcfHeaderReader implements ItemReader<VariantSource> {
      * Look at the test to see how is this checked.
      */
     private VariantSource doRead() throws IOException {
-        VCFFileReader reader = new VCFFileReader(file, false);
-        VCFHeader fileHeader = reader.getFileHeader();
-
-        Map<String, List<VCFHeaderLine>> metadata = new TreeMap<>();
-        Set<VCFHeaderLine> metaDataInSortedOrder = fileHeader.getMetaDataInSortedOrder();
-        // group the lines by key (INFO, ALT, contig, ...) to a List<VCFHeaderLine>
-        for (VCFHeaderLine vcfHeaderLine : metaDataInSortedOrder) {
-            if (!metadata.containsKey(vcfHeaderLine.getKey())) {
-                metadata.put(vcfHeaderLine.getKey(), new ArrayList<>());
-            }
-            metadata.get(vcfHeaderLine.getKey()).add(vcfHeaderLine);
-        }
-
-        // for each key, transform into biodata's header lines; unless it's an unsupported field and then write strings
-        for (Map.Entry<String, List<VCFHeaderLine>> headerLineListEntry : metadata.entrySet()) {
-            if (headerLineListEntry.getKey().equals("INFO")) {
-                source.getMetadata().put(headerLineListEntry.getKey(), getVcfInfoHeaders(headerLineListEntry));
-            } else if (headerLineListEntry.getKey().equals("FILTER")) {
-                source.getMetadata().put(headerLineListEntry.getKey(), getVcfFilterHeaders(headerLineListEntry));
-            } else if (headerLineListEntry.getKey().equals("FORMAT")) {
-                source.getMetadata().put(headerLineListEntry.getKey(), getVcfFormatHeaders(headerLineListEntry));
-            } else if (headerLineListEntry.getKey().equals("ALT")) {
-                source.getMetadata().put(headerLineListEntry.getKey(), getVcfAlternateHeaders(headerLineListEntry));
-            } else if (headerLineListEntry.getKey().equals(VCFConstants.CONTIG_HEADER_KEY)) {
-                source.getMetadata().put(headerLineListEntry.getKey(), getContigHeaderLines(headerLineListEntry));
-            } else {
-                source.addMetadata(headerLineListEntry.getKey(), headerLineListEntry.getValue());
-            }
-        }
-
-        source.setSamples(fileHeader.getGenotypeSamples());
+        VariantVcfReader reader = new VariantVcfReader(source, file.getPath());
+        reader.open();
+        reader.pre();
+        reader.post();
         reader.close();
 
-        source.addMetadata(VARIANT_FILE_HEADER_KEY, getHeader(metaDataInSortedOrder));
+        source.addMetadata(VARIANT_FILE_HEADER_KEY, reader.getHeader());
         return source;
-    }
-
-    private List<String> getContigHeaderLines(Map.Entry<String, List<VCFHeaderLine>> headerLineListEntry) {
-        List<String> vcfHeaders = new ArrayList<>();
-        for (VCFHeaderLine vcfHeaderLine : headerLineListEntry.getValue()) {
-            if (vcfHeaderLine instanceof VCFContigHeaderLine) {
-                VCFContigHeaderLine line = ((VCFContigHeaderLine) vcfHeaderLine);
-                String biodataLine = line.getID() + line.getValue();
-                vcfHeaders.add(biodataLine);
-            }
-        }
-        return vcfHeaders;
-    }
-
-    private List<VcfAlternateHeader> getVcfAlternateHeaders(Map.Entry<String, List<VCFHeaderLine>> headerLineListEntry) {
-        List<VcfAlternateHeader> vcfHeaders = new ArrayList<>();
-        for (VCFHeaderLine vcfHeaderLine : headerLineListEntry.getValue()) {
-            if (vcfHeaderLine instanceof VCFSimpleHeaderLine) {
-                VCFSimpleHeaderLine line = ((VCFSimpleHeaderLine) vcfHeaderLine);
-                VcfAlternateHeader biodataLine = new VcfAlternateHeader(line.toString());
-                vcfHeaders.add(biodataLine);
-            }
-        }
-        return vcfHeaders;
-    }
-
-    private List<VcfFormatHeader> getVcfFormatHeaders(Map.Entry<String, List<VCFHeaderLine>> headerLineListEntry) {
-        List<VcfFormatHeader> vcfHeaders = new ArrayList<>();
-        for (VCFHeaderLine vcfHeaderLine : headerLineListEntry.getValue()) {
-            if (vcfHeaderLine instanceof VCFFormatHeaderLine) {
-                VCFFormatHeaderLine line = ((VCFFormatHeaderLine) vcfHeaderLine);
-                VcfFormatHeader biodataLine = new VcfFormatHeader(line.getID(), getNumber(line),
-                                                                  line.getType().toString(),
-                                                                  line.getDescription());
-                vcfHeaders.add(biodataLine);
-            }
-        }
-        return vcfHeaders;
-    }
-
-    private List<VcfFilterHeader> getVcfFilterHeaders(Map.Entry<String, List<VCFHeaderLine>> headerLineListEntry) {
-        List<VcfFilterHeader> vcfHeaders = new ArrayList<>();
-        for (VCFHeaderLine vcfHeaderLine : headerLineListEntry.getValue()) {
-            if (vcfHeaderLine instanceof VCFFilterHeaderLine) {
-                VCFFilterHeaderLine line = ((VCFFilterHeaderLine) vcfHeaderLine);
-                VcfFilterHeader biodataLine = new VcfFilterHeader(line.toString());
-                vcfHeaders.add(biodataLine);
-            }
-        }
-        return vcfHeaders;
-    }
-
-    private List<VcfInfoHeader> getVcfInfoHeaders(Map.Entry<String, List<VCFHeaderLine>> headerLineListEntry) {
-        List<VcfInfoHeader> vcfHeaders = new ArrayList<>();
-        for (VCFHeaderLine vcfHeaderLine : headerLineListEntry.getValue()) {
-            if (vcfHeaderLine instanceof VCFInfoHeaderLine) {
-                VCFInfoHeaderLine line = ((VCFInfoHeaderLine) vcfHeaderLine);
-                VcfInfoHeader biodataLine = new VcfInfoHeader(line.getID(), getNumber(line), line.getType().toString(),
-                                                              line.getDescription());
-                vcfHeaders.add(biodataLine);
-            }
-        }
-        return vcfHeaders;
-    }
-
-    public static String getNumber(VCFCompoundHeaderLine line) {
-        String number;
-        switch (line.getCountType()) {
-            case A:
-                number = VCFConstants.PER_ALTERNATE_COUNT;
-                break;
-            case R:
-                number = VCFConstants.PER_ALLELE_COUNT;
-                break;
-            case G:
-                number = VCFConstants.PER_GENOTYPE_COUNT;
-                break;
-            case UNBOUNDED:
-                number = VCFConstants.UNBOUNDED_ENCODING_v4;
-                break;
-            case INTEGER:
-                number = Integer.toString(line.getCount());
-                break;
-            default:
-                throw new UnsupportedOperationException(
-                        "VcfReader seems outdated (parsing the header), it doesn't support "
-                                + line.getCountType().toString()
-                                + " as VCF metadata count specifier (as member of the enum VCFHeaderLineCount)");
-        }
-        return number;
-    }
-
-    /**
-     * This method is private because it rebuilds the header. To get the header, this reader stores it in
-     * {@code source.getMetadata().get(VARIANT_FILE_HEADER_KEY)}
-     * <p>
-     * VCFHeader from htsjdk adds unwanted text in its toString method:
-     * This is a replacement for {@link VCFHeader#toString()}
-     */
-    private String getHeader(Set<VCFHeaderLine> vcfHeaderLines) throws IOException {
-        final StringBuilder builder = new StringBuilder();
-
-        for (VCFHeaderLine vcfHeaderLine : vcfHeaderLines) {
-            builder.append(vcfHeaderLine).append("\n");
-        }
-        return builder.toString();
     }
 }

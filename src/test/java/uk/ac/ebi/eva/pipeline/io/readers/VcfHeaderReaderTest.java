@@ -13,6 +13,7 @@ import org.opencb.biodata.models.variant.VariantStudy;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -58,11 +59,11 @@ public class VcfHeaderReaderTest {
         assertFalse(source.getMetadata().isEmpty());
         assertTrue(source.getMetadata().containsKey(VcfHeaderReader.VARIANT_FILE_HEADER_KEY));
         assertFalse(((String) source.getMetadata().get(VcfHeaderReader.VARIANT_FILE_HEADER_KEY)).isEmpty());
-        assertFalse(((List) source.getMetadata().get("INFO")).isEmpty());
-        assertFalse(((List) source.getMetadata().get("FORMAT")).isEmpty());
-        assertFalse(((List) source.getMetadata().get("FILTER")).isEmpty());
-        assertFalse(((List) source.getMetadata().get("ALT")).isEmpty());
-        assertFalse(((List) source.getMetadata().get("contig")).isEmpty());
+        assertFalse(((Collection) source.getMetadata().get("INFO")).isEmpty());
+        assertFalse(((Collection) source.getMetadata().get("FORMAT")).isEmpty());
+        assertFalse(((Collection) source.getMetadata().get("FILTER")).isEmpty());
+        assertFalse(((Collection) source.getMetadata().get("ALT")).isEmpty());
+        assertFalse(((Collection) source.getMetadata().get("contig")).isEmpty());
 
     }
 
