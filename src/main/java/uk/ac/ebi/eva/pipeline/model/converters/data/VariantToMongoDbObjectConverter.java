@@ -55,17 +55,6 @@ public class VariantToMongoDbObjectConverter implements Converter<Variant, DBObj
         this.variantConverter = new DBObjectToVariantConverter(null, null);
     }
 
-
-    public VariantToMongoDbObjectConverter(DBObjectToVariantConverter variantConverter,
-                                           DBObjectToVariantStatsConverter statsConverter,
-                                           DBObjectToVariantSourceEntryConverter sourceEntryConverter,
-                                           boolean includeStats) {
-        this.variantConverter = variantConverter;
-        this.statsConverter = statsConverter;
-        this.sourceEntryConverter = sourceEntryConverter;
-        this.includeStats = includeStats;
-    }
-
     @Override
     public DBObject convert(Variant variant) {
         Assert.notNull(variant, "Variant should not be null. Please provide a valid Variant object");
