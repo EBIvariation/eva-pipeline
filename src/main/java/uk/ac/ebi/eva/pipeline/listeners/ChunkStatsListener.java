@@ -21,12 +21,12 @@ import org.springframework.batch.core.ChunkListener;
 import org.springframework.batch.core.scope.context.ChunkContext;
 
 /**
- * Log the number of items processed every 1000 items.
+ * Log the number of read, write and skip items for each chunk.
  * Should be wired into a {@link org.springframework.batch.core.Step}
  *
  */
-public class ProcessedItemListener implements ChunkListener {
-    private static final Logger logger = LoggerFactory.getLogger(ProcessedItemListener.class);
+public class ChunkStatsListener implements ChunkListener {
+    private static final Logger logger = LoggerFactory.getLogger(ChunkStatsListener.class);
 
     @Override
     public void beforeChunk(ChunkContext context) {
@@ -34,10 +34,14 @@ public class ProcessedItemListener implements ChunkListener {
 
     @Override
     public void afterChunk(ChunkContext context) {
-        int itemProcessed = context.getStepContext().getStepExecution().getReadCount();
-        if(itemProcessed % 1000 == 0) {
-            logger.debug("Items processed " + itemProcessed);
-        }
+        logger.debug("Chunk stats: Items read count {}, items write count {}, items skip count{}",
+                context.getStepContext().getStepExecution().getReadCount(),
+                context.getStepContext().getStepExecution().getWriteCount(),
+                context.getStepContext().getStepExecution().getReadSkipCount()+
+                        context.getStepContext().getStepExecution().getProcessSkipCount()+
+                        context.getStepContext().getStepExecution().getWriteSkipCount()
+        );
+
     }
 
     @Override
