@@ -23,6 +23,7 @@ import org.mockito.Mockito;
 import org.opencb.biodata.models.variant.Variant;
 import org.opencb.datastore.core.ObjectMap;
 import org.springframework.data.mongodb.core.MongoOperations;
+import uk.ac.ebi.eva.pipeline.configuration.JobParametersNames;
 import uk.ac.ebi.eva.pipeline.model.converters.data.VariantToMongoDbObjectConverter;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
 import uk.ac.ebi.eva.utils.MongoDBHelper;
@@ -44,7 +45,7 @@ public class VariantMongoWriterTest {
 
     @Before
     public void setUp() throws Exception {
-        objectMap.put("config.db.read-preference", "primary");
+        objectMap.put(JobParametersNames.CONFIG_DB_READPREFERENCE, "primary");
     }
 
     @Test
