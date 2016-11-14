@@ -39,9 +39,6 @@ import java.util.List;
 public class VariantMongoWriter extends MongoItemWriter<Variant> {
     private static final Logger logger = LoggerFactory.getLogger(VariantMongoWriter.class);
 
-    private MongoOperations mongoOperations;
-    private String collection;
-
     private BulkWriteOperation bulk;
     private int currentBulkSize = 0;
 
@@ -49,8 +46,9 @@ public class VariantMongoWriter extends MongoItemWriter<Variant> {
 
     public VariantMongoWriter(String collection, MongoOperations mongoOperations,
                               VariantToMongoDbObjectConverter variantToMongoDbObjectConverter) {
-        this.collection = collection;
-        this.mongoOperations = mongoOperations;
+        Assert.notNull(mongoOperations, "A Mongo instance is required");
+        Assert.hasText(collection, "A collection name is required");
+
         this.variantToMongoDbObjectConverter = variantToMongoDbObjectConverter;
 
         bulk = mongoOperations.getCollection(collection).initializeUnorderedBulkOperation();
@@ -59,7 +57,6 @@ public class VariantMongoWriter extends MongoItemWriter<Variant> {
     @Override
     protected void doWrite(List<? extends Variant> variants) {
         for (Variant variant : variants) {
-
             String id = MongoDBHelper.buildStorageId(variant.getChromosome(), variant.getStart(),
                     variant.getReference(), variant.getAlternate());
 
@@ -83,12 +80,6 @@ public class VariantMongoWriter extends MongoItemWriter<Variant> {
             logger.debug("Execute bulk. BulkSize : " + currentBulkSize);
             bulk.execute();
         }
-    }
-
-    @Override
-    public void afterPropertiesSet() throws Exception {
-        Assert.notNull(mongoOperations, "A Mongo instance is required");
-        Assert.hasText(collection, "A collection name is required");
     }
 
 }
