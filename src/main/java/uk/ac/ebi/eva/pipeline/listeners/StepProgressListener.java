@@ -25,8 +25,8 @@ import org.springframework.batch.core.scope.context.ChunkContext;
  * Should be wired into a {@link org.springframework.batch.core.Step}
  *
  */
-public class ChunkStatsListener implements ChunkListener {
-    private static final Logger logger = LoggerFactory.getLogger(ChunkStatsListener.class);
+public class StepProgressListener implements ChunkListener {
+    private static final Logger logger = LoggerFactory.getLogger(StepProgressListener.class);
 
     @Override
     public void beforeChunk(ChunkContext context) {
@@ -34,18 +34,16 @@ public class ChunkStatsListener implements ChunkListener {
 
     @Override
     public void afterChunk(ChunkContext context) {
-        logger.debug("Chunk stats: Items read count {}, items write count {}, items skip count{}",
+        logger.info("Chunk stats: Items read count {}, items write count {}, items skip count{}",
                 context.getStepContext().getStepExecution().getReadCount(),
                 context.getStepContext().getStepExecution().getWriteCount(),
-                context.getStepContext().getStepExecution().getReadSkipCount()+
-                        context.getStepContext().getStepExecution().getProcessSkipCount()+
-                        context.getStepContext().getStepExecution().getWriteSkipCount()
+                context.getStepContext().getStepExecution().getReadSkipCount()
+                        + context.getStepContext().getStepExecution().getProcessSkipCount()
+                        + context.getStepContext().getStepExecution().getWriteSkipCount()
         );
-
     }
 
     @Override
     public void afterChunkError(ChunkContext context) {
-
     }
 }
