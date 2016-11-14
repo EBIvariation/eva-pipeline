@@ -17,7 +17,6 @@
 package uk.ac.ebi.eva.pipeline.jobs.steps;
 
 import org.opencb.biodata.models.variant.annotation.VariantAnnotation;
-import org.opencb.opencga.storage.mongodb.variant.DBObjectToVariantAnnotationConverter;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
