@@ -16,11 +16,9 @@
 package uk.ac.ebi.eva.pipeline.model.converters.data;
 
 import com.google.common.collect.Sets;
-import com.googlecode.junittoolbox.ParallelRunner;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.opencb.biodata.models.variant.Variant;
 import org.opencb.biodata.models.variant.VariantSourceEntry;
 import org.opencb.biodata.models.variant.stats.VariantStats;
@@ -36,7 +34,6 @@ import static org.junit.Assert.assertNull;
 /**
  * Test {@link VariantToMongoDbObjectConverter}
  */
-@RunWith(ParallelRunner.class)
 public class VariantToMongoDbObjectConverterTest {
 
     private GenericConversionService conversionService = new GenericConversionService();

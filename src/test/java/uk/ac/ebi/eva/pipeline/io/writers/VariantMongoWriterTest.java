@@ -15,12 +15,10 @@
  */
 package uk.ac.ebi.eva.pipeline.io.writers;
 
-import com.googlecode.junittoolbox.ParallelRunner;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.opencb.biodata.models.variant.Variant;
 import org.opencb.datastore.core.ObjectMap;
@@ -37,7 +35,6 @@ import static org.mockito.Mockito.when;
 /**
  * Testing {@link VariantMongoWriter}
  */
-@RunWith(ParallelRunner.class)
 public class VariantMongoWriterTest {
     private VariantMongoWriter variantMongoWriter;
     private VariantToMongoDbObjectConverter variantToMongoDbObjectConverter =

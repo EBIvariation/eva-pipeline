@@ -69,11 +69,6 @@
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
         </dependency>
-        <dependency>
-            <groupId>com.googlecode.junit-toolbox</groupId>
-            <artifactId>junit-toolbox</artifactId>
-            <version>1.5</version>
-        </dependency>
 
         <dependency>
             <groupId>org.opencb.opencga</groupId>
