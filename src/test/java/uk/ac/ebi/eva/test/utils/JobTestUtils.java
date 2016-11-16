@@ -104,6 +104,13 @@ public class JobTestUtils {
                 .addLong("time", System.currentTimeMillis()).toJobParameters();
     }
 
+    /**
+     * Creates a temporal GzipFile withe the content at {@param content}. This file is marked to be deleted by java
+     * after finishing the test process.
+     * @param content
+     * @return
+     * @throws IOException
+     */
     public static File makeGzipFile(String content) throws IOException {
         File tempFile = createTempFile();
         try (FileOutputStream output = new FileOutputStream(tempFile)) {
