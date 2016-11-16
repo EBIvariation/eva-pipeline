@@ -40,9 +40,12 @@ import uk.ac.ebi.eva.pipeline.jobs.AnnotationJob;
 import uk.ac.ebi.eva.test.data.VepOutputContent;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
 
+import java.io.File;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static uk.ac.ebi.eva.test.utils.JobTestUtils.makeGzipFile;
+import static uk.ac.ebi.eva.test.utils.JobTestUtils.makeTemporalGzipFile;
 import static uk.ac.ebi.eva.test.utils.JobTestUtils.restoreMongoDbFromDump;
 
 
@@ -56,6 +59,7 @@ import static uk.ac.ebi.eva.test.utils.JobTestUtils.restoreMongoDbFromDump;
 @ContextConfiguration(classes = {AnnotationJob.class, AnnotationLoaderStepTestConfiguration.class, JobLauncherTestUtils.class})
 public class AnnotationLoaderStepTest {
 
+    private static final String DATABASE_NAME = AnnotationLoaderStepTest.class.getSimpleName();
     @Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
     @Autowired
@@ -66,19 +70,18 @@ public class AnnotationLoaderStepTest {
     @Before
     public void setUp() throws Exception {
         jobOptions.loadArgs();
+        jobOptions.setDbName(DATABASE_NAME);
         mongoClient = new MongoClient();
-    }
-
-    @Test
-    public void shouldLoadAllAnnotations() throws Exception {
-        DBObjectToVariantAnnotationConverter converter = new DBObjectToVariantAnnotationConverter();
 
         String dump = AnnotationLoaderStepTest.class.getResource("/dump/VariantStatsConfigurationTest_vl").getFile();
         restoreMongoDbFromDump(dump, jobOptions.getDbName());
 
-        String vepOutput = jobOptions.getVepOutput();
-        makeGzipFile(VepOutputContent.vepOutputContent, vepOutput);
+        File file = makeTemporalGzipFile(VepOutputContent.vepOutputContent);
+        jobOptions.setVepOutput(file.getAbsolutePath());
+    }
 
+    @Test
+    public void shouldLoadAllAnnotations() throws Exception {
         JobExecution jobExecution = jobLauncherTestUtils.launchStep(AnnotationLoaderStep.LOAD_VEP_ANNOTATION);
 
         assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
@@ -86,6 +89,8 @@ public class AnnotationLoaderStepTest {
 
         //check that documents have the annotation
         DBCursor cursor = collection(jobOptions.getDbName(), jobOptions.getDbCollectionsVariantsName()).find();
+
+        DBObjectToVariantAnnotationConverter converter = new DBObjectToVariantAnnotationConverter();
 
         int cnt = 0;
         int consequenceTypeCount = 0;
