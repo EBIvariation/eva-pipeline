@@ -115,8 +115,7 @@ public class VepAnnotationMongoWriterTest {
      */
     @Test
     public void shouldWriteAllFieldsIntoMongoDbMultipleSetsAnnotations() throws Exception {
-        String dbName = jobOptions.getDbName();
-        String dbCollectionVariantsName = jobOptions.getPipelineOptions().getString("db.collections.variants.name");
+        String dbCollectionVariantsName = jobOptions.getDbCollectionsVariantsName();
 
         List<VariantAnnotation> annotations = new ArrayList<>();
         for (String annotLine : vepOutputContent.split("\n")) {
@@ -147,8 +146,7 @@ public class VepAnnotationMongoWriterTest {
         }
 
         // now, load the annotation
-        String collections = jobOptions.getPipelineOptions().getString("db.collections.variants.name");
-        annotationWriter = new VepAnnotationMongoWriter(mongoOperations, collections);
+        annotationWriter = new VepAnnotationMongoWriter(mongoOperations, dbCollectionVariantsName);
 
         annotationWriter.write(annotationSet1);
         annotationWriter.write(annotationSet2);
