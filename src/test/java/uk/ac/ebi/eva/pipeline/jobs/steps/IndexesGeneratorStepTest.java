@@ -45,24 +45,23 @@ import static org.junit.Assert.assertEquals;
 @ContextConfiguration(classes = {DatabaseInitializationJob.class, DatabaseInitializationConfiguration.class, JobLauncherTestUtils.class})
 public class IndexesGeneratorStepTest {
 
+    private static final String DATABASE_NAME = IndexesGeneratorStepTest.class.getSimpleName();
+
     @Autowired
     public JobOptions jobOptions;
 
     @Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
 
-    private String dbName;
-
     @Before
     public void setUp() throws Exception {
         jobOptions.loadArgs();
-        dbName = jobOptions.getDbName();
-        JobTestUtils.cleanDBs(dbName);
+        jobOptions.setDbName(DATABASE_NAME);
     }
 
     @After
     public void tearDown() throws Exception {
-        JobTestUtils.cleanDBs(dbName);
+        JobTestUtils.cleanDBs(DATABASE_NAME);
     }
 
     @Test
@@ -74,11 +73,11 @@ public class IndexesGeneratorStepTest {
         assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());
 
         MongoClient mongoClient = new MongoClient();
-        DBCollection genesCollection = mongoClient.getDB(dbName).getCollection(dbCollectionGenesName);
-        assertEquals("[{ \"v\" : 1 , \"key\" : { \"_id\" : 1} , \"name\" : \"_id_\" , \"ns\" : \"" + dbName +
+        DBCollection genesCollection = mongoClient.getDB(DATABASE_NAME).getCollection(dbCollectionGenesName);
+        assertEquals("[{ \"v\" : 1 , \"key\" : { \"_id\" : 1} , \"name\" : \"_id_\" , \"ns\" : \"" + DATABASE_NAME +
                         "." + dbCollectionGenesName +
                         "\"}, { \"v\" : 1 , \"key\" : { \"name\" : 1} , \"name\" : \"name_1\" , \"ns\" : \"" +
-                        dbName + "." + dbCollectionGenesName + "\" , \"sparse\" : true , \"background\" : true}]",
+                        DATABASE_NAME + "." + dbCollectionGenesName + "\" , \"sparse\" : true , \"background\" : true}]",
                 genesCollection.getIndexInfo().toString());
     }
 
@@ -92,7 +91,7 @@ public class IndexesGeneratorStepTest {
 
 
         MongoClient mongoClient = new MongoClient();
-        DBCollection genesCollection = mongoClient.getDB(dbName).getCollection(dbCollectionGenesName);
+        DBCollection genesCollection = mongoClient.getDB(DATABASE_NAME).getCollection(dbCollectionGenesName);
         genesCollection.insert(new BasicDBObject("_id", "example_id"));
         genesCollection.insert(new BasicDBObject("_id", "example_id"));
     }

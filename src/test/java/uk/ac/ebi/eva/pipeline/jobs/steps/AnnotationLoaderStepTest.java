@@ -60,6 +60,7 @@ import static uk.ac.ebi.eva.test.utils.JobTestUtils.restoreMongoDbFromDump;
 public class AnnotationLoaderStepTest {
 
     private static final String DATABASE_NAME = AnnotationLoaderStepTest.class.getSimpleName();
+
     @Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
     @Autowired
