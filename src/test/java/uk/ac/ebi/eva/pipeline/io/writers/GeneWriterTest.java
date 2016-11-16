@@ -21,10 +21,10 @@ import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.mongodb.MongoClient;
 import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.ac.ebi.eva.pipeline.configuration.DatabaseInitializationConfiguration;
@@ -39,6 +39,7 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static uk.ac.ebi.eva.utils.MongoDBHelper.getMongoOperationsFromPipelineOptions;
 
 /**
  * {@link GeneWriter}
@@ -49,22 +50,22 @@ import static org.junit.Assert.assertTrue;
 @ContextConfiguration(classes = {JobOptions.class, DatabaseInitializationConfiguration.class,})
 public class GeneWriterTest {
 
+    private static final String DATABASE_NAME = GeneWriterTest.class.getSimpleName();
+
     @Autowired
     private JobOptions jobOptions;
 
-    @Before
-    public void setUp() throws Exception {
-        jobOptions.setDbName(getClass().getSimpleName());
-    }
-
     @After
     public void tearDown() throws Exception {
-        JobTestUtils.cleanDBs(jobOptions.getDbName());
+        JobTestUtils.cleanDBs(DATABASE_NAME);
     }
 
     @Test
     public void shouldWriteAllFieldsIntoMongoDb() throws Exception {
-        GeneWriter geneWriter = new GeneWriter(jobOptions.getMongoOperations(), jobOptions.getDbCollectionsFeaturesName());
+        MongoOperations mongoOperations = getMongoOperationsFromPipelineOptions(DATABASE_NAME,
+                jobOptions.getMongoConnection());
+
+        GeneWriter geneWriter = new GeneWriter(mongoOperations, jobOptions.getDbCollectionsFeaturesName());
 
         GeneLineMapper lineMapper = new GeneLineMapper();
         List<FeatureCoordinates> genes = new ArrayList<>();
@@ -76,7 +77,8 @@ public class GeneWriterTest {
         geneWriter.write(genes);
 
         MongoClient mongoClient = new MongoClient();
-        DBCollection genesCollection = mongoClient.getDB(jobOptions.getDbName()).getCollection(jobOptions.getDbCollectionsFeaturesName());
+        DBCollection genesCollection = mongoClient.getDB(DATABASE_NAME)
+                .getCollection(jobOptions.getDbCollectionsFeaturesName());
 
         // count documents in DB and check they have region (chr + start + end)
         DBCursor cursor = genesCollection.find();

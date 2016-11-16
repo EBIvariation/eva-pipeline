@@ -32,6 +32,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import uk.ac.ebi.eva.pipeline.configuration.AnnotationConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.AnnotationLoaderStepConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
+import uk.ac.ebi.eva.pipeline.io.writers.GeneWriterTest;
 import uk.ac.ebi.eva.pipeline.jobs.AnnotationJob;
 import uk.ac.ebi.eva.test.data.VariantData;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
@@ -52,6 +53,7 @@ import static org.junit.Assert.*;
         AnnotationLoaderStepConfiguration.class})
 public class NonAnnotatedVariantsMongoReaderTest {
 
+    private static final String DATABASE_NAME = NonAnnotatedVariantsMongoReaderTest.class.getSimpleName();
     private static final String DOC_CHR = "chr";
     private static final String DOC_START = "start";
     private static final String DOC_ANNOT = "annot";
@@ -75,8 +77,8 @@ public class NonAnnotatedVariantsMongoReaderTest {
         ExecutionContext executionContext = MetaDataInstanceFactory.createStepExecution().getExecutionContext();
         insertDocuments();
 
-        NonAnnotatedVariantsMongoReader mongoItemReader = new NonAnnotatedVariantsMongoReader(getClass()
-                .getSimpleName(), jobOptions.getDbCollectionsVariantsName(), jobOptions.getMongoConnection());
+        NonAnnotatedVariantsMongoReader mongoItemReader = new NonAnnotatedVariantsMongoReader(DATABASE_NAME,
+                jobOptions.getDbCollectionsVariantsName(), jobOptions.getMongoConnection());
         mongoItemReader.open(executionContext);
 
         int itemCount = 0;
@@ -93,11 +95,11 @@ public class NonAnnotatedVariantsMongoReaderTest {
 
     @After
     public void tearDown() throws Exception {
-        JobTestUtils.cleanDBs(getClass().getSimpleName());
+        JobTestUtils.cleanDBs(DATABASE_NAME);
     }
 
     private DBCollection collection() {
-        return mongoClient.getDB(getClass().getSimpleName()).getCollection(jobOptions.getDbCollectionsVariantsName());
+        return mongoClient.getDB(DATABASE_NAME).getCollection(jobOptions.getDbCollectionsVariantsName());
     }
 
     private void insertDocuments() throws IOException {
