@@ -15,6 +15,8 @@
  */
 package uk.ac.ebi.eva.test.utils;
 
+import com.mongodb.BasicDBList;
+import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 import com.mongodb.util.JSON;
 import org.slf4j.Logger;
@@ -22,18 +24,31 @@ import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.zip.GZIPInputStream;
-import java.util.zip.GZIPOutputStream;
+
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 public abstract class JobTestUtils {
     private static final Logger logger = LoggerFactory.getLogger(JobTestUtils.class);
+
     private static final String EVA_PIPELINE_TEMP_PREFIX = "eva-pipeline-test";
+
     private static final java.lang.String EVA_PIPELINE_TEMP_POSTFIX = ".tmp";
 
     /**
@@ -103,6 +118,32 @@ public abstract class JobTestUtils {
      */
     public static DBObject constructDbo(String variant) {
         return (DBObject) JSON.parse(variant);
+    }
+
+    public static void checkStringInsideList(BasicDBObject metadataMongo, String field) {
+        assertTrue(metadataMongo.containsField(field));
+        Object objectList = metadataMongo.get(field);
+        assertTrue(objectList instanceof BasicDBList);
+        BasicDBList list = (BasicDBList) objectList;
+        for (Object element : list) {
+            assertTrue(element instanceof String);
+            assertNotNull(element);
+            assertFalse(element.toString().isEmpty());
+        }
+    }
+
+    public static void checkFieldsInsideList(BasicDBObject metadataMongo, String field, List<String> innerFields) {
+        assertTrue(metadataMongo.containsField(field));
+        Object objectList = metadataMongo.get(field);
+        assertTrue(objectList instanceof BasicDBList);
+        BasicDBList list = (BasicDBList) objectList;
+        for (Object element : list) {
+            assertTrue(element instanceof BasicDBObject);
+            for (String innerField : innerFields) {
+                assertNotNull(((BasicDBObject) element).get(innerField));
+                assertFalse(((BasicDBObject) element).get(innerField).toString().isEmpty());
+            }
+        }
     }
 
     public static void uncompress(String inputCompressedFile, File outputFile) throws IOException {
