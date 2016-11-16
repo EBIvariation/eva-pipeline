@@ -18,11 +18,11 @@ package uk.ac.ebi.eva.pipeline.io.writers;
 
 import com.mongodb.*;
 import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.batch.item.file.mapping.JsonLineMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.ac.ebi.eva.pipeline.configuration.CommonConfiguration;
@@ -37,6 +37,7 @@ import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static uk.ac.ebi.eva.utils.MongoDBHelper.getMongoOperationsFromPipelineOptions;
 
 
 /**
@@ -48,29 +49,21 @@ import static org.junit.Assert.assertNotNull;
 @ContextConfiguration(classes = {JobOptions.class, CommonConfiguration.class})
 public class StatisticsMongoWriterTest {
 
+    private static final String DATABASE_NAME = StatisticsMongoWriterTest.class.getSimpleName();
+
     @Autowired
     private JobOptions jobOptions;
-    private String dbName;
-
-    @Before
-    public void setUp() throws Exception {
-        dbName = getClass().getSimpleName();
-        jobOptions.setDbName(dbName);
-        JobTestUtils.cleanDBs(dbName);
-    }
 
     @After
     public void tearDown() throws Exception {
-        JobTestUtils.cleanDBs(dbName);
+        JobTestUtils.cleanDBs(DATABASE_NAME);
     }
 
     @Test
     public void shouldWriteAllFieldsIntoMongoDb() throws Exception {
         List<PopulationStatistics> populationStatisticsList = buildPopulationStatsList();
 
-        // do the actual writing
-        StatisticsMongoWriter statisticsMongoWriter = new StatisticsMongoWriter(
-                jobOptions.getMongoOperations(), jobOptions.getDbCollectionsStatsName());
+        StatisticsMongoWriter statisticsMongoWriter = getStatisticsMongoWriter();
 
         int n = 1;
         for (int i = 0; i < n; i++) {
@@ -78,7 +71,7 @@ public class StatisticsMongoWriterTest {
         }
 
         // do the checks
-        DB db = new MongoClient().getDB(dbName);
+        DB db = new MongoClient().getDB(DATABASE_NAME);
         DBCollection statsCollection = db.getCollection(jobOptions.getDbCollectionsStatsName());
 
         // count documents in DB and check they have at least the index fields (vid, sid, cid) and maf and genotypeCount
@@ -101,21 +94,17 @@ public class StatisticsMongoWriterTest {
     public void shouldCreateIndexesInCollection() throws Exception {
         List<PopulationStatistics> populationStatisticsList = buildPopulationStatsList();
 
-        // do the actual writing
-        StatisticsMongoWriter statisticsMongoWriter = new StatisticsMongoWriter(
-                jobOptions.getMongoOperations(), jobOptions.getDbCollectionsStatsName());
-
+        StatisticsMongoWriter statisticsMongoWriter = getStatisticsMongoWriter();
         statisticsMongoWriter.write(populationStatisticsList);
 
-
         // do the checks
-        DB db = new MongoClient().getDB(dbName);
+        DB db = new MongoClient().getDB(DATABASE_NAME);
         DBCollection statsCollection = db.getCollection(jobOptions.getDbCollectionsStatsName());
 
         // check vid has an index
-        assertEquals("[{ \"v\" : 1 , \"key\" : { \"_id\" : 1} , \"name\" : \"_id_\" , \"ns\" : \"" + dbName +
+        assertEquals("[{ \"v\" : 1 , \"key\" : { \"_id\" : 1} , \"name\" : \"_id_\" , \"ns\" : \"" + DATABASE_NAME +
                         ".populationStatistics\"}, { \"v\" : 1 , \"unique\" : true , \"key\" : { \"vid\" : 1 , \"sid\" : 1 , " +
-                        "\"cid\" : 1} , \"name\" : \"vscid\" , \"ns\" : \"" + dbName + ".populationStatistics\"}]",
+                        "\"cid\" : 1} , \"name\" : \"vscid\" , \"ns\" : \"" + DATABASE_NAME + ".populationStatistics\"}]",
                 statsCollection.getIndexInfo().toString());
     }
 
@@ -123,10 +112,7 @@ public class StatisticsMongoWriterTest {
     public void shouldFailIfduplicatedVidSidCid() throws Exception {
         List<PopulationStatistics> populationStatisticsList = buildPopulationStatsList();
 
-        // do the actual writing
-        StatisticsMongoWriter statisticsMongoWriter = new StatisticsMongoWriter(
-                jobOptions.getMongoOperations(), jobOptions.getDbCollectionsStatsName());
-
+        StatisticsMongoWriter statisticsMongoWriter = getStatisticsMongoWriter();
         statisticsMongoWriter.write(populationStatisticsList);
         statisticsMongoWriter.write(populationStatisticsList);   // should throw
     }
@@ -148,5 +134,13 @@ public class StatisticsMongoWriterTest {
                 (Map<String, Integer>) map.get("numGt"));
 
         return Arrays.asList(populationStatistics);
+    }
+
+    public StatisticsMongoWriter getStatisticsMongoWriter() {
+        MongoOperations mongoOperations = getMongoOperationsFromPipelineOptions(DATABASE_NAME,
+                jobOptions.getMongoConnection());
+        StatisticsMongoWriter statisticsMongoWriter = new StatisticsMongoWriter(
+                mongoOperations, jobOptions.getDbCollectionsStatsName());
+        return statisticsMongoWriter;
     }
 }
