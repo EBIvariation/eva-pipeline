@@ -42,7 +42,7 @@ public class GeneFilterProcessorTest {
         GeneFilterProcessor geneFilterProcessor = new GeneFilterProcessor();
 
         //simulate VEP output file
-        File file = JobTestUtils.makeGzipFile(GtfStaticTestData.GTF_CONTENT);
+        File file = JobTestUtils.makeTemporalGzipFile(GtfStaticTestData.GTF_CONTENT);
 
         GeneReader geneReader = new GeneReader(file);
         geneReader.setSaveState(false);

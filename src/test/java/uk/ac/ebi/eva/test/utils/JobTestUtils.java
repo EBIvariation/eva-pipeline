@@ -111,7 +111,7 @@ public class JobTestUtils {
      * @return
      * @throws IOException
      */
-    public static File makeGzipFile(String content) throws IOException {
+    public static File makeTemporalGzipFile(String content) throws IOException {
         File tempFile = createTempFile();
         try (FileOutputStream output = new FileOutputStream(tempFile)) {
             try (Writer writer = new OutputStreamWriter(new GZIPOutputStream(output), "UTF-8")) {
