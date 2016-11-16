@@ -62,6 +62,8 @@ import static uk.ac.ebi.eva.test.data.VepOutputContent.vepOutputContent;
 @ContextConfiguration(classes = {AnnotationJob.class, AnnotationConfiguration.class})
 public class VepAnnotationMongoWriterTest {
 
+    private static final String DATABASE_NAME = VepAnnotationMongoWriterTest.class.getSimpleName();
+
     @Autowired
     private JobOptions jobOptions;
 
@@ -73,20 +75,19 @@ public class VepAnnotationMongoWriterTest {
 
     @Test
     public void shouldWriteAllFieldsIntoMongoDb() throws Exception {
-        String dbName = jobOptions.getDbName();
         String dbCollectionVariantsName = jobOptions.getDbCollectionsVariantsName();
 
         List<VariantAnnotation> annotations = new ArrayList<>();
         for (String annotLine : vepOutputContent.split("\n")) {
             annotations.add(AnnotationLineMapper.mapLine(annotLine, 0));
         }
-        DBCollection variants = mongoClient.getDB(dbName).getCollection(dbCollectionVariantsName);
+        DBCollection variants = mongoClient.getDB(DATABASE_NAME).getCollection(dbCollectionVariantsName);
 
         // first do a mock of a "variants" collection, with just the _id
         writeIdsIntoMongo(annotations, variants);
 
         // now, load the annotation
-        MongoOperations mongoOperations = MongoDBHelper.getMongoOperationsFromPipelineOptions(jobOptions.getDbName(),
+        MongoOperations mongoOperations = MongoDBHelper.getMongoOperationsFromPipelineOptions(DATABASE_NAME,
                 jobOptions.getMongoConnection());
         annotationWriter = new VepAnnotationMongoWriter(mongoOperations, dbCollectionVariantsName);
         annotationWriter.write(annotations);
@@ -115,13 +116,13 @@ public class VepAnnotationMongoWriterTest {
     @Test
     public void shouldWriteAllFieldsIntoMongoDbMultipleSetsAnnotations() throws Exception {
         String dbName = jobOptions.getDbName();
-        String dbCollectionVariantsName = jobOptions.getPipelineOptions().getString(JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME);
+        String dbCollectionVariantsName = jobOptions.getPipelineOptions().getString("db.collections.variants.name");
 
         List<VariantAnnotation> annotations = new ArrayList<>();
         for (String annotLine : vepOutputContent.split("\n")) {
             annotations.add(AnnotationLineMapper.mapLine(annotLine, 0));
         }
-        DBCollection variants = mongoClient.getDB(dbName).getCollection(dbCollectionVariantsName);
+        DBCollection variants = mongoClient.getDB(DATABASE_NAME).getCollection(dbCollectionVariantsName);
 
         // first do a mock of a "variants" collection, with just the _id
         writeIdsIntoMongo(annotations, variants);
@@ -146,7 +147,7 @@ public class VepAnnotationMongoWriterTest {
         }
 
         // now, load the annotation
-        String collections = jobOptions.getPipelineOptions().getString(JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME);
+        String collections = jobOptions.getPipelineOptions().getString("db.collections.variants.name");
         annotationWriter = new VepAnnotationMongoWriter(mongoOperations, collections);
 
         annotationWriter.write(annotationSet1);
@@ -173,19 +174,17 @@ public class VepAnnotationMongoWriterTest {
     @Before
     public void setUp() throws Exception {
         converter = new DBObjectToVariantAnnotationConverter();
-        mongoOperations = MongoDBHelper.getMongoOperationsFromPipelineOptions(jobOptions.getDbName(),
+        mongoOperations = MongoDBHelper.getMongoOperationsFromPipelineOptions(DATABASE_NAME,
                 jobOptions.getMongoConnection());
         mongoClient = new MongoClient();
         AnnotationLineMapper = new AnnotationLineMapper();
 
-        String dbName = jobOptions.getDbName();
-        JobTestUtils.cleanDBs(dbName);
+        JobTestUtils.cleanDBs(DATABASE_NAME);
     }
 
     @After
     public void tearDown() throws Exception {
-        String dbName = jobOptions.getDbName();
-        JobTestUtils.cleanDBs(dbName);
+        JobTestUtils.cleanDBs(DATABASE_NAME);
     }
 
     private void writeIdsIntoMongo(List<VariantAnnotation> annotations, DBCollection variants) {
