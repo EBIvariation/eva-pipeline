@@ -21,15 +21,17 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.opencb.biodata.models.variant.Variant;
-import org.opencb.datastore.core.ObjectMap;
 import org.springframework.data.mongodb.core.MongoOperations;
-import uk.ac.ebi.eva.pipeline.configuration.JobParametersNames;
 import uk.ac.ebi.eva.pipeline.model.converters.data.VariantToMongoDbObjectConverter;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
 import uk.ac.ebi.eva.utils.MongoConnection;
 import uk.ac.ebi.eva.utils.MongoDBHelper;
+
 import java.net.UnknownHostException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
@@ -38,27 +40,30 @@ import static org.mockito.Mockito.when;
  * Testing {@link VariantMongoWriter}
  */
 public class VariantMongoWriterTest {
+
+    private static final List<? extends Variant> EMPTY_LIST = new ArrayList<>();
+    
     private VariantMongoWriter variantMongoWriter;
     private VariantToMongoDbObjectConverter variantToMongoDbObjectConverter =
             Mockito.mock(VariantToMongoDbObjectConverter.class);
-    private MongoConnection mongoConnection;
     private final String collectionName = "variants";
+    private MongoConnection connection;
 
     @Before
     public void setUp() throws Exception {
-        mongoConnection = new MongoConnection();
-        mongoConnection.setReadPreference("primary");
+        connection = new MongoConnection();
+        connection.setReadPreference("primary");
     }
 
     @Test
     public void noVariantsNothingShouldBeWritten() throws UnknownHostException {
         String dbName = "VariantMongoWriterNoVariant";
 
-        MongoOperations mongoOperations = MongoDBHelper.getMongoOperationsFromPipelineOptions(dbName,mongoConnection);
+        MongoOperations mongoOperations = MongoDBHelper.getMongoOperationsFromPipelineOptions(dbName, connection);
         DBCollection dbCollection = mongoOperations.getCollection(collectionName);
 
         variantMongoWriter = new VariantMongoWriter(collectionName, mongoOperations, variantToMongoDbObjectConverter);
-        variantMongoWriter.doWrite(Collections.EMPTY_LIST);
+        variantMongoWriter.doWrite(EMPTY_LIST);
 
         assertEquals(0, dbCollection.count());
     }
@@ -73,7 +78,7 @@ public class VariantMongoWriterTest {
         when(variant.getReference()).thenReturn("A").thenReturn("B");
         when(variant.getAlternate()).thenReturn("B").thenReturn("C");
 
-        MongoOperations mongoOperations = MongoDBHelper.getMongoOperationsFromPipelineOptions(dbName,mongoConnection);
+        MongoOperations mongoOperations = MongoDBHelper.getMongoOperationsFromPipelineOptions(dbName, connection);
         DBCollection dbCollection = mongoOperations.getCollection(collectionName);
 
         BasicDBObject dbObject = new BasicDBObject();
