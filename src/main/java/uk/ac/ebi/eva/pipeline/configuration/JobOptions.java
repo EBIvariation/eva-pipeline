@@ -104,8 +104,8 @@ public class JobOptions {
 
     @Value("${" + JobParametersNames.CONFIG_RESTARTABILITY_ALLOW + ":false}") private boolean allowStartIfComplete;
 
-    private ObjectMap variantOptions  = new ObjectMap();
-    private ObjectMap pipelineOptions  = new ObjectMap();
+    private ObjectMap variantOptions = new ObjectMap();
+    private ObjectMap pipelineOptions = new ObjectMap();
     private File vepInput;
     private File appVepPath;
 

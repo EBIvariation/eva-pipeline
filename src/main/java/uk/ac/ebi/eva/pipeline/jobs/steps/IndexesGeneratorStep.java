@@ -31,10 +31,6 @@ import org.springframework.stereotype.Component;
 import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
 import uk.ac.ebi.eva.utils.MongoDBHelper;
 
-import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
-import uk.ac.ebi.eva.pipeline.configuration.JobParametersNames;
-import uk.ac.ebi.eva.utils.MongoDBHelper;
-
 /**
  * This step initializes the indexes in the databases.
  * <p>
