@@ -48,30 +48,24 @@ public class ConnectionHelper {
     public static MongoTemplate getMongoTemplate(String database, String hosts, String authenticationDB,
                                                  String user, char[] password) throws UnknownHostException {
         return new MongoTemplate(
-                new SimpleMongoDbFactory(
-                        getMongoClient(hosts, authenticationDB, user, password), database
-                )
+                new SimpleMongoDbFactory(getMongoClient(hosts, authenticationDB, user, password), database)
         );
     }
 
+    public static MongoTemplate getMongoTemplate(String database, MongoClient mongoClient) throws UnknownHostException {
+        return new MongoTemplate(new SimpleMongoDbFactory(mongoClient, database));
+    }
+
     public static MongoTemplate getMongoTemplate(String database) throws UnknownHostException {
-        return new MongoTemplate(
-                new SimpleMongoDbFactory(
-                        getMongoClient(), database
-                )
-        );
+        return new MongoTemplate(new SimpleMongoDbFactory(getMongoClient(), database));
     }
 
     public static MongoClient getMongoClient(String hosts, String authenticationDB,
                                              String user, char[] password) throws UnknownHostException {
         return new MongoClient(
                 parseServerAddresses(hosts),
-                Collections.singletonList(MongoCredential.createCredential(
-                        user,
-                        authenticationDB,
-                        password
-                        )
-                ));
+                Collections.singletonList(MongoCredential.createCredential(user,authenticationDB,password))
+        );
     }
 
     public static MongoClient getMongoClient() throws UnknownHostException {

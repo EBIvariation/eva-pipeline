@@ -26,6 +26,7 @@ import org.springframework.data.mongodb.core.MongoOperations;
 import uk.ac.ebi.eva.pipeline.configuration.JobParametersNames;
 import uk.ac.ebi.eva.pipeline.model.converters.data.VariantToMongoDbObjectConverter;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
+import uk.ac.ebi.eva.utils.MongoConnection;
 import uk.ac.ebi.eva.utils.MongoDBHelper;
 import java.net.UnknownHostException;
 import java.util.*;
@@ -40,20 +41,20 @@ public class VariantMongoWriterTest {
     private VariantMongoWriter variantMongoWriter;
     private VariantToMongoDbObjectConverter variantToMongoDbObjectConverter =
             Mockito.mock(VariantToMongoDbObjectConverter.class);
-    private ObjectMap objectMap = new ObjectMap();
+    private MongoConnection mongoConnection;
     private final String collectionName = "variants";
 
     @Before
     public void setUp() throws Exception {
-        objectMap.put(JobParametersNames.CONFIG_DB_READPREFERENCE, "primary");
+        mongoConnection = new MongoConnection();
+        mongoConnection.setReadPreference("primary");
     }
 
     @Test
     public void noVariantsNothingShouldBeWritten() throws UnknownHostException {
         String dbName = "VariantMongoWriterNoVariant";
 
-        objectMap.put(JobParametersNames.DB_NAME, dbName);
-        MongoOperations mongoOperations = MongoDBHelper.getMongoOperationsFromPipelineOptions(objectMap);
+        MongoOperations mongoOperations = MongoDBHelper.getMongoOperationsFromPipelineOptions(dbName,mongoConnection);
         DBCollection dbCollection = mongoOperations.getCollection(collectionName);
 
         variantMongoWriter = new VariantMongoWriter(collectionName, mongoOperations, variantToMongoDbObjectConverter);
@@ -72,8 +73,7 @@ public class VariantMongoWriterTest {
         when(variant.getReference()).thenReturn("A").thenReturn("B");
         when(variant.getAlternate()).thenReturn("B").thenReturn("C");
 
-        objectMap.put(JobParametersNames.DB_NAME, dbName);
-        MongoOperations mongoOperations = MongoDBHelper.getMongoOperationsFromPipelineOptions(objectMap);
+        MongoOperations mongoOperations = MongoDBHelper.getMongoOperationsFromPipelineOptions(dbName,mongoConnection);
         DBCollection dbCollection = mongoOperations.getCollection(collectionName);
 
         BasicDBObject dbObject = new BasicDBObject();

@@ -26,7 +26,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.stereotype.Component;
-
+import uk.ac.ebi.eva.pipeline.jobs.flows.AnnotationFlow;
+import uk.ac.ebi.eva.pipeline.jobs.flows.PopulationStatisticsFlow;
+import uk.ac.ebi.eva.utils.MongoConnection;
 import uk.ac.ebi.eva.utils.MongoDBHelper;
 
 import javax.annotation.PostConstruct;
@@ -39,10 +41,9 @@ import java.nio.file.Paths;
 import java.util.Properties;
 
 /**
- *
  * Class to extract configuration from properties files and from command line.
  * Default values are in resources/application.properties
- *
+ * <p>
  * TODO: 20/05/2016 add type/null/file/dir validators
  * TODO validation checks for all the parameters
  */
@@ -105,6 +106,8 @@ public class JobOptions {
 
     private ObjectMap variantOptions  = new ObjectMap();
     private ObjectMap pipelineOptions  = new ObjectMap();
+    private File vepInput;
+    private File appVepPath;
 
     @PostConstruct
     public void loadArgs() throws IOException {
@@ -222,12 +225,12 @@ public class JobOptions {
         logger.debug("Using as pipelineOptions: {}", pipelineOptions.entrySet().toString());
     }
 
-    public void configureGenotypesStorage (boolean includeSamples, boolean compressGenotypes){
+    public void configureGenotypesStorage(boolean includeSamples, boolean compressGenotypes) {
         variantOptions.put(VariantStorageManager.INCLUDE_SAMPLES, includeSamples);
         variantOptions.put(VariantStorageManager.COMPRESS_GENOTYPES, compressGenotypes);
     }
 
-    public void configureStatisticsStorage (boolean calculateStats, boolean includeStats){
+    public void configureStatisticsStorage(boolean calculateStats, boolean includeStats) {
         variantOptions.put(VariantStorageManager.CALCULATE_STATS, calculateStats);   // this is tested by hand
         variantOptions.put(VariantStorageManager.INCLUDE_STATS, includeStats);
     }
@@ -240,10 +243,6 @@ public class JobOptions {
         return pipelineOptions;
     }
 
-    public MongoOperations getMongoOperations() {
-        return MongoDBHelper.getMongoOperationsFromPipelineOptions(getPipelineOptions());
-    }
-
     public String getDbCollectionsFeaturesName() {
         return getPipelineOptions().getString(JobParametersNames.DB_COLLECTIONS_FEATURES_NAME);
     }
@@ -251,6 +250,7 @@ public class JobOptions {
     public String getDbCollectionsVariantsName() {
         return getPipelineOptions().getString(JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME);
     }
+
     public String getDbCollectionsStatsName() {
         return getPipelineOptions().getString(JobParametersNames.DB_COLLECTIONS_STATISTICS_NAME);
     }
@@ -278,7 +278,7 @@ public class JobOptions {
         return getPipelineOptions().getString(VEP_OUTPUT);
     }
 
-    public void setVepOutput(String vepOutput){
+    public void setVepOutput(String vepOutput) {
         getPipelineOptions().put(VEP_OUTPUT, URI.create(vepOutput));
     }
 
@@ -289,4 +289,19 @@ public class JobOptions {
     public String getOutputDir() {
         return getPipelineOptions().getString(JobParametersNames.OUTPUT_DIR);
     }
+
+    public MongoConnection getMongoConnection() {
+        MongoConnection connection = new MongoConnection();
+        connection.setAuthenticationDatabase(dbAuthenticationDb);
+        connection.setHosts(dbHosts);
+        connection.setUser(dbUser);
+        connection.setPassword(dbPassword);
+        connection.setReadPreference(readPreference);
+        return connection;
+    }
+
+    public MongoOperations getMongoOperations() {
+        return MongoDBHelper.getMongoOperationsFromPipelineOptions(getDbName(), getMongoConnection());
+    }
+
 }

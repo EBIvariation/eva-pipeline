@@ -68,7 +68,6 @@ public class NonAnnotatedVariantsMongoReaderTest {
     @Before
     public void setUp() throws Exception {
         jobOptions.loadArgs();
-        jobOptions.setDbName(getClass().getSimpleName());
     }
 
     @Test
@@ -76,7 +75,8 @@ public class NonAnnotatedVariantsMongoReaderTest {
         ExecutionContext executionContext = MetaDataInstanceFactory.createStepExecution().getExecutionContext();
         insertDocuments();
 
-        NonAnnotatedVariantsMongoReader mongoItemReader = new NonAnnotatedVariantsMongoReader(jobOptions.getPipelineOptions());
+        NonAnnotatedVariantsMongoReader mongoItemReader = new NonAnnotatedVariantsMongoReader(getClass()
+                .getSimpleName(), jobOptions.getDbCollectionsVariantsName(), jobOptions.getMongoConnection());
         mongoItemReader.open(executionContext);
 
         int itemCount = 0;
@@ -93,11 +93,11 @@ public class NonAnnotatedVariantsMongoReaderTest {
 
     @After
     public void tearDown() throws Exception {
-        JobTestUtils.cleanDBs(jobOptions.getDbName());
+        JobTestUtils.cleanDBs(getClass().getSimpleName());
     }
 
     private DBCollection collection() {
-        return mongoClient.getDB(jobOptions.getDbName()).getCollection(jobOptions.getDbCollectionsVariantsName());
+        return mongoClient.getDB(getClass().getSimpleName()).getCollection(jobOptions.getDbCollectionsVariantsName());
     }
 
     private void insertDocuments() throws IOException {

@@ -22,7 +22,8 @@ public class AnnotationLoaderStepConfiguration {
     @Scope("prototype")
     @Profile(Application.VARIANT_ANNOTATION_MONGO_PROFILE)
     public ItemWriter<VariantAnnotation> variantAnnotationItemWriter() {
-        MongoOperations mongoOperations = MongoDBHelper.getMongoOperationsFromPipelineOptions(jobOptions.getPipelineOptions());
+        MongoOperations mongoOperations = MongoDBHelper.getMongoOperationsFromPipelineOptions(jobOptions
+                .getDbName(),jobOptions.getMongoConnection());
         String collections = jobOptions.getPipelineOptions().getString(JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME);
         return new VepAnnotationMongoWriter(mongoOperations, collections);
     }

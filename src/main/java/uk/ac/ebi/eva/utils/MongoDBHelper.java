@@ -16,11 +16,9 @@
 
 package uk.ac.ebi.eva.utils;
 
-import com.mongodb.Mongo;
 import com.mongodb.MongoClient;
 import com.mongodb.ReadPreference;
 import org.opencb.commons.utils.CryptoUtils;
-import org.opencb.datastore.core.ObjectMap;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.data.mongodb.core.MongoTemplate;
 
@@ -33,63 +31,52 @@ import java.net.UnknownHostException;
  */
 public class MongoDBHelper {
 
-    public static MongoOperations getMongoOperationsFromPipelineOptions(ObjectMap pipelineOptions) {
+    public static MongoOperations getMongoOperationsFromPipelineOptions(String database, MongoConnection connection) {
         MongoTemplate mongoTemplate;
         try {
-            mongoTemplate = getMongoTemplate(pipelineOptions);
+            mongoTemplate = getMongoTemplate(database, connection);
         } catch (UnknownHostException e) {
             throw new RuntimeException("Unable to initialize mongo template", e);
         }
         return mongoTemplate;
     }
 
-    private static MongoTemplate getMongoTemplate(ObjectMap pipelineOptions) throws UnknownHostException {
+    private static MongoTemplate getMongoTemplate(String database, MongoConnection connection) throws
+            UnknownHostException {
         MongoTemplate mongoTemplate;
-        if (pipelineOptions.getString(JobParametersNames.CONFIG_DB_AUTHENTICATIONDB).isEmpty()) {
-            mongoTemplate = ConnectionHelper.getMongoTemplate(
-                    pipelineOptions.getString(JobParametersNames.DB_NAME)
-            );
+        if (connection.getAuthenticationDatabase() == null || connection.getAuthenticationDatabase().isEmpty()) {
+            mongoTemplate = ConnectionHelper.getMongoTemplate(database);
         } else {
-            mongoTemplate = ConnectionHelper.getMongoTemplate(
-                    pipelineOptions.getString(JobParametersNames.DB_NAME),
-                    pipelineOptions.getString(JobParametersNames.CONFIG_DB_HOSTS),
-                    pipelineOptions.getString(JobParametersNames.CONFIG_DB_AUTHENTICATIONDB),
-                    pipelineOptions.getString(JobParametersNames.CONFIG_DB_USER),
-                    pipelineOptions.getString(JobParametersNames.CONFIG_DB_PASSWORD).toCharArray()
-            );
+            mongoTemplate = ConnectionHelper.getMongoTemplate(database, getMongoClient(connection));
         }
-
-        mongoTemplate.setReadPreference(getMongoTemplateReadPreferences(pipelineOptions.getString(JobParametersNames.CONFIG_DB_READPREFERENCE)));
+        mongoTemplate.setReadPreference(getMongoTemplateReadPreferences(connection.getReadPreference()));
 
         return mongoTemplate;
     }
 
-    public static Mongo getMongoClientFromPipelineOptions(ObjectMap pipelineOptions) {
-        Mongo mongo;
+    public static MongoClient getMongoClientFromPipelineOptions(MongoConnection connection) {
         try {
-            mongo = getMongoClient(pipelineOptions);
+            return getMongoClient(connection);
         } catch (UnknownHostException e) {
             throw new RuntimeException("Unable to initialize mongo client", e);
         }
-
-        return mongo;
     }
 
-    private static Mongo getMongoClient(ObjectMap pipelineOptions) throws UnknownHostException {
+    private static MongoClient getMongoClient(MongoConnection connection) throws UnknownHostException {
         MongoClient mongoClient;
 
-        if (pipelineOptions.getString(JobParametersNames.CONFIG_DB_AUTHENTICATIONDB).isEmpty()) {
+        if (connection.getAuthenticationDatabase() == null || connection.getAuthenticationDatabase().isEmpty()) {
             mongoClient = ConnectionHelper.getMongoClient();
         } else {
             mongoClient = ConnectionHelper.getMongoClient(
-                    pipelineOptions.getString(JobParametersNames.CONFIG_DB_HOSTS),
-                    pipelineOptions.getString(JobParametersNames.CONFIG_DB_AUTHENTICATIONDB),
-                    pipelineOptions.getString(JobParametersNames.CONFIG_DB_USER),
-                    pipelineOptions.getString(JobParametersNames.CONFIG_DB_PASSWORD).toCharArray()
+                    connection.getHosts(),
+                    connection.getAuthenticationDatabase(),
+                    connection.getUser(),
+                    connection.getPassword().toCharArray()
             );
         }
 
-        mongoClient.setReadPreference(getMongoTemplateReadPreferences(pipelineOptions.getString(JobParametersNames.CONFIG_DB_READPREFERENCE)));
+        mongoClient.setReadPreference(getMongoTemplateReadPreferences(connection.getReadPreference()));
 
         return mongoClient;
     }
