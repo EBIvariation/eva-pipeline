@@ -42,7 +42,7 @@ import static org.mockito.Mockito.when;
 public class VariantMongoWriterTest {
 
     private static final List<? extends Variant> EMPTY_LIST = new ArrayList<>();
-    
+
     private VariantMongoWriter variantMongoWriter;
     private VariantToMongoDbObjectConverter variantToMongoDbObjectConverter =
             Mockito.mock(VariantToMongoDbObjectConverter.class);
