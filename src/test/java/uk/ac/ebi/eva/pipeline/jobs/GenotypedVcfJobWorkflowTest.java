@@ -16,8 +16,8 @@
 
 package uk.ac.ebi.eva.pipeline.jobs;
 
-import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.opencb.biodata.models.variant.VariantSource;
@@ -31,7 +31,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
-
 import uk.ac.ebi.eva.pipeline.configuration.GenotypedVcfWorkflowConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
 import uk.ac.ebi.eva.pipeline.configuration.JobParametersNames;
@@ -39,21 +38,13 @@ import uk.ac.ebi.eva.pipeline.jobs.flows.PopulationStatisticsFlow;
 import uk.ac.ebi.eva.pipeline.jobs.steps.AnnotationLoaderStep;
 import uk.ac.ebi.eva.pipeline.jobs.steps.VepAnnotationGeneratorStep;
 import uk.ac.ebi.eva.pipeline.jobs.steps.VepInputGeneratorStep;
-import uk.ac.ebi.eva.test.utils.JobTestUtils;
+import uk.ac.ebi.eva.test.rules.TemporalMongoRule;
 
 import java.io.File;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * Workflow test for {@link GenotypedVcfJob}
@@ -63,6 +54,9 @@ import static org.junit.Assert.assertTrue;
 @ContextConfiguration(classes = {JobOptions.class, GenotypedVcfJob.class, GenotypedVcfWorkflowConfiguration.class,
         JobLauncherTestUtils.class})
 public class GenotypedVcfJobWorkflowTest {
+
+    @Rule
+    public TemporalMongoRule mongoRule = new TemporalMongoRule();
 
     @Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
@@ -245,15 +239,10 @@ public class GenotypedVcfJobWorkflowTest {
         dbName = jobOptions.getPipelineOptions().getString(JobParametersNames.DB_NAME);
         vepInput = jobOptions.getPipelineOptions().getString(JobOptions.VEP_INPUT);
         vepOutput = jobOptions.getPipelineOptions().getString(JobOptions.VEP_OUTPUT);
-        JobTestUtils.cleanDBs(dbName);
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        JobTestUtils.cleanDBs(dbName);
     }
 
     private void initVariantConfigurationJob() {
+        mongoRule.createTemporalDatabase(dbName);
         String inputFile = GenotypedVcfJobTest.class.getResource(inputFileResouce).getFile();
         String mockVep = GenotypedVcfJobTest.class.getResource("/mockvep.pl").getFile();
 

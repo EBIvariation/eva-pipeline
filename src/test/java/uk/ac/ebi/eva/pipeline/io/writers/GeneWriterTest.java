@@ -19,8 +19,7 @@ package uk.ac.ebi.eva.pipeline.io.writers;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
-import com.mongodb.MongoClient;
-import org.junit.After;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +31,7 @@ import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
 import uk.ac.ebi.eva.pipeline.io.mappers.GeneLineMapper;
 import uk.ac.ebi.eva.pipeline.model.FeatureCoordinates;
 import uk.ac.ebi.eva.test.data.GtfStaticTestData;
-import uk.ac.ebi.eva.test.utils.JobTestUtils;
+import uk.ac.ebi.eva.test.rules.TemporalMongoRule;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,16 +51,16 @@ public class GeneWriterTest {
 
     private static final String DATABASE_NAME = GeneWriterTest.class.getSimpleName();
 
+    @Rule
+    public TemporalMongoRule mongoRule = new TemporalMongoRule();
+
     @Autowired
     private JobOptions jobOptions;
 
-    @After
-    public void tearDown() throws Exception {
-        JobTestUtils.cleanDBs(DATABASE_NAME);
-    }
-
     @Test
     public void shouldWriteAllFieldsIntoMongoDb() throws Exception {
+        mongoRule.createTemporalDatabase(DATABASE_NAME);
+
         MongoOperations mongoOperations = getMongoOperationsFromPipelineOptions(DATABASE_NAME,
                 jobOptions.getMongoConnection());
 
@@ -76,9 +75,7 @@ public class GeneWriterTest {
         }
         geneWriter.write(genes);
 
-        MongoClient mongoClient = new MongoClient();
-        DBCollection genesCollection = mongoClient.getDB(DATABASE_NAME)
-                .getCollection(jobOptions.getDbCollectionsFeaturesName());
+        DBCollection genesCollection = mongoRule.getCollection(DATABASE_NAME, jobOptions.getDbCollectionsFeaturesName());
 
         // count documents in DB and check they have region (chr + start + end)
         DBCursor cursor = genesCollection.find();

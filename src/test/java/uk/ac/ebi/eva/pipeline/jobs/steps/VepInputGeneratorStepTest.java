@@ -15,8 +15,8 @@
  */
 package uk.ac.ebi.eva.pipeline.jobs.steps;
 
-import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.batch.core.BatchStatus;
@@ -30,6 +30,7 @@ import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
 import uk.ac.ebi.eva.pipeline.configuration.VepInputGeneratorStepConfiguration;
 import uk.ac.ebi.eva.pipeline.jobs.AnnotationJob;
 import uk.ac.ebi.eva.pipeline.jobs.PopulationStatisticsJobTest;
+import uk.ac.ebi.eva.test.rules.TemporalMongoRule;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
 
 import java.io.File;
@@ -44,6 +45,9 @@ import static uk.ac.ebi.eva.test.utils.JobTestUtils.readFirstLine;
 @ContextConfiguration(classes = {AnnotationJob.class, VepInputGeneratorStepConfiguration.class, JobLauncherTestUtils.class})
 public class VepInputGeneratorStepTest {
 
+    @Rule
+    public TemporalMongoRule mongoRule = new TemporalMongoRule();
+
     @Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
     @Autowired
@@ -54,13 +58,9 @@ public class VepInputGeneratorStepTest {
         jobOptions.loadArgs();
     }
 
-    @After
-    public void tearDown() throws Exception {
-        JobTestUtils.cleanDBs(jobOptions.getDbName());
-    }
-
     @Test
     public void shouldGenerateVepInput() throws Exception {
+        mongoRule.createTemporalDatabase(jobOptions.getDbName());
         String dump = PopulationStatisticsJobTest.class.getResource("/dump/VariantStatsConfigurationTest_vl").getFile();
         JobTestUtils.restoreMongoDbFromDump(dump, jobOptions.getDbName());
         File vepInputFile = new File(jobOptions.getVepInput());

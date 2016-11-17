@@ -18,16 +18,16 @@ package uk.ac.ebi.eva.pipeline.io.writers;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.opencb.biodata.models.variant.Variant;
 import org.springframework.data.mongodb.core.MongoOperations;
 import uk.ac.ebi.eva.pipeline.model.converters.data.VariantToMongoDbObjectConverter;
-import uk.ac.ebi.eva.test.utils.JobTestUtils;
+import uk.ac.ebi.eva.test.rules.TemporalMongoRule;
 import uk.ac.ebi.eva.utils.MongoConnection;
 import uk.ac.ebi.eva.utils.MongoDBHelper;
 
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -49,6 +49,9 @@ public class VariantMongoWriterTest {
     private final String collectionName = "variants";
     private MongoConnection connection;
 
+    @Rule
+    public TemporalMongoRule mongoRule = new TemporalMongoRule();
+
     @Before
     public void setUp() throws Exception {
         connection = new MongoConnection();
@@ -56,8 +59,8 @@ public class VariantMongoWriterTest {
     }
 
     @Test
-    public void noVariantsNothingShouldBeWritten() throws UnknownHostException {
-        String dbName = "VariantMongoWriterNoVariant";
+    public void noVariantsNothingShouldBeWritten() {
+        String dbName = mongoRule.createTemporalDatabase();
 
         MongoOperations mongoOperations = MongoDBHelper.getMongoOperationsFromPipelineOptions(dbName, connection);
         DBCollection dbCollection = mongoOperations.getCollection(collectionName);
@@ -69,8 +72,8 @@ public class VariantMongoWriterTest {
     }
 
     @Test
-    public void variantsShouldBeWrittenIntoMongoDb() throws UnknownHostException {
-        String dbName = "VariantsShouldBeWrittenIntoMongoDb";
+    public void variantsShouldBeWrittenIntoMongoDb() {
+        String dbName = mongoRule.createTemporalDatabase();
 
         Variant variant = Mockito.mock(Variant.class);
         when(variant.getChromosome()).thenReturn("1").thenReturn("2").thenReturn("3");
@@ -89,8 +92,6 @@ public class VariantMongoWriterTest {
         variantMongoWriter.doWrite(Arrays.asList(variant, variant));
 
         assertEquals(2, dbCollection.count());
-
-        JobTestUtils.cleanDBs(dbName);
     }
 
 }

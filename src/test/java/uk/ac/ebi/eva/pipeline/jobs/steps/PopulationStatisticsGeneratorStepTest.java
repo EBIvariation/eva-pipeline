@@ -15,8 +15,8 @@
  */
 package uk.ac.ebi.eva.pipeline.jobs.steps;
 
-import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.opencb.biodata.models.variant.VariantSource;
@@ -30,21 +30,18 @@ import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
-
 import uk.ac.ebi.eva.pipeline.configuration.CommonConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
 import uk.ac.ebi.eva.pipeline.configuration.JobParametersNames;
 import uk.ac.ebi.eva.pipeline.jobs.PopulationStatisticsJob;
 import uk.ac.ebi.eva.pipeline.jobs.flows.PopulationStatisticsFlow;
-import uk.ac.ebi.eva.test.utils.JobTestUtils;
+import uk.ac.ebi.eva.test.rules.TemporalMongoRule;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.opencb.opencga.storage.core.variant.VariantStorageManager.VARIANT_SOURCE;
 import static uk.ac.ebi.eva.test.utils.JobTestUtils.restoreMongoDbFromDump;
 
@@ -56,6 +53,9 @@ import static uk.ac.ebi.eva.test.utils.JobTestUtils.restoreMongoDbFromDump;
 public class PopulationStatisticsGeneratorStepTest {
 
     private static final String SMALL_VCF_FILE = "/small20.vcf.gz";
+
+    @Rule
+    public TemporalMongoRule mongoRule = new TemporalMongoRule();
 
     @Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
@@ -69,6 +69,7 @@ public class PopulationStatisticsGeneratorStepTest {
     @Test
     public void statisticsGeneratorStepShouldCalculateStats() throws IOException, InterruptedException {
         //and a valid variants load step already completed
+        mongoRule.createTemporalDatabase(jobOptions.getDbName());
         String dump = PopulationStatisticsGeneratorStepTest.class.getResource("/dump/VariantStatsConfigurationTest_vl").getFile();
         restoreMongoDbFromDump(dump, jobOptions.getDbName());
 
@@ -146,11 +147,6 @@ public class PopulationStatisticsGeneratorStepTest {
         jobOptions.setDbName(getClass().getSimpleName());
         pipelineOptions = jobOptions.getPipelineOptions();
         variantOptions = jobOptions.getVariantOptions();
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        JobTestUtils.cleanDBs(jobOptions.getDbName());
     }
 
 }

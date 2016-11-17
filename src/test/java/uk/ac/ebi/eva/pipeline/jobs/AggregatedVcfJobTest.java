@@ -15,10 +15,9 @@
  */
 package uk.ac.ebi.eva.pipeline.jobs;
 
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.BeforeClass;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.opencb.biodata.models.variant.VariantSource;
@@ -37,23 +36,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
-
 import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
 import uk.ac.ebi.eva.pipeline.configuration.JobParametersNames;
 import uk.ac.ebi.eva.pipeline.configuration.VariantAggregatedConfiguration;
+import uk.ac.ebi.eva.test.rules.TemporalMongoRule;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
 
 import java.io.FileInputStream;
-import java.net.UnknownHostException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static uk.ac.ebi.eva.test.utils.JobTestUtils.cleanDBs;
+import static org.junit.Assert.*;
 import static uk.ac.ebi.eva.test.utils.JobTestUtils.getTransformedOutputPath;
 
 /**
@@ -64,6 +59,9 @@ import static uk.ac.ebi.eva.test.utils.JobTestUtils.getTransformedOutputPath;
 @SpringBootTest
 @ContextConfiguration(classes = {JobOptions.class, AggregatedVcfJob.class, VariantAggregatedConfiguration.class, JobLauncherTestUtils.class})
 public class AggregatedVcfJobTest {
+
+    @Rule
+    public TemporalMongoRule mongoRule = new TemporalMongoRule();
 
     @Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
@@ -81,6 +79,7 @@ public class AggregatedVcfJobTest {
     @Test
     public void aggregatedTransformAndLoadShouldBeExecuted() throws Exception {
         Config.setOpenCGAHome(opencgaHome);
+        mongoRule.createTemporalDatabase(dbName);
 
         JobExecution jobExecution = jobLauncherTestUtils.launchJob();
 
@@ -118,6 +117,7 @@ public class AggregatedVcfJobTest {
 
     @Test
     public void aggregationNoneOptionShouldNotLoadStats() throws Exception {
+        mongoRule.createTemporalDatabase(dbName);
         VariantSource source =
                 (VariantSource) jobOptions.getVariantOptions().get(VariantStorageManager.VARIANT_SOURCE);
         jobOptions.getVariantOptions().put(
@@ -154,10 +154,6 @@ public class AggregatedVcfJobTest {
                 new QueryOptions()).next().getSourceEntries().values().iterator().next().getCohortStats().isEmpty());
     }
 
-    @BeforeClass
-    public static void beforeTests() throws UnknownHostException {
-        cleanDBs();
-    }
 
     @Before
     public void setUp() throws Exception {
@@ -170,11 +166,6 @@ public class AggregatedVcfJobTest {
 
         String inputFile = AggregatedVcfJobTest.class.getResource(input).getFile();
         jobOptions.getPipelineOptions().put(JobParametersNames.INPUT_VCF, inputFile);
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        cleanDBs(dbName);
     }
 
 }

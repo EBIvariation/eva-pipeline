@@ -16,8 +16,8 @@
 package uk.ac.ebi.eva.pipeline.jobs.steps;
 
 import org.apache.commons.io.FileUtils;
-import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.opencb.biodata.models.variant.VariantSource;
@@ -37,12 +37,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
-
 import uk.ac.ebi.eva.pipeline.configuration.GenotypedVcfConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
 import uk.ac.ebi.eva.pipeline.configuration.JobParametersNames;
 import uk.ac.ebi.eva.pipeline.jobs.GenotypedVcfJob;
-import uk.ac.ebi.eva.test.utils.JobTestUtils;
+import uk.ac.ebi.eva.test.rules.TemporalMongoRule;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -61,6 +60,9 @@ import static uk.ac.ebi.eva.test.utils.JobTestUtils.getLines;
 @ContextConfiguration(classes = {GenotypedVcfJob.class, JobOptions.class, GenotypedVcfConfiguration.class, JobLauncherTestUtils.class})
 public class VariantLoaderStepTest {
 
+    @Rule
+    public TemporalMongoRule mongoRule = new TemporalMongoRule();
+
     @Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
 
@@ -76,6 +78,7 @@ public class VariantLoaderStepTest {
     @Test
     public void loaderStepShouldLoadAllVariants() throws Exception {
         Config.setOpenCGAHome(opencgaHome);
+        mongoRule.createTemporalDatabase(dbName);
 
         jobOptions.getVariantOptions().put(VariantStorageManager.DB_NAME, dbName);
         jobOptions.getVariantOptions().put(VARIANT_SOURCE, new VariantSource(
@@ -119,6 +122,7 @@ public class VariantLoaderStepTest {
     @Test
     public void loaderStepShouldFailBecauseOpenCGAHomeIsWrong() throws JobExecutionException {
         String inputFile = VariantLoaderStepTest.class.getResource(input).getFile();
+        mongoRule.createTemporalDatabase(dbName);
 
         Config.setOpenCGAHome("");
 
@@ -150,8 +154,4 @@ public class VariantLoaderStepTest {
         dbName = jobOptions.getPipelineOptions().getString(JobParametersNames.DB_NAME);
     }
 
-    @After
-    public void tearDown() throws Exception {
-        JobTestUtils.cleanDBs(dbName);
-    }
 }

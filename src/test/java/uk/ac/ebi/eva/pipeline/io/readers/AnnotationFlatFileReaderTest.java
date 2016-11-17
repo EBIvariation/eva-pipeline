@@ -43,7 +43,6 @@ public class AnnotationFlatFileReaderTest {
     @Rule
     public PipelineTemporaryFolderRule temporaryFolderRule = new PipelineTemporaryFolderRule();
 
-
     @Test
     public void shouldReadAllLinesInVepOutput() throws Exception {
         ExecutionContext executionContext = MetaDataInstanceFactory.createStepExecution().getExecutionContext();

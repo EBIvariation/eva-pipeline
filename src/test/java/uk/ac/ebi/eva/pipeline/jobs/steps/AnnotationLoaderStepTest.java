@@ -15,11 +15,12 @@
  */
 package uk.ac.ebi.eva.pipeline.jobs.steps;
 
-import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
-import com.mongodb.MongoClient;
-import org.junit.*;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.opencb.biodata.models.variant.annotation.VariantAnnotation;
 import org.opencb.opencga.storage.mongodb.variant.DBObjectToVariantAnnotationConverter;
@@ -36,7 +37,7 @@ import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
 import uk.ac.ebi.eva.pipeline.jobs.AnnotationJob;
 import uk.ac.ebi.eva.test.data.VepOutputContent;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
-import uk.ac.ebi.eva.test.utils.JobTestUtils;
+import uk.ac.ebi.eva.test.rules.TemporalMongoRule;
 
 import java.io.File;
 
@@ -58,6 +59,9 @@ public class AnnotationLoaderStepTest {
     private static final String DATABASE_NAME = AnnotationLoaderStepTest.class.getSimpleName();
 
     @Rule
+    public TemporalMongoRule mongoRule = new TemporalMongoRule();
+
+    @Rule
     public PipelineTemporaryFolderRule temporaryFolderRule = new PipelineTemporaryFolderRule();
 
     @Autowired
@@ -65,13 +69,10 @@ public class AnnotationLoaderStepTest {
     @Autowired
     private JobOptions jobOptions;
 
-    private MongoClient mongoClient;
-
     @Before
     public void setUp() throws Exception {
         jobOptions.loadArgs();
         jobOptions.setDbName(DATABASE_NAME);
-        mongoClient = new MongoClient();
 
         String dump = AnnotationLoaderStepTest.class.getResource("/dump/VariantStatsConfigurationTest_vl").getFile();
         restoreMongoDbFromDump(dump, jobOptions.getDbName());
@@ -82,13 +83,16 @@ public class AnnotationLoaderStepTest {
 
     @Test
     public void shouldLoadAllAnnotations() throws Exception {
+        mongoRule.createTemporalDatabase(DATABASE_NAME);
+
         JobExecution jobExecution = jobLauncherTestUtils.launchStep(AnnotationLoaderStep.LOAD_VEP_ANNOTATION);
 
         assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
         assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());
 
         //check that documents have the annotation
-        DBCursor cursor = collection(jobOptions.getDbName(), jobOptions.getDbCollectionsVariantsName()).find();
+        DBCursor cursor = mongoRule.getCollection(jobOptions.getDbName(), jobOptions.getDbCollectionsVariantsName())
+                .find();
 
         DBObjectToVariantAnnotationConverter converter = new DBObjectToVariantAnnotationConverter();
 
@@ -106,19 +110,6 @@ public class AnnotationLoaderStepTest {
 
         assertEquals(300, cnt);
         assertTrue("Annotations not found", consequenceTypeCount > 0);
-    }
-
-    /**
-     * Release resources and delete the temporary output file
-     */
-    @After
-    public void tearDown() throws Exception {
-        JobTestUtils.cleanDBs(jobOptions.getDbName());
-        mongoClient.close();
-    }
-
-    private DBCollection collection(String databaseName, String collectionName) {
-        return mongoClient.getDB(databaseName).getCollection(collectionName);
     }
 
 }

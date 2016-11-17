@@ -19,8 +19,8 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
 import com.mongodb.DuplicateKeyException;
 import com.mongodb.MongoClient;
-import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.batch.core.BatchStatus;
@@ -33,7 +33,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import uk.ac.ebi.eva.pipeline.configuration.DatabaseInitializationConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
 import uk.ac.ebi.eva.pipeline.jobs.DatabaseInitializationJob;
-import uk.ac.ebi.eva.test.utils.JobTestUtils;
+import uk.ac.ebi.eva.test.rules.TemporalMongoRule;
 
 import static org.junit.Assert.assertEquals;
 
@@ -47,6 +47,9 @@ public class IndexesGeneratorStepTest {
 
     private static final String DATABASE_NAME = IndexesGeneratorStepTest.class.getSimpleName();
 
+    @Rule
+    public TemporalMongoRule mongoRule = new TemporalMongoRule();
+
     @Autowired
     public JobOptions jobOptions;
 
@@ -59,13 +62,9 @@ public class IndexesGeneratorStepTest {
         jobOptions.setDbName(DATABASE_NAME);
     }
 
-    @After
-    public void tearDown() throws Exception {
-        JobTestUtils.cleanDBs(DATABASE_NAME);
-    }
-
     @Test
     public void testIndexesAreCreated() throws Exception {
+        mongoRule.createTemporalDatabase(DATABASE_NAME);
         String dbCollectionGenesName = jobOptions.getDbCollectionsFeaturesName();
         JobExecution jobExecution = jobLauncherTestUtils.launchStep(DatabaseInitializationJob.CREATE_DATABASE_INDEXES);
 
@@ -83,6 +82,7 @@ public class IndexesGeneratorStepTest {
 
     @Test(expected = DuplicateKeyException.class)
     public void testNoDuplicatesCanBeInserted() throws Exception {
+        mongoRule.createTemporalDatabase(DATABASE_NAME);
         String dbCollectionGenesName = jobOptions.getDbCollectionsFeaturesName();
         JobExecution jobExecution = jobLauncherTestUtils.launchStep(DatabaseInitializationJob.CREATE_DATABASE_INDEXES);
 

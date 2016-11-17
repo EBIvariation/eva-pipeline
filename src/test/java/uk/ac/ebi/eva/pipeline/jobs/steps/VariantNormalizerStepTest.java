@@ -15,9 +15,9 @@
  */
 package uk.ac.ebi.eva.pipeline.jobs.steps;
 
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.opencb.opencga.lib.common.Config;
@@ -29,12 +29,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
-
 import uk.ac.ebi.eva.pipeline.configuration.GenotypedVcfConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
 import uk.ac.ebi.eva.pipeline.configuration.JobParametersNames;
 import uk.ac.ebi.eva.pipeline.jobs.GenotypedVcfJob;
-import uk.ac.ebi.eva.test.utils.JobTestUtils;
+import uk.ac.ebi.eva.test.rules.TemporalMongoRule;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -57,6 +56,9 @@ import static uk.ac.ebi.eva.test.utils.JobTestUtils.getTransformedOutputPath;
 @ContextConfiguration(classes = {GenotypedVcfJob.class, JobOptions.class, GenotypedVcfConfiguration.class, JobLauncherTestUtils.class})
 public class VariantNormalizerStepTest {
 
+    @Rule
+    public TemporalMongoRule mongoRule = new TemporalMongoRule();
+
     @Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
 
@@ -72,6 +74,7 @@ public class VariantNormalizerStepTest {
     @Test
     public void normalizerStepShouldTransformAllVariants() throws Exception {
         Config.setOpenCGAHome(opencgaHome);
+        mongoRule.createTemporalDatabase(dbName);
 
         String inputFile = VariantNormalizerStepTest.class.getResource(input).getFile();
         jobOptions.getPipelineOptions().put(JobParametersNames.INPUT_VCF, inputFile);
@@ -105,6 +108,7 @@ public class VariantNormalizerStepTest {
     public void normalizerStepShouldFailIfVariantsAreMalformed() {
         final String FILE_WRONG_NO_ALT = "/wrong_no_alt.vcf.gz";
         Config.setOpenCGAHome(opencgaHome);
+        mongoRule.createTemporalDatabase(dbName);
 
         //Given a malformed VCF input file
         String inputFile = VariantNormalizerStepTest.class.getResource(FILE_WRONG_NO_ALT).getFile();
@@ -128,11 +132,6 @@ public class VariantNormalizerStepTest {
         input = jobOptions.getPipelineOptions().getString(JobParametersNames.INPUT_VCF);
         outputDir = jobOptions.getOutputDir();
         dbName = jobOptions.getPipelineOptions().getString(JobParametersNames.DB_NAME);
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        JobTestUtils.cleanDBs(dbName);
     }
 
 }

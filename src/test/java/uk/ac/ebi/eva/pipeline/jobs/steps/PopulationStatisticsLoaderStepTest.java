@@ -1,7 +1,6 @@
 package uk.ac.ebi.eva.pipeline.jobs.steps;
 
 import org.apache.commons.io.FileUtils;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -23,13 +22,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.rule.OutputCapture;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
-
 import uk.ac.ebi.eva.pipeline.configuration.CommonConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
 import uk.ac.ebi.eva.pipeline.configuration.JobParametersNames;
 import uk.ac.ebi.eva.pipeline.jobs.PopulationStatisticsJob;
 import uk.ac.ebi.eva.pipeline.jobs.flows.PopulationStatisticsFlow;
-import uk.ac.ebi.eva.test.utils.JobTestUtils;
+import uk.ac.ebi.eva.test.rules.TemporalMongoRule;
 
 import java.io.File;
 import java.io.IOException;
@@ -47,6 +45,10 @@ import static uk.ac.ebi.eva.test.utils.JobTestUtils.restoreMongoDbFromDump;
 public class PopulationStatisticsLoaderStepTest {
 
     private static final String SMALL_VCF_FILE = "/small20.vcf.gz";
+    private static final String DATABASE_NAME = PopulationStatisticsLoaderStepTest.class.getSimpleName();
+
+    @Rule
+    public TemporalMongoRule mongoRule = new TemporalMongoRule();
 
     @Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
@@ -67,6 +69,8 @@ public class PopulationStatisticsLoaderStepTest {
     @Test
     public void statisticsLoaderStepShouldLoadStatsIntoDb() throws StorageManagerException, IllegalAccessException,
             ClassNotFoundException, InstantiationException, IOException, InterruptedException {
+        mongoRule.createTemporalDatabase(DATABASE_NAME);
+
         //Given a valid VCF input file
         String input = PopulationStatisticsLoaderStepTest.class.getResource(SMALL_VCF_FILE).getFile();
         VariantSource source = new VariantSource(input, "1", "1", "studyName");
@@ -118,6 +122,7 @@ public class PopulationStatisticsLoaderStepTest {
 
     @Test
     public void statisticsLoaderStepShouldFaildBecauseVariantStatsFileIsMissing() throws JobExecutionException {
+        mongoRule.createTemporalDatabase(DATABASE_NAME);
         String input = PopulationStatisticsLoaderStepTest.class.getResource(SMALL_VCF_FILE).getFile();
         VariantSource source = new VariantSource(input, "4", "1", "studyName");
 
@@ -137,12 +142,7 @@ public class PopulationStatisticsLoaderStepTest {
         jobOptions.loadArgs();
         pipelineOptions = jobOptions.getPipelineOptions();
         variantOptions = jobOptions.getVariantOptions();
-        jobOptions.setDbName(getClass().getSimpleName());
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        JobTestUtils.cleanDBs(jobOptions.getDbName());
+        jobOptions.setDbName(DATABASE_NAME);
     }
 
 }

@@ -15,9 +15,7 @@
  */
 package uk.ac.ebi.eva.test.utils;
 
-import com.mongodb.DB;
 import com.mongodb.DBObject;
-import com.mongodb.MongoClient;
 import com.mongodb.util.JSON;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,7 +23,6 @@ import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
 
 import java.io.*;
-import java.net.UnknownHostException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Iterator;
@@ -86,17 +83,6 @@ public class JobTestUtils {
 
     public static String getTransformedOutputPath(Path input, String compressExtension, String outputDir) {
         return Paths.get(outputDir).resolve(input) + ".variants.json" + compressExtension;
-    }
-
-    public static void cleanDBs(String... dbs) throws UnknownHostException {
-        // Delete Mongo collection
-        MongoClient mongoClient = new MongoClient("localhost");
-
-        for (String dbName : dbs) {
-            DB db = mongoClient.getDB(dbName);
-            db.dropDatabase();
-        }
-        mongoClient.close();
     }
 
     public static JobParameters getJobParameters() {

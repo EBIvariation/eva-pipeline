@@ -17,7 +17,7 @@ package uk.ac.ebi.eva.pipeline.io.writers;
 
 
 import com.mongodb.*;
-import org.junit.After;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.batch.item.file.mapping.JsonLineMapper;
@@ -29,11 +29,12 @@ import uk.ac.ebi.eva.pipeline.configuration.CommonConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
 import uk.ac.ebi.eva.pipeline.model.PopulationStatistics;
 import uk.ac.ebi.eva.test.data.VariantData;
-import uk.ac.ebi.eva.test.utils.JobTestUtils;
+import uk.ac.ebi.eva.test.rules.TemporalMongoRule;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -49,15 +50,13 @@ import static uk.ac.ebi.eva.utils.MongoDBHelper.getMongoOperationsFromPipelineOp
 @ContextConfiguration(classes = {JobOptions.class, CommonConfiguration.class})
 public class StatisticsMongoWriterTest {
 
-    private static final String DATABASE_NAME = StatisticsMongoWriterTest.class.getSimpleName();
+    private static final String DATABASE_NAME = UUID.randomUUID().toString();
+
+    @Rule
+    public TemporalMongoRule mongoRule = new TemporalMongoRule();
 
     @Autowired
     private JobOptions jobOptions;
-
-    @After
-    public void tearDown() throws Exception {
-        JobTestUtils.cleanDBs(DATABASE_NAME);
-    }
 
     @Test
     public void shouldWriteAllFieldsIntoMongoDb() throws Exception {
@@ -71,9 +70,7 @@ public class StatisticsMongoWriterTest {
         }
 
         // do the checks
-        DB db = new MongoClient().getDB(DATABASE_NAME);
-        DBCollection statsCollection = db.getCollection(jobOptions.getDbCollectionsStatsName());
-
+        DBCollection statsCollection = mongoRule.getCollection(DATABASE_NAME, jobOptions.getDbCollectionsStatsName());
         // count documents in DB and check they have at least the index fields (vid, sid, cid) and maf and genotypeCount
         DBCursor cursor = statsCollection.find();
 
@@ -137,6 +134,7 @@ public class StatisticsMongoWriterTest {
     }
 
     public StatisticsMongoWriter getStatisticsMongoWriter() {
+        mongoRule.createTemporalDatabase(DATABASE_NAME);
         MongoOperations mongoOperations = getMongoOperationsFromPipelineOptions(DATABASE_NAME,
                 jobOptions.getMongoConnection());
         StatisticsMongoWriter statisticsMongoWriter = new StatisticsMongoWriter(

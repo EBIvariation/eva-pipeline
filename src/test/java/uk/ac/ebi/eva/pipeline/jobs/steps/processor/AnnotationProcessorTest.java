@@ -21,9 +21,9 @@ import org.springframework.batch.item.ItemProcessor;
 import uk.ac.ebi.eva.pipeline.jobs.steps.processors.AnnotationProcessor;
 import uk.ac.ebi.eva.pipeline.model.VariantWrapper;
 import uk.ac.ebi.eva.test.data.VariantData;
-import uk.ac.ebi.eva.test.utils.JobTestUtils;
 
 import static org.junit.Assert.assertEquals;
+import static uk.ac.ebi.eva.test.rules.TemporalMongoRule.constructDbo;
 
 /**
  * {@link AnnotationProcessor}
@@ -34,9 +34,9 @@ public class AnnotationProcessorTest {
 
     @Test
     public void shouldConvertAllFieldsInVariant() throws Exception {
-        DBObject dbo = JobTestUtils.constructDbo(VariantData.getVariantWithoutAnnotation());
+        DBObject dbo = constructDbo(VariantData.getVariantWithoutAnnotation());
 
-        ItemProcessor<DBObject, VariantWrapper> processor =  new AnnotationProcessor();
+        ItemProcessor<DBObject, VariantWrapper> processor = new AnnotationProcessor();
         VariantWrapper variant = processor.process(dbo);
         assertEquals("+", variant.getStrand());
         assertEquals("20", variant.getChr());

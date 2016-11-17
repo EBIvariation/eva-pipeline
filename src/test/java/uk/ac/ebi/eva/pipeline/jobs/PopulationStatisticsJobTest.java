@@ -16,8 +16,8 @@
 package uk.ac.ebi.eva.pipeline.jobs;
 
 import org.apache.commons.io.FileUtils;
-import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.opencb.biodata.models.variant.VariantSource;
@@ -35,19 +35,17 @@ import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
-
 import uk.ac.ebi.eva.pipeline.configuration.CommonConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
 import uk.ac.ebi.eva.pipeline.configuration.JobParametersNames;
+import uk.ac.ebi.eva.test.rules.TemporalMongoRule;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.opencb.opencga.storage.core.variant.VariantStorageManager.VARIANT_SOURCE;
 import static uk.ac.ebi.eva.test.utils.JobTestUtils.restoreMongoDbFromDump;
 
@@ -59,6 +57,9 @@ import static uk.ac.ebi.eva.test.utils.JobTestUtils.restoreMongoDbFromDump;
 public class PopulationStatisticsJobTest {
 
     private static final String SMALL_VCF_FILE = "/small20.vcf.gz";
+
+    @Rule
+    public TemporalMongoRule mongoRule = new TemporalMongoRule();
 
     @Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
@@ -125,6 +126,7 @@ public class PopulationStatisticsJobTest {
 
     private void initStatsLoadStepFiles() throws IOException, InterruptedException {
         //and a valid variants load and stats create steps already completed
+        mongoRule.createTemporalDatabase(jobOptions.getDbName());
         String dump = PopulationStatisticsJobTest.class.getResource("/dump/").getFile();
         restoreMongoDbFromDump(dump, jobOptions.getDbName());
 
@@ -156,11 +158,6 @@ public class PopulationStatisticsJobTest {
         jobOptions.setDbName(getClass().getSimpleName());
         pipelineOptions = jobOptions.getPipelineOptions();
         variantOptions = jobOptions.getVariantOptions();
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        JobTestUtils.cleanDBs(jobOptions.getDbName());
     }
 
 }
