@@ -19,10 +19,7 @@ import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.mongodb.MongoClient;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.runner.RunWith;
 import org.opencb.biodata.models.variant.annotation.VariantAnnotation;
 import org.opencb.opencga.storage.mongodb.variant.DBObjectToVariantAnnotationConverter;
@@ -38,14 +35,13 @@ import uk.ac.ebi.eva.pipeline.configuration.AnnotationLoaderStepTestConfiguratio
 import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
 import uk.ac.ebi.eva.pipeline.jobs.AnnotationJob;
 import uk.ac.ebi.eva.test.data.VepOutputContent;
+import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
 
 import java.io.File;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static uk.ac.ebi.eva.test.utils.JobTestUtils.makeGzipFile;
-import static uk.ac.ebi.eva.test.utils.JobTestUtils.makeTemporalGzipFile;
 import static uk.ac.ebi.eva.test.utils.JobTestUtils.restoreMongoDbFromDump;
 
 
@@ -60,6 +56,9 @@ import static uk.ac.ebi.eva.test.utils.JobTestUtils.restoreMongoDbFromDump;
 public class AnnotationLoaderStepTest {
 
     private static final String DATABASE_NAME = AnnotationLoaderStepTest.class.getSimpleName();
+
+    @Rule
+    public PipelineTemporaryFolderRule temporaryFolderRule = new PipelineTemporaryFolderRule();
 
     @Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
@@ -77,7 +76,7 @@ public class AnnotationLoaderStepTest {
         String dump = AnnotationLoaderStepTest.class.getResource("/dump/VariantStatsConfigurationTest_vl").getFile();
         restoreMongoDbFromDump(dump, jobOptions.getDbName());
 
-        File file = makeTemporalGzipFile(VepOutputContent.vepOutputContent);
+        File file = temporaryFolderRule.makeTemporalGzipFile(VepOutputContent.vepOutputContent);
         jobOptions.setVepOutput(file.getAbsolutePath());
     }
 

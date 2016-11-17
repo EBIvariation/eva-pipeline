@@ -19,6 +19,7 @@ import static org.junit.Assert.assertEquals;
 
 import java.io.File;
 
+import org.junit.Rule;
 import org.junit.Test;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.test.MetaDataInstanceFactory;
@@ -27,6 +28,7 @@ import uk.ac.ebi.eva.pipeline.io.readers.GeneReader;
 import uk.ac.ebi.eva.pipeline.jobs.steps.processors.GeneFilterProcessor;
 import uk.ac.ebi.eva.pipeline.model.FeatureCoordinates;
 import uk.ac.ebi.eva.test.data.GtfStaticTestData;
+import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
 
 /**
@@ -36,13 +38,16 @@ import uk.ac.ebi.eva.test.utils.JobTestUtils;
  */
 public class GeneFilterProcessorTest {
 
+    @Rule
+    public PipelineTemporaryFolderRule temporaryFolderRule = new PipelineTemporaryFolderRule();
+
     @Test
     public void shouldKeepGenesAndTranscripts() throws Exception {
         ExecutionContext executionContext = MetaDataInstanceFactory.createStepExecution().getExecutionContext();
         GeneFilterProcessor geneFilterProcessor = new GeneFilterProcessor();
 
         //simulate VEP output file
-        File file = JobTestUtils.makeTemporalGzipFile(GtfStaticTestData.GTF_CONTENT);
+        File file = temporaryFolderRule.makeTemporalGzipFile(GtfStaticTestData.GTF_CONTENT);
 
         GeneReader geneReader = new GeneReader(file);
         geneReader.setSaveState(false);
