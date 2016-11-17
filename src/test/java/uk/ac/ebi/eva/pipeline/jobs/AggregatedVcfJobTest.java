@@ -79,7 +79,7 @@ public class AggregatedVcfJobTest {
     @Test
     public void aggregatedTransformAndLoadShouldBeExecuted() throws Exception {
         Config.setOpenCGAHome(opencgaHome);
-        mongoRule.createTemporalDatabase(dbName);
+        mongoRule.getTemporalDatabase(dbName);
 
         JobExecution jobExecution = jobLauncherTestUtils.launchJob();
 
@@ -117,7 +117,7 @@ public class AggregatedVcfJobTest {
 
     @Test
     public void aggregationNoneOptionShouldNotLoadStats() throws Exception {
-        mongoRule.createTemporalDatabase(dbName);
+        mongoRule.getTemporalDatabase(dbName);
         VariantSource source =
                 (VariantSource) jobOptions.getVariantOptions().get(VariantStorageManager.VARIANT_SOURCE);
         jobOptions.getVariantOptions().put(

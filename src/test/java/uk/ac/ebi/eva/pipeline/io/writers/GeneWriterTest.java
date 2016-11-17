@@ -59,7 +59,7 @@ public class GeneWriterTest {
 
     @Test
     public void shouldWriteAllFieldsIntoMongoDb() throws Exception {
-        mongoRule.createTemporalDatabase(DATABASE_NAME);
+        mongoRule.getTemporalDatabase(DATABASE_NAME);
 
         MongoOperations mongoOperations = getMongoOperationsFromPipelineOptions(DATABASE_NAME,
                 jobOptions.getMongoConnection());

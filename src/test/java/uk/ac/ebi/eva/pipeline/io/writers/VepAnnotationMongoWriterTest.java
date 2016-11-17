@@ -68,13 +68,12 @@ public class VepAnnotationMongoWriterTest {
 
     @Test
     public void shouldWriteAllFieldsIntoMongoDb() throws Exception {
-        String dbCollectionVariantsName = jobOptions.getDbCollectionsVariantsName();
-        mongoRule.createTemporalDatabase(DATABASE_NAME);
-
         List<VariantAnnotation> annotations = new ArrayList<>();
         for (String annotLine : vepOutputContent.split("\n")) {
             annotations.add(AnnotationLineMapper.mapLine(annotLine, 0));
         }
+
+        String dbCollectionVariantsName = jobOptions.getDbCollectionsVariantsName();
         DBCollection variants = mongoRule.getCollection(DATABASE_NAME, dbCollectionVariantsName);
 
         // first do a mock of a "variants" collection, with just the _id
@@ -109,13 +108,11 @@ public class VepAnnotationMongoWriterTest {
      */
     @Test
     public void shouldWriteAllFieldsIntoMongoDbMultipleSetsAnnotations() throws Exception {
-        String dbCollectionVariantsName = jobOptions.getDbCollectionsVariantsName();
-        mongoRule.createTemporalDatabase(DATABASE_NAME);
-
         List<VariantAnnotation> annotations = new ArrayList<>();
         for (String annotLine : vepOutputContent.split("\n")) {
             annotations.add(AnnotationLineMapper.mapLine(annotLine, 0));
         }
+        String dbCollectionVariantsName = jobOptions.getDbCollectionsVariantsName();
         DBCollection variants = mongoRule.getCollection(DATABASE_NAME, dbCollectionVariantsName);
 
         // first do a mock of a "variants" collection, with just the _id

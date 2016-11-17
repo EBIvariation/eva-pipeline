@@ -74,7 +74,7 @@ public class VariantNormalizerStepTest {
     @Test
     public void normalizerStepShouldTransformAllVariants() throws Exception {
         Config.setOpenCGAHome(opencgaHome);
-        mongoRule.createTemporalDatabase(dbName);
+        mongoRule.getTemporalDatabase(dbName);
 
         String inputFile = VariantNormalizerStepTest.class.getResource(input).getFile();
         jobOptions.getPipelineOptions().put(JobParametersNames.INPUT_VCF, inputFile);
@@ -108,7 +108,7 @@ public class VariantNormalizerStepTest {
     public void normalizerStepShouldFailIfVariantsAreMalformed() {
         final String FILE_WRONG_NO_ALT = "/wrong_no_alt.vcf.gz";
         Config.setOpenCGAHome(opencgaHome);
-        mongoRule.createTemporalDatabase(dbName);
+        mongoRule.getTemporalDatabase(dbName);
 
         //Given a malformed VCF input file
         String inputFile = VariantNormalizerStepTest.class.getResource(FILE_WRONG_NO_ALT).getFile();

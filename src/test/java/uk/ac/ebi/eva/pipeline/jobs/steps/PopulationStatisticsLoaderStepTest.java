@@ -118,7 +118,7 @@ public class PopulationStatisticsLoaderStepTest {
 
     @Test
     public void statisticsLoaderStepShouldFaildBecauseVariantStatsFileIsMissing() throws JobExecutionException {
-        mongoRule.createTemporalDatabase(DATABASE_NAME);
+        mongoRule.getTemporalDatabase(DATABASE_NAME);
         String input = PopulationStatisticsLoaderStepTest.class.getResource(SMALL_VCF_FILE).getFile();
         VariantSource source = new VariantSource(input, "4", "1", "studyName");
 

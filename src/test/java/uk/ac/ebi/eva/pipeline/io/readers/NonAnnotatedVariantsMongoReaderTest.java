@@ -85,7 +85,7 @@ public class NonAnnotatedVariantsMongoReaderTest {
     }
 
     private String insertDocuments(String collectionName) throws IOException {
-        String databaseName = mongoRule.createTemporalDatabase();
+        String databaseName = mongoRule.getRandomTemporalDatabaseName();
         mongoRule.insert(databaseName, collectionName, VariantData.getVariantWithAnnotation());
         mongoRule.insert(databaseName, collectionName, VariantData.getVariantWithoutAnnotation());
         return databaseName;

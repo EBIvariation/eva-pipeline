@@ -55,7 +55,6 @@ public class JobTestUtils {
         return lines.iterator().next();
     }
 
-
     /**
      * counts non-comment lines in an InputStream
      */

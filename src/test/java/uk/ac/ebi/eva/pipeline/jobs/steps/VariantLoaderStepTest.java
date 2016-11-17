@@ -78,7 +78,7 @@ public class VariantLoaderStepTest {
     @Test
     public void loaderStepShouldLoadAllVariants() throws Exception {
         Config.setOpenCGAHome(opencgaHome);
-        mongoRule.createTemporalDatabase(dbName);
+        mongoRule.getTemporalDatabase(dbName);
 
         jobOptions.getVariantOptions().put(VariantStorageManager.DB_NAME, dbName);
         jobOptions.getVariantOptions().put(VARIANT_SOURCE, new VariantSource(
@@ -122,7 +122,7 @@ public class VariantLoaderStepTest {
     @Test
     public void loaderStepShouldFailBecauseOpenCGAHomeIsWrong() throws JobExecutionException {
         String inputFile = VariantLoaderStepTest.class.getResource(input).getFile();
-        mongoRule.createTemporalDatabase(dbName);
+        mongoRule.getTemporalDatabase(dbName);
 
         Config.setOpenCGAHome("");
 

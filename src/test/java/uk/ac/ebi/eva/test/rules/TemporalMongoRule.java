@@ -48,12 +48,8 @@ public class TemporalMongoRule extends ExternalResource {
         mongoClient = new MongoClient();
     }
 
-    public String createTemporalDatabase() {
-        return getDatabase().getName();
-    }
-
-    public DB createTemporalDatabase(String dbName) {
-        return getDatabase(dbName);
+    public String getRandomTemporalDatabaseName() {
+        return getTemporalDatabase().getName();
     }
 
     /**
@@ -67,24 +63,16 @@ public class TemporalMongoRule extends ExternalResource {
     }
 
     public DBCollection getCollection(String databaseName, String collection) {
-        return getDatabase(databaseName).getCollection(collection);
+        return getTemporalDatabase(databaseName).getCollection(collection);
     }
-
-//    public DBCollection getCollection(String collection) {
-//        return getDatabase().getCollection(collection);
-//    }
-//
-//    public DBCollection getCollection() {
-//        return getCollection(UUID.randomUUID().toString());
-//    }
 
     /**
      * Returns a new temporal database
      *
      * @return
      */
-    private DB getDatabase() {
-        return getDatabase(UUID.randomUUID().toString());
+    private DB getTemporalDatabase() {
+        return getTemporalDatabase(UUID.randomUUID().toString());
     }
 
     /**
@@ -93,7 +81,7 @@ public class TemporalMongoRule extends ExternalResource {
      * @param databaseName
      * @return
      */
-    public DB getDatabase(String databaseName) {
+    public DB getTemporalDatabase(String databaseName) {
         databaseNames.add(databaseName);
         return mongoClient.getDB(databaseName);
     }
@@ -116,7 +104,7 @@ public class TemporalMongoRule extends ExternalResource {
         assert (databaseName != null && !databaseName.isEmpty());
         String file = dumpLocation.getFile();
         assert (file != null && !file.isEmpty());
-        createTemporalDatabase(databaseName);
+        getTemporalDatabase(databaseName);
 
         logger.info("restoring DB from " + file + " into database " + databaseName);
 

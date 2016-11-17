@@ -64,7 +64,7 @@ public class IndexesGeneratorStepTest {
 
     @Test
     public void testIndexesAreCreated() throws Exception {
-        mongoRule.createTemporalDatabase(DATABASE_NAME);
+        mongoRule.getTemporalDatabase(DATABASE_NAME);
         String dbCollectionGenesName = jobOptions.getDbCollectionsFeaturesName();
         JobExecution jobExecution = jobLauncherTestUtils.launchStep(DatabaseInitializationJob.CREATE_DATABASE_INDEXES);
 
@@ -82,7 +82,7 @@ public class IndexesGeneratorStepTest {
 
     @Test(expected = DuplicateKeyException.class)
     public void testNoDuplicatesCanBeInserted() throws Exception {
-        mongoRule.createTemporalDatabase(DATABASE_NAME);
+        mongoRule.getTemporalDatabase(DATABASE_NAME);
         String dbCollectionGenesName = jobOptions.getDbCollectionsFeaturesName();
         JobExecution jobExecution = jobLauncherTestUtils.launchStep(DatabaseInitializationJob.CREATE_DATABASE_INDEXES);
 

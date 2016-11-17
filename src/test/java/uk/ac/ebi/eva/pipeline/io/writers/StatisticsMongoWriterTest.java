@@ -16,7 +16,9 @@
 package uk.ac.ebi.eva.pipeline.io.writers;
 
 
-import com.mongodb.*;
+import com.mongodb.DBCollection;
+import com.mongodb.DBCursor;
+import com.mongodb.DBObject;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -95,8 +97,7 @@ public class StatisticsMongoWriterTest {
         statisticsMongoWriter.write(populationStatisticsList);
 
         // do the checks
-        DB db = new MongoClient().getDB(DATABASE_NAME);
-        DBCollection statsCollection = db.getCollection(jobOptions.getDbCollectionsStatsName());
+        DBCollection statsCollection = mongoRule.getCollection(DATABASE_NAME, jobOptions.getDbCollectionsStatsName());
 
         // check vid has an index
         assertEquals("[{ \"v\" : 1 , \"key\" : { \"_id\" : 1} , \"name\" : \"_id_\" , \"ns\" : \"" + DATABASE_NAME +
@@ -129,12 +130,11 @@ public class StatisticsMongoWriterTest {
                 (Integer) map.get("missAl"),
                 (Integer) map.get("missGt"),
                 (Map<String, Integer>) map.get("numGt"));
-
         return Arrays.asList(populationStatistics);
     }
 
     public StatisticsMongoWriter getStatisticsMongoWriter() {
-        mongoRule.createTemporalDatabase(DATABASE_NAME);
+        mongoRule.getTemporalDatabase(DATABASE_NAME);
         MongoOperations mongoOperations = getMongoOperationsFromPipelineOptions(DATABASE_NAME,
                 jobOptions.getMongoConnection());
         StatisticsMongoWriter statisticsMongoWriter = new StatisticsMongoWriter(

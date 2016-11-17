@@ -242,7 +242,7 @@ public class GenotypedVcfJobWorkflowTest {
     }
 
     private void initVariantConfigurationJob() {
-        mongoRule.createTemporalDatabase(dbName);
+        mongoRule.getTemporalDatabase(dbName);
         String inputFile = GenotypedVcfJobTest.class.getResource(inputFileResouce).getFile();
         String mockVep = GenotypedVcfJobTest.class.getResource("/mockvep.pl").getFile();
 

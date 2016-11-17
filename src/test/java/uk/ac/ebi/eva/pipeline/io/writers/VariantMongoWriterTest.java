@@ -60,7 +60,7 @@ public class VariantMongoWriterTest {
 
     @Test
     public void noVariantsNothingShouldBeWritten() {
-        String dbName = mongoRule.createTemporalDatabase();
+        String dbName = mongoRule.getRandomTemporalDatabaseName();
 
         MongoOperations mongoOperations = MongoDBHelper.getMongoOperationsFromPipelineOptions(dbName, connection);
         DBCollection dbCollection = mongoOperations.getCollection(collectionName);
@@ -73,7 +73,7 @@ public class VariantMongoWriterTest {
 
     @Test
     public void variantsShouldBeWrittenIntoMongoDb() {
-        String dbName = mongoRule.createTemporalDatabase();
+        String dbName = mongoRule.getRandomTemporalDatabaseName();
 
         Variant variant = Mockito.mock(Variant.class);
         when(variant.getChromosome()).thenReturn("1").thenReturn("2").thenReturn("3");

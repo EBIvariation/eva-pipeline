@@ -103,7 +103,7 @@ public class GenotypedVcfJobTest {
         jobOptions.getPipelineOptions().put(JobParametersNames.APP_VEP_PATH, mockVep);
 
         Config.setOpenCGAHome(opencgaHome);
-        mongoRule.createTemporalDatabase(dbName);
+        mongoRule.getTemporalDatabase(dbName);
 
         // transformedVcf file init
         String transformedVcf = outputDir + input + ".variants.json" + compressExtension;
