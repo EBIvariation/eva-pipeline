@@ -17,6 +17,7 @@ package uk.ac.ebi.eva.pipeline.jobs.steps;
 
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.batch.core.BatchStatus;
@@ -32,6 +33,7 @@ import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
 import uk.ac.ebi.eva.pipeline.jobs.AnnotationJob;
 import uk.ac.ebi.eva.pipeline.jobs.AnnotationJobTest;
 import uk.ac.ebi.eva.pipeline.jobs.flows.AnnotationFlow;
+import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
 
 import java.io.File;
@@ -39,7 +41,6 @@ import java.io.FileInputStream;
 import java.util.zip.GZIPInputStream;
 
 import static org.junit.Assert.*;
-import static uk.ac.ebi.eva.test.utils.JobTestUtils.makeGzipFile;
 
 /**
  * Test for {@link VepAnnotationGeneratorStep}
@@ -48,6 +49,9 @@ import static uk.ac.ebi.eva.test.utils.JobTestUtils.makeGzipFile;
 @ActiveProfiles("variant-annotation-mongo")
 @ContextConfiguration(classes = {JobOptions.class, AnnotationJob.class, AnnotationConfiguration.class, JobLauncherTestUtils.class})
 public class VepAnnotationGeneratorStepTest {
+
+    @Rule
+    public PipelineTemporaryFolderRule temporaryFolderRule = new PipelineTemporaryFolderRule();
 
     @Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
@@ -63,9 +67,9 @@ public class VepAnnotationGeneratorStepTest {
 
     @Test
     public void shouldGenerateVepAnnotations() throws Exception {
-        makeGzipFile("20\t60343\t60343\tG/A\t+", jobOptions.getVepInput());
-
-        File vepOutputFile = JobTestUtils.createTempFile();
+        File vepInputFile = temporaryFolderRule.makeTemporalGzipFile("20\t60343\t60343\tG/A\t+");
+        jobOptions.setVepInputFile(vepInputFile.getAbsolutePath());
+        File vepOutputFile = temporaryFolderRule.newFile();
         jobOptions.setVepOutput(vepOutputFile.getAbsolutePath());
 
         vepOutputFile.delete();

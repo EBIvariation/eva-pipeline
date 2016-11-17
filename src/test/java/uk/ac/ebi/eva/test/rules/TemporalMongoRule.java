@@ -8,12 +8,20 @@ import com.mongodb.util.JSON;
 import org.junit.rules.ExternalResource;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.URL;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
 public class TemporalMongoRule extends ExternalResource {
+
+    private static final Logger logger = LoggerFactory.getLogger(TemporalMongoRule.class);
 
     private final Set<String> databaseNames;
     private Description description;
@@ -103,4 +111,29 @@ public class TemporalMongoRule extends ExternalResource {
         getCollection(databaseName, collectionName).insert(constructDbo(jsonString));
     }
 
+    public void importDump(URL dumpLocation, String databaseName) throws IOException, InterruptedException {
+        assert (dumpLocation != null);
+        assert (databaseName != null && !databaseName.isEmpty());
+        String file = dumpLocation.getFile();
+        assert (file != null && !file.isEmpty());
+        createTemporalDatabase(databaseName);
+
+        logger.info("restoring DB from " + file + " into database " + databaseName);
+
+        Process exec = Runtime.getRuntime().exec(String.format("mongorestore -d %s %s", databaseName, file));
+        exec.waitFor();
+        String line;
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(exec.getInputStream()));
+        while ((line = bufferedReader.readLine()) != null) {
+            logger.info("mongorestore output:" + line);
+        }
+        bufferedReader.close();
+        bufferedReader = new BufferedReader(new InputStreamReader(exec.getErrorStream()));
+        while ((line = bufferedReader.readLine()) != null) {
+            logger.info("mongorestore errorOutput:" + line);
+        }
+        bufferedReader.close();
+
+        logger.info("mongorestore exit value: " + exec.exitValue());
+    }
 }

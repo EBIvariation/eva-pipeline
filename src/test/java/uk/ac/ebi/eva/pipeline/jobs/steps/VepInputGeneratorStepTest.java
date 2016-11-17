@@ -29,9 +29,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
 import uk.ac.ebi.eva.pipeline.configuration.VepInputGeneratorStepConfiguration;
 import uk.ac.ebi.eva.pipeline.jobs.AnnotationJob;
-import uk.ac.ebi.eva.pipeline.jobs.PopulationStatisticsJobTest;
 import uk.ac.ebi.eva.test.rules.TemporalMongoRule;
-import uk.ac.ebi.eva.test.utils.JobTestUtils;
 
 import java.io.File;
 
@@ -60,9 +58,7 @@ public class VepInputGeneratorStepTest {
 
     @Test
     public void shouldGenerateVepInput() throws Exception {
-        mongoRule.createTemporalDatabase(jobOptions.getDbName());
-        String dump = PopulationStatisticsJobTest.class.getResource("/dump/VariantStatsConfigurationTest_vl").getFile();
-        JobTestUtils.restoreMongoDbFromDump(dump, jobOptions.getDbName());
+        mongoRule.importDump(getClass().getResource("/dump/VariantStatsConfigurationTest_vl"), jobOptions.getDbName());
         File vepInputFile = new File(jobOptions.getVepInput());
 
         if (vepInputFile.exists())

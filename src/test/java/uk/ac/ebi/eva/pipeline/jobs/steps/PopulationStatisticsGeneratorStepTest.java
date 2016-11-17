@@ -43,7 +43,6 @@ import java.nio.file.Paths;
 
 import static org.junit.Assert.*;
 import static org.opencb.opencga.storage.core.variant.VariantStorageManager.VARIANT_SOURCE;
-import static uk.ac.ebi.eva.test.utils.JobTestUtils.restoreMongoDbFromDump;
 
 /**
  * Test for {@link PopulationStatisticsGeneratorStep}
@@ -69,9 +68,7 @@ public class PopulationStatisticsGeneratorStepTest {
     @Test
     public void statisticsGeneratorStepShouldCalculateStats() throws IOException, InterruptedException {
         //and a valid variants load step already completed
-        mongoRule.createTemporalDatabase(jobOptions.getDbName());
-        String dump = PopulationStatisticsGeneratorStepTest.class.getResource("/dump/VariantStatsConfigurationTest_vl").getFile();
-        restoreMongoDbFromDump(dump, jobOptions.getDbName());
+        mongoRule.importDump(getClass().getResource("/dump/VariantStatsConfigurationTest_vl"), jobOptions.getDbName());
 
         //Given a valid VCF input file
         String input = SMALL_VCF_FILE;

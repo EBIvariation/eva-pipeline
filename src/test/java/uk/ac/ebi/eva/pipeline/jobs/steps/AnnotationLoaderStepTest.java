@@ -18,7 +18,6 @@ package uk.ac.ebi.eva.pipeline.jobs.steps;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -43,7 +42,6 @@ import java.io.File;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static uk.ac.ebi.eva.test.utils.JobTestUtils.restoreMongoDbFromDump;
 
 
 /**
@@ -69,21 +67,9 @@ public class AnnotationLoaderStepTest {
     @Autowired
     private JobOptions jobOptions;
 
-    @Before
-    public void setUp() throws Exception {
-        jobOptions.loadArgs();
-        jobOptions.setDbName(DATABASE_NAME);
-
-        String dump = AnnotationLoaderStepTest.class.getResource("/dump/VariantStatsConfigurationTest_vl").getFile();
-        restoreMongoDbFromDump(dump, jobOptions.getDbName());
-
-        File file = temporaryFolderRule.makeTemporalGzipFile(VepOutputContent.vepOutputContent);
-        jobOptions.setVepOutput(file.getAbsolutePath());
-    }
-
     @Test
     public void shouldLoadAllAnnotations() throws Exception {
-        mongoRule.createTemporalDatabase(DATABASE_NAME);
+        setUp();
 
         JobExecution jobExecution = jobLauncherTestUtils.launchStep(AnnotationLoaderStep.LOAD_VEP_ANNOTATION);
 
@@ -110,6 +96,16 @@ public class AnnotationLoaderStepTest {
 
         assertEquals(300, cnt);
         assertTrue("Annotations not found", consequenceTypeCount > 0);
+    }
+
+    private void setUp() throws Exception {
+        jobOptions.loadArgs();
+        jobOptions.setDbName(DATABASE_NAME);
+
+        mongoRule.importDump(getClass().getResource("/dump/VariantStatsConfigurationTest_vl"), jobOptions.getDbName());
+
+        File file = temporaryFolderRule.makeTemporalGzipFile(VepOutputContent.vepOutputContent);
+        jobOptions.setVepOutput(file.getAbsolutePath());
     }
 
 }

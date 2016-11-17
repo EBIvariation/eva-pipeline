@@ -35,7 +35,6 @@ import java.io.IOException;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
-import static uk.ac.ebi.eva.test.utils.JobTestUtils.restoreMongoDbFromDump;
 
 /**
  * Test for {@link PopulationStatisticsLoaderStep}
@@ -69,8 +68,6 @@ public class PopulationStatisticsLoaderStepTest {
     @Test
     public void statisticsLoaderStepShouldLoadStatsIntoDb() throws StorageManagerException, IllegalAccessException,
             ClassNotFoundException, InstantiationException, IOException, InterruptedException {
-        mongoRule.createTemporalDatabase(DATABASE_NAME);
-
         //Given a valid VCF input file
         String input = PopulationStatisticsLoaderStepTest.class.getResource(SMALL_VCF_FILE).getFile();
         VariantSource source = new VariantSource(input, "1", "1", "studyName");
@@ -79,8 +76,7 @@ public class PopulationStatisticsLoaderStepTest {
         variantOptions.put(VariantStorageManager.VARIANT_SOURCE, source);
 
         //and a valid variants load and stats create steps already completed
-        String dump = PopulationStatisticsLoaderStepTest.class.getResource("/dump/VariantStatsConfigurationTest_vl").getFile();
-        restoreMongoDbFromDump(dump, jobOptions.getDbName());
+        mongoRule.importDump(getClass().getResource("/dump/VariantStatsConfigurationTest_vl"), jobOptions.getDbName());
 
         String outputDir = pipelineOptions.getString(JobParametersNames.OUTPUT_DIR_STATISTICS);
 

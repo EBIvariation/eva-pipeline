@@ -58,6 +58,7 @@ import static uk.ac.ebi.eva.pipeline.jobs.steps.VepInputGeneratorStep.FIND_VARIA
 @SpringBootTest
 @ContextConfiguration(classes = {JobOptions.class, AnnotationJob.class, AnnotationJobConfiguration.class, JobLauncherTestUtils.class})
 public class AnnotationJobTest {
+    //TODO check later to substitute files for temporal ones
 
     @Rule
     public TemporalMongoRule mongoRule = new TemporalMongoRule();
@@ -73,9 +74,7 @@ public class AnnotationJobTest {
 
     @Test
     public void allAnnotationStepsShouldBeExecuted() throws Exception {
-        mongoRule.createTemporalDatabase(jobOptions.getDbName());
-        String dump = PopulationStatisticsJobTest.class.getResource("/dump/VariantStatsConfigurationTest_vl").getFile();
-        JobTestUtils.restoreMongoDbFromDump(dump, jobOptions.getDbName());
+        mongoRule.importDump(getClass().getResource("/dump/VariantStatsConfigurationTest_vl"), jobOptions.getDbName());
 
         JobExecution jobExecution = jobLauncherTestUtils.launchJob();
 

@@ -39,7 +39,6 @@ import uk.ac.ebi.eva.pipeline.configuration.CommonConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
 import uk.ac.ebi.eva.pipeline.configuration.JobParametersNames;
 import uk.ac.ebi.eva.test.rules.TemporalMongoRule;
-import uk.ac.ebi.eva.test.utils.JobTestUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -47,7 +46,6 @@ import java.nio.file.Paths;
 
 import static org.junit.Assert.*;
 import static org.opencb.opencga.storage.core.variant.VariantStorageManager.VARIANT_SOURCE;
-import static uk.ac.ebi.eva.test.utils.JobTestUtils.restoreMongoDbFromDump;
 
 /**
  * Test for {@link PopulationStatisticsJob}
@@ -55,7 +53,7 @@ import static uk.ac.ebi.eva.test.utils.JobTestUtils.restoreMongoDbFromDump;
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = {JobOptions.class, PopulationStatisticsJob.class, CommonConfiguration.class, JobLauncherTestUtils.class})
 public class PopulationStatisticsJobTest {
-
+    //TODO review files / temporal
     private static final String SMALL_VCF_FILE = "/small20.vcf.gz";
 
     @Rule
@@ -76,8 +74,7 @@ public class PopulationStatisticsJobTest {
 
     @Test
     public void fullPopulationStatisticsJob() throws Exception {
-        String dump = PopulationStatisticsJobTest.class.getResource("/dump/VariantStatsConfigurationTest_vl").getFile();
-        JobTestUtils.restoreMongoDbFromDump(dump, jobOptions.getDbName());
+        mongoRule.importDump(getClass().getResource("/dump/VariantStatsConfigurationTest_vl"), jobOptions.getDbName());
 
         //Given a valid VCF input file
         String input = SMALL_VCF_FILE;
@@ -126,9 +123,7 @@ public class PopulationStatisticsJobTest {
 
     private void initStatsLoadStepFiles() throws IOException, InterruptedException {
         //and a valid variants load and stats create steps already completed
-        mongoRule.createTemporalDatabase(jobOptions.getDbName());
-        String dump = PopulationStatisticsJobTest.class.getResource("/dump/").getFile();
-        restoreMongoDbFromDump(dump, jobOptions.getDbName());
+        mongoRule.importDump(getClass().getResource("/dump/"), jobOptions.getDbName());
 
         String outputDir = pipelineOptions.getString(JobParametersNames.OUTPUT_DIR_STATISTICS);
 
