@@ -99,6 +99,12 @@ public class TemporalMongoRule extends ExternalResource {
         getCollection(databaseName, collectionName).insert(constructDbo(jsonString));
     }
 
+    public String importDumpInTemporalDatabase(URL dumpLocation) throws IOException, InterruptedException {
+        String databaseName = getRandomTemporalDatabaseName();
+        importDump(dumpLocation, databaseName);
+        return databaseName;
+    }
+
     public void importDump(URL dumpLocation, String databaseName) throws IOException, InterruptedException {
         assert (dumpLocation != null);
         assert (databaseName != null && !databaseName.isEmpty());

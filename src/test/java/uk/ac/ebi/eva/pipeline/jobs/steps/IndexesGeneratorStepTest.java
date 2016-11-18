@@ -18,7 +18,6 @@ package uk.ac.ebi.eva.pipeline.jobs.steps;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
 import com.mongodb.DuplicateKeyException;
-import com.mongodb.MongoClient;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -71,8 +70,7 @@ public class IndexesGeneratorStepTest {
         assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
         assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());
 
-        MongoClient mongoClient = new MongoClient();
-        DBCollection genesCollection = mongoClient.getDB(DATABASE_NAME).getCollection(dbCollectionGenesName);
+        DBCollection genesCollection = mongoRule.getCollection(DATABASE_NAME, dbCollectionGenesName);
         assertEquals("[{ \"v\" : 1 , \"key\" : { \"_id\" : 1} , \"name\" : \"_id_\" , \"ns\" : \"" + DATABASE_NAME +
                         "." + dbCollectionGenesName +
                         "\"}, { \"v\" : 1 , \"key\" : { \"name\" : 1} , \"name\" : \"name_1\" , \"ns\" : \"" +
@@ -89,9 +87,7 @@ public class IndexesGeneratorStepTest {
         assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
         assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());
 
-
-        MongoClient mongoClient = new MongoClient();
-        DBCollection genesCollection = mongoClient.getDB(DATABASE_NAME).getCollection(dbCollectionGenesName);
+        DBCollection genesCollection = mongoRule.getCollection(DATABASE_NAME, dbCollectionGenesName);
         genesCollection.insert(new BasicDBObject("_id", "example_id"));
         genesCollection.insert(new BasicDBObject("_id", "example_id"));
     }

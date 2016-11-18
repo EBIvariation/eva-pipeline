@@ -21,7 +21,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.opencb.biodata.models.variant.VariantSource;
 import org.opencb.biodata.models.variant.VariantStudy;
-import org.opencb.datastore.core.ObjectMap;
 import org.opencb.opencga.storage.core.variant.VariantStorageManager;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.ExitStatus;
@@ -35,6 +34,7 @@ import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
 import uk.ac.ebi.eva.pipeline.configuration.JobParametersNames;
 import uk.ac.ebi.eva.pipeline.jobs.PopulationStatisticsJob;
 import uk.ac.ebi.eva.pipeline.jobs.flows.PopulationStatisticsFlow;
+import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 import uk.ac.ebi.eva.test.rules.TemporalMongoRule;
 
 import java.io.File;
@@ -52,42 +52,30 @@ import static org.opencb.opencga.storage.core.variant.VariantStorageManager.VARI
 public class PopulationStatisticsGeneratorStepTest {
 
     private static final String SMALL_VCF_FILE = "/small20.vcf.gz";
+    private static final String STATS_FILE_POSTFIX = ".variants.stats.json.gz";
 
     @Rule
     public TemporalMongoRule mongoRule = new TemporalMongoRule();
+
+    @Rule
+    public PipelineTemporaryFolderRule temporaryFolderRule = new PipelineTemporaryFolderRule();
 
     @Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
     @Autowired
     private JobOptions jobOptions;
 
-    private ObjectMap variantOptions;
-    private ObjectMap pipelineOptions;
-    private File statsFile;
-
     @Test
     public void statisticsGeneratorStepShouldCalculateStats() throws IOException, InterruptedException {
+        //Given a valid VCF input file
+        jobOptions.getPipelineOptions().put(JobParametersNames.INPUT_VCF, SMALL_VCF_FILE);
         //and a valid variants load step already completed
         mongoRule.importDump(getClass().getResource("/dump/VariantStatsConfigurationTest_vl"), jobOptions.getDbName());
 
-        //Given a valid VCF input file
-        String input = SMALL_VCF_FILE;
+        VariantSource source = configureVariantSource();
+        configureTempOutput();
 
-        pipelineOptions.put(JobParametersNames.INPUT_VCF, input);
-
-        VariantSource source = new VariantSource(
-                input,
-                "1",
-                "1",
-                "studyName",
-                VariantStudy.StudyType.COLLECTION,
-                VariantSource.Aggregation.NONE);
-
-        variantOptions.put(VARIANT_SOURCE, source);
-
-        statsFile = new File(Paths.get(pipelineOptions.getString(JobParametersNames.OUTPUT_DIR_STATISTICS)).resolve(VariantStorageManager.buildFilename(source))
-                + ".variants.stats.json.gz");
-        statsFile.delete();
+        File statsFile = getStatsFile(source);
         assertFalse(statsFile.exists());  // ensure the stats file doesn't exist from previous executions
 
         // When the execute method in variantsStatsCreate is executed
@@ -99,12 +87,6 @@ public class PopulationStatisticsGeneratorStepTest {
 
         //and the file containing statistics should exist
         assertTrue(statsFile.exists());
-
-        //delete created files
-        statsFile.delete();
-        new File(Paths.get(pipelineOptions.getString(JobParametersNames.OUTPUT_DIR_STATISTICS)).resolve(VariantStorageManager.buildFilename(source))
-                + ".source.stats.json.gz").delete();
-
     }
 
     /**
@@ -114,23 +96,12 @@ public class PopulationStatisticsGeneratorStepTest {
     @Test
     public void statisticsGeneratorStepShouldFailIfVariantLoadStepIsNotCompleted() throws Exception {
         //Given a valid VCF input file
-        String input = SMALL_VCF_FILE;
+        jobOptions.getPipelineOptions().put(JobParametersNames.INPUT_VCF, SMALL_VCF_FILE);
 
-        pipelineOptions.put(JobParametersNames.INPUT_VCF, input);
+        VariantSource source = configureVariantSource();
+        configureTempOutput();
 
-        VariantSource source = new VariantSource(
-                input,
-                "1",
-                "1",
-                "studyName",
-                VariantStudy.StudyType.COLLECTION,
-                VariantSource.Aggregation.NONE);
-
-        variantOptions.put(VARIANT_SOURCE, source);
-
-        statsFile = new File(Paths.get(pipelineOptions.getString(JobParametersNames.OUTPUT_DIR_STATISTICS)).resolve(VariantStorageManager.buildFilename(source))
-                + ".variants.stats.json.gz");
-        statsFile.delete();
+        File statsFile = getStatsFile(source);
         assertFalse(statsFile.exists());  // ensure the stats file doesn't exist from previous executions
 
         // When the execute method in variantsStatsCreate is executed
@@ -138,12 +109,34 @@ public class PopulationStatisticsGeneratorStepTest {
         assertEquals(ExitStatus.FAILED.getExitCode(), jobExecution.getExitStatus().getExitCode());
     }
 
+    private void configureTempOutput() throws IOException {
+        String tempFolder = temporaryFolderRule.newFolder().getAbsolutePath();
+        jobOptions.getPipelineOptions().put(JobParametersNames.OUTPUT_DIR_STATISTICS, tempFolder);
+    }
+
+    private VariantSource configureVariantSource() {
+        VariantSource source = new VariantSource(
+                SMALL_VCF_FILE,
+                "1",
+                "1",
+                "studyName",
+                VariantStudy.StudyType.COLLECTION,
+                VariantSource.Aggregation.NONE);
+        jobOptions.getVariantOptions().put(VARIANT_SOURCE, source);
+        return source;
+    }
+
     @Before
     public void setUp() throws Exception {
         jobOptions.loadArgs();
         jobOptions.setDbName(getClass().getSimpleName());
-        pipelineOptions = jobOptions.getPipelineOptions();
-        variantOptions = jobOptions.getVariantOptions();
     }
 
+    public File getStatsFile(VariantSource source) {
+        return new File(
+                Paths.get(jobOptions.getPipelineOptions().getString(JobParametersNames.OUTPUT_DIR_STATISTICS))
+                        .resolve(VariantStorageManager.buildFilename(source))
+                        + STATS_FILE_POSTFIX
+        );
+    }
 }

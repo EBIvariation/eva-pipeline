@@ -37,6 +37,7 @@ import uk.ac.ebi.eva.pipeline.jobs.AnnotationJob;
 import uk.ac.ebi.eva.test.data.VepOutputContent;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 import uk.ac.ebi.eva.test.rules.TemporalMongoRule;
+import uk.ac.ebi.eva.utils.FileUtils;
 
 import java.io.File;
 
@@ -53,6 +54,7 @@ import static org.junit.Assert.assertTrue;
 @ActiveProfiles("variant-annotation-mongo")
 @ContextConfiguration(classes = {AnnotationJob.class, AnnotationLoaderStepTestConfiguration.class, JobLauncherTestUtils.class})
 public class AnnotationLoaderStepTest {
+    // TODO vep Output must be passed as a job parameter to allow temporal files.
 
     private static final String DATABASE_NAME = AnnotationLoaderStepTest.class.getSimpleName();
 
@@ -104,8 +106,11 @@ public class AnnotationLoaderStepTest {
 
         mongoRule.importDump(getClass().getResource("/dump/VariantStatsConfigurationTest_vl"), jobOptions.getDbName());
 
-        File file = temporaryFolderRule.makeTemporalGzipFile(VepOutputContent.vepOutputContent);
-        jobOptions.setVepOutput(file.getAbsolutePath());
+        //TODO change for commented lines when vep output file can be passed as a job parameter
+        //File file = temporaryFolderRule.makeTemporalGzipFile(VepOutputContent.vepOutputContent);
+        //jobOptions.setVepOutput(file.getAbsolutePath());
+        File file = FileUtils.makeGzipFile(VepOutputContent.vepOutputContent, jobOptions.getVepOutput());
+
     }
 
 }
