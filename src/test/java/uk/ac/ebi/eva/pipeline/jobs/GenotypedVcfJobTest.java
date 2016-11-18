@@ -58,6 +58,7 @@ import java.util.zip.GZIPInputStream;
 import static org.junit.Assert.*;
 import static uk.ac.ebi.eva.test.utils.JobTestUtils.count;
 import static uk.ac.ebi.eva.test.utils.JobTestUtils.getLines;
+import static uk.ac.ebi.eva.utils.FileUtils.getResource;
 
 /**
  * Test for {@link GenotypedVcfJob}
@@ -75,6 +76,9 @@ import static uk.ac.ebi.eva.test.utils.JobTestUtils.getLines;
 @SpringBootTest
 @ContextConfiguration(classes = {JobOptions.class, GenotypedVcfJob.class, GenotypedVcfConfiguration.class, JobLauncherTestUtils.class})
 public class GenotypedVcfJobTest {
+    //TODO check later to substitute files for temporal ones / pay attention to vep Input file
+
+    private static final String MOCK_VEP = "/mockvep.pl";
 
     @Rule
     public TemporalMongoRule mongoRule = new TemporalMongoRule();
@@ -96,11 +100,8 @@ public class GenotypedVcfJobTest {
 
     @Test
     public void fullGenotypedVcfJob() throws Exception {
-        String inputFile = GenotypedVcfJobTest.class.getResource(input).getFile();
-        String mockVep = GenotypedVcfJobTest.class.getResource("/mockvep.pl").getFile();
-
-        jobOptions.getPipelineOptions().put(JobParametersNames.INPUT_VCF, inputFile);
-        jobOptions.getPipelineOptions().put(JobParametersNames.APP_VEP_PATH, mockVep);
+        jobOptions.getPipelineOptions().put(JobParametersNames.INPUT_VCF, getResource(input).getAbsolutePath());
+        jobOptions.getPipelineOptions().put(JobParametersNames.APP_VEP_PATH, getResource(MOCK_VEP).getAbsolutePath());
 
         Config.setOpenCGAHome(opencgaHome);
         mongoRule.getTemporalDatabase(dbName);
@@ -162,7 +163,7 @@ public class GenotypedVcfJobTest {
         // 5 annotation flow
         // annotation input vep generate step
         BufferedReader testReader = new BufferedReader(new InputStreamReader(new FileInputStream(
-                GenotypedVcfJobTest.class.getResource("/preannot.sorted").getFile())));
+                getResource("/preannot.sorted"))));
         BufferedReader actualReader = new BufferedReader(new InputStreamReader(new FileInputStream(
                 vepInputFile.toString())));
 

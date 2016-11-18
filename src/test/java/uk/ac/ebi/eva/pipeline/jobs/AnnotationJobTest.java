@@ -50,6 +50,8 @@ import static org.junit.Assert.*;
 import static uk.ac.ebi.eva.pipeline.jobs.steps.AnnotationLoaderStep.LOAD_VEP_ANNOTATION;
 import static uk.ac.ebi.eva.pipeline.jobs.steps.VepAnnotationGeneratorStep.GENERATE_VEP_ANNOTATION;
 import static uk.ac.ebi.eva.pipeline.jobs.steps.VepInputGeneratorStep.FIND_VARIANTS_TO_ANNOTATE;
+import static uk.ac.ebi.eva.utils.FileUtils.getResource;
+import static uk.ac.ebi.eva.utils.FileUtils.getResourceUrl;
 
 /**
  * Test for {@link AnnotationJob}
@@ -58,7 +60,9 @@ import static uk.ac.ebi.eva.pipeline.jobs.steps.VepInputGeneratorStep.FIND_VARIA
 @SpringBootTest
 @ContextConfiguration(classes = {JobOptions.class, AnnotationJob.class, AnnotationJobConfiguration.class, JobLauncherTestUtils.class})
 public class AnnotationJobTest {
-    //TODO check later to substitute files for temporal ones
+    private static final String MOCK_VEP = "/mockvep.pl";
+    private static final String MONGO_DUMP = "/dump/VariantStatsConfigurationTest_vl";
+    //TODO check later to substitute files for temporal ones / pay attention to vep Input file
 
     @Rule
     public TemporalMongoRule mongoRule = new TemporalMongoRule();
@@ -74,7 +78,8 @@ public class AnnotationJobTest {
 
     @Test
     public void allAnnotationStepsShouldBeExecuted() throws Exception {
-        mongoRule.importDump(getClass().getResource("/dump/VariantStatsConfigurationTest_vl"), jobOptions.getDbName());
+        mongoRule.importDump(getResourceUrl(MONGO_DUMP), jobOptions
+                .getDbName());
 
         JobExecution jobExecution = jobLauncherTestUtils.launchJob();
 
@@ -140,10 +145,9 @@ public class AnnotationJobTest {
     @Before
     public void setUp() throws Exception {
         jobOptions.loadArgs();
-        vepInputFile = new File(jobOptions.getVepInput());
 
-        File vepPathFile = new File(AnnotationJobTest.class.getResource("/mockvep.pl").getFile());
-        jobOptions.setAppVepPath(vepPathFile);
+        vepInputFile = new File(jobOptions.getVepInput());
+        jobOptions.setAppVepPath(getResource(MOCK_VEP));
 
         converter = new DBObjectToVariantAnnotationConverter();
     }

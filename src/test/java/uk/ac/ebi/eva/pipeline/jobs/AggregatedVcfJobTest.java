@@ -60,6 +60,8 @@ import static uk.ac.ebi.eva.test.utils.JobTestUtils.getTransformedOutputPath;
 @ContextConfiguration(classes = {JobOptions.class, AggregatedVcfJob.class, VariantAggregatedConfiguration.class, JobLauncherTestUtils.class})
 public class AggregatedVcfJobTest {
 
+    // TODO this test can't be modified to use fully the temporal folder rule / mongo rule.
+
     @Rule
     public TemporalMongoRule mongoRule = new TemporalMongoRule();
 

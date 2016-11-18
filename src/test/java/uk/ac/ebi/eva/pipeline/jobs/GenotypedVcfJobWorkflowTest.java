@@ -45,6 +45,7 @@ import java.nio.file.Paths;
 import java.util.*;
 
 import static org.junit.Assert.*;
+import static uk.ac.ebi.eva.utils.FileUtils.getResource;
 
 /**
  * Workflow test for {@link GenotypedVcfJob}
@@ -54,6 +55,8 @@ import static org.junit.Assert.*;
 @ContextConfiguration(classes = {JobOptions.class, GenotypedVcfJob.class, GenotypedVcfWorkflowConfiguration.class,
         JobLauncherTestUtils.class})
 public class GenotypedVcfJobWorkflowTest {
+    private static final String MOCK_VEP = "/mockvep.pl";
+    //TODO check later to substitute files for temporal ones / pay attention to vep Input file
 
     @Rule
     public TemporalMongoRule mongoRule = new TemporalMongoRule();
@@ -67,7 +70,6 @@ public class GenotypedVcfJobWorkflowTest {
     private String inputFileResouce;
     private String outputDir;
     private String compressExtension;
-    private String dbName;
     private String vepInput;
     private String vepOutput;
 
@@ -146,9 +148,6 @@ public class GenotypedVcfJobWorkflowTest {
     public void statsStepsShouldBeSkipped() throws Exception {
         initVariantConfigurationJob();
         jobOptions.getPipelineOptions().put(JobParametersNames.STATISTICS_SKIP, true);
-
-        jobOptions.getPipelineOptions().put(JobParametersNames.DB_NAME, "diegoTest");
-
 
         JobExecution execution = jobLauncherTestUtils.launchJob();
 
@@ -236,18 +235,14 @@ public class GenotypedVcfJobWorkflowTest {
         inputFileResouce = jobOptions.getPipelineOptions().getString(JobParametersNames.INPUT_VCF);
         outputDir = jobOptions.getOutputDir();
         compressExtension = jobOptions.getPipelineOptions().getString("compressExtension");
-        dbName = jobOptions.getPipelineOptions().getString(JobParametersNames.DB_NAME);
         vepInput = jobOptions.getPipelineOptions().getString(JobOptions.VEP_INPUT);
         vepOutput = jobOptions.getPipelineOptions().getString(JobOptions.VEP_OUTPUT);
     }
 
     private void initVariantConfigurationJob() {
-        mongoRule.getTemporalDatabase(dbName);
-        String inputFile = GenotypedVcfJobTest.class.getResource(inputFileResouce).getFile();
-        String mockVep = GenotypedVcfJobTest.class.getResource("/mockvep.pl").getFile();
-
-        jobOptions.getPipelineOptions().put(JobParametersNames.INPUT_VCF, inputFile);
-        jobOptions.getPipelineOptions().put(JobParametersNames.APP_VEP_PATH, mockVep);
+        jobOptions.getPipelineOptions().put(JobParametersNames.DB_NAME,mongoRule.getRandomTemporalDatabaseName());
+        jobOptions.getPipelineOptions().put(JobParametersNames.INPUT_VCF, getResource(inputFileResouce).getAbsolutePath());
+        jobOptions.getPipelineOptions().put(JobParametersNames.APP_VEP_PATH, getResource(MOCK_VEP).getAbsolutePath());
 
         Config.setOpenCGAHome(opencgaHome);
 
