@@ -61,7 +61,6 @@ public class VariantMongoWriterTest {
     @Test
     public void noVariantsNothingShouldBeWritten() {
         String dbName = mongoRule.getRandomTemporalDatabaseName();
-
         MongoOperations mongoOperations = MongoDBHelper.getMongoOperationsFromPipelineOptions(dbName, connection);
         DBCollection dbCollection = mongoOperations.getCollection(collectionName);
 

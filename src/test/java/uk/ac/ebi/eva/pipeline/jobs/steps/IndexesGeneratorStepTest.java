@@ -44,8 +44,6 @@ import static org.junit.Assert.assertEquals;
 @ContextConfiguration(classes = {DatabaseInitializationJob.class, DatabaseInitializationConfiguration.class, JobLauncherTestUtils.class})
 public class IndexesGeneratorStepTest {
 
-    private static final String DATABASE_NAME = IndexesGeneratorStepTest.class.getSimpleName();
-
     @Rule
     public TemporalMongoRule mongoRule = new TemporalMongoRule();
 
@@ -58,36 +56,36 @@ public class IndexesGeneratorStepTest {
     @Before
     public void setUp() throws Exception {
         jobOptions.loadArgs();
-        jobOptions.setDbName(DATABASE_NAME);
     }
 
     @Test
     public void testIndexesAreCreated() throws Exception {
-        mongoRule.getTemporalDatabase(DATABASE_NAME);
+        jobOptions.setDbName(mongoRule.getRandomTemporalDatabaseName());
+
         String dbCollectionGenesName = jobOptions.getDbCollectionsFeaturesName();
         JobExecution jobExecution = jobLauncherTestUtils.launchStep(DatabaseInitializationJob.CREATE_DATABASE_INDEXES);
 
         assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
         assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());
 
-        DBCollection genesCollection = mongoRule.getCollection(DATABASE_NAME, dbCollectionGenesName);
-        assertEquals("[{ \"v\" : 1 , \"key\" : { \"_id\" : 1} , \"name\" : \"_id_\" , \"ns\" : \"" + DATABASE_NAME +
-                        "." + dbCollectionGenesName +
+        DBCollection genesCollection = mongoRule.getCollection(jobOptions.getDbName(), dbCollectionGenesName);
+        assertEquals("[{ \"v\" : 1 , \"key\" : { \"_id\" : 1} , \"name\" : \"_id_\" , \"ns\" : \"" +
+                        jobOptions.getDbName() + "." + dbCollectionGenesName +
                         "\"}, { \"v\" : 1 , \"key\" : { \"name\" : 1} , \"name\" : \"name_1\" , \"ns\" : \"" +
-                        DATABASE_NAME + "." + dbCollectionGenesName + "\" , \"sparse\" : true , \"background\" : true}]",
+                        jobOptions.getDbName() + "." + dbCollectionGenesName + "\" , \"sparse\" : true , \"background\" : true}]",
                 genesCollection.getIndexInfo().toString());
     }
 
     @Test(expected = DuplicateKeyException.class)
     public void testNoDuplicatesCanBeInserted() throws Exception {
-        mongoRule.getTemporalDatabase(DATABASE_NAME);
+        jobOptions.setDbName(mongoRule.getRandomTemporalDatabaseName());
         String dbCollectionGenesName = jobOptions.getDbCollectionsFeaturesName();
         JobExecution jobExecution = jobLauncherTestUtils.launchStep(DatabaseInitializationJob.CREATE_DATABASE_INDEXES);
 
         assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
         assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());
 
-        DBCollection genesCollection = mongoRule.getCollection(DATABASE_NAME, dbCollectionGenesName);
+        DBCollection genesCollection = mongoRule.getCollection(jobOptions.getDbName(), dbCollectionGenesName);
         genesCollection.insert(new BasicDBObject("_id", "example_id"));
         genesCollection.insert(new BasicDBObject("_id", "example_id"));
     }

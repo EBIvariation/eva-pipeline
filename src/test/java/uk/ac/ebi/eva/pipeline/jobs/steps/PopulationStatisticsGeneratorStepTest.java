@@ -43,6 +43,7 @@ import java.nio.file.Paths;
 
 import static org.junit.Assert.*;
 import static org.opencb.opencga.storage.core.variant.VariantStorageManager.VARIANT_SOURCE;
+import static uk.ac.ebi.eva.utils.FileUtils.getResourceUrl;
 
 /**
  * Test for {@link PopulationStatisticsGeneratorStep}
@@ -53,6 +54,7 @@ public class PopulationStatisticsGeneratorStepTest {
 
     private static final String SMALL_VCF_FILE = "/small20.vcf.gz";
     private static final String STATS_FILE_POSTFIX = ".variants.stats.json.gz";
+    private static final String MONGO_DUMP = "/dump/VariantStatsConfigurationTest_vl";
 
     @Rule
     public TemporalMongoRule mongoRule = new TemporalMongoRule();
@@ -70,7 +72,7 @@ public class PopulationStatisticsGeneratorStepTest {
         //Given a valid VCF input file
         jobOptions.getPipelineOptions().put(JobParametersNames.INPUT_VCF, SMALL_VCF_FILE);
         //and a valid variants load step already completed
-        mongoRule.importDump(getClass().getResource("/dump/VariantStatsConfigurationTest_vl"), jobOptions.getDbName());
+        mongoRule.importDump(getResourceUrl(MONGO_DUMP), jobOptions.getDbName());
 
         VariantSource source = configureVariantSource();
         configureTempOutput();

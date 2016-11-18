@@ -49,8 +49,6 @@ import static uk.ac.ebi.eva.utils.MongoDBHelper.getMongoOperationsFromPipelineOp
 @ContextConfiguration(classes = {JobOptions.class, DatabaseInitializationConfiguration.class,})
 public class GeneWriterTest {
 
-    private static final String DATABASE_NAME = GeneWriterTest.class.getSimpleName();
-
     @Rule
     public TemporalMongoRule mongoRule = new TemporalMongoRule();
 
@@ -59,9 +57,9 @@ public class GeneWriterTest {
 
     @Test
     public void shouldWriteAllFieldsIntoMongoDb() throws Exception {
-        mongoRule.getTemporalDatabase(DATABASE_NAME);
+        String databaseName = mongoRule.getRandomTemporalDatabaseName();
 
-        MongoOperations mongoOperations = getMongoOperationsFromPipelineOptions(DATABASE_NAME,
+        MongoOperations mongoOperations = getMongoOperationsFromPipelineOptions(databaseName,
                 jobOptions.getMongoConnection());
 
         GeneWriter geneWriter = new GeneWriter(mongoOperations, jobOptions.getDbCollectionsFeaturesName());
@@ -75,7 +73,7 @@ public class GeneWriterTest {
         }
         geneWriter.write(genes);
 
-        DBCollection genesCollection = mongoRule.getCollection(DATABASE_NAME, jobOptions.getDbCollectionsFeaturesName());
+        DBCollection genesCollection = mongoRule.getCollection(databaseName, jobOptions.getDbCollectionsFeaturesName());
 
         // count documents in DB and check they have region (chr + start + end)
         DBCursor cursor = genesCollection.find();

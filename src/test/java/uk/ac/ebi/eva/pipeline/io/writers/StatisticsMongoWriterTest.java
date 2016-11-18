@@ -52,8 +52,6 @@ import static uk.ac.ebi.eva.utils.MongoDBHelper.getMongoOperationsFromPipelineOp
 @ContextConfiguration(classes = {JobOptions.class, CommonConfiguration.class})
 public class StatisticsMongoWriterTest {
 
-    private static final String DATABASE_NAME = UUID.randomUUID().toString();
-
     @Rule
     public TemporalMongoRule mongoRule = new TemporalMongoRule();
 
@@ -64,7 +62,8 @@ public class StatisticsMongoWriterTest {
     public void shouldWriteAllFieldsIntoMongoDb() throws Exception {
         List<PopulationStatistics> populationStatisticsList = buildPopulationStatsList();
 
-        StatisticsMongoWriter statisticsMongoWriter = getStatisticsMongoWriter();
+        String databaseName = mongoRule.getRandomTemporalDatabaseName();
+        StatisticsMongoWriter statisticsMongoWriter = getStatisticsMongoWriter(databaseName);
 
         int n = 1;
         for (int i = 0; i < n; i++) {
@@ -72,7 +71,7 @@ public class StatisticsMongoWriterTest {
         }
 
         // do the checks
-        DBCollection statsCollection = mongoRule.getCollection(DATABASE_NAME, jobOptions.getDbCollectionsStatsName());
+        DBCollection statsCollection = mongoRule.getCollection(databaseName, jobOptions.getDbCollectionsStatsName());
         // count documents in DB and check they have at least the index fields (vid, sid, cid) and maf and genotypeCount
         DBCursor cursor = statsCollection.find();
 
@@ -93,16 +92,17 @@ public class StatisticsMongoWriterTest {
     public void shouldCreateIndexesInCollection() throws Exception {
         List<PopulationStatistics> populationStatisticsList = buildPopulationStatsList();
 
-        StatisticsMongoWriter statisticsMongoWriter = getStatisticsMongoWriter();
+        String databaseName = mongoRule.getRandomTemporalDatabaseName();
+        StatisticsMongoWriter statisticsMongoWriter = getStatisticsMongoWriter(databaseName);
         statisticsMongoWriter.write(populationStatisticsList);
 
         // do the checks
-        DBCollection statsCollection = mongoRule.getCollection(DATABASE_NAME, jobOptions.getDbCollectionsStatsName());
+        DBCollection statsCollection = mongoRule.getCollection(databaseName, jobOptions.getDbCollectionsStatsName());
 
         // check vid has an index
-        assertEquals("[{ \"v\" : 1 , \"key\" : { \"_id\" : 1} , \"name\" : \"_id_\" , \"ns\" : \"" + DATABASE_NAME +
+        assertEquals("[{ \"v\" : 1 , \"key\" : { \"_id\" : 1} , \"name\" : \"_id_\" , \"ns\" : \"" + databaseName +
                         ".populationStatistics\"}, { \"v\" : 1 , \"unique\" : true , \"key\" : { \"vid\" : 1 , \"sid\" : 1 , " +
-                        "\"cid\" : 1} , \"name\" : \"vscid\" , \"ns\" : \"" + DATABASE_NAME + ".populationStatistics\"}]",
+                        "\"cid\" : 1} , \"name\" : \"vscid\" , \"ns\" : \"" + databaseName + ".populationStatistics\"}]",
                 statsCollection.getIndexInfo().toString());
     }
 
@@ -110,7 +110,8 @@ public class StatisticsMongoWriterTest {
     public void shouldFailIfduplicatedVidSidCid() throws Exception {
         List<PopulationStatistics> populationStatisticsList = buildPopulationStatsList();
 
-        StatisticsMongoWriter statisticsMongoWriter = getStatisticsMongoWriter();
+        String databaseName = mongoRule.getRandomTemporalDatabaseName();
+        StatisticsMongoWriter statisticsMongoWriter = getStatisticsMongoWriter(databaseName);
         statisticsMongoWriter.write(populationStatisticsList);
         statisticsMongoWriter.write(populationStatisticsList);   // should throw
     }
@@ -133,9 +134,8 @@ public class StatisticsMongoWriterTest {
         return Arrays.asList(populationStatistics);
     }
 
-    public StatisticsMongoWriter getStatisticsMongoWriter() {
-        mongoRule.getTemporalDatabase(DATABASE_NAME);
-        MongoOperations mongoOperations = getMongoOperationsFromPipelineOptions(DATABASE_NAME,
+    public StatisticsMongoWriter getStatisticsMongoWriter(String databaseName) {
+        MongoOperations mongoOperations = getMongoOperationsFromPipelineOptions(databaseName,
                 jobOptions.getMongoConnection());
         StatisticsMongoWriter statisticsMongoWriter = new StatisticsMongoWriter(
                 mongoOperations, jobOptions.getDbCollectionsStatsName());

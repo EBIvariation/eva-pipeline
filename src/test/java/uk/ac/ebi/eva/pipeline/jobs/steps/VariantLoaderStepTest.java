@@ -52,6 +52,7 @@ import static org.junit.Assert.assertEquals;
 import static org.opencb.opencga.storage.core.variant.VariantStorageManager.VARIANT_SOURCE;
 import static uk.ac.ebi.eva.test.utils.JobTestUtils.count;
 import static uk.ac.ebi.eva.test.utils.JobTestUtils.getLines;
+import static uk.ac.ebi.eva.utils.FileUtils.getResource;
 
 /**
  * Test for {@link VariantLoaderStep}
@@ -112,7 +113,7 @@ public class VariantLoaderStepTest {
         VariantStorageManager variantStorageManager = StorageManagerFactory.getVariantStorageManager();
         VariantDBAdaptor variantDBAdaptor = variantStorageManager.getDBAdaptor(databaseName, null);
         VariantDBIterator iterator = variantDBAdaptor.iterator(new QueryOptions());
-        File transformedVcfVariantsFile = FileUtils.getResource(TRANSFORMED_VCF_VARIANTS_FILE);
+        File transformedVcfVariantsFile = getResource(TRANSFORMED_VCF_VARIANTS_FILE);
         long lines = getLines(new GZIPInputStream(new FileInputStream(transformedVcfVariantsFile)));
 
         assertEquals(count(iterator), lines);
@@ -120,7 +121,7 @@ public class VariantLoaderStepTest {
 
     @Test
     public void loaderStepShouldFailBecauseOpenCGAHomeIsWrong() throws JobExecutionException {
-        String inputFile = VariantLoaderStepTest.class.getResource(input).getFile();
+        String inputFile = getResource(input).getAbsolutePath();
 
         Config.setOpenCGAHome("");
 

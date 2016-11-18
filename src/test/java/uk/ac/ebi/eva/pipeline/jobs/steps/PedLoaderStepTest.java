@@ -31,7 +31,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
-
 import uk.ac.ebi.eva.pipeline.configuration.CommonConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
 import uk.ac.ebi.eva.pipeline.configuration.JobParametersNames;
@@ -40,6 +39,7 @@ import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static uk.ac.ebi.eva.utils.FileUtils.getResource;
 
 /**
  * Test for {@link PedLoaderStep}
@@ -53,6 +53,8 @@ import static org.junit.Assert.assertTrue;
 @ContextConfiguration(classes = {JobOptions.class, CommonConfiguration.class})
 public class PedLoaderStepTest {
 
+    private static final String PEDIGREE_FILE = "/ped/pedigree-test-file.ped";
+    private static final String MALFORMED_PEDIGREE = "/ped/malformed-pedigree-test-file.ped";
     @Autowired
     private JobOptions jobOptions;
 
@@ -62,8 +64,8 @@ public class PedLoaderStepTest {
 
     @Test
     public void allPedFileShouldBeParsedIntoPedigree() throws Exception {
-        String pedigreeFile = PedLoaderStepTest.class.getResource("/ped/pedigree-test-file.ped").getFile();
-        jobOptions.getPipelineOptions().put(JobParametersNames.INPUT_PEDIGREE, pedigreeFile);
+        jobOptions.getPipelineOptions().put(JobParametersNames.INPUT_PEDIGREE, getResource(PEDIGREE_FILE)
+                .getAbsolutePath());
 
         ReflectionTestUtils.setField(pedLoaderStep, "jobOptions", jobOptions);
         RepeatStatus status = pedLoaderStep.execute(stepContribution, chunkContext);
@@ -92,8 +94,8 @@ public class PedLoaderStepTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void missingLastColumnInPedFileShouldThrowsException() throws Exception {
-        String pedigreeFile = PedLoaderStepTest.class.getResource("/ped/malformed-pedigree-test-file.ped").getFile();
-        jobOptions.getPipelineOptions().put(JobParametersNames.INPUT_PEDIGREE, pedigreeFile);
+        jobOptions.getPipelineOptions().put(JobParametersNames.INPUT_PEDIGREE, getResource(MALFORMED_PEDIGREE)
+                .getAbsolutePath());
 
         ReflectionTestUtils.setField(pedLoaderStep, "jobOptions", jobOptions);
         pedLoaderStep.execute(stepContribution, chunkContext);

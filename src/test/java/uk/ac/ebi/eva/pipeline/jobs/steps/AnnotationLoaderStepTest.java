@@ -43,6 +43,7 @@ import java.io.File;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static uk.ac.ebi.eva.utils.FileUtils.getResourceUrl;
 
 
 /**
@@ -54,9 +55,11 @@ import static org.junit.Assert.assertTrue;
 @ActiveProfiles("variant-annotation-mongo")
 @ContextConfiguration(classes = {AnnotationJob.class, AnnotationLoaderStepTestConfiguration.class, JobLauncherTestUtils.class})
 public class AnnotationLoaderStepTest {
-    // TODO vep Output must be passed as a job parameter to allow temporal files.
+    // TODO vep Output must be passed as a job parameter to allow temporal files. Database name can't be changed to a
+    // random one.
 
     private static final String DATABASE_NAME = AnnotationLoaderStepTest.class.getSimpleName();
+    private static final String MONGO_DUMP = "/dump/VariantStatsConfigurationTest_vl";
 
     @Rule
     public TemporalMongoRule mongoRule = new TemporalMongoRule();
@@ -104,7 +107,7 @@ public class AnnotationLoaderStepTest {
         jobOptions.loadArgs();
         jobOptions.setDbName(DATABASE_NAME);
 
-        mongoRule.importDump(getClass().getResource("/dump/VariantStatsConfigurationTest_vl"), jobOptions.getDbName());
+        mongoRule.importDump(getResourceUrl(MONGO_DUMP), jobOptions.getDbName());
 
         //TODO change for commented lines when vep output file can be passed as a job parameter
         //File file = temporaryFolderRule.makeTemporalGzipFile(VepOutputContent.vepOutputContent);
