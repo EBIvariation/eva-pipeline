@@ -40,6 +40,7 @@ import uk.ac.ebi.eva.pipeline.configuration.GenotypedVcfConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
 import uk.ac.ebi.eva.pipeline.configuration.JobParametersNames;
 import uk.ac.ebi.eva.pipeline.jobs.GenotypedVcfJob;
+import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 import uk.ac.ebi.eva.test.rules.TemporalMongoRule;
 import uk.ac.ebi.eva.utils.FileUtils;
 
@@ -62,6 +63,10 @@ public class VariantLoaderStepTest {
 
     private static final String TRANSFORMED_VCF_VARIANTS_FILE = "/small20.vcf.gz.variants.json.gz";
     private static final String TRANSFORMED_VARIANTS_FILE = "/small20.vcf.gz.file.json.gz";
+
+    @Rule
+    public PipelineTemporaryFolderRule temporaryFolderRule = new PipelineTemporaryFolderRule();
+
     @Rule
     public TemporalMongoRule mongoRule = new TemporalMongoRule();
 
@@ -72,17 +77,18 @@ public class VariantLoaderStepTest {
     private JobOptions jobOptions;
 
     private String input;
-    private String outputDir;
-    private String dbName;
 
     private static String opencgaHome = System.getenv("OPENCGA_HOME") != null ? System.getenv("OPENCGA_HOME") : "/opt/opencga";
 
     @Test
     public void loaderStepShouldLoadAllVariants() throws Exception {
-        Config.setOpenCGAHome(opencgaHome);
-        mongoRule.getTemporalDatabase(dbName);
+        String outputDir = temporaryFolderRule.getRoot().getAbsolutePath();
+        jobOptions.getPipelineOptions().put(JobParametersNames.OUTPUT_DIR,outputDir);
 
-        jobOptions.getVariantOptions().put(VariantStorageManager.DB_NAME, dbName);
+        Config.setOpenCGAHome(opencgaHome);
+
+        String databaseName = mongoRule.getRandomTemporalDatabaseName();
+        jobOptions.setDbName(databaseName);
         jobOptions.getVariantOptions().put(VARIANT_SOURCE, new VariantSource(
                 input,
                 "1",
@@ -104,7 +110,7 @@ public class VariantLoaderStepTest {
 
         // And the number of documents in db should be the same number of line of the vcf transformed file
         VariantStorageManager variantStorageManager = StorageManagerFactory.getVariantStorageManager();
-        VariantDBAdaptor variantDBAdaptor = variantStorageManager.getDBAdaptor(dbName, null);
+        VariantDBAdaptor variantDBAdaptor = variantStorageManager.getDBAdaptor(databaseName, null);
         VariantDBIterator iterator = variantDBAdaptor.iterator(new QueryOptions());
         File transformedVcfVariantsFile = FileUtils.getResource(TRANSFORMED_VCF_VARIANTS_FILE);
         long lines = getLines(new GZIPInputStream(new FileInputStream(transformedVcfVariantsFile)));
@@ -115,12 +121,11 @@ public class VariantLoaderStepTest {
     @Test
     public void loaderStepShouldFailBecauseOpenCGAHomeIsWrong() throws JobExecutionException {
         String inputFile = VariantLoaderStepTest.class.getResource(input).getFile();
-        mongoRule.getTemporalDatabase(dbName);
 
         Config.setOpenCGAHome("");
 
         jobOptions.getPipelineOptions().put(JobParametersNames.INPUT_VCF, inputFile);
-        jobOptions.getVariantOptions().put(VariantStorageManager.DB_NAME, dbName);
+        jobOptions.getVariantOptions().put(VariantStorageManager.DB_NAME, mongoRule.getRandomTemporalDatabaseName());
 
         VariantSource source = (VariantSource) jobOptions.getVariantOptions().get(VariantStorageManager.VARIANT_SOURCE);
 
@@ -143,8 +148,6 @@ public class VariantLoaderStepTest {
         jobOptions.loadArgs();
 
         input = jobOptions.getPipelineOptions().getString(JobParametersNames.INPUT_VCF);
-        outputDir = jobOptions.getOutputDir();
-        dbName = jobOptions.getPipelineOptions().getString(JobParametersNames.DB_NAME);
     }
 
 }
