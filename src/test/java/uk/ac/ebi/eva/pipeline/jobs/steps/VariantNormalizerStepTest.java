@@ -33,7 +33,9 @@ import uk.ac.ebi.eva.pipeline.configuration.GenotypedVcfConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
 import uk.ac.ebi.eva.pipeline.configuration.JobParametersNames;
 import uk.ac.ebi.eva.pipeline.jobs.GenotypedVcfJob;
+import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 import uk.ac.ebi.eva.test.rules.TemporalMongoRule;
+import uk.ac.ebi.eva.utils.FileUtils;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -44,6 +46,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static uk.ac.ebi.eva.test.utils.JobTestUtils.getLines;
 import static uk.ac.ebi.eva.test.utils.JobTestUtils.getTransformedOutputPath;
+import static uk.ac.ebi.eva.utils.FileUtils.getResource;
 
 /**
  * Test for {@link VariantNormalizerStep}
@@ -56,6 +59,12 @@ import static uk.ac.ebi.eva.test.utils.JobTestUtils.getTransformedOutputPath;
 @ContextConfiguration(classes = {GenotypedVcfJob.class, JobOptions.class, GenotypedVcfConfiguration.class, JobLauncherTestUtils.class})
 public class VariantNormalizerStepTest {
 
+    private static final String FILE_WRONG_NO_ALT = "/wrong_no_alt.vcf.gz";
+    private static final String VCF_FILE = "/small20.vcf.gz";
+
+    @Rule
+    public PipelineTemporaryFolderRule temporaryFolderRule = new PipelineTemporaryFolderRule();
+
     @Rule
     public TemporalMongoRule mongoRule = new TemporalMongoRule();
 
@@ -64,27 +73,19 @@ public class VariantNormalizerStepTest {
 
     @Autowired
     private JobOptions jobOptions;
-
-    private String input;
-    private String outputDir;
-    private String dbName;
-
+    
     private static String opencgaHome = System.getenv("OPENCGA_HOME") != null ? System.getenv("OPENCGA_HOME") : "/opt/opencga";
 
     @Test
     public void normalizerStepShouldTransformAllVariants() throws Exception {
         Config.setOpenCGAHome(opencgaHome);
-        mongoRule.getTemporalDatabase(dbName);
+        jobOptions.getPipelineOptions().put(JobParametersNames.DB_NAME,mongoRule.getRandomTemporalDatabaseName());
+        String temporaryFolder = temporaryFolderRule.getRoot().getAbsolutePath();
+        jobOptions.getPipelineOptions().put(JobParametersNames.OUTPUT_DIR, temporaryFolder);
 
-        String inputFile = VariantNormalizerStepTest.class.getResource(input).getFile();
-        jobOptions.getPipelineOptions().put(JobParametersNames.INPUT_VCF, inputFile);
+        jobOptions.getPipelineOptions().put(JobParametersNames.INPUT_VCF, getResource(VCF_FILE));
 
-        String outputFilename = getTransformedOutputPath(Paths.get(input).getFileName(), ".gz", "/tmp");
-
-        File file = new File(outputFilename);
-        if (file.exists())
-            file.delete();
-        assertFalse(file.exists());
+        String outputFilename = getTransformedOutputPath(Paths.get(VCF_FILE).getFileName(), ".gz", temporaryFolder);
 
         // When the execute method in variantsTransform is executed
         JobExecution jobExecution = jobLauncherTestUtils.launchStep(GenotypedVcfJob.NORMALIZE_VARIANTS);
@@ -95,9 +96,6 @@ public class VariantNormalizerStepTest {
 
         // And the transformed file should contain the same number of line of the Vcf input file
         Assert.assertEquals(300, getLines(new GZIPInputStream(new FileInputStream(outputFilename))));
-
-        file.delete();
-        new File(outputDir, "small20.vcf.gz.file.json.gz").delete();
     }
 
     /**
@@ -106,19 +104,13 @@ public class VariantNormalizerStepTest {
      */
     @Test
     public void normalizerStepShouldFailIfVariantsAreMalformed() {
-        final String FILE_WRONG_NO_ALT = "/wrong_no_alt.vcf.gz";
         Config.setOpenCGAHome(opencgaHome);
-        mongoRule.getTemporalDatabase(dbName);
+        jobOptions.getPipelineOptions().put(JobParametersNames.DB_NAME,mongoRule.getRandomTemporalDatabaseName());
+        String temporaryFolder = temporaryFolderRule.getRoot().getAbsolutePath();
+        jobOptions.getPipelineOptions().put(JobParametersNames.OUTPUT_DIR, temporaryFolder);
 
         //Given a malformed VCF input file
-        String inputFile = VariantNormalizerStepTest.class.getResource(FILE_WRONG_NO_ALT).getFile();
-        jobOptions.getPipelineOptions().put(JobParametersNames.INPUT_VCF, inputFile);
-
-        String outputFilename = getTransformedOutputPath(Paths.get(FILE_WRONG_NO_ALT).getFileName(), ".gz", "/tmp");
-
-        File file = new File(outputFilename);
-        file.delete();
-        assertFalse(file.exists());
+        jobOptions.getPipelineOptions().put(JobParametersNames.INPUT_VCF, getResource(FILE_WRONG_NO_ALT));
 
         //When the execute method in variantsTransform is invoked then a StorageManagerException is thrown
         JobExecution jobExecution = jobLauncherTestUtils.launchStep(GenotypedVcfJob.NORMALIZE_VARIANTS);
@@ -128,10 +120,6 @@ public class VariantNormalizerStepTest {
     @Before
     public void setUp() throws Exception {
         jobOptions.loadArgs();
-
-        input = jobOptions.getPipelineOptions().getString(JobParametersNames.INPUT_VCF);
-        outputDir = jobOptions.getOutputDir();
-        dbName = jobOptions.getPipelineOptions().getString(JobParametersNames.DB_NAME);
     }
 
 }
