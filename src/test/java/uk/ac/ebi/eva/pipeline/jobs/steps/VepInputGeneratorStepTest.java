@@ -30,11 +30,13 @@ import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
 import uk.ac.ebi.eva.pipeline.configuration.VepInputGeneratorStepConfiguration;
 import uk.ac.ebi.eva.pipeline.jobs.AnnotationJob;
 import uk.ac.ebi.eva.test.rules.TemporalMongoRule;
+import uk.ac.ebi.eva.utils.FileUtils;
 
 import java.io.File;
 
 import static org.junit.Assert.*;
 import static uk.ac.ebi.eva.test.utils.JobTestUtils.readFirstLine;
+import static uk.ac.ebi.eva.utils.FileUtils.getResourceUrl;
 
 /**
  * Test {@link VepInputGeneratorStep}
@@ -43,6 +45,7 @@ import static uk.ac.ebi.eva.test.utils.JobTestUtils.readFirstLine;
 @ContextConfiguration(classes = {AnnotationJob.class, VepInputGeneratorStepConfiguration.class, JobLauncherTestUtils.class})
 public class VepInputGeneratorStepTest {
 
+    private static final String MONGO_DUMP = "/dump/VariantStatsConfigurationTest_vl";
     @Rule
     public TemporalMongoRule mongoRule = new TemporalMongoRule();
 
@@ -58,7 +61,9 @@ public class VepInputGeneratorStepTest {
 
     @Test
     public void shouldGenerateVepInput() throws Exception {
-        mongoRule.importDump(getClass().getResource("/dump/VariantStatsConfigurationTest_vl"), jobOptions.getDbName());
+        // TODO This test can't be changed to use temporal directory right now, as vepInput is a composite parameter
+        // that is not being recalculated at execution time.
+        mongoRule.importDump(getResourceUrl(MONGO_DUMP), jobOptions.getDbName());
         File vepInputFile = new File(jobOptions.getVepInput());
 
         if (vepInputFile.exists())

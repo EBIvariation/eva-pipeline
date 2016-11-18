@@ -9,6 +9,7 @@ import uk.ac.ebi.eva.pipeline.io.GzipLazyResource;
 import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.zip.GZIPOutputStream;
 
 public abstract class FileUtils {
@@ -49,6 +50,10 @@ public abstract class FileUtils {
 
     public static File getResource(String resourcePath) {
         return new File(FileUtils.class.getResource(resourcePath).getFile());
+    }
+
+    public static URL getResourceUrl(String resourcePath) {
+        return FileUtils.class.getResource(resourcePath);
     }
 
     public static Resource getResource(File file) throws IOException {
