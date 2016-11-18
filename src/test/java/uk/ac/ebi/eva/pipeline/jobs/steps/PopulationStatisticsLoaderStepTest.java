@@ -45,7 +45,6 @@ import static org.junit.Assert.assertThat;
 public class PopulationStatisticsLoaderStepTest {
 
     private static final String SMALL_VCF_FILE = "/small20.vcf.gz";
-    private static final String DATABASE_NAME = PopulationStatisticsLoaderStepTest.class.getSimpleName();
     private static final String MONGO_DUMP = "/dump/VariantStatsConfigurationTest_vl";
     private static final String SOURCE_FILE_NAME = "/1_1.source.stats.json.gz";
     private static final String VARIANTS_FILE_NAME = "/1_1.variants.stats.json.gz";
@@ -63,9 +62,6 @@ public class PopulationStatisticsLoaderStepTest {
     @Autowired
     private JobOptions jobOptions;
 
-    private ObjectMap variantOptions;
-    private ObjectMap pipelineOptions;
-
     //Capture error output
     @Rule
     public OutputCapture capture = new OutputCapture();
@@ -77,8 +73,8 @@ public class PopulationStatisticsLoaderStepTest {
         String input = PopulationStatisticsLoaderStepTest.class.getResource(SMALL_VCF_FILE).getFile();
         VariantSource source = new VariantSource(input, "1", "1", "studyName");
 
-        pipelineOptions.put(JobParametersNames.INPUT_VCF, input);
-        variantOptions.put(VariantStorageManager.VARIANT_SOURCE, source);
+        jobOptions.getPipelineOptions().put(JobParametersNames.INPUT_VCF, input);
+        jobOptions.getVariantOptions().put(VariantStorageManager.VARIANT_SOURCE, source);
 
         //and a valid variants load and stats create steps already completed
         jobOptions.setDbName(mongoRule.importDumpInTemporalDatabase(getClass().getResource(MONGO_DUMP)));
@@ -110,7 +106,7 @@ public class PopulationStatisticsLoaderStepTest {
 
     private String createTempDirectoryForStatistics() {
         File temporaryFolder = temporaryFolderRule.getRoot();
-        pipelineOptions.put(JobParametersNames.OUTPUT_DIR_STATISTICS, temporaryFolder);
+        jobOptions.getPipelineOptions().put(JobParametersNames.OUTPUT_DIR_STATISTICS, temporaryFolder);
         String outputDir = temporaryFolder.getAbsolutePath();
         return outputDir;
     }
@@ -120,23 +116,20 @@ public class PopulationStatisticsLoaderStepTest {
         String input = PopulationStatisticsLoaderStepTest.class.getResource(SMALL_VCF_FILE).getFile();
         VariantSource source = new VariantSource(input, "4", "1", "studyName");
 
-        pipelineOptions.put(JobParametersNames.INPUT_VCF, input);
-        variantOptions.put(VariantStorageManager.DB_NAME, mongoRule.getRandomTemporalDatabaseName());
-        variantOptions.put(VariantStorageManager.VARIANT_SOURCE, source);
+        jobOptions.getPipelineOptions().put(JobParametersNames.INPUT_VCF, input);
+        jobOptions.getVariantOptions().put(VariantStorageManager.DB_NAME, mongoRule.getRandomTemporalDatabaseName());
+        jobOptions.getVariantOptions().put(VariantStorageManager.VARIANT_SOURCE, source);
 
         JobExecution jobExecution = jobLauncherTestUtils.launchStep(PopulationStatisticsFlow.LOAD_STATISTICS);
         assertThat(capture.toString(), containsString(FILE_NOT_FOUND_EXCEPTION));
 
-        assertEquals(input, pipelineOptions.getString(JobParametersNames.INPUT_VCF));
+        assertEquals(input, jobOptions.getPipelineOptions().getString(JobParametersNames.INPUT_VCF));
         assertEquals(ExitStatus.FAILED.getExitCode(), jobExecution.getExitStatus().getExitCode());
     }
 
     @Before
     public void setUp() throws Exception {
         jobOptions.loadArgs();
-        pipelineOptions = jobOptions.getPipelineOptions();
-        variantOptions = jobOptions.getVariantOptions();
-        jobOptions.setDbName(DATABASE_NAME);
     }
 
 }

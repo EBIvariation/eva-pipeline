@@ -15,7 +15,6 @@
  */
 package uk.ac.ebi.eva.pipeline.jobs.steps;
 
-import org.apache.commons.io.FileUtils;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -42,6 +41,7 @@ import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
 import uk.ac.ebi.eva.pipeline.configuration.JobParametersNames;
 import uk.ac.ebi.eva.pipeline.jobs.GenotypedVcfJob;
 import uk.ac.ebi.eva.test.rules.TemporalMongoRule;
+import uk.ac.ebi.eva.utils.FileUtils;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -60,6 +60,8 @@ import static uk.ac.ebi.eva.test.utils.JobTestUtils.getLines;
 @ContextConfiguration(classes = {GenotypedVcfJob.class, JobOptions.class, GenotypedVcfConfiguration.class, JobLauncherTestUtils.class})
 public class VariantLoaderStepTest {
 
+    private static final String TRANSFORMED_VCF_VARIANTS_FILE = "/small20.vcf.gz.variants.json.gz";
+    private static final String TRANSFORMED_VARIANTS_FILE = "/small20.vcf.gz.file.json.gz";
     @Rule
     public TemporalMongoRule mongoRule = new TemporalMongoRule();
 
@@ -90,15 +92,8 @@ public class VariantLoaderStepTest {
                 VariantSource.Aggregation.NONE));
 
         //and a variants transform step already executed
-        File transformedVcfVariantsFile =
-                new File(VariantLoaderStepTest.class.getResource("/small20.vcf.gz.variants.json.gz").getFile());
-        File tmpTransformedVcfVariantsFile = new File(outputDir, transformedVcfVariantsFile.getName());
-        FileUtils.copyFile(transformedVcfVariantsFile, tmpTransformedVcfVariantsFile);
-
-        File transformedVariantsFile =
-                new File(VariantLoaderStepTest.class.getResource("/small20.vcf.gz.file.json.gz").getFile());
-        File tmpTransformedVariantsFile = new File(outputDir, transformedVariantsFile.getName());
-        FileUtils.copyFile(transformedVariantsFile, tmpTransformedVariantsFile);
+        FileUtils.copyResource(TRANSFORMED_VCF_VARIANTS_FILE, outputDir);
+        FileUtils.copyResource(TRANSFORMED_VARIANTS_FILE, outputDir);
 
         // When the execute method in variantsLoad is executed
         JobExecution jobExecution = jobLauncherTestUtils.launchStep(GenotypedVcfJob.LOAD_VARIANTS);
@@ -111,12 +106,10 @@ public class VariantLoaderStepTest {
         VariantStorageManager variantStorageManager = StorageManagerFactory.getVariantStorageManager();
         VariantDBAdaptor variantDBAdaptor = variantStorageManager.getDBAdaptor(dbName, null);
         VariantDBIterator iterator = variantDBAdaptor.iterator(new QueryOptions());
+        File transformedVcfVariantsFile = FileUtils.getResource(TRANSFORMED_VCF_VARIANTS_FILE);
         long lines = getLines(new GZIPInputStream(new FileInputStream(transformedVcfVariantsFile)));
 
         assertEquals(count(iterator), lines);
-
-        tmpTransformedVcfVariantsFile.delete();
-        tmpTransformedVariantsFile.delete();
     }
 
     @Test

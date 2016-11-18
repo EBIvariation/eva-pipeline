@@ -47,6 +47,10 @@ public abstract class FileUtils {
         FileCopyUtils.copy(vcfFile, new File(outputDir, resourcePath));
     }
 
+    public static File getResource(String resourcePath) {
+        return new File(FileUtils.class.getResource(resourcePath).getFile());
+    }
+
     public static Resource getResource(File file) throws IOException {
         Resource resource;
         if (CompressionHelper.isGzip(file)) {
