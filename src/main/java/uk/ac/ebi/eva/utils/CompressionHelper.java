@@ -22,9 +22,10 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.ZipException;
 
 /**
- * @author Jose Miguel Mut Lopez &lt;jmmut@ebi.ac.uk&gt;
+ * Utility methods to work with compressed files.
  */
 public class CompressionHelper {
+
     public static boolean isGzip(String file) throws IOException {
         return isGzip(new File(file));
     }
