@@ -70,7 +70,7 @@ public class VcfHeaderReaderTest {
     /**
      * This test is intended to check that the metadata of the VariantSource is properly filled when using a VcfReader,
      * in a way that mostly maintains the structure we already have in mongo, in the files collection. See the doc in
-     * {@link VcfHeaderReader#doRead()}
+     * {@link VcfHeaderReader#read()}
      *
      * @throws Exception
      */

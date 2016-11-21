@@ -21,14 +21,13 @@ import org.opencb.biodata.models.variant.VariantStudy;
 import org.springframework.batch.item.ItemReader;
 
 import java.io.File;
-import java.io.IOException;
 
 public class VcfHeaderReader implements ItemReader<VariantSource> {
 
     /**
-     * You can retrieve the header of the VCF like this: `source.getMetadata().get(VARIANT_FILE_HEADER_KEY)`,
-     * but why "variantFileHeader"? we are using the converter
-     * {@link org.opencb.opencga.storage.mongodb.variant.DBObjectToVariantSourceConverter}, which requires it, and will
+     * The header of the VCF can be retrieved using `source.getMetadata().get(VARIANT_FILE_HEADER_KEY)`.
+     * The "variantFileHeader" is required by the converter
+     * {@link org.opencb.opencga.storage.mongodb.variant.DBObjectToVariantSourceConverter}, which will
      * store it in mongo as "header".
      */
     public static final String VARIANT_FILE_HEADER_KEY = "variantFileHeader";
@@ -43,28 +42,22 @@ public class VcfHeaderReader implements ItemReader<VariantSource> {
                            String studyName,
                            VariantStudy.StudyType type,
                            VariantSource.Aggregation aggregation) {
-
         this.file = file;
         this.source = new VariantSource(file.getName(), fileId, studyId, studyName, type, aggregation);
     }
 
-    @Override
-    public VariantSource read() throws Exception {
-        return doRead();
-    }
-
     /**
-     * Before passing our VariantSource to a VcfReader (that uses the VariantVcfFactory inside the mapper), we
-     * need to fill some attributes from the header:
+     * Before providing the VariantSource as argument to a VcfReader (that uses the VariantVcfFactory inside 
+     * the mapper), we need to fill some attributes from the header:
      * <ul>
-     * <li>common vcf fields (FORMAT, INFO, ALT, FILTER, contig)</li>
-     * <li>other fields (maybe custom fields from users: reference, source...)</li>
-     * <li>the sample names.</li>
-     * <li>The full header string.</li>
+     * <li>Common VCF fields (FORMAT, INFO, ALT, FILTER, contig)</li>
+     * <li>Other fields (may be custom fields from users: reference, source...)</li>
+     * <li>Sample names</li>
+     * <li>Full header string</li>
      * </ul>
      * <p>
-     * We get the fields with htsjdk to parse the header. As some tags will appear more than once (INFO, contig, ALT...)
-     * we store a map, where the key is the field tag, and the value is a list of lines:
+     * As some tags from the header will appear more than once (INFO, contig, ALT...), they are stored in a Map
+     * where the key is the field tag, and the value is a list of lines:
      * <p>
      * {@code INFO -> [{ "id" : "CIEND", "number" : "2", "type" : "Integer", "description" : "Confidence..." }, ... ]}
      * <p>
@@ -74,7 +67,8 @@ public class VcfHeaderReader implements ItemReader<VariantSource> {
      * <p>
      * Look at the test to see how is this checked.
      */
-    private VariantSource doRead() throws IOException {
+    @Override
+    public VariantSource read() throws Exception {
         VariantVcfReader reader = new VariantVcfReader(source, file.getPath());
         reader.open();
         reader.pre();
