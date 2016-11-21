@@ -38,8 +38,7 @@ import java.util.List;
 public class VcfReader extends FlatFileItemReader<List<Variant>> {
 
     public VcfReader(VariantSource source, File file) throws IOException {
-        Resource resource;
-        resource = FileUtils.getResource(file);
+        Resource resource = FileUtils.getResource(file);
         setResource(resource);
         setLineMapper(new VcfLineMapper(source));
     }
