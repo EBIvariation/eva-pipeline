@@ -77,7 +77,7 @@ public class AnnotationFlatFileReaderTest {
         annotationFlatFileReader.read();
     }
 
-    // Missing '/' in 20_63351_AG (sould be 20_63351_A/G)
+    // Missing '/' in 20_63351_AG (should be 20_63351_A/G)
     @Test(expected = FlatFileParseException.class)
     public void malformedVariantFieldsAnnotationLinesShouldBeSkipped() throws Exception {
         ExecutionContext executionContext = MetaDataInstanceFactory.createStepExecution().getExecutionContext();
