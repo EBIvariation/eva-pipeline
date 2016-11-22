@@ -13,7 +13,7 @@ import uk.ac.ebi.eva.pipeline.io.writers.VepAnnotationMongoWriter;
 import uk.ac.ebi.eva.utils.MongoDBHelper;
 
 @Configuration
-public class AnnotationLoaderConfiguration {
+public class AnnotationLoaderStepConfiguration {
 
     @Autowired
     private JobOptions jobOptions;

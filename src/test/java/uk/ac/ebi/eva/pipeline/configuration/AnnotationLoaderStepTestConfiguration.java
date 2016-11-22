@@ -26,7 +26,7 @@ import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
  */
 @Configuration
 @PropertySource({"annotation-loader-step.properties"})
-public class AnnotationLoaderStepConfiguration {
+public class AnnotationLoaderStepTestConfiguration {
 
     @Bean
     private static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {

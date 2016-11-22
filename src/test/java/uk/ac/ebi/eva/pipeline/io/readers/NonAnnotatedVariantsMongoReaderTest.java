@@ -30,7 +30,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.ac.ebi.eva.pipeline.configuration.AnnotationConfiguration;
-import uk.ac.ebi.eva.pipeline.configuration.AnnotationLoaderConfiguration;
+import uk.ac.ebi.eva.pipeline.configuration.AnnotationLoaderStepConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
 import uk.ac.ebi.eva.pipeline.jobs.AnnotationJob;
 import uk.ac.ebi.eva.test.data.VariantData;
@@ -49,7 +49,7 @@ import static org.junit.Assert.*;
 @RunWith(SpringRunner.class)
 @ActiveProfiles("variant-annotation-mongo")
 @ContextConfiguration(classes = {AnnotationJob.class, AnnotationConfiguration.class,
-        AnnotationLoaderConfiguration.class})
+        AnnotationLoaderStepConfiguration.class})
 public class NonAnnotatedVariantsMongoReaderTest {
 
     private static final String DOC_CHR = "chr";

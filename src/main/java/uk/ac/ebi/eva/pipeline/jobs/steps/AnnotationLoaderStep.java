@@ -27,7 +27,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import uk.ac.ebi.eva.pipeline.configuration.AnnotationLoaderConfiguration;
+import uk.ac.ebi.eva.pipeline.configuration.AnnotationLoaderStepConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
 import uk.ac.ebi.eva.pipeline.io.readers.AnnotationFlatFileReader;
 import uk.ac.ebi.eva.pipeline.io.writers.VepAnnotationMongoWriter;
@@ -52,7 +52,7 @@ import java.io.IOException;
 
 @Configuration
 @EnableBatchProcessing
-@Import({JobOptions.class, AnnotationLoaderConfiguration.class})
+@Import({JobOptions.class, AnnotationLoaderStepConfiguration.class})
 public class AnnotationLoaderStep {
 
     public static final String LOAD_VEP_ANNOTATION = "Load VEP annotation";
