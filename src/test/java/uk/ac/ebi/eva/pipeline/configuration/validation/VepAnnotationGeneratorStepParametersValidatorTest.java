@@ -17,10 +17,14 @@ package uk.ac.ebi.eva.pipeline.configuration.validation;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.batch.core.JobParameter;
+import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersInvalidException;
 
-import java.io.File;
-import java.io.IOException;
+import uk.ac.ebi.eva.pipeline.configuration.JobParametersNames;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * Tests that the arguments necessary to run a {@link uk.ac.ebi.eva.pipeline.jobs.steps.VepAnnotationGeneratorStep} are
@@ -35,111 +39,39 @@ public class VepAnnotationGeneratorStepParametersValidatorTest {
     }
 
     @Test
-    public void vepPathIsValid() throws JobParametersInvalidException {
-        validator.validateVepPath(VepAnnotationGeneratorStepParametersValidatorTest.class.getResource(
-                "/parameters-validation/vepapp.pl").getFile());
+    public void allJobParametersAreValid() throws JobParametersInvalidException {
+        final String APP_VEP_PATH = VepAnnotationGeneratorStepParametersValidatorTest.class
+                .getResource("/parameters-validation/vepapp.pl").getPath();
+        final String DIR = VepAnnotationGeneratorStepParametersValidatorTest.class
+                .getResource("/parameters-validation/").getPath();
+        final String INPUT_FASTA = VepAnnotationGeneratorStepParametersValidatorTest.class
+                .getResource("/parameters-validation/fasta.fa").getPath();
+
+        final Map<String, JobParameter> parameters = new LinkedHashMap<>();
+        parameters.putIfAbsent(JobParametersNames.APP_VEP_PATH, new JobParameter(APP_VEP_PATH));
+        parameters.putIfAbsent(JobParametersNames.APP_VEP_CACHE_VERSION, new JobParameter("100_A"));
+        parameters.putIfAbsent(JobParametersNames.APP_VEP_CACHE_PATH, new JobParameter(DIR));
+        parameters.putIfAbsent(JobParametersNames.APP_VEP_CACHE_SPECIES, new JobParameter("Human"));
+        parameters.putIfAbsent(JobParametersNames.INPUT_FASTA, new JobParameter(INPUT_FASTA));
+        parameters.putIfAbsent(JobParametersNames.APP_VEP_NUMFORKS, new JobParameter("6"));
+        parameters.putIfAbsent(JobParametersNames.OUTPUT_DIR_ANNOTATION, new JobParameter(DIR));
+        parameters.putIfAbsent(JobParametersNames.INPUT_STUDY_ID, new JobParameter("inputStudyId"));
+        parameters.putIfAbsent(JobParametersNames.INPUT_VCF_ID, new JobParameter("inputVcfId"));
+
+        validator.validate(new JobParameters(parameters));
     }
 
     @Test(expected = JobParametersInvalidException.class)
-    public void vepPathNotExist() throws JobParametersInvalidException {
-        validator.validateVepPath("file://path/to/file.vcf");
+    public void invalidAndMissingParameters() throws JobParametersInvalidException {
+        final Map<String, JobParameter> parameters = new LinkedHashMap<>();
+        parameters.putIfAbsent(JobParametersNames.APP_VEP_PATH, new JobParameter("file://path/to/file.vcf"));
+        parameters.putIfAbsent(JobParametersNames.APP_VEP_CACHE_PATH, new JobParameter("file://path/to/"));
+        parameters.putIfAbsent(JobParametersNames.APP_VEP_CACHE_SPECIES, new JobParameter(""));
+        parameters.putIfAbsent(JobParametersNames.INPUT_FASTA, new JobParameter("file://path/to/file.vcf"));
+        parameters.putIfAbsent(JobParametersNames.OUTPUT_DIR_ANNOTATION, new JobParameter("file://path/to/"));
+        parameters.putIfAbsent(JobParametersNames.INPUT_STUDY_ID, new JobParameter(""));
+        parameters.putIfAbsent(JobParametersNames.INPUT_VCF_ID, new JobParameter(""));
+
+        validator.validate(new JobParameters(parameters));
     }
-
-    @Test(expected = JobParametersInvalidException.class)
-    public void vepPathNotReadable() throws JobParametersInvalidException, IOException {
-        File file = new File(VepAnnotationGeneratorStepParametersValidatorTest.class.getResource(
-                "/parameters-validation/input_not_readable.vcf.gz").getFile());
-        file.setReadable(false);
-
-        validator.validateVepPath(file.getCanonicalPath());
-    }
-
-
-    @Test
-    public void vepCacheVersionIsValid() throws JobParametersInvalidException {
-        validator.validateVepCacheVersion("vepCacheVersion");
-    }
-
-    @Test(expected = JobParametersInvalidException.class)
-    public void vepCacheVersionIsEmpty() throws JobParametersInvalidException {
-        validator.validateVepCacheVersion("");
-    }
-
-    @Test(expected = JobParametersInvalidException.class)
-    public void vepCacheVersionIsNull() throws JobParametersInvalidException {
-        validator.validateVepCacheVersion(null);
-    }
-
-
-    @Test
-    public void vepCachePathIsValid() throws JobParametersInvalidException {
-        validator.validateVepCachePath(
-                VepInputGeneratorStepParametersValidatorTest.class.getResource("/parameters-validation/").getFile());
-    }
-
-    @Test(expected = JobParametersInvalidException.class)
-    public void vepCachePathNotExist() throws JobParametersInvalidException {
-        validator.validateVepCachePath("file://path/to/");
-    }
-
-
-    @Test
-    public void vepChacheSpeciesIsValid() throws JobParametersInvalidException {
-        validator.validateVepCacheSpecies("vepChacheSpecies");
-    }
-
-    @Test(expected = JobParametersInvalidException.class)
-    public void vepChacheSpeciesIsEmpty() throws JobParametersInvalidException {
-        validator.validateVepCacheSpecies("");
-    }
-
-    @Test(expected = JobParametersInvalidException.class)
-    public void vepChacheSpeciesIsNull() throws JobParametersInvalidException {
-        validator.validateVepCacheSpecies(null);
-    }
-
-
-    @Test
-    public void inputFastaIsValid() throws JobParametersInvalidException {
-        validator.validateInputFasta(VepAnnotationGeneratorStepParametersValidatorTest.class.getResource(
-                "/parameters-validation/fasta.fa").getFile());
-    }
-
-    @Test(expected = JobParametersInvalidException.class)
-    public void inputFastaNotExist() throws JobParametersInvalidException {
-        validator.validateInputFasta("file://path/to/file.vcf");
-    }
-
-    @Test(expected = JobParametersInvalidException.class)
-    public void inputFastaNotReadable() throws JobParametersInvalidException, IOException {
-        File file = new File(VepAnnotationGeneratorStepParametersValidatorTest.class.getResource(
-                "/parameters-validation/fasta_not_readable.fa").getFile());
-        file.setReadable(false);
-
-        validator.validateInputFasta(file.getCanonicalPath());
-    }
-
-
-    @Test
-    public void vepNumForksIsValid() throws JobParametersInvalidException {
-        validator.validateVepNumForks("11");
-    }
-
-    @Test(expected = JobParametersInvalidException.class)
-    public void vepNumForksIsNotValid() throws JobParametersInvalidException {
-        validator.validateVepNumForks("hello");
-    }
-
-    @Test(expected = JobParametersInvalidException.class)
-    public void vepNumForksIsEmpty() throws JobParametersInvalidException {
-        validator.validateVepNumForks("");
-    }
-
-    @Test(expected = JobParametersInvalidException.class)
-    public void vepNumForksIsNull() throws JobParametersInvalidException {
-        validator.validateVepNumForks(null);
-    }
-
-    //TODO outputDirAnnotation, inputVcfId, inputStudyId validations test are the same in
-    // VepInputGeneratorStepParametersValidatorTest
 }
