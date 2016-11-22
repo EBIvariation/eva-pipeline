@@ -23,6 +23,8 @@ import uk.ac.ebi.eva.utils.MongoDBHelper;
 
 import javax.annotation.PostConstruct;
 
+import java.net.UnknownHostException;
+
 /**
  * Mongo variant reader using an ItemReader cursor based. This is speeding up the reading of the variant in big
  * collections. The {@link org.springframework.batch.item.data.MongoItemReader} is using pagination and it is slow with
@@ -31,10 +33,10 @@ import javax.annotation.PostConstruct;
 public class NonAnnotatedVariantsMongoReader extends MongoDbCursorItemReader {
 
     public NonAnnotatedVariantsMongoReader(String databaseName, String collectionsVariantsName,
-                                           MongoConnection connection) {
+                                           MongoConnection connection) throws UnknownHostException {
         super();
 
-        setMongo(MongoDBHelper.getMongoClientFromPipelineOptions(connection));
+        setMongo(MongoDBHelper.getMongoClient(connection));
 
         setDatabaseName(databaseName);
         setCollectionName(collectionsVariantsName);

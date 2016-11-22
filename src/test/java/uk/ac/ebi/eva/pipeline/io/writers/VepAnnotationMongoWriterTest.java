@@ -85,7 +85,7 @@ public class VepAnnotationMongoWriterTest {
         writeIdsIntoMongo(annotations, variants);
 
         // now, load the annotation
-        MongoOperations mongoOperations = MongoDBHelper.getMongoOperationsFromPipelineOptions(databaseName,
+        MongoOperations mongoOperations = MongoDBHelper.getMongoOperations(databaseName,
                 jobOptions.getMongoConnection());
         annotationWriter = new VepAnnotationMongoWriter(mongoOperations, dbCollectionVariantsName);
         annotationWriter.write(annotations);
@@ -144,7 +144,7 @@ public class VepAnnotationMongoWriterTest {
         }
 
         // now, load the annotation
-        MongoOperations mongoOperations = MongoDBHelper.getMongoOperationsFromPipelineOptions(databaseName,
+        MongoOperations mongoOperations = MongoDBHelper.getMongoOperations(databaseName,
                 jobOptions.getMongoConnection());
         annotationWriter = new VepAnnotationMongoWriter(mongoOperations, dbCollectionVariantsName);
 

@@ -38,7 +38,7 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static uk.ac.ebi.eva.utils.MongoDBHelper.getMongoOperationsFromPipelineOptions;
+import static uk.ac.ebi.eva.utils.MongoDBHelper.getMongoOperations;
 
 /**
  * {@link GeneWriter}
@@ -59,7 +59,7 @@ public class GeneWriterTest {
     public void shouldWriteAllFieldsIntoMongoDb() throws Exception {
         String databaseName = mongoRule.getRandomTemporaryDatabaseName();
 
-        MongoOperations mongoOperations = getMongoOperationsFromPipelineOptions(databaseName,
+        MongoOperations mongoOperations = getMongoOperations(databaseName,
                 jobOptions.getMongoConnection());
 
         GeneWriter geneWriter = new GeneWriter(mongoOperations, jobOptions.getDbCollectionsFeaturesName());

@@ -28,6 +28,7 @@ import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 import uk.ac.ebi.eva.utils.MongoConnection;
 import uk.ac.ebi.eva.utils.MongoDBHelper;
 
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -59,9 +60,9 @@ public class VariantMongoWriterTest {
     }
 
     @Test
-    public void noVariantsNothingShouldBeWritten() {
+    public void noVariantsNothingShouldBeWritten() throws UnknownHostException {
         String dbName = mongoRule.getRandomTemporaryDatabaseName();
-        MongoOperations mongoOperations = MongoDBHelper.getMongoOperationsFromPipelineOptions(dbName, connection);
+        MongoOperations mongoOperations = MongoDBHelper.getMongoOperations(dbName, connection);
         DBCollection dbCollection = mongoOperations.getCollection(collectionName);
 
         variantMongoWriter = new VariantMongoWriter(collectionName, mongoOperations, variantToMongoDbObjectConverter);
@@ -71,7 +72,7 @@ public class VariantMongoWriterTest {
     }
 
     @Test
-    public void variantsShouldBeWrittenIntoMongoDb() {
+    public void variantsShouldBeWrittenIntoMongoDb() throws UnknownHostException {
         String dbName = mongoRule.getRandomTemporaryDatabaseName();
 
         Variant variant = Mockito.mock(Variant.class);
@@ -80,7 +81,7 @@ public class VariantMongoWriterTest {
         when(variant.getReference()).thenReturn("A").thenReturn("B");
         when(variant.getAlternate()).thenReturn("B").thenReturn("C");
 
-        MongoOperations mongoOperations = MongoDBHelper.getMongoOperationsFromPipelineOptions(dbName, connection);
+        MongoOperations mongoOperations = MongoDBHelper.getMongoOperations(dbName, connection);
         DBCollection dbCollection = mongoOperations.getCollection(collectionName);
 
         BasicDBObject dbObject = new BasicDBObject();

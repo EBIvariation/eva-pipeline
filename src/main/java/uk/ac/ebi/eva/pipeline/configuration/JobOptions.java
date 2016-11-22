@@ -37,6 +37,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URI;
+import java.net.UnknownHostException;
 import java.nio.file.Paths;
 import java.util.Properties;
 
@@ -300,8 +301,8 @@ public class JobOptions {
         return connection;
     }
 
-    public MongoOperations getMongoOperations() {
-        return MongoDBHelper.getMongoOperationsFromPipelineOptions(getDbName(), getMongoConnection());
+    public MongoOperations getMongoOperations() throws UnknownHostException {
+        return MongoDBHelper.getMongoOperations(getDbName(), getMongoConnection());
     }
 
 }

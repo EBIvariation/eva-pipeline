@@ -17,68 +17,60 @@
 package uk.ac.ebi.eva.utils;
 
 import com.mongodb.MongoClient;
+import com.mongodb.MongoCredential;
 import com.mongodb.ReadPreference;
+import com.mongodb.ServerAddress;
 import org.opencb.commons.utils.CryptoUtils;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.data.mongodb.core.MongoTemplate;
-
-import uk.ac.ebi.eva.pipeline.configuration.JobParametersNames;
+import org.springframework.data.mongodb.core.SimpleMongoDbFactory;
 
 import java.net.UnknownHostException;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Utility class dealing with MongoDB connections using pipeline options
  */
 public class MongoDBHelper {
 
-    public static MongoOperations getMongoOperationsFromPipelineOptions(String database, MongoConnection connection) {
-        MongoTemplate mongoTemplate;
-        try {
-            mongoTemplate = getMongoTemplate(database, connection);
-        } catch (UnknownHostException e) {
-            throw new RuntimeException("Unable to initialize mongo template", e);
-        }
+    public static MongoOperations getMongoOperations(String database, MongoConnection connection) 
+            throws UnknownHostException {
+        MongoClient client = getMongoClient(connection);
+        MongoTemplate mongoTemplate = new MongoTemplate(new SimpleMongoDbFactory(client, database));
         return mongoTemplate;
     }
-
-    private static MongoTemplate getMongoTemplate(String database, MongoConnection connection) throws
-            UnknownHostException {
-        MongoTemplate mongoTemplate;
-        if (connection.getAuthenticationDatabase() == null || connection.getAuthenticationDatabase().isEmpty()) {
-            mongoTemplate = ConnectionHelper.getMongoTemplate(database);
-        } else {
-            mongoTemplate = ConnectionHelper.getMongoTemplate(database, getMongoClient(connection));
-        }
-        mongoTemplate.setReadPreference(getMongoTemplateReadPreferences(connection.getReadPreference()));
-
-        return mongoTemplate;
-    }
-
-    public static MongoClient getMongoClientFromPipelineOptions(MongoConnection connection) {
-        try {
-            return getMongoClient(connection);
-        } catch (UnknownHostException e) {
-            throw new RuntimeException("Unable to initialize mongo client", e);
-        }
-    }
-
-    private static MongoClient getMongoClient(MongoConnection connection) throws UnknownHostException {
+    
+    public static MongoClient getMongoClient(MongoConnection connection) throws UnknownHostException {
         MongoClient mongoClient;
 
         if (connection.getAuthenticationDatabase() == null || connection.getAuthenticationDatabase().isEmpty()) {
-            mongoClient = ConnectionHelper.getMongoClient();
+            mongoClient = new MongoClient();
         } else {
-            mongoClient = ConnectionHelper.getMongoClient(
-                    connection.getHosts(),
-                    connection.getAuthenticationDatabase(),
-                    connection.getUser(),
-                    connection.getPassword().toCharArray()
-            );
+            mongoClient = new MongoClient(
+                    parseServerAddresses(connection.getHosts()),
+                    Collections.singletonList(MongoCredential.createCredential(connection.getUser(),
+                            connection.getAuthenticationDatabase(),connection.getPassword().toCharArray())));
         }
 
         mongoClient.setReadPreference(getMongoTemplateReadPreferences(connection.getReadPreference()));
 
         return mongoClient;
+    }
+
+    private static List<ServerAddress> parseServerAddresses(String hosts) throws UnknownHostException {
+        List<ServerAddress> serverAddresses = new LinkedList<>();
+        for (String hostPort : hosts.split(",")) {
+            if (hostPort.contains(":")) {
+                String[] split = hostPort.split(":");
+                Integer port = Integer.valueOf(split[1]);
+                serverAddresses.add(new ServerAddress(split[0], port));
+            } else {
+                serverAddresses.add(new ServerAddress(hostPort, 27017));
+            }
+        }
+        return serverAddresses;
     }
 
 
