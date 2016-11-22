@@ -42,7 +42,6 @@ import uk.ac.ebi.eva.pipeline.configuration.JobParametersNames;
 import uk.ac.ebi.eva.pipeline.jobs.GenotypedVcfJob;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 import uk.ac.ebi.eva.test.rules.TemporalMongoRule;
-import uk.ac.ebi.eva.utils.FileUtils;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -52,7 +51,8 @@ import static org.junit.Assert.assertEquals;
 import static org.opencb.opencga.storage.core.variant.VariantStorageManager.VARIANT_SOURCE;
 import static uk.ac.ebi.eva.test.utils.JobTestUtils.count;
 import static uk.ac.ebi.eva.test.utils.JobTestUtils.getLines;
-import static uk.ac.ebi.eva.utils.FileUtils.getResource;
+import static uk.ac.ebi.eva.test.utils.TestFileUtils.copyResource;
+import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResource;
 
 /**
  * Test for {@link VariantLoaderStep}
@@ -84,7 +84,7 @@ public class VariantLoaderStepTest {
     @Test
     public void loaderStepShouldLoadAllVariants() throws Exception {
         String outputDir = temporaryFolderRule.getRoot().getAbsolutePath();
-        jobOptions.getPipelineOptions().put(JobParametersNames.OUTPUT_DIR,outputDir);
+        jobOptions.getPipelineOptions().put(JobParametersNames.OUTPUT_DIR, outputDir);
 
         Config.setOpenCGAHome(opencgaHome);
 
@@ -99,8 +99,8 @@ public class VariantLoaderStepTest {
                 VariantSource.Aggregation.NONE));
 
         //and a variants transform step already executed
-        FileUtils.copyResource(TRANSFORMED_VCF_VARIANTS_FILE, outputDir);
-        FileUtils.copyResource(TRANSFORMED_VARIANTS_FILE, outputDir);
+        copyResource(TRANSFORMED_VCF_VARIANTS_FILE, outputDir);
+        copyResource(TRANSFORMED_VARIANTS_FILE, outputDir);
 
         // When the execute method in variantsLoad is executed
         JobExecution jobExecution = jobLauncherTestUtils.launchStep(GenotypedVcfJob.LOAD_VARIANTS);

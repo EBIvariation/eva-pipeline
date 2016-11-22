@@ -39,15 +39,16 @@ import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
 import uk.ac.ebi.eva.pipeline.configuration.JobParametersNames;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 import uk.ac.ebi.eva.test.rules.TemporalMongoRule;
-import uk.ac.ebi.eva.utils.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.opencb.opencga.storage.core.variant.VariantStorageManager.VARIANT_SOURCE;
-import static uk.ac.ebi.eva.utils.FileUtils.getResourceUrl;
+import static uk.ac.ebi.eva.test.utils.TestFileUtils.copyResource;
+import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResourceUrl;
 
 /**
  * Test for {@link PopulationStatisticsJob}
@@ -116,16 +117,16 @@ public class PopulationStatisticsJobTest {
         jobOptions.setDbName(mongoDatabase);
 
         String outputDir = temporaryFolderRule.getRoot().getAbsolutePath();
-        pipelineOptions.put(JobParametersNames.OUTPUT_DIR_STATISTICS,outputDir);
+        pipelineOptions.put(JobParametersNames.OUTPUT_DIR_STATISTICS, outputDir);
 
         // copy stat file to load
-        FileUtils.copyResource(VARIANTS_FILE_NAME, outputDir);
+        copyResource(VARIANTS_FILE_NAME, outputDir);
 
         // copy source file to load
-        FileUtils.copyResource(SOURCE_FILE_NAME, outputDir);
+        copyResource(SOURCE_FILE_NAME, outputDir);
 
         // copy transformed vcf
-        FileUtils.copyResource(VCF_FILE_NAME, outputDir);
+        copyResource(VCF_FILE_NAME, outputDir);
     }
 
     @Before

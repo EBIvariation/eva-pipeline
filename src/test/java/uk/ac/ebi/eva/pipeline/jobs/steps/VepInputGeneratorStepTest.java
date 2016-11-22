@@ -30,13 +30,12 @@ import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
 import uk.ac.ebi.eva.pipeline.configuration.VepInputGeneratorStepConfiguration;
 import uk.ac.ebi.eva.pipeline.jobs.AnnotationJob;
 import uk.ac.ebi.eva.test.rules.TemporalMongoRule;
-import uk.ac.ebi.eva.utils.FileUtils;
 
 import java.io.File;
 
 import static org.junit.Assert.*;
 import static uk.ac.ebi.eva.test.utils.JobTestUtils.readFirstLine;
-import static uk.ac.ebi.eva.utils.FileUtils.getResourceUrl;
+import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResourceUrl;
 
 /**
  * Test {@link VepInputGeneratorStep}

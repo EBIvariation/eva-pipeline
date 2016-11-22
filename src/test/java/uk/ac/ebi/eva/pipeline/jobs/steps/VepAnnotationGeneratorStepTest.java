@@ -41,7 +41,7 @@ import java.io.FileInputStream;
 import java.util.zip.GZIPInputStream;
 
 import static org.junit.Assert.*;
-import static uk.ac.ebi.eva.utils.FileUtils.getResource;
+import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResource;
 
 /**
  * Test for {@link VepAnnotationGeneratorStep}

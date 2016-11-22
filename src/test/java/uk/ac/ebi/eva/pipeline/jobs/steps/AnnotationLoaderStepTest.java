@@ -37,13 +37,13 @@ import uk.ac.ebi.eva.pipeline.jobs.AnnotationJob;
 import uk.ac.ebi.eva.test.data.VepOutputContent;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 import uk.ac.ebi.eva.test.rules.TemporalMongoRule;
-import uk.ac.ebi.eva.utils.FileUtils;
 
 import java.io.File;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static uk.ac.ebi.eva.utils.FileUtils.getResourceUrl;
+import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResourceUrl;
+import static uk.ac.ebi.eva.test.utils.TestFileUtils.makeGzipFile;
 
 
 /**
@@ -112,7 +112,7 @@ public class AnnotationLoaderStepTest {
         //TODO change for commented lines when vep output file can be passed as a job parameter
         //File file = temporaryFolderRule.makeTemporalGzipFile(VepOutputContent.vepOutputContent);
         //jobOptions.setVepOutput(file.getAbsolutePath());
-        File file = FileUtils.makeGzipFile(VepOutputContent.vepOutputContent, jobOptions.getVepOutput());
+        File file = makeGzipFile(VepOutputContent.vepOutputContent, jobOptions.getVepOutput());
 
     }
 

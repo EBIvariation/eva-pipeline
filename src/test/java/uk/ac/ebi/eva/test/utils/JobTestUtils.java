@@ -31,7 +31,7 @@ import java.util.TreeSet;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
-public class JobTestUtils {
+public abstract class JobTestUtils {
     private static final Logger logger = LoggerFactory.getLogger(JobTestUtils.class);
     private static final String EVA_PIPELINE_TEMP_PREFIX = "eva-pipeline-test";
     private static final java.lang.String EVA_PIPELINE_TEMP_POSTFIX = ".tmp";

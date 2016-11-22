@@ -43,7 +43,7 @@ import java.nio.file.Paths;
 
 import static org.junit.Assert.*;
 import static org.opencb.opencga.storage.core.variant.VariantStorageManager.VARIANT_SOURCE;
-import static uk.ac.ebi.eva.utils.FileUtils.getResourceUrl;
+import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResourceUrl;
 
 /**
  * Test for {@link PopulationStatisticsGeneratorStep}

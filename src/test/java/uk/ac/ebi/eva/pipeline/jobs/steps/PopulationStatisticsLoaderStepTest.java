@@ -5,7 +5,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.opencb.biodata.models.variant.VariantSource;
-import org.opencb.datastore.core.ObjectMap;
 import org.opencb.datastore.core.QueryOptions;
 import org.opencb.opencga.storage.core.StorageManagerException;
 import org.opencb.opencga.storage.core.StorageManagerFactory;
@@ -28,7 +27,6 @@ import uk.ac.ebi.eva.pipeline.jobs.PopulationStatisticsJob;
 import uk.ac.ebi.eva.pipeline.jobs.flows.PopulationStatisticsFlow;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 import uk.ac.ebi.eva.test.rules.TemporalMongoRule;
-import uk.ac.ebi.eva.utils.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -36,8 +34,9 @@ import java.io.IOException;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
-import static uk.ac.ebi.eva.utils.FileUtils.getResource;
-import static uk.ac.ebi.eva.utils.FileUtils.getResourceUrl;
+import static uk.ac.ebi.eva.test.utils.TestFileUtils.copyResource;
+import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResource;
+import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResourceUrl;
 
 /**
  * Test for {@link PopulationStatisticsLoaderStep}
@@ -99,11 +98,11 @@ public class PopulationStatisticsLoaderStepTest {
 
     private void copyFilesToOutpurDir(String outputDir) throws IOException {
         // copy stat file to load
-        FileUtils.copyResource(VARIANTS_FILE_NAME, outputDir);
+        copyResource(VARIANTS_FILE_NAME, outputDir);
         // copy source file to load
-        FileUtils.copyResource(SOURCE_FILE_NAME, outputDir);
+        copyResource(SOURCE_FILE_NAME, outputDir);
         // copy transformed vcf
-        FileUtils.copyResource(VCF_FILE_NAME, outputDir);
+        copyResource(VCF_FILE_NAME, outputDir);
     }
 
     private String createTempDirectoryForStatistics() {

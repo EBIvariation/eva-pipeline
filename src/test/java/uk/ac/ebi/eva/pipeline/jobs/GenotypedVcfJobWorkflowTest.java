@@ -45,7 +45,7 @@ import java.nio.file.Paths;
 import java.util.*;
 
 import static org.junit.Assert.*;
-import static uk.ac.ebi.eva.utils.FileUtils.getResource;
+import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResource;
 
 /**
  * Workflow test for {@link GenotypedVcfJob}
@@ -240,7 +240,7 @@ public class GenotypedVcfJobWorkflowTest {
     }
 
     private void initVariantConfigurationJob() {
-        jobOptions.getPipelineOptions().put(JobParametersNames.DB_NAME,mongoRule.getRandomTemporalDatabaseName());
+        jobOptions.getPipelineOptions().put(JobParametersNames.DB_NAME, mongoRule.getRandomTemporalDatabaseName());
         jobOptions.getPipelineOptions().put(JobParametersNames.INPUT_VCF, getResource(inputFileResouce).getAbsolutePath());
         jobOptions.getPipelineOptions().put(JobParametersNames.APP_VEP_PATH, getResource(MOCK_VEP).getAbsolutePath());
 

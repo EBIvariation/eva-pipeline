@@ -35,18 +35,15 @@ import uk.ac.ebi.eva.pipeline.configuration.JobParametersNames;
 import uk.ac.ebi.eva.pipeline.jobs.GenotypedVcfJob;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 import uk.ac.ebi.eva.test.rules.TemporalMongoRule;
-import uk.ac.ebi.eva.utils.FileUtils;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.nio.file.Paths;
 import java.util.zip.GZIPInputStream;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static uk.ac.ebi.eva.test.utils.JobTestUtils.getLines;
 import static uk.ac.ebi.eva.test.utils.JobTestUtils.getTransformedOutputPath;
-import static uk.ac.ebi.eva.utils.FileUtils.getResource;
+import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResource;
 
 /**
  * Test for {@link VariantNormalizerStep}
@@ -73,13 +70,13 @@ public class VariantNormalizerStepTest {
 
     @Autowired
     private JobOptions jobOptions;
-    
+
     private static String opencgaHome = System.getenv("OPENCGA_HOME") != null ? System.getenv("OPENCGA_HOME") : "/opt/opencga";
 
     @Test
     public void normalizerStepShouldTransformAllVariants() throws Exception {
         Config.setOpenCGAHome(opencgaHome);
-        jobOptions.getPipelineOptions().put(JobParametersNames.DB_NAME,mongoRule.getRandomTemporalDatabaseName());
+        jobOptions.getPipelineOptions().put(JobParametersNames.DB_NAME, mongoRule.getRandomTemporalDatabaseName());
         String temporaryFolder = temporaryFolderRule.getRoot().getAbsolutePath();
         jobOptions.getPipelineOptions().put(JobParametersNames.OUTPUT_DIR, temporaryFolder);
 
@@ -105,7 +102,7 @@ public class VariantNormalizerStepTest {
     @Test
     public void normalizerStepShouldFailIfVariantsAreMalformed() {
         Config.setOpenCGAHome(opencgaHome);
-        jobOptions.getPipelineOptions().put(JobParametersNames.DB_NAME,mongoRule.getRandomTemporalDatabaseName());
+        jobOptions.getPipelineOptions().put(JobParametersNames.DB_NAME, mongoRule.getRandomTemporalDatabaseName());
         String temporaryFolder = temporaryFolderRule.getRoot().getAbsolutePath();
         jobOptions.getPipelineOptions().put(JobParametersNames.OUTPUT_DIR, temporaryFolder);
 

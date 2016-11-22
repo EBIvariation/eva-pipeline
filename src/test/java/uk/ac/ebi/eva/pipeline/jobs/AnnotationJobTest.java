@@ -50,8 +50,8 @@ import static org.junit.Assert.*;
 import static uk.ac.ebi.eva.pipeline.jobs.steps.AnnotationLoaderStep.LOAD_VEP_ANNOTATION;
 import static uk.ac.ebi.eva.pipeline.jobs.steps.VepAnnotationGeneratorStep.GENERATE_VEP_ANNOTATION;
 import static uk.ac.ebi.eva.pipeline.jobs.steps.VepInputGeneratorStep.FIND_VARIANTS_TO_ANNOTATE;
-import static uk.ac.ebi.eva.utils.FileUtils.getResource;
-import static uk.ac.ebi.eva.utils.FileUtils.getResourceUrl;
+import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResource;
+import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResourceUrl;
 
 /**
  * Test for {@link AnnotationJob}
@@ -78,8 +78,7 @@ public class AnnotationJobTest {
 
     @Test
     public void allAnnotationStepsShouldBeExecuted() throws Exception {
-        mongoRule.importDump(getResourceUrl(MONGO_DUMP), jobOptions
-                .getDbName());
+        mongoRule.importDump(getResourceUrl(MONGO_DUMP), jobOptions.getDbName());
 
         JobExecution jobExecution = jobLauncherTestUtils.launchJob();
 
