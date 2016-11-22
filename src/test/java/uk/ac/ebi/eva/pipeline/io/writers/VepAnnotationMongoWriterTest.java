@@ -28,6 +28,7 @@ import org.opencb.biodata.models.variant.annotation.VariantAnnotation;
 import org.opencb.opencga.storage.mongodb.variant.DBObjectToVariantAnnotationConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoOperations;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -57,6 +58,7 @@ import static uk.ac.ebi.eva.test.data.VepOutputContent.vepOutputContent;
  * "consequence types" annotations set
  */
 @RunWith(SpringRunner.class)
+@ActiveProfiles("variant-annotation-mongo")
 @ContextConfiguration(classes = {AnnotationJob.class, AnnotationConfiguration.class})
 public class VepAnnotationMongoWriterTest {
 
