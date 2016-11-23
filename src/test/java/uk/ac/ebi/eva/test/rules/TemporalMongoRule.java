@@ -24,17 +24,10 @@ public class TemporalMongoRule extends ExternalResource {
     private static final Logger logger = LoggerFactory.getLogger(TemporalMongoRule.class);
 
     private final Set<String> databaseNames;
-    private Description description;
     private MongoClient mongoClient;
 
     public TemporalMongoRule() {
         databaseNames = new HashSet<>();
-    }
-
-    @Override
-    public Statement apply(Statement base, Description description) {
-        this.description = description;
-        return super.apply(base, description);
     }
 
     @Override
