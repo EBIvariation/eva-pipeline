@@ -49,7 +49,7 @@ public class TemporalMongoRule extends ExternalResource {
      * @param variant string in JSON format
      * @return DBObject
      */
-    public static DBObject constructDbo(String variant) {
+    public static DBObject constructDbObject(String variant) {
         return (DBObject) JSON.parse(variant);
     }
 
@@ -87,7 +87,7 @@ public class TemporalMongoRule extends ExternalResource {
     }
 
     public void insert(String databaseName, String collectionName, String jsonString) {
-        getCollection(databaseName, collectionName).insert(constructDbo(jsonString));
+        getCollection(databaseName, collectionName).insert(constructDbObject(jsonString));
     }
 
     public String importDumpInTemporalDatabase(URL dumpLocation) throws IOException, InterruptedException {

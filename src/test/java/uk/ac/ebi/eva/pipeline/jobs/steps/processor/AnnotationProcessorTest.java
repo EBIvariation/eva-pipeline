@@ -23,7 +23,7 @@ import uk.ac.ebi.eva.pipeline.model.VariantWrapper;
 import uk.ac.ebi.eva.test.data.VariantData;
 
 import static org.junit.Assert.assertEquals;
-import static uk.ac.ebi.eva.test.rules.TemporalMongoRule.constructDbo;
+import static uk.ac.ebi.eva.test.rules.TemporalMongoRule.constructDbObject;
 
 /**
  * {@link AnnotationProcessor}
@@ -34,7 +34,7 @@ public class AnnotationProcessorTest {
 
     @Test
     public void shouldConvertAllFieldsInVariant() throws Exception {
-        DBObject dbo = constructDbo(VariantData.getVariantWithoutAnnotation());
+        DBObject dbo = constructDbObject(VariantData.getVariantWithoutAnnotation());
 
         ItemProcessor<DBObject, VariantWrapper> processor = new AnnotationProcessor();
         VariantWrapper variant = processor.process(dbo);

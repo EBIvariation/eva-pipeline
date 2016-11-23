@@ -29,7 +29,7 @@ import java.io.File;
 import java.util.Collections;
 
 import static org.junit.Assert.assertEquals;
-import static uk.ac.ebi.eva.test.rules.TemporalMongoRule.constructDbo;
+import static uk.ac.ebi.eva.test.rules.TemporalMongoRule.constructDbObject;
 import static uk.ac.ebi.eva.test.utils.JobTestUtils.readFirstLine;
 
 /**
@@ -47,7 +47,7 @@ public class VepInputFlatFileWriterTest {
         ExecutionContext executionContext = MetaDataInstanceFactory.createStepExecution().getExecutionContext();
 
         DBObjectToVariantConverter converter = new DBObjectToVariantConverter();
-        VariantWrapper variant = new VariantWrapper(converter.convertToDataModelType(constructDbo(VariantData
+        VariantWrapper variant = new VariantWrapper(converter.convertToDataModelType(constructDbObject(VariantData
                 .getVariantWithAnnotation())));
 
         File tempFile = temporaryFolderRule.newFile();
