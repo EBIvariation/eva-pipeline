@@ -134,7 +134,7 @@ public class StatisticsMongoWriterTest {
         return Arrays.asList(populationStatistics);
     }
 
-    public StatisticsMongoWriter getStatisticsMongoWriter(String databaseName) {
+    private StatisticsMongoWriter getStatisticsMongoWriter(String databaseName) {
         MongoOperations mongoOperations = getMongoOperationsFromPipelineOptions(databaseName,
                 jobOptions.getMongoConnection());
         StatisticsMongoWriter statisticsMongoWriter = new StatisticsMongoWriter(
