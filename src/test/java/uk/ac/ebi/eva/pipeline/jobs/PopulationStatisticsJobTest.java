@@ -113,7 +113,7 @@ public class PopulationStatisticsJobTest {
     }
 
     private void initStatsLoadStepFiles() throws IOException, InterruptedException {
-        String mongoDatabase = mongoRule.importDumpInTemporaryDatabase(getResourceUrl(MONGO_DUMP));
+        String mongoDatabase = mongoRule.restoreDumpInTemporaryDatabase(getResourceUrl(MONGO_DUMP));
         jobOptions.setDbName(mongoDatabase);
 
         String outputDir = temporaryFolderRule.getRoot().getAbsolutePath();

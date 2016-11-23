@@ -90,7 +90,7 @@ public class TemporaryMongoRule extends ExternalResource {
         getCollection(databaseName, collectionName).insert(constructDbObject(jsonString));
     }
 
-    public String importDumpInTemporaryDatabase(URL dumpLocation) throws IOException, InterruptedException {
+    public String restoreDumpInTemporaryDatabase(URL dumpLocation) throws IOException, InterruptedException {
         String databaseName = getRandomTemporaryDatabaseName();
         restoreDump(dumpLocation, databaseName);
         return databaseName;

@@ -78,7 +78,7 @@ public class PopulationStatisticsLoaderStepTest {
         jobOptions.getVariantOptions().put(VariantStorageManager.VARIANT_SOURCE, source);
 
         //and a valid variants load and stats create steps already completed
-        jobOptions.setDbName(mongoRule.importDumpInTemporaryDatabase(getResourceUrl(MONGO_DUMP)));
+        jobOptions.setDbName(mongoRule.restoreDumpInTemporaryDatabase(getResourceUrl(MONGO_DUMP)));
 
         copyFilesToOutpurDir(createTempDirectoryForStatistics());
 
