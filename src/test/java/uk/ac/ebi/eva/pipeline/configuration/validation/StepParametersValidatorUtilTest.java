@@ -25,7 +25,7 @@ import java.io.File;
 import java.io.IOException;
 
 /**
- *
+ * Test for {@link StepParametersValidatorUtil}
  */
 public class StepParametersValidatorUtilTest {
     private StepParametersValidatorUtil validator;
