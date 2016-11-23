@@ -89,37 +89,6 @@ public abstract class JobTestUtils {
                 .addLong("time", System.currentTimeMillis()).toJobParameters();
     }
 
-    public static void makeGzipFile(String content, String file) throws IOException {
-        try (FileOutputStream output = new FileOutputStream(file)) {
-            try (Writer writer = new OutputStreamWriter(new GZIPOutputStream(output), "UTF-8")) {
-                writer.write(content);
-            }
-        }
-    }
-
-    public static void restoreMongoDbFromDump(String dumpLocation, String databaseName) throws IOException, InterruptedException {
-        assert (dumpLocation != null && !dumpLocation.isEmpty());
-        assert (databaseName != null && !databaseName.isEmpty());
-
-        logger.info("restoring DB from " + dumpLocation + " into database " + databaseName);
-
-        Process exec = Runtime.getRuntime().exec(String.format("mongorestore -d %s %s", databaseName, dumpLocation));
-        exec.waitFor();
-        String line;
-        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(exec.getInputStream()));
-        while ((line = bufferedReader.readLine()) != null) {
-            logger.info("mongorestore output:" + line);
-        }
-        bufferedReader.close();
-        bufferedReader = new BufferedReader(new InputStreamReader(exec.getErrorStream()));
-        while ((line = bufferedReader.readLine()) != null) {
-            logger.info("mongorestore errorOutput:" + line);
-        }
-        bufferedReader.close();
-
-        logger.info("mongorestore exit value: " + exec.exitValue());
-    }
-
     public static File createTempFile() throws IOException {
         File tempFile = File.createTempFile(EVA_PIPELINE_TEMP_PREFIX, EVA_PIPELINE_TEMP_POSTFIX);
         tempFile.deleteOnExit();
