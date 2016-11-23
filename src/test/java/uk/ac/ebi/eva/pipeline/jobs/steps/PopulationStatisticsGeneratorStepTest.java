@@ -134,7 +134,7 @@ public class PopulationStatisticsGeneratorStepTest {
         jobOptions.setDbName(getClass().getSimpleName());
     }
 
-    public File getStatsFile(VariantSource source) {
+    private File getStatsFile(VariantSource source) {
         return new File(
                 Paths.get(jobOptions.getPipelineOptions().getString(JobParametersNames.OUTPUT_DIR_STATISTICS))
                         .resolve(VariantStorageManager.buildFilename(source))
