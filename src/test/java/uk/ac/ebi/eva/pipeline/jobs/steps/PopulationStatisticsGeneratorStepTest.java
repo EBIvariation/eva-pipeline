@@ -53,7 +53,7 @@ import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResourceUrl;
 public class PopulationStatisticsGeneratorStepTest {
 
     private static final String SMALL_VCF_FILE = "/small20.vcf.gz";
-    private static final String STATS_FILE_POSTFIX = ".variants.stats.json.gz";
+    private static final String STATS_FILE_SUFFIX = ".variants.stats.json.gz";
     private static final String MONGO_DUMP = "/dump/VariantStatsConfigurationTest_vl";
 
     @Rule
@@ -138,7 +138,7 @@ public class PopulationStatisticsGeneratorStepTest {
         return new File(
                 Paths.get(jobOptions.getPipelineOptions().getString(JobParametersNames.OUTPUT_DIR_STATISTICS))
                         .resolve(VariantStorageManager.buildFilename(source))
-                        + STATS_FILE_POSTFIX
+                        + STATS_FILE_SUFFIX
         );
     }
 }
