@@ -37,7 +37,7 @@ public class PipelineTemporaryFolderRule extends TemporaryFolder {
      * @return
      * @throws IOException
      */
-    public File makeTemporalGzipFile(String content) throws IOException {
+    public File newGzipFile(String content) throws IOException {
         File tempFile = newFile();
         try (FileOutputStream output = new FileOutputStream(tempFile)) {
             try (Writer writer = new OutputStreamWriter(new GZIPOutputStream(output), "UTF-8")) {

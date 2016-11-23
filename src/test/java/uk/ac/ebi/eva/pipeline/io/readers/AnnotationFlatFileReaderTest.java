@@ -48,7 +48,7 @@ public class AnnotationFlatFileReaderTest {
         ExecutionContext executionContext = MetaDataInstanceFactory.createStepExecution().getExecutionContext();
 
         //simulate VEP output file
-        File file = temporaryFolderRule.makeTemporalGzipFile(VepOutputContent.vepOutputContent);
+        File file = temporaryFolderRule.newGzipFile(VepOutputContent.vepOutputContent);
 
         AnnotationFlatFileReader annotationFlatFileReader = new AnnotationFlatFileReader(file);
         annotationFlatFileReader.setSaveState(false);
@@ -76,7 +76,7 @@ public class AnnotationFlatFileReaderTest {
     public void malformedCoordinatesAnnotationLinesShouldBeSkipped() throws Exception {
         ExecutionContext executionContext = MetaDataInstanceFactory.createStepExecution().getExecutionContext();
 
-        File file = temporaryFolderRule.makeTemporalGzipFile(VepOutputContent.vepOutputContentMalformedCoordinates);
+        File file = temporaryFolderRule.newGzipFile(VepOutputContent.vepOutputContentMalformedCoordinates);
         AnnotationFlatFileReader annotationFlatFileReader = new AnnotationFlatFileReader(file);
         annotationFlatFileReader.open(executionContext);
         annotationFlatFileReader.read();
@@ -87,7 +87,7 @@ public class AnnotationFlatFileReaderTest {
     public void malformedVariantFieldsAnnotationLinesShouldBeSkipped() throws Exception {
         ExecutionContext executionContext = MetaDataInstanceFactory.createStepExecution().getExecutionContext();
 
-        File file = temporaryFolderRule.makeTemporalGzipFile(VepOutputContent.vepOutputContentMalformedVariantFields);
+        File file = temporaryFolderRule.newGzipFile(VepOutputContent.vepOutputContentMalformedVariantFields);
         AnnotationFlatFileReader annotationFlatFileReader = new AnnotationFlatFileReader(file);
         annotationFlatFileReader.open(executionContext);
         annotationFlatFileReader.read();

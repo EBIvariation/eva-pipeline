@@ -31,7 +31,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import uk.ac.ebi.eva.pipeline.configuration.AnnotationConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
 import uk.ac.ebi.eva.pipeline.jobs.AnnotationJob;
-import uk.ac.ebi.eva.pipeline.jobs.AnnotationJobTest;
 import uk.ac.ebi.eva.pipeline.jobs.flows.AnnotationFlow;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
@@ -69,7 +68,7 @@ public class VepAnnotationGeneratorStepTest {
 
     @Test
     public void shouldGenerateVepAnnotations() throws Exception {
-        jobOptions.setVepInputFile(temporaryFolderRule.makeTemporalGzipFile(VEP_INPUT_CONTENT).getAbsolutePath());
+        jobOptions.setVepInputFile(temporaryFolderRule.newGzipFile(VEP_INPUT_CONTENT).getAbsolutePath());
         File vepOutputFile = temporaryFolderRule.newFile();
         jobOptions.setVepOutput(vepOutputFile.getAbsolutePath());
 

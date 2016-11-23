@@ -45,7 +45,7 @@ public class GeneReaderTest {
         ExecutionContext executionContext = MetaDataInstanceFactory.createStepExecution().getExecutionContext();
 
         //simulate VEP output file
-        File file = temporaryFolderRule.makeTemporalGzipFile(GtfStaticTestData.GTF_CONTENT);
+        File file = temporaryFolderRule.newGzipFile(GtfStaticTestData.GTF_CONTENT);
 
         GeneReader geneReader = new GeneReader(file);
         geneReader.setSaveState(false);

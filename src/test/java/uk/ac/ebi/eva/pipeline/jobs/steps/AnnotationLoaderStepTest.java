@@ -110,7 +110,7 @@ public class AnnotationLoaderStepTest {
         mongoRule.importDump(getResourceUrl(MONGO_DUMP), jobOptions.getDbName());
 
         //TODO change for commented lines when vep output file can be passed as a job parameter
-        //File file = temporaryFolderRule.makeTemporalGzipFile(VepOutputContent.vepOutputContent);
+        //File file = temporaryFolderRule.newGzipFile(VepOutputContent.vepOutputContent);
         //jobOptions.setVepOutput(file.getAbsolutePath());
         File file = makeGzipFile(VepOutputContent.vepOutputContent, jobOptions.getVepOutput());
 

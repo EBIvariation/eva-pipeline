@@ -29,7 +29,6 @@ import uk.ac.ebi.eva.pipeline.jobs.steps.processors.GeneFilterProcessor;
 import uk.ac.ebi.eva.pipeline.model.FeatureCoordinates;
 import uk.ac.ebi.eva.test.data.GtfStaticTestData;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
-import uk.ac.ebi.eva.test.utils.JobTestUtils;
 
 /**
  * {@link GeneFilterProcessor}
@@ -47,7 +46,7 @@ public class GeneFilterProcessorTest {
         GeneFilterProcessor geneFilterProcessor = new GeneFilterProcessor();
 
         //simulate VEP output file
-        File file = temporaryFolderRule.makeTemporalGzipFile(GtfStaticTestData.GTF_CONTENT);
+        File file = temporaryFolderRule.newGzipFile(GtfStaticTestData.GTF_CONTENT);
 
         GeneReader geneReader = new GeneReader(file);
         geneReader.setSaveState(false);
