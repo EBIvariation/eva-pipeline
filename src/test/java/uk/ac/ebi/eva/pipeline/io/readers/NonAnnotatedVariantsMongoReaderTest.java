@@ -26,9 +26,11 @@ import org.junit.runner.RunWith;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.test.MetaDataInstanceFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.ac.ebi.eva.pipeline.configuration.AnnotationConfiguration;
+import uk.ac.ebi.eva.pipeline.configuration.AnnotationLoaderStepConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
 import uk.ac.ebi.eva.pipeline.jobs.AnnotationJob;
 import uk.ac.ebi.eva.test.data.VariantData;
@@ -45,7 +47,9 @@ import static org.junit.Assert.*;
  * output: a DBObject each time `.read()` is called, with at least: chr, start, annot
  */
 @RunWith(SpringRunner.class)
-@ContextConfiguration(classes = {AnnotationJob.class, AnnotationConfiguration.class})
+@ActiveProfiles("variant-annotation-mongo")
+@ContextConfiguration(classes = {AnnotationJob.class, AnnotationConfiguration.class,
+        AnnotationLoaderStepConfiguration.class})
 public class NonAnnotatedVariantsMongoReaderTest {
 
     private static final String DOC_CHR = "chr";

@@ -31,9 +31,10 @@ import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
-import uk.ac.ebi.eva.pipeline.configuration.AnnotationLoaderStepConfiguration;
+import uk.ac.ebi.eva.pipeline.configuration.AnnotationLoaderStepTestConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
 import uk.ac.ebi.eva.pipeline.jobs.AnnotationJob;
 import uk.ac.ebi.eva.test.data.VepOutputContent;
@@ -51,7 +52,8 @@ import static uk.ac.ebi.eva.test.utils.JobTestUtils.restoreMongoDbFromDump;
  * to run properly.
  */
 @RunWith(SpringRunner.class)
-@ContextConfiguration(classes = {AnnotationJob.class, AnnotationLoaderStepConfiguration.class, JobLauncherTestUtils.class})
+@ActiveProfiles("variant-annotation-mongo")
+@ContextConfiguration(classes = {AnnotationJob.class, AnnotationLoaderStepTestConfiguration.class, JobLauncherTestUtils.class})
 public class AnnotationLoaderStepTest {
 
     @Autowired

@@ -34,6 +34,7 @@ import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobExecutionException;
 import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -56,6 +57,7 @@ import static uk.ac.ebi.eva.test.utils.JobTestUtils.getLines;
  * Test for {@link VariantLoaderStep}
  */
 @RunWith(SpringRunner.class)
+@ActiveProfiles("variant-annotation-mongo")
 @ContextConfiguration(classes = {GenotypedVcfJob.class, JobOptions.class, GenotypedVcfConfiguration.class, JobLauncherTestUtils.class})
 public class VariantLoaderStepTest {
 

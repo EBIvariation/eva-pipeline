@@ -26,6 +26,7 @@ import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -52,6 +53,7 @@ import static uk.ac.ebi.eva.test.utils.JobTestUtils.getTransformedOutputPath;
  * FILE_WRONG_NO_ALT should be renamed because the alt allele is not missing but is the same as the reference
  */
 @RunWith(SpringRunner.class)
+@ActiveProfiles("variant-annotation-mongo")
 @ContextConfiguration(classes = {GenotypedVcfJob.class, JobOptions.class, GenotypedVcfConfiguration.class, JobLauncherTestUtils.class})
 public class VariantNormalizerStepTest {
 
