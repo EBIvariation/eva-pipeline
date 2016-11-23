@@ -29,7 +29,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
 import uk.ac.ebi.eva.pipeline.configuration.VepInputGeneratorStepConfiguration;
 import uk.ac.ebi.eva.pipeline.jobs.AnnotationJob;
-import uk.ac.ebi.eva.test.rules.TemporalMongoRule;
+import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 
 import java.io.File;
 
@@ -46,7 +46,7 @@ public class VepInputGeneratorStepTest {
 
     private static final String MONGO_DUMP = "/dump/VariantStatsConfigurationTest_vl";
     @Rule
-    public TemporalMongoRule mongoRule = new TemporalMongoRule();
+    public TemporaryMongoRule mongoRule = new TemporaryMongoRule();
 
     @Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
@@ -60,7 +60,7 @@ public class VepInputGeneratorStepTest {
 
     @Test
     public void shouldGenerateVepInput() throws Exception {
-        // TODO This test can't be changed to use temporal directory right now, as vepInput is a composite parameter
+        // TODO This test can't be changed to use temporary directory right now, as vepInput is a composite parameter
         // that is not being recalculated at execution time.
         mongoRule.restoreDump(getResourceUrl(MONGO_DUMP), jobOptions.getDbName());
         File vepInputFile = new File(jobOptions.getVepInput());

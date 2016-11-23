@@ -31,7 +31,7 @@ import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
 import uk.ac.ebi.eva.pipeline.io.mappers.GeneLineMapper;
 import uk.ac.ebi.eva.pipeline.model.FeatureCoordinates;
 import uk.ac.ebi.eva.test.data.GtfStaticTestData;
-import uk.ac.ebi.eva.test.rules.TemporalMongoRule;
+import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,14 +50,14 @@ import static uk.ac.ebi.eva.utils.MongoDBHelper.getMongoOperationsFromPipelineOp
 public class GeneWriterTest {
 
     @Rule
-    public TemporalMongoRule mongoRule = new TemporalMongoRule();
+    public TemporaryMongoRule mongoRule = new TemporaryMongoRule();
 
     @Autowired
     private JobOptions jobOptions;
 
     @Test
     public void shouldWriteAllFieldsIntoMongoDb() throws Exception {
-        String databaseName = mongoRule.getRandomTemporalDatabaseName();
+        String databaseName = mongoRule.getRandomTemporaryDatabaseName();
 
         MongoOperations mongoOperations = getMongoOperationsFromPipelineOptions(databaseName,
                 jobOptions.getMongoConnection());

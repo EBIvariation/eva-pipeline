@@ -24,7 +24,7 @@ import org.mockito.Mockito;
 import org.opencb.biodata.models.variant.Variant;
 import org.springframework.data.mongodb.core.MongoOperations;
 import uk.ac.ebi.eva.pipeline.model.converters.data.VariantToMongoDbObjectConverter;
-import uk.ac.ebi.eva.test.rules.TemporalMongoRule;
+import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 import uk.ac.ebi.eva.utils.MongoConnection;
 import uk.ac.ebi.eva.utils.MongoDBHelper;
 
@@ -50,7 +50,7 @@ public class VariantMongoWriterTest {
     private MongoConnection connection;
 
     @Rule
-    public TemporalMongoRule mongoRule = new TemporalMongoRule();
+    public TemporaryMongoRule mongoRule = new TemporaryMongoRule();
 
     @Before
     public void setUp() throws Exception {
@@ -60,7 +60,7 @@ public class VariantMongoWriterTest {
 
     @Test
     public void noVariantsNothingShouldBeWritten() {
-        String dbName = mongoRule.getRandomTemporalDatabaseName();
+        String dbName = mongoRule.getRandomTemporaryDatabaseName();
         MongoOperations mongoOperations = MongoDBHelper.getMongoOperationsFromPipelineOptions(dbName, connection);
         DBCollection dbCollection = mongoOperations.getCollection(collectionName);
 
@@ -72,7 +72,7 @@ public class VariantMongoWriterTest {
 
     @Test
     public void variantsShouldBeWrittenIntoMongoDb() {
-        String dbName = mongoRule.getRandomTemporalDatabaseName();
+        String dbName = mongoRule.getRandomTemporaryDatabaseName();
 
         Variant variant = Mockito.mock(Variant.class);
         when(variant.getChromosome()).thenReturn("1").thenReturn("2").thenReturn("3");

@@ -29,7 +29,7 @@ import java.io.File;
 import java.util.Collections;
 
 import static org.junit.Assert.assertEquals;
-import static uk.ac.ebi.eva.test.rules.TemporalMongoRule.constructDbObject;
+import static uk.ac.ebi.eva.test.rules.TemporaryMongoRule.constructDbObject;
 import static uk.ac.ebi.eva.test.utils.JobTestUtils.readFirstLine;
 
 /**

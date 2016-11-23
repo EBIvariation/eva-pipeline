@@ -36,7 +36,7 @@ import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
 import uk.ac.ebi.eva.pipeline.jobs.AnnotationJob;
 import uk.ac.ebi.eva.test.data.VepOutputContent;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
-import uk.ac.ebi.eva.test.rules.TemporalMongoRule;
+import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 
 import java.io.File;
 
@@ -55,14 +55,14 @@ import static uk.ac.ebi.eva.test.utils.TestFileUtils.makeGzipFile;
 @ActiveProfiles("variant-annotation-mongo")
 @ContextConfiguration(classes = {AnnotationJob.class, AnnotationLoaderStepTestConfiguration.class, JobLauncherTestUtils.class})
 public class AnnotationLoaderStepTest {
-    // TODO vep Output must be passed as a job parameter to allow temporal files. Database name can't be changed to a
+    // TODO vep Output must be passed as a job parameter to allow temporary files. Database name can't be changed to a
     // random one.
 
     private static final String DATABASE_NAME = AnnotationLoaderStepTest.class.getSimpleName();
     private static final String MONGO_DUMP = "/dump/VariantStatsConfigurationTest_vl";
 
     @Rule
-    public TemporalMongoRule mongoRule = new TemporalMongoRule();
+    public TemporaryMongoRule mongoRule = new TemporaryMongoRule();
 
     @Rule
     public PipelineTemporaryFolderRule temporaryFolderRule = new PipelineTemporaryFolderRule();

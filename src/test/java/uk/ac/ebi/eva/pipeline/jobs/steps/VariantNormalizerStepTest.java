@@ -34,7 +34,7 @@ import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
 import uk.ac.ebi.eva.pipeline.configuration.JobParametersNames;
 import uk.ac.ebi.eva.pipeline.jobs.GenotypedVcfJob;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
-import uk.ac.ebi.eva.test.rules.TemporalMongoRule;
+import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 
 import java.io.FileInputStream;
 import java.nio.file.Paths;
@@ -63,7 +63,7 @@ public class VariantNormalizerStepTest {
     public PipelineTemporaryFolderRule temporaryFolderRule = new PipelineTemporaryFolderRule();
 
     @Rule
-    public TemporalMongoRule mongoRule = new TemporalMongoRule();
+    public TemporaryMongoRule mongoRule = new TemporaryMongoRule();
 
     @Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
@@ -76,7 +76,7 @@ public class VariantNormalizerStepTest {
     @Test
     public void normalizerStepShouldTransformAllVariants() throws Exception {
         Config.setOpenCGAHome(opencgaHome);
-        jobOptions.getPipelineOptions().put(JobParametersNames.DB_NAME, mongoRule.getRandomTemporalDatabaseName());
+        jobOptions.getPipelineOptions().put(JobParametersNames.DB_NAME, mongoRule.getRandomTemporaryDatabaseName());
         String temporaryFolder = temporaryFolderRule.getRoot().getAbsolutePath();
         jobOptions.getPipelineOptions().put(JobParametersNames.OUTPUT_DIR, temporaryFolder);
 
@@ -102,7 +102,7 @@ public class VariantNormalizerStepTest {
     @Test
     public void normalizerStepShouldFailIfVariantsAreMalformed() {
         Config.setOpenCGAHome(opencgaHome);
-        jobOptions.getPipelineOptions().put(JobParametersNames.DB_NAME, mongoRule.getRandomTemporalDatabaseName());
+        jobOptions.getPipelineOptions().put(JobParametersNames.DB_NAME, mongoRule.getRandomTemporaryDatabaseName());
         String temporaryFolder = temporaryFolderRule.getRoot().getAbsolutePath();
         jobOptions.getPipelineOptions().put(JobParametersNames.OUTPUT_DIR, temporaryFolder);
 

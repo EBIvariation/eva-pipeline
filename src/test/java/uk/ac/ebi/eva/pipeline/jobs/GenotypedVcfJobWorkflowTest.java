@@ -38,7 +38,7 @@ import uk.ac.ebi.eva.pipeline.jobs.flows.PopulationStatisticsFlow;
 import uk.ac.ebi.eva.pipeline.jobs.steps.AnnotationLoaderStep;
 import uk.ac.ebi.eva.pipeline.jobs.steps.VepAnnotationGeneratorStep;
 import uk.ac.ebi.eva.pipeline.jobs.steps.VepInputGeneratorStep;
-import uk.ac.ebi.eva.test.rules.TemporalMongoRule;
+import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 
 import java.io.File;
 import java.nio.file.Paths;
@@ -56,10 +56,10 @@ import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResource;
         JobLauncherTestUtils.class})
 public class GenotypedVcfJobWorkflowTest {
     private static final String MOCK_VEP = "/mockvep.pl";
-    //TODO check later to substitute files for temporal ones / pay attention to vep Input file
+    //TODO check later to substitute files for temporary ones / pay attention to vep Input file
 
     @Rule
-    public TemporalMongoRule mongoRule = new TemporalMongoRule();
+    public TemporaryMongoRule mongoRule = new TemporaryMongoRule();
 
     @Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
@@ -240,7 +240,7 @@ public class GenotypedVcfJobWorkflowTest {
     }
 
     private void initVariantConfigurationJob() {
-        jobOptions.getPipelineOptions().put(JobParametersNames.DB_NAME, mongoRule.getRandomTemporalDatabaseName());
+        jobOptions.getPipelineOptions().put(JobParametersNames.DB_NAME, mongoRule.getRandomTemporaryDatabaseName());
         jobOptions.getPipelineOptions().put(JobParametersNames.INPUT_VCF, getResource(inputFileResouce).getAbsolutePath());
         jobOptions.getPipelineOptions().put(JobParametersNames.APP_VEP_PATH, getResource(MOCK_VEP).getAbsolutePath());
 

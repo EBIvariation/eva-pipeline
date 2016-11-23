@@ -26,7 +26,7 @@ import uk.ac.ebi.eva.pipeline.configuration.JobParametersNames;
 import uk.ac.ebi.eva.pipeline.jobs.PopulationStatisticsJob;
 import uk.ac.ebi.eva.pipeline.jobs.flows.PopulationStatisticsFlow;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
-import uk.ac.ebi.eva.test.rules.TemporalMongoRule;
+import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 
 import java.io.File;
 import java.io.IOException;
@@ -56,7 +56,7 @@ public class PopulationStatisticsLoaderStepTest {
     public PipelineTemporaryFolderRule temporaryFolderRule = new PipelineTemporaryFolderRule();
 
     @Rule
-    public TemporalMongoRule mongoRule = new TemporalMongoRule();
+    public TemporaryMongoRule mongoRule = new TemporaryMongoRule();
 
     @Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
@@ -78,7 +78,7 @@ public class PopulationStatisticsLoaderStepTest {
         jobOptions.getVariantOptions().put(VariantStorageManager.VARIANT_SOURCE, source);
 
         //and a valid variants load and stats create steps already completed
-        jobOptions.setDbName(mongoRule.importDumpInTemporalDatabase(getResourceUrl(MONGO_DUMP)));
+        jobOptions.setDbName(mongoRule.importDumpInTemporaryDatabase(getResourceUrl(MONGO_DUMP)));
 
         copyFilesToOutpurDir(createTempDirectoryForStatistics());
 
@@ -118,7 +118,7 @@ public class PopulationStatisticsLoaderStepTest {
         VariantSource source = new VariantSource(input, "4", "1", "studyName");
 
         jobOptions.getPipelineOptions().put(JobParametersNames.INPUT_VCF, input);
-        jobOptions.getVariantOptions().put(VariantStorageManager.DB_NAME, mongoRule.getRandomTemporalDatabaseName());
+        jobOptions.getVariantOptions().put(VariantStorageManager.DB_NAME, mongoRule.getRandomTemporaryDatabaseName());
         jobOptions.getVariantOptions().put(VariantStorageManager.VARIANT_SOURCE, source);
 
         JobExecution jobExecution = jobLauncherTestUtils.launchStep(PopulationStatisticsFlow.LOAD_STATISTICS);

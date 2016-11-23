@@ -17,14 +17,14 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
-public class TemporalMongoRule extends ExternalResource {
+public class TemporaryMongoRule extends ExternalResource {
 
-    private static final Logger logger = LoggerFactory.getLogger(TemporalMongoRule.class);
+    private static final Logger logger = LoggerFactory.getLogger(TemporaryMongoRule.class);
 
     private final Set<String> databaseNames;
     private MongoClient mongoClient;
 
-    public TemporalMongoRule() {
+    public TemporaryMongoRule() {
         databaseNames = new HashSet<>();
     }
 
@@ -39,8 +39,8 @@ public class TemporalMongoRule extends ExternalResource {
         mongoClient = new MongoClient();
     }
 
-    public String getRandomTemporalDatabaseName() {
-        return getTemporalDatabase().getName();
+    public String getRandomTemporaryDatabaseName() {
+        return getTemporaryDatabase().getName();
     }
 
     /**
@@ -54,25 +54,25 @@ public class TemporalMongoRule extends ExternalResource {
     }
 
     public DBCollection getCollection(String databaseName, String collection) {
-        return getTemporalDatabase(databaseName).getCollection(collection);
+        return getTemporaryDatabase(databaseName).getCollection(collection);
     }
 
     /**
-     * Returns a new temporal database
+     * Returns a new temporary database
      *
      * @return
      */
-    private DB getTemporalDatabase() {
-        return getTemporalDatabase(UUID.randomUUID().toString());
+    private DB getTemporaryDatabase() {
+        return getTemporaryDatabase(UUID.randomUUID().toString());
     }
 
     /**
-     * Returns a temporal database with {@param database} name
+     * Returns a temporary database with {@param database} name
      *
      * @param databaseName
      * @return
      */
-    public DB getTemporalDatabase(String databaseName) {
+    public DB getTemporaryDatabase(String databaseName) {
         databaseNames.add(databaseName);
         return mongoClient.getDB(databaseName);
     }
@@ -90,8 +90,8 @@ public class TemporalMongoRule extends ExternalResource {
         getCollection(databaseName, collectionName).insert(constructDbObject(jsonString));
     }
 
-    public String importDumpInTemporalDatabase(URL dumpLocation) throws IOException, InterruptedException {
-        String databaseName = getRandomTemporalDatabaseName();
+    public String importDumpInTemporaryDatabase(URL dumpLocation) throws IOException, InterruptedException {
+        String databaseName = getRandomTemporaryDatabaseName();
         restoreDump(dumpLocation, databaseName);
         return databaseName;
     }
@@ -101,7 +101,7 @@ public class TemporalMongoRule extends ExternalResource {
         assert (databaseName != null && !databaseName.isEmpty());
         String file = dumpLocation.getFile();
         assert (file != null && !file.isEmpty());
-        getTemporalDatabase(databaseName);
+        getTemporaryDatabase(databaseName);
 
         logger.info("restoring DB from " + file + " into database " + databaseName);
 

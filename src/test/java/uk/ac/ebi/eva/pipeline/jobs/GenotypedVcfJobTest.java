@@ -42,7 +42,7 @@ import uk.ac.ebi.eva.pipeline.configuration.GenotypedVcfConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
 import uk.ac.ebi.eva.pipeline.configuration.JobParametersNames;
 import uk.ac.ebi.eva.pipeline.jobs.steps.AnnotationLoaderStep;
-import uk.ac.ebi.eva.test.rules.TemporalMongoRule;
+import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -76,12 +76,12 @@ import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResource;
 @SpringBootTest
 @ContextConfiguration(classes = {JobOptions.class, GenotypedVcfJob.class, GenotypedVcfConfiguration.class, JobLauncherTestUtils.class})
 public class GenotypedVcfJobTest {
-    //TODO check later to substitute files for temporal ones / pay attention to vep Input file
+    //TODO check later to substitute files for temporary ones / pay attention to vep Input file
 
     private static final String MOCK_VEP = "/mockvep.pl";
 
     @Rule
-    public TemporalMongoRule mongoRule = new TemporalMongoRule();
+    public TemporaryMongoRule mongoRule = new TemporaryMongoRule();
 
     @Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
@@ -104,7 +104,7 @@ public class GenotypedVcfJobTest {
         jobOptions.getPipelineOptions().put(JobParametersNames.APP_VEP_PATH, getResource(MOCK_VEP).getAbsolutePath());
 
         Config.setOpenCGAHome(opencgaHome);
-        mongoRule.getTemporalDatabase(dbName);
+        mongoRule.getTemporaryDatabase(dbName);
 
         // transformedVcf file init
         String transformedVcf = outputDir + input + ".variants.json" + compressExtension;

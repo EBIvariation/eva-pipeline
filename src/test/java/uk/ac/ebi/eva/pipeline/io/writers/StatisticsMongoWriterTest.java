@@ -31,12 +31,11 @@ import uk.ac.ebi.eva.pipeline.configuration.CommonConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
 import uk.ac.ebi.eva.pipeline.model.PopulationStatistics;
 import uk.ac.ebi.eva.test.data.VariantData;
-import uk.ac.ebi.eva.test.rules.TemporalMongoRule;
+import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -53,7 +52,7 @@ import static uk.ac.ebi.eva.utils.MongoDBHelper.getMongoOperationsFromPipelineOp
 public class StatisticsMongoWriterTest {
 
     @Rule
-    public TemporalMongoRule mongoRule = new TemporalMongoRule();
+    public TemporaryMongoRule mongoRule = new TemporaryMongoRule();
 
     @Autowired
     private JobOptions jobOptions;
@@ -62,7 +61,7 @@ public class StatisticsMongoWriterTest {
     public void shouldWriteAllFieldsIntoMongoDb() throws Exception {
         List<PopulationStatistics> populationStatisticsList = buildPopulationStatsList();
 
-        String databaseName = mongoRule.getRandomTemporalDatabaseName();
+        String databaseName = mongoRule.getRandomTemporaryDatabaseName();
         StatisticsMongoWriter statisticsMongoWriter = getStatisticsMongoWriter(databaseName);
 
         int n = 1;
@@ -92,7 +91,7 @@ public class StatisticsMongoWriterTest {
     public void shouldCreateIndexesInCollection() throws Exception {
         List<PopulationStatistics> populationStatisticsList = buildPopulationStatsList();
 
-        String databaseName = mongoRule.getRandomTemporalDatabaseName();
+        String databaseName = mongoRule.getRandomTemporaryDatabaseName();
         StatisticsMongoWriter statisticsMongoWriter = getStatisticsMongoWriter(databaseName);
         statisticsMongoWriter.write(populationStatisticsList);
 
@@ -110,7 +109,7 @@ public class StatisticsMongoWriterTest {
     public void shouldFailIfduplicatedVidSidCid() throws Exception {
         List<PopulationStatistics> populationStatisticsList = buildPopulationStatsList();
 
-        String databaseName = mongoRule.getRandomTemporalDatabaseName();
+        String databaseName = mongoRule.getRandomTemporaryDatabaseName();
         StatisticsMongoWriter statisticsMongoWriter = getStatisticsMongoWriter(databaseName);
         statisticsMongoWriter.write(populationStatisticsList);
         statisticsMongoWriter.write(populationStatisticsList);   // should throw

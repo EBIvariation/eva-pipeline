@@ -41,7 +41,7 @@ import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
 import uk.ac.ebi.eva.pipeline.configuration.JobParametersNames;
 import uk.ac.ebi.eva.pipeline.jobs.GenotypedVcfJob;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
-import uk.ac.ebi.eva.test.rules.TemporalMongoRule;
+import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -69,7 +69,7 @@ public class VariantLoaderStepTest {
     public PipelineTemporaryFolderRule temporaryFolderRule = new PipelineTemporaryFolderRule();
 
     @Rule
-    public TemporalMongoRule mongoRule = new TemporalMongoRule();
+    public TemporaryMongoRule mongoRule = new TemporaryMongoRule();
 
     @Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
@@ -88,7 +88,7 @@ public class VariantLoaderStepTest {
 
         Config.setOpenCGAHome(opencgaHome);
 
-        String databaseName = mongoRule.getRandomTemporalDatabaseName();
+        String databaseName = mongoRule.getRandomTemporaryDatabaseName();
         jobOptions.setDbName(databaseName);
         jobOptions.getVariantOptions().put(VARIANT_SOURCE, new VariantSource(
                 input,
@@ -126,7 +126,7 @@ public class VariantLoaderStepTest {
         Config.setOpenCGAHome("");
 
         jobOptions.getPipelineOptions().put(JobParametersNames.INPUT_VCF, inputFile);
-        jobOptions.getVariantOptions().put(VariantStorageManager.DB_NAME, mongoRule.getRandomTemporalDatabaseName());
+        jobOptions.getVariantOptions().put(VariantStorageManager.DB_NAME, mongoRule.getRandomTemporaryDatabaseName());
 
         VariantSource source = (VariantSource) jobOptions.getVariantOptions().get(VariantStorageManager.VARIANT_SOURCE);
 

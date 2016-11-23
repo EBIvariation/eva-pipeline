@@ -34,7 +34,7 @@ import uk.ac.ebi.eva.pipeline.configuration.AnnotationConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
 import uk.ac.ebi.eva.pipeline.io.mappers.AnnotationLineMapper;
 import uk.ac.ebi.eva.pipeline.jobs.AnnotationJob;
-import uk.ac.ebi.eva.test.rules.TemporalMongoRule;
+import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 import uk.ac.ebi.eva.utils.MongoDBHelper;
 
 import java.util.ArrayList;
@@ -60,7 +60,7 @@ import static uk.ac.ebi.eva.test.data.VepOutputContent.vepOutputContent;
 public class VepAnnotationMongoWriterTest {
 
     @Rule
-    public TemporalMongoRule mongoRule = new TemporalMongoRule();
+    public TemporaryMongoRule mongoRule = new TemporaryMongoRule();
 
     @Autowired
     private JobOptions jobOptions;
@@ -71,7 +71,7 @@ public class VepAnnotationMongoWriterTest {
 
     @Test
     public void shouldWriteAllFieldsIntoMongoDb() throws Exception {
-        String databaseName = mongoRule.getRandomTemporalDatabaseName();
+        String databaseName = mongoRule.getRandomTemporaryDatabaseName();
 
         List<VariantAnnotation> annotations = new ArrayList<>();
         for (String annotLine : vepOutputContent.split("\n")) {
@@ -113,7 +113,7 @@ public class VepAnnotationMongoWriterTest {
      */
     @Test
     public void shouldWriteAllFieldsIntoMongoDbMultipleSetsAnnotations() throws Exception {
-        String databaseName = mongoRule.getRandomTemporalDatabaseName();
+        String databaseName = mongoRule.getRandomTemporaryDatabaseName();
         List<VariantAnnotation> annotations = new ArrayList<>();
         for (String annotLine : vepOutputContent.split("\n")) {
             annotations.add(AnnotationLineMapper.mapLine(annotLine, 0));

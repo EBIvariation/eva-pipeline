@@ -39,7 +39,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
 import uk.ac.ebi.eva.pipeline.configuration.JobParametersNames;
 import uk.ac.ebi.eva.pipeline.configuration.VariantAggregatedConfiguration;
-import uk.ac.ebi.eva.test.rules.TemporalMongoRule;
+import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
 
 import java.io.FileInputStream;
@@ -60,10 +60,10 @@ import static uk.ac.ebi.eva.test.utils.JobTestUtils.getTransformedOutputPath;
 @ContextConfiguration(classes = {JobOptions.class, AggregatedVcfJob.class, VariantAggregatedConfiguration.class, JobLauncherTestUtils.class})
 public class AggregatedVcfJobTest {
 
-    // TODO this test can't be modified to use fully the temporal folder rule / mongo rule.
+    // TODO this test can't be modified to use fully the temporary folder rule / mongo rule.
 
     @Rule
-    public TemporalMongoRule mongoRule = new TemporalMongoRule();
+    public TemporaryMongoRule mongoRule = new TemporaryMongoRule();
 
     @Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
@@ -81,7 +81,7 @@ public class AggregatedVcfJobTest {
     @Test
     public void aggregatedTransformAndLoadShouldBeExecuted() throws Exception {
         Config.setOpenCGAHome(opencgaHome);
-        mongoRule.getTemporalDatabase(dbName);
+        mongoRule.getTemporaryDatabase(dbName);
 
         JobExecution jobExecution = jobLauncherTestUtils.launchJob();
 
@@ -119,7 +119,7 @@ public class AggregatedVcfJobTest {
 
     @Test
     public void aggregationNoneOptionShouldNotLoadStats() throws Exception {
-        mongoRule.getTemporalDatabase(dbName);
+        mongoRule.getTemporaryDatabase(dbName);
         VariantSource source =
                 (VariantSource) jobOptions.getVariantOptions().get(VariantStorageManager.VARIANT_SOURCE);
         jobOptions.getVariantOptions().put(

@@ -32,7 +32,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import uk.ac.ebi.eva.pipeline.configuration.DatabaseInitializationConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
 import uk.ac.ebi.eva.pipeline.jobs.DatabaseInitializationJob;
-import uk.ac.ebi.eva.test.rules.TemporalMongoRule;
+import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 
 import static org.junit.Assert.assertEquals;
 
@@ -45,7 +45,7 @@ import static org.junit.Assert.assertEquals;
 public class IndexesGeneratorStepTest {
 
     @Rule
-    public TemporalMongoRule mongoRule = new TemporalMongoRule();
+    public TemporaryMongoRule mongoRule = new TemporaryMongoRule();
 
     @Autowired
     public JobOptions jobOptions;
@@ -60,7 +60,7 @@ public class IndexesGeneratorStepTest {
 
     @Test
     public void testIndexesAreCreated() throws Exception {
-        jobOptions.setDbName(mongoRule.getRandomTemporalDatabaseName());
+        jobOptions.setDbName(mongoRule.getRandomTemporaryDatabaseName());
 
         String dbCollectionGenesName = jobOptions.getDbCollectionsFeaturesName();
         JobExecution jobExecution = jobLauncherTestUtils.launchStep(DatabaseInitializationJob.CREATE_DATABASE_INDEXES);
@@ -78,7 +78,7 @@ public class IndexesGeneratorStepTest {
 
     @Test(expected = DuplicateKeyException.class)
     public void testNoDuplicatesCanBeInserted() throws Exception {
-        jobOptions.setDbName(mongoRule.getRandomTemporalDatabaseName());
+        jobOptions.setDbName(mongoRule.getRandomTemporaryDatabaseName());
         String dbCollectionGenesName = jobOptions.getDbCollectionsFeaturesName();
         JobExecution jobExecution = jobLauncherTestUtils.launchStep(DatabaseInitializationJob.CREATE_DATABASE_INDEXES);
 

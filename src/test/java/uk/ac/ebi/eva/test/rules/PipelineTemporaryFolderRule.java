@@ -20,7 +20,7 @@ public class PipelineTemporaryFolderRule extends TemporaryFolder {
         super.before();
         String className = description.getClassName() == null ? "" : description.getClassName();
         String methodName = description.getMethodName() == null ? "" : description.getMethodName();
-        logger.debug("Temporal folder for Class '" + className + "', method '" + methodName + "' path '" +
+        logger.debug("temporary folder for Class '" + className + "', method '" + methodName + "' path '" +
                 getRoot().getAbsolutePath() + "'");
     }
 
@@ -31,7 +31,7 @@ public class PipelineTemporaryFolderRule extends TemporaryFolder {
     }
 
     /**
-     * Creates a temporal GzipFile withe the content at {@param content}. This file is marked to be deleted by java
+     * Creates a temporary GzipFile withe the content at {@param content}. This file is marked to be deleted by java
      * after finishing the test process.
      * @param content
      * @return

@@ -38,7 +38,7 @@ import uk.ac.ebi.eva.pipeline.configuration.CommonConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
 import uk.ac.ebi.eva.pipeline.configuration.JobParametersNames;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
-import uk.ac.ebi.eva.test.rules.TemporalMongoRule;
+import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 
 import java.io.File;
 import java.io.IOException;
@@ -66,7 +66,7 @@ public class PopulationStatisticsJobTest {
     public PipelineTemporaryFolderRule temporaryFolderRule = new PipelineTemporaryFolderRule();
 
     @Rule
-    public TemporalMongoRule mongoRule = new TemporalMongoRule();
+    public TemporaryMongoRule mongoRule = new TemporaryMongoRule();
 
     @Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
@@ -113,7 +113,7 @@ public class PopulationStatisticsJobTest {
     }
 
     private void initStatsLoadStepFiles() throws IOException, InterruptedException {
-        String mongoDatabase = mongoRule.importDumpInTemporalDatabase(getResourceUrl(MONGO_DUMP));
+        String mongoDatabase = mongoRule.importDumpInTemporaryDatabase(getResourceUrl(MONGO_DUMP));
         jobOptions.setDbName(mongoDatabase);
 
         String outputDir = temporaryFolderRule.getRoot().getAbsolutePath();

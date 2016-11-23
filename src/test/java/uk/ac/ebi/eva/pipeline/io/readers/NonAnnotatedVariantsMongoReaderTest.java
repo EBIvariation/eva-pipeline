@@ -31,7 +31,7 @@ import uk.ac.ebi.eva.pipeline.configuration.AnnotationLoaderStepConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
 import uk.ac.ebi.eva.pipeline.jobs.AnnotationJob;
 import uk.ac.ebi.eva.test.data.VariantData;
-import uk.ac.ebi.eva.test.rules.TemporalMongoRule;
+import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 
 import java.io.IOException;
 
@@ -53,7 +53,7 @@ public class NonAnnotatedVariantsMongoReaderTest {
     private static final String DOC_ANNOT = "annot";
 
     @Rule
-    public TemporalMongoRule mongoRule = new TemporalMongoRule();
+    public TemporaryMongoRule mongoRule = new TemporaryMongoRule();
 
     @Autowired
     private JobOptions jobOptions;
@@ -85,7 +85,7 @@ public class NonAnnotatedVariantsMongoReaderTest {
     }
 
     private String insertDocuments(String collectionName) throws IOException {
-        String databaseName = mongoRule.getRandomTemporalDatabaseName();
+        String databaseName = mongoRule.getRandomTemporaryDatabaseName();
         mongoRule.insert(databaseName, collectionName, VariantData.getVariantWithAnnotation());
         mongoRule.insert(databaseName, collectionName, VariantData.getVariantWithoutAnnotation());
         return databaseName;

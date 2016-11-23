@@ -86,7 +86,7 @@ public class VcfReaderTest {
     public void testUncompressedVcf() throws Exception {
         ExecutionContext executionContext = MetaDataInstanceFactory.createStepExecution().getExecutionContext();
 
-        // uncompress the input VCF into a temporal file
+        // uncompress the input VCF into a temporary file
         final String inputFilePath = "/small20.vcf.gz";
         String inputFile = VcfReaderTest.class.getResource(inputFilePath).getFile();
         File tempFile = JobTestUtils.createTempFile();
