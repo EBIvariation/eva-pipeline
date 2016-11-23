@@ -6,8 +6,6 @@ import com.mongodb.DBObject;
 import com.mongodb.MongoClient;
 import com.mongodb.util.JSON;
 import org.junit.rules.ExternalResource;
-import org.junit.runner.Description;
-import org.junit.runners.model.Statement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -94,11 +92,11 @@ public class TemporalMongoRule extends ExternalResource {
 
     public String importDumpInTemporalDatabase(URL dumpLocation) throws IOException, InterruptedException {
         String databaseName = getRandomTemporalDatabaseName();
-        importDump(dumpLocation, databaseName);
+        restoreDump(dumpLocation, databaseName);
         return databaseName;
     }
 
-    public void importDump(URL dumpLocation, String databaseName) throws IOException, InterruptedException {
+    public void restoreDump(URL dumpLocation, String databaseName) throws IOException, InterruptedException {
         assert (dumpLocation != null);
         assert (databaseName != null && !databaseName.isEmpty());
         String file = dumpLocation.getFile();

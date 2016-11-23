@@ -78,7 +78,7 @@ public class AnnotationJobTest {
 
     @Test
     public void allAnnotationStepsShouldBeExecuted() throws Exception {
-        mongoRule.importDump(getResourceUrl(MONGO_DUMP), jobOptions.getDbName());
+        mongoRule.restoreDump(getResourceUrl(MONGO_DUMP), jobOptions.getDbName());
 
         JobExecution jobExecution = jobLauncherTestUtils.launchJob();
 

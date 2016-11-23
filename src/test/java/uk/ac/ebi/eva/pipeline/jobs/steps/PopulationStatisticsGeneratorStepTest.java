@@ -72,7 +72,7 @@ public class PopulationStatisticsGeneratorStepTest {
         //Given a valid VCF input file
         jobOptions.getPipelineOptions().put(JobParametersNames.INPUT_VCF, SMALL_VCF_FILE);
         //and a valid variants load step already completed
-        mongoRule.importDump(getResourceUrl(MONGO_DUMP), jobOptions.getDbName());
+        mongoRule.restoreDump(getResourceUrl(MONGO_DUMP), jobOptions.getDbName());
 
         VariantSource source = configureVariantSource();
         configureTempOutput();

@@ -62,7 +62,7 @@ public class VepInputGeneratorStepTest {
     public void shouldGenerateVepInput() throws Exception {
         // TODO This test can't be changed to use temporal directory right now, as vepInput is a composite parameter
         // that is not being recalculated at execution time.
-        mongoRule.importDump(getResourceUrl(MONGO_DUMP), jobOptions.getDbName());
+        mongoRule.restoreDump(getResourceUrl(MONGO_DUMP), jobOptions.getDbName());
         File vepInputFile = new File(jobOptions.getVepInput());
 
         if (vepInputFile.exists())
