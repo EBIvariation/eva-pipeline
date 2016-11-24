@@ -19,12 +19,11 @@ package uk.ac.ebi.eva.pipeline.io.writers;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
-import com.mongodb.MongoClient;
-import org.junit.After;
-import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.ac.ebi.eva.pipeline.configuration.DatabaseInitializationConfiguration;
@@ -32,13 +31,14 @@ import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
 import uk.ac.ebi.eva.pipeline.io.mappers.GeneLineMapper;
 import uk.ac.ebi.eva.pipeline.model.FeatureCoordinates;
 import uk.ac.ebi.eva.test.data.GtfStaticTestData;
-import uk.ac.ebi.eva.test.utils.JobTestUtils;
+import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static uk.ac.ebi.eva.utils.MongoDBHelper.getMongoOperations;
 
 /**
  * {@link GeneWriter}
@@ -49,22 +49,20 @@ import static org.junit.Assert.assertTrue;
 @ContextConfiguration(classes = {JobOptions.class, DatabaseInitializationConfiguration.class,})
 public class GeneWriterTest {
 
+    @Rule
+    public TemporaryMongoRule mongoRule = new TemporaryMongoRule();
+
     @Autowired
     private JobOptions jobOptions;
 
-    @Before
-    public void setUp() throws Exception {
-        jobOptions.setDbName(getClass().getSimpleName());
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        JobTestUtils.cleanDBs(jobOptions.getDbName());
-    }
-
     @Test
     public void shouldWriteAllFieldsIntoMongoDb() throws Exception {
-        GeneWriter geneWriter = new GeneWriter(jobOptions.getMongoOperations(), jobOptions.getDbCollectionsFeaturesName());
+        String databaseName = mongoRule.getRandomTemporaryDatabaseName();
+
+        MongoOperations mongoOperations = getMongoOperations(databaseName,
+                jobOptions.getMongoConnection());
+
+        GeneWriter geneWriter = new GeneWriter(mongoOperations, jobOptions.getDbCollectionsFeaturesName());
 
         GeneLineMapper lineMapper = new GeneLineMapper();
         List<FeatureCoordinates> genes = new ArrayList<>();
@@ -75,8 +73,7 @@ public class GeneWriterTest {
         }
         geneWriter.write(genes);
 
-        MongoClient mongoClient = new MongoClient();
-        DBCollection genesCollection = mongoClient.getDB(jobOptions.getDbName()).getCollection(jobOptions.getDbCollectionsFeaturesName());
+        DBCollection genesCollection = mongoRule.getCollection(databaseName, jobOptions.getDbCollectionsFeaturesName());
 
         // count documents in DB and check they have region (chr + start + end)
         DBCursor cursor = genesCollection.find();

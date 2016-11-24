@@ -16,12 +16,11 @@
 
 package uk.ac.ebi.eva.pipeline.jobs;
 
-import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
-import com.mongodb.MongoClient;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.opencb.biodata.models.variant.annotation.VariantAnnotation;
@@ -37,6 +36,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.ac.ebi.eva.pipeline.configuration.AnnotationJobConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
+import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
 
 import java.io.File;
@@ -50,6 +50,8 @@ import static org.junit.Assert.*;
 import static uk.ac.ebi.eva.pipeline.jobs.steps.AnnotationLoaderStep.LOAD_VEP_ANNOTATION;
 import static uk.ac.ebi.eva.pipeline.jobs.steps.VepAnnotationGeneratorStep.GENERATE_VEP_ANNOTATION;
 import static uk.ac.ebi.eva.pipeline.jobs.steps.VepInputGeneratorStep.FIND_VARIANTS_TO_ANNOTATE;
+import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResource;
+import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResourceUrl;
 
 /**
  * Test for {@link AnnotationJob}
@@ -58,6 +60,12 @@ import static uk.ac.ebi.eva.pipeline.jobs.steps.VepInputGeneratorStep.FIND_VARIA
 @SpringBootTest
 @ContextConfiguration(classes = {JobOptions.class, AnnotationJob.class, AnnotationJobConfiguration.class, JobLauncherTestUtils.class})
 public class AnnotationJobTest {
+    private static final String MOCK_VEP = "/mockvep.pl";
+    private static final String MONGO_DUMP = "/dump/VariantStatsConfigurationTest_vl";
+    //TODO check later to substitute files for temporary ones / pay attention to vep Input file
+
+    @Rule
+    public TemporaryMongoRule mongoRule = new TemporaryMongoRule();
 
     @Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
@@ -66,13 +74,11 @@ public class AnnotationJobTest {
     private JobOptions jobOptions;
 
     private File vepInputFile;
-    private MongoClient mongoClient;
     private DBObjectToVariantAnnotationConverter converter;
 
     @Test
     public void allAnnotationStepsShouldBeExecuted() throws Exception {
-        String dump = PopulationStatisticsJobTest.class.getResource("/dump/VariantStatsConfigurationTest_vl").getFile();
-        JobTestUtils.restoreMongoDbFromDump(dump, jobOptions.getDbName());
+        mongoRule.restoreDump(getResourceUrl(MONGO_DUMP), jobOptions.getDbName());
 
         JobExecution jobExecution = jobLauncherTestUtils.launchJob();
 
@@ -94,7 +100,8 @@ public class AnnotationJobTest {
         assertEquals("20\t60343\t60343\tG/A\t+", JobTestUtils.readFirstLine(vepInputFile));
 
         //check that documents have the annotation
-        DBCursor cursor = collection(jobOptions.getDbName(), jobOptions.getDbCollectionsVariantsName()).find();
+        DBCursor cursor = mongoRule.getCollection(jobOptions.getDbName(), jobOptions.getDbCollectionsVariantsName())
+                .find();
 
         int cnt = 0;
         int consequenceTypeCount = 0;
@@ -137,13 +144,11 @@ public class AnnotationJobTest {
     @Before
     public void setUp() throws Exception {
         jobOptions.loadArgs();
-        vepInputFile = new File(jobOptions.getVepInput());
 
-        File vepPathFile = new File(AnnotationJobTest.class.getResource("/mockvep.pl").getFile());
-        jobOptions.setAppVepPath(vepPathFile);
+        vepInputFile = new File(jobOptions.getVepInput());
+        jobOptions.setAppVepPath(getResource(MOCK_VEP));
 
         converter = new DBObjectToVariantAnnotationConverter();
-        mongoClient = new MongoClient();
     }
 
     /**
@@ -151,16 +156,8 @@ public class AnnotationJobTest {
      */
     @After
     public void tearDown() throws Exception {
-        mongoClient.close();
-
         vepInputFile.delete();
         new File(jobOptions.getVepOutput()).delete();
-
-        JobTestUtils.cleanDBs(jobOptions.getDbName());
-    }
-
-    private DBCollection collection(String databaseName, String collectionName) {
-        return mongoClient.getDB(databaseName).getCollection(collectionName);
     }
 
 }

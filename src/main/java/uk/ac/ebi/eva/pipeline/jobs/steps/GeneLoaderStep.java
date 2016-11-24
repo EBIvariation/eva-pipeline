@@ -25,6 +25,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.mongodb.core.MongoOperations;
 
 import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
 import uk.ac.ebi.eva.pipeline.configuration.JobParametersNames;
@@ -34,6 +35,7 @@ import uk.ac.ebi.eva.pipeline.io.writers.GeneWriter;
 import uk.ac.ebi.eva.pipeline.jobs.steps.processors.GeneFilterProcessor;
 import uk.ac.ebi.eva.pipeline.listeners.SkippedItemListener;
 import uk.ac.ebi.eva.pipeline.model.FeatureCoordinates;
+import uk.ac.ebi.eva.utils.MongoDBHelper;
 
 import java.io.IOException;
 
@@ -66,10 +68,12 @@ public class GeneLoaderStep {
     @Bean
     @Qualifier("genesLoadStep")
     public Step genesLoadStep() throws IOException {
+        MongoOperations mongoOperations = MongoDBHelper.getMongoOperations(jobOptions.getDbName(), jobOptions.getMongoConnection());
+
         return stepBuilderFactory.get(LOAD_FEATURES).<FeatureCoordinates, FeatureCoordinates>chunk(10)
                 .reader(new GeneReader(jobOptions.getPipelineOptions().getString(JobParametersNames.INPUT_GTF)))
                 .processor(new GeneFilterProcessor())
-                .writer(new GeneWriter(jobOptions.getMongoOperations(), jobOptions.getDbCollectionsFeaturesName()))
+                .writer(new GeneWriter(mongoOperations, jobOptions.getDbCollectionsFeaturesName()))
                 .faultTolerant().skipLimit(50).skip(FlatFileParseException.class)
                 .listener(new SkippedItemListener())
                 .build();

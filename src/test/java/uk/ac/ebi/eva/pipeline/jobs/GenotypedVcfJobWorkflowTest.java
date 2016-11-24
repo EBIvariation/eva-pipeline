@@ -16,8 +16,8 @@
 
 package uk.ac.ebi.eva.pipeline.jobs;
 
-import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.opencb.biodata.models.variant.VariantSource;
@@ -31,7 +31,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
-
 import uk.ac.ebi.eva.pipeline.configuration.GenotypedVcfWorkflowConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
 import uk.ac.ebi.eva.pipeline.configuration.JobParametersNames;
@@ -39,21 +38,14 @@ import uk.ac.ebi.eva.pipeline.jobs.flows.PopulationStatisticsFlow;
 import uk.ac.ebi.eva.pipeline.jobs.steps.AnnotationLoaderStep;
 import uk.ac.ebi.eva.pipeline.jobs.steps.VepAnnotationGeneratorStep;
 import uk.ac.ebi.eva.pipeline.jobs.steps.VepInputGeneratorStep;
-import uk.ac.ebi.eva.test.utils.JobTestUtils;
+import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 
 import java.io.File;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
+import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResource;
 
 /**
  * Workflow test for {@link GenotypedVcfJob}
@@ -63,6 +55,11 @@ import static org.junit.Assert.assertTrue;
 @ContextConfiguration(classes = {JobOptions.class, GenotypedVcfJob.class, GenotypedVcfWorkflowConfiguration.class,
         JobLauncherTestUtils.class})
 public class GenotypedVcfJobWorkflowTest {
+    private static final String MOCK_VEP = "/mockvep.pl";
+    //TODO check later to substitute files for temporary ones / pay attention to vep Input file
+
+    @Rule
+    public TemporaryMongoRule mongoRule = new TemporaryMongoRule();
 
     @Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
@@ -73,7 +70,6 @@ public class GenotypedVcfJobWorkflowTest {
     private String inputFileResouce;
     private String outputDir;
     private String compressExtension;
-    private String dbName;
     private String vepInput;
     private String vepOutput;
 
@@ -152,9 +148,6 @@ public class GenotypedVcfJobWorkflowTest {
     public void statsStepsShouldBeSkipped() throws Exception {
         initVariantConfigurationJob();
         jobOptions.getPipelineOptions().put(JobParametersNames.STATISTICS_SKIP, true);
-
-        jobOptions.getPipelineOptions().put(JobParametersNames.DB_NAME, "diegoTest");
-
 
         JobExecution execution = jobLauncherTestUtils.launchJob();
 
@@ -242,23 +235,14 @@ public class GenotypedVcfJobWorkflowTest {
         inputFileResouce = jobOptions.getPipelineOptions().getString(JobParametersNames.INPUT_VCF);
         outputDir = jobOptions.getOutputDir();
         compressExtension = jobOptions.getPipelineOptions().getString("compressExtension");
-        dbName = jobOptions.getPipelineOptions().getString(JobParametersNames.DB_NAME);
         vepInput = jobOptions.getPipelineOptions().getString(JobOptions.VEP_INPUT);
         vepOutput = jobOptions.getPipelineOptions().getString(JobOptions.VEP_OUTPUT);
-        JobTestUtils.cleanDBs(dbName);
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        JobTestUtils.cleanDBs(dbName);
     }
 
     private void initVariantConfigurationJob() {
-        String inputFile = GenotypedVcfJobTest.class.getResource(inputFileResouce).getFile();
-        String mockVep = GenotypedVcfJobTest.class.getResource("/mockvep.pl").getFile();
-
-        jobOptions.getPipelineOptions().put(JobParametersNames.INPUT_VCF, inputFile);
-        jobOptions.getPipelineOptions().put(JobParametersNames.APP_VEP_PATH, mockVep);
+        jobOptions.getPipelineOptions().put(JobParametersNames.DB_NAME, mongoRule.getRandomTemporaryDatabaseName());
+        jobOptions.getPipelineOptions().put(JobParametersNames.INPUT_VCF, getResource(inputFileResouce).getAbsolutePath());
+        jobOptions.getPipelineOptions().put(JobParametersNames.APP_VEP_PATH, getResource(MOCK_VEP).getAbsolutePath());
 
         Config.setOpenCGAHome(opencgaHome);
 

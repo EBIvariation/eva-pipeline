@@ -15,12 +15,9 @@
  */
 package uk.ac.ebi.eva.pipeline.io.readers;
 
-import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
-import com.mongodb.MongoClient;
-import org.junit.After;
 import org.junit.Before;
-import org.junit.BeforeClass;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.batch.item.ExecutionContext;
@@ -34,10 +31,9 @@ import uk.ac.ebi.eva.pipeline.configuration.AnnotationLoaderStepConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
 import uk.ac.ebi.eva.pipeline.jobs.AnnotationJob;
 import uk.ac.ebi.eva.test.data.VariantData;
-import uk.ac.ebi.eva.test.utils.JobTestUtils;
+import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 
 import java.io.IOException;
-import java.net.UnknownHostException;
 
 import static org.junit.Assert.*;
 
@@ -56,27 +52,24 @@ public class NonAnnotatedVariantsMongoReaderTest {
     private static final String DOC_START = "start";
     private static final String DOC_ANNOT = "annot";
 
+    @Rule
+    public TemporaryMongoRule mongoRule = new TemporaryMongoRule();
+
     @Autowired
     private JobOptions jobOptions;
-    private static MongoClient mongoClient;
-
-    @BeforeClass
-    public static void classSetup() throws UnknownHostException {
-        mongoClient = new MongoClient();
-    }
 
     @Before
     public void setUp() throws Exception {
         jobOptions.loadArgs();
-        jobOptions.setDbName(getClass().getSimpleName());
     }
 
     @Test
     public void shouldReadVariantsWithoutAnnotationField() throws Exception {
         ExecutionContext executionContext = MetaDataInstanceFactory.createStepExecution().getExecutionContext();
-        insertDocuments();
+        String databaseName = insertDocuments(jobOptions.getDbCollectionsVariantsName());
 
-        NonAnnotatedVariantsMongoReader mongoItemReader = new NonAnnotatedVariantsMongoReader(jobOptions.getPipelineOptions());
+        NonAnnotatedVariantsMongoReader mongoItemReader = new NonAnnotatedVariantsMongoReader(databaseName,
+                jobOptions.getDbCollectionsVariantsName(), jobOptions.getMongoConnection());
         mongoItemReader.open(executionContext);
 
         int itemCount = 0;
@@ -91,17 +84,10 @@ public class NonAnnotatedVariantsMongoReaderTest {
         mongoItemReader.close();
     }
 
-    @After
-    public void tearDown() throws Exception {
-        JobTestUtils.cleanDBs(jobOptions.getDbName());
-    }
-
-    private DBCollection collection() {
-        return mongoClient.getDB(jobOptions.getDbName()).getCollection(jobOptions.getDbCollectionsVariantsName());
-    }
-
-    private void insertDocuments() throws IOException {
-        collection().insert(JobTestUtils.constructDbo(VariantData.getVariantWithAnnotation()));
-        collection().insert(JobTestUtils.constructDbo(VariantData.getVariantWithoutAnnotation()));
+    private String insertDocuments(String collectionName) throws IOException {
+        String databaseName = mongoRule.getRandomTemporaryDatabaseName();
+        mongoRule.insert(databaseName, collectionName, VariantData.getVariantWithAnnotation());
+        mongoRule.insert(databaseName, collectionName, VariantData.getVariantWithoutAnnotation());
+        return databaseName;
     }
 }

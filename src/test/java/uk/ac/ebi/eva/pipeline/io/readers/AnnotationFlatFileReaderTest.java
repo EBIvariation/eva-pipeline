@@ -15,12 +15,14 @@
  */
 package uk.ac.ebi.eva.pipeline.io.readers;
 
+import org.junit.Rule;
 import org.junit.Test;
 import org.opencb.biodata.models.variant.annotation.VariantAnnotation;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.item.file.FlatFileParseException;
 import org.springframework.batch.test.MetaDataInstanceFactory;
 import uk.ac.ebi.eva.test.data.VepOutputContent;
+import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
 
 import java.io.File;
@@ -38,12 +40,15 @@ import static org.junit.Assert.assertEquals;
  */
 public class AnnotationFlatFileReaderTest {
 
+    @Rule
+    public PipelineTemporaryFolderRule temporaryFolderRule = new PipelineTemporaryFolderRule();
+
     @Test
     public void shouldReadAllLinesInVepOutput() throws Exception {
         ExecutionContext executionContext = MetaDataInstanceFactory.createStepExecution().getExecutionContext();
 
         //simulate VEP output file
-        File file = JobTestUtils.makeGzipFile(VepOutputContent.vepOutputContent);
+        File file = temporaryFolderRule.newGzipFile(VepOutputContent.vepOutputContent);
 
         AnnotationFlatFileReader annotationFlatFileReader = new AnnotationFlatFileReader(file);
         annotationFlatFileReader.setSaveState(false);
@@ -71,7 +76,7 @@ public class AnnotationFlatFileReaderTest {
     public void malformedCoordinatesAnnotationLinesShouldBeSkipped() throws Exception {
         ExecutionContext executionContext = MetaDataInstanceFactory.createStepExecution().getExecutionContext();
 
-        File file = JobTestUtils.makeGzipFile(VepOutputContent.vepOutputContentMalformedCoordinates);
+        File file = temporaryFolderRule.newGzipFile(VepOutputContent.vepOutputContentMalformedCoordinates);
         AnnotationFlatFileReader annotationFlatFileReader = new AnnotationFlatFileReader(file);
         annotationFlatFileReader.open(executionContext);
         annotationFlatFileReader.read();
@@ -82,7 +87,7 @@ public class AnnotationFlatFileReaderTest {
     public void malformedVariantFieldsAnnotationLinesShouldBeSkipped() throws Exception {
         ExecutionContext executionContext = MetaDataInstanceFactory.createStepExecution().getExecutionContext();
 
-        File file = JobTestUtils.makeGzipFile(VepOutputContent.vepOutputContentMalformedVariantFields);
+        File file = temporaryFolderRule.newGzipFile(VepOutputContent.vepOutputContentMalformedVariantFields);
         AnnotationFlatFileReader annotationFlatFileReader = new AnnotationFlatFileReader(file);
         annotationFlatFileReader.open(executionContext);
         annotationFlatFileReader.read();

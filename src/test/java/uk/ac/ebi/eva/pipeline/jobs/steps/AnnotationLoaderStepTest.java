@@ -15,13 +15,10 @@
  */
 package uk.ac.ebi.eva.pipeline.jobs.steps;
 
-import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
-import com.mongodb.MongoClient;
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.opencb.biodata.models.variant.annotation.VariantAnnotation;
@@ -38,12 +35,15 @@ import uk.ac.ebi.eva.pipeline.configuration.AnnotationLoaderStepTestConfiguratio
 import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
 import uk.ac.ebi.eva.pipeline.jobs.AnnotationJob;
 import uk.ac.ebi.eva.test.data.VepOutputContent;
-import uk.ac.ebi.eva.test.utils.JobTestUtils;
+import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
+import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
+
+import java.io.File;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static uk.ac.ebi.eva.test.utils.JobTestUtils.makeGzipFile;
-import static uk.ac.ebi.eva.test.utils.JobTestUtils.restoreMongoDbFromDump;
+import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResourceUrl;
+import static uk.ac.ebi.eva.test.utils.TestFileUtils.makeGzipFile;
 
 
 /**
@@ -55,29 +55,26 @@ import static uk.ac.ebi.eva.test.utils.JobTestUtils.restoreMongoDbFromDump;
 @ActiveProfiles("variant-annotation-mongo")
 @ContextConfiguration(classes = {AnnotationJob.class, AnnotationLoaderStepTestConfiguration.class, JobLauncherTestUtils.class})
 public class AnnotationLoaderStepTest {
+    // TODO vep Output must be passed as a job parameter to allow temporary files. Database name can't be changed to a
+    // random one.
+
+    private static final String DATABASE_NAME = AnnotationLoaderStepTest.class.getSimpleName();
+    private static final String MONGO_DUMP = "/dump/VariantStatsConfigurationTest_vl";
+
+    @Rule
+    public TemporaryMongoRule mongoRule = new TemporaryMongoRule();
+
+    @Rule
+    public PipelineTemporaryFolderRule temporaryFolderRule = new PipelineTemporaryFolderRule();
 
     @Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
     @Autowired
     private JobOptions jobOptions;
 
-    private MongoClient mongoClient;
-
-    @Before
-    public void setUp() throws Exception {
-        jobOptions.loadArgs();
-        mongoClient = new MongoClient();
-    }
-
     @Test
     public void shouldLoadAllAnnotations() throws Exception {
-        DBObjectToVariantAnnotationConverter converter = new DBObjectToVariantAnnotationConverter();
-
-        String dump = AnnotationLoaderStepTest.class.getResource("/dump/VariantStatsConfigurationTest_vl").getFile();
-        restoreMongoDbFromDump(dump, jobOptions.getDbName());
-
-        String vepOutput = jobOptions.getVepOutput();
-        makeGzipFile(VepOutputContent.vepOutputContent, vepOutput);
+        setUp();
 
         JobExecution jobExecution = jobLauncherTestUtils.launchStep(AnnotationLoaderStep.LOAD_VEP_ANNOTATION);
 
@@ -85,7 +82,10 @@ public class AnnotationLoaderStepTest {
         assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());
 
         //check that documents have the annotation
-        DBCursor cursor = collection(jobOptions.getDbName(), jobOptions.getDbCollectionsVariantsName()).find();
+        DBCursor cursor = mongoRule.getCollection(jobOptions.getDbName(), jobOptions.getDbCollectionsVariantsName())
+                .find();
+
+        DBObjectToVariantAnnotationConverter converter = new DBObjectToVariantAnnotationConverter();
 
         int cnt = 0;
         int consequenceTypeCount = 0;
@@ -103,17 +103,17 @@ public class AnnotationLoaderStepTest {
         assertTrue("Annotations not found", consequenceTypeCount > 0);
     }
 
-    /**
-     * Release resources and delete the temporary output file
-     */
-    @After
-    public void tearDown() throws Exception {
-        JobTestUtils.cleanDBs(jobOptions.getDbName());
-        mongoClient.close();
-    }
+    private void setUp() throws Exception {
+        jobOptions.loadArgs();
+        jobOptions.setDbName(DATABASE_NAME);
 
-    private DBCollection collection(String databaseName, String collectionName) {
-        return mongoClient.getDB(databaseName).getCollection(collectionName);
+        mongoRule.restoreDump(getResourceUrl(MONGO_DUMP), jobOptions.getDbName());
+
+        //TODO change for commented lines when vep output file can be passed as a job parameter
+        //File file = temporaryFolderRule.newGzipFile(VepOutputContent.vepOutputContent);
+        //jobOptions.setVepOutput(file.getAbsolutePath());
+        File file = makeGzipFile(VepOutputContent.vepOutputContent, jobOptions.getVepOutput());
+
     }
 
 }

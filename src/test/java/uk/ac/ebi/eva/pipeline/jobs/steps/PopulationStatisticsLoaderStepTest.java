@@ -1,13 +1,10 @@
 package uk.ac.ebi.eva.pipeline.jobs.steps;
 
-import org.apache.commons.io.FileUtils;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.opencb.biodata.models.variant.VariantSource;
-import org.opencb.datastore.core.ObjectMap;
 import org.opencb.datastore.core.QueryOptions;
 import org.opencb.opencga.storage.core.StorageManagerException;
 import org.opencb.opencga.storage.core.StorageManagerFactory;
@@ -23,13 +20,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.rule.OutputCapture;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
-
 import uk.ac.ebi.eva.pipeline.configuration.CommonConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
 import uk.ac.ebi.eva.pipeline.configuration.JobParametersNames;
 import uk.ac.ebi.eva.pipeline.jobs.PopulationStatisticsJob;
 import uk.ac.ebi.eva.pipeline.jobs.flows.PopulationStatisticsFlow;
-import uk.ac.ebi.eva.test.utils.JobTestUtils;
+import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
+import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 
 import java.io.File;
 import java.io.IOException;
@@ -37,7 +34,9 @@ import java.io.IOException;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
-import static uk.ac.ebi.eva.test.utils.JobTestUtils.restoreMongoDbFromDump;
+import static uk.ac.ebi.eva.test.utils.TestFileUtils.copyResource;
+import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResource;
+import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResourceUrl;
 
 /**
  * Test for {@link PopulationStatisticsLoaderStep}
@@ -47,18 +46,22 @@ import static uk.ac.ebi.eva.test.utils.JobTestUtils.restoreMongoDbFromDump;
 public class PopulationStatisticsLoaderStepTest {
 
     private static final String SMALL_VCF_FILE = "/small20.vcf.gz";
+    private static final String MONGO_DUMP = "/dump/VariantStatsConfigurationTest_vl";
+    private static final String SOURCE_FILE_NAME = "/1_1.source.stats.json.gz";
+    private static final String VARIANTS_FILE_NAME = "/1_1.variants.stats.json.gz";
+    private static final String VCF_FILE_NAME = "/small20.vcf.gz.variants.json.gz";
+    private static final String FILE_NOT_FOUND_EXCEPTION = "java.io.FileNotFoundException:";
+
+    @Rule
+    public PipelineTemporaryFolderRule temporaryFolderRule = new PipelineTemporaryFolderRule();
+
+    @Rule
+    public TemporaryMongoRule mongoRule = new TemporaryMongoRule();
 
     @Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
     @Autowired
     private JobOptions jobOptions;
-
-    private ObjectMap variantOptions;
-    private ObjectMap pipelineOptions;
-
-    private File statsFileToLoad;
-    private File sourceFileToLoad;
-    private File vcfFileToLoad;
 
     //Capture error output
     @Rule
@@ -68,35 +71,16 @@ public class PopulationStatisticsLoaderStepTest {
     public void statisticsLoaderStepShouldLoadStatsIntoDb() throws StorageManagerException, IllegalAccessException,
             ClassNotFoundException, InstantiationException, IOException, InterruptedException {
         //Given a valid VCF input file
-        String input = PopulationStatisticsLoaderStepTest.class.getResource(SMALL_VCF_FILE).getFile();
+        String input = getResource(SMALL_VCF_FILE).getAbsolutePath();
         VariantSource source = new VariantSource(input, "1", "1", "studyName");
 
-        pipelineOptions.put(JobParametersNames.INPUT_VCF, input);
-        variantOptions.put(VariantStorageManager.VARIANT_SOURCE, source);
+        jobOptions.getPipelineOptions().put(JobParametersNames.INPUT_VCF, input);
+        jobOptions.getVariantOptions().put(VariantStorageManager.VARIANT_SOURCE, source);
 
         //and a valid variants load and stats create steps already completed
-        String dump = PopulationStatisticsLoaderStepTest.class.getResource("/dump/VariantStatsConfigurationTest_vl").getFile();
-        restoreMongoDbFromDump(dump, jobOptions.getDbName());
+        jobOptions.setDbName(mongoRule.restoreDumpInTemporaryDatabase(getResourceUrl(MONGO_DUMP)));
 
-        String outputDir = pipelineOptions.getString(JobParametersNames.OUTPUT_DIR_STATISTICS);
-
-        // copy stat file to load
-        String variantsFileName = "/1_1.variants.stats.json.gz";
-        statsFileToLoad = new File(outputDir, variantsFileName);
-        File variantStatsFile = new File(PopulationStatisticsLoaderStepTest.class.getResource(variantsFileName).getFile());
-        FileUtils.copyFile(variantStatsFile, statsFileToLoad);
-
-        // copy source file to load
-        String sourceFileName = "/1_1.source.stats.json.gz";
-        sourceFileToLoad = new File(outputDir, sourceFileName);
-        File sourceStatsFile = new File(PopulationStatisticsLoaderStepTest.class.getResource(sourceFileName).getFile());
-        FileUtils.copyFile(sourceStatsFile, sourceFileToLoad);
-
-        // copy transformed vcf
-        String vcfFileName = "/small20.vcf.gz.variants.json.gz";
-        vcfFileToLoad = new File(outputDir, vcfFileName);
-        File vcfFile = new File(PopulationStatisticsLoaderStepTest.class.getResource(vcfFileName).getFile());
-        FileUtils.copyFile(vcfFile, vcfFileToLoad);
+        copyFilesToOutpurDir(createTempDirectoryForStatistics());
 
         // When the execute method in variantsStatsLoad is executed
         JobExecution jobExecution = jobLauncherTestUtils.launchStep(PopulationStatisticsFlow.LOAD_STATISTICS);
@@ -110,39 +94,43 @@ public class PopulationStatisticsLoaderStepTest {
         VariantDBAdaptor variantDBAdaptor = variantStorageManager.getDBAdaptor(jobOptions.getDbName(), null);
         VariantDBIterator iterator = variantDBAdaptor.iterator(new QueryOptions());
         assertEquals(1, iterator.next().getSourceEntries().values().iterator().next().getCohortStats().size());
+    }
 
-        statsFileToLoad.delete();
-        sourceFileToLoad.delete();
-        vcfFileToLoad.delete();
+    private void copyFilesToOutpurDir(String outputDir) throws IOException {
+        // copy stat file to load
+        copyResource(VARIANTS_FILE_NAME, outputDir);
+        // copy source file to load
+        copyResource(SOURCE_FILE_NAME, outputDir);
+        // copy transformed vcf
+        copyResource(VCF_FILE_NAME, outputDir);
+    }
+
+    private String createTempDirectoryForStatistics() {
+        File temporaryFolder = temporaryFolderRule.getRoot();
+        jobOptions.getPipelineOptions().put(JobParametersNames.OUTPUT_DIR_STATISTICS, temporaryFolder);
+        String outputDir = temporaryFolder.getAbsolutePath();
+        return outputDir;
     }
 
     @Test
     public void statisticsLoaderStepShouldFaildBecauseVariantStatsFileIsMissing() throws JobExecutionException {
-        String input = PopulationStatisticsLoaderStepTest.class.getResource(SMALL_VCF_FILE).getFile();
+        String input = getResource(SMALL_VCF_FILE).getAbsolutePath();
         VariantSource source = new VariantSource(input, "4", "1", "studyName");
 
-        pipelineOptions.put(JobParametersNames.INPUT_VCF, input);
-        variantOptions.put(VariantStorageManager.DB_NAME, jobOptions.getDbName());
-        variantOptions.put(VariantStorageManager.VARIANT_SOURCE, source);
+        jobOptions.getPipelineOptions().put(JobParametersNames.INPUT_VCF, input);
+        jobOptions.getVariantOptions().put(VariantStorageManager.DB_NAME, mongoRule.getRandomTemporaryDatabaseName());
+        jobOptions.getVariantOptions().put(VariantStorageManager.VARIANT_SOURCE, source);
 
         JobExecution jobExecution = jobLauncherTestUtils.launchStep(PopulationStatisticsFlow.LOAD_STATISTICS);
-        assertThat(capture.toString(), containsString("java.io.FileNotFoundException:"));
+        assertThat(capture.toString(), containsString(FILE_NOT_FOUND_EXCEPTION));
 
-        assertEquals(input, pipelineOptions.getString(JobParametersNames.INPUT_VCF));
+        assertEquals(input, jobOptions.getPipelineOptions().getString(JobParametersNames.INPUT_VCF));
         assertEquals(ExitStatus.FAILED.getExitCode(), jobExecution.getExitStatus().getExitCode());
     }
 
     @Before
     public void setUp() throws Exception {
         jobOptions.loadArgs();
-        pipelineOptions = jobOptions.getPipelineOptions();
-        variantOptions = jobOptions.getVariantOptions();
-        jobOptions.setDbName(getClass().getSimpleName());
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        JobTestUtils.cleanDBs(jobOptions.getDbName());
     }
 
 }

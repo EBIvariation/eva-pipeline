@@ -18,12 +18,12 @@ package uk.ac.ebi.eva.pipeline.io.readers;
 import com.mongodb.BasicDBObject;
 import com.mongodb.BasicDBObjectBuilder;
 import com.mongodb.DBObject;
-import org.opencb.datastore.core.ObjectMap;
-
-import uk.ac.ebi.eva.pipeline.configuration.JobParametersNames;
+import uk.ac.ebi.eva.utils.MongoConnection;
 import uk.ac.ebi.eva.utils.MongoDBHelper;
 
 import javax.annotation.PostConstruct;
+
+import java.net.UnknownHostException;
 
 /**
  * Mongo variant reader using an ItemReader cursor based. This is speeding up the reading of the variant in big
@@ -32,13 +32,14 @@ import javax.annotation.PostConstruct;
  */
 public class NonAnnotatedVariantsMongoReader extends MongoDbCursorItemReader {
 
-    public NonAnnotatedVariantsMongoReader(ObjectMap pipelineOptions) {
+    public NonAnnotatedVariantsMongoReader(String databaseName, String collectionsVariantsName,
+                                           MongoConnection connection) throws UnknownHostException {
         super();
 
-        setMongo(MongoDBHelper.getMongoClientFromPipelineOptions(pipelineOptions));
+        setMongo(MongoDBHelper.getMongoClient(connection));
 
-        setDatabaseName(pipelineOptions.getString(JobParametersNames.DB_NAME));
-        setCollectionName(pipelineOptions.getString(JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME));
+        setDatabaseName(databaseName);
+        setCollectionName(collectionsVariantsName);
 
         DBObject refDbObject = BasicDBObjectBuilder.start().add("annot.ct.so", new BasicDBObject("$exists", false)).get();
         setRefDbObject(refDbObject);

@@ -28,9 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.stereotype.Component;
-
 import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
-import uk.ac.ebi.eva.pipeline.configuration.JobParametersNames;
 import uk.ac.ebi.eva.utils.MongoDBHelper;
 
 /**
@@ -50,8 +48,9 @@ public class IndexesGeneratorStep implements Tasklet {
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
         ObjectMap pipelineOptions = jobOptions.getPipelineOptions();
-        MongoOperations operations = MongoDBHelper.getMongoOperationsFromPipelineOptions(pipelineOptions);
-        operations.getCollection(pipelineOptions.getString(JobParametersNames.DB_COLLECTIONS_FEATURES_NAME))
+        MongoOperations operations = MongoDBHelper.getMongoOperations(jobOptions.getDbName(),
+                jobOptions.getMongoConnection());
+        operations.getCollection(jobOptions.getDbCollectionsFeaturesName())
                 .createIndex(new BasicDBObject("name", 1), new BasicDBObject("sparse", true).append("background", true));
 
         return RepeatStatus.FINISHED;

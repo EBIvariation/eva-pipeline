@@ -15,8 +15,8 @@
  */
 package uk.ac.ebi.eva.pipeline.jobs.steps;
 
-import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.batch.core.BatchStatus;
@@ -29,13 +29,13 @@ import org.springframework.test.context.junit4.SpringRunner;
 import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
 import uk.ac.ebi.eva.pipeline.configuration.VepInputGeneratorStepConfiguration;
 import uk.ac.ebi.eva.pipeline.jobs.AnnotationJob;
-import uk.ac.ebi.eva.pipeline.jobs.PopulationStatisticsJobTest;
-import uk.ac.ebi.eva.test.utils.JobTestUtils;
+import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 
 import java.io.File;
 
 import static org.junit.Assert.*;
 import static uk.ac.ebi.eva.test.utils.JobTestUtils.readFirstLine;
+import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResourceUrl;
 
 /**
  * Test {@link VepInputGeneratorStep}
@@ -43,6 +43,10 @@ import static uk.ac.ebi.eva.test.utils.JobTestUtils.readFirstLine;
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = {AnnotationJob.class, VepInputGeneratorStepConfiguration.class, JobLauncherTestUtils.class})
 public class VepInputGeneratorStepTest {
+
+    private static final String MONGO_DUMP = "/dump/VariantStatsConfigurationTest_vl";
+    @Rule
+    public TemporaryMongoRule mongoRule = new TemporaryMongoRule();
 
     @Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
@@ -54,15 +58,11 @@ public class VepInputGeneratorStepTest {
         jobOptions.loadArgs();
     }
 
-    @After
-    public void tearDown() throws Exception {
-        JobTestUtils.cleanDBs(jobOptions.getDbName());
-    }
-
     @Test
     public void shouldGenerateVepInput() throws Exception {
-        String dump = PopulationStatisticsJobTest.class.getResource("/dump/VariantStatsConfigurationTest_vl").getFile();
-        JobTestUtils.restoreMongoDbFromDump(dump, jobOptions.getDbName());
+        // TODO This test can't be changed to use temporary directory right now, as vepInput is a composite parameter
+        // that is not being recalculated at execution time.
+        mongoRule.restoreDump(getResourceUrl(MONGO_DUMP), jobOptions.getDbName());
         File vepInputFile = new File(jobOptions.getVepInput());
 
         if (vepInputFile.exists())

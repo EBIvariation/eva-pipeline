@@ -17,18 +17,22 @@ package uk.ac.ebi.eva.pipeline.io.writers;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
-import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.opencb.biodata.models.variant.Variant;
-import org.opencb.datastore.core.ObjectMap;
 import org.springframework.data.mongodb.core.MongoOperations;
-import uk.ac.ebi.eva.pipeline.configuration.JobParametersNames;
+
 import uk.ac.ebi.eva.pipeline.model.converters.data.VariantToMongoDbObjectConverter;
-import uk.ac.ebi.eva.test.utils.JobTestUtils;
+import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
+import uk.ac.ebi.eva.utils.MongoConnection;
 import uk.ac.ebi.eva.utils.MongoDBHelper;
+
 import java.net.UnknownHostException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
@@ -37,43 +41,39 @@ import static org.mockito.Mockito.when;
  * Testing {@link VariantMongoWriter}
  */
 public class VariantMongoWriterTest {
+
+    private static final List<? extends Variant> EMPTY_LIST = new ArrayList<>();
+
     private VariantMongoWriter variantMongoWriter;
     private VariantToMongoDbObjectConverter variantToMongoDbObjectConverter =
             Mockito.mock(VariantToMongoDbObjectConverter.class);
-    private ObjectMap objectMap = new ObjectMap();
     private final String collectionName = "variants";
 
-    @Before
-    public void setUp() throws Exception {
-        objectMap.put(JobParametersNames.CONFIG_DB_READPREFERENCE, "primary");
-    }
+    @Rule
+    public TemporaryMongoRule mongoRule = new TemporaryMongoRule();
 
     @Test
     public void noVariantsNothingShouldBeWritten() throws UnknownHostException {
-        String dbName = "VariantMongoWriterNoVariant";
-
-        objectMap.put(JobParametersNames.DB_NAME, dbName);
-        MongoOperations mongoOperations = MongoDBHelper.getMongoOperationsFromPipelineOptions(objectMap);
+        String dbName = mongoRule.getRandomTemporaryDatabaseName();
+        MongoOperations mongoOperations = MongoDBHelper.getDefaultMongoOperations(dbName);
         DBCollection dbCollection = mongoOperations.getCollection(collectionName);
 
         variantMongoWriter = new VariantMongoWriter(collectionName, mongoOperations, variantToMongoDbObjectConverter);
-        variantMongoWriter.doWrite(Collections.EMPTY_LIST);
+        variantMongoWriter.doWrite(EMPTY_LIST);
 
         assertEquals(0, dbCollection.count());
     }
 
     @Test
     public void variantsShouldBeWrittenIntoMongoDb() throws UnknownHostException {
-        String dbName = "VariantsShouldBeWrittenIntoMongoDb";
-
         Variant variant = Mockito.mock(Variant.class);
         when(variant.getChromosome()).thenReturn("1").thenReturn("2").thenReturn("3");
         when(variant.getStart()).thenReturn(1).thenReturn(2).thenReturn(3);
         when(variant.getReference()).thenReturn("A").thenReturn("B");
         when(variant.getAlternate()).thenReturn("B").thenReturn("C");
 
-        objectMap.put(JobParametersNames.DB_NAME, dbName);
-        MongoOperations mongoOperations = MongoDBHelper.getMongoOperationsFromPipelineOptions(objectMap);
+        String dbName = mongoRule.getRandomTemporaryDatabaseName();
+        MongoOperations mongoOperations = MongoDBHelper.getDefaultMongoOperations(dbName);
         DBCollection dbCollection = mongoOperations.getCollection(collectionName);
 
         BasicDBObject dbObject = new BasicDBObject();
@@ -84,8 +84,6 @@ public class VariantMongoWriterTest {
         variantMongoWriter.doWrite(Arrays.asList(variant, variant));
 
         assertEquals(2, dbCollection.count());
-
-        JobTestUtils.cleanDBs(dbName);
     }
 
 }

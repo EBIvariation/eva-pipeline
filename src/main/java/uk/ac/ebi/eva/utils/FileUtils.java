@@ -3,15 +3,16 @@ package uk.ac.ebi.eva.utils;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 
+import org.springframework.util.FileCopyUtils;
 import uk.ac.ebi.eva.pipeline.io.GzipLazyResource;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
+import java.util.zip.GZIPOutputStream;
 
-public class FileUtils {
+public abstract class FileUtils {
 
     public static void validateDirectoryPath(String path, boolean emptyIsValid) throws FileNotFoundException {
         if (emptyIsValid && (path == null || path.isEmpty())) {

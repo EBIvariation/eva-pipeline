@@ -19,9 +19,8 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
-import com.mongodb.MongoClient;
-import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.opencb.biodata.models.variant.annotation.VariantAnnotation;
@@ -31,20 +30,18 @@ import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
-
 import uk.ac.ebi.eva.pipeline.configuration.AnnotationConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
-import uk.ac.ebi.eva.pipeline.configuration.JobParametersNames;
 import uk.ac.ebi.eva.pipeline.io.mappers.AnnotationLineMapper;
 import uk.ac.ebi.eva.pipeline.jobs.AnnotationJob;
-import uk.ac.ebi.eva.test.utils.JobTestUtils;
+import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 import uk.ac.ebi.eva.utils.MongoDBHelper;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.HashSet;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -62,31 +59,34 @@ import static uk.ac.ebi.eva.test.data.VepOutputContent.vepOutputContent;
 @ContextConfiguration(classes = {AnnotationJob.class, AnnotationConfiguration.class})
 public class VepAnnotationMongoWriterTest {
 
+    @Rule
+    public TemporaryMongoRule mongoRule = new TemporaryMongoRule();
+
     @Autowired
     private JobOptions jobOptions;
 
     private DBObjectToVariantAnnotationConverter converter;
-    private MongoOperations mongoOperations;
-    private MongoClient mongoClient;
     private VepAnnotationMongoWriter annotationWriter;
     private AnnotationLineMapper AnnotationLineMapper;
 
     @Test
     public void shouldWriteAllFieldsIntoMongoDb() throws Exception {
-        String dbName = jobOptions.getDbName();
-        String dbCollectionVariantsName = jobOptions.getDbCollectionsVariantsName();
+        String databaseName = mongoRule.getRandomTemporaryDatabaseName();
 
         List<VariantAnnotation> annotations = new ArrayList<>();
         for (String annotLine : vepOutputContent.split("\n")) {
             annotations.add(AnnotationLineMapper.mapLine(annotLine, 0));
         }
-        DBCollection variants = mongoClient.getDB(dbName).getCollection(dbCollectionVariantsName);
+
+        String dbCollectionVariantsName = jobOptions.getDbCollectionsVariantsName();
+        DBCollection variants = mongoRule.getCollection(databaseName, dbCollectionVariantsName);
 
         // first do a mock of a "variants" collection, with just the _id
         writeIdsIntoMongo(annotations, variants);
 
         // now, load the annotation
-        MongoOperations mongoOperations = MongoDBHelper.getMongoOperationsFromPipelineOptions(jobOptions.getPipelineOptions());
+        MongoOperations mongoOperations = MongoDBHelper.getMongoOperations(databaseName,
+                jobOptions.getMongoConnection());
         annotationWriter = new VepAnnotationMongoWriter(mongoOperations, dbCollectionVariantsName);
         annotationWriter.write(annotations);
 
@@ -113,14 +113,13 @@ public class VepAnnotationMongoWriterTest {
      */
     @Test
     public void shouldWriteAllFieldsIntoMongoDbMultipleSetsAnnotations() throws Exception {
-        String dbName = jobOptions.getDbName();
-        String dbCollectionVariantsName = jobOptions.getPipelineOptions().getString(JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME);
-
+        String databaseName = mongoRule.getRandomTemporaryDatabaseName();
         List<VariantAnnotation> annotations = new ArrayList<>();
         for (String annotLine : vepOutputContent.split("\n")) {
             annotations.add(AnnotationLineMapper.mapLine(annotLine, 0));
         }
-        DBCollection variants = mongoClient.getDB(dbName).getCollection(dbCollectionVariantsName);
+        String dbCollectionVariantsName = jobOptions.getDbCollectionsVariantsName();
+        DBCollection variants = mongoRule.getCollection(databaseName, dbCollectionVariantsName);
 
         // first do a mock of a "variants" collection, with just the _id
         writeIdsIntoMongo(annotations, variants);
@@ -145,8 +144,9 @@ public class VepAnnotationMongoWriterTest {
         }
 
         // now, load the annotation
-        String collections = jobOptions.getPipelineOptions().getString(JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME);
-        annotationWriter = new VepAnnotationMongoWriter(mongoOperations, collections);
+        MongoOperations mongoOperations = MongoDBHelper.getMongoOperations(databaseName,
+                jobOptions.getMongoConnection());
+        annotationWriter = new VepAnnotationMongoWriter(mongoOperations, dbCollectionVariantsName);
 
         annotationWriter.write(annotationSet1);
         annotationWriter.write(annotationSet2);
@@ -165,25 +165,13 @@ public class VepAnnotationMongoWriterTest {
                 assertEquals(2, annot.getConsequenceTypes().size());
                 assertEquals(4, annot.getXrefs().size());
             }
-
         }
     }
 
     @Before
     public void setUp() throws Exception {
         converter = new DBObjectToVariantAnnotationConverter();
-        mongoOperations = MongoDBHelper.getMongoOperationsFromPipelineOptions(jobOptions.getPipelineOptions());
-        mongoClient = new MongoClient();
         AnnotationLineMapper = new AnnotationLineMapper();
-
-        String dbName = jobOptions.getDbName();
-        JobTestUtils.cleanDBs(dbName);
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        String dbName = jobOptions.getDbName();
-        JobTestUtils.cleanDBs(dbName);
     }
 
     private void writeIdsIntoMongo(List<VariantAnnotation> annotations, DBCollection variants) {

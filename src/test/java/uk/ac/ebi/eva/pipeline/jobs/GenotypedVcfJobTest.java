@@ -16,8 +16,8 @@
 
 package uk.ac.ebi.eva.pipeline.jobs;
 
-import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.opencb.biodata.models.variant.Variant;
@@ -38,12 +38,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
-
 import uk.ac.ebi.eva.pipeline.configuration.GenotypedVcfConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
 import uk.ac.ebi.eva.pipeline.configuration.JobParametersNames;
 import uk.ac.ebi.eva.pipeline.jobs.steps.AnnotationLoaderStep;
-import uk.ac.ebi.eva.test.utils.JobTestUtils;
+import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -56,12 +55,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static uk.ac.ebi.eva.test.utils.JobTestUtils.count;
 import static uk.ac.ebi.eva.test.utils.JobTestUtils.getLines;
+import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResource;
 
 /**
  * Test for {@link GenotypedVcfJob}
@@ -79,6 +76,12 @@ import static uk.ac.ebi.eva.test.utils.JobTestUtils.getLines;
 @SpringBootTest
 @ContextConfiguration(classes = {JobOptions.class, GenotypedVcfJob.class, GenotypedVcfConfiguration.class, JobLauncherTestUtils.class})
 public class GenotypedVcfJobTest {
+    //TODO check later to substitute files for temporary ones / pay attention to vep Input file
+
+    private static final String MOCK_VEP = "/mockvep.pl";
+
+    @Rule
+    public TemporaryMongoRule mongoRule = new TemporaryMongoRule();
 
     @Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
@@ -97,13 +100,11 @@ public class GenotypedVcfJobTest {
 
     @Test
     public void fullGenotypedVcfJob() throws Exception {
-        String inputFile = GenotypedVcfJobTest.class.getResource(input).getFile();
-        String mockVep = GenotypedVcfJobTest.class.getResource("/mockvep.pl").getFile();
-
-        jobOptions.getPipelineOptions().put(JobParametersNames.INPUT_VCF, inputFile);
-        jobOptions.getPipelineOptions().put(JobParametersNames.APP_VEP_PATH, mockVep);
+        jobOptions.getPipelineOptions().put(JobParametersNames.INPUT_VCF, getResource(input).getAbsolutePath());
+        jobOptions.getPipelineOptions().put(JobParametersNames.APP_VEP_PATH, getResource(MOCK_VEP).getAbsolutePath());
 
         Config.setOpenCGAHome(opencgaHome);
+        mongoRule.getTemporaryDatabase(dbName);
 
         // transformedVcf file init
         String transformedVcf = outputDir + input + ".variants.json" + compressExtension;
@@ -162,7 +163,7 @@ public class GenotypedVcfJobTest {
         // 5 annotation flow
         // annotation input vep generate step
         BufferedReader testReader = new BufferedReader(new InputStreamReader(new FileInputStream(
-                GenotypedVcfJobTest.class.getResource("/preannot.sorted").getFile())));
+                getResource("/preannot.sorted"))));
         BufferedReader actualReader = new BufferedReader(new InputStreamReader(new FileInputStream(
                 vepInputFile.toString())));
 
@@ -222,12 +223,6 @@ public class GenotypedVcfJobTest {
         dbName = jobOptions.getPipelineOptions().getString(JobParametersNames.DB_NAME);
         vepInput = jobOptions.getPipelineOptions().getString(JobOptions.VEP_INPUT);
         vepOutput = jobOptions.getPipelineOptions().getString(JobOptions.VEP_OUTPUT);
-        JobTestUtils.cleanDBs(dbName);
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        JobTestUtils.cleanDBs(dbName);
     }
 
     private VariantDBIterator getVariantDBIterator() throws IllegalAccessException,

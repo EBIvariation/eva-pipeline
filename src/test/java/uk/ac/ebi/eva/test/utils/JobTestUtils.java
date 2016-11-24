@@ -15,9 +15,7 @@
  */
 package uk.ac.ebi.eva.test.utils;
 
-import com.mongodb.DB;
 import com.mongodb.DBObject;
-import com.mongodb.MongoClient;
 import com.mongodb.util.JSON;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,7 +23,6 @@ import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
 
 import java.io.*;
-import java.net.UnknownHostException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Iterator;
@@ -34,7 +31,7 @@ import java.util.TreeSet;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
-public class JobTestUtils {
+public abstract class JobTestUtils {
     private static final Logger logger = LoggerFactory.getLogger(JobTestUtils.class);
     private static final String EVA_PIPELINE_TEMP_PREFIX = "eva-pipeline-test";
     private static final java.lang.String EVA_PIPELINE_TEMP_POSTFIX = ".tmp";
@@ -57,7 +54,6 @@ public class JobTestUtils {
         }
         return lines.iterator().next();
     }
-
 
     /**
      * counts non-comment lines in an InputStream
@@ -88,61 +84,9 @@ public class JobTestUtils {
         return Paths.get(outputDir).resolve(input) + ".variants.json" + compressExtension;
     }
 
-    public static void cleanDBs(String... dbs) throws UnknownHostException {
-        // Delete Mongo collection
-        MongoClient mongoClient = new MongoClient("localhost");
-
-        for (String dbName : dbs) {
-            DB db = mongoClient.getDB(dbName);
-            db.dropDatabase();
-        }
-        mongoClient.close();
-    }
-
     public static JobParameters getJobParameters() {
         return new JobParametersBuilder()
                 .addLong("time", System.currentTimeMillis()).toJobParameters();
-    }
-
-    public static File makeGzipFile(String content) throws IOException {
-        File tempFile = createTempFile();
-        try (FileOutputStream output = new FileOutputStream(tempFile)) {
-            try (Writer writer = new OutputStreamWriter(new GZIPOutputStream(output), "UTF-8")) {
-                writer.write(content);
-            }
-        }
-        return tempFile;
-    }
-
-    public static void makeGzipFile(String content, String file) throws IOException {
-        try (FileOutputStream output = new FileOutputStream(file)) {
-            try (Writer writer = new OutputStreamWriter(new GZIPOutputStream(output), "UTF-8")) {
-                writer.write(content);
-            }
-        }
-    }
-
-    public static void restoreMongoDbFromDump(String dumpLocation, String databaseName) throws IOException, InterruptedException {
-        assert (dumpLocation != null && !dumpLocation.isEmpty());
-        assert (databaseName != null && !databaseName.isEmpty());
-
-        logger.info("restoring DB from " + dumpLocation + " into database " + databaseName);
-
-        Process exec = Runtime.getRuntime().exec(String.format("mongorestore -d %s %s", databaseName, dumpLocation));
-        exec.waitFor();
-        String line;
-        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(exec.getInputStream()));
-        while ((line = bufferedReader.readLine()) != null) {
-            logger.info("mongorestore output:" + line);
-        }
-        bufferedReader.close();
-        bufferedReader = new BufferedReader(new InputStreamReader(exec.getErrorStream()));
-        while ((line = bufferedReader.readLine()) != null) {
-            logger.info("mongorestore errorOutput:" + line);
-        }
-        bufferedReader.close();
-
-        logger.info("mongorestore exit value: " + exec.exitValue());
     }
 
     public static File createTempFile() throws IOException {

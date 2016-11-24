@@ -18,9 +18,8 @@ package uk.ac.ebi.eva.pipeline.jobs.steps;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
 import com.mongodb.DuplicateKeyException;
-import com.mongodb.MongoClient;
-import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.batch.core.BatchStatus;
@@ -33,7 +32,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import uk.ac.ebi.eva.pipeline.configuration.DatabaseInitializationConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
 import uk.ac.ebi.eva.pipeline.jobs.DatabaseInitializationJob;
-import uk.ac.ebi.eva.test.utils.JobTestUtils;
+import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 
 import static org.junit.Assert.assertEquals;
 
@@ -45,54 +44,48 @@ import static org.junit.Assert.assertEquals;
 @ContextConfiguration(classes = {DatabaseInitializationJob.class, DatabaseInitializationConfiguration.class, JobLauncherTestUtils.class})
 public class IndexesGeneratorStepTest {
 
+    @Rule
+    public TemporaryMongoRule mongoRule = new TemporaryMongoRule();
+
     @Autowired
     public JobOptions jobOptions;
 
     @Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
 
-    private String dbName;
-
     @Before
     public void setUp() throws Exception {
         jobOptions.loadArgs();
-        dbName = jobOptions.getDbName();
-        JobTestUtils.cleanDBs(dbName);
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        JobTestUtils.cleanDBs(dbName);
     }
 
     @Test
     public void testIndexesAreCreated() throws Exception {
+        jobOptions.setDbName(mongoRule.getRandomTemporaryDatabaseName());
+
         String dbCollectionGenesName = jobOptions.getDbCollectionsFeaturesName();
         JobExecution jobExecution = jobLauncherTestUtils.launchStep(DatabaseInitializationJob.CREATE_DATABASE_INDEXES);
 
         assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
         assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());
 
-        MongoClient mongoClient = new MongoClient();
-        DBCollection genesCollection = mongoClient.getDB(dbName).getCollection(dbCollectionGenesName);
-        assertEquals("[{ \"v\" : 1 , \"key\" : { \"_id\" : 1} , \"name\" : \"_id_\" , \"ns\" : \"" + dbName +
-                        "." + dbCollectionGenesName +
+        DBCollection genesCollection = mongoRule.getCollection(jobOptions.getDbName(), dbCollectionGenesName);
+        assertEquals("[{ \"v\" : 1 , \"key\" : { \"_id\" : 1} , \"name\" : \"_id_\" , \"ns\" : \"" +
+                        jobOptions.getDbName() + "." + dbCollectionGenesName +
                         "\"}, { \"v\" : 1 , \"key\" : { \"name\" : 1} , \"name\" : \"name_1\" , \"ns\" : \"" +
-                        dbName + "." + dbCollectionGenesName + "\" , \"sparse\" : true , \"background\" : true}]",
+                        jobOptions.getDbName() + "." + dbCollectionGenesName + "\" , \"sparse\" : true , \"background\" : true}]",
                 genesCollection.getIndexInfo().toString());
     }
 
     @Test(expected = DuplicateKeyException.class)
     public void testNoDuplicatesCanBeInserted() throws Exception {
+        jobOptions.setDbName(mongoRule.getRandomTemporaryDatabaseName());
         String dbCollectionGenesName = jobOptions.getDbCollectionsFeaturesName();
         JobExecution jobExecution = jobLauncherTestUtils.launchStep(DatabaseInitializationJob.CREATE_DATABASE_INDEXES);
 
         assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
         assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());
 
-
-        MongoClient mongoClient = new MongoClient();
-        DBCollection genesCollection = mongoClient.getDB(dbName).getCollection(dbCollectionGenesName);
+        DBCollection genesCollection = mongoRule.getCollection(jobOptions.getDbName(), dbCollectionGenesName);
         genesCollection.insert(new BasicDBObject("_id", "example_id"));
         genesCollection.insert(new BasicDBObject("_id", "example_id"));
     }

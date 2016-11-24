@@ -69,7 +69,8 @@ public class VepInputGeneratorStep {
     @Qualifier("vepInputGeneratorStep")
     public Step variantsAnnotGenerateInputBatchStep() throws Exception {
         return stepBuilderFactory.get(FIND_VARIANTS_TO_ANNOTATE).<DBObject, VariantWrapper>chunk(10)
-                .reader(new NonAnnotatedVariantsMongoReader(jobOptions.getPipelineOptions()))
+                .reader(new NonAnnotatedVariantsMongoReader(jobOptions.getDbName(), jobOptions
+                        .getDbCollectionsVariantsName(), jobOptions.getMongoConnection()))
                 .processor(new AnnotationProcessor())
                 .writer(new VepInputFlatFileWriter(jobOptions.getVepInput()))
                 .allowStartIfComplete(jobOptions.getPipelineOptions().getBoolean(JobParametersNames.CONFIG_RESTARTABILITY_ALLOW))

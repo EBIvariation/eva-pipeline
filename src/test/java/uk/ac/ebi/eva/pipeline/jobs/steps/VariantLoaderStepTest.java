@@ -15,9 +15,8 @@
  */
 package uk.ac.ebi.eva.pipeline.jobs.steps;
 
-import org.apache.commons.io.FileUtils;
-import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.opencb.biodata.models.variant.VariantSource;
@@ -37,12 +36,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
-
 import uk.ac.ebi.eva.pipeline.configuration.GenotypedVcfConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
 import uk.ac.ebi.eva.pipeline.configuration.JobParametersNames;
 import uk.ac.ebi.eva.pipeline.jobs.GenotypedVcfJob;
-import uk.ac.ebi.eva.test.utils.JobTestUtils;
+import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
+import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -52,6 +51,8 @@ import static org.junit.Assert.assertEquals;
 import static org.opencb.opencga.storage.core.variant.VariantStorageManager.VARIANT_SOURCE;
 import static uk.ac.ebi.eva.test.utils.JobTestUtils.count;
 import static uk.ac.ebi.eva.test.utils.JobTestUtils.getLines;
+import static uk.ac.ebi.eva.test.utils.TestFileUtils.copyResource;
+import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResource;
 
 /**
  * Test for {@link VariantLoaderStep}
@@ -61,6 +62,15 @@ import static uk.ac.ebi.eva.test.utils.JobTestUtils.getLines;
 @ContextConfiguration(classes = {GenotypedVcfJob.class, JobOptions.class, GenotypedVcfConfiguration.class, JobLauncherTestUtils.class})
 public class VariantLoaderStepTest {
 
+    private static final String TRANSFORMED_VCF_VARIANTS_FILE = "/small20.vcf.gz.variants.json.gz";
+    private static final String TRANSFORMED_VARIANTS_FILE = "/small20.vcf.gz.file.json.gz";
+
+    @Rule
+    public PipelineTemporaryFolderRule temporaryFolderRule = new PipelineTemporaryFolderRule();
+
+    @Rule
+    public TemporaryMongoRule mongoRule = new TemporaryMongoRule();
+
     @Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
 
@@ -68,16 +78,18 @@ public class VariantLoaderStepTest {
     private JobOptions jobOptions;
 
     private String input;
-    private String outputDir;
-    private String dbName;
 
     private static String opencgaHome = System.getenv("OPENCGA_HOME") != null ? System.getenv("OPENCGA_HOME") : "/opt/opencga";
 
     @Test
     public void loaderStepShouldLoadAllVariants() throws Exception {
+        String outputDir = temporaryFolderRule.getRoot().getAbsolutePath();
+        jobOptions.getPipelineOptions().put(JobParametersNames.OUTPUT_DIR, outputDir);
+
         Config.setOpenCGAHome(opencgaHome);
 
-        jobOptions.getVariantOptions().put(VariantStorageManager.DB_NAME, dbName);
+        String databaseName = mongoRule.getRandomTemporaryDatabaseName();
+        jobOptions.setDbName(databaseName);
         jobOptions.getVariantOptions().put(VARIANT_SOURCE, new VariantSource(
                 input,
                 "1",
@@ -87,15 +99,8 @@ public class VariantLoaderStepTest {
                 VariantSource.Aggregation.NONE));
 
         //and a variants transform step already executed
-        File transformedVcfVariantsFile =
-                new File(VariantLoaderStepTest.class.getResource("/small20.vcf.gz.variants.json.gz").getFile());
-        File tmpTransformedVcfVariantsFile = new File(outputDir, transformedVcfVariantsFile.getName());
-        FileUtils.copyFile(transformedVcfVariantsFile, tmpTransformedVcfVariantsFile);
-
-        File transformedVariantsFile =
-                new File(VariantLoaderStepTest.class.getResource("/small20.vcf.gz.file.json.gz").getFile());
-        File tmpTransformedVariantsFile = new File(outputDir, transformedVariantsFile.getName());
-        FileUtils.copyFile(transformedVariantsFile, tmpTransformedVariantsFile);
+        copyResource(TRANSFORMED_VCF_VARIANTS_FILE, outputDir);
+        copyResource(TRANSFORMED_VARIANTS_FILE, outputDir);
 
         // When the execute method in variantsLoad is executed
         JobExecution jobExecution = jobLauncherTestUtils.launchStep(GenotypedVcfJob.LOAD_VARIANTS);
@@ -106,24 +111,22 @@ public class VariantLoaderStepTest {
 
         // And the number of documents in db should be the same number of line of the vcf transformed file
         VariantStorageManager variantStorageManager = StorageManagerFactory.getVariantStorageManager();
-        VariantDBAdaptor variantDBAdaptor = variantStorageManager.getDBAdaptor(dbName, null);
+        VariantDBAdaptor variantDBAdaptor = variantStorageManager.getDBAdaptor(databaseName, null);
         VariantDBIterator iterator = variantDBAdaptor.iterator(new QueryOptions());
+        File transformedVcfVariantsFile = getResource(TRANSFORMED_VCF_VARIANTS_FILE);
         long lines = getLines(new GZIPInputStream(new FileInputStream(transformedVcfVariantsFile)));
 
         assertEquals(count(iterator), lines);
-
-        tmpTransformedVcfVariantsFile.delete();
-        tmpTransformedVariantsFile.delete();
     }
 
     @Test
     public void loaderStepShouldFailBecauseOpenCGAHomeIsWrong() throws JobExecutionException {
-        String inputFile = VariantLoaderStepTest.class.getResource(input).getFile();
+        String inputFile = getResource(input).getAbsolutePath();
 
         Config.setOpenCGAHome("");
 
         jobOptions.getPipelineOptions().put(JobParametersNames.INPUT_VCF, inputFile);
-        jobOptions.getVariantOptions().put(VariantStorageManager.DB_NAME, dbName);
+        jobOptions.getVariantOptions().put(VariantStorageManager.DB_NAME, mongoRule.getRandomTemporaryDatabaseName());
 
         VariantSource source = (VariantSource) jobOptions.getVariantOptions().get(VariantStorageManager.VARIANT_SOURCE);
 
@@ -146,12 +149,6 @@ public class VariantLoaderStepTest {
         jobOptions.loadArgs();
 
         input = jobOptions.getPipelineOptions().getString(JobParametersNames.INPUT_VCF);
-        outputDir = jobOptions.getOutputDir();
-        dbName = jobOptions.getPipelineOptions().getString(JobParametersNames.DB_NAME);
     }
 
-    @After
-    public void tearDown() throws Exception {
-        JobTestUtils.cleanDBs(dbName);
-    }
 }

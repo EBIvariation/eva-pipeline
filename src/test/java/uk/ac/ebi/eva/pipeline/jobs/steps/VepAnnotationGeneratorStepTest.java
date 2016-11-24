@@ -17,6 +17,7 @@ package uk.ac.ebi.eva.pipeline.jobs.steps;
 
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.batch.core.BatchStatus;
@@ -30,8 +31,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 import uk.ac.ebi.eva.pipeline.configuration.AnnotationConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
 import uk.ac.ebi.eva.pipeline.jobs.AnnotationJob;
-import uk.ac.ebi.eva.pipeline.jobs.AnnotationJobTest;
 import uk.ac.ebi.eva.pipeline.jobs.flows.AnnotationFlow;
+import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
 
 import java.io.File;
@@ -39,7 +40,7 @@ import java.io.FileInputStream;
 import java.util.zip.GZIPInputStream;
 
 import static org.junit.Assert.*;
-import static uk.ac.ebi.eva.test.utils.JobTestUtils.makeGzipFile;
+import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResource;
 
 /**
  * Test for {@link VepAnnotationGeneratorStep}
@@ -49,6 +50,11 @@ import static uk.ac.ebi.eva.test.utils.JobTestUtils.makeGzipFile;
 @ContextConfiguration(classes = {JobOptions.class, AnnotationJob.class, AnnotationConfiguration.class, JobLauncherTestUtils.class})
 public class VepAnnotationGeneratorStepTest {
 
+    private static final String VEP_INPUT_CONTENT = "20\t60343\t60343\tG/A\t+";
+    private static final String MOCKVEP = "/mockvep.pl";
+    @Rule
+    public PipelineTemporaryFolderRule temporaryFolderRule = new PipelineTemporaryFolderRule();
+
     @Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
     @Autowired
@@ -57,19 +63,14 @@ public class VepAnnotationGeneratorStepTest {
     @Before
     public void setUp() throws Exception {
         jobOptions.loadArgs();
-        File vepPathFile = new File(AnnotationJobTest.class.getResource("/mockvep.pl").getFile());
-        jobOptions.setAppVepPath(vepPathFile);
+        jobOptions.setAppVepPath(getResource(MOCKVEP));
     }
 
     @Test
     public void shouldGenerateVepAnnotations() throws Exception {
-        makeGzipFile("20\t60343\t60343\tG/A\t+", jobOptions.getVepInput());
-
-        File vepOutputFile = JobTestUtils.createTempFile();
+        jobOptions.setVepInputFile(temporaryFolderRule.newGzipFile(VEP_INPUT_CONTENT).getAbsolutePath());
+        File vepOutputFile = temporaryFolderRule.newFile();
         jobOptions.setVepOutput(vepOutputFile.getAbsolutePath());
-
-        vepOutputFile.delete();
-        assertFalse(vepOutputFile.exists());  // ensure the annot file doesn't exist from previous executions
 
         // When the execute method in variantsAnnotCreate is executed
         JobExecution jobExecution = jobLauncherTestUtils.launchStep(AnnotationFlow.GENERATE_VEP_ANNOTATION);
@@ -81,7 +82,6 @@ public class VepAnnotationGeneratorStepTest {
         // And VEP output should exist and annotations should be in the file
         assertTrue(vepOutputFile.exists());
         Assert.assertEquals(537, JobTestUtils.getLines(new GZIPInputStream(new FileInputStream(vepOutputFile))));
-        vepOutputFile.delete();
     }
 
 }

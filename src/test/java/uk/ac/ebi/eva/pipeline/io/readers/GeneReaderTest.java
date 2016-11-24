@@ -15,11 +15,13 @@
  */
 package uk.ac.ebi.eva.pipeline.io.readers;
 
+import org.junit.Rule;
 import org.junit.Test;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.test.MetaDataInstanceFactory;
 import uk.ac.ebi.eva.pipeline.model.FeatureCoordinates;
 import uk.ac.ebi.eva.test.data.GtfStaticTestData;
+import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
 
 import java.io.File;
@@ -35,12 +37,15 @@ import static org.junit.Assert.assertEquals;
  */
 public class GeneReaderTest {
 
+    @Rule
+    public PipelineTemporaryFolderRule temporaryFolderRule = new PipelineTemporaryFolderRule();
+
     @Test
     public void shouldReadAllLinesInGtf() throws Exception {
         ExecutionContext executionContext = MetaDataInstanceFactory.createStepExecution().getExecutionContext();
 
         //simulate VEP output file
-        File file = JobTestUtils.makeGzipFile(GtfStaticTestData.GTF_CONTENT);
+        File file = temporaryFolderRule.newGzipFile(GtfStaticTestData.GTF_CONTENT);
 
         GeneReader geneReader = new GeneReader(file);
         geneReader.setSaveState(false);
