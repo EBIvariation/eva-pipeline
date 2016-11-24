@@ -17,12 +17,12 @@ package uk.ac.ebi.eva.pipeline.io.writers;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.opencb.biodata.models.variant.Variant;
 import org.springframework.data.mongodb.core.MongoOperations;
+
 import uk.ac.ebi.eva.pipeline.model.converters.data.VariantToMongoDbObjectConverter;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 import uk.ac.ebi.eva.utils.MongoConnection;
@@ -48,21 +48,14 @@ public class VariantMongoWriterTest {
     private VariantToMongoDbObjectConverter variantToMongoDbObjectConverter =
             Mockito.mock(VariantToMongoDbObjectConverter.class);
     private final String collectionName = "variants";
-    private MongoConnection connection;
 
     @Rule
     public TemporaryMongoRule mongoRule = new TemporaryMongoRule();
 
-    @Before
-    public void setUp() throws Exception {
-        connection = new MongoConnection();
-        connection.setReadPreference("primary");
-    }
-
     @Test
     public void noVariantsNothingShouldBeWritten() throws UnknownHostException {
         String dbName = mongoRule.getRandomTemporaryDatabaseName();
-        MongoOperations mongoOperations = MongoDBHelper.getMongoOperations(dbName, connection);
+        MongoOperations mongoOperations = MongoDBHelper.getDefaultMongoOperations(dbName);
         DBCollection dbCollection = mongoOperations.getCollection(collectionName);
 
         variantMongoWriter = new VariantMongoWriter(collectionName, mongoOperations, variantToMongoDbObjectConverter);
@@ -73,15 +66,14 @@ public class VariantMongoWriterTest {
 
     @Test
     public void variantsShouldBeWrittenIntoMongoDb() throws UnknownHostException {
-        String dbName = mongoRule.getRandomTemporaryDatabaseName();
-
         Variant variant = Mockito.mock(Variant.class);
         when(variant.getChromosome()).thenReturn("1").thenReturn("2").thenReturn("3");
         when(variant.getStart()).thenReturn(1).thenReturn(2).thenReturn(3);
         when(variant.getReference()).thenReturn("A").thenReturn("B");
         when(variant.getAlternate()).thenReturn("B").thenReturn("C");
 
-        MongoOperations mongoOperations = MongoDBHelper.getMongoOperations(dbName, connection);
+        String dbName = mongoRule.getRandomTemporaryDatabaseName();
+        MongoOperations mongoOperations = MongoDBHelper.getDefaultMongoOperations(dbName);
         DBCollection dbCollection = mongoOperations.getCollection(collectionName);
 
         BasicDBObject dbObject = new BasicDBObject();

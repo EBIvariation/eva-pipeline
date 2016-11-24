@@ -35,6 +35,13 @@ import java.util.List;
  */
 public class MongoDBHelper {
 
+    public static MongoOperations getDefaultMongoOperations(String database) throws UnknownHostException {
+        MongoClient mongoClient = new MongoClient();
+        mongoClient.setReadPreference(ReadPreference.primary());
+        MongoTemplate mongoTemplate = new MongoTemplate(new SimpleMongoDbFactory(mongoClient, database));
+        return mongoTemplate;
+    }
+
     public static MongoOperations getMongoOperations(String database, MongoConnection connection) 
             throws UnknownHostException {
         MongoClient client = getMongoClient(connection);
@@ -43,17 +50,30 @@ public class MongoDBHelper {
     }
     
     public static MongoClient getMongoClient(MongoConnection connection) throws UnknownHostException {
+        String authenticationDatabase = null;
+        String user = null;
+        String password = null;
         MongoClient mongoClient;
-
-        if (connection.getAuthenticationDatabase() == null || connection.getAuthenticationDatabase().isEmpty()) {
-            mongoClient = new MongoClient();
+        
+        // The Mongo API is not happy to deal with empty strings for authentication DB, user and password
+        if (connection.getAuthenticationDatabase() != null && !connection.getAuthenticationDatabase().trim().isEmpty()) {
+            authenticationDatabase = connection.getAuthenticationDatabase();
+        }
+        if (connection.getUser() != null && !connection.getUser().trim().isEmpty()) {
+            user = connection.getUser();
+        }
+        if (connection.getPassword() != null && !connection.getPassword().trim().isEmpty()) {
+            password = connection.getPassword();
+        }
+        
+        if (user == null || password == null) {
+            mongoClient = new MongoClient(parseServerAddresses(connection.getHosts()));
         } else {
             mongoClient = new MongoClient(
                     parseServerAddresses(connection.getHosts()),
                     Collections.singletonList(MongoCredential.createCredential(connection.getUser(),
-                            connection.getAuthenticationDatabase(),connection.getPassword().toCharArray())));
+                            authenticationDatabase, connection.getPassword().toCharArray())));
         }
-
         mongoClient.setReadPreference(getMongoTemplateReadPreferences(connection.getReadPreference()));
 
         return mongoClient;

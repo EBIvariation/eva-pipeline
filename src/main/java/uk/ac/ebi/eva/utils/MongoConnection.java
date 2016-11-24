@@ -2,20 +2,16 @@ package uk.ac.ebi.eva.utils;
 
 public class MongoConnection {
 
-    private String hosts;
+    private final String hosts;
 
-    private String authenticationDatabase;
+    private final String authenticationDatabase;
 
-    private String user;
+    private final String user;
 
-    private String password;
+    private final String password;
 
-    private String readPreference;
+    private final String readPreference;
 
-    public MongoConnection() {
-        
-    }
-    
     public MongoConnection(String hosts, String authenticationDatabase, String user, String password,
             String readPreference) {
         this.hosts = hosts;
@@ -43,10 +39,6 @@ public class MongoConnection {
 
     public String getReadPreference() {
         return readPreference;
-    }
-
-    public void setReadPreference(String readPreference) {
-        this.readPreference = readPreference;
     }
 
 }
