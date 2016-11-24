@@ -32,6 +32,7 @@ import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
 import uk.ac.ebi.eva.pipeline.model.PopulationStatistics;
 import uk.ac.ebi.eva.test.data.VariantData;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
+import uk.ac.ebi.eva.utils.MongoDBHelper;
 
 import java.net.UnknownHostException;
 import java.util.Arrays;
@@ -40,7 +41,6 @@ import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static uk.ac.ebi.eva.utils.MongoDBHelper.getMongoOperations;
 
 
 /**
@@ -135,7 +135,7 @@ public class StatisticsMongoWriterTest {
     }
 
     public StatisticsMongoWriter getStatisticsMongoWriter(String databaseName) throws UnknownHostException {
-        MongoOperations mongoOperations = getMongoOperations(databaseName,
+        MongoOperations mongoOperations = MongoDBHelper.getMongoOperations(databaseName,
                 jobOptions.getMongoConnection());
         StatisticsMongoWriter statisticsMongoWriter = new StatisticsMongoWriter(
                 mongoOperations, jobOptions.getDbCollectionsStatsName());

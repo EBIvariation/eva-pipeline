@@ -24,20 +24,17 @@ import org.opencb.opencga.storage.mongodb.variant.MongoDBVariantStorageManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.stereotype.Component;
-import uk.ac.ebi.eva.pipeline.jobs.flows.AnnotationFlow;
-import uk.ac.ebi.eva.pipeline.jobs.flows.PopulationStatisticsFlow;
+
 import uk.ac.ebi.eva.utils.MongoConnection;
-import uk.ac.ebi.eva.utils.MongoDBHelper;
 
 import javax.annotation.PostConstruct;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URI;
-import java.net.UnknownHostException;
 import java.nio.file.Paths;
 import java.util.Properties;
 
@@ -107,8 +104,6 @@ public class JobOptions {
 
     private ObjectMap variantOptions = new ObjectMap();
     private ObjectMap pipelineOptions = new ObjectMap();
-    private File vepInput;
-    private File appVepPath;
 
     @PostConstruct
     public void loadArgs() throws IOException {
@@ -292,17 +287,7 @@ public class JobOptions {
     }
 
     public MongoConnection getMongoConnection() {
-        MongoConnection connection = new MongoConnection();
-        connection.setAuthenticationDatabase(dbAuthenticationDb);
-        connection.setHosts(dbHosts);
-        connection.setUser(dbUser);
-        connection.setPassword(dbPassword);
-        connection.setReadPreference(readPreference);
-        return connection;
-    }
-
-    public MongoOperations getMongoOperations() throws UnknownHostException {
-        return MongoDBHelper.getMongoOperations(getDbName(), getMongoConnection());
+        return new MongoConnection(dbHosts, dbAuthenticationDb, dbUser, dbPassword, readPreference);
     }
 
 }
