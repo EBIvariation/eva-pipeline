@@ -32,7 +32,7 @@ public class StepParametersValidatorUtil {
     /**
      * Checks that the vep path has been filled in
      *
-     * @param vepPath The directory where vep is
+     * @param vepPath           The directory where vep is
      * @param jobParametersName
      * @throws JobParametersInvalidException If the vep path is null or empty
      */
@@ -43,7 +43,7 @@ public class StepParametersValidatorUtil {
     /**
      * Checks that the cache version option has benn filled in
      *
-     * @param vepCacheVersion The version of the vep cache
+     * @param vepCacheVersion   The version of the vep cache
      * @param jobParametersName
      * @throws JobParametersInvalidException If the vep cache version is null or empty
      */
@@ -55,7 +55,7 @@ public class StepParametersValidatorUtil {
     /**
      * Checks that the path of the vep cache is a valid directory
      *
-     * @param vepCachePath The path of the vep cache
+     * @param vepCachePath      The path of the vep cache
      * @param jobParametersName
      * @throws JobParametersInvalidException If the vep cache path is not a valid directory
      */
@@ -66,7 +66,7 @@ public class StepParametersValidatorUtil {
     /**
      * Checks that the species of the vep cache has been filled in
      *
-     * @param vepCacheSpecies The cache species used by vep
+     * @param vepCacheSpecies   The cache species used by vep
      * @param jobParametersName
      * @throws JobParametersInvalidException If the vep cache species is null or empty
      */
@@ -78,7 +78,7 @@ public class StepParametersValidatorUtil {
     /**
      * Checks that the fasta input file exist and is readable
      *
-     * @param inputFasta Path to the fasta file used by vep
+     * @param inputFasta        Path to the fasta file used by vep
      * @param jobParametersName
      * @throws JobParametersInvalidException If the file is not a valid path, does not exist or is not readable
      */
@@ -89,7 +89,7 @@ public class StepParametersValidatorUtil {
     /**
      * Checks that the number of forks is a valid integer number
      *
-     * @param vepNumForks The number of fork to use by vep
+     * @param vepNumForks       The number of fork to use by vep
      * @param jobParametersName
      * @throws JobParametersInvalidException If the number of fork is not a valid number
      */
@@ -134,7 +134,7 @@ public class StepParametersValidatorUtil {
     /**
      * Checks that the database name has been filled in.
      *
-     * @param dbName The database name
+     * @param dbName            The database name
      * @param jobParametersName
      * @throws JobParametersInvalidException If the database name is null or empty
      */
@@ -171,7 +171,7 @@ public class StepParametersValidatorUtil {
 
     private void checkNullOrEmptyString(String stringToValidate,
                                         String jobParametersName) throws JobParametersInvalidException {
-        if (Strings.isNullOrEmpty(stringToValidate)) {
+        if (Strings.isNullOrEmpty(stringToValidate) || stringToValidate.trim().length() == 0) {
             throw new JobParametersInvalidException(
                     String.format("%s in %s must be specified", stringToValidate, jobParametersName));
         }
@@ -230,11 +230,13 @@ public class StepParametersValidatorUtil {
         }
     }
 
-    private void checkPositiveInteger(String numberToValidate, String jobParametersName) throws JobParametersInvalidException {
+    private void checkPositiveInteger(String numberToValidate,
+                                      String jobParametersName) throws JobParametersInvalidException {
         int integer = checkInteger(numberToValidate, jobParametersName);
 
-        if(integer<=0){
-            throw new JobParametersInvalidException(String.format("%s is %s, please provide a positive number", jobParametersName, numberToValidate));
+        if (integer <= 0) {
+            throw new JobParametersInvalidException(
+                    String.format("%s is %s, please provide a positive number", jobParametersName, numberToValidate));
         }
     }
 }

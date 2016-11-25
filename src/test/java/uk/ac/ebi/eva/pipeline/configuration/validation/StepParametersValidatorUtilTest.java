@@ -46,6 +46,11 @@ public class StepParametersValidatorUtilTest {
     }
 
     @Test(expected = JobParametersInvalidException.class)
+    public void dbNameIsAspace() throws JobParametersInvalidException {
+        validator.validateDbName(" ", JobParametersNames.DB_NAME);
+    }
+
+    @Test(expected = JobParametersInvalidException.class)
     public void dbNameIsNull() throws JobParametersInvalidException {
         validator.validateDbName(null, JobParametersNames.DB_NAME);
     }
@@ -60,6 +65,11 @@ public class StepParametersValidatorUtilTest {
     @Test(expected = JobParametersInvalidException.class)
     public void collectionsVariantsNameIsEmpty() throws JobParametersInvalidException {
         validator.validateDbCollectionsVariantsName("", JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME);
+    }
+
+    @Test(expected = JobParametersInvalidException.class)
+    public void collectionsVariantsNameIsASpace() throws JobParametersInvalidException {
+        validator.validateDbCollectionsVariantsName(" ", JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME);
     }
 
     @Test(expected = JobParametersInvalidException.class)
@@ -81,6 +91,11 @@ public class StepParametersValidatorUtilTest {
     @Test(expected = JobParametersInvalidException.class)
     public void configRestartabilityAllowIsEmpty() throws JobParametersInvalidException {
         validator.validateConfigRestartabilityAllow("", JobParametersNames.CONFIG_RESTARTABILITY_ALLOW);
+    }
+
+    @Test(expected = JobParametersInvalidException.class)
+    public void configRestartabilityAllowIsAspace() throws JobParametersInvalidException {
+        validator.validateConfigRestartabilityAllow(" ", JobParametersNames.CONFIG_RESTARTABILITY_ALLOW);
     }
 
     @Test(expected = JobParametersInvalidException.class)
@@ -113,6 +128,11 @@ public class StepParametersValidatorUtilTest {
     }
 
     @Test(expected = JobParametersInvalidException.class)
+    public void inputVcfIdIsASpace() throws JobParametersInvalidException {
+        validator.validateInputVcfId(" ", JobParametersNames.INPUT_VCF_ID);
+    }
+
+    @Test(expected = JobParametersInvalidException.class)
     public void inputVcfIdIsNull() throws JobParametersInvalidException {
         validator.validateInputVcfId(null, JobParametersNames.INPUT_VCF_ID);
     }
@@ -126,6 +146,11 @@ public class StepParametersValidatorUtilTest {
     @Test(expected = JobParametersInvalidException.class)
     public void inputStudyIdIsEmpty() throws JobParametersInvalidException {
         validator.validateInputStudyId("", JobParametersNames.INPUT_STUDY_ID);
+    }
+
+    @Test(expected = JobParametersInvalidException.class)
+    public void inputStudyIdIsAspace() throws JobParametersInvalidException {
+        validator.validateInputStudyId(" ", JobParametersNames.INPUT_STUDY_ID);
     }
 
     @Test(expected = JobParametersInvalidException.class)
@@ -166,6 +191,11 @@ public class StepParametersValidatorUtilTest {
     }
 
     @Test(expected = JobParametersInvalidException.class)
+    public void vepCacheVersionIsAspace() throws JobParametersInvalidException {
+        validator.validateVepCacheVersion(" ", JobParametersNames.APP_VEP_CACHE_VERSION);
+    }
+
+    @Test(expected = JobParametersInvalidException.class)
     public void vepCacheVersionIsNull() throws JobParametersInvalidException {
         validator.validateVepCacheVersion(null, JobParametersNames.APP_VEP_CACHE_VERSION);
     }
@@ -192,6 +222,11 @@ public class StepParametersValidatorUtilTest {
     @Test(expected = JobParametersInvalidException.class)
     public void vepCacheSpeciesIsEmpty() throws JobParametersInvalidException {
         validator.validateVepCacheSpecies("", JobParametersNames.APP_VEP_CACHE_SPECIES);
+    }
+
+    @Test(expected = JobParametersInvalidException.class)
+    public void vepCacheSpeciesIsASpace() throws JobParametersInvalidException {
+        validator.validateVepCacheSpecies(" ", JobParametersNames.APP_VEP_CACHE_SPECIES);
     }
 
     @Test(expected = JobParametersInvalidException.class)
