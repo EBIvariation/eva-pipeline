@@ -4,15 +4,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.mongodb.BasicDBObject;
 import com.mongodb.util.JSON;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.opencb.biodata.models.variant.VariantSource;
 import org.opencb.biodata.models.variant.VariantStudy;
-import org.springframework.batch.item.ExecutionContext;
-import org.springframework.batch.test.MetaDataInstanceFactory;
 
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
+import uk.ac.ebi.eva.test.utils.TestFileUtils;
 
 import java.io.File;
 import java.util.Arrays;
@@ -34,27 +31,30 @@ import static uk.ac.ebi.eva.test.utils.JobTestUtils.checkStringInsideList;
  */
 public class VcfHeaderReaderTest {
 
-    @Rule
-    public ExpectedException exception = ExpectedException.none();
+    private static final String INPUT_FILE_PATH = "/small20.vcf.gz";
+
+    private static final String FILE_ID = "5";
+
+    private static final String STUDY_ID = "7";
+
+    private static final String STUDY_NAME = "study name";
+
+    private static final String INPUT_AGGREGATED_FILE_PATH = "/aggregated.vcf.gz";
 
     @Test
     public void testRead() throws Exception {
-        final String inputFilePath = "/small20.vcf.gz";
-        String inputFile = VcfHeaderReaderTest.class.getResource(inputFilePath).getFile();
+        File input = TestFileUtils.getResource(INPUT_FILE_PATH);
 
-        String fileId = "5";
-        String studyId = "7";
-        String studyName = "study name";
         VariantStudy.StudyType studyType = VariantStudy.StudyType.COLLECTION;
         VariantSource.Aggregation aggregation = VariantSource.Aggregation.NONE;
 
-        VcfHeaderReader headerReader = new VcfHeaderReader(new File(inputFile), fileId, studyId, studyName,
+        VcfHeaderReader headerReader = new VcfHeaderReader(input, FILE_ID, STUDY_ID, STUDY_NAME,
                                                            studyType, aggregation);
         VariantSource source = headerReader.read();
 
-        assertEquals(fileId, source.getFileId());
-        assertEquals(studyId, source.getStudyId());
-        assertEquals(studyName, source.getStudyName());
+        assertEquals(FILE_ID, source.getFileId());
+        assertEquals(STUDY_ID, source.getStudyId());
+        assertEquals(STUDY_NAME, source.getStudyName());
         assertEquals(studyType, source.getType());
         assertEquals(aggregation, source.getAggregation());
 
@@ -79,13 +79,9 @@ public class VcfHeaderReaderTest {
      */
     @Test
     public void testConversion() throws Exception {
-        final String inputFilePath = "/small20.vcf.gz";
-        String inputFile = VcfHeaderReaderTest.class.getResource(inputFilePath).getFile();
+        File input = TestFileUtils.getResource(INPUT_FILE_PATH);
 
-        String fileId = "5";
-        String studyId = "7";
-        String studyName = "study name";
-        VcfHeaderReader headerReader = new VcfHeaderReader(new File(inputFile), fileId, studyId, studyName,
+        VcfHeaderReader headerReader = new VcfHeaderReader(input, FILE_ID, STUDY_ID, STUDY_NAME,
                                                            VariantStudy.StudyType.COLLECTION,
                                                            VariantSource.Aggregation.NONE);
         VariantSource source = headerReader.read();
@@ -111,15 +107,11 @@ public class VcfHeaderReaderTest {
     @Test
     public void testConversionAggregated() throws Exception {
         // uncompress the input VCF into a temporal file
-        final String inputFilePath = "/aggregated.vcf.gz";
-        String inputFile = AggregatedVcfReaderTest.class.getResource(inputFilePath).getFile();
-        File tempFile = JobTestUtils.createTempFile();
-        JobTestUtils.uncompress(inputFile, tempFile);
+        File input = TestFileUtils.getResource(INPUT_AGGREGATED_FILE_PATH);
+        File tempFile = JobTestUtils.createTempFile();  // TODO replace with temporary rules
+        JobTestUtils.uncompress(input.getAbsolutePath(), tempFile);
 
-        String fileId = "5";
-        String studyId = "7";
-        String studyName = "study name";
-        VcfHeaderReader headerReader = new VcfHeaderReader(new File(inputFile), fileId, studyId, studyName,
+        VcfHeaderReader headerReader = new VcfHeaderReader(input, FILE_ID, STUDY_ID, STUDY_NAME,
                                                            VariantStudy.StudyType.COLLECTION,
                                                            VariantSource.Aggregation.NONE);
         VariantSource source = headerReader.read();
@@ -138,11 +130,6 @@ public class VcfHeaderReaderTest {
 
         checkFieldsInsideList(metadataMongo, "INFO", Arrays.asList("id", "description", "number", "type"));
         checkStringInsideList(metadataMongo, "contig");
-
-        // the current aggregated.vcf.gz doesn't have FORMAT, FILTER or ALT tags
-//        checkFieldsInsideList(metadataMongo, "FILTER", Arrays.asList("id", "description"));
-//        checkFieldsInsideList(metadataMongo, "ALT", Arrays.asList("id", "description"));
-//        checkFieldsInsideList(metadataMongo, "FORMAT", Arrays.asList("id", "description", "number", "type"));
     }
 
 }

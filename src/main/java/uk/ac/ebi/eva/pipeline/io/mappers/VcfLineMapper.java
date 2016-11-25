@@ -28,9 +28,9 @@ import java.util.List;
  * The actual implementation is reused from {@link VariantVcfFactory}.
  */
 public class VcfLineMapper implements LineMapper<List<Variant>> {
-    private VariantSource source;
+    private final VariantSource source;
 
-    private VariantVcfFactory factory;
+    private final VariantVcfFactory factory;
 
     public VcfLineMapper(VariantSource source) {
         this.source = source;

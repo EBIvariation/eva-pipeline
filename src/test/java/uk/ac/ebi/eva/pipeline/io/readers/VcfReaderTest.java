@@ -12,6 +12,7 @@ import org.springframework.batch.item.file.FlatFileParseException;
 import org.springframework.batch.test.MetaDataInstanceFactory;
 
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
+import uk.ac.ebi.eva.test.utils.TestFileUtils;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -33,18 +34,24 @@ public class VcfReaderTest {
     @Rule
     public ExpectedException exception = ExpectedException.none();
 
+    private static final String INPUT_FILE_PATH = "/small20.vcf.gz";
+
+    private static final String INPUT_WRONG_FILE_PATH = "/wrong_no_alt.vcf.gz";
+
+    private static final String FILE_ID = "5";
+
+    private static final String STUDY_ID = "7";
+
+    private static final String STUDY_NAME = "study name";
+
     @Test
     public void shouldReadAllLines() throws Exception {
         ExecutionContext executionContext = MetaDataInstanceFactory.createStepExecution().getExecutionContext();
 
         // input vcf
-        final String inputFilePath = "/small20.vcf.gz";
-        String input = VcfReaderTest.class.getResource(inputFilePath).getFile();
+        File input = TestFileUtils.getResource(INPUT_FILE_PATH);
 
-        String fileId = "5";
-        String studyId = "7";
-        String studyName = "study name";
-        VcfHeaderReader headerReader = new VcfHeaderReader(new File(input), fileId, studyId, studyName,
+        VcfHeaderReader headerReader = new VcfHeaderReader(input, FILE_ID, STUDY_ID, STUDY_NAME,
                                                            VariantStudy.StudyType.COLLECTION,
                                                            VariantSource.Aggregation.NONE);
         VariantSource source = headerReader.read();
@@ -61,18 +68,14 @@ public class VcfReaderTest {
         ExecutionContext executionContext = MetaDataInstanceFactory.createStepExecution().getExecutionContext();
 
         // input vcf
-        final String inputFilePath = "/wrong_no_alt.vcf.gz";
-        String inputFile = VcfReaderTest.class.getResource(inputFilePath).getFile();
+        File input = TestFileUtils.getResource(INPUT_WRONG_FILE_PATH);
 
-        String fileId = "5";
-        String studyId = "7";
-        String studyName = "study name";
-        VcfHeaderReader headerReader = new VcfHeaderReader(new File(inputFile), fileId, studyId, studyName,
+        VcfHeaderReader headerReader = new VcfHeaderReader(input, FILE_ID, STUDY_ID, STUDY_NAME,
                                                            VariantStudy.StudyType.COLLECTION,
                                                            VariantSource.Aggregation.NONE);
         VariantSource source = headerReader.read();
 
-        VcfReader vcfReader = new VcfReader(source, inputFile);
+        VcfReader vcfReader = new VcfReader(source, input);
         vcfReader.setSaveState(false);
         vcfReader.open(executionContext);
 
@@ -87,15 +90,11 @@ public class VcfReaderTest {
         ExecutionContext executionContext = MetaDataInstanceFactory.createStepExecution().getExecutionContext();
 
         // uncompress the input VCF into a temporary file
-        final String inputFilePath = "/small20.vcf.gz";
-        String inputFile = VcfReaderTest.class.getResource(inputFilePath).getFile();
-        File tempFile = JobTestUtils.createTempFile();
-        JobTestUtils.uncompress(inputFile, tempFile);
+        File input = TestFileUtils.getResource(INPUT_FILE_PATH);
+        File tempFile = JobTestUtils.createTempFile();  // TODO replace with temporary rules
+        JobTestUtils.uncompress(input.getAbsolutePath(), tempFile);
 
-        String fileId = "5";
-        String studyId = "7";
-        String studyName = "study name";
-        VcfHeaderReader headerReader = new VcfHeaderReader(new File(inputFile), fileId, studyId, studyName,
+        VcfHeaderReader headerReader = new VcfHeaderReader(input, FILE_ID, STUDY_ID, STUDY_NAME,
                                                            VariantStudy.StudyType.COLLECTION,
                                                            VariantSource.Aggregation.NONE);
         VariantSource source = headerReader.read();
@@ -104,10 +103,10 @@ public class VcfReaderTest {
         vcfReader.setSaveState(false);
         vcfReader.open(executionContext);
 
-        consumeReader(inputFile, vcfReader);
+        consumeReader(input, vcfReader);
     }
 
-    private void consumeReader(String inputFile, VcfReader vcfReader) throws Exception {
+    private void consumeReader(File inputFile, VcfReader vcfReader) throws Exception {
         List<Variant> variants;
         int count = 0;
 
