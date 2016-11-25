@@ -15,41 +15,28 @@
  */
 package uk.ac.ebi.eva.pipeline.io.readers;
 
-import org.opencb.biodata.models.variant.Variant;
 import org.opencb.biodata.models.variant.VariantSource;
-import org.springframework.batch.item.file.FlatFileItemReader;
-import org.springframework.batch.item.file.LineMapper;
-import org.springframework.core.io.Resource;
 
-import uk.ac.ebi.eva.pipeline.io.mappers.VcfLineMapper;
-import uk.ac.ebi.eva.utils.FileUtils;
+import uk.ac.ebi.eva.pipeline.io.mappers.AggregatedVcfLineMapper;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
 
 /**
- * VCF file reader.
+ * VCF file reader for VCFs without genotypes (aggregated VCFs).
  * <p>
- * This Reader uses a {@link VcfLineMapper} to parse each line.
+ * This Reader uses a {@link AggregatedVcfReader} to parse each line.
  * <p>
  * It receives a VariantSource (which needs to be completely filled, including the samples, possibly by
  * {@link VcfHeaderReader}), and a file (compressed or not).
  */
-public class VcfReader extends FlatFileItemReader<List<Variant>> {
+public class AggregatedVcfReader extends VcfReader {
 
-    public VcfReader(VariantSource source, String file) throws IOException {
+    public AggregatedVcfReader(VariantSource source, String file) throws IOException {
         this(source, new File(file));
     }
 
-    public VcfReader(VariantSource source, File file) throws IOException {
-        this(new VcfLineMapper(source), file);
+    public AggregatedVcfReader(VariantSource source, File file) throws IOException {
+        super(new AggregatedVcfLineMapper(source), file);
     }
-
-    public VcfReader(LineMapper<List<Variant>> lineMapper, File file) throws IOException {
-        Resource resource = FileUtils.getResource(file);
-        setResource(resource);
-        setLineMapper(lineMapper);
-    }
-
 }

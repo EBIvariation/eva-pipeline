@@ -16,25 +16,39 @@
 package uk.ac.ebi.eva.pipeline.io.mappers;
 
 import org.opencb.biodata.models.variant.Variant;
+import org.opencb.biodata.models.variant.VariantAggregatedVcfFactory;
 import org.opencb.biodata.models.variant.VariantSource;
+import org.opencb.biodata.models.variant.VariantVcfEVSFactory;
+import org.opencb.biodata.models.variant.VariantVcfExacFactory;
 import org.opencb.biodata.models.variant.VariantVcfFactory;
 import org.springframework.batch.item.file.LineMapper;
 
 import java.util.List;
 
 /**
- * Maps a String (in VCF format) to a list of variants.
+ * Maps a String (in VCF format, with aggregated samples) to a list of variants.
  * <p>
  * The actual implementation is reused from {@link VariantVcfFactory}.
  */
-public class VcfLineMapper implements LineMapper<List<Variant>> {
+public class AggregatedVcfLineMapper implements LineMapper<List<Variant>> {
     private final VariantSource source;
 
     private final VariantVcfFactory factory;
 
-    public VcfLineMapper(VariantSource source) {
+    public AggregatedVcfLineMapper(VariantSource source) {
         this.source = source;
-        this.factory = new VariantVcfFactory();
+        switch (source.getAggregation()) {
+            case EVS:
+                factory = new VariantVcfEVSFactory();
+                break;
+            case EXAC:
+                factory = new VariantVcfExacFactory();
+                break;
+            default:
+            case BASIC:
+                factory = new VariantAggregatedVcfFactory();
+                break;
+        }
     }
 
     @Override

@@ -2,25 +2,25 @@ package uk.ac.ebi.eva.pipeline.io.readers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
-import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.util.JSON;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.opencb.biodata.models.variant.VariantSource;
 import org.opencb.biodata.models.variant.VariantStudy;
+
+import uk.ac.ebi.eva.test.utils.JobTestUtils;
+import uk.ac.ebi.eva.test.utils.TestFileUtils;
 
 import java.io.File;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static uk.ac.ebi.eva.test.utils.JobTestUtils.checkFieldsInsideList;
+import static uk.ac.ebi.eva.test.utils.JobTestUtils.checkStringInsideList;
 
 /**
  * {@link VcfHeaderReader}
@@ -31,27 +31,30 @@ import static org.junit.Assert.assertTrue;
  */
 public class VcfHeaderReaderTest {
 
-    @Rule
-    public ExpectedException exception = ExpectedException.none();
+    private static final String INPUT_FILE_PATH = "/small20.vcf.gz";
+
+    private static final String FILE_ID = "5";
+
+    private static final String STUDY_ID = "7";
+
+    private static final String STUDY_NAME = "study name";
+
+    private static final String INPUT_AGGREGATED_FILE_PATH = "/aggregated.vcf.gz";
 
     @Test
     public void testRead() throws Exception {
-        final String inputFilePath = "/small20.vcf.gz";
-        String inputFile = VcfHeaderReaderTest.class.getResource(inputFilePath).getFile();
+        File input = TestFileUtils.getResource(INPUT_FILE_PATH);
 
-        String fileId = "5";
-        String studyId = "7";
-        String studyName = "study name";
         VariantStudy.StudyType studyType = VariantStudy.StudyType.COLLECTION;
         VariantSource.Aggregation aggregation = VariantSource.Aggregation.NONE;
 
-        VcfHeaderReader headerReader = new VcfHeaderReader(new File(inputFile), fileId, studyId, studyName,
+        VcfHeaderReader headerReader = new VcfHeaderReader(input, FILE_ID, STUDY_ID, STUDY_NAME,
                                                            studyType, aggregation);
         VariantSource source = headerReader.read();
 
-        assertEquals(fileId, source.getFileId());
-        assertEquals(studyId, source.getStudyId());
-        assertEquals(studyName, source.getStudyName());
+        assertEquals(FILE_ID, source.getFileId());
+        assertEquals(STUDY_ID, source.getStudyId());
+        assertEquals(STUDY_NAME, source.getStudyName());
         assertEquals(studyType, source.getType());
         assertEquals(aggregation, source.getAggregation());
 
@@ -76,13 +79,9 @@ public class VcfHeaderReaderTest {
      */
     @Test
     public void testConversion() throws Exception {
-        final String inputFilePath = "/small20.vcf.gz";
-        String inputFile = VcfHeaderReaderTest.class.getResource(inputFilePath).getFile();
+        File input = TestFileUtils.getResource(INPUT_FILE_PATH);
 
-        String fileId = "5";
-        String studyId = "7";
-        String studyName = "study name";
-        VcfHeaderReader headerReader = new VcfHeaderReader(new File(inputFile), fileId, studyId, studyName,
+        VcfHeaderReader headerReader = new VcfHeaderReader(input, FILE_ID, STUDY_ID, STUDY_NAME,
                                                            VariantStudy.StudyType.COLLECTION,
                                                            VariantSource.Aggregation.NONE);
         VariantSource source = headerReader.read();
@@ -105,30 +104,32 @@ public class VcfHeaderReaderTest {
         checkStringInsideList(metadataMongo, "contig");
     }
 
-    private void checkStringInsideList(BasicDBObject metadataMongo, String field) {
-        assertTrue(metadataMongo.containsField(field));
-        Object objectList = metadataMongo.get(field);
-        assertTrue(objectList instanceof BasicDBList);
-        BasicDBList list = (BasicDBList) objectList;
-        for (Object element : list) {
-            assertTrue(element instanceof String);
-            assertNotNull(element);
-            assertFalse(element.toString().isEmpty());
-        }
-    }
+    @Test
+    public void testConversionAggregated() throws Exception {
+        // uncompress the input VCF into a temporal file
+        File input = TestFileUtils.getResource(INPUT_AGGREGATED_FILE_PATH);
+        File tempFile = JobTestUtils.createTempFile();  // TODO replace with temporary rules
+        JobTestUtils.uncompress(input.getAbsolutePath(), tempFile);
 
-    private void checkFieldsInsideList(BasicDBObject metadataMongo, String field, List<String> innerFields) {
-        assertTrue(metadataMongo.containsField(field));
-        Object objectList = metadataMongo.get(field);
-        assertTrue(objectList instanceof BasicDBList);
-        BasicDBList list = (BasicDBList) objectList;
-        for (Object element : list) {
-            assertTrue(element instanceof BasicDBObject);
-            for (String innerField : innerFields) {
-                assertNotNull(((BasicDBObject) element).get(innerField));
-                assertFalse(((BasicDBObject) element).get(innerField).toString().isEmpty());
-            }
+        VcfHeaderReader headerReader = new VcfHeaderReader(input, FILE_ID, STUDY_ID, STUDY_NAME,
+                                                           VariantStudy.StudyType.COLLECTION,
+                                                           VariantSource.Aggregation.NONE);
+        VariantSource source = headerReader.read();
+
+        char CHARACTER_TO_REPLACE_DOTS = (char) 163;
+        Map<String, Object> meta = source.getMetadata();
+        BasicDBObject metadataMongo = new BasicDBObject();
+        for (Map.Entry<String, Object> metaEntry : meta.entrySet()) {
+            ObjectMapper mapper = new ObjectMapper();
+            ObjectWriter writer = mapper.writer();
+            String key = metaEntry.getKey().replace('.', CHARACTER_TO_REPLACE_DOTS);
+            Object value = metaEntry.getValue();
+            String jsonString = writer.writeValueAsString(value);
+            metadataMongo.append(key, JSON.parse(jsonString));
         }
+
+        checkFieldsInsideList(metadataMongo, "INFO", Arrays.asList("id", "description", "number", "type"));
+        checkStringInsideList(metadataMongo, "contig");
     }
 
 }
