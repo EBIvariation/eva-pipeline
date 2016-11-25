@@ -17,8 +17,7 @@ package uk.ac.ebi.eva.pipeline.configuration.validation;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.batch.core.JobParameter;
-import org.springframework.batch.core.JobParameters;
+import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.JobParametersInvalidException;
 
 import uk.ac.ebi.eva.pipeline.configuration.JobParametersNames;
@@ -43,28 +42,27 @@ public class VepInputGeneratorStepParametersValidatorTest {
         final String DIR = VepAnnotationGeneratorStepParametersValidatorTest.class
                 .getResource("/parameters-validation/").getPath();
 
-        final Map<String, JobParameter> parameters = new LinkedHashMap<>();
-        parameters.putIfAbsent(JobParametersNames.CONFIG_RESTARTABILITY_ALLOW, new JobParameter("true"));
-        parameters.putIfAbsent(JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME,
-                               new JobParameter("dbCollectionsVariantName"));
-        parameters.putIfAbsent(JobParametersNames.DB_NAME, new JobParameter("dbName"));
-        parameters.putIfAbsent(JobParametersNames.INPUT_STUDY_ID, new JobParameter("inputStudyId"));
-        parameters.putIfAbsent(JobParametersNames.INPUT_VCF_ID, new JobParameter("inputVcfId"));
-        parameters.putIfAbsent(JobParametersNames.OUTPUT_DIR_ANNOTATION, new JobParameter(DIR));
+        JobParametersBuilder jobParametersBuilder = new JobParametersBuilder();
+        jobParametersBuilder.addString(JobParametersNames.CONFIG_RESTARTABILITY_ALLOW, "true");
+        jobParametersBuilder.addString(JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME, "dbCollectionsVariantName");
+        jobParametersBuilder.addString(JobParametersNames.DB_NAME, "dbName");
+        jobParametersBuilder.addString(JobParametersNames.INPUT_STUDY_ID, "inputStudyId");
+        jobParametersBuilder.addString(JobParametersNames.INPUT_VCF_ID, "inputVcfId");
+        jobParametersBuilder.addString(JobParametersNames.OUTPUT_DIR_ANNOTATION, DIR);
 
-        validator.validate(new JobParameters(parameters));
+        validator.validate(jobParametersBuilder.toJobParameters());
     }
 
     @Test(expected = JobParametersInvalidException.class)
     public void invalidAndMissingParameters() throws JobParametersInvalidException {
-        final Map<String, JobParameter> parameters = new LinkedHashMap<>();
-        parameters.putIfAbsent(JobParametersNames.CONFIG_RESTARTABILITY_ALLOW, new JobParameter("maybe"));
-        parameters.putIfAbsent(JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME, new JobParameter(""));
-        parameters.putIfAbsent(JobParametersNames.DB_NAME, new JobParameter(""));
-        parameters.putIfAbsent(JobParametersNames.INPUT_STUDY_ID, new JobParameter(""));
-        parameters.putIfAbsent(JobParametersNames.INPUT_VCF_ID, new JobParameter(""));
-        parameters.putIfAbsent(JobParametersNames.OUTPUT_DIR_ANNOTATION, new JobParameter("file://path/to/"));
+        JobParametersBuilder jobParametersBuilder = new JobParametersBuilder();
+        jobParametersBuilder.addString(JobParametersNames.CONFIG_RESTARTABILITY_ALLOW, "maybe");
+        jobParametersBuilder.addString(JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME, "");
+        jobParametersBuilder.addString(JobParametersNames.DB_NAME, "");
+        jobParametersBuilder.addString(JobParametersNames.INPUT_STUDY_ID, "");
+        jobParametersBuilder.addString(JobParametersNames.INPUT_VCF_ID, "");
+        jobParametersBuilder.addString(JobParametersNames.OUTPUT_DIR_ANNOTATION, "file://path/to/");
 
-        validator.validate(new JobParameters(parameters));
+        validator.validate(jobParametersBuilder.toJobParameters());
     }
 }
