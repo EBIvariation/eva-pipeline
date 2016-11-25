@@ -227,6 +227,16 @@ public class StepParametersValidatorUtilTest {
     }
 
     @Test(expected = JobParametersInvalidException.class)
+    public void vepNumForksIsZero() throws JobParametersInvalidException {
+        validator.validateVepNumForks("0", JobParametersNames.APP_VEP_NUMFORKS);
+    }
+
+    @Test(expected = JobParametersInvalidException.class)
+    public void vepNumForksIsNegative() throws JobParametersInvalidException {
+        validator.validateVepNumForks("-1", JobParametersNames.APP_VEP_NUMFORKS);
+    }
+
+    @Test(expected = JobParametersInvalidException.class)
     public void vepNumForksIsNotValid() throws JobParametersInvalidException {
         validator.validateVepNumForks("hello", JobParametersNames.APP_VEP_NUMFORKS);
     }
