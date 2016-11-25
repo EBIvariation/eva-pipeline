@@ -37,7 +37,7 @@ public class StepParametersValidatorUtil {
      * @throws JobParametersInvalidException If the vep path is null or empty
      */
     void validateVepPath(String vepPath, String jobParametersName) throws JobParametersInvalidException {
-        checkFileExistAndReadable(vepPath, jobParametersName);
+        checkFileExistsAndIsReadable(vepPath, jobParametersName);
     }
 
     /**
@@ -83,7 +83,7 @@ public class StepParametersValidatorUtil {
      * @throws JobParametersInvalidException If the file is not a valid path, does not exist or is not readable
      */
     void validateInputFasta(String inputFasta, String jobParametersName) throws JobParametersInvalidException {
-        checkFileExistAndReadable(inputFasta, jobParametersName);
+        checkFileExistsAndIsReadable(inputFasta, jobParametersName);
     }
 
     /**
@@ -200,8 +200,8 @@ public class StepParametersValidatorUtil {
         }
     }
 
-    private void checkFileExistAndReadable(String fileToValidate,
-                                           String jobParametersName) throws JobParametersInvalidException {
+    private void checkFileExistsAndIsReadable(String fileToValidate,
+                                              String jobParametersName) throws JobParametersInvalidException {
         Path path;
         try {
             path = Paths.get(fileToValidate);
