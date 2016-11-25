@@ -94,7 +94,7 @@ public class StepParametersValidatorUtil {
      * @throws JobParametersInvalidException If the number of fork is not a valid number
      */
     void validateVepNumForks(String vepNumForks, String jobParametersName) throws JobParametersInvalidException {
-        checkInteger(vepNumForks, jobParametersName);
+        checkPositiveInteger(vepNumForks, jobParametersName);
     }
 
     /**
@@ -221,12 +221,20 @@ public class StepParametersValidatorUtil {
         }
     }
 
-    private void checkInteger(String numberToValidate, String jobParametersName) throws JobParametersInvalidException {
+    private int checkInteger(String numberToValidate, String jobParametersName) throws JobParametersInvalidException {
         try {
-            Integer.parseInt(numberToValidate);
+            return Integer.parseInt(numberToValidate);
         } catch (NumberFormatException e) {
             throw new JobParametersInvalidException(
                     String.format("%s in %s is not a valid number", numberToValidate, jobParametersName));
+        }
+    }
+
+    private void checkPositiveInteger(String numberToValidate, String jobParametersName) throws JobParametersInvalidException {
+        int integer = checkInteger(numberToValidate, jobParametersName);
+
+        if(integer<=0){
+            throw new JobParametersInvalidException(String.format("%s is %s, please provide a positive number", jobParametersName, numberToValidate));
         }
     }
 }
