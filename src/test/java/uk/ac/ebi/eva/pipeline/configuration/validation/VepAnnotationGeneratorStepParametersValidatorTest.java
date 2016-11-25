@@ -22,9 +22,6 @@ import org.springframework.batch.core.JobParametersInvalidException;
 
 import uk.ac.ebi.eva.pipeline.configuration.JobParametersNames;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-
 /**
  * Tests that the arguments necessary to run a {@link uk.ac.ebi.eva.pipeline.jobs.steps.VepAnnotationGeneratorStep} are
  * correctly validated
