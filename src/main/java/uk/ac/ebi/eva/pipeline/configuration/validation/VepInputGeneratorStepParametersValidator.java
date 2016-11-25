@@ -46,18 +46,22 @@ public class VepInputGeneratorStepParametersValidator extends DefaultJobParamete
 
         parametersValidator
                 .validateDbName(parameters.getString(JobParametersNames.DB_NAME), JobParametersNames.DB_NAME);
-        parametersValidator.validateDbCollectionsVariantsName(
-                parameters.getString(JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME),
-                JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME);
-        parametersValidator.validateConfigRestartabilityAllow(
-                parameters.getString(JobParametersNames.CONFIG_RESTARTABILITY_ALLOW),
-                JobParametersNames.CONFIG_RESTARTABILITY_ALLOW);
-        parametersValidator.validateOutputDirAnnotation(parameters.getString(JobParametersNames.OUTPUT_DIR_ANNOTATION),
-                                                        JobParametersNames.OUTPUT_DIR_ANNOTATION);
-        parametersValidator.validateInputStudyId(parameters.getString(JobParametersNames.INPUT_STUDY_ID),
-                                                 JobParametersNames.INPUT_STUDY_ID);
-        parametersValidator.validateInputVcfId(parameters.getString(JobParametersNames.INPUT_VCF_ID),
-                                               JobParametersNames.INPUT_VCF_ID);
+        parametersValidator
+                .validateDbCollectionsVariantsName(
+                        parameters.getString(JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME),
+                        JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME);
+        parametersValidator
+                .validateConfigRestartabilityAllow(parameters.getString(JobParametersNames.CONFIG_RESTARTABILITY_ALLOW),
+                                                   JobParametersNames.CONFIG_RESTARTABILITY_ALLOW);
+        parametersValidator
+                .validateOutputDirAnnotation(parameters.getString(JobParametersNames.OUTPUT_DIR_ANNOTATION),
+                                             JobParametersNames.OUTPUT_DIR_ANNOTATION);
+        parametersValidator
+                .validateInputStudyId(parameters.getString(JobParametersNames.INPUT_STUDY_ID),
+                                      JobParametersNames.INPUT_STUDY_ID);
+        parametersValidator
+                .validateInputVcfId(parameters.getString(JobParametersNames.INPUT_VCF_ID),
+                                    JobParametersNames.INPUT_VCF_ID);
     }
 
 }
