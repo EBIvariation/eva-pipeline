@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.ac.ebi.eva.pipeline.configuration.validation;
+package uk.ac.ebi.eva.pipeline.configuration.validation.step;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -55,8 +55,6 @@ public class VepInputGeneratorStepParametersValidatorTest {
         JobParametersBuilder jobParametersBuilder = new JobParametersBuilder();
         jobParametersBuilder.addString(JobParametersNames.CONFIG_RESTARTABILITY_ALLOW, "maybe");
         jobParametersBuilder.addString(JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME, "");
-        jobParametersBuilder.addString(JobParametersNames.DB_NAME, "");
-        jobParametersBuilder.addString(JobParametersNames.INPUT_STUDY_ID, "");
         jobParametersBuilder.addString(JobParametersNames.INPUT_VCF_ID, "");
         jobParametersBuilder.addString(JobParametersNames.OUTPUT_DIR_ANNOTATION, "file://path/to/");
 
