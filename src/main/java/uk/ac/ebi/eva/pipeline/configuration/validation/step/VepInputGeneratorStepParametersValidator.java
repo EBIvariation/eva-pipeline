@@ -13,13 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.ac.ebi.eva.pipeline.configuration.validation;
+package uk.ac.ebi.eva.pipeline.configuration.validation.step;
 
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersInvalidException;
+import org.springframework.batch.core.JobParametersValidator;
+import org.springframework.batch.core.job.CompositeJobParametersValidator;
 import org.springframework.batch.core.job.DefaultJobParametersValidator;
 
 import uk.ac.ebi.eva.pipeline.configuration.JobParametersNames;
+import uk.ac.ebi.eva.pipeline.configuration.validation.ConfigRestartabilityAllowValidator;
+import uk.ac.ebi.eva.pipeline.configuration.validation.DbCollectionsVariantsNameValidator;
+import uk.ac.ebi.eva.pipeline.configuration.validation.DbNameValidator;
+import uk.ac.ebi.eva.pipeline.configuration.validation.InputStudyIdValidator;
+import uk.ac.ebi.eva.pipeline.configuration.validation.InputVcfIdValidator;
+import uk.ac.ebi.eva.pipeline.configuration.validation.OutputDirAnnotationValidator;
+
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Validates the job parameters necessary to execute a {@link uk.ac.ebi.eva.pipeline.jobs.steps.VepInputGeneratorStep}
@@ -28,40 +39,33 @@ import uk.ac.ebi.eva.pipeline.configuration.JobParametersNames;
  */
 public class VepInputGeneratorStepParametersValidator extends DefaultJobParametersValidator {
 
-    private StepParametersValidatorUtil parametersValidator;
-
     public VepInputGeneratorStepParametersValidator() {
         super(new String[]{JobParametersNames.CONFIG_RESTARTABILITY_ALLOW,
                       JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME, JobParametersNames.DB_NAME,
                       JobParametersNames.INPUT_STUDY_ID, JobParametersNames.INPUT_VCF_ID,
                       JobParametersNames.OUTPUT_DIR_ANNOTATION},
               new String[]{});
-
-        parametersValidator = new StepParametersValidatorUtil();
     }
 
     @Override
     public void validate(JobParameters parameters) throws JobParametersInvalidException {
         super.validate(parameters);
+        compositeJobParametersValidator().validate(parameters);
+    }
 
-        parametersValidator
-                .validateDbName(parameters.getString(JobParametersNames.DB_NAME), JobParametersNames.DB_NAME);
-        parametersValidator
-                .validateDbCollectionsVariantsName(
-                        parameters.getString(JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME),
-                        JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME);
-        parametersValidator
-                .validateConfigRestartabilityAllow(parameters.getString(JobParametersNames.CONFIG_RESTARTABILITY_ALLOW),
-                                                   JobParametersNames.CONFIG_RESTARTABILITY_ALLOW);
-        parametersValidator
-                .validateOutputDirAnnotation(parameters.getString(JobParametersNames.OUTPUT_DIR_ANNOTATION),
-                                             JobParametersNames.OUTPUT_DIR_ANNOTATION);
-        parametersValidator
-                .validateInputStudyId(parameters.getString(JobParametersNames.INPUT_STUDY_ID),
-                                      JobParametersNames.INPUT_STUDY_ID);
-        parametersValidator
-                .validateInputVcfId(parameters.getString(JobParametersNames.INPUT_VCF_ID),
-                                    JobParametersNames.INPUT_VCF_ID);
+    private CompositeJobParametersValidator compositeJobParametersValidator() {
+        final List<JobParametersValidator> jobParametersValidators = Arrays.asList(
+                new ConfigRestartabilityAllowValidator(),
+                new DbCollectionsVariantsNameValidator(),
+                new DbNameValidator(),
+                new InputStudyIdValidator(),
+                new InputVcfIdValidator(),
+                new OutputDirAnnotationValidator()
+        );
+
+        CompositeJobParametersValidator compositeJobParametersValidator = new CompositeJobParametersValidator();
+        compositeJobParametersValidator.setValidators(jobParametersValidators);
+        return compositeJobParametersValidator;
     }
 
 }
