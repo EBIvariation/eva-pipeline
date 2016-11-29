@@ -27,6 +27,7 @@ import uk.ac.ebi.eva.pipeline.configuration.validation.DbCollectionsVariantsName
 import uk.ac.ebi.eva.pipeline.configuration.validation.DbNameValidator;
 import uk.ac.ebi.eva.pipeline.configuration.validation.InputStudyIdValidator;
 import uk.ac.ebi.eva.pipeline.configuration.validation.InputVcfIdValidator;
+import uk.ac.ebi.eva.pipeline.configuration.validation.OptionalValidator;
 import uk.ac.ebi.eva.pipeline.configuration.validation.OutputDirAnnotationValidator;
 
 import java.util.Arrays;
@@ -44,7 +45,7 @@ public class VepInputGeneratorStepParametersValidator extends DefaultJobParamete
         super(new String[]{JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME, JobParametersNames.DB_NAME,
                       JobParametersNames.INPUT_STUDY_ID, JobParametersNames.INPUT_VCF_ID,
                       JobParametersNames.OUTPUT_DIR_ANNOTATION},
-              new String[]{});
+              new String[]{JobParametersNames.CONFIG_RESTARTABILITY_ALLOW});
     }
 
     @Override
@@ -55,7 +56,7 @@ public class VepInputGeneratorStepParametersValidator extends DefaultJobParamete
 
     private CompositeJobParametersValidator compositeJobParametersValidator() {
         final List<JobParametersValidator> jobParametersValidators = Arrays.asList(
-                new ConfigRestartabilityAllowValidator(),
+                new OptionalValidator(new ConfigRestartabilityAllowValidator(), JobParametersNames.CONFIG_RESTARTABILITY_ALLOW),
                 new DbCollectionsVariantsNameValidator(),
                 new DbNameValidator(),
                 new InputStudyIdValidator(),
