@@ -22,24 +22,20 @@ import org.springframework.batch.core.JobParametersValidator;
 import uk.ac.ebi.eva.pipeline.configuration.JobParametersNames;
 
 /**
- * ConfigRestartabilityAllow is a Boolean option to allow the restartability of a {@link org.springframework.batch.core.Step}
+ * Checks that the option to allow restartability has been filled in and it is "true" or "false".
+ *
+ * @throws JobParametersInvalidException If the allow restartability option is null or empty or any text different
+ * from 'true' or 'false'
  */
 public class ConfigRestartabilityAllowValidator implements JobParametersValidator {
-
-    /**
-     * Checks that the option to allow restartability has been filled in and it is "true" or "false".
-     *
-     * @param parameters
-     * @throws JobParametersInvalidException If the allow restartability option is null or empty or any text different
-     *                                       from 'true' or 'false'
-     */
     @Override
     public void validate(JobParameters parameters) throws JobParametersInvalidException {
         String configRestartabilityAllowValue = parameters.getString(JobParametersNames.CONFIG_RESTARTABILITY_ALLOW);
 
         ParametersValidatorUtil
-                .checkNullOrEmptyString(configRestartabilityAllowValue, JobParametersNames.CONFIG_RESTARTABILITY_ALLOW);
-        ParametersValidatorUtil.checkBooleanStringSyntax(configRestartabilityAllowValue,
-                                                         JobParametersNames.CONFIG_RESTARTABILITY_ALLOW);
+                .checkIsNotNullOrEmptyString(configRestartabilityAllowValue, JobParametersNames.CONFIG_RESTARTABILITY_ALLOW);
+        ParametersValidatorUtil
+                .checkIsBoolean(configRestartabilityAllowValue,
+                                JobParametersNames.CONFIG_RESTARTABILITY_ALLOW);
     }
 }

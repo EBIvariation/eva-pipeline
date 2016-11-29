@@ -24,20 +24,20 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 /**
- * Utility to hold the low level checks on strings, dirs, files... parameters
+ * Utility class to hold the low level checks on strings, dirs, files... parameters
  */
 public class ParametersValidatorUtil {
 
-    static void checkNullOrEmptyString(String stringToValidate,
-                                       String jobParametersName) throws JobParametersInvalidException {
+    static void checkIsNotNullOrEmptyString(String stringToValidate,
+                                            String jobParametersName) throws JobParametersInvalidException {
         if (Strings.isNullOrEmpty(stringToValidate) || stringToValidate.trim().length() == 0) {
             throw new JobParametersInvalidException(
                     String.format("%s in %s must be specified", stringToValidate, jobParametersName));
         }
     }
 
-    static void checkBooleanStringSyntax(String booleanStringToValidate,
-                                         String jobParametersName) throws JobParametersInvalidException {
+    static void checkIsBoolean(String booleanStringToValidate,
+                               String jobParametersName) throws JobParametersInvalidException {
         if (booleanStringToValidate == null || (!booleanStringToValidate
                 .equalsIgnoreCase("true") && !booleanStringToValidate.equalsIgnoreCase("false"))) {
             throw new JobParametersInvalidException(
@@ -45,14 +45,8 @@ public class ParametersValidatorUtil {
         }
     }
 
-    static void checkDirectory(String dirToValidate, String jobParametersName) throws JobParametersInvalidException {
-        Path path;
-        try {
-            path = Paths.get(dirToValidate);
-        } catch (InvalidPathException e) {
-            throw new JobParametersInvalidException(
-                    String.format("%s in %s is not a valid path", dirToValidate, jobParametersName));
-        }
+    static void checkDirectoryExists(String dirToValidate, String jobParametersName) throws JobParametersInvalidException {
+        Path path = getPath(dirToValidate, jobParametersName);
 
         if (!Files.isDirectory(path)) {
             throw new JobParametersInvalidException(
@@ -60,20 +54,19 @@ public class ParametersValidatorUtil {
         }
     }
 
-    static void checkFileExistsAndIsReadable(String fileToValidate,
+    static void checkFileExists(String fileToValidate,
                                              String jobParametersName) throws JobParametersInvalidException {
-        Path path;
-        try {
-            path = Paths.get(fileToValidate);
-        } catch (InvalidPathException e) {
-            throw new JobParametersInvalidException(
-                    String.format("File %s in %s is not a valid path", fileToValidate, jobParametersName));
-        }
+        Path path = getPath(fileToValidate, jobParametersName);
 
-        if (Files.notExists(path)) {
+        if (Files.notExists(path) || Files.isDirectory(path)) {
             throw new JobParametersInvalidException(
                     String.format("File %s in %s does not exist", fileToValidate, jobParametersName));
         }
+    }
+
+    static void checkFileIsReadable(String fileToValidate,
+                                             String jobParametersName) throws JobParametersInvalidException {
+        Path path = getPath(fileToValidate, jobParametersName);
 
         if (!Files.isReadable(path)) {
             throw new JobParametersInvalidException(
@@ -81,7 +74,28 @@ public class ParametersValidatorUtil {
         }
     }
 
-    static int checkInteger(String numberToValidate, String jobParametersName) throws JobParametersInvalidException {
+    static void checkFileIsWritable(String fileToValidate,
+                                    String jobParametersName) throws JobParametersInvalidException {
+        Path path = getPath(fileToValidate, jobParametersName);
+
+        if (!Files.isWritable(path)) {
+            throw new JobParametersInvalidException(
+                    String.format("File %s in %s is not writable", fileToValidate, jobParametersName));
+        }
+    }
+
+    private static Path getPath(String pathToValidate, String jobParametersName) throws JobParametersInvalidException {
+        Path path;
+        try {
+            path = Paths.get(pathToValidate);
+        } catch (InvalidPathException e) {
+            throw new JobParametersInvalidException(
+                    String.format("Path %s in %s is not valid", pathToValidate, jobParametersName));
+        }
+        return path;
+    }
+
+    static int checkIsInteger(String numberToValidate, String jobParametersName) throws JobParametersInvalidException {
         try {
             return Integer.parseInt(numberToValidate);
         } catch (NumberFormatException e) {
@@ -90,9 +104,9 @@ public class ParametersValidatorUtil {
         }
     }
 
-    static void checkPositiveInteger(String numberToValidate,
-                                     String jobParametersName) throws JobParametersInvalidException {
-        int integer = checkInteger(numberToValidate, jobParametersName);
+    static void checkIsPositiveInteger(String numberToValidate,
+                                       String jobParametersName) throws JobParametersInvalidException {
+        int integer = checkIsInteger(numberToValidate, jobParametersName);
 
         if (integer <= 0) {
             throw new JobParametersInvalidException(

@@ -21,17 +21,17 @@ import org.springframework.batch.core.JobParametersValidator;
 
 import uk.ac.ebi.eva.pipeline.configuration.JobParametersNames;
 
+/**
+ * Checks that the output directory for annotations is a directory and it is writable
+ *
+ * @throws JobParametersInvalidException If the output directory is not a directory
+ */
 public class OutputDirAnnotationValidator implements JobParametersValidator {
-
-    /**
-     * Checks that the output directory for annotations is a directory and it is writable
-     *
-     * @param parameters
-     * @throws JobParametersInvalidException If the output directory is not a directory
-     */
     @Override
     public void validate(JobParameters parameters) throws JobParametersInvalidException {
-        ParametersValidatorUtil.checkDirectory(parameters.getString(JobParametersNames.OUTPUT_DIR_ANNOTATION),
-                                               JobParametersNames.OUTPUT_DIR_ANNOTATION);
+        ParametersValidatorUtil.checkDirectoryExists(parameters.getString(JobParametersNames.OUTPUT_DIR_ANNOTATION),
+                                                     JobParametersNames.OUTPUT_DIR_ANNOTATION);
+        ParametersValidatorUtil.checkFileIsWritable(parameters.getString(JobParametersNames.OUTPUT_DIR_ANNOTATION),
+                                                     JobParametersNames.OUTPUT_DIR_ANNOTATION);
     }
 }

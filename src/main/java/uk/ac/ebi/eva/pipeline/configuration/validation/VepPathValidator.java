@@ -21,16 +21,17 @@ import org.springframework.batch.core.JobParametersValidator;
 
 import uk.ac.ebi.eva.pipeline.configuration.JobParametersNames;
 
+/**
+ * Checks that the vep path has been filled in
+ *
+ * @throws JobParametersInvalidException If the vep path is null or empty
+ */
 public class VepPathValidator implements JobParametersValidator {
-    /**
-     * Checks that the vep path has been filled in
-     *
-     * @param parameters
-     * @throws JobParametersInvalidException If the vep path is null or empty
-     */
     @Override
     public void validate(JobParameters parameters) throws JobParametersInvalidException {
-        ParametersValidatorUtil.checkFileExistsAndIsReadable(parameters.getString(JobParametersNames.APP_VEP_PATH),
+        ParametersValidatorUtil.checkFileExists(parameters.getString(JobParametersNames.APP_VEP_PATH),
                                                              JobParametersNames.APP_VEP_PATH);
+        ParametersValidatorUtil.checkFileIsReadable(parameters.getString(JobParametersNames.APP_VEP_PATH),
+                                                JobParametersNames.APP_VEP_PATH);
     }
 }
