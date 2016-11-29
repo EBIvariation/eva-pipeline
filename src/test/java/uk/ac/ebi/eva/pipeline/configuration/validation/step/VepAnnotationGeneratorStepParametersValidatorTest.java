@@ -22,6 +22,9 @@ import org.springframework.batch.core.JobParametersInvalidException;
 
 import uk.ac.ebi.eva.pipeline.configuration.JobParametersNames;
 
+import java.io.File;
+import java.io.IOException;
+
 /**
  * Tests that the arguments necessary to run a {@link uk.ac.ebi.eva.pipeline.jobs.steps.VepAnnotationGeneratorStep} are
  * correctly validated
@@ -35,22 +38,26 @@ public class VepAnnotationGeneratorStepParametersValidatorTest {
     }
 
     @Test
-    public void allJobParametersAreValid() throws JobParametersInvalidException {
-        final String APP_VEP_PATH = VepAnnotationGeneratorStepParametersValidatorTest.class
-                .getResource("/parameters-validation/vepapp.pl").getPath();
-        final String DIR = VepAnnotationGeneratorStepParametersValidatorTest.class
-                .getResource("/parameters-validation/").getPath();
-        final String INPUT_FASTA = VepAnnotationGeneratorStepParametersValidatorTest.class
-                .getResource("/parameters-validation/fasta.fa").getPath();
+    public void allJobParametersAreValid() throws JobParametersInvalidException, IOException {
+        final File APP_VEP_PATH = new File(VepAnnotationGeneratorStepParametersValidatorTest.class
+                .getResource("/parameters-validation/vepapp.pl").getFile());
+        APP_VEP_PATH.setReadable(true);
+        final File DIR = new File(VepAnnotationGeneratorStepParametersValidatorTest.class
+                .getResource("/parameters-validation/").getFile());
+        DIR.setReadable(true);
+        DIR.setWritable(true);
+        final File INPUT_FASTA = new File(VepAnnotationGeneratorStepParametersValidatorTest.class
+                .getResource("/parameters-validation/fasta.fa").getFile());
+        INPUT_FASTA.setReadable(true);
 
         JobParametersBuilder jobParametersBuilder = new JobParametersBuilder();
-        jobParametersBuilder.addString(JobParametersNames.APP_VEP_PATH, APP_VEP_PATH);
+        jobParametersBuilder.addString(JobParametersNames.APP_VEP_PATH, APP_VEP_PATH.getCanonicalPath());
         jobParametersBuilder.addString(JobParametersNames.APP_VEP_CACHE_VERSION, "100_A");
-        jobParametersBuilder.addString(JobParametersNames.APP_VEP_CACHE_PATH, DIR);
+        jobParametersBuilder.addString(JobParametersNames.APP_VEP_CACHE_PATH, DIR.getCanonicalPath());
         jobParametersBuilder.addString(JobParametersNames.APP_VEP_CACHE_SPECIES, "Human");
-        jobParametersBuilder.addString(JobParametersNames.INPUT_FASTA, INPUT_FASTA);
+        jobParametersBuilder.addString(JobParametersNames.INPUT_FASTA, INPUT_FASTA.getCanonicalPath());
         jobParametersBuilder.addString(JobParametersNames.APP_VEP_NUMFORKS, "6");
-        jobParametersBuilder.addString(JobParametersNames.OUTPUT_DIR_ANNOTATION, DIR);
+        jobParametersBuilder.addString(JobParametersNames.OUTPUT_DIR_ANNOTATION, DIR.getCanonicalPath());
         jobParametersBuilder.addString(JobParametersNames.INPUT_STUDY_ID, "inputStudyId");
         jobParametersBuilder.addString(JobParametersNames.INPUT_VCF_ID, "inputVcfId");
 
