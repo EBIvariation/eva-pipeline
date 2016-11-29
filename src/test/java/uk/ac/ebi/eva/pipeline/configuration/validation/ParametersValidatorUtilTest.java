@@ -18,8 +18,6 @@ package uk.ac.ebi.eva.pipeline.configuration.validation;
 import org.junit.Test;
 import org.springframework.batch.core.JobParametersInvalidException;
 
-import uk.ac.ebi.eva.pipeline.configuration.validation.step.VepAnnotationGeneratorStepParametersValidatorTest;
-
 import java.io.File;
 import java.io.IOException;
 
@@ -103,6 +101,13 @@ public class ParametersValidatorUtilTest {
         ParametersValidatorUtil.checkDirectoryExists("file://path/to/", "any job parameters name");
     }
 
+    @Test(expected = JobParametersInvalidException.class)
+    public void directoryStringIsAFile() throws JobParametersInvalidException, IOException {
+        File file = new File(ParametersValidatorUtilTest.class.getResource(
+                "/parameters-validation/fasta_not_readable.fa").getFile());
+        ParametersValidatorUtil.checkDirectoryExists(file.getCanonicalPath(), "any job parameters name");
+    }
+
 
     @Test
     public void fileStringExists() throws JobParametersInvalidException {
@@ -116,6 +121,13 @@ public class ParametersValidatorUtilTest {
         ParametersValidatorUtil.checkFileExists("file://path/to/file.vcf", "any job parameters name");
     }
 
+    @Test(expected = JobParametersInvalidException.class)
+    public void fileStringIsADirectory() throws JobParametersInvalidException {
+        ParametersValidatorUtil
+                .checkFileExists(ParametersValidatorUtilTest.class.getResource("/parameters-validation/").getFile(),
+                                 "any job parameters name");
+    }
+
 
     @Test
     public void pathIsReadable() throws JobParametersInvalidException {
@@ -126,11 +138,11 @@ public class ParametersValidatorUtilTest {
 
     @Test(expected = JobParametersInvalidException.class)
     public void pathIsNorReadable() throws JobParametersInvalidException, IOException {
-        File file = new File(VepAnnotationGeneratorStepParametersValidatorTest.class.getResource(
-                "/parameters-validation/fasta_not_readable.fa").getFile());
+        File file = new File(
+                ParametersValidatorUtilTest.class.getResource("/parameters-validation/fasta_not_readable.fa")
+                        .getFile());
         file.setReadable(false);
 
-        ParametersValidatorUtil.checkFileExists(file.getCanonicalPath(), "any job parameters name");
         ParametersValidatorUtil.checkFileIsReadable(file.getCanonicalPath(), "any job parameters name");
     }
 
@@ -143,11 +155,11 @@ public class ParametersValidatorUtilTest {
 
     @Test(expected = JobParametersInvalidException.class)
     public void pathIsNorWritable() throws JobParametersInvalidException, IOException {
-        File file = new File(VepAnnotationGeneratorStepParametersValidatorTest.class.getResource(
-                "/parameters-validation/fasta_not_readable.fa").getFile());
+        File file = new File(
+                ParametersValidatorUtilTest.class.getResource("/parameters-validation/fasta_not_readable.fa")
+                        .getFile());
         file.setReadable(false);
 
-        ParametersValidatorUtil.checkFileExists(file.getCanonicalPath(), "any job parameters name");
         ParametersValidatorUtil.checkFileIsReadable(file.getCanonicalPath(), "any job parameters name");
     }
 
