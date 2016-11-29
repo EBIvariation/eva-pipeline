@@ -60,4 +60,15 @@ public class InputFastaValidatorTest {
         jobParametersBuilder.addString(JobParametersNames.INPUT_FASTA, file.getCanonicalPath());
         validator.validate(jobParametersBuilder.toJobParameters());
     }
+
+    @Test(expected = JobParametersInvalidException.class)
+    public void inputFastaIsADirectory() throws JobParametersInvalidException, IOException {
+        File file = new File(VepAnnotationGeneratorStepParametersValidatorTest.class.getResource(
+                "/parameters-validation/").getFile());
+        file.setReadable(true);
+
+        jobParametersBuilder = new JobParametersBuilder();
+        jobParametersBuilder.addString(JobParametersNames.INPUT_FASTA, file.getCanonicalPath());
+        validator.validate(jobParametersBuilder.toJobParameters());
+    }
 }

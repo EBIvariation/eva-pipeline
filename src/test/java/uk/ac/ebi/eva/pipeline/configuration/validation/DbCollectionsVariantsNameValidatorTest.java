@@ -46,7 +46,7 @@ public class DbCollectionsVariantsNameValidatorTest {
     }
 
     @Test(expected = JobParametersInvalidException.class)
-    public void collectionsVariantsNameIsASpace() throws JobParametersInvalidException {
+    public void collectionsVariantsNameIsWhitespace() throws JobParametersInvalidException {
         jobParametersBuilder = new JobParametersBuilder();
         jobParametersBuilder.addString(JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME, " ");
         validator.validate(jobParametersBuilder.toJobParameters());

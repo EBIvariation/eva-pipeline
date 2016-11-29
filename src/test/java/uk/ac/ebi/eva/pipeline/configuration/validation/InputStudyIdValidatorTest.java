@@ -46,7 +46,7 @@ public class InputStudyIdValidatorTest {
     }
 
     @Test(expected = JobParametersInvalidException.class)
-    public void inputStudyIdIsAspace() throws JobParametersInvalidException {
+    public void inputStudyIdIsWhitespace() throws JobParametersInvalidException {
         jobParametersBuilder = new JobParametersBuilder();
         jobParametersBuilder.addString(JobParametersNames.INPUT_STUDY_ID, " ");
         validator.validate(jobParametersBuilder.toJobParameters());

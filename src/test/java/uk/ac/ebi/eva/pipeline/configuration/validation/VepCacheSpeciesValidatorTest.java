@@ -46,7 +46,7 @@ public class VepCacheSpeciesValidatorTest {
     }
 
     @Test(expected = JobParametersInvalidException.class)
-    public void vepCacheSpeciesIsASpace() throws JobParametersInvalidException {
+    public void vepCacheSpeciesIsWhitespace() throws JobParametersInvalidException {
         jobParametersBuilder = new JobParametersBuilder();
         jobParametersBuilder.addString(JobParametersNames.APP_VEP_CACHE_SPECIES, " ");
         validator.validate(jobParametersBuilder.toJobParameters());

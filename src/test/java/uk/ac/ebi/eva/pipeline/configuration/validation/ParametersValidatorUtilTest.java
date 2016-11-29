@@ -30,113 +30,155 @@ public class ParametersValidatorUtilTest {
 
     @Test
     public void validString() throws JobParametersInvalidException {
-        ParametersValidatorUtil.checkNullOrEmptyString("any string", "any job parameters name");
+        ParametersValidatorUtil.checkIsNotNullOrEmptyString("any string", "any job parameters name");
     }
 
     @Test(expected = JobParametersInvalidException.class)
-    public void emptyString() throws JobParametersInvalidException {
-        ParametersValidatorUtil.checkNullOrEmptyString("", "any job parameters name");
+    public void stringIsEmpty() throws JobParametersInvalidException {
+        ParametersValidatorUtil.checkIsNotNullOrEmptyString("", "any job parameters name");
     }
 
     @Test(expected = JobParametersInvalidException.class)
-    public void spaceString() throws JobParametersInvalidException {
-        ParametersValidatorUtil.checkNullOrEmptyString(" ", "any job parameters name");
+    public void stringIsAWhitespace() throws JobParametersInvalidException {
+        ParametersValidatorUtil.checkIsNotNullOrEmptyString(" ", "any job parameters name");
     }
 
     @Test(expected = JobParametersInvalidException.class)
-    public void nullString() throws JobParametersInvalidException {
-        ParametersValidatorUtil.checkNullOrEmptyString(null, "any job parameters name");
+    public void stringIsNull() throws JobParametersInvalidException {
+        ParametersValidatorUtil.checkIsNotNullOrEmptyString(null, "any job parameters name");
     }
 
 
     @Test
-    public void validBooleanString() throws JobParametersInvalidException {
-        ParametersValidatorUtil.checkBooleanStringSyntax("false", "any job parameters name");
+    public void validBooleanFalseString() throws JobParametersInvalidException {
+        ParametersValidatorUtil.checkIsBoolean("false", "any job parameters name");
+    }
+
+    @Test
+    public void validBooleanFalseStringAllCapitals() throws JobParametersInvalidException {
+        ParametersValidatorUtil.checkIsBoolean("FALSE", "any job parameters name");
+    }
+
+    @Test
+    public void validBooleanTrueString() throws JobParametersInvalidException {
+        ParametersValidatorUtil.checkIsBoolean("true", "any job parameters name");
+    }
+
+    @Test
+    public void validBooleanTrueStringAllCapitals() throws JobParametersInvalidException {
+        ParametersValidatorUtil.checkIsBoolean("TRUE", "any job parameters name");
     }
 
     @Test(expected = JobParametersInvalidException.class)
-    public void invalidBooleanString() throws JobParametersInvalidException {
-        ParametersValidatorUtil.checkBooleanStringSyntax("blabla", "any job parameters name");
+    public void booleanStringIsInvalid() throws JobParametersInvalidException {
+        ParametersValidatorUtil.checkIsBoolean("blabla", "any job parameters name");
     }
 
     @Test(expected = JobParametersInvalidException.class)
-    public void emptyBooleanString() throws JobParametersInvalidException {
-        ParametersValidatorUtil.checkBooleanStringSyntax("", "any job parameters name");
+    public void booleanStringIsEmpty() throws JobParametersInvalidException {
+        ParametersValidatorUtil.checkIsBoolean("", "any job parameters name");
     }
 
     @Test(expected = JobParametersInvalidException.class)
-    public void spaceBooleanString() throws JobParametersInvalidException {
-        ParametersValidatorUtil.checkBooleanStringSyntax(" ", "any job parameters name");
+    public void booleanStringIsWhitespace() throws JobParametersInvalidException {
+        ParametersValidatorUtil.checkIsBoolean(" ", "any job parameters name");
     }
 
     @Test(expected = JobParametersInvalidException.class)
-    public void nullBooleanString() throws JobParametersInvalidException {
-        ParametersValidatorUtil.checkBooleanStringSyntax(null, "any job parameters name");
+    public void booleanStringIsNull() throws JobParametersInvalidException {
+        ParametersValidatorUtil.checkIsBoolean(null, "any job parameters name");
     }
 
 
     @Test
-    public void validDirectoryString() throws JobParametersInvalidException {
+    public void directoryStringExist() throws JobParametersInvalidException {
         ParametersValidatorUtil
-                .checkDirectory(ParametersValidatorUtilTest.class.getResource("/parameters-validation/").getFile(),
-                                "any job parameters name");
+                .checkDirectoryExists(
+                        ParametersValidatorUtilTest.class.getResource("/parameters-validation/").getFile(),
+                        "any job parameters name");
     }
 
     @Test(expected = JobParametersInvalidException.class)
     public void directoryStringDoesNotExist() throws JobParametersInvalidException {
-        ParametersValidatorUtil.checkDirectory("file://path/to/", "any job parameters name");
+        ParametersValidatorUtil.checkDirectoryExists("file://path/to/", "any job parameters name");
     }
 
 
     @Test
-    public void validFileString() throws JobParametersInvalidException {
-        ParametersValidatorUtil.checkFileExistsAndIsReadable(
+    public void fileStringExists() throws JobParametersInvalidException {
+        ParametersValidatorUtil.checkFileExists(
                 ParametersValidatorUtilTest.class.getResource("/parameters-validation/fasta.fa").getFile(),
                 "any job parameters name");
     }
 
     @Test(expected = JobParametersInvalidException.class)
     public void fileStringDoesNotExist() throws JobParametersInvalidException {
-        ParametersValidatorUtil.checkFileExistsAndIsReadable("file://path/to/file.vcf", "any job parameters name");
-    }
-
-    @Test(expected = JobParametersInvalidException.class)
-    public void fileStringIsNotReadable() throws JobParametersInvalidException, IOException {
-        File file = new File(VepAnnotationGeneratorStepParametersValidatorTest.class.getResource(
-                "/parameters-validation/fasta_not_readable.fa").getFile());
-        file.setReadable(false);
-
-        ParametersValidatorUtil.checkFileExistsAndIsReadable(file.getCanonicalPath(), "any job parameters name");
+        ParametersValidatorUtil.checkFileExists("file://path/to/file.vcf", "any job parameters name");
     }
 
 
     @Test
-    public void validPositiveIntegerString() throws JobParametersInvalidException {
-        ParametersValidatorUtil.checkPositiveInteger("11", "any job parameters name");
+    public void pathIsReadable() throws JobParametersInvalidException {
+        ParametersValidatorUtil.checkFileIsReadable(
+                ParametersValidatorUtilTest.class.getResource("/parameters-validation/fasta.fa").getFile(),
+                "any job parameters name");
+    }
+
+    @Test(expected = JobParametersInvalidException.class)
+    public void pathIsNorReadable() throws JobParametersInvalidException, IOException {
+        File file = new File(VepAnnotationGeneratorStepParametersValidatorTest.class.getResource(
+                "/parameters-validation/fasta_not_readable.fa").getFile());
+        file.setReadable(false);
+
+        ParametersValidatorUtil.checkFileExists(file.getCanonicalPath(), "any job parameters name");
+        ParametersValidatorUtil.checkFileIsReadable(file.getCanonicalPath(), "any job parameters name");
+    }
+
+    @Test
+    public void pathIsWritable() throws JobParametersInvalidException {
+        ParametersValidatorUtil.checkFileIsWritable(
+                ParametersValidatorUtilTest.class.getResource("/parameters-validation/fasta.fa").getFile(),
+                "any job parameters name");
+    }
+
+    @Test(expected = JobParametersInvalidException.class)
+    public void pathIsNorWritable() throws JobParametersInvalidException, IOException {
+        File file = new File(VepAnnotationGeneratorStepParametersValidatorTest.class.getResource(
+                "/parameters-validation/fasta_not_readable.fa").getFile());
+        file.setReadable(false);
+
+        ParametersValidatorUtil.checkFileExists(file.getCanonicalPath(), "any job parameters name");
+        ParametersValidatorUtil.checkFileIsReadable(file.getCanonicalPath(), "any job parameters name");
+    }
+
+
+    @Test
+    public void integerStringIsValid() throws JobParametersInvalidException {
+        ParametersValidatorUtil.checkIsPositiveInteger("11", "any job parameters name");
     }
 
     @Test(expected = JobParametersInvalidException.class)
     public void integerStringIsZero() throws JobParametersInvalidException {
-        ParametersValidatorUtil.checkPositiveInteger("0", "any job parameters name");
+        ParametersValidatorUtil.checkIsPositiveInteger("0", "any job parameters name");
     }
 
     @Test(expected = JobParametersInvalidException.class)
     public void integerStringIsNegative() throws JobParametersInvalidException {
-        ParametersValidatorUtil.checkPositiveInteger("-1", "any job parameters name");
+        ParametersValidatorUtil.checkIsPositiveInteger("-1", "any job parameters name");
     }
 
     @Test(expected = JobParametersInvalidException.class)
     public void integerStringIsNotValid() throws JobParametersInvalidException {
-        ParametersValidatorUtil.checkPositiveInteger("hello", "any job parameters name");
+        ParametersValidatorUtil.checkIsPositiveInteger("hello", "any job parameters name");
     }
 
     @Test(expected = JobParametersInvalidException.class)
-    public void notValidIntegerString() throws JobParametersInvalidException {
-        ParametersValidatorUtil.checkPositiveInteger("", "any job parameters name");
+    public void integerStringIsEmpty() throws JobParametersInvalidException {
+        ParametersValidatorUtil.checkIsPositiveInteger("", "any job parameters name");
     }
 
     @Test(expected = JobParametersInvalidException.class)
-    public void nullIntegerString() throws JobParametersInvalidException {
-        ParametersValidatorUtil.checkPositiveInteger(null, "any job parameters name");
+    public void integerStringIsNull() throws JobParametersInvalidException {
+        ParametersValidatorUtil.checkIsPositiveInteger(null, "any job parameters name");
     }
 }

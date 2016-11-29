@@ -45,7 +45,7 @@ public class InputVcfIdValidatorTest {
         validator.validate(jobParametersBuilder.toJobParameters());    }
 
     @Test(expected = JobParametersInvalidException.class)
-    public void inputVcfIdIsASpace() throws JobParametersInvalidException {
+    public void inputVcfIdIsWhitespace() throws JobParametersInvalidException {
         jobParametersBuilder = new JobParametersBuilder();
         jobParametersBuilder.addString(JobParametersNames.INPUT_VCF_ID, " ");
         validator.validate(jobParametersBuilder.toJobParameters());
