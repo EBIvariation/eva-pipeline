@@ -21,16 +21,15 @@ import org.springframework.batch.core.JobParametersValidator;
 
 import uk.ac.ebi.eva.pipeline.configuration.JobParametersNames;
 
+/**
+ * Checks that the number of forks is a valid integer number
+ *
+ * @throws JobParametersInvalidException If the number of fork is not a valid number
+ */
 public class VepNumForksValidator implements JobParametersValidator {
-    /**
-     * Checks that the number of forks is a valid integer number
-     *
-     * @param parameters
-     * @throws JobParametersInvalidException If the number of fork is not a valid number
-     */
     @Override
     public void validate(JobParameters parameters) throws JobParametersInvalidException {
-        ParametersValidatorUtil.checkPositiveInteger(parameters.getString(JobParametersNames.APP_VEP_NUMFORKS),
-                                                     JobParametersNames.APP_VEP_NUMFORKS);
+        ParametersValidatorUtil.checkIsPositiveInteger(parameters.getString(JobParametersNames.APP_VEP_NUMFORKS),
+                                                       JobParametersNames.APP_VEP_NUMFORKS);
     }
 }

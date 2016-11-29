@@ -21,17 +21,17 @@ import org.springframework.batch.core.JobParametersValidator;
 
 import uk.ac.ebi.eva.pipeline.configuration.JobParametersNames;
 
+/**
+ * Checks that the name of the variants collection has been filled in.
+ *
+ * @throws JobParametersInvalidException If the variant collection name is null or empty
+ */
 public class DbCollectionsVariantsNameValidator implements JobParametersValidator{
 
-    /**
-     * Checks that the name of the variants collection has been filled in.
-     * @param parameters
-     * @throws JobParametersInvalidException If the variant collection name is null or empty
-     */
     @Override
     public void validate(JobParameters parameters) throws JobParametersInvalidException {
         ParametersValidatorUtil
-                .checkNullOrEmptyString(parameters.getString(JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME),
-                                        JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME);
+                .checkIsNotNullOrEmptyString(parameters.getString(JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME),
+                                             JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME);
     }
 }

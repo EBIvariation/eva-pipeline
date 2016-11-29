@@ -21,16 +21,17 @@ import org.springframework.batch.core.JobParametersValidator;
 
 import uk.ac.ebi.eva.pipeline.configuration.JobParametersNames;
 
+/**
+ * Checks that the fasta input file exist and is readable
+ *
+ * @throws JobParametersInvalidException If the file is not a valid path, does not exist or is not readable
+ */
 public class InputFastaValidator implements JobParametersValidator {
-    /**
-     * Checks that the fasta input file exist and is readable
-     *
-     * @param parameters
-     * @throws JobParametersInvalidException If the file is not a valid path, does not exist or is not readable
-     */
     @Override
     public void validate(JobParameters parameters) throws JobParametersInvalidException {
-        ParametersValidatorUtil.checkFileExistsAndIsReadable(parameters.getString(JobParametersNames.INPUT_FASTA),
+        ParametersValidatorUtil.checkFileExists(parameters.getString(JobParametersNames.INPUT_FASTA),
                                                              JobParametersNames.INPUT_FASTA);
+        ParametersValidatorUtil.checkFileIsReadable(parameters.getString(JobParametersNames.INPUT_FASTA),
+                                                JobParametersNames.INPUT_FASTA);
     }
 }

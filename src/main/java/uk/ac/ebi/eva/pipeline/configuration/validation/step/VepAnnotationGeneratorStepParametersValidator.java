@@ -38,7 +38,8 @@ import java.util.List;
 /**
  * Validates the job parameters necessary to execute a {@link uk.ac.ebi.eva.pipeline.jobs.steps.VepAnnotationGeneratorStep}
  * <p>
- * The parameters OUTPUT_DIR_ANNOTATION, INPUT_STUDY_ID and INPUT_VCF_ID are used to build the vep input/output options
+ * The parameters OUTPUT_DIR_ANNOTATION, INPUT_STUDY_ID and INPUT_VCF_ID are used to build the VEP input/output options
+ * {@see uk.ac.ebi.eva.pipeline.configuration.JobOptions#loadPipelineOptions()}
  */
 public class VepAnnotationGeneratorStepParametersValidator extends DefaultJobParametersValidator {
 

@@ -21,16 +21,15 @@ import org.springframework.batch.core.JobParametersValidator;
 
 import uk.ac.ebi.eva.pipeline.configuration.JobParametersNames;
 
+/**
+ * Checks that the species of the vep cache has been filled in
+ *
+ * @throws JobParametersInvalidException If the vep cache species is null or empty
+ */
 public class VepCacheSpeciesValidator implements JobParametersValidator {
-    /**
-     * Checks that the species of the vep cache has been filled in
-     *
-     * @param parameters
-     * @throws JobParametersInvalidException If the vep cache species is null or empty
-     */
     @Override
     public void validate(JobParameters parameters) throws JobParametersInvalidException {
-        ParametersValidatorUtil.checkNullOrEmptyString(parameters.getString(JobParametersNames.APP_VEP_CACHE_SPECIES),
-                                                       JobParametersNames.APP_VEP_CACHE_SPECIES);
+        ParametersValidatorUtil.checkIsNotNullOrEmptyString(parameters.getString(JobParametersNames.APP_VEP_CACHE_SPECIES),
+                                                            JobParametersNames.APP_VEP_CACHE_SPECIES);
     }
 }

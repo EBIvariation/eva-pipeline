@@ -21,16 +21,16 @@ import org.springframework.batch.core.JobParametersValidator;
 
 import uk.ac.ebi.eva.pipeline.configuration.JobParametersNames;
 
+/**
+ * Checks that the study id has been filled in.
+ *
+ * @throws JobParametersInvalidException If the study id is null or empty
+ */
 public class InputStudyIdValidator implements JobParametersValidator {
-    /**
-     * Checks that the study id has been filled in.
-     *
-     * @param parameters
-     * @throws JobParametersInvalidException If the study id is null or empty
-     */
+
     @Override
     public void validate(JobParameters parameters) throws JobParametersInvalidException {
-        ParametersValidatorUtil.checkNullOrEmptyString(parameters.getString(JobParametersNames.INPUT_STUDY_ID),
-                                                       JobParametersNames.INPUT_STUDY_ID);
+        ParametersValidatorUtil.checkIsNotNullOrEmptyString(parameters.getString(JobParametersNames.INPUT_STUDY_ID),
+                                                            JobParametersNames.INPUT_STUDY_ID);
     }
 }

@@ -35,13 +35,13 @@ import java.util.List;
 /**
  * Validates the job parameters necessary to execute a {@link uk.ac.ebi.eva.pipeline.jobs.steps.VepInputGeneratorStep}
  * <p>
- * The parameters OUTPUT_DIR_ANNOTATION, INPUT_STUDY_ID and INPUT_VCF_ID are used to build the vep input option.
+ * The parameters OUTPUT_DIR_ANNOTATION, INPUT_STUDY_ID and INPUT_VCF_ID are used to build the VEP input option
+ * {@see uk.ac.ebi.eva.pipeline.configuration.JobOptions#loadPipelineOptions()}
  */
 public class VepInputGeneratorStepParametersValidator extends DefaultJobParametersValidator {
 
     public VepInputGeneratorStepParametersValidator() {
-        super(new String[]{JobParametersNames.CONFIG_RESTARTABILITY_ALLOW,
-                      JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME, JobParametersNames.DB_NAME,
+        super(new String[]{JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME, JobParametersNames.DB_NAME,
                       JobParametersNames.INPUT_STUDY_ID, JobParametersNames.INPUT_VCF_ID,
                       JobParametersNames.OUTPUT_DIR_ANNOTATION},
               new String[]{});

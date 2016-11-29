@@ -21,16 +21,17 @@ import org.springframework.batch.core.JobParametersValidator;
 
 import uk.ac.ebi.eva.pipeline.configuration.JobParametersNames;
 
+/**
+ * Checks that the path of the vep cache is a valid directory
+ *
+ * @throws JobParametersInvalidException If the vep cache path is not a valid directory
+ */
 public class VepCachePathValidator implements JobParametersValidator {
-    /**
-     * Checks that the path of the vep cache is a valid directory
-     *
-     * @param parameters
-     * @throws JobParametersInvalidException If the vep cache path is not a valid directory
-     */
     @Override
     public void validate(JobParameters parameters) throws JobParametersInvalidException {
-        ParametersValidatorUtil.checkDirectory(parameters.getString(JobParametersNames.APP_VEP_CACHE_PATH),
-                                               JobParametersNames.APP_VEP_CACHE_PATH);
+        ParametersValidatorUtil.checkDirectoryExists(parameters.getString(JobParametersNames.APP_VEP_CACHE_PATH),
+                                                     JobParametersNames.APP_VEP_CACHE_PATH);
+        ParametersValidatorUtil.checkFileIsReadable(parameters.getString(JobParametersNames.APP_VEP_CACHE_PATH),
+                                                     JobParametersNames.APP_VEP_CACHE_PATH);
     }
 }

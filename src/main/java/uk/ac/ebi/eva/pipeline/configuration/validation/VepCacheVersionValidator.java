@@ -21,16 +21,15 @@ import org.springframework.batch.core.JobParametersValidator;
 
 import uk.ac.ebi.eva.pipeline.configuration.JobParametersNames;
 
+/**
+ * Checks that the cache version option has benn filled in
+ *
+ * @throws JobParametersInvalidException If the vep cache version is null or empty
+ */
 public class VepCacheVersionValidator implements JobParametersValidator {
-    /**
-     * Checks that the cache version option has benn filled in
-     *
-     * @param parameters
-     * @throws JobParametersInvalidException If the vep cache version is null or empty
-     */
     @Override
     public void validate(JobParameters parameters) throws JobParametersInvalidException {
-        ParametersValidatorUtil.checkNullOrEmptyString(parameters.getString(JobParametersNames.APP_VEP_CACHE_VERSION),
-                                                       JobParametersNames.APP_VEP_CACHE_VERSION);
+        ParametersValidatorUtil.checkIsNotNullOrEmptyString(parameters.getString(JobParametersNames.APP_VEP_CACHE_VERSION),
+                                                            JobParametersNames.APP_VEP_CACHE_VERSION);
     }
 }
