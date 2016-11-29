@@ -50,6 +50,21 @@ public class VepInputGeneratorStepParametersValidatorTest {
         validator.validate(jobParametersBuilder.toJobParameters());
     }
 
+    @Test
+    public void optionalConfigRestartabilityAllowMissing() throws JobParametersInvalidException {
+        final String DIR = VepAnnotationGeneratorStepParametersValidatorTest.class
+                .getResource("/parameters-validation/").getPath();
+
+        JobParametersBuilder jobParametersBuilder = new JobParametersBuilder();
+        jobParametersBuilder.addString(JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME, "dbCollectionsVariantName");
+        jobParametersBuilder.addString(JobParametersNames.DB_NAME, "dbName");
+        jobParametersBuilder.addString(JobParametersNames.INPUT_STUDY_ID, "inputStudyId");
+        jobParametersBuilder.addString(JobParametersNames.INPUT_VCF_ID, "inputVcfId");
+        jobParametersBuilder.addString(JobParametersNames.OUTPUT_DIR_ANNOTATION, DIR);
+
+        validator.validate(jobParametersBuilder.toJobParameters());
+    }
+
     @Test(expected = JobParametersInvalidException.class)
     public void invalidAndMissingParameters() throws JobParametersInvalidException {
         JobParametersBuilder jobParametersBuilder = new JobParametersBuilder();
