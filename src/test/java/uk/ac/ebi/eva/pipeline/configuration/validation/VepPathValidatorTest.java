@@ -60,4 +60,15 @@ public class VepPathValidatorTest {
         jobParametersBuilder.addString(JobParametersNames.APP_VEP_PATH, file.getCanonicalPath());
         validator.validate(jobParametersBuilder.toJobParameters());
     }
+
+    @Test(expected = JobParametersInvalidException.class)
+    public void vepPathIsADirectory() throws JobParametersInvalidException, IOException {
+        File file = new File(VepAnnotationGeneratorStepParametersValidatorTest.class.getResource(
+                "/parameters-validation/").getFile());
+        file.setReadable(true);
+
+        jobParametersBuilder = new JobParametersBuilder();
+        jobParametersBuilder.addString(JobParametersNames.APP_VEP_PATH, file.getCanonicalPath());
+        validator.validate(jobParametersBuilder.toJobParameters());
+    }
 }

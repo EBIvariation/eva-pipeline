@@ -46,7 +46,7 @@ public class DbNameValidatorTest {
     }
 
     @Test(expected = JobParametersInvalidException.class)
-    public void dbNameIsAspace() throws JobParametersInvalidException {
+    public void dbNameIsWhitespace() throws JobParametersInvalidException {
         jobParametersBuilder = new JobParametersBuilder();
         jobParametersBuilder.addString(JobParametersNames.DB_NAME, " ");
         validator.validate(jobParametersBuilder.toJobParameters());    }

@@ -46,7 +46,7 @@ public class VepCacheVersionValidatorTest {
     }
 
     @Test(expected = JobParametersInvalidException.class)
-    public void vepCacheVersionIsAspace() throws JobParametersInvalidException {
+    public void vepCacheVersionIsWhitespace() throws JobParametersInvalidException {
         jobParametersBuilder = new JobParametersBuilder();
         jobParametersBuilder.addString(JobParametersNames.APP_VEP_CACHE_VERSION, " ");
         validator.validate(jobParametersBuilder.toJobParameters());

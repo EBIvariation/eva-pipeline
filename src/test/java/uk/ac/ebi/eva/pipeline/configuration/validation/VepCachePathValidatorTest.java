@@ -23,8 +23,12 @@ import org.springframework.batch.core.JobParametersInvalidException;
 import uk.ac.ebi.eva.pipeline.configuration.JobParametersNames;
 import uk.ac.ebi.eva.pipeline.configuration.validation.step.VepInputGeneratorStepParametersValidatorTest;
 
+import java.io.File;
+import java.io.IOException;
+
 public class VepCachePathValidatorTest {
     private VepCachePathValidator validator;
+
     private JobParametersBuilder jobParametersBuilder;
 
     @Before
@@ -33,18 +37,39 @@ public class VepCachePathValidatorTest {
     }
 
     @Test
-    public void vepCachePathIsValid() throws JobParametersInvalidException {
+    public void vepCachePathIsValid() throws JobParametersInvalidException, IOException {
+        File writableVepCachePath = new File(VepCachePathValidatorTest.class.getResource("/parameters-validation/").getFile());
+        writableVepCachePath.setReadable(true);
+
         jobParametersBuilder = new JobParametersBuilder();
-        jobParametersBuilder.addString(JobParametersNames.APP_VEP_CACHE_PATH,
-                                       VepInputGeneratorStepParametersValidatorTest.class
-                                               .getResource("/parameters-validation/").getFile());
+        jobParametersBuilder.addString(JobParametersNames.APP_VEP_CACHE_PATH, writableVepCachePath.getCanonicalPath());
         validator.validate(jobParametersBuilder.toJobParameters());
     }
 
     @Test(expected = JobParametersInvalidException.class)
-    public void vepCachePathNotExist() throws JobParametersInvalidException {
+    public void vepCachePathDoesNotExist() throws JobParametersInvalidException {
         jobParametersBuilder = new JobParametersBuilder();
         jobParametersBuilder.addString(JobParametersNames.APP_VEP_CACHE_PATH, "file://path/to/");
         validator.validate(jobParametersBuilder.toJobParameters());
+    }
+
+    @Test(expected = JobParametersInvalidException.class)
+    public void vepCachePathIsNotReadable() throws JobParametersInvalidException, IOException {
+        File notWritablefile = new File(
+                VepInputGeneratorStepParametersValidatorTest.class.getResource("/parameters-validation/").getFile());
+        notWritablefile.setReadable(false);
+
+        jobParametersBuilder = new JobParametersBuilder();
+        jobParametersBuilder.addString(JobParametersNames.APP_VEP_CACHE_PATH, notWritablefile.getCanonicalPath());
+        validator.validate(jobParametersBuilder.toJobParameters());
+    }
+
+    @Test(expected = JobParametersInvalidException.class)
+    public void vepCachePathIsAFile() throws JobParametersInvalidException {
+        jobParametersBuilder = new JobParametersBuilder();
+        jobParametersBuilder.addString(JobParametersNames.APP_VEP_CACHE_PATH, VepCachePathValidatorTest.class.getResource(
+                "/parameters-validation/vepapp.pl").getFile());
+        validator.validate(jobParametersBuilder.toJobParameters());
+
     }
 }

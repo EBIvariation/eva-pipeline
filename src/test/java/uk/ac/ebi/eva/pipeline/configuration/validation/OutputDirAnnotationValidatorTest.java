@@ -23,8 +23,12 @@ import org.springframework.batch.core.JobParametersInvalidException;
 import uk.ac.ebi.eva.pipeline.configuration.JobParametersNames;
 import uk.ac.ebi.eva.pipeline.configuration.validation.step.VepInputGeneratorStepParametersValidatorTest;
 
+import java.io.File;
+import java.io.IOException;
+
 public class OutputDirAnnotationValidatorTest {
     private OutputDirAnnotationValidator validator;
+
     private JobParametersBuilder jobParametersBuilder;
 
     @Before
@@ -33,18 +37,39 @@ public class OutputDirAnnotationValidatorTest {
     }
 
     @Test
-    public void outputDirAnnotationIsValid() throws JobParametersInvalidException {
+    public void outputDirAnnotationIsValid() throws JobParametersInvalidException, IOException {
+        File writableOutputDir = new File(
+                VepInputGeneratorStepParametersValidatorTest.class.getResource("/parameters-validation/").getFile());
+        writableOutputDir.setWritable(true);
+
         jobParametersBuilder = new JobParametersBuilder();
-        jobParametersBuilder.addString(JobParametersNames.OUTPUT_DIR_ANNOTATION,
-                                       VepInputGeneratorStepParametersValidatorTest.class
-                                               .getResource("/parameters-validation/").getFile());
+        jobParametersBuilder.addString(JobParametersNames.OUTPUT_DIR_ANNOTATION, writableOutputDir.getCanonicalPath());
         validator.validate(jobParametersBuilder.toJobParameters());
     }
 
     @Test(expected = JobParametersInvalidException.class)
-    public void outputDirAnnotationNotExist() throws JobParametersInvalidException {
+    public void outputDirAnnotationDoesNotExist() throws JobParametersInvalidException {
         jobParametersBuilder = new JobParametersBuilder();
         jobParametersBuilder.addString(JobParametersNames.OUTPUT_DIR_ANNOTATION, "file://path/to/");
+        validator.validate(jobParametersBuilder.toJobParameters());
+    }
+
+    @Test(expected = JobParametersInvalidException.class)
+    public void outputDirAnnotationIsNotWritable() throws JobParametersInvalidException, IOException {
+        File notWritablefile = new File(
+                VepInputGeneratorStepParametersValidatorTest.class.getResource("/parameters-validation/").getFile());
+        notWritablefile.setWritable(false);
+
+        jobParametersBuilder = new JobParametersBuilder();
+        jobParametersBuilder.addString(JobParametersNames.OUTPUT_DIR_ANNOTATION, notWritablefile.getCanonicalPath());
+        validator.validate(jobParametersBuilder.toJobParameters());
+    }
+
+    @Test(expected = JobParametersInvalidException.class)
+    public void outputDirAnnotationIsAFile() throws JobParametersInvalidException, IOException {
+        jobParametersBuilder = new JobParametersBuilder();
+        jobParametersBuilder.addString(JobParametersNames.OUTPUT_DIR_ANNOTATION, OutputDirAnnotationValidatorTest.class.getResource(
+                "/parameters-validation/vepapp.pl").getFile());
         validator.validate(jobParametersBuilder.toJobParameters());
     }
 }

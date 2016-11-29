@@ -32,9 +32,30 @@ public class ConfigRestartabilityAllowValidatorTest {
     }
 
     @Test
-    public void configRestartabilityAllowIsValid() throws JobParametersInvalidException {
+    public void configRestartabilityAllowIsTrue() throws JobParametersInvalidException {
+        jobParametersBuilder = new JobParametersBuilder();
+        jobParametersBuilder.addString(JobParametersNames.CONFIG_RESTARTABILITY_ALLOW, "true");
+        validator.validate(jobParametersBuilder.toJobParameters());
+    }
+
+    @Test
+    public void configRestartabilityAllowIsTrueAllCapital() throws JobParametersInvalidException {
+        jobParametersBuilder = new JobParametersBuilder();
+        jobParametersBuilder.addString(JobParametersNames.CONFIG_RESTARTABILITY_ALLOW, "TRUE");
+        validator.validate(jobParametersBuilder.toJobParameters());
+    }
+
+    @Test
+    public void configRestartabilityAllowIsFalse() throws JobParametersInvalidException {
         jobParametersBuilder = new JobParametersBuilder();
         jobParametersBuilder.addString(JobParametersNames.CONFIG_RESTARTABILITY_ALLOW, "false");
+        validator.validate(jobParametersBuilder.toJobParameters());
+    }
+
+    @Test
+    public void configRestartabilityAllowIsFalseAllCapital() throws JobParametersInvalidException {
+        jobParametersBuilder = new JobParametersBuilder();
+        jobParametersBuilder.addString(JobParametersNames.CONFIG_RESTARTABILITY_ALLOW, "FALSE");
         validator.validate(jobParametersBuilder.toJobParameters());
     }
 
@@ -53,7 +74,7 @@ public class ConfigRestartabilityAllowValidatorTest {
     }
 
     @Test(expected = JobParametersInvalidException.class)
-    public void configRestartabilityAllowIsAspace() throws JobParametersInvalidException {
+    public void configRestartabilityAllowIsWhitespace() throws JobParametersInvalidException {
         jobParametersBuilder = new JobParametersBuilder();
         jobParametersBuilder.addString(JobParametersNames.CONFIG_RESTARTABILITY_ALLOW, " ");
         validator.validate(jobParametersBuilder.toJobParameters());
