@@ -51,7 +51,7 @@ public class VepInputGeneratorStepParametersValidatorTest {
     }
 
     @Test
-    public void optionalConfigRestartabilityAllowMissing() throws JobParametersInvalidException {
+    public void optionalConfigRestartabilityAllowIsMissing() throws JobParametersInvalidException {
         final String DIR = VepAnnotationGeneratorStepParametersValidatorTest.class
                 .getResource("/parameters-validation/").getPath();
 
