@@ -12,7 +12,7 @@ import java.util.Iterator;
 
 /**
  * The unwinding reader takes a reader that returns a collection of elements in each read call and acts as a
- * buffer that pass single elements in each read call.
+ * buffer that pass single elements in each read call. This class can only be used with ItemStreamReaders
  *
  * @param <T>
  */

@@ -10,6 +10,15 @@ import org.springframework.batch.item.UnexpectedInputException;
 import java.util.Collection;
 import java.util.Iterator;
 
+/**
+ * The unwinding reader takes a reader that returns a collection of elements in each read call and acts as a
+ * buffer that pass single elements in each read call. This class can be used with any kind of item reader,
+ * beware that some subtypes of ItemReaders like {@link ItemStreamReader} require special operations before
+ * and after read operations. If your reader extends {@link ItemStreamReader} please use
+ * {@link UnwindingItemStreamReader}
+ *
+ * @param <T>
+ */
 public class UnwindingItemReader <T> implements ItemReader<T> {
 
     private final ItemReader<? extends Collection<? extends T>> windedReader;
