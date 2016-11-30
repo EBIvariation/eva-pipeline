@@ -101,9 +101,10 @@ public class StatisticsMongoWriterTest {
 
         // check vid has an index
         assertEquals("[{ \"v\" : 1 , \"key\" : { \"_id\" : 1} , \"name\" : \"_id_\" , \"ns\" : \"" + databaseName +
-                        ".populationStatistics\"}, { \"v\" : 1 , \"unique\" : true , \"key\" : { \"vid\" : 1 , \"sid\" : 1 , " +
-                        "\"cid\" : 1} , \"name\" : \"vscid\" , \"ns\" : \"" + databaseName + ".populationStatistics\"}]",
-                statsCollection.getIndexInfo().toString());
+                             ".populationStatistics\"}, { \"v\" : 1 , \"unique\" : true , \"key\" : " +
+                             "{ \"chr\" : 1 , \"pos\" : 1 , \"ref\" : 1 , \"alt\" : 1 , \"sid\" : 1 , \"cid\" : 1} , " +
+                             "\"name\" : \"vscid\" , \"ns\" : \"" + databaseName + ".populationStatistics\"}]",
+                     statsCollection.getIndexInfo().toString());
     }
 
     @Test(expected = org.springframework.dao.DuplicateKeyException.class)
@@ -122,6 +123,10 @@ public class StatisticsMongoWriterTest {
         Map<String, Object> map = mapper.mapLine(statsPath, 0);
         PopulationStatistics populationStatistics = new PopulationStatistics(
                 (String) map.get("vid"),
+                (String) map.get("chr"),
+                (String) map.get("start"),
+                (String) map.get("reference"),
+                (String) map.get("alternate"),
                 (String) map.get("cid"),
                 (String) map.get("sid"),
                 (Double) map.get("maf"),
