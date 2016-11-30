@@ -21,6 +21,7 @@ import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.JobParametersInvalidException;
 
 import uk.ac.ebi.eva.pipeline.configuration.JobParametersNames;
+import uk.ac.ebi.eva.test.utils.TestFileUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -39,15 +40,13 @@ public class VepAnnotationGeneratorStepParametersValidatorTest {
 
     @Test
     public void allJobParametersAreValid() throws JobParametersInvalidException, IOException {
-        final File APP_VEP_PATH = new File(VepAnnotationGeneratorStepParametersValidatorTest.class
-                .getResource("/parameters-validation/vepapp.pl").getFile());
-        APP_VEP_PATH.setReadable(true);
-        final File DIR = new File(VepAnnotationGeneratorStepParametersValidatorTest.class
-                .getResource("/parameters-validation/").getFile());
+        final File DIR = TestFileUtils.getResource("/parameters-validation/");
+        final File APP_VEP_PATH = TestFileUtils.getResource("/parameters-validation/vepapp.pl");
+        final File INPUT_FASTA = TestFileUtils.getResource("/parameters-validation/fasta.fa");
+
         DIR.setReadable(true);
         DIR.setWritable(true);
-        final File INPUT_FASTA = new File(VepAnnotationGeneratorStepParametersValidatorTest.class
-                .getResource("/parameters-validation/fasta.fa").getFile());
+        APP_VEP_PATH.setReadable(true);
         INPUT_FASTA.setReadable(true);
 
         JobParametersBuilder jobParametersBuilder = new JobParametersBuilder();

@@ -1,7 +1,6 @@
 package uk.ac.ebi.eva.test.utils;
 
 import org.springframework.util.FileCopyUtils;
-import uk.ac.ebi.eva.utils.FileUtils;
 
 import java.io.*;
 import java.net.URL;
@@ -21,16 +20,16 @@ public abstract class TestFileUtils {
     }
 
     public static void copyResource(String resourcePath, String outputDir) throws IOException {
-        File vcfFile = new File(FileUtils.class.getResource(resourcePath).getFile());
+        File vcfFile = new File(TestFileUtils.class.getResource(resourcePath).getFile());
         FileCopyUtils.copy(vcfFile, new File(outputDir, resourcePath));
     }
 
     public static File getResource(String resourcePath) {
-        return new File(FileUtils.class.getResource(resourcePath).getFile());
+        return new File(TestFileUtils.class.getResource(resourcePath).getFile());
     }
 
     public static URL getResourceUrl(String resourcePath) {
-        return FileUtils.class.getResource(resourcePath);
+        return TestFileUtils.class.getResource(resourcePath);
     }
 
 }
