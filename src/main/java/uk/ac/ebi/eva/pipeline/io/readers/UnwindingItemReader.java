@@ -35,17 +35,17 @@ import java.util.Iterator;
  */
 public class UnwindingItemReader <T> implements ItemReader<T> {
 
-    private final ItemReader<? extends Collection<? extends T>> windedReader;
+    private final ItemReader<? extends Collection<? extends T>> reader;
     private Iterator<? extends T> bufferIterator;
 
-    public UnwindingItemReader(ItemReader<? extends Collection<? extends T>> windedReader) {
-        this.windedReader = windedReader;
+    public UnwindingItemReader(ItemReader<? extends Collection<? extends T>> reader) {
+        this.reader = reader;
     }
 
     @Override
     public T read() throws Exception, UnexpectedInputException, ParseException, NonTransientResourceException {
         while (bufferIterator == null || !bufferIterator.hasNext()) {
-            Collection<? extends T> buffer = windedReader.read();
+            Collection<? extends T> buffer = reader.read();
             if (buffer == null) {
                 return null;
             }
@@ -54,7 +54,7 @@ public class UnwindingItemReader <T> implements ItemReader<T> {
         return bufferIterator.next();
     }
 
-    protected ItemReader<? extends Collection<? extends T>> getWindedReader() {
-        return windedReader;
+    protected ItemReader<? extends Collection<? extends T>> getReader() {
+        return reader;
     }
 }
