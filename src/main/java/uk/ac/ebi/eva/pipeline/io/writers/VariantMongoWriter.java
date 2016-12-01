@@ -39,10 +39,9 @@ import java.util.List;
 public class VariantMongoWriter extends MongoItemWriter<Variant> {
     private static final Logger logger = LoggerFactory.getLogger(VariantMongoWriter.class);
 
-    private BulkWriteOperation bulk;
-    private int currentBulkSize = 0;
-
-    private VariantToMongoDbObjectConverter variantToMongoDbObjectConverter;
+    private final MongoOperations mongoOperations;
+    private final String collection;
+    private final VariantToMongoDbObjectConverter variantToMongoDbObjectConverter;
 
     public VariantMongoWriter(String collection, MongoOperations mongoOperations,
                               VariantToMongoDbObjectConverter variantToMongoDbObjectConverter) {
@@ -50,15 +49,16 @@ public class VariantMongoWriter extends MongoItemWriter<Variant> {
         Assert.hasText(collection, "A collection name is required");
 
         this.variantToMongoDbObjectConverter = variantToMongoDbObjectConverter;
-
-        bulk = mongoOperations.getCollection(collection).initializeUnorderedBulkOperation();
+        this.mongoOperations = mongoOperations;
+        this.collection = collection;
     }
 
     @Override
     protected void doWrite(List<? extends Variant> variants) {
+        BulkWriteOperation bulk = mongoOperations.getCollection(collection).initializeUnorderedBulkOperation();
         for (Variant variant : variants) {
             String id = MongoDBHelper.buildStorageId(variant.getChromosome(), variant.getStart(),
-                    variant.getReference(), variant.getAlternate());
+                                                     variant.getReference(), variant.getAlternate());
 
             // the chromosome and start appear just as shard keys, in an unsharded cluster they wouldn't be needed
             BasicDBObject query = new BasicDBObject("_id", id)
@@ -69,13 +69,12 @@ public class VariantMongoWriter extends MongoItemWriter<Variant> {
 
             bulk.find(query).upsert().updateOne(update);
 
-            currentBulkSize++;
         }
 
-        executeBulk();
+        executeBulk(bulk, variants.size());
     }
 
-    private void executeBulk() {
+    private void executeBulk(BulkWriteOperation bulk, int currentBulkSize) {
         if (currentBulkSize != 0) {
             logger.debug("Execute bulk. BulkSize : " + currentBulkSize);
             bulk.execute();

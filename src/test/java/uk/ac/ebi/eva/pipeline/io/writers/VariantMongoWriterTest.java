@@ -25,12 +25,11 @@ import org.springframework.data.mongodb.core.MongoOperations;
 
 import uk.ac.ebi.eva.pipeline.model.converters.data.VariantToMongoDbObjectConverter;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
-import uk.ac.ebi.eva.utils.MongoConnection;
 import uk.ac.ebi.eva.utils.MongoDBHelper;
 
 import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -65,7 +64,7 @@ public class VariantMongoWriterTest {
     }
 
     @Test
-    public void variantsShouldBeWrittenIntoMongoDb() throws UnknownHostException {
+    public void variantsShouldBeWrittenIntoMongoDb() throws Exception {
         Variant variant = Mockito.mock(Variant.class);
         when(variant.getChromosome()).thenReturn("1").thenReturn("2").thenReturn("3");
         when(variant.getStart()).thenReturn(1).thenReturn(2).thenReturn(3);
@@ -81,7 +80,8 @@ public class VariantMongoWriterTest {
         when(variantToMongoDbObjectConverter.convert(any(Variant.class))).thenReturn(dbObject).thenReturn(dbObject);
 
         variantMongoWriter = new VariantMongoWriter(collectionName, mongoOperations, variantToMongoDbObjectConverter);
-        variantMongoWriter.doWrite(Arrays.asList(variant, variant));
+        variantMongoWriter.write(Collections.singletonList(variant));
+        variantMongoWriter.write(Collections.singletonList(variant));
 
         assertEquals(2, dbCollection.count());
     }
