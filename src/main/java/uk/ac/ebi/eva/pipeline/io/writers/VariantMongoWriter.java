@@ -51,6 +51,7 @@ public class VariantMongoWriter extends MongoItemWriter<Variant> {
         this.variantToMongoDbObjectConverter = variantToMongoDbObjectConverter;
         this.mongoOperations = mongoOperations;
         this.collection = collection;
+        setTemplate(mongoOperations);
     }
 
     @Override

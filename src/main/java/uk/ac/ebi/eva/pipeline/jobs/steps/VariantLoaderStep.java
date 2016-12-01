@@ -15,69 +15,118 @@
  */
 package uk.ac.ebi.eva.pipeline.jobs.steps;
 
-import org.opencb.datastore.core.ObjectMap;
-import org.opencb.opencga.storage.core.StorageManagerFactory;
+import org.opencb.biodata.models.variant.Variant;
+import org.opencb.biodata.models.variant.VariantSource;
 import org.opencb.opencga.storage.core.variant.VariantStorageManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.batch.core.StepContribution;
+import org.springframework.batch.core.Step;
+import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
+import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepScope;
-import org.springframework.batch.core.scope.context.ChunkContext;
-import org.springframework.batch.core.step.tasklet.Tasklet;
-import org.springframework.batch.repeat.RepeatStatus;
+import org.springframework.batch.item.file.FlatFileParseException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.stereotype.Component;
+import org.springframework.data.mongodb.core.MongoOperations;
 
+import uk.ac.ebi.eva.pipeline.io.readers.AggregatedVcfReader;
+import uk.ac.ebi.eva.pipeline.io.readers.UnwindingItemStreamReader;
+import uk.ac.ebi.eva.pipeline.io.readers.VcfHeaderReader;
+import uk.ac.ebi.eva.pipeline.io.writers.VariantMongoWriter;
+import uk.ac.ebi.eva.pipeline.listeners.SkippedItemListener;
+import uk.ac.ebi.eva.pipeline.model.converters.data.VariantToMongoDbObjectConverter;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
-import uk.ac.ebi.eva.utils.FileUtils;
-import uk.ac.ebi.eva.utils.URLHelper;
+import uk.ac.ebi.eva.utils.MongoDBHelper;
 
-import java.net.URI;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.io.File;
 
 /**
- * Tasklet that loads transformed variants into mongoDB
+ * Step that loads transformed variants into mongoDB
  * <p>
  * Input: transformed variants file (variants.json.gz)
  * Output: variants loaded into mongodb
  */
-@Component
-@StepScope
-@Import({JobOptions.class})
-public class VariantLoaderStep implements Tasklet {
-    private static final Logger logger = LoggerFactory.getLogger(VariantLoaderStep.class);
+@Configuration
+@EnableBatchProcessing
+@Import(JobOptions.class)
+public class VariantLoaderStep {
+    public static final String LOAD_VARIANTS = "Load variants";
+
+    @Autowired
+    private StepBuilderFactory stepBuilderFactory;
 
     @Autowired
     private JobOptions jobOptions;
+//<bean id="flatFileItemReader" scope="step"
+//      class="org.springframework.batch.item.file.FlatFileItemReader">
+//    <property name="resource" value="#{jobParameters[input.file.name]}" />
+//
+//</bean>
+//
+//    @Bean
+//    @StepScope
+//    public VariantMongoWriter variantMongoWriter() {
+//        return new VariantMongoWriter()
+//    }
+//
+    @Bean
+    @Qualifier("variantsLoadStep")
+    public Step variantsLoadStep() throws Exception {
+        return stepBuilderFactory.get(LOAD_VARIANTS).<Variant, Variant>chunk(10)
+                .reader(unwindingReader())
+                .writer(variantMongoWriter())
+                .faultTolerant().skipLimit(50).skip(FlatFileParseException.class)
+                .listener(new SkippedItemListener())
+                .build();
+    }
 
-    @Override
-    public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
-        ObjectMap variantOptions = jobOptions.getVariantOptions();
-        ObjectMap pipelineOptions = jobOptions.getPipelineOptions();
+    @Bean
+    @StepScope
+    public VariantMongoWriter variantMongoWriter() throws Exception {
+        MongoOperations mongoOperations = MongoDBHelper
+                .getMongoOperations(jobOptions.getDbName(), jobOptions.getMongoConnection());
 
-        VariantStorageManager variantStorageManager = StorageManagerFactory.getVariantStorageManager();// TODO add mongo
+        return new VariantMongoWriter(jobOptions.getDbCollectionsVariantsName(),
+                                      mongoOperations,
+                                      variantToMongoDbObjectConverter());
+    }
 
-        URI outdirUri = FileUtils.getPathUri(pipelineOptions.getString(JobParametersNames.OUTPUT_DIR),true);
-        URI nextFileUri = URLHelper.createUri(pipelineOptions.getString(JobParametersNames.INPUT_VCF));
+    @Bean
+    @StepScope
+    public UnwindingItemStreamReader<Variant> unwindingReader() throws Exception {
+        return new UnwindingItemStreamReader<>(
+                new AggregatedVcfReader(variantSource(),
+                                                  jobOptions.getPipelineOptions().getString(JobParametersNames.INPUT_VCF)));
+    }
 
-//          URI pedigreeUri = pipelineOptions.getString(JobParametersNames.INPUT_PEDIGREE) != null ? createUri(pipelineOptions.getString(JobParametersNames.INPUT_PEDIGREE)) : null;
-        Path output = Paths.get(outdirUri.getPath());
-        Path input = Paths.get(nextFileUri.getPath());
-        Path outputVariantJsonFile = output.resolve(input.getFileName().toString() + ".variants.json" + pipelineOptions.getString("compressExtension"));
-//          outputFileJsonFile = output.resolve(input.getFileName().toString() + ".file.json" + config.compressExtension);
-        URI transformedVariantsUri = outdirUri.resolve(outputVariantJsonFile.getFileName().toString());
+    @Bean
+    @StepScope
+    public VariantSource variantSource() throws Exception {
+        VariantSource source = (VariantSource) jobOptions.getVariantOptions()
+                                                         .get(VariantStorageManager.VARIANT_SOURCE);
 
-        logger.info("-- PreLoad variants -- {}", nextFileUri);
-        variantStorageManager.preLoad(transformedVariantsUri, outdirUri, variantOptions);
-        logger.info("-- Load variants -- {}", nextFileUri);
-        variantStorageManager.load(transformedVariantsUri, variantOptions);
-//          logger.info("-- PostLoad variants -- {}", nextFileUri);
-//          variantStorageManager.postLoad(transformedVariantsUri, outdirUri, variantOptions);
+        VcfHeaderReader headerReader = new VcfHeaderReader(
+                new File(jobOptions.getPipelineOptions().getString(JobParametersNames.INPUT_VCF)),
+                source.getFileId(),
+                source.getStudyId(),
+                source.getStudyName(),
+                source.getType(),
+                source.getAggregation());
 
-        return RepeatStatus.FINISHED;
+        return headerReader.read();
+    }
+
+    @Bean
+    @StepScope
+    public VariantToMongoDbObjectConverter variantToMongoDbObjectConverter() throws Exception {
+        return new VariantToMongoDbObjectConverter(
+                jobOptions.getVariantOptions().getBoolean(VariantStorageManager.INCLUDE_STATS),
+                variantSource().getSamplesPosition(),
+                jobOptions.getVariantOptions().getBoolean(VariantStorageManager.CALCULATE_STATS),
+                jobOptions.getVariantOptions().getBoolean(VariantStorageManager.INCLUDE_SAMPLES),
+                (VariantStorageManager.IncludeSrc) jobOptions.getVariantOptions().get(VariantStorageManager.INCLUDE_SRC));
     }
 
 }

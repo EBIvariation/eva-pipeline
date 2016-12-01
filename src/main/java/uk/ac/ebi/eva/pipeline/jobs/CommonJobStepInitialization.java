@@ -22,12 +22,8 @@ import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.core.step.builder.TaskletStepBuilder;
 import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.Scope;
 
-import uk.ac.ebi.eva.pipeline.jobs.steps.VariantLoaderStep;
-import uk.ac.ebi.eva.pipeline.jobs.steps.VariantNormalizerStep;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 
@@ -39,7 +35,6 @@ import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 @Import({JobOptions.class})
 public abstract class CommonJobStepInitialization {
 
-    public static final String NORMALIZE_VARIANTS = "Normalize variants";
     public static final String LOAD_VARIANTS = "Load variants";
 
     @Autowired
@@ -67,16 +62,6 @@ public abstract class CommonJobStepInitialization {
         final TaskletStepBuilder taskletBuilder = step1.tasklet(tasklet);
         initStep(taskletBuilder);
         return taskletBuilder.build();
-    }
-
-    @Bean
-    @Scope("prototype")
-    protected Step normalize() {
-        return generateStep(NORMALIZE_VARIANTS, new VariantNormalizerStep(getVariantOptions(), getPipelineOptions()));
-    }
-
-    protected Step load(VariantLoaderStep variantLoaderStep) {
-        return generateStep(LOAD_VARIANTS, variantLoaderStep);
     }
 
     public ObjectMap getPipelineOptions() {

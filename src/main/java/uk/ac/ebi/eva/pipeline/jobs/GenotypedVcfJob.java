@@ -19,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecutionListener;
+import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.job.builder.FlowBuilder;
@@ -69,7 +70,8 @@ public class GenotypedVcfJob extends CommonJobStepInitialization{
     @Autowired
     private Flow optionalStatisticsFlow;
     @Autowired
-    private VariantLoaderStep variantLoaderStep;
+    @Qualifier("variantsLoadStep")
+    private Step variantLoaderStep;
 
     @Bean
     @Qualifier("genotypedJob")
@@ -87,8 +89,7 @@ public class GenotypedVcfJob extends CommonJobStepInitialization{
                 .build();
 
         FlowJobBuilder builder = jobBuilder
-                .flow(normalize())
-                .next(load(variantLoaderStep))
+                .flow(variantLoaderStep)
                 .next(parallelStatisticsAndAnnotation)
                 .end();
 

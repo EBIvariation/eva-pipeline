@@ -19,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecutionListener;
+import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.job.builder.FlowJobBuilder;
@@ -62,8 +63,10 @@ public class AggregatedVcfJob extends CommonJobStepInitialization {
     private JobBuilderFactory jobBuilderFactory;
     @Autowired
     private Flow annotationFlowOptional;
+
     @Autowired
-    private VariantLoaderStep variantLoaderStep;
+    @Qualifier("variantsLoadStep")
+    private Step variantLoaderStep;
 
     @Bean
     @Qualifier("aggregatedJob")
@@ -76,8 +79,7 @@ public class AggregatedVcfJob extends CommonJobStepInitialization {
                 .listener(aggregatedJobListener());
 
         FlowJobBuilder builder = jobBuilder
-                .flow(normalize())
-                .next(load(variantLoaderStep))
+                .flow(variantLoaderStep)
                 .next(annotationFlowOptional)
                 .end();
 

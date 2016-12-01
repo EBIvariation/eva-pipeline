@@ -94,7 +94,6 @@ public class GenotypedVcfJobWorkflowTest {
             parallelStepsNameToStepExecution.put(steps.get(i).getStepName(), steps.get(i));
         }
 
-        assertEquals(GenotypedVcfJob.NORMALIZE_VARIANTS, transformStep.getStepName());
         assertEquals(GenotypedVcfJob.LOAD_VARIANTS, loadStep.getStepName());
 
         Set<String> parallelStepNamesExecuted = parallelStepsNameToStepExecution.keySet();
@@ -138,7 +137,6 @@ public class GenotypedVcfJobWorkflowTest {
         StepExecution transformStep = steps.get(0);
         StepExecution loadStep = steps.get(1);
 
-        assertEquals(GenotypedVcfJob.NORMALIZE_VARIANTS, transformStep.getStepName());
         assertEquals(GenotypedVcfJob.LOAD_VARIANTS, loadStep.getStepName());
 
         assertTrue(transformStep.getEndTime().before(loadStep.getStartTime()));
@@ -163,7 +161,6 @@ public class GenotypedVcfJobWorkflowTest {
             parallelStepsNameToStepExecution.put(steps.get(i).getStepName(), steps.get(i));
         }
 
-        assertEquals(GenotypedVcfJob.NORMALIZE_VARIANTS, transformStep.getStepName());
         assertEquals(GenotypedVcfJob.LOAD_VARIANTS, loadStep.getStepName());
 
         Set<String> parallelStepNamesExecuted = parallelStepsNameToStepExecution.keySet();
@@ -204,7 +201,6 @@ public class GenotypedVcfJobWorkflowTest {
             parallelStepsNameToStepExecution.put(steps.get(i).getStepName(), steps.get(i));
         }
 
-        assertEquals(GenotypedVcfJob.NORMALIZE_VARIANTS, transformStep.getStepName());
         assertEquals(GenotypedVcfJob.LOAD_VARIANTS, loadStep.getStepName());
 
         Set<String> parallelStepNamesExecuted = parallelStepsNameToStepExecution.keySet();

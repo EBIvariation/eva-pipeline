@@ -90,15 +90,11 @@ public class AggregatedVcfJobTest {
         assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());
 
         // check execution flow
-        Assert.assertEquals(2, jobExecution.getStepExecutions().size());
+        Assert.assertEquals(1, jobExecution.getStepExecutions().size());
         List<StepExecution> steps = new ArrayList<>(jobExecution.getStepExecutions());
-        StepExecution transformStep = steps.get(0);
-        StepExecution loadStep = steps.get(1);
+        StepExecution load = steps.get(0);
 
-        Assert.assertEquals(AggregatedVcfJob.NORMALIZE_VARIANTS, transformStep.getStepName());
-        Assert.assertEquals(AggregatedVcfJob.LOAD_VARIANTS, loadStep.getStepName());
-
-        assertTrue(transformStep.getEndTime().before(loadStep.getStartTime()));
+        Assert.assertEquals(AggregatedVcfJob.LOAD_VARIANTS, load.getStepName());
 
         // check transformed file
         String outputFilename = getTransformedOutputPath(Paths.get(input).getFileName(), compressExtension, outputDir);
