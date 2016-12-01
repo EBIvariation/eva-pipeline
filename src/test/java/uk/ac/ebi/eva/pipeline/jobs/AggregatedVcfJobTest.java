@@ -44,13 +44,12 @@ import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
 
 import java.io.FileInputStream;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
 
-import static org.junit.Assert.*;
-import static uk.ac.ebi.eva.test.utils.JobTestUtils.getTransformedOutputPath;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 /**
  * Test for {@link AggregatedVcfJob}
@@ -73,11 +72,15 @@ public class AggregatedVcfJobTest {
     private JobOptions jobOptions;
 
     private String input;
+
     private String outputDir;
+
     private String compressExtension;
+
     private String dbName;
 
-    private static String opencgaHome = System.getenv("OPENCGA_HOME") != null ? System.getenv("OPENCGA_HOME") : "/opt/opencga";
+    private static String opencgaHome = System.getenv("OPENCGA_HOME") != null ? System
+            .getenv("OPENCGA_HOME") : "/opt/opencga";
 
     @Test
     public void aggregatedTransformAndLoadShouldBeExecuted() throws Exception {
@@ -96,17 +99,13 @@ public class AggregatedVcfJobTest {
 
         Assert.assertEquals(AggregatedVcfJob.LOAD_VARIANTS, load.getStepName());
 
-        // check transformed file
-        String outputFilename = getTransformedOutputPath(Paths.get(input).getFileName(), compressExtension, outputDir);
-
-        long lines = JobTestUtils.getLines(new GZIPInputStream(new FileInputStream(outputFilename)));
-        assertEquals(156, lines);
-
-        // check ((documents in DB) == (lines in transformed file))
+        // check ((documents in DB) == (lines in file))
         VariantStorageManager variantStorageManager = StorageManagerFactory.getVariantStorageManager();
         VariantDBAdaptor variantDBAdaptor = variantStorageManager.getDBAdaptor(dbName, null);
         VariantDBIterator iterator = variantDBAdaptor.iterator(new QueryOptions());
 
+        String file = jobOptions.getPipelineOptions().getString(JobParametersNames.INPUT_VCF);
+        long lines = JobTestUtils.getLines(new GZIPInputStream(new FileInputStream(file)));
         Assert.assertEquals(JobTestUtils.count(iterator), lines);
 
         // check that stats are loaded properly
@@ -115,7 +114,7 @@ public class AggregatedVcfJobTest {
     }
 
     @Test
-    public void aggregationNoneOptionShouldNotLoadStats() throws Exception {
+    public void aggregationNoneIsNotAllowed() throws Exception {
         mongoRule.getTemporaryDatabase(dbName);
         VariantSource source =
                 (VariantSource) jobOptions.getVariantOptions().get(VariantStorageManager.VARIANT_SOURCE);
@@ -132,25 +131,8 @@ public class AggregatedVcfJobTest {
 
         JobExecution jobExecution = jobLauncherTestUtils.launchJob();
 
-        assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
-        assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());
-
-        // check transformed file
-        String outputFilename = getTransformedOutputPath(Paths.get(input).getFileName(), compressExtension, outputDir);
-
-        long lines = JobTestUtils.getLines(new GZIPInputStream(new FileInputStream(outputFilename)));
-        assertEquals(156, lines);
-
-        // check ((documents in DB) == (lines in transformed file))
-        VariantStorageManager variantStorageManager = StorageManagerFactory.getVariantStorageManager();
-        VariantDBAdaptor variantDBAdaptor = variantStorageManager.getDBAdaptor(dbName, null);
-        VariantDBIterator iterator = variantDBAdaptor.iterator(new QueryOptions());
-
-        Assert.assertEquals(JobTestUtils.count(iterator), lines);
-
-        // check that stats are NOT loaded
-        assertTrue(variantDBAdaptor.iterator(
-                new QueryOptions()).next().getSourceEntries().values().iterator().next().getCohortStats().isEmpty());
+        assertEquals(ExitStatus.FAILED, jobExecution.getExitStatus());
+        assertEquals(BatchStatus.FAILED, jobExecution.getStatus());
     }
 
 

@@ -21,6 +21,7 @@ import org.opencb.biodata.models.variant.VariantSource;
 import org.opencb.biodata.models.variant.VariantVcfEVSFactory;
 import org.opencb.biodata.models.variant.VariantVcfExacFactory;
 import org.opencb.biodata.models.variant.VariantVcfFactory;
+import org.spockframework.util.Assert;
 import org.springframework.batch.item.file.LineMapper;
 
 import java.util.List;
@@ -33,7 +34,7 @@ import java.util.List;
 public class AggregatedVcfLineMapper implements LineMapper<List<Variant>> {
     private final VariantSource source;
 
-    private final VariantVcfFactory factory;
+    private VariantVcfFactory factory;
 
     public AggregatedVcfLineMapper(VariantSource source) {
         this.source = source;
@@ -44,15 +45,21 @@ public class AggregatedVcfLineMapper implements LineMapper<List<Variant>> {
             case EXAC:
                 factory = new VariantVcfExacFactory();
                 break;
-            default:
             case BASIC:
                 factory = new VariantAggregatedVcfFactory();
                 break;
+            case NONE:
+                factory = null;
+                throw new IllegalArgumentException(
+                        this.getClass().getSimpleName() + " should not take non-aggregated " +
+                                "VCFs, but the VariantSource is marked as Aggregation.NONE");
         }
     }
 
     @Override
     public List<Variant> mapLine(String line, int lineNumber) throws Exception {
+        Assert.notNull(factory, "It is not allowed to use " + this.getClass().getSimpleName()
+                + " with non-aggregated VCFs (hint: do not set VariantSource.Aggregation to NONE");
         return factory.create(source, line);
     }
 }

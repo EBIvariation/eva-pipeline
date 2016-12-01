@@ -62,8 +62,7 @@ import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResource;
 @ContextConfiguration(classes = {GenotypedVcfJob.class, JobOptions.class, GenotypedVcfConfiguration.class, JobLauncherTestUtils.class})
 public class VariantLoaderStepTest {
 
-    private static final String TRANSFORMED_VCF_VARIANTS_FILE = "/small20.vcf.gz.variants.json.gz";
-    private static final String TRANSFORMED_VARIANTS_FILE = "/small20.vcf.gz.file.json.gz";
+    private static final int EXPECTED_VARIANTS = 300;
 
     @Rule
     public PipelineTemporaryFolderRule temporaryFolderRule = new PipelineTemporaryFolderRule();
@@ -98,10 +97,6 @@ public class VariantLoaderStepTest {
                 VariantStudy.StudyType.COLLECTION,
                 VariantSource.Aggregation.NONE));
 
-        //and a variants transform step already executed
-        copyResource(TRANSFORMED_VCF_VARIANTS_FILE, outputDir);
-        copyResource(TRANSFORMED_VARIANTS_FILE, outputDir);
-
         // When the execute method in variantsLoad is executed
         JobExecution jobExecution = jobLauncherTestUtils.launchStep(GenotypedVcfJob.LOAD_VARIANTS);
 
@@ -109,46 +104,19 @@ public class VariantLoaderStepTest {
         assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
         assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());
 
-        // And the number of documents in db should be the same number of line of the vcf transformed file
+        // And the number of documents in db should be the same number of line of the vcf file
         VariantStorageManager variantStorageManager = StorageManagerFactory.getVariantStorageManager();
         VariantDBAdaptor variantDBAdaptor = variantStorageManager.getDBAdaptor(databaseName, null);
         VariantDBIterator iterator = variantDBAdaptor.iterator(new QueryOptions());
-        File transformedVcfVariantsFile = getResource(TRANSFORMED_VCF_VARIANTS_FILE);
-        long lines = getLines(new GZIPInputStream(new FileInputStream(transformedVcfVariantsFile)));
 
-        assertEquals(count(iterator), lines);
-    }
-
-    @Test
-    public void loaderStepShouldFailBecauseOpenCGAHomeIsWrong() throws JobExecutionException {
-        String inputFile = getResource(input).getAbsolutePath();
-
-        Config.setOpenCGAHome("");
-
-        jobOptions.getPipelineOptions().put(JobParametersNames.INPUT_VCF, inputFile);
-        jobOptions.getVariantOptions().put(VariantStorageManager.DB_NAME, mongoRule.getRandomTemporaryDatabaseName());
-
-        VariantSource source = (VariantSource) jobOptions.getVariantOptions().get(VariantStorageManager.VARIANT_SOURCE);
-
-        jobOptions.getVariantOptions().put(VariantStorageManager.VARIANT_SOURCE, new VariantSource(
-                input,
-                source.getFileId(),
-                source.getStudyId(),
-                source.getStudyName(),
-                source.getType(),
-                source.getAggregation()));
-
-        JobExecution jobExecution = jobLauncherTestUtils.launchStep(GenotypedVcfJob.LOAD_VARIANTS);
-
-        assertEquals(inputFile, jobOptions.getPipelineOptions().getString(JobParametersNames.INPUT_VCF));
-        assertEquals(ExitStatus.FAILED.getExitCode(), jobExecution.getExitStatus().getExitCode());
+        assertEquals(EXPECTED_VARIANTS, count(iterator));
     }
 
     @Before
     public void setUp() throws Exception {
-        jobOptions.loadArgs();
 
-        input = jobOptions.getPipelineOptions().getString(JobParametersNames.INPUT_VCF);
+        input = getResource(jobOptions.getPipelineOptions().getString(JobParametersNames.INPUT_VCF)).getAbsolutePath();
+        jobOptions.getPipelineOptions().put(JobParametersNames.INPUT_VCF, input);
     }
 
 }

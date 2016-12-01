@@ -59,23 +59,20 @@ public class VariantLoaderStep {
 
     @Autowired
     private JobOptions jobOptions;
-//<bean id="flatFileItemReader" scope="step"
-//      class="org.springframework.batch.item.file.FlatFileItemReader">
-//    <property name="resource" value="#{jobParameters[input.file.name]}" />
-//
-//</bean>
-//
-//    @Bean
-//    @StepScope
-//    public VariantMongoWriter variantMongoWriter() {
-//        return new VariantMongoWriter()
-//    }
-//
+
+    @Autowired
+    VariantSource variantSource;
+
+    @Autowired
+    UnwindingItemStreamReader<Variant> unwindingReader;
+
+
     @Bean
     @Qualifier("variantsLoadStep")
+
     public Step variantsLoadStep() throws Exception {
         return stepBuilderFactory.get(LOAD_VARIANTS).<Variant, Variant>chunk(10)
-                .reader(unwindingReader())
+                .reader(unwindingReader)
                 .writer(variantMongoWriter())
                 .faultTolerant().skipLimit(50).skip(FlatFileParseException.class)
                 .listener(new SkippedItemListener())
@@ -95,38 +92,14 @@ public class VariantLoaderStep {
 
     @Bean
     @StepScope
-    public UnwindingItemStreamReader<Variant> unwindingReader() throws Exception {
-        return new UnwindingItemStreamReader<>(
-                new AggregatedVcfReader(variantSource(),
-                                                  jobOptions.getPipelineOptions().getString(JobParametersNames.INPUT_VCF)));
-    }
-
-    @Bean
-    @StepScope
-    public VariantSource variantSource() throws Exception {
-        VariantSource source = (VariantSource) jobOptions.getVariantOptions()
-                                                         .get(VariantStorageManager.VARIANT_SOURCE);
-
-        VcfHeaderReader headerReader = new VcfHeaderReader(
-                new File(jobOptions.getPipelineOptions().getString(JobParametersNames.INPUT_VCF)),
-                source.getFileId(),
-                source.getStudyId(),
-                source.getStudyName(),
-                source.getType(),
-                source.getAggregation());
-
-        return headerReader.read();
-    }
-
-    @Bean
-    @StepScope
     public VariantToMongoDbObjectConverter variantToMongoDbObjectConverter() throws Exception {
         return new VariantToMongoDbObjectConverter(
                 jobOptions.getVariantOptions().getBoolean(VariantStorageManager.INCLUDE_STATS),
-                variantSource().getSamplesPosition(),
+                variantSource.getSamplesPosition(),
                 jobOptions.getVariantOptions().getBoolean(VariantStorageManager.CALCULATE_STATS),
                 jobOptions.getVariantOptions().getBoolean(VariantStorageManager.INCLUDE_SAMPLES),
-                (VariantStorageManager.IncludeSrc) jobOptions.getVariantOptions().get(VariantStorageManager.INCLUDE_SRC));
+                (VariantStorageManager.IncludeSrc) jobOptions.getVariantOptions()
+                                                             .get(VariantStorageManager.INCLUDE_SRC));
     }
 
 }

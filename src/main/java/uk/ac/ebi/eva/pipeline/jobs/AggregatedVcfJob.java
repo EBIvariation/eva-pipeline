@@ -15,6 +15,9 @@
  */
 package uk.ac.ebi.eva.pipeline.jobs;
 
+import org.opencb.biodata.models.variant.Variant;
+import org.opencb.biodata.models.variant.VariantSource;
+import org.opencb.opencga.storage.core.variant.VariantStorageManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.Job;
@@ -22,6 +25,7 @@ import org.springframework.batch.core.JobExecutionListener;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
+import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.job.builder.FlowJobBuilder;
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.job.flow.Flow;
@@ -32,9 +36,17 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
+
+import uk.ac.ebi.eva.pipeline.io.readers.AggregatedVcfReader;
+import uk.ac.ebi.eva.pipeline.io.readers.UnwindingItemStreamReader;
+import uk.ac.ebi.eva.pipeline.io.readers.VcfHeaderReader;
 import uk.ac.ebi.eva.pipeline.jobs.flows.AnnotationFlow;
 import uk.ac.ebi.eva.pipeline.jobs.steps.VariantLoaderStep;
 import uk.ac.ebi.eva.pipeline.listeners.VariantOptionsConfigurerListener;
+import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
+import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
+
+import java.io.File;
 
 /**
  * Complete pipeline workflow for aggregated VCF.
@@ -68,6 +80,9 @@ public class AggregatedVcfJob extends CommonJobStepInitialization {
     @Qualifier("variantsLoadStep")
     private Step variantLoaderStep;
 
+    @Autowired
+    private JobOptions jobOptions;
+
     @Bean
     @Qualifier("aggregatedJob")
     public Job aggregatedJob() {
@@ -93,5 +108,30 @@ public class AggregatedVcfJob extends CommonJobStepInitialization {
                 COMPRESS_GENOTYPES,
                 CALCULATE_STATS,
                 INCLUDE_STATS);
+    }
+
+    @Bean
+    @StepScope
+    public UnwindingItemStreamReader<Variant> unwindingReader() throws Exception {
+        return new UnwindingItemStreamReader<>(
+                new AggregatedVcfReader(variantSource(),
+                                        jobOptions.getPipelineOptions().getString(JobParametersNames.INPUT_VCF)));
+    }
+
+    @Bean
+    @StepScope
+    public VariantSource variantSource() throws Exception {
+        VariantSource source = (VariantSource) jobOptions.getVariantOptions()
+                                                         .get(VariantStorageManager.VARIANT_SOURCE);
+
+        VcfHeaderReader headerReader = new VcfHeaderReader(
+                new File(jobOptions.getPipelineOptions().getString(JobParametersNames.INPUT_VCF)),
+                source.getFileId(),
+                source.getStudyId(),
+                source.getStudyName(),
+                source.getType(),
+                source.getAggregation());
+
+        return headerReader.read();
     }
 }

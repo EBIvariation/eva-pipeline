@@ -44,7 +44,7 @@ public class AggregatedVcfReaderTest {
 
         VcfHeaderReader headerReader = new VcfHeaderReader(input, FILE_ID, STUDY_ID, STUDY_NAME,
                                                            VariantStudy.StudyType.COLLECTION,
-                                                           VariantSource.Aggregation.NONE);
+                                                           VariantSource.Aggregation.BASIC);
         VariantSource source = headerReader.read();
 
         AggregatedVcfReader vcfReader = new AggregatedVcfReader(source, input);
@@ -65,7 +65,7 @@ public class AggregatedVcfReaderTest {
 
         VcfHeaderReader headerReader = new VcfHeaderReader(inputFile, FILE_ID, STUDY_ID, STUDY_NAME,
                                                            VariantStudy.StudyType.COLLECTION,
-                                                           VariantSource.Aggregation.NONE);
+                                                           VariantSource.Aggregation.BASIC);
         VariantSource source = headerReader.read();
 
         AggregatedVcfReader vcfReader = new AggregatedVcfReader(source, tempFile);
