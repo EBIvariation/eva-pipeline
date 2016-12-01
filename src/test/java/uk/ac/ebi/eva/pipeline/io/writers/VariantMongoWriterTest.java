@@ -65,7 +65,7 @@ public class VariantMongoWriterTest {
     }
 
     @Test
-    public void variantsShouldBeWrittenIntoMongoDb() throws UnknownHostException {
+    public void variantsShouldBeWrittenIntoMongoDb() throws Exception {
         Variant variant = Mockito.mock(Variant.class);
         when(variant.getChromosome()).thenReturn("1").thenReturn("2").thenReturn("3");
         when(variant.getStart()).thenReturn(1).thenReturn(2).thenReturn(3);
@@ -81,7 +81,8 @@ public class VariantMongoWriterTest {
         when(variantToMongoDbObjectConverter.convert(any(Variant.class))).thenReturn(dbObject).thenReturn(dbObject);
 
         variantMongoWriter = new VariantMongoWriter(collectionName, mongoOperations, variantToMongoDbObjectConverter);
-        variantMongoWriter.doWrite(Arrays.asList(variant, variant));
+        variantMongoWriter.write(Arrays.asList(variant));
+        variantMongoWriter.write(Arrays.asList(variant));
 
         assertEquals(2, dbCollection.count());
     }
