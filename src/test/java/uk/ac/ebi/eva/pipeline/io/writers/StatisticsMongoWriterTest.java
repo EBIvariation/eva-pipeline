@@ -82,6 +82,10 @@ public class StatisticsMongoWriterTest {
             assertNotNull(next.get("cid"));
             assertNotNull(next.get("sid"));
             assertNotNull(next.get("vid"));
+            assertNotNull(next.get("chr"));
+            assertNotNull(next.get("start"));
+            assertNotNull(next.get("ref"));
+            assertNotNull(next.get("alt"));
             assertNotNull(next.get("maf"));
             assertNotNull(next.get("numGt"));
         }
@@ -99,10 +103,10 @@ public class StatisticsMongoWriterTest {
         // do the checks
         DBCollection statsCollection = mongoRule.getCollection(databaseName, jobOptions.getDbCollectionsStatsName());
 
-        // check vid has an index
+        // check there is an index in chr + start + ref + alt + sid + cid
         assertEquals("[{ \"v\" : 1 , \"key\" : { \"_id\" : 1} , \"name\" : \"_id_\" , \"ns\" : \"" + databaseName +
                              ".populationStatistics\"}, { \"v\" : 1 , \"unique\" : true , \"key\" : " +
-                             "{ \"chr\" : 1 , \"pos\" : 1 , \"ref\" : 1 , \"alt\" : 1 , \"sid\" : 1 , \"cid\" : 1} , " +
+                             "{ \"chr\" : 1 , \"start\" : 1 , \"ref\" : 1 , \"alt\" : 1 , \"sid\" : 1 , \"cid\" : 1} , " +
                              "\"name\" : \"vscid\" , \"ns\" : \"" + databaseName + ".populationStatistics\"}]",
                      statsCollection.getIndexInfo().toString());
     }
@@ -124,9 +128,9 @@ public class StatisticsMongoWriterTest {
         PopulationStatistics populationStatistics = new PopulationStatistics(
                 (String) map.get("vid"),
                 (String) map.get("chr"),
-                (String) map.get("start"),
-                (String) map.get("reference"),
-                (String) map.get("alternate"),
+                (Integer) map.get("start"),
+                (String) map.get("ref"),
+                (String) map.get("alt"),
                 (String) map.get("cid"),
                 (String) map.get("sid"),
                 (Double) map.get("maf"),

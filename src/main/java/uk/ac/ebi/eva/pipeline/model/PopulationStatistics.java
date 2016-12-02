@@ -28,13 +28,13 @@ import java.util.Map;
  */
 @Document
 @CompoundIndexes({
-    @CompoundIndex(name = "vscid", def = "{'chr': 1, 'pos': 1, 'ref': 1, 'alt': 1, 'sid': 1, 'cid': 1}", unique = true)
+    @CompoundIndex(name = "vscid", def = "{'chr': 1, 'start': 1, 'ref': 1, 'alt': 1, 'sid': 1, 'cid': 1}", unique = true)
 })
 public class PopulationStatistics {
 
     @Field(value = "vid") private String variantId;
     @Field(value = "chr") private String chromosome;
-    @Field(value = "start") private String start;
+    @Field(value = "start") private int start;
     @Field(value = "ref") private String reference;
     @Field(value = "alt") private String alternate;
 
@@ -52,7 +52,7 @@ public class PopulationStatistics {
     @PersistenceConstructor
     public PopulationStatistics(String variantId,
                                 String chromosome,
-                                String start,
+                                int start,
                                 String reference,
                                 String alternate,
                                 String cohortId,
@@ -103,11 +103,11 @@ public class PopulationStatistics {
         this.chromosome = chromosome;
     }
 
-    public String getPosition() {
+    public int getStart() {
         return start;
     }
 
-    void setStart(String start) {
+    void setStart(int start) {
         this.start = start;
     }
 
