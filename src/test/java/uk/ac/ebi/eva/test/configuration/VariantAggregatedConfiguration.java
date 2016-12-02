@@ -13,8 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-package uk.ac.ebi.eva.pipeline.configuration;
+package uk.ac.ebi.eva.test.configuration;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,15 +21,13 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 
 /**
- * Configuration init for GenotypedVcfJob, from a workflow perspective
+ * Configuration init for VariantAggregatedConfiguration Job
  */
 @Configuration
-@PropertySource({"genotyped-vcf-workflow.properties"})
-public class GenotypedVcfWorkflowConfiguration {
-
+@PropertySource({"variant-aggregated.properties"})
+public class VariantAggregatedConfiguration {
     @Bean
     private static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
         return new PropertySourcesPlaceholderConfigurer();
     }
-
 }

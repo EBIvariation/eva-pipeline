@@ -58,7 +58,7 @@ public class VariantToMongoDbObjectConverter implements Converter<Variant, DBObj
     @Override
     public DBObject convert(Variant variant) {
         Assert.notNull(variant, "Variant should not be null. Please provide a valid Variant object");
-        logger.debug("Convert variant {} into mongo object", variant);
+        logger.trace("Convert variant {} into mongo object", variant);
 
         variant.setAnnotation(null);
 
