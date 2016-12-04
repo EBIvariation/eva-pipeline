@@ -15,13 +15,28 @@
  */
 package uk.ac.ebi.eva.pipeline.jobs.steps;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.zip.GZIPInputStream;
+
 import org.opencb.biodata.models.variant.VariantSource;
+import org.opencb.biodata.models.variant.stats.VariantSourceStats;
+import org.opencb.biodata.models.variant.stats.VariantStats;
 import org.opencb.datastore.core.ObjectMap;
 import org.opencb.datastore.core.QueryOptions;
+import org.opencb.datastore.core.QueryResult;
 import org.opencb.opencga.storage.core.StorageManagerFactory;
 import org.opencb.opencga.storage.core.variant.VariantStorageManager;
 import org.opencb.opencga.storage.core.variant.adaptors.VariantDBAdaptor;
+import org.opencb.opencga.storage.core.variant.io.json.VariantStatsJsonMixin;
 import org.opencb.opencga.storage.core.variant.stats.VariantStatisticsManager;
+import org.opencb.opencga.storage.core.variant.stats.VariantStatsWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.StepContribution;
@@ -33,11 +48,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
 import uk.ac.ebi.eva.pipeline.configuration.JobParametersNames;
 import uk.ac.ebi.eva.utils.URLHelper;
-
-import java.net.URI;
 
 /**
  * Tasklet that loads statistics into mongoDB.
@@ -83,9 +100,23 @@ import java.net.URI;
 public class PopulationStatisticsLoaderStep implements Tasklet {
     private static final Logger logger = LoggerFactory.getLogger(PopulationStatisticsLoaderStep.class);
 
+    private static final String VARIANT_STATS_SUFFIX = ".variants.stats.json.gz";
+
+    private static final String SOURCE_STATS_SUFFIX = ".source.stats.json.gz";
+
     @Autowired
     private JobOptions jobOptions;
+    
+    private JsonFactory jsonFactory;
+    
+    private ObjectMapper jsonObjectMapper;
 
+    public PopulationStatisticsLoaderStep() {
+        jsonFactory = new JsonFactory();
+        jsonObjectMapper = new ObjectMapper(jsonFactory);
+        jsonObjectMapper.addMixIn(VariantStats.class, VariantStatsJsonMixin.class);
+    }
+    
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
         ObjectMap variantOptions = jobOptions.getVariantOptions();
@@ -95,15 +126,73 @@ public class PopulationStatisticsLoaderStep implements Tasklet {
         VariantSource variantSource = variantOptions.get(VariantStorageManager.VARIANT_SOURCE, VariantSource.class);
         VariantDBAdaptor dbAdaptor = variantStorageManager.getDBAdaptor(
                 variantOptions.getString(VariantStorageManager.DB_NAME), variantOptions);
+
         URI outdirUri = URLHelper.createUri(pipelineOptions.getString(JobParametersNames.OUTPUT_DIR_STATISTICS));
         URI statsOutputUri = outdirUri.resolve(VariantStorageManager.buildFilename(variantSource));
 
-        VariantStatisticsManager variantStatisticsManager = new VariantStatisticsManager();
         QueryOptions statsOptions = new QueryOptions(variantOptions);
-
+        
         // actual stats load
-        variantStatisticsManager.loadStats(dbAdaptor, statsOutputUri, statsOptions);
+        loadVariantStats(dbAdaptor, statsOutputUri, statsOptions);
+        loadSourceStats(dbAdaptor, statsOutputUri);
 
         return RepeatStatus.FINISHED;
     }
+
+    private void loadVariantStats(VariantDBAdaptor variantDBAdaptor, URI uri, QueryOptions options) throws IOException {
+        // Open input stream
+        Path variantInput = Paths.get(uri.getPath() + VARIANT_STATS_SUFFIX);
+        InputStream variantInputStream = new GZIPInputStream(new FileInputStream(variantInput.toFile()));
+
+        // Initialize JSON parser
+        JsonParser parser = jsonFactory.createParser(variantInputStream);
+
+        int batchSize = 1000;
+        int writes = 0;
+        int variantsNumber = 0;
+        List<VariantStatsWrapper> statsBatch = new ArrayList<>(batchSize);
+
+        // Store variant statistics in Mongo
+        while (parser.nextToken() != null) {
+            variantsNumber++;
+            statsBatch.add(parser.readValueAs(VariantStatsWrapper.class));
+
+            if (statsBatch.size() == batchSize) {
+                QueryResult writeResult = variantDBAdaptor.updateStats(statsBatch, options);
+                writes += writeResult.getNumResults();
+                logger.info("stats loaded up to position {}:{}", 
+                		statsBatch.get(statsBatch.size()-1).getChromosome(), 
+                		statsBatch.get(statsBatch.size()-1).getPosition());
+                statsBatch.clear();
+            }
+        }
+
+        if (!statsBatch.isEmpty()) {
+            QueryResult writeResult = variantDBAdaptor.updateStats(statsBatch, options);
+            writes += writeResult.getNumResults();
+            logger.info("stats loaded up to position {}:{}", 
+            		statsBatch.get(statsBatch.size()-1).getChromosome(), 
+            		statsBatch.get(statsBatch.size()-1).getPosition());
+            statsBatch.clear();
+        }
+
+        if (writes < variantsNumber) {
+            logger.warn("provided statistics of {} variants, but only {} were updated", variantsNumber, writes);
+            logger.info("note: maybe those variants didn't had the proper study? maybe the new and the old stats were the same?");
+        }
+    }
+
+    private void loadSourceStats(VariantDBAdaptor variantDBAdaptor, URI uri) throws IOException {
+        // Open input stream
+        Path sourceInput = Paths.get(uri.getPath() + SOURCE_STATS_SUFFIX);
+        InputStream sourceInputStream = new GZIPInputStream(new FileInputStream(sourceInput.toFile()));
+
+        // Read from JSON file
+        JsonParser sourceParser = jsonFactory.createParser(sourceInputStream);
+        VariantSourceStats variantSourceStats = sourceParser.readValueAs(VariantSourceStats.class);
+
+        // Store source statistics in Mongo
+        variantDBAdaptor.getVariantSourceDBAdaptor().updateSourceStats(variantSourceStats, null);
+    }
+
 }
