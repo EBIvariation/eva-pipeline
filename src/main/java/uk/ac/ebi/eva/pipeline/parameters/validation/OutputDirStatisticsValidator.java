@@ -21,16 +21,19 @@ import org.springframework.batch.core.JobParametersValidator;
 
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 
+
 /**
- * Checks that the database name has been filled in.
+ * Checks that the output directory for statistics is a directory and it is writable
  *
- * @throws JobParametersInvalidException If the database name is null or empty
+ * @throws JobParametersInvalidException If the output directory is not a directory
  */
-public class DbNameValidator implements JobParametersValidator {
+public class OutputDirStatisticsValidator implements JobParametersValidator {
 
     @Override
     public void validate(JobParameters parameters) throws JobParametersInvalidException {
-        ParametersValidatorUtil.checkIsNotNullOrEmptyString(
-        		parameters.getString(JobParametersNames.DB_NAME), JobParametersNames.DB_NAME);
+        ParametersValidatorUtil.checkDirectoryExists(parameters.getString(JobParametersNames.OUTPUT_DIR_STATISTICS),
+                                                     JobParametersNames.OUTPUT_DIR_STATISTICS);
+        ParametersValidatorUtil.checkFileIsWritable(parameters.getString(JobParametersNames.OUTPUT_DIR_STATISTICS),
+                                                     JobParametersNames.OUTPUT_DIR_STATISTICS);
     }
 }
