@@ -304,7 +304,7 @@ public class VariantVcfFactory {
             }
 
             // Add sample to the variant entry in the source file
-            variant.getSourceEntry(source.getFileId(), source.getStudyId()).addSampleData(samples.get(i - 9), map);
+            variant.getSourceEntry(source.getFileId(), source.getStudyId()).addSampleData(i - 9, map);
         }
     }
 
@@ -385,8 +385,8 @@ public class VariantVcfFactory {
                         break;
                     case "DP":
                         int dp = 0;
-                        for (String sampleName : file.getSampleNames()) {
-                            String sampleDp = file.getSampleData(sampleName, "DP");
+                        for (Map<String, String> sampleData : file.getSamplesData()) {
+                            String sampleDp = sampleData.get("DP");
                             if (StringUtils.isNumeric(sampleDp)) {
                                 dp += Integer.parseInt(sampleDp);
                             }
@@ -397,9 +397,10 @@ public class VariantVcfFactory {
                     case "MQ0":
                         int mq = 0;
                         int mq0 = 0;
-                        for (String sampleName : file.getSampleNames()) {
-                            if (StringUtils.isNumeric(file.getSampleData(sampleName, "GQ"))) {
-                                int gq = Integer.parseInt(file.getSampleData(sampleName, "GQ"));
+                        for (Map<String, String> sampleData : file.getSamplesData()) {
+                            String sampleGq = sampleData.get("GQ");
+                            if (StringUtils.isNumeric(sampleGq)) {
+                                int gq = Integer.parseInt(sampleGq);
                                 mq += gq * gq;
                                 if (gq == 0) {
                                     mq0++;

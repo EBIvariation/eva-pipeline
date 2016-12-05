@@ -340,14 +340,6 @@ public class Variant {
     public void addEffect(String allele, VariantEffect ct) {
         annotation.addEffect(allele, ct);
     }
-    
-    public Iterable<String> getSampleNames(String studyId, String fileId) {
-        VariantSourceEntry file = sourceEntries.get(composeId(studyId, fileId));
-        if (file == null) {
-            return null;
-        }
-        return file.getSampleNames();
-    }
 
     /**
      * Copies the current variant and returns the copy in Ensembl format.

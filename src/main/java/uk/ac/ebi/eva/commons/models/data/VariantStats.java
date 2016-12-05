@@ -372,7 +372,7 @@ public class VariantStats {
                 + '}';
     }
 
-    public VariantStats calculate(Map<String, Map<String, String>> samplesData, Map<String, String> attributes, Pedigree pedigree) {
+    public VariantStats calculate(List<Map<String, String>> samplesData, Map<String, String> attributes, Pedigree pedigree) {
         int[] allelesCount = new int[2];
         int totalAllelesCount = 0, totalGenotypesCount = 0;
 
@@ -386,9 +386,8 @@ public class VariantStats {
             this.setMendelianErrors(0);
         }
 
-        for (Map.Entry<String, Map<String, String>> sample : samplesData.entrySet()) {
-            String sampleName = sample.getKey();
-            Genotype g = new Genotype(sample.getValue().get("GT"), this.getRefAllele(), this.getAltAllele());
+        for (Map<String, String> sample : samplesData) {
+            Genotype g = new Genotype(sample.get("GT"), this.getRefAllele(), this.getAltAllele());
             this.addGenotype(g);
 
             // Check missing alleles and genotypes
@@ -437,41 +436,7 @@ public class VariantStats {
                         totalAllelesCount++;
                     }
                     break;
-
             }
-
-            // Include statistics that depend on pedigree information
-            if (pedigree != null) {
-                if (g.getCode() == AllelesCode.ALLELES_OK || g.getCode() == AllelesCode.HAPLOID) {
-                    Individual ind = pedigree.getIndividual(sampleName);
-//                    if (MendelChecker.isMendelianError(ind, g, variant.getChromosome(), file.getSamplesData())) {
-//                        this.setMendelianErrors(this.getMendelianErrors() + 1);
-//                    }
-                    if (g.getCode() == AllelesCode.ALLELES_OK) {
-                        // Check inheritance models
-                        if (ind.getCondition() == Condition.UNAFFECTED) {
-                            if (g.isAlleleRef(0) && g.isAlleleRef(1)) { // 0|0
-                                controlsDominant++;
-                                controlsRecessive++;
-
-                            } else if ((g.isAlleleRef(0) && !g.isAlleleRef(1)) || (!g.isAlleleRef(0) || g.isAlleleRef(1))) { // 0|1 or 1|0
-                                controlsRecessive++;
-
-                            }
-                        } else if (ind.getCondition() == Condition.AFFECTED) {
-                            if (!g.isAlleleRef(0) && !g.isAlleleRef(1) && g.getAllele(0) == g.getAllele(1)) {// 1|1, 2|2, and so on
-                                casesRecessive++;
-                                casesDominant++;
-                            } else if (!g.isAlleleRef(0) || !g.isAlleleRef(1)) { // 0|1, 1|0, 1|2, 2|1, 1|3, and so on
-                                casesDominant++;
-
-                            }
-                        }
-
-                    }
-                }
-            } 
-
         }  // Finish all samples loop
         
         // Set counts for each allele

@@ -1,7 +1,9 @@
 package uk.ac.ebi.eva.commons.models.data;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -37,7 +39,7 @@ public class VariantSourceEntry {
      * of the samples. The values are pairs (field name, field value), such as
      * (GT, A/C).
      */
-    private Map<String, Map<String, String>> samplesData;
+    private List<Map<String, String>> samplesData;
     
     /**
      * Statistics of the genomic variation, such as its alleles/genotypes count 
@@ -67,7 +69,7 @@ public class VariantSourceEntry {
         this.secondaryAlternates = secondaryAlternates;
         this.format = format;
         
-        this.samplesData = new LinkedHashMap<>();
+        this.samplesData = new ArrayList<>();
         this.attributes = new LinkedHashMap<>();
         this.cohortStats = new LinkedHashMap<>();
 //        this.cohortStats.put(DEFAULT_COHORT, null);   // downside: serialization always puts "all":null
@@ -105,28 +107,20 @@ public class VariantSourceEntry {
         this.format = format;
     }
 
-    public Map<String, Map<String, String>> getSamplesData() {
+    public List<Map<String, String>> getSamplesData() {
         return samplesData;
     }
 
-    public String getSampleData(String sampleName, String field) {
-        Map<String, String> sampleData = samplesData.get(sampleName);
-        if (sampleData == null) {
-            return null;
-        }
-        return samplesData.get(sampleName).get(field.toUpperCase());
+    public String getSampleData(int sampleIndex, String field) {
+        return getSampleData(sampleIndex).get(field.toUpperCase());
     }
 
-    public Map<String, String> getSampleData(String sampleName) {
-        return samplesData.get(sampleName);
+    public Map<String, String> getSampleData(int sampleIndex) {
+        return samplesData.get(sampleIndex);
     }
 
-    public void addSampleData(String sampleName, Map<String, String> sampleData) {
-        this.samplesData.put(sampleName, sampleData);
-    }
-
-    public Set<String> getSampleNames() {
-        return this.samplesData.keySet();
+    public void addSampleData(int sampleIndex, Map<String, String> sampleData) {
+        this.samplesData.add(sampleIndex, sampleData);
     }
 
     public VariantStats getStats() {

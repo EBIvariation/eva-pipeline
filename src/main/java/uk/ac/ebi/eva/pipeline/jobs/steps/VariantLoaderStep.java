@@ -94,7 +94,6 @@ public class VariantLoaderStep {
     public VariantToMongoDbObjectConverter variantToMongoDbObjectConverter() throws Exception {
         return new VariantToMongoDbObjectConverter(
                 jobOptions.getVariantOptions().getBoolean(VariantStorageManager.INCLUDE_STATS),
-                variantSource.getSamplesPosition(),
                 jobOptions.getVariantOptions().getBoolean(VariantStorageManager.CALCULATE_STATS),
                 jobOptions.getVariantOptions().getBoolean(VariantStorageManager.INCLUDE_SAMPLES),
                 (VariantStorageManager.IncludeSrc) jobOptions.getVariantOptions()

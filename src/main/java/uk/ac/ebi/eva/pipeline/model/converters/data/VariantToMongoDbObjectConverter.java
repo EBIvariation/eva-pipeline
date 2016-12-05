@@ -45,13 +45,12 @@ public class VariantToMongoDbObjectConverter implements Converter<Variant, DBObj
 
     private boolean includeStats;
 
-    public VariantToMongoDbObjectConverter(boolean includeStats, Map<String, Integer> samplesPosition,
-                                           boolean calculateStats, boolean includeSample,
+    public VariantToMongoDbObjectConverter(boolean includeStats, boolean calculateStats, boolean includeSample,
                                            VariantStorageManager.IncludeSrc includeSrc) {
+        
         this.includeStats = includeStats;
         this.statsConverter = calculateStats ? new DBObjectToVariantStatsConverter() : null;
-        DBObjectToSamplesConverter sampleConverter =
-                includeSample ? new DBObjectToSamplesConverter(true, samplesPosition) : null;
+        DBObjectToSamplesConverter sampleConverter = includeSample ? new DBObjectToSamplesConverter() : null;
         this.sourceEntryConverter = new DBObjectToVariantSourceEntryConverter(includeSrc, sampleConverter);
         this.variantConverter = new DBObjectToVariantConverter(null, null);
     }
