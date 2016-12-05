@@ -38,16 +38,16 @@ public class JobParametersNames {
 
 
     /*
-     * Database infrastructure (most parameters read from OpenCGA "conf" folder)
+     * Database infrastructure (Spring Data)
      */
     
-    public static final String CONFIG_DB_HOSTS = "config.db.hosts";
+    public static final String CONFIG_DB_HOSTS = "spring.data.mongodb.host";
     
-    public static final String CONFIG_DB_AUTHENTICATIONDB = "config.db.authentication-db";
+    public static final String CONFIG_DB_AUTHENTICATIONDB = "spring.data.mongodb.authentication-database";
     
-    public static final String CONFIG_DB_USER = "config.db.user";
+    public static final String CONFIG_DB_USER = "spring.data.mongodb.username";
     
-    public static final String CONFIG_DB_PASSWORD = "config.db.password";
+    public static final String CONFIG_DB_PASSWORD = "spring.data.mongodb.password";
     
     public static final String CONFIG_DB_READPREFERENCE = "config.db.read-preference";
     
@@ -56,7 +56,7 @@ public class JobParametersNames {
      * Database and collections
      */
     
-    public static final String DB_NAME = "db.name";
+    public static final String DB_NAME = "spring.data.mongodb.database";
     
     public static final String DB_COLLECTIONS_VARIANTS_NAME = "db.collections.variants.name";
     
@@ -79,7 +79,7 @@ public class JobParametersNames {
     
     
     /*
-     * OpenCGA
+     * OpenCGA (parameters read from OpenCGA "conf" folder)
      */
     
     public static final String APP_OPENCGA_PATH = "app.opencga.path";
