@@ -19,6 +19,7 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.BulkWriteOperation;
 import com.mongodb.DBObject;
 import org.opencb.opencga.storage.mongodb.variant.DBObjectToVariantConverter;
+import org.opencb.opencga.storage.mongodb.variant.DBObjectToVariantSourceEntryConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.item.data.MongoItemWriter;
@@ -26,6 +27,7 @@ import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.util.Assert;
 
 import uk.ac.ebi.eva.commons.models.data.Variant;
+
 import uk.ac.ebi.eva.pipeline.model.converters.data.VariantToMongoDbObjectConverter;
 import uk.ac.ebi.eva.utils.MongoDBHelper;
 
@@ -41,7 +43,9 @@ public class VariantMongoWriter extends MongoItemWriter<Variant> {
     private static final Logger logger = LoggerFactory.getLogger(VariantMongoWriter.class);
 
     private final MongoOperations mongoOperations;
+
     private final String collection;
+
     private final VariantToMongoDbObjectConverter variantToMongoDbObjectConverter;
 
     public VariantMongoWriter(String collection, MongoOperations mongoOperations,
@@ -53,6 +57,8 @@ public class VariantMongoWriter extends MongoItemWriter<Variant> {
         this.mongoOperations = mongoOperations;
         this.collection = collection;
         setTemplate(mongoOperations);
+
+        generateIndexes();
     }
 
     @Override
@@ -83,4 +89,25 @@ public class VariantMongoWriter extends MongoItemWriter<Variant> {
         }
     }
 
+    private void generateIndexes() {
+        mongoOperations.getCollection(collection).createIndex(new BasicDBObject(
+                DBObjectToVariantConverter.CHROMOSOME_FIELD, 1)
+                                                                      .append(DBObjectToVariantConverter.START_FIELD, 1)
+                                                                      .append(DBObjectToVariantConverter.END_FIELD, 1)
+                                                                      .append("background", true));
+        mongoOperations.getCollection(collection).createIndex(new BasicDBObject(
+                DBObjectToVariantConverter.IDS_FIELD, 1).append("background", true));
+
+        String filesStudyIdField = String.format("%s.%s", DBObjectToVariantConverter.FILES_FIELD,
+                                                 DBObjectToVariantSourceEntryConverter.STUDYID_FIELD);
+        String filesFileIdField = String.format("%s.%s", DBObjectToVariantConverter.FILES_FIELD,
+                                                DBObjectToVariantSourceEntryConverter.FILEID_FIELD);
+        mongoOperations.getCollection(collection).createIndex(
+                new BasicDBObject(filesStudyIdField, 1).append(filesFileIdField, 1).append("background", true));
+        mongoOperations.getCollection(collection).createIndex(new BasicDBObject(
+                "annot.xrefs.id", 1).append("background", true));
+        mongoOperations.getCollection(collection).createIndex(new BasicDBObject("annot", 1).append("background", true));
+
+        //// TODO: 05/12/2016 to create a unique index on { chr : 1, start : 1, end : 1, ref : 1, alt : 1 } double check with DBA
+    }
 }

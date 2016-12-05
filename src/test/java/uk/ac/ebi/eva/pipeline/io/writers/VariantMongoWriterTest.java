@@ -15,6 +15,7 @@
  */
 package uk.ac.ebi.eva.pipeline.io.writers;
 
+import com.google.common.collect.Sets;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
 import org.junit.Rule;
@@ -31,6 +32,8 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
@@ -44,8 +47,10 @@ public class VariantMongoWriterTest {
     private static final List<? extends Variant> EMPTY_LIST = new ArrayList<>();
 
     private VariantMongoWriter variantMongoWriter;
-    private VariantToMongoDbObjectConverter variantToMongoDbObjectConverter =
-            Mockito.mock(VariantToMongoDbObjectConverter.class);
+
+    private VariantToMongoDbObjectConverter variantToMongoDbObjectConverter = Mockito
+            .mock(VariantToMongoDbObjectConverter.class);
+
     private final String collectionName = "variants";
 
     @Rule
@@ -84,6 +89,23 @@ public class VariantMongoWriterTest {
         variantMongoWriter.write(Collections.singletonList(variant));
 
         assertEquals(2, dbCollection.count());
+    }
+
+    @Test
+    public void indexesShouldBeCreated() throws UnknownHostException {
+        String dbName = mongoRule.getRandomTemporaryDatabaseName();
+        MongoOperations mongoOperations = MongoDBHelper.getDefaultMongoOperations(dbName);
+        DBCollection dbCollection = mongoOperations.getCollection(collectionName);
+
+        variantMongoWriter = new VariantMongoWriter(collectionName, mongoOperations, variantToMongoDbObjectConverter);
+
+        Set<String> createdIndexes = dbCollection.getIndexInfo().stream().map(o -> o.get("name").toString())
+                .collect(Collectors.toSet());
+        Set<String> expectedIndexes = Sets.newHashSet("annot.xrefs.id_1_background_", "ids_1_background_", "_id_",
+                                                      "files.sid_1_files.fid_1_background_",
+                                                      "chr_1_start_1_end_1_background_", "annot_1_background_");
+
+        assertEquals(expectedIndexes, createdIndexes);
     }
 
 }
