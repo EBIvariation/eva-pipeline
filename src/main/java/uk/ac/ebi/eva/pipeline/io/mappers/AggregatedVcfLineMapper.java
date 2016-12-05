@@ -15,14 +15,15 @@
  */
 package uk.ac.ebi.eva.pipeline.io.mappers;
 
-import org.opencb.biodata.models.variant.Variant;
-import org.opencb.biodata.models.variant.VariantAggregatedVcfFactory;
 import org.opencb.biodata.models.variant.VariantSource;
-import org.opencb.biodata.models.variant.VariantVcfEVSFactory;
-import org.opencb.biodata.models.variant.VariantVcfExacFactory;
-import org.opencb.biodata.models.variant.VariantVcfFactory;
 import org.spockframework.util.Assert;
 import org.springframework.batch.item.file.LineMapper;
+
+import uk.ac.ebi.eva.commons.models.data.Variant;
+import uk.ac.ebi.eva.commons.readers.VariantAggregatedVcfFactory;
+import uk.ac.ebi.eva.commons.readers.VariantVcfEVSFactory;
+import uk.ac.ebi.eva.commons.readers.VariantVcfExacFactory;
+import uk.ac.ebi.eva.commons.readers.VariantVcfFactory;
 
 import java.util.List;
 

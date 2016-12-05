@@ -15,10 +15,11 @@
  */
 package uk.ac.ebi.eva.pipeline.io.mappers;
 
-import org.opencb.biodata.models.variant.Variant;
 import org.opencb.biodata.models.variant.VariantSource;
-import org.opencb.biodata.models.variant.VariantVcfFactory;
 import org.springframework.batch.item.file.LineMapper;
+
+import uk.ac.ebi.eva.commons.models.data.Variant;
+import uk.ac.ebi.eva.commons.readers.VariantVcfFactory;
 
 import java.util.List;
 

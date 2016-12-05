@@ -17,7 +17,6 @@ package uk.ac.ebi.eva.commons.models.data;
 
 import org.opencb.biodata.models.variant.annotation.VariantAnnotation;
 import org.opencb.biodata.models.variant.annotation.VariantEffect;
-import org.opencb.biodata.models.variant.stats.VariantStats;
 
 import java.util.HashMap;
 import java.util.HashSet;

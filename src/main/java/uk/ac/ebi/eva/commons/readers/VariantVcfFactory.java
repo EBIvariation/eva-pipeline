@@ -4,12 +4,13 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.opencb.biodata.models.feature.AllelesCode;
 import org.opencb.biodata.models.feature.Genotype;
-import org.opencb.biodata.models.variant.Variant;
 import org.opencb.biodata.models.variant.VariantFactory;
 import org.opencb.biodata.models.variant.VariantSource;
-import org.opencb.biodata.models.variant.VariantSourceEntry;
 import org.opencb.biodata.models.variant.exceptions.NonStandardCompliantSampleField;
 import org.opencb.biodata.models.variant.exceptions.NotAVariantException;
+
+import uk.ac.ebi.eva.commons.models.data.Variant;
+import uk.ac.ebi.eva.commons.models.data.VariantSourceEntry;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,7 +28,7 @@ import java.util.logging.Logger;
  * @author Cristina Yenyxe Gonzalez Garcia &lt;cyenyxe@ebi.ac.uk&gt;
  * @author Jose Miguel Mut Lopez &lt;jmmut@ebi.ac.uk&gt;
  */
-public class VariantVcfFactory implements VariantFactory {
+public class VariantVcfFactory {
 
     /**
      * Creates a list of Variant objects using the fields in a record of a VCF
@@ -43,7 +44,6 @@ public class VariantVcfFactory implements VariantFactory {
      * @return The list of Variant objects that can be created using the fields
      * from a VCF record
      */
-    @Override
     public List<Variant> create(VariantSource source, String line) throws IllegalArgumentException, NotAVariantException {
         String[] fields = line.split("\t");
         if (fields.length < 8) {

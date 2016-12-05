@@ -15,12 +15,12 @@
  */
 package uk.ac.ebi.eva.pipeline.io.readers;
 
-import org.opencb.biodata.models.variant.Variant;
 import org.opencb.biodata.models.variant.VariantSource;
 import org.springframework.batch.item.file.FlatFileItemReader;
 import org.springframework.batch.item.file.LineMapper;
 import org.springframework.core.io.Resource;
 
+import uk.ac.ebi.eva.commons.models.data.Variant;
 import uk.ac.ebi.eva.pipeline.io.mappers.VcfLineMapper;
 import uk.ac.ebi.eva.utils.FileUtils;
 

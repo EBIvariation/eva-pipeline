@@ -17,8 +17,6 @@ package uk.ac.ebi.eva.pipeline.model.converters.data;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
-import org.opencb.biodata.models.variant.Variant;
-import org.opencb.biodata.models.variant.VariantSourceEntry;
 import org.opencb.opencga.storage.core.variant.VariantStorageManager;
 import org.opencb.opencga.storage.mongodb.variant.DBObjectToSamplesConverter;
 import org.opencb.opencga.storage.mongodb.variant.DBObjectToVariantConverter;
@@ -28,6 +26,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.util.Assert;
+
+import uk.ac.ebi.eva.commons.models.data.Variant;
+import uk.ac.ebi.eva.commons.models.data.VariantSourceEntry;
 
 import java.util.List;
 import java.util.Map;

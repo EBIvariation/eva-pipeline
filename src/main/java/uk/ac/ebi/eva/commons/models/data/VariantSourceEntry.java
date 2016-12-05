@@ -1,7 +1,5 @@
 package uk.ac.ebi.eva.commons.models.data;
 
-import org.opencb.biodata.models.variant.stats.VariantStats;
-
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
