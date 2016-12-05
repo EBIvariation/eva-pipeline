@@ -39,7 +39,6 @@ public class VariantVcfFactory {
      * as Ensembl does, except for insertions, where start is greater than end: 
      * http://www.ensembl.org/info/docs/tools/vep/vep_formats.html#vcf
      *
-     * @param source Origin of the variants information
      * @param line Contents of the line in the file
      * @return The list of Variant objects that can be created using the fields
      * from a VCF record

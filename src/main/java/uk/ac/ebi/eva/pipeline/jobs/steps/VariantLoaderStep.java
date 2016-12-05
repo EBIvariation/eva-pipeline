@@ -60,9 +60,6 @@ public class VariantLoaderStep {
     private JobOptions jobOptions;
 
     @Autowired
-    VariantSource variantSource;
-
-    @Autowired
     UnwindingItemStreamReader<Variant> unwindingReader;
 
 

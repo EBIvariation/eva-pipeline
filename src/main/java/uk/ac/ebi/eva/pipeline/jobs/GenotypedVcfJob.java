@@ -119,29 +119,12 @@ public class GenotypedVcfJob extends CommonJobStepInitialization{
                 INCLUDE_STATS);
     }
 
-
     @Bean
     @StepScope
     public UnwindingItemStreamReader<Variant> unwindingReader() throws Exception {
         return new UnwindingItemStreamReader<>(
-                new VcfReader(variantSource(),
-                              jobOptions.getPipelineOptions().getString(JobParametersNames.INPUT_VCF)));
-    }
-
-    @Bean
-    @StepScope
-    public VariantSource variantSource() throws Exception {
-        VariantSource source = (VariantSource) jobOptions.getVariantOptions()
-                                                         .get(VariantStorageManager.VARIANT_SOURCE);
-
-        VcfHeaderReader headerReader = new VcfHeaderReader(
-                new File(jobOptions.getPipelineOptions().getString(JobParametersNames.INPUT_VCF)),
-                source.getFileId(),
-                source.getStudyId(),
-                source.getStudyName(),
-                source.getType(),
-                source.getAggregation());
-
-        return headerReader.read();
+                new VcfReader(
+                        (VariantSource) jobOptions.getVariantOptions().get(VariantStorageManager.VARIANT_SOURCE),
+                        jobOptions.getPipelineOptions().getString(JobParametersNames.INPUT_VCF)));
     }
 }
