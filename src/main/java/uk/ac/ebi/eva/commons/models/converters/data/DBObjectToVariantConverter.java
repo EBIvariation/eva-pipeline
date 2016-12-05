@@ -1,16 +1,23 @@
-package org.opencb.opencga.storage.mongodb.variant;
+package uk.ac.ebi.eva.commons.models.converters.data;
 
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
-
-import java.util.*;
-
-import org.opencb.biodata.models.variant.VariantSourceEntry;
-import org.opencb.biodata.models.variant.Variant;
 import org.opencb.biodata.models.variant.annotation.VariantAnnotation;
 import org.opencb.commons.utils.CryptoUtils;
 import org.opencb.datastore.core.ComplexTypeConverter;
+import org.opencb.opencga.storage.mongodb.variant.DBObjectToVariantAnnotationConverter;
+import org.opencb.opencga.storage.mongodb.variant.VariantMongoDBWriter;
+
+import uk.ac.ebi.eva.commons.models.data.Variant;
+import uk.ac.ebi.eva.commons.models.data.VariantSourceEntry;
+
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  *

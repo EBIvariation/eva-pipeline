@@ -1,18 +1,19 @@
-package org.opencb.opencga.storage.mongodb.variant;
+package uk.ac.ebi.eva.commons.models.converters.data;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
+import org.opencb.biodata.models.feature.Genotype;
+import org.opencb.datastore.core.ComplexTypeConverter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import uk.ac.ebi.eva.commons.models.data.Variant;
+import uk.ac.ebi.eva.commons.models.data.VariantSourceEntry;
+import uk.ac.ebi.eva.commons.models.data.VariantStats;
 
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import org.opencb.biodata.models.feature.Genotype;
-import org.opencb.biodata.models.variant.Variant;
-import org.opencb.biodata.models.variant.VariantSourceEntry;
-import org.opencb.biodata.models.variant.stats.VariantStats;
-import org.opencb.datastore.core.ComplexTypeConverter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @author Cristina Yenyxe Gonzalez Garcia &lt;cyenyxe@ebi.ac.uk&gt;

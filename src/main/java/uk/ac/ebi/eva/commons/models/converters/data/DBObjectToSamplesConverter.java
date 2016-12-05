@@ -1,18 +1,23 @@
-package org.opencb.opencga.storage.mongodb.variant;
+package uk.ac.ebi.eva.commons.models.converters.data;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
+import org.opencb.biodata.models.feature.Genotype;
+import org.opencb.datastore.core.ComplexTypeConverter;
+import org.opencb.datastore.core.QueryResult;
+import org.opencb.opencga.storage.core.variant.adaptors.VariantSourceDBAdaptor;
+import org.opencb.opencga.storage.mongodb.utils.MongoCredentials;
+import org.opencb.opencga.storage.mongodb.variant.VariantSourceMongoDBAdaptor;
+
+import uk.ac.ebi.eva.commons.models.data.VariantSourceEntry;
+
 import java.net.UnknownHostException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.opencb.biodata.models.feature.Genotype;
-import org.opencb.biodata.models.variant.VariantSourceEntry;
-import org.opencb.datastore.core.ComplexTypeConverter;
-
-import org.opencb.datastore.core.QueryResult;
-import org.opencb.opencga.storage.mongodb.utils.MongoCredentials;
-import org.opencb.opencga.storage.core.variant.adaptors.VariantSourceDBAdaptor;
 
 import static org.opencb.opencga.storage.mongodb.variant.DBObjectToVariantSourceEntryConverter.FILEID_FIELD;
 import static org.opencb.opencga.storage.mongodb.variant.DBObjectToVariantSourceEntryConverter.SAMPLES_FIELD;

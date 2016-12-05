@@ -1,16 +1,17 @@
-package org.opencb.opencga.storage.mongodb.variant;
+package uk.ac.ebi.eva.commons.models.converters.data;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
+import org.opencb.datastore.core.ComplexTypeConverter;
+import org.opencb.opencga.storage.core.variant.VariantStorageManager;
+
+import uk.ac.ebi.eva.commons.models.data.VariantSourceEntry;
+
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import org.opencb.biodata.models.variant.VariantSourceEntry;
-import org.opencb.datastore.core.ComplexTypeConverter;
-import org.opencb.opencga.storage.core.variant.VariantStorageManager;
 
 /**
  * 

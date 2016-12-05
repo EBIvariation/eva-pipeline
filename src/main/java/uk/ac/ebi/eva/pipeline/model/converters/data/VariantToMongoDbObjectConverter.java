@@ -18,15 +18,15 @@ package uk.ac.ebi.eva.pipeline.model.converters.data;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 import org.opencb.opencga.storage.core.variant.VariantStorageManager;
-import org.opencb.opencga.storage.mongodb.variant.DBObjectToSamplesConverter;
-import org.opencb.opencga.storage.mongodb.variant.DBObjectToVariantConverter;
-import org.opencb.opencga.storage.mongodb.variant.DBObjectToVariantSourceEntryConverter;
-import org.opencb.opencga.storage.mongodb.variant.DBObjectToVariantStatsConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.util.Assert;
 
+import uk.ac.ebi.eva.commons.models.converters.data.DBObjectToSamplesConverter;
+import uk.ac.ebi.eva.commons.models.converters.data.DBObjectToVariantConverter;
+import uk.ac.ebi.eva.commons.models.converters.data.DBObjectToVariantSourceEntryConverter;
+import uk.ac.ebi.eva.commons.models.converters.data.DBObjectToVariantStatsConverter;
 import uk.ac.ebi.eva.commons.models.data.Variant;
 import uk.ac.ebi.eva.commons.models.data.VariantSourceEntry;
 
