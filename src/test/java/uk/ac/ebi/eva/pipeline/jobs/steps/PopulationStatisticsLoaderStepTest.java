@@ -117,8 +117,8 @@ public class PopulationStatisticsLoaderStepTest {
         String input = getResource(SMALL_VCF_FILE).getAbsolutePath();
         VariantSource source = new VariantSource(input, "4", "1", "studyName");
 
+        jobOptions.setDbName(mongoRule.getRandomTemporaryDatabaseName());
         jobOptions.getPipelineOptions().put(JobParametersNames.INPUT_VCF, input);
-        jobOptions.getVariantOptions().put(VariantStorageManager.DB_NAME, mongoRule.getRandomTemporaryDatabaseName());
         jobOptions.getVariantOptions().put(VariantStorageManager.VARIANT_SOURCE, source);
 
         JobExecution jobExecution = jobLauncherTestUtils.launchStep(PopulationStatisticsFlow.LOAD_STATISTICS);

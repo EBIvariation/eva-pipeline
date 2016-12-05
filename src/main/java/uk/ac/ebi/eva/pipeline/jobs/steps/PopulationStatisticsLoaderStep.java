@@ -15,28 +15,23 @@
  */
 package uk.ac.ebi.eva.pipeline.jobs.steps;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URI;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.zip.GZIPInputStream;
-
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.opencb.biodata.models.variant.VariantSource;
 import org.opencb.biodata.models.variant.stats.VariantSourceStats;
 import org.opencb.biodata.models.variant.stats.VariantStats;
 import org.opencb.datastore.core.ObjectMap;
 import org.opencb.datastore.core.QueryOptions;
 import org.opencb.datastore.core.QueryResult;
-import org.opencb.opencga.storage.core.StorageManagerFactory;
+import org.opencb.datastore.core.config.DataStoreServerAddress;
+import org.opencb.opencga.lib.auth.IllegalOpenCGACredentialsException;
 import org.opencb.opencga.storage.core.variant.VariantStorageManager;
 import org.opencb.opencga.storage.core.variant.adaptors.VariantDBAdaptor;
 import org.opencb.opencga.storage.core.variant.io.json.VariantStatsJsonMixin;
-import org.opencb.opencga.storage.core.variant.stats.VariantStatisticsManager;
 import org.opencb.opencga.storage.core.variant.stats.VariantStatsWrapper;
+import org.opencb.opencga.storage.mongodb.utils.MongoCredentials;
+import org.opencb.opencga.storage.mongodb.variant.VariantMongoDBAdaptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.StepContribution;
@@ -48,13 +43,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 import org.springframework.stereotype.Component;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
 import uk.ac.ebi.eva.pipeline.configuration.JobParametersNames;
+import uk.ac.ebi.eva.utils.MongoDBHelper;
 import uk.ac.ebi.eva.utils.URLHelper;
+
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
+import java.net.UnknownHostException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.zip.GZIPInputStream;
 
 /**
  * Tasklet that loads statistics into mongoDB.
@@ -122,21 +125,42 @@ public class PopulationStatisticsLoaderStep implements Tasklet {
         ObjectMap variantOptions = jobOptions.getVariantOptions();
         ObjectMap pipelineOptions = jobOptions.getPipelineOptions();
 
-        VariantStorageManager variantStorageManager = StorageManagerFactory.getVariantStorageManager();
         VariantSource variantSource = variantOptions.get(VariantStorageManager.VARIANT_SOURCE, VariantSource.class);
-        VariantDBAdaptor dbAdaptor = variantStorageManager.getDBAdaptor(
-                variantOptions.getString(VariantStorageManager.DB_NAME), variantOptions);
-
         URI outdirUri = URLHelper.createUri(pipelineOptions.getString(JobParametersNames.OUTPUT_DIR_STATISTICS));
-        URI statsOutputUri = outdirUri.resolve(VariantStorageManager.buildFilename(variantSource));
+        URI statsOutputUri = outdirUri.resolve(MongoDBHelper.buildStorageFileId(
+                variantSource.getStudyId(), variantSource.getFileId()));
 
+        VariantDBAdaptor dbAdaptor = getDbAdaptor(pipelineOptions);
         QueryOptions statsOptions = new QueryOptions(variantOptions);
         
-        // actual stats load
+        // Load statistics for variants and the file
         loadVariantStats(dbAdaptor, statsOutputUri, statsOptions);
         loadSourceStats(dbAdaptor, statsOutputUri);
 
         return RepeatStatus.FINISHED;
+    }
+
+    private VariantDBAdaptor getDbAdaptor(ObjectMap properties) throws UnknownHostException, IllegalOpenCGACredentialsException {
+        MongoCredentials credentials = getMongoCredentials(properties);
+        String variantsCollectionName = properties.getString(JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME);
+        String filesCollectionName = properties.getString(JobParametersNames.DB_COLLECTIONS_FILES_NAME);
+
+        logger.debug("Getting DBAdaptor to database '{}'", credentials.getMongoDbName());
+        return new VariantMongoDBAdaptor(credentials, variantsCollectionName, filesCollectionName);
+    }
+
+    private MongoCredentials getMongoCredentials(ObjectMap properties) throws IllegalOpenCGACredentialsException {
+        String hosts = properties.getString(JobParametersNames.CONFIG_DB_HOSTS);
+        List<DataStoreServerAddress> dataStoreServerAddresses = MongoCredentials.parseDataStoreServerAddresses(hosts);
+
+        String dbName = properties.getString(JobParametersNames.DB_NAME);
+        String authenticationDatabase = properties.getString(JobParametersNames.CONFIG_DB_AUTHENTICATIONDB, null);
+        String user = properties.getString(JobParametersNames.CONFIG_DB_USER, null);
+        String pass = properties.getString(JobParametersNames.CONFIG_DB_PASSWORD, null);
+
+        MongoCredentials mongoCredentials = new MongoCredentials(dataStoreServerAddresses, dbName, user, pass);
+        mongoCredentials.setAuthenticationDatabase(authenticationDatabase);
+        return mongoCredentials;
     }
 
     private void loadVariantStats(VariantDBAdaptor variantDBAdaptor, URI uri, QueryOptions options) throws IOException {
@@ -158,7 +182,7 @@ public class PopulationStatisticsLoaderStep implements Tasklet {
             statsBatch.add(parser.readValueAs(VariantStatsWrapper.class));
 
             if (statsBatch.size() == batchSize) {
-                QueryResult writeResult = variantDBAdaptor.updateStats(statsBatch, options);
+                QueryResult<?> writeResult = variantDBAdaptor.updateStats(statsBatch, options);
                 writes += writeResult.getNumResults();
                 logger.info("stats loaded up to position {}:{}", 
                 		statsBatch.get(statsBatch.size()-1).getChromosome(), 
@@ -168,7 +192,7 @@ public class PopulationStatisticsLoaderStep implements Tasklet {
         }
 
         if (!statsBatch.isEmpty()) {
-            QueryResult writeResult = variantDBAdaptor.updateStats(statsBatch, options);
+            QueryResult<?> writeResult = variantDBAdaptor.updateStats(statsBatch, options);
             writes += writeResult.getNumResults();
             logger.info("stats loaded up to position {}:{}", 
             		statsBatch.get(statsBatch.size()-1).getChromosome(), 
