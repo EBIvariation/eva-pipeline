@@ -36,6 +36,11 @@ public class VcfLineMapper implements LineMapper<List<Variant>> {
     public VcfLineMapper(VariantSource source) {
         this.source = source;
         this.factory = new VariantVcfFactory();
+        if (!VariantSource.Aggregation.NONE.equals(source.getAggregation())) {
+            throw new IllegalArgumentException(
+                    this.getClass().getSimpleName() + " should not take aggregated " +
+                            "VCFs, but the VariantSource is not marked as Aggregation.NONE");
+        }
     }
 
     @Override

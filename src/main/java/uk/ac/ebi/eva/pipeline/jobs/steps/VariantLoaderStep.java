@@ -24,14 +24,16 @@ import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.item.file.FlatFileParseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.mongodb.core.MongoOperations;
 
 import uk.ac.ebi.eva.commons.models.data.Variant;
+import uk.ac.ebi.eva.pipeline.io.readers.AggregatedVcfReader;
 import uk.ac.ebi.eva.pipeline.io.readers.UnwindingItemStreamReader;
-import uk.ac.ebi.eva.pipeline.io.readers.VcfHeaderReader;
+import uk.ac.ebi.eva.pipeline.io.readers.VcfReader;
 import uk.ac.ebi.eva.pipeline.io.writers.VariantMongoWriter;
 import uk.ac.ebi.eva.pipeline.listeners.SkippedItemListener;
 import uk.ac.ebi.eva.pipeline.model.converters.data.VariantToMongoDbObjectConverter;
@@ -60,16 +62,17 @@ public class VariantLoaderStep {
     private JobOptions jobOptions;
 
     @Autowired
-    UnwindingItemStreamReader<Variant> unwindingReader;
+    private UnwindingItemStreamReader<Variant> reader;
 
-
+    @Autowired
+    private VariantMongoWriter variantMongoWriter;
+    
     @Bean
     @Qualifier("variantsLoadStep")
-
     public Step variantsLoadStep() throws Exception {
         return stepBuilderFactory.get(LOAD_VARIANTS).<Variant, Variant>chunk(10)
-                .reader(unwindingReader)
-                .writer(variantMongoWriter())
+                .reader(reader)
+                .writer(variantMongoWriter)
                 .faultTolerant().skipLimit(50).skip(FlatFileParseException.class)
                 .listener(new SkippedItemListener())
                 .build();
@@ -97,4 +100,33 @@ public class VariantLoaderStep {
                                                              .get(VariantStorageManager.INCLUDE_SRC));
     }
 
+    @Bean
+    @StepScope
+    public UnwindingItemStreamReader<Variant> unwindingReader(VcfReader vcfReader) throws Exception {
+        return new UnwindingItemStreamReader<>(vcfReader);
+    }
+    
+    /**
+     * - the aggregation type is passed so that spring won't cache the instance of VcfReader if it is already built 
+     * with other aggregation type.
+     * - 
+     * @param aggregationType
+     * @return
+     * @throws Exception
+     */
+    @Bean
+    @StepScope
+    public VcfReader vcfReader(@Value("${" + JobParametersNames.INPUT_VCF_AGGREGATION + "}")
+                                                        String aggregationType) throws Exception {
+        VariantSource.Aggregation aggregation = VariantSource.Aggregation.valueOf(aggregationType);
+        if (VariantSource.Aggregation.NONE.equals(aggregation)) {
+            return new VcfReader(
+                    (VariantSource) jobOptions.getVariantOptions().get(VariantStorageManager.VARIANT_SOURCE),
+                    jobOptions.getPipelineOptions().getString(JobParametersNames.INPUT_VCF));
+        } else {
+            return new AggregatedVcfReader(
+                    (VariantSource) jobOptions.getVariantOptions().get(VariantStorageManager.VARIANT_SOURCE),
+                    jobOptions.getPipelineOptions().getString(JobParametersNames.INPUT_VCF));
+        }
+    }
 }

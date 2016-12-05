@@ -50,6 +50,7 @@ import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 
 import java.io.File;
+import java.io.IOException;
 
 /**
  *  Complete pipeline workflow:
@@ -117,14 +118,5 @@ public class GenotypedVcfJob extends CommonJobStepInitialization{
                 COMPRESS_GENOTYPES,
                 CALCULATE_STATS,
                 INCLUDE_STATS);
-    }
-
-    @Bean
-    @StepScope
-    public UnwindingItemStreamReader<Variant> unwindingReader() throws Exception {
-        return new UnwindingItemStreamReader<>(
-                new VcfReader(
-                        (VariantSource) jobOptions.getVariantOptions().get(VariantStorageManager.VARIANT_SOURCE),
-                        jobOptions.getPipelineOptions().getString(JobParametersNames.INPUT_VCF)));
     }
 }

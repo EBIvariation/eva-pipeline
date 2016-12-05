@@ -109,13 +109,4 @@ public class AggregatedVcfJob extends CommonJobStepInitialization {
                 CALCULATE_STATS,
                 INCLUDE_STATS);
     }
-
-    @Bean
-    @StepScope
-    public UnwindingItemStreamReader<Variant> unwindingReader() throws Exception {
-        return new UnwindingItemStreamReader<>(
-                new AggregatedVcfReader(
-                        (VariantSource) jobOptions.getVariantOptions().get(VariantStorageManager.VARIANT_SOURCE),
-                        jobOptions.getPipelineOptions().getString(JobParametersNames.INPUT_VCF)));
-    }
 }
