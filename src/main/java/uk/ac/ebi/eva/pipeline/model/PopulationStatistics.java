@@ -28,11 +28,16 @@ import java.util.Map;
  */
 @Document
 @CompoundIndexes({
-    @CompoundIndex(name = "vscid", def = "{'vid': 1, 'sid': 1, 'cid': 1}", unique = true)
+    @CompoundIndex(name = "vscid", def = "{'chr': 1, 'start': 1, 'ref': 1, 'alt': 1, 'sid': 1, 'cid': 1}", unique = true)
 })
 public class PopulationStatistics {
 
     @Field(value = "vid") private String variantId;
+    @Field(value = "chr") private String chromosome;
+    @Field(value = "start") private int start;
+    @Field(value = "ref") private String reference;
+    @Field(value = "alt") private String alternate;
+
     @Field(value = "cid") private String cohortId;
     @Field(value = "sid") private String studyId;
 
@@ -46,6 +51,10 @@ public class PopulationStatistics {
 
     @PersistenceConstructor
     public PopulationStatistics(String variantId,
+                                String chromosome,
+                                int start,
+                                String reference,
+                                String alternate,
                                 String cohortId,
                                 String studyId,
                                 double maf,
@@ -57,6 +66,11 @@ public class PopulationStatistics {
                                 Map<String, Integer> genotypeCount) {
 
         setVariantId(variantId);
+        setChromosome(chromosome);
+        setStart(start);
+        setReference(reference);
+        setAlternate(alternate);
+
         setCohortId(cohortId);
         setStudyId(studyId);
 
@@ -81,7 +95,37 @@ public class PopulationStatistics {
         }
         this.variantId = variantId;
     }
+    public String getChromosome() {
+        return chromosome;
+    }
 
+    void setChromosome(String chromosome) {
+        this.chromosome = chromosome;
+    }
+
+    public int getStart() {
+        return start;
+    }
+
+    void setStart(int start) {
+        this.start = start;
+    }
+
+    public String getReference() {
+        return reference;
+    }
+
+    void setReference(String reference) {
+        this.reference = reference;
+    }
+
+    public String getAlternate() {
+        return alternate;
+    }
+
+    void setAlternate(String alternate) {
+        this.alternate = alternate;
+    }
     public String getCohortId() {
         return cohortId;
     }
