@@ -185,8 +185,8 @@ public class PopulationStatisticsLoaderStep implements Tasklet {
                 QueryResult<?> writeResult = variantDBAdaptor.updateStats(statsBatch, options);
                 writes += writeResult.getNumResults();
                 logger.info("stats loaded up to position {}:{}", 
-                		statsBatch.get(statsBatch.size()-1).getChromosome(), 
-                		statsBatch.get(statsBatch.size()-1).getPosition());
+                            statsBatch.get(statsBatch.size()-1).getChromosome(),
+                            statsBatch.get(statsBatch.size()-1).getPosition());
                 statsBatch.clear();
             }
         }
@@ -195,8 +195,8 @@ public class PopulationStatisticsLoaderStep implements Tasklet {
             QueryResult<?> writeResult = variantDBAdaptor.updateStats(statsBatch, options);
             writes += writeResult.getNumResults();
             logger.info("stats loaded up to position {}:{}", 
-            		statsBatch.get(statsBatch.size()-1).getChromosome(), 
-            		statsBatch.get(statsBatch.size()-1).getPosition());
+                        statsBatch.get(statsBatch.size()-1).getChromosome(),
+                        statsBatch.get(statsBatch.size()-1).getPosition());
             statsBatch.clear();
         }
 
