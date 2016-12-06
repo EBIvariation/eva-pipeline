@@ -16,6 +16,7 @@
 package uk.ac.ebi.eva.pipeline.io.writers;
 
 
+import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
@@ -27,6 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
+
 import uk.ac.ebi.eva.pipeline.configuration.CommonConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
 import uk.ac.ebi.eva.pipeline.model.PopulationStatistics;
@@ -35,6 +37,7 @@ import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 import uk.ac.ebi.eva.utils.MongoDBHelper;
 
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -104,11 +107,25 @@ public class StatisticsMongoWriterTest {
         DBCollection statsCollection = mongoRule.getCollection(databaseName, jobOptions.getDbCollectionsStatsName());
 
         // check there is an index in chr + start + ref + alt + sid + cid
-        assertEquals("[{ \"v\" : 1 , \"key\" : { \"_id\" : 1} , \"name\" : \"_id_\" , \"ns\" : \"" + databaseName +
-                             ".populationStatistics\"}, { \"v\" : 1 , \"unique\" : true , \"key\" : " +
-                             "{ \"chr\" : 1 , \"start\" : 1 , \"ref\" : 1 , \"alt\" : 1 , \"sid\" : 1 , \"cid\" : 1} , " +
-                             "\"name\" : \"vscid\" , \"ns\" : \"" + databaseName + ".populationStatistics\"}]",
-                     statsCollection.getIndexInfo().toString());
+        List<DBObject> indexes = new ArrayList<>();
+        indexes.add(new BasicDBObject("v", 1)
+                            .append("key", new BasicDBObject("_id", 1))
+                            .append("name", "_id_")
+                            .append("ns", databaseName + ".populationStatistics")
+        );
+        indexes.add(new BasicDBObject("v", 1)
+                            .append("unique", true)
+                            .append("key", new BasicDBObject("chr", 1)
+                                    .append("start", 1)
+                                    .append("ref", 1)
+                                    .append("alt", 1)
+                                    .append("sid", 1)
+                                    .append("cid", 1))
+                            .append("name", "vscid")
+                            .append("ns", databaseName + ".populationStatistics")
+        );
+
+        assertEquals(statsCollection.getIndexInfo(), indexes);
     }
 
     @Test(expected = org.springframework.dao.DuplicateKeyException.class)
@@ -145,7 +162,7 @@ public class StatisticsMongoWriterTest {
 
     public StatisticsMongoWriter getStatisticsMongoWriter(String databaseName) throws UnknownHostException {
         MongoOperations mongoOperations = MongoDBHelper.getMongoOperations(databaseName,
-                jobOptions.getMongoConnection());
+                                                                           jobOptions.getMongoConnection());
         StatisticsMongoWriter statisticsMongoWriter = new StatisticsMongoWriter(
                 mongoOperations, jobOptions.getDbCollectionsStatsName());
         return statisticsMongoWriter;
