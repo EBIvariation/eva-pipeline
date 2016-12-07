@@ -23,10 +23,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.util.Assert;
 
-import uk.ac.ebi.eva.commons.models.converters.data.DBObjectToVariantConverter;
-import uk.ac.ebi.eva.commons.models.converters.data.DBObjectToVariantSourceEntryConverter;
-import uk.ac.ebi.eva.commons.models.converters.data.DBObjectToSamplesConverter;
-import uk.ac.ebi.eva.commons.models.converters.data.DBObjectToVariantStatsConverter;
+import uk.ac.ebi.eva.commons.models.converters.data.VariantToDBObjectConverter;
+import uk.ac.ebi.eva.commons.models.converters.data.VariantSourceEntryToDBObjectConverter;
+import uk.ac.ebi.eva.commons.models.converters.data.SamplesToDBObjectConverter;
+import uk.ac.ebi.eva.commons.models.converters.data.VariantStatsToDBObjectConverter;
 import uk.ac.ebi.eva.commons.models.data.Variant;
 import uk.ac.ebi.eva.commons.models.data.VariantSourceEntry;
 
@@ -38,9 +38,9 @@ import java.util.List;
 public class VariantToMongoDbObjectConverter implements Converter<Variant, DBObject> {
     private static final Logger logger = LoggerFactory.getLogger(VariantToMongoDbObjectConverter.class);
 
-    private DBObjectToVariantConverter variantConverter;
-    private DBObjectToVariantStatsConverter statsConverter;
-    private DBObjectToVariantSourceEntryConverter sourceEntryConverter;
+    private VariantToDBObjectConverter variantConverter;
+    private VariantStatsToDBObjectConverter statsConverter;
+    private VariantSourceEntryToDBObjectConverter sourceEntryConverter;
 
     private boolean includeStats;
 
@@ -48,10 +48,10 @@ public class VariantToMongoDbObjectConverter implements Converter<Variant, DBObj
                                            VariantStorageManager.IncludeSrc includeSrc) {
         
         this.includeStats = includeStats;
-        this.statsConverter = calculateStats ? new DBObjectToVariantStatsConverter() : null;
-        DBObjectToSamplesConverter sampleConverter = includeSample ? new DBObjectToSamplesConverter() : null;
-        this.sourceEntryConverter = new DBObjectToVariantSourceEntryConverter(sampleConverter);
-        this.variantConverter = new DBObjectToVariantConverter(null, null, null);
+        this.statsConverter = calculateStats ? new VariantStatsToDBObjectConverter() : null;
+        SamplesToDBObjectConverter sampleConverter = includeSample ? new SamplesToDBObjectConverter() : null;
+        this.sourceEntryConverter = new VariantSourceEntryToDBObjectConverter(sampleConverter);
+        this.variantConverter = new VariantToDBObjectConverter(null, null, null);
     }
 
     @Override
@@ -63,18 +63,18 @@ public class VariantToMongoDbObjectConverter implements Converter<Variant, DBObj
 
         VariantSourceEntry variantSourceEntry = variant.getSourceEntries().entrySet().iterator().next().getValue();
 
-        BasicDBObject addToSet = new BasicDBObject().append(DBObjectToVariantConverter.FILES_FIELD,
+        BasicDBObject addToSet = new BasicDBObject().append(VariantToDBObjectConverter.FILES_FIELD,
                                                             sourceEntryConverter.convert(variantSourceEntry));
 
         if (includeStats) {
             List<DBObject> sourceEntryStats = statsConverter.convertCohorts(variantSourceEntry.getCohortStats(),
                                                                             variantSourceEntry.getStudyId(),
                                                                             variantSourceEntry.getFileId());
-            addToSet.put(DBObjectToVariantConverter.STATS_FIELD, new BasicDBObject("$each", sourceEntryStats));
+            addToSet.put(VariantToDBObjectConverter.STATS_FIELD, new BasicDBObject("$each", sourceEntryStats));
         }
 
         if (variant.getIds() != null && !variant.getIds().isEmpty()) {
-            addToSet.put(DBObjectToVariantConverter.IDS_FIELD, new BasicDBObject("$each", variant.getIds()));
+            addToSet.put(VariantToDBObjectConverter.IDS_FIELD, new BasicDBObject("$each", variant.getIds()));
         }
 
         BasicDBObject update = new BasicDBObject();

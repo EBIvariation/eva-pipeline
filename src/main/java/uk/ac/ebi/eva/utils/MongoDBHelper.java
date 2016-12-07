@@ -109,12 +109,12 @@ public class MongoDBHelper {
     }
 
     /**
-     * From org.opencb.opencga.storage.mongodb.variant.DBObjectToVariantConverter
+     * From org.opencb.opencga.storage.mongodb.variant.VariantToDBObjectConverter
      * #buildStorageId(java.lang.String, int, java.lang.String, java.lang.String)
      * <p>
      * To avoid the initialization of:
-     * - DBObjectToVariantSourceEntryConverter
-     * - DBObjectToVariantConverter
+     * - VariantSourceEntryToDBObjectConverter
+     * - VariantToDBObjectConverter
      */
     public static String buildStorageId(String chromosome, int start, String reference, String alternate) {
         StringBuilder builder = new StringBuilder(chromosome);

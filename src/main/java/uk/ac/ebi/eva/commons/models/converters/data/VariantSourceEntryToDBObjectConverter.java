@@ -32,7 +32,7 @@ import java.util.logging.Logger;
  * <p>
  * This class is based on OpenCGA MongoDB converters.
  */
-public class DBObjectToVariantSourceEntryConverter implements Converter<VariantSourceEntry, DBObject> {
+public class VariantSourceEntryToDBObjectConverter implements Converter<VariantSourceEntry, DBObject> {
 
     public final static String FILEID_FIELD = "fid";
 
@@ -49,13 +49,13 @@ public class DBObjectToVariantSourceEntryConverter implements Converter<VariantS
     static final char CHARACTER_TO_REPLACE_DOTS = (char) 163; // <-- £
 
 
-    private DBObjectToSamplesConverter samplesConverter;
+    private SamplesToDBObjectConverter samplesConverter;
 
     /**
      * Create a converter between VariantSourceEntry and DBObject entities when
      * there is no need to provide a list of samples or statistics.
      */
-    public DBObjectToVariantSourceEntryConverter() {
+    public VariantSourceEntryToDBObjectConverter() {
         this(null);
     }
 
@@ -66,7 +66,7 @@ public class DBObjectToVariantSourceEntryConverter implements Converter<VariantS
      *
      * @param samplesConverter The object used to convert the samples. If null, won't convert
      */
-    public DBObjectToVariantSourceEntryConverter(DBObjectToSamplesConverter samplesConverter) {
+    public VariantSourceEntryToDBObjectConverter(SamplesToDBObjectConverter samplesConverter) {
         this.samplesConverter = samplesConverter;
     }
 
@@ -96,7 +96,7 @@ public class DBObjectToVariantSourceEntryConverter implements Converter<VariantS
                     try {
                         value = org.opencb.commons.utils.StringUtils.gzip(sb.toString());
                     } catch (IOException ex) {
-                        Logger.getLogger(DBObjectToVariantSourceEntryConverter.class.getName())
+                        Logger.getLogger(VariantSourceEntryToDBObjectConverter.class.getName())
                               .log(Level.SEVERE, null, ex);
                     }
                 }

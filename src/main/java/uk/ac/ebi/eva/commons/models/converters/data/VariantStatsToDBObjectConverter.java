@@ -35,7 +35,7 @@ import java.util.Map;
  * <p>
  * This class is based on OpenCGA MongoDB converters.
  */
-public class DBObjectToVariantStatsConverter implements Converter<VariantSourceEntry, List<DBObject>> {
+public class VariantStatsToDBObjectConverter implements Converter<VariantSourceEntry, List<DBObject>> {
 
     public final static String COHORT_ID = "cid";
 
@@ -57,7 +57,7 @@ public class DBObjectToVariantStatsConverter implements Converter<VariantSourceE
 
     public final static String NUMGT_FIELD = "numGt";
 
-    protected static Logger logger = LoggerFactory.getLogger(DBObjectToVariantStatsConverter.class);
+    protected static Logger logger = LoggerFactory.getLogger(VariantStatsToDBObjectConverter.class);
 
     /**
      * converts all the cohortstats within the sourceEntries
@@ -84,9 +84,9 @@ public class DBObjectToVariantStatsConverter implements Converter<VariantSourceE
         for (Map.Entry<String, VariantStats> variantStatsEntry : cohortStats.entrySet()) {
             variantStats = variantStatsEntry.getValue();
             DBObject variantStatsDBObject = convertStats(variantStats);
-            variantStatsDBObject.put(DBObjectToVariantStatsConverter.COHORT_ID, variantStatsEntry.getKey());
-            variantStatsDBObject.put(DBObjectToVariantStatsConverter.STUDY_ID, studyId);
-            variantStatsDBObject.put(DBObjectToVariantStatsConverter.FILE_ID, fileId);
+            variantStatsDBObject.put(VariantStatsToDBObjectConverter.COHORT_ID, variantStatsEntry.getKey());
+            variantStatsDBObject.put(VariantStatsToDBObjectConverter.STUDY_ID, studyId);
+            variantStatsDBObject.put(VariantStatsToDBObjectConverter.FILE_ID, fileId);
             cohortsStatsList.add(variantStatsDBObject);
         }
         return cohortsStatsList;

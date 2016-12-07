@@ -44,7 +44,7 @@ import static uk.ac.ebi.eva.utils.MongoDBHelper.buildStorageId;
  * <p>
  * This class is based on OpenCGA MongoDB converters.
  */
-public class DBObjectToVariantConverter implements Converter<Variant, DBObject> {
+public class VariantToDBObjectConverter implements Converter<Variant, DBObject> {
 
     public static final String ONE_THOUSAND_STRING = VariantMongoDBWriter.CHUNK_SIZE_SMALL / 1000 + "k";
 
@@ -82,18 +82,18 @@ public class DBObjectToVariantConverter implements Converter<Variant, DBObject> 
     public final static String ANNOTATION_FIELD = "annot";
 
     public final static String STATS_FIELD = "st";
-    
-    private DBObjectToVariantSourceEntryConverter variantSourceEntryConverter;
+
+    private VariantSourceEntryToDBObjectConverter variantSourceEntryConverter;
 
     private DBObjectToVariantAnnotationConverter variantAnnotationConverter;
 
-    private DBObjectToVariantStatsConverter statsConverter;
+    private VariantStatsToDBObjectConverter statsConverter;
 
     /**
      * Create a converter between Variant and DBObject entities when the fields of VariantSourceEntry,
      * VariantAnnotation and VariantStats should not be written.
      */
-    public DBObjectToVariantConverter() {
+    public VariantToDBObjectConverter() {
         this(null, null, null);
     }
 
@@ -106,10 +106,10 @@ public class DBObjectToVariantConverter implements Converter<Variant, DBObject> 
      * @param variantAnnotationConverter  Nullable
      * @param VariantStatsConverter       Nullable
      */
-    public DBObjectToVariantConverter(
-            DBObjectToVariantSourceEntryConverter variantSourceEntryConverter,
+    public VariantToDBObjectConverter(
+            VariantSourceEntryToDBObjectConverter variantSourceEntryConverter,
             DBObjectToVariantAnnotationConverter variantAnnotationConverter,
-            DBObjectToVariantStatsConverter VariantStatsConverter) {
+            VariantStatsToDBObjectConverter VariantStatsConverter) {
         this.variantSourceEntryConverter = variantSourceEntryConverter;
         this.variantAnnotationConverter = variantAnnotationConverter;
         this.statsConverter = VariantStatsConverter;

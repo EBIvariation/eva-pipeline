@@ -33,7 +33,7 @@ import java.util.Map;
  * <p>
  * This class is based on OpenCGA MongoDB converters.
  */
-public class DBObjectToSamplesConverter implements Converter<VariantSourceEntry, DBObject> {
+public class SamplesToDBObjectConverter implements Converter<VariantSourceEntry, DBObject> {
 
     @Override
     public DBObject convert(VariantSourceEntry object) {
