@@ -141,4 +141,8 @@ public class MongoDBHelper {
         return builder.toString();
     }
 
+    public static String buildStorageFileId(String studyId, String fileId) {
+        return studyId + "_" + fileId;
+    }
+
 }

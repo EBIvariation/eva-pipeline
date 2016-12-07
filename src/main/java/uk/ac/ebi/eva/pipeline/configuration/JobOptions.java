@@ -120,6 +120,7 @@ public class JobOptions {
     }
 
     private void loadDbConnectionOptions() throws IOException {
+        // TODO This block shall be removed when we use Spring Data parameters only
         URI configUri = URI.create(Config.getOpenCGAHome() + "/").resolve("conf/").resolve("storage-mongodb.properties");
         Properties properties = new Properties();
         properties.load(new InputStreamReader(new FileInputStream(configUri.getPath())));
@@ -145,6 +146,7 @@ public class JobOptions {
         if (dbCollectionFilesName == null) {
             dbCollectionFilesName = properties.getProperty(JobParametersNames.OPENCGA_DB_COLLECTIONS_FILES_NAME, "files");
         }
+        // TODO End of block to be removed when we use Spring Data parameters only
 
         if (dbHosts == null || dbHosts.isEmpty()) {
             throw new IllegalArgumentException("Please provide a database hostname");
@@ -169,6 +171,7 @@ public class JobOptions {
                 VariantStudy.StudyType.valueOf(studyType),
                 VariantSource.Aggregation.valueOf(aggregated));
 
+        // TODO This block shall be removed when we use Spring Data parameters only
         variantOptions.put(VariantStorageManager.VARIANT_SOURCE, source);
         variantOptions.put(VariantStorageManager.OVERWRITE_STATS, overwriteStats);
         variantOptions.put(VariantStorageManager.INCLUDE_SRC, includeSourceLine);
@@ -181,6 +184,7 @@ public class JobOptions {
         variantOptions.put(MongoDBVariantStorageManager.OPENCGA_STORAGE_MONGODB_VARIANT_DB_AUTHENTICATION_DB, dbAuthenticationDb);
         variantOptions.put(MongoDBVariantStorageManager.OPENCGA_STORAGE_MONGODB_VARIANT_DB_USER, dbUser);
         variantOptions.put(MongoDBVariantStorageManager.OPENCGA_STORAGE_MONGODB_VARIANT_DB_PASS, dbPassword);
+        // TODO End of block to be removed when we use Spring Data parameters only
 
         logger.debug("Using as input: {}", input);
         logger.debug("Using as variantOptions: {}", variantOptions.entrySet().toString());

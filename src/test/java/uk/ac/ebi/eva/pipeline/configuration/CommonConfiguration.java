@@ -50,10 +50,10 @@ public class CommonConfiguration {
 
         properties.put(JobParametersNames.STATISTICS_OVERWRITE, "false");
 
-        properties.put("db.hosts", "localhost:27017");
+        properties.put(JobParametersNames.CONFIG_DB_HOSTS, "localhost:27017");
 //        properties.put("dbName", null);
-        properties.put("db.collection.variants.name", "variants");
-        properties.put("db.collection.files.name", "files");
+        properties.put(JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME, "variants");
+        properties.put(JobParametersNames.DB_COLLECTIONS_FILES_NAME, "files");
         properties.put(JobParametersNames.DB_COLLECTIONS_FEATURES_NAME, "features");
         properties.put(JobParametersNames.DB_COLLECTIONS_STATISTICS_NAME, "populationStatistics");
         properties.put(JobParametersNames.CONFIG_DB_READPREFERENCE, "primary");
