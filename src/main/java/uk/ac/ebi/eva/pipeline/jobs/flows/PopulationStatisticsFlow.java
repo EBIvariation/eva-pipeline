@@ -10,11 +10,11 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
-import uk.ac.ebi.eva.pipeline.configuration.JobParametersNames;
 import uk.ac.ebi.eva.pipeline.jobs.CommonJobStepInitialization;
 import uk.ac.ebi.eva.pipeline.jobs.deciders.SkipStepDecider;
 import uk.ac.ebi.eva.pipeline.jobs.steps.PopulationStatisticsGeneratorStep;
 import uk.ac.ebi.eva.pipeline.jobs.steps.PopulationStatisticsLoaderStep;
+import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 
 @Configuration
 @EnableBatchProcessing
