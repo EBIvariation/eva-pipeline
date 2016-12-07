@@ -107,7 +107,5 @@ public class VariantMongoWriter extends MongoItemWriter<Variant> {
         mongoOperations.getCollection(collection).createIndex(new BasicDBObject(
                 "annot.xrefs.id", 1).append("background", true));
         mongoOperations.getCollection(collection).createIndex(new BasicDBObject("annot", 1).append("background", true));
-
-        //// TODO: 05/12/2016 to create a unique index on { chr : 1, start : 1, end : 1, ref : 1, alt : 1 } double check with DBA
     }
 }
