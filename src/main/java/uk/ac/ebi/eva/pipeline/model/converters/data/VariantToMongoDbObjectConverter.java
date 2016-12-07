@@ -23,15 +23,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.util.Assert;
 
-import uk.ac.ebi.eva.commons.models.converters.data.DBObjectToSamplesConverter;
 import uk.ac.ebi.eva.commons.models.converters.data.DBObjectToVariantConverter;
 import uk.ac.ebi.eva.commons.models.converters.data.DBObjectToVariantSourceEntryConverter;
+import uk.ac.ebi.eva.commons.models.converters.data.DBObjectToSamplesConverter;
 import uk.ac.ebi.eva.commons.models.converters.data.DBObjectToVariantStatsConverter;
 import uk.ac.ebi.eva.commons.models.data.Variant;
 import uk.ac.ebi.eva.commons.models.data.VariantSourceEntry;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * Converts a {@link Variant} into mongoDb {@link DBObject}
@@ -51,8 +50,8 @@ public class VariantToMongoDbObjectConverter implements Converter<Variant, DBObj
         this.includeStats = includeStats;
         this.statsConverter = calculateStats ? new DBObjectToVariantStatsConverter() : null;
         DBObjectToSamplesConverter sampleConverter = includeSample ? new DBObjectToSamplesConverter() : null;
-        this.sourceEntryConverter = new DBObjectToVariantSourceEntryConverter(includeSrc, sampleConverter);
-        this.variantConverter = new DBObjectToVariantConverter(null, null);
+        this.sourceEntryConverter = new DBObjectToVariantSourceEntryConverter(sampleConverter);
+        this.variantConverter = new DBObjectToVariantConverter(null, null, null);
     }
 
     @Override
@@ -65,12 +64,12 @@ public class VariantToMongoDbObjectConverter implements Converter<Variant, DBObj
         VariantSourceEntry variantSourceEntry = variant.getSourceEntries().entrySet().iterator().next().getValue();
 
         BasicDBObject addToSet = new BasicDBObject().append(DBObjectToVariantConverter.FILES_FIELD,
-                        sourceEntryConverter.convertToStorageType(variantSourceEntry));
+                                                            sourceEntryConverter.convert(variantSourceEntry));
 
         if (includeStats) {
-            List<DBObject> sourceEntryStats =
-                    statsConverter.convertCohortsToStorageType(variantSourceEntry.getCohortStats(),
-                    variantSourceEntry.getStudyId(), variantSourceEntry.getFileId());
+            List<DBObject> sourceEntryStats = statsConverter.convertCohorts(variantSourceEntry.getCohortStats(),
+                                                                            variantSourceEntry.getStudyId(),
+                                                                            variantSourceEntry.getFileId());
             addToSet.put(DBObjectToVariantConverter.STATS_FIELD, new BasicDBObject("$each", sourceEntryStats));
         }
 
@@ -79,7 +78,7 @@ public class VariantToMongoDbObjectConverter implements Converter<Variant, DBObj
         }
 
         BasicDBObject update = new BasicDBObject();
-        update.append("$addToSet", addToSet).append("$setOnInsert", variantConverter.convertToStorageType(variant));
+        update.append("$addToSet", addToSet).append("$setOnInsert", variantConverter.convert(variant));
 
         return update;
     }

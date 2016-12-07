@@ -1,9 +1,24 @@
+/*
+ * Copyright 2014-2016 EMBL - European Bioinformatics Institute
+ * Copyright 2015 OpenCB
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package uk.ac.ebi.eva.commons.models.converters.data;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
-import org.opencb.datastore.core.ComplexTypeConverter;
-import org.opencb.opencga.storage.core.variant.VariantStorageManager;
+import org.springframework.core.convert.converter.Converter;
 
 import uk.ac.ebi.eva.commons.models.data.VariantSourceEntry;
 
@@ -13,9 +28,11 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * @author Cristina Yenyxe Gonzalez Garcia <cyenyxe@ebi.ac.uk>
+ * Converter of VariantSourceEntry to DBObject. Implements spring's interface of converter.
+ * <p>
+ * This class is based on OpenCGA MongoDB converters.
  */
-public class DBObjectToVariantSourceEntryConverter implements ComplexTypeConverter<VariantSourceEntry, DBObject> {
+public class DBObjectToVariantSourceEntryConverter implements Converter<VariantSourceEntry, DBObject> {
 
     public final static String FILEID_FIELD = "fid";
 
@@ -31,50 +48,36 @@ public class DBObjectToVariantSourceEntryConverter implements ComplexTypeConvert
 
     static final char CHARACTER_TO_REPLACE_DOTS = (char) 163; // <-- £
 
-    private VariantStorageManager.IncludeSrc includeSrc;
 
     private DBObjectToSamplesConverter samplesConverter;
 
     /**
      * Create a converter between VariantSourceEntry and DBObject entities when
      * there is no need to provide a list of samples or statistics.
-     *
-     * @param includeSrc If true, will include and gzip the "src" attribute in the DBObject
      */
-    public DBObjectToVariantSourceEntryConverter(VariantStorageManager.IncludeSrc includeSrc) {
-        this.includeSrc = includeSrc;
-        this.samplesConverter = null;
+    public DBObjectToVariantSourceEntryConverter() {
+        this(null);
     }
-
 
     /**
      * Create a converter from VariantSourceEntry to DBObject entities. A
      * samples converter and a statistics converter may be provided in case those
      * should be processed during the conversion.
      *
-     * @param includeSrc       If true, will include and gzip the "src" attribute in the DBObject
      * @param samplesConverter The object used to convert the samples. If null, won't convert
      */
-    public DBObjectToVariantSourceEntryConverter(VariantStorageManager.IncludeSrc includeSrc,
-                                                 DBObjectToSamplesConverter samplesConverter) {
-        this(includeSrc);
+    public DBObjectToVariantSourceEntryConverter(DBObjectToSamplesConverter samplesConverter) {
         this.samplesConverter = samplesConverter;
     }
 
     @Override
-    public VariantSourceEntry convertToDataModelType(DBObject object) {
-        throw new UnsupportedOperationException(
-                "This version of " + getClass().getSimpleName() + " is only for writing, try the version in OpenCGA");
-    }
-
-    @Override
-    public DBObject convertToStorageType(VariantSourceEntry object) {
+    public DBObject convert(VariantSourceEntry object) {
         BasicDBObject mongoFile = new BasicDBObject(FILEID_FIELD, object.getFileId())
                 .append(STUDYID_FIELD, object.getStudyId());
 
         // Alternate alleles
-        if (object
-                .getSecondaryAlternates().length > 0) {   // assuming secondaryAlternates doesn't contain the primary alternate
+        // assuming secondaryAlternates doesn't contain the primary alternate
+        if (object.getSecondaryAlternates().length > 0) {
             mongoFile.append(ALTERNATES_FIELD, object.getSecondaryAlternates());
         }
 
@@ -84,28 +87,17 @@ public class DBObjectToVariantSourceEntryConverter implements ComplexTypeConvert
             for (Map.Entry<String, String> entry : object.getAttributes().entrySet()) {
                 Object value = entry.getValue();
                 if (entry.getKey().equals("src")) {
-                    if (VariantStorageManager.IncludeSrc.FULL.equals(includeSrc)) {
-                        try {
-                            value = org.opencb.commons.utils.StringUtils.gzip(entry.getValue());
-                        } catch (IOException ex) {
-                            Logger.getLogger(DBObjectToVariantSourceEntryConverter.class.getName())
-                                  .log(Level.SEVERE, null, ex);
-                        }
-                    } else if (VariantStorageManager.IncludeSrc.FIRST_8_COLUMNS.equals(includeSrc)) {
-                        String[] fields = entry.getValue().split("\t");
-                        StringBuilder sb = new StringBuilder();
-                        sb.append(fields[0]);
-                        for (int i = 1; i < fields.length && i < 8; i++) {
-                            sb.append("\t").append(fields[i]);
-                        }
-                        try {
-                            value = org.opencb.commons.utils.StringUtils.gzip(sb.toString());
-                        } catch (IOException ex) {
-                            Logger.getLogger(DBObjectToVariantSourceEntryConverter.class.getName())
-                                  .log(Level.SEVERE, null, ex);
-                        }
-                    } else {
-                        continue;
+                    String[] fields = entry.getValue().split("\t");
+                    StringBuilder sb = new StringBuilder();
+                    sb.append(fields[0]);
+                    for (int i = 1; i < fields.length && i < 8; i++) {
+                        sb.append("\t").append(fields[i]);
+                    }
+                    try {
+                        value = org.opencb.commons.utils.StringUtils.gzip(sb.toString());
+                    } catch (IOException ex) {
+                        Logger.getLogger(DBObjectToVariantSourceEntryConverter.class.getName())
+                              .log(Level.SEVERE, null, ex);
                     }
                 }
 
@@ -121,17 +113,12 @@ public class DBObjectToVariantSourceEntryConverter implements ComplexTypeConvert
             }
         }
 
-//        if (samples != null && !samples.isEmpty()) {
         if (samplesConverter != null) {
             mongoFile.append(FORMAT_FIELD, object.getFormat()); // Useless field if genotypeCodes are not stored
-            mongoFile.put(SAMPLES_FIELD, samplesConverter.convertToStorageType(object));
+            mongoFile.put(SAMPLES_FIELD, samplesConverter.convert(object));
         }
-
 
         return mongoFile;
     }
 
-    public void setIncludeSrc(VariantStorageManager.IncludeSrc includeSrc) {
-        this.includeSrc = includeSrc;
-    }
 }
