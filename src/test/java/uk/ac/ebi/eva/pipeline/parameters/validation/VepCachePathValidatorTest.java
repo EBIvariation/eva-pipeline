@@ -21,7 +21,6 @@ import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.JobParametersInvalidException;
 
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
-import uk.ac.ebi.eva.pipeline.parameters.validation.VepCachePathValidator;
 import uk.ac.ebi.eva.test.utils.TestFileUtils;
 
 import java.io.File;

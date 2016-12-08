@@ -21,13 +21,13 @@ import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.JobParametersInvalidException;
 
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
-import uk.ac.ebi.eva.pipeline.parameters.validation.InputFastaValidator;
-import uk.ac.ebi.eva.pipeline.parameters.validation.step.VepAnnotationGeneratorStepParametersValidatorTest;
+import uk.ac.ebi.eva.test.utils.TestFileUtils;
 
 import java.io.File;
 import java.io.IOException;
 
 public class InputFastaValidatorTest {
+
     private InputFastaValidator validator;
     private JobParametersBuilder jobParametersBuilder;
 
@@ -37,10 +37,11 @@ public class InputFastaValidatorTest {
     }
 
     @Test
-    public void inputFastaIsValid() throws JobParametersInvalidException {
+    public void inputFastaIsValid() throws JobParametersInvalidException, IOException {
         jobParametersBuilder = new JobParametersBuilder();
-        jobParametersBuilder.addString(JobParametersNames.INPUT_FASTA, (VepAnnotationGeneratorStepParametersValidatorTest.class.getResource(
-                "/parameters-validation/fasta.fa").getFile()));
+        jobParametersBuilder.addString(JobParametersNames.INPUT_FASTA,
+                                       TestFileUtils.getResource(
+                                           "/parameters-validation/fasta.fa").getCanonicalPath());
         validator.validate(jobParametersBuilder.toJobParameters());
     }
 
@@ -53,8 +54,7 @@ public class InputFastaValidatorTest {
 
     @Test(expected = JobParametersInvalidException.class)
     public void inputFastaNotReadable() throws JobParametersInvalidException, IOException {
-        File file = new File(VepAnnotationGeneratorStepParametersValidatorTest.class.getResource(
-                "/parameters-validation/fasta_not_readable.fa").getFile());
+        File file = TestFileUtils.getResource("/parameters-validation/fasta_not_readable.fa");
         file.setReadable(false);
 
         jobParametersBuilder = new JobParametersBuilder();
@@ -64,8 +64,7 @@ public class InputFastaValidatorTest {
 
     @Test(expected = JobParametersInvalidException.class)
     public void inputFastaIsADirectory() throws JobParametersInvalidException, IOException {
-        File file = new File(VepAnnotationGeneratorStepParametersValidatorTest.class.getResource(
-                "/parameters-validation/").getFile());
+        File file = TestFileUtils.getResource("/parameters-validation/");
         file.setReadable(true);
 
         jobParametersBuilder = new JobParametersBuilder();
