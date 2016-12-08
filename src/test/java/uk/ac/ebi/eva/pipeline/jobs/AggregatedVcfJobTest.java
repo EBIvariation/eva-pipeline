@@ -109,7 +109,7 @@ public class AggregatedVcfJobTest {
 
         String file = jobOptions.getPipelineOptions().getString(JobParametersNames.INPUT_VCF);
         long lines = JobTestUtils.getLines(new GZIPInputStream(new FileInputStream(file)));
-        Assert.assertEquals(JobTestUtils.count(iterator), lines);
+        Assert.assertEquals(lines, JobTestUtils.count(iterator));
 
         // check that stats are loaded properly
         assertFalse(variantDBAdaptor.iterator(

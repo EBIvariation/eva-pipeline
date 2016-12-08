@@ -101,6 +101,7 @@ public class JobOptions {
     @Value("${" + JobParametersNames.APP_VEP_NUMFORKS + "}") private String vepNumForks;
 
     @Value("${" + JobParametersNames.CONFIG_RESTARTABILITY_ALLOW + ":false}") private boolean allowStartIfComplete;
+    @Value("${" + JobParametersNames.CONFIG_CHUNK_SIZE + ":1000}") private int chunkSize;
 
     private ObjectMap variantOptions = new ObjectMap();
     private ObjectMap pipelineOptions = new ObjectMap();
@@ -221,6 +222,7 @@ public class JobOptions {
         pipelineOptions.put(JobParametersNames.INPUT_FASTA, vepFasta);
         pipelineOptions.put(JobParametersNames.APP_VEP_NUMFORKS, vepNumForks);
         pipelineOptions.put(JobParametersNames.CONFIG_RESTARTABILITY_ALLOW, allowStartIfComplete);
+        pipelineOptions.put(JobParametersNames.CONFIG_CHUNK_SIZE, chunkSize);
 
         logger.debug("Using as pipelineOptions: {}", pipelineOptions.entrySet().toString());
     }

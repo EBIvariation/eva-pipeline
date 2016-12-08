@@ -78,7 +78,9 @@ public class AnnotationLoaderStep {
         String collections = jobOptions.getDbCollectionsVariantsName();
         VepAnnotationMongoWriter writer = new VepAnnotationMongoWriter(mongoOperations, collections);
 
-        return stepBuilderFactory.get(LOAD_VEP_ANNOTATION).<VariantAnnotation, VariantAnnotation>chunk(10)
+        return stepBuilderFactory.get(LOAD_VEP_ANNOTATION)
+                .<VariantAnnotation, VariantAnnotation>chunk(
+                        jobOptions.getPipelineOptions().getInt(JobParametersNames.CONFIG_CHUNK_SIZE))
                 .reader(new AnnotationFlatFileReader(jobOptions.getPipelineOptions().getString(JobOptions.VEP_OUTPUT)))
                 .writer(variantAnnotationItemWriter)
                 .faultTolerant().skipLimit(50).skip(FlatFileParseException.class)

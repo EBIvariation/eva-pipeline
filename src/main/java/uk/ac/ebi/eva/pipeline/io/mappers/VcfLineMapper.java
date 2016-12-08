@@ -23,6 +23,8 @@ import uk.ac.ebi.eva.commons.readers.VariantVcfFactory;
 
 import java.util.List;
 
+import static org.junit.Assert.assertNotNull;
+
 /**
  * Maps a String (in VCF format) to a list of variants.
  * <p>
@@ -34,17 +36,20 @@ public class VcfLineMapper implements LineMapper<List<Variant>> {
     private final VariantVcfFactory factory;
 
     public VcfLineMapper(VariantSource source) {
-        this.source = source;
-        this.factory = new VariantVcfFactory();
         if (!VariantSource.Aggregation.NONE.equals(source.getAggregation())) {
             throw new IllegalArgumentException(
                     this.getClass().getSimpleName() + " should not take aggregated " +
                             "VCFs, but the VariantSource is not marked as Aggregation.NONE");
         }
+        this.source = source;
+        this.factory = new VariantVcfFactory();
     }
 
     @Override
-    public List<Variant> mapLine(String line, int lineNumber) throws Exception {
+    public List<Variant> mapLine(String line, int lineNumber) {
+        assertNotNull("It is not allowed to use " + this.getClass().getSimpleName()
+                              + " with aggregated VCFs (hint: set VariantSource.Aggregation to NONE)",
+                      factory);
         return factory.create(source, line);
     }
 }

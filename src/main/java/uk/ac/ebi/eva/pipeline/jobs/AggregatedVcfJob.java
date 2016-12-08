@@ -15,8 +15,6 @@
  */
 package uk.ac.ebi.eva.pipeline.jobs;
 
-import org.opencb.biodata.models.variant.VariantSource;
-import org.opencb.opencga.storage.core.variant.VariantStorageManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.Job;
@@ -24,7 +22,6 @@ import org.springframework.batch.core.JobExecutionListener;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
-import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.job.builder.FlowJobBuilder;
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.job.flow.Flow;
@@ -36,23 +33,16 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
 
-import uk.ac.ebi.eva.commons.models.data.Variant;
-import uk.ac.ebi.eva.pipeline.io.readers.AggregatedVcfReader;
-import uk.ac.ebi.eva.pipeline.io.readers.UnwindingItemStreamReader;
-import uk.ac.ebi.eva.pipeline.io.readers.VcfHeaderReader;
 import uk.ac.ebi.eva.pipeline.jobs.flows.AnnotationFlow;
 import uk.ac.ebi.eva.pipeline.jobs.steps.VariantLoaderStep;
 import uk.ac.ebi.eva.pipeline.listeners.VariantOptionsConfigurerListener;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
-import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
-
-import java.io.File;
 
 /**
- * Complete pipeline workflow for aggregated VCF.
- * Aggregated statistics are provided in the VCF instead of the genotypes.
+ * Complete pipeline workflow for aggregated VCF. Aggregated statistics are provided in the VCF instead of the
+ * genotypes.
  * <p>
- * transform ---> load --> (optionalAnnotationFlow: variantsAnnotGenerateInput --> (annotationCreate --> annotationLoad))
+ * load --> (optionalAnnotationFlow: variantsAnnotGenerateInput --> (annotationCreate --> annotationLoad))
  * <p>
  * Steps in () are optional
  */
@@ -67,12 +57,16 @@ public class AggregatedVcfJob extends CommonJobStepInitialization {
 
     //job default settings
     private static final boolean INCLUDE_SAMPLES = false;
+
     private static final boolean COMPRESS_GENOTYPES = false;
+
     private static final boolean CALCULATE_STATS = true;
+
     private static final boolean INCLUDE_STATS = true;
 
     @Autowired
     private JobBuilderFactory jobBuilderFactory;
+
     @Autowired
     private Flow annotationFlowOptional;
 
@@ -105,8 +99,8 @@ public class AggregatedVcfJob extends CommonJobStepInitialization {
     @Scope("prototype")
     public JobExecutionListener aggregatedJobListener() {
         return new VariantOptionsConfigurerListener(INCLUDE_SAMPLES,
-                COMPRESS_GENOTYPES,
-                CALCULATE_STATS,
-                INCLUDE_STATS);
+                                                    COMPRESS_GENOTYPES,
+                                                    CALCULATE_STATS,
+                                                    INCLUDE_STATS);
     }
 }

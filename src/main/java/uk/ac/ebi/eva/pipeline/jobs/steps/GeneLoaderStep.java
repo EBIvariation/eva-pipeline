@@ -68,9 +68,12 @@ public class GeneLoaderStep {
     @Bean
     @Qualifier("genesLoadStep")
     public Step genesLoadStep() throws IOException {
-        MongoOperations mongoOperations = MongoDBHelper.getMongoOperations(jobOptions.getDbName(), jobOptions.getMongoConnection());
+        MongoOperations mongoOperations = MongoDBHelper
+                .getMongoOperations(jobOptions.getDbName(), jobOptions.getMongoConnection());
 
-        return stepBuilderFactory.get(LOAD_FEATURES).<FeatureCoordinates, FeatureCoordinates>chunk(10)
+        return stepBuilderFactory.get(LOAD_FEATURES)
+                .<FeatureCoordinates, FeatureCoordinates>chunk(
+                        jobOptions.getPipelineOptions().getInt(JobParametersNames.CONFIG_CHUNK_SIZE))
                 .reader(new GeneReader(jobOptions.getPipelineOptions().getString(JobParametersNames.INPUT_GTF)))
                 .processor(new GeneFilterProcessor())
                 .writer(new GeneWriter(mongoOperations, jobOptions.getDbCollectionsFeaturesName()))
@@ -78,5 +81,5 @@ public class GeneLoaderStep {
                 .listener(new SkippedItemListener())
                 .build();
     }
-
+    
 }

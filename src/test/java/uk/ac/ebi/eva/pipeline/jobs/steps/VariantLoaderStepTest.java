@@ -104,7 +104,7 @@ public class VariantLoaderStepTest {
         assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
         assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());
 
-        // And the number of documents in db should be the same number of line of the vcf file
+        // And the number of documents in the DB should be equals to the number of lines in the VCF file
         VariantStorageManager variantStorageManager = StorageManagerFactory.getVariantStorageManager();
         VariantDBAdaptor variantDBAdaptor = variantStorageManager.getDBAdaptor(databaseName, null);
         VariantDBIterator iterator = variantDBAdaptor.iterator(new QueryOptions());

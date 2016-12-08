@@ -16,7 +16,6 @@
 package uk.ac.ebi.eva.pipeline.io.mappers;
 
 import org.opencb.biodata.models.variant.VariantSource;
-import org.spockframework.util.Assert;
 import org.springframework.batch.item.file.LineMapper;
 
 import uk.ac.ebi.eva.commons.models.data.Variant;
@@ -26,6 +25,8 @@ import uk.ac.ebi.eva.commons.readers.VariantVcfExacFactory;
 import uk.ac.ebi.eva.commons.readers.VariantVcfFactory;
 
 import java.util.List;
+
+import static org.junit.Assert.assertNotNull;
 
 /**
  * Maps a String (in VCF format, with aggregated samples) to a list of variants.
@@ -38,7 +39,6 @@ public class AggregatedVcfLineMapper implements LineMapper<List<Variant>> {
     private VariantVcfFactory factory;
 
     public AggregatedVcfLineMapper(VariantSource source) {
-        this.source = source;
         switch (source.getAggregation()) {
             case EVS:
                 factory = new VariantVcfEVSFactory();
@@ -55,12 +55,14 @@ public class AggregatedVcfLineMapper implements LineMapper<List<Variant>> {
                         this.getClass().getSimpleName() + " should not take non-aggregated " +
                                 "VCFs, but the VariantSource is marked as Aggregation.NONE");
         }
+        this.source = source;
     }
 
     @Override
     public List<Variant> mapLine(String line, int lineNumber) throws Exception {
-        Assert.notNull(factory, "It is not allowed to use " + this.getClass().getSimpleName()
-                + " with non-aggregated VCFs (hint: do not set VariantSource.Aggregation to NONE");
+        assertNotNull("It is not allowed to use " + this.getClass().getSimpleName()
+                              + " with non-aggregated VCFs (hint: do not set VariantSource.Aggregation to NONE)",
+                      factory);
         return factory.create(source, line);
     }
 }

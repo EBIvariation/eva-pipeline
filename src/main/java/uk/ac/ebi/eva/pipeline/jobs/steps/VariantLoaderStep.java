@@ -41,12 +41,12 @@ import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 import uk.ac.ebi.eva.utils.MongoDBHelper;
 
-import java.io.File;
+import java.io.IOException;
 
 /**
- * Step that loads transformed variants into mongoDB
+ * Step that normalizes variants during the reading and loads them into MongoDB
  * <p>
- * Input: transformed variants file (variants.json.gz)
+ * Input: VCF file
  * Output: variants loaded into mongodb
  */
 @Configuration
@@ -66,11 +66,12 @@ public class VariantLoaderStep {
 
     @Autowired
     private VariantMongoWriter variantMongoWriter;
-    
+
     @Bean
     @Qualifier("variantsLoadStep")
     public Step variantsLoadStep() throws Exception {
-        return stepBuilderFactory.get(LOAD_VARIANTS).<Variant, Variant>chunk(10)
+        return stepBuilderFactory.get(LOAD_VARIANTS)
+                .<Variant, Variant>chunk(jobOptions.getPipelineOptions().getInt(JobParametersNames.CONFIG_CHUNK_SIZE))
                 .reader(reader)
                 .writer(variantMongoWriter)
                 .faultTolerant().skipLimit(50).skip(FlatFileParseException.class)
@@ -105,19 +106,19 @@ public class VariantLoaderStep {
     public UnwindingItemStreamReader<Variant> unwindingReader(VcfReader vcfReader) throws Exception {
         return new UnwindingItemStreamReader<>(vcfReader);
     }
-    
+
     /**
-     * - the aggregation type is passed so that spring won't cache the instance of VcfReader if it is already built 
+     * The aggregation type is passed so that spring won't cache the instance of VcfReader if it is already built
      * with other aggregation type.
-     * - 
-     * @param aggregationType
-     * @return
-     * @throws Exception
+     *
+     * @param aggregationType to decide whether to instantiate a VcfReader or AggregatedVcfReader.
+     * @return a VcfReader for the given aggregation type.
+     * @throws IOException if the file doesn't exist, because it has to be read to see if it's compressed.
      */
     @Bean
     @StepScope
     public VcfReader vcfReader(@Value("${" + JobParametersNames.INPUT_VCF_AGGREGATION + "}")
-                                                        String aggregationType) throws Exception {
+                                       String aggregationType) throws IOException {
         VariantSource.Aggregation aggregation = VariantSource.Aggregation.valueOf(aggregationType);
         if (VariantSource.Aggregation.NONE.equals(aggregation)) {
             return new VcfReader(
