@@ -21,7 +21,6 @@ import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.JobParametersInvalidException;
 
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
-import uk.ac.ebi.eva.pipeline.parameters.validation.step.VepInputGeneratorStepParametersValidator;
 
 /**
  * Tests that the arguments necessary to run a {@link uk.ac.ebi.eva.pipeline.jobs.steps.VepInputGeneratorStep} are
@@ -37,7 +36,7 @@ public class VepInputGeneratorStepParametersValidatorTest {
 
     @Test
     public void allJobParametersAreValid() throws JobParametersInvalidException {
-        final String DIR = VepAnnotationGeneratorStepParametersValidatorTest.class
+        final String dir = VepAnnotationGeneratorStepParametersValidatorTest.class
                 .getResource("/parameters-validation/").getPath();
 
         JobParametersBuilder jobParametersBuilder = new JobParametersBuilder();
@@ -46,14 +45,14 @@ public class VepInputGeneratorStepParametersValidatorTest {
         jobParametersBuilder.addString(JobParametersNames.DB_NAME, "dbName");
         jobParametersBuilder.addString(JobParametersNames.INPUT_STUDY_ID, "inputStudyId");
         jobParametersBuilder.addString(JobParametersNames.INPUT_VCF_ID, "inputVcfId");
-        jobParametersBuilder.addString(JobParametersNames.OUTPUT_DIR_ANNOTATION, DIR);
+        jobParametersBuilder.addString(JobParametersNames.OUTPUT_DIR_ANNOTATION, dir);
 
         validator.validate(jobParametersBuilder.toJobParameters());
     }
 
     @Test
     public void optionalConfigRestartabilityAllowIsMissing() throws JobParametersInvalidException {
-        final String DIR = VepAnnotationGeneratorStepParametersValidatorTest.class
+        final String dir = VepAnnotationGeneratorStepParametersValidatorTest.class
                 .getResource("/parameters-validation/").getPath();
 
         JobParametersBuilder jobParametersBuilder = new JobParametersBuilder();
@@ -61,7 +60,7 @@ public class VepInputGeneratorStepParametersValidatorTest {
         jobParametersBuilder.addString(JobParametersNames.DB_NAME, "dbName");
         jobParametersBuilder.addString(JobParametersNames.INPUT_STUDY_ID, "inputStudyId");
         jobParametersBuilder.addString(JobParametersNames.INPUT_VCF_ID, "inputVcfId");
-        jobParametersBuilder.addString(JobParametersNames.OUTPUT_DIR_ANNOTATION, DIR);
+        jobParametersBuilder.addString(JobParametersNames.OUTPUT_DIR_ANNOTATION, dir);
 
         validator.validate(jobParametersBuilder.toJobParameters());
     }
