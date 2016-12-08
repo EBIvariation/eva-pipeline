@@ -1,9 +1,23 @@
+/*
+ * Copyright 2014-2016 EMBL - European Bioinformatics Institute
+ * Copyright 2015 OpenCB
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package uk.ac.ebi.eva.commons.models.data;
 
 import org.opencb.biodata.models.feature.AllelesCode;
 import org.opencb.biodata.models.feature.Genotype;
-import org.opencb.biodata.models.pedigree.Condition;
-import org.opencb.biodata.models.pedigree.Individual;
 import org.opencb.biodata.models.pedigree.Pedigree;
 import org.opencb.biodata.models.variant.stats.VariantHardyWeinbergStats;
 
@@ -15,63 +29,77 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
- * @author Alejandro Aleman Ramos &lt;aaleman@cipf.es&gt;
- * @author Cristina Yenyxe Gonzalez Garcia &lt;cyenyxe@ebi.ac.uk&gt;
- * @author Jose Miguel Mut Lopez &lt;jmmut@ebi.ac.uk&gt;
- *
+ * Bean to represent statistics related to a set of samples for a given variant
+ * <p>
  * TODO Mendelian errors must be calculated
  */
 public class VariantStats {
 
     private String refAllele;
+
     private String altAllele;
+
     private Variant.VariantType variantType;
-    
+
     private int refAlleleCount;
+
     private int altAlleleCount;
+
     private Map<Genotype, Integer> genotypesCount;
-    
+
     private int missingAlleles;
+
     private int missingGenotypes;
-    
+
     private float refAlleleFreq;
+
     private float altAlleleFreq;
+
     private Map<Genotype, Float> genotypesFreq;
+
     private float maf;
+
     private float mgf;
+
     private String mafAllele;
+
     private String mgfGenotype;
-    
+
     private boolean passedFilters;
-    
+
     private int mendelianErrors;
-    
+
     private float casesPercentDominant;
+
     private float controlsPercentDominant;
+
     private float casesPercentRecessive;
+
     private float controlsPercentRecessive;
-    
+
     private float quality;
+
     private int numSamples;
+
     private VariantHardyWeinbergStats hw;
 
-    
+
     public VariantStats() {
         this(null, -1, null, null, Variant.VariantType.SNV, -1, -1, null, null, -1, -1, -1, -1, -1, -1, -1);
     }
 
     public VariantStats(Variant variant) {
         this(null, -1,
-                variant != null ? variant.getReference() : null,
-                variant != null ? variant.getAlternate() : null,
-                variant != null ? variant.getType() : Variant.VariantType.SNV,
-                -1, -1, null, null, -1, -1, -1, -1, -1, -1, -1);
+             variant != null ? variant.getReference() : null,
+             variant != null ? variant.getAlternate() : null,
+             variant != null ? variant.getType() : Variant.VariantType.SNV,
+             -1, -1, null, null, -1, -1, -1, -1, -1, -1, -1);
     }
 
     public VariantStats(String referenceAllele, String alternateAllele, Variant.VariantType type) {
         this(null, -1, referenceAllele, alternateAllele, type, -1, -1, null, null, -1, -1, -1, -1, -1, -1, -1);
     }
-    
+
     public VariantStats(String chromosome, int position, String referenceAllele, String alternateAlleles,
                         Variant.VariantType variantType, float maf, float mgf, String mafAllele, String mgfGenotype,
                         int numMissingAlleles, int numMissingGenotypes, int numMendelErrors, float percentCasesDominant,
@@ -79,7 +107,7 @@ public class VariantStats {
         this.refAllele = referenceAllele;
         this.altAllele = alternateAlleles;
         this.variantType = variantType;
-        
+
         this.maf = maf;
         this.mgf = mgf;
         this.mafAllele = mafAllele;
@@ -95,7 +123,7 @@ public class VariantStats {
         this.controlsPercentDominant = percentControlsDominant;
         this.casesPercentRecessive = percentCasesRecessive;
         this.controlsPercentRecessive = percentControlsRecessive;
-        
+
         this.quality = -1;
 
         this.hw = new VariantHardyWeinbergStats();
@@ -156,7 +184,7 @@ public class VariantStats {
     public void setAltAlleleFreq(float altAlleleFreq) {
         this.altAlleleFreq = altAlleleFreq;
     }
-    
+
     public String getMafAllele() {
         return mafAllele;
     }
@@ -180,7 +208,7 @@ public class VariantStats {
     public void addGenotype(Genotype g) {
         this.addGenotype(g, 1);
     }
-    
+
     public void addGenotype(Genotype g, int addedCount) {
         Integer count;
         Genotype normalizedGenotype = normalizeGenotypeAlleles(g);
@@ -191,11 +219,11 @@ public class VariantStats {
         }
         genotypesCount.put(normalizedGenotype, count);
     }
-    
+
     private Genotype normalizeGenotypeAlleles(Genotype g) {
         // Get alleles sorted in ascending order
         int[] sortedAlleles = g.getNormalizedAllelesIdx();
-        
+
         if (Arrays.equals(sortedAlleles, g.getAllelesIdx())) {
             // If the alleles do not change, no need to do anything
             return g;
@@ -210,7 +238,7 @@ public class VariantStats {
             return new Genotype(joinedAlleles.toString(), g.getReference(), g.getAlternate());
         }
     }
-    
+
     void setGenotypesCount(Map<Genotype, Integer> genotypesCount) {
         this.genotypesCount = genotypesCount;
     }
@@ -372,7 +400,8 @@ public class VariantStats {
                 + '}';
     }
 
-    public VariantStats calculate(List<Map<String, String>> samplesData, Map<String, String> attributes, Pedigree pedigree) {
+    public VariantStats calculate(List<Map<String, String>> samplesData, Map<String, String> attributes,
+                                  Pedigree pedigree) {
         int[] allelesCount = new int[2];
         int totalAllelesCount = 0, totalGenotypesCount = 0;
 
@@ -403,7 +432,8 @@ public class VariantStats {
                     // Counting genotypes for Hardy-Weinberg (all phenotypes)
                     if (g.isAlleleRef(0) && g.isAlleleRef(1)) { // 0|0
                         this.getHw().incN_AA();
-                    } else if ((g.isAlleleRef(0) && g.getAllele(1) == 1) || (g.getAllele(0) == 1 && g.isAlleleRef(1))) {  // 0|1, 1|0
+                    } else if ((g.isAlleleRef(0) && g.getAllele(1) == 1)
+                            || (g.getAllele(0) == 1 && g.isAlleleRef(1))) {  // 0|1, 1|0
                         this.getHw().incN_Aa();
 
                     } else if (g.getAllele(0) == 1 && g.getAllele(1) == 1) {
@@ -438,7 +468,7 @@ public class VariantStats {
                     break;
             }
         }  // Finish all samples loop
-        
+
         // Set counts for each allele
         this.setRefAlleleCount(allelesCount[0]);
         this.setAltAlleleCount(allelesCount[1]);
@@ -479,17 +509,18 @@ public class VariantStats {
     }
 
     /**
-     * Calculates the statistics for some variants read from a set of files, and 
-     * optionally given pedigree information. Some statistics like inheritance 
+     * Calculates the statistics for some variants read from a set of files, and
+     * optionally given pedigree information. Some statistics like inheritance
      * patterns can only be calculated if pedigree information is provided.
-     * 
+     *
      * @param variants The variants whose statistics will be calculated
      * @param ped Optional pedigree information to calculate some statistics
      */
     public static void calculateStatsForVariantsList(List<Variant> variants, Pedigree ped) {
         for (Variant variant : variants) {
             for (VariantSourceEntry file : variant.getSourceEntries().values()) {
-                VariantStats stats = new VariantStats(variant).calculate(file.getSamplesData(), file.getAttributes(), ped);
+                VariantStats stats = new VariantStats(variant)
+                        .calculate(file.getSamplesData(), file.getAttributes(), ped);
                 file.setStats(stats); // TODO Correct?
             }
         }
@@ -499,17 +530,17 @@ public class VariantStats {
         if (totalAllelesCount < 0) {
             throw new IllegalArgumentException("The number of alleles must be equals or greater than zero");
         }
-        
+
         if (totalAllelesCount == 0) {
             // Nothing to calculate here
             this.setMaf(-1);
             this.setMafAllele(null);
             return;
         }
-        
+
         refAlleleFreq = refAlleleCount / (float) totalAllelesCount;
         altAlleleFreq = altAlleleCount / (float) totalAllelesCount;
-        
+
         if (refAlleleFreq <= altAlleleFreq) {
             this.setMaf(refAlleleFreq);
             this.setMafAllele(refAllele);
@@ -523,34 +554,34 @@ public class VariantStats {
         if (totalGenotypesCount < 0) {
             throw new IllegalArgumentException("The number of genotypes must be equals or greater than zero");
         }
-        
+
         if (genotypesCount.isEmpty() || totalGenotypesCount == 0) {
             // Nothing to calculate here
             this.setMgf(-1);
             this.setMgfGenotype(null);
             return;
         }
-        
+
         // Set all combinations of genotypes to zero
         genotypesFreq.put(new Genotype("0/0", refAllele, altAllele), 0.0f);
         genotypesFreq.put(new Genotype("0/1", refAllele, altAllele), 0.0f);
         genotypesFreq.put(new Genotype("1/1", refAllele, altAllele), 0.0f);
-        
+
         // Insert the genotypes found in the file
         for (Map.Entry<Genotype, Integer> gtCount : genotypesCount.entrySet()) {
             if (gtCount.getKey().getCode() == AllelesCode.ALLELES_MISSING) {
                 // Missing genotypes shouldn't have frequencies calculated
                 continue;
             }
-            
+
             float freq = (totalGenotypesCount > 0) ? gtCount.getValue() / (float) totalGenotypesCount : 0;
             genotypesFreq.put(gtCount.getKey(), freq);
         }
-        
+
         // Traverse the genotypes to see which one has the MGF
         float currMgf = Float.MAX_VALUE;
         Genotype currMgfGenotype = null;
-        
+
         for (Map.Entry<Genotype, Float> gtCount : genotypesFreq.entrySet()) {
             float freq = gtCount.getValue();
             if (freq < currMgf) {
@@ -558,7 +589,7 @@ public class VariantStats {
                 currMgfGenotype = gtCount.getKey();
             }
         }
-        
+
         if (currMgfGenotype != null) {
             this.setMgf(currMgf);
             this.setMgfGenotype(currMgfGenotype.toString());
@@ -659,7 +690,8 @@ public class VariantStats {
         if (Float.floatToIntBits(this.casesPercentRecessive) != Float.floatToIntBits(other.casesPercentRecessive)) {
             return false;
         }
-        if (Float.floatToIntBits(this.controlsPercentRecessive) != Float.floatToIntBits(other.controlsPercentRecessive)) {
+        if (Float.floatToIntBits(this.controlsPercentRecessive) 
+                != Float.floatToIntBits(other.controlsPercentRecessive)) {
             return false;
         }
         if (Float.floatToIntBits(this.quality) != Float.floatToIntBits(other.quality)) {
@@ -670,6 +702,6 @@ public class VariantStats {
         }
         return true;
     }
-    
+
 
 }
