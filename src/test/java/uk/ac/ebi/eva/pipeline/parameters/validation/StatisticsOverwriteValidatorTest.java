@@ -34,56 +34,56 @@ public class StatisticsOverwriteValidatorTest {
     }
 
     @Test
-    public void configRestartabilityAllowIsTrue() throws JobParametersInvalidException {
+    public void statisticsOverwriteIsTrue() throws JobParametersInvalidException {
         jobParametersBuilder = new JobParametersBuilder();
         jobParametersBuilder.addString(JobParametersNames.STATISTICS_OVERWRITE, "true");
         validator.validate(jobParametersBuilder.toJobParameters());
     }
 
     @Test
-    public void configRestartabilityAllowIsTrueAllCapital() throws JobParametersInvalidException {
+    public void statisticsOverwriteIsTrueAllCapital() throws JobParametersInvalidException {
         jobParametersBuilder = new JobParametersBuilder();
         jobParametersBuilder.addString(JobParametersNames.STATISTICS_OVERWRITE, "TRUE");
         validator.validate(jobParametersBuilder.toJobParameters());
     }
 
     @Test
-    public void configRestartabilityAllowIsFalse() throws JobParametersInvalidException {
+    public void statisticsOverwriteIsFalse() throws JobParametersInvalidException {
         jobParametersBuilder = new JobParametersBuilder();
         jobParametersBuilder.addString(JobParametersNames.STATISTICS_OVERWRITE, "false");
         validator.validate(jobParametersBuilder.toJobParameters());
     }
 
     @Test
-    public void configRestartabilityAllowIsFalseAllCapital() throws JobParametersInvalidException {
+    public void statisticsOverwriteIsFalseAllCapital() throws JobParametersInvalidException {
         jobParametersBuilder = new JobParametersBuilder();
         jobParametersBuilder.addString(JobParametersNames.STATISTICS_OVERWRITE, "FALSE");
         validator.validate(jobParametersBuilder.toJobParameters());
     }
 
     @Test(expected = JobParametersInvalidException.class)
-    public void configRestartabilityAllowIsNotValid() throws JobParametersInvalidException {
+    public void statisticsOverwriteIsNotValid() throws JobParametersInvalidException {
         jobParametersBuilder = new JobParametersBuilder();
         jobParametersBuilder.addString(JobParametersNames.STATISTICS_OVERWRITE, "blabla");
         validator.validate(jobParametersBuilder.toJobParameters());
     }
 
     @Test(expected = JobParametersInvalidException.class)
-    public void configRestartabilityAllowIsEmpty() throws JobParametersInvalidException {
+    public void statisticsOverwriteIsEmpty() throws JobParametersInvalidException {
         jobParametersBuilder = new JobParametersBuilder();
         jobParametersBuilder.addString(JobParametersNames.STATISTICS_OVERWRITE, "");
         validator.validate(jobParametersBuilder.toJobParameters());
     }
 
     @Test(expected = JobParametersInvalidException.class)
-    public void configRestartabilityAllowIsWhitespace() throws JobParametersInvalidException {
+    public void statisticsOverwriteIsWhitespace() throws JobParametersInvalidException {
         jobParametersBuilder = new JobParametersBuilder();
         jobParametersBuilder.addString(JobParametersNames.STATISTICS_OVERWRITE, " ");
         validator.validate(jobParametersBuilder.toJobParameters());
     }
 
     @Test(expected = JobParametersInvalidException.class)
-    public void configRestartabilityAllowIsNull() throws JobParametersInvalidException {
+    public void statisticsOverwriteIsNull() throws JobParametersInvalidException {
         jobParametersBuilder = new JobParametersBuilder();
         jobParametersBuilder.addString(JobParametersNames.STATISTICS_OVERWRITE, null);
         validator.validate(jobParametersBuilder.toJobParameters());

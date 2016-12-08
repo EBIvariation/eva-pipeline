@@ -27,7 +27,7 @@ import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 import java.io.IOException;
 
 /**
- * Tests that the arguments necessary to run a {@link uk.ac.ebi.eva.pipeline.jobs.steps.VepAnnotationGeneratorStep} are
+ * Tests that the arguments necessary to run a {@link uk.ac.ebi.eva.pipeline.jobs.steps.PopulationStatisticsLoaderStep} are
  * correctly validated
  */
 public class PopulationStatisticsLoaderStepParametersValidatorTest {

@@ -31,11 +31,11 @@ public class StatisticsOverwriteValidator implements JobParametersValidator {
     
     @Override
     public void validate(JobParameters parameters) throws JobParametersInvalidException {
-        String configRestartabilityAllowValue = parameters.getString(JobParametersNames.STATISTICS_OVERWRITE);
+        String statisticsOverwriteValue = parameters.getString(JobParametersNames.STATISTICS_OVERWRITE);
 
         ParametersValidatorUtil.checkIsNotNullOrEmptyString(
-                configRestartabilityAllowValue, JobParametersNames.STATISTICS_OVERWRITE);
+                statisticsOverwriteValue, JobParametersNames.STATISTICS_OVERWRITE);
         ParametersValidatorUtil.checkIsBoolean(
-                configRestartabilityAllowValue,JobParametersNames.CONFIG_RESTARTABILITY_ALLOW);
+                statisticsOverwriteValue,JobParametersNames.STATISTICS_OVERWRITE);
     }
 }

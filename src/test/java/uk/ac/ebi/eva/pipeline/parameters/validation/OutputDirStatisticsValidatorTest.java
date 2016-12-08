@@ -38,7 +38,7 @@ public class OutputDirStatisticsValidatorTest {
     }
 
     @Test
-    public void outputDirAnnotationIsValid() throws JobParametersInvalidException, IOException {
+    public void outputDirStatisticsIsValid() throws JobParametersInvalidException, IOException {
         File writableOutputDir = TestFileUtils.getResource("/parameters-validation/");
         writableOutputDir.setWritable(true);
 
@@ -48,14 +48,14 @@ public class OutputDirStatisticsValidatorTest {
     }
 
     @Test(expected = JobParametersInvalidException.class)
-    public void outputDirAnnotationDoesNotExist() throws JobParametersInvalidException {
+    public void outputDirStatisticsDoesNotExist() throws JobParametersInvalidException {
         jobParametersBuilder = new JobParametersBuilder();
         jobParametersBuilder.addString(JobParametersNames.OUTPUT_DIR_STATISTICS, "file://path/to/");
         validator.validate(jobParametersBuilder.toJobParameters());
     }
 
     @Test(expected = JobParametersInvalidException.class)
-    public void outputDirAnnotationIsNotWritable() throws JobParametersInvalidException, IOException {
+    public void outputDirStatisticsIsNotWritable() throws JobParametersInvalidException, IOException {
         File notWritablefile = TestFileUtils.getResource("/parameters-validation/");
         notWritablefile.setWritable(false);
 
@@ -65,7 +65,7 @@ public class OutputDirStatisticsValidatorTest {
     }
 
     @Test(expected = JobParametersInvalidException.class)
-    public void outputDirAnnotationIsNotADirectory() throws JobParametersInvalidException, IOException {
+    public void outputDirStatisticsIsNotADirectory() throws JobParametersInvalidException, IOException {
         jobParametersBuilder = new JobParametersBuilder();
         jobParametersBuilder.addString(JobParametersNames.OUTPUT_DIR_STATISTICS,
                                        TestFileUtils.getResource(
