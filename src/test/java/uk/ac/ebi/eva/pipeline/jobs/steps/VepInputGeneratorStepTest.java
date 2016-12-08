@@ -27,14 +27,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import uk.ac.ebi.eva.pipeline.configuration.VepInputGeneratorStepConfiguration;
 import uk.ac.ebi.eva.pipeline.jobs.AnnotationJob;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
+import uk.ac.ebi.eva.test.configuration.VepInputGeneratorStepConfiguration;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 
 import java.io.File;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static uk.ac.ebi.eva.test.utils.JobTestUtils.readFirstLine;
 import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResourceUrl;
 

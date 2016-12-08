@@ -37,22 +37,19 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import uk.ac.ebi.eva.pipeline.configuration.VariantAggregatedConfiguration;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
+import uk.ac.ebi.eva.test.configuration.VariantAggregatedConfiguration;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
 
 import java.io.FileInputStream;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static uk.ac.ebi.eva.test.utils.JobTestUtils.getTransformedOutputPath;
 
 /**
  * Test for {@link AggregatedVcfJob}

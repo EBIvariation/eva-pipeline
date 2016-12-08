@@ -38,10 +38,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
-import uk.ac.ebi.eva.pipeline.configuration.GenotypedVcfConfiguration;
+
 import uk.ac.ebi.eva.pipeline.jobs.steps.AnnotationLoaderStep;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
+import uk.ac.ebi.eva.test.configuration.GenotypedVcfConfiguration;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 
 import java.io.BufferedReader;
@@ -55,7 +56,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static uk.ac.ebi.eva.test.utils.JobTestUtils.count;
 import static uk.ac.ebi.eva.test.utils.JobTestUtils.getLines;
 import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResource;

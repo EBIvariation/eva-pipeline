@@ -30,28 +30,22 @@ import org.opencb.opencga.storage.core.variant.adaptors.VariantDBIterator;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.JobExecution;
-import org.springframework.batch.core.JobExecutionException;
 import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
-import uk.ac.ebi.eva.pipeline.configuration.GenotypedVcfConfiguration;
+
 import uk.ac.ebi.eva.pipeline.jobs.GenotypedVcfJob;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
+import uk.ac.ebi.eva.test.configuration.GenotypedVcfConfiguration;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.util.zip.GZIPInputStream;
 
 import static org.junit.Assert.assertEquals;
 import static org.opencb.opencga.storage.core.variant.VariantStorageManager.VARIANT_SOURCE;
 import static uk.ac.ebi.eva.test.utils.JobTestUtils.count;
-import static uk.ac.ebi.eva.test.utils.JobTestUtils.getLines;
-import static uk.ac.ebi.eva.test.utils.TestFileUtils.copyResource;
 import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResource;
 
 /**

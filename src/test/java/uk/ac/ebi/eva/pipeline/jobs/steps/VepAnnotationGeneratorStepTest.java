@@ -28,10 +28,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
-import uk.ac.ebi.eva.pipeline.configuration.AnnotationConfiguration;
+
 import uk.ac.ebi.eva.pipeline.jobs.AnnotationJob;
 import uk.ac.ebi.eva.pipeline.jobs.flows.AnnotationFlow;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
+import uk.ac.ebi.eva.test.configuration.AnnotationConfiguration;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
 
@@ -39,7 +40,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.util.zip.GZIPInputStream;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResource;
 
 /**
