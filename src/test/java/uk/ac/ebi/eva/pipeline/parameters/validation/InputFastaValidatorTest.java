@@ -29,6 +29,7 @@ import java.io.IOException;
 public class InputFastaValidatorTest {
 
     private InputFastaValidator validator;
+
     private JobParametersBuilder jobParametersBuilder;
 
     @Before

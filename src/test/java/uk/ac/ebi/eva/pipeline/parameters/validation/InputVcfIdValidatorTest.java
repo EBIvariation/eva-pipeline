@@ -25,6 +25,7 @@ import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 public class InputVcfIdValidatorTest {
 
     private InputVcfIdValidator validator;
+
     private JobParametersBuilder jobParametersBuilder;
 
     @Before
@@ -43,7 +44,8 @@ public class InputVcfIdValidatorTest {
     public void inputVcfIdIsEmpty() throws JobParametersInvalidException {
         jobParametersBuilder = new JobParametersBuilder();
         jobParametersBuilder.addString(JobParametersNames.INPUT_VCF_ID, "");
-        validator.validate(jobParametersBuilder.toJobParameters());    }
+        validator.validate(jobParametersBuilder.toJobParameters());
+    }
 
     @Test(expected = JobParametersInvalidException.class)
     public void inputVcfIdIsWhitespace() throws JobParametersInvalidException {

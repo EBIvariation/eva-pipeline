@@ -32,6 +32,6 @@ public class OutputDirAnnotationValidator implements JobParametersValidator {
         ParametersValidatorUtil.checkDirectoryExists(parameters.getString(JobParametersNames.OUTPUT_DIR_ANNOTATION),
                                                      JobParametersNames.OUTPUT_DIR_ANNOTATION);
         ParametersValidatorUtil.checkFileIsWritable(parameters.getString(JobParametersNames.OUTPUT_DIR_ANNOTATION),
-                                                     JobParametersNames.OUTPUT_DIR_ANNOTATION);
+                                                    JobParametersNames.OUTPUT_DIR_ANNOTATION);
     }
 }

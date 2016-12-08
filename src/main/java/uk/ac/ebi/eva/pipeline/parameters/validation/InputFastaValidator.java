@@ -30,8 +30,8 @@ public class InputFastaValidator implements JobParametersValidator {
     @Override
     public void validate(JobParameters parameters) throws JobParametersInvalidException {
         ParametersValidatorUtil.checkFileExists(parameters.getString(JobParametersNames.INPUT_FASTA),
-                                                             JobParametersNames.INPUT_FASTA);
-        ParametersValidatorUtil.checkFileIsReadable(parameters.getString(JobParametersNames.INPUT_FASTA),
                                                 JobParametersNames.INPUT_FASTA);
+        ParametersValidatorUtil.checkFileIsReadable(parameters.getString(JobParametersNames.INPUT_FASTA),
+                                                    JobParametersNames.INPUT_FASTA);
     }
 }

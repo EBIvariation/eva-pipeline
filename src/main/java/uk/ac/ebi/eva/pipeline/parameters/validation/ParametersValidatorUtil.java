@@ -45,7 +45,8 @@ public class ParametersValidatorUtil {
         }
     }
 
-    static void checkDirectoryExists(String dirToValidate, String jobParametersName) throws JobParametersInvalidException {
+    static void checkDirectoryExists(String dirToValidate,
+                                     String jobParametersName) throws JobParametersInvalidException {
         Path path = getPath(dirToValidate, jobParametersName);
 
         if (!Files.isDirectory(path)) {
@@ -55,7 +56,7 @@ public class ParametersValidatorUtil {
     }
 
     static void checkFileExists(String fileToValidate,
-                                             String jobParametersName) throws JobParametersInvalidException {
+                                String jobParametersName) throws JobParametersInvalidException {
         Path path = getPath(fileToValidate, jobParametersName);
 
         if (Files.notExists(path) || Files.isDirectory(path)) {
@@ -65,7 +66,7 @@ public class ParametersValidatorUtil {
     }
 
     static void checkFileIsReadable(String fileToValidate,
-                                             String jobParametersName) throws JobParametersInvalidException {
+                                    String jobParametersName) throws JobParametersInvalidException {
         Path path = getPath(fileToValidate, jobParametersName);
 
         if (!Files.isReadable(path)) {

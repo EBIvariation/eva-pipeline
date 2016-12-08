@@ -67,7 +67,8 @@ public class VepCachePathValidatorTest {
     public void vepCachePathIsAFile() throws JobParametersInvalidException, IOException {
         jobParametersBuilder = new JobParametersBuilder();
         jobParametersBuilder.addString(JobParametersNames.APP_VEP_CACHE_PATH,
-                TestFileUtils.getResource("/parameters-validation/vepapp.pl").getCanonicalPath());
+                                       TestFileUtils.getResource("/parameters-validation/vepapp.pl")
+                                               .getCanonicalPath());
         validator.validate(jobParametersBuilder.toJobParameters());
 
     }

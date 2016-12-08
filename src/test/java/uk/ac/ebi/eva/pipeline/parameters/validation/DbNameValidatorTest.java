@@ -25,6 +25,7 @@ import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 public class DbNameValidatorTest {
 
     private DbNameValidator validator;
+
     private JobParametersBuilder jobParametersBuilder;
 
     @Before
@@ -50,7 +51,8 @@ public class DbNameValidatorTest {
     public void dbNameIsWhitespace() throws JobParametersInvalidException {
         jobParametersBuilder = new JobParametersBuilder();
         jobParametersBuilder.addString(JobParametersNames.DB_NAME, " ");
-        validator.validate(jobParametersBuilder.toJobParameters());    }
+        validator.validate(jobParametersBuilder.toJobParameters());
+    }
 
     @Test(expected = JobParametersInvalidException.class)
     public void dbNameIsNull() throws JobParametersInvalidException {

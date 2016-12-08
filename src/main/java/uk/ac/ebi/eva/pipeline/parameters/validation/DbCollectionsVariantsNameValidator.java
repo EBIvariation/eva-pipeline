@@ -26,7 +26,7 @@ import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
  *
  * @throws JobParametersInvalidException If the variant collection name is null or empty
  */
-public class DbCollectionsVariantsNameValidator implements JobParametersValidator{
+public class DbCollectionsVariantsNameValidator implements JobParametersValidator {
 
     @Override
     public void validate(JobParameters parameters) throws JobParametersInvalidException {

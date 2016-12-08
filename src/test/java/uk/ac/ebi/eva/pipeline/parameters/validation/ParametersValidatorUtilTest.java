@@ -18,8 +18,6 @@ package uk.ac.ebi.eva.pipeline.parameters.validation;
 import org.junit.Test;
 import org.springframework.batch.core.JobParametersInvalidException;
 
-import uk.ac.ebi.eva.pipeline.parameters.validation.ParametersValidatorUtil;
-
 import java.io.File;
 import java.io.IOException;
 

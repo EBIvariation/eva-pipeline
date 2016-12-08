@@ -24,6 +24,7 @@ import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 
 public class VepCacheSpeciesValidatorTest {
     private VepCacheSpeciesValidator validator;
+
     private JobParametersBuilder jobParametersBuilder;
 
     @Before
