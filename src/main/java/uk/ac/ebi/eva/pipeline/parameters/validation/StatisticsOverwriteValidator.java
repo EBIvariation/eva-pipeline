@@ -28,7 +28,7 @@ import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
  * from 'true' or 'false'
  */
 public class StatisticsOverwriteValidator implements JobParametersValidator {
-    
+
     @Override
     public void validate(JobParameters parameters) throws JobParametersInvalidException {
         String statisticsOverwriteValue = parameters.getString(JobParametersNames.STATISTICS_OVERWRITE);
