@@ -21,7 +21,8 @@ import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobExecutionListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
-import uk.ac.ebi.eva.pipeline.configuration.JobOptions;
+
+import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 
 /**
  * Modifies the JobOptions instance with job-specific configuration, where only the configuration for the
