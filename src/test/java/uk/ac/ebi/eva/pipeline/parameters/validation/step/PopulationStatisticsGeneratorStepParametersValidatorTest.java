@@ -16,14 +16,14 @@
 package uk.ac.ebi.eva.pipeline.parameters.validation.step;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.JobParametersInvalidException;
 
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
-import uk.ac.ebi.eva.test.utils.TestFileUtils;
+import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 
-import java.io.File;
 import java.io.IOException;
 
 /**
@@ -33,6 +33,9 @@ import java.io.IOException;
 public class PopulationStatisticsGeneratorStepParametersValidatorTest {
     private PopulationStatisticsGeneratorStepParametersValidator validator;
 
+    @Rule
+    public PipelineTemporaryFolderRule temporaryFolderRule = new PipelineTemporaryFolderRule();
+
     @Before
     public void initialize() {
         validator = new PopulationStatisticsGeneratorStepParametersValidator();
@@ -40,14 +43,20 @@ public class PopulationStatisticsGeneratorStepParametersValidatorTest {
 
     @Test
     public void allJobParametersAreValid() throws JobParametersInvalidException, IOException {
-        final File dir = TestFileUtils.getResource("/parameters-validation/");
-
-        dir.setReadable(true);
-        dir.setWritable(true);
-
         JobParametersBuilder jobParametersBuilder = new JobParametersBuilder();
         jobParametersBuilder.addString(JobParametersNames.DB_NAME, "dbName");
-        jobParametersBuilder.addString(JobParametersNames.OUTPUT_DIR_STATISTICS, dir.getCanonicalPath());
+        jobParametersBuilder.addString(JobParametersNames.OUTPUT_DIR_STATISTICS, temporaryFolderRule.getRoot().getCanonicalPath());
+        jobParametersBuilder.addString(JobParametersNames.INPUT_STUDY_ID, "inputStudyId");
+        jobParametersBuilder.addString(JobParametersNames.INPUT_VCF_ID, "inputVcfId");
+
+        validator.validate(jobParametersBuilder.toJobParameters());
+    }
+
+    @Test
+    public void allJobParametersIncludingOptionalAreValid() throws JobParametersInvalidException, IOException {
+        JobParametersBuilder jobParametersBuilder = new JobParametersBuilder();
+        jobParametersBuilder.addString(JobParametersNames.DB_NAME, "dbName");
+        jobParametersBuilder.addString(JobParametersNames.OUTPUT_DIR_STATISTICS, temporaryFolderRule.getRoot().getCanonicalPath());
         jobParametersBuilder.addString(JobParametersNames.INPUT_STUDY_ID, "inputStudyId");
         jobParametersBuilder.addString(JobParametersNames.INPUT_VCF_ID, "inputVcfId");
         jobParametersBuilder.addString(JobParametersNames.STATISTICS_OVERWRITE, "true");
@@ -55,16 +64,10 @@ public class PopulationStatisticsGeneratorStepParametersValidatorTest {
         validator.validate(jobParametersBuilder.toJobParameters());
     }
 
-    @Test
-    public void optionalStatisticsOverwriteIsMissing() throws JobParametersInvalidException, IOException {
-        final File dir = TestFileUtils.getResource("/parameters-validation/");
-
-        dir.setReadable(true);
-        dir.setWritable(true);
-
+    @Test(expected = JobParametersInvalidException.class)
+    public void dbNameIsMissing() throws JobParametersInvalidException, IOException {
         JobParametersBuilder jobParametersBuilder = new JobParametersBuilder();
-        jobParametersBuilder.addString(JobParametersNames.DB_NAME, "dbName");
-        jobParametersBuilder.addString(JobParametersNames.OUTPUT_DIR_STATISTICS, dir.getCanonicalPath());
+        jobParametersBuilder.addString(JobParametersNames.OUTPUT_DIR_STATISTICS, temporaryFolderRule.getRoot().getCanonicalPath());
         jobParametersBuilder.addString(JobParametersNames.INPUT_STUDY_ID, "inputStudyId");
         jobParametersBuilder.addString(JobParametersNames.INPUT_VCF_ID, "inputVcfId");
 
@@ -72,11 +75,31 @@ public class PopulationStatisticsGeneratorStepParametersValidatorTest {
     }
 
     @Test(expected = JobParametersInvalidException.class)
-    public void invalidAndMissingParameters() throws JobParametersInvalidException {
+    public void outputDirStatisticsIsMissing() throws JobParametersInvalidException, IOException {
         JobParametersBuilder jobParametersBuilder = new JobParametersBuilder();
-        jobParametersBuilder.addString(JobParametersNames.DB_NAME, "");
-        jobParametersBuilder.addString(JobParametersNames.INPUT_STUDY_ID, "");
-        jobParametersBuilder.addString(JobParametersNames.INPUT_VCF_ID, "");
+        jobParametersBuilder.addString(JobParametersNames.DB_NAME, "dbName");
+        jobParametersBuilder.addString(JobParametersNames.INPUT_STUDY_ID, "inputStudyId");
+        jobParametersBuilder.addString(JobParametersNames.INPUT_VCF_ID, "inputVcfId");
+
+        validator.validate(jobParametersBuilder.toJobParameters());
+    }
+
+    @Test(expected = JobParametersInvalidException.class)
+    public void inputStudyIdIsMissing() throws JobParametersInvalidException, IOException {
+        JobParametersBuilder jobParametersBuilder = new JobParametersBuilder();
+        jobParametersBuilder.addString(JobParametersNames.DB_NAME, "dbName");
+        jobParametersBuilder.addString(JobParametersNames.OUTPUT_DIR_STATISTICS, temporaryFolderRule.getRoot().getCanonicalPath());
+        jobParametersBuilder.addString(JobParametersNames.INPUT_VCF_ID, "inputVcfId");
+
+        validator.validate(jobParametersBuilder.toJobParameters());
+    }
+
+    @Test(expected = JobParametersInvalidException.class)
+    public void inputVcfIdIsMissing() throws JobParametersInvalidException, IOException {
+        JobParametersBuilder jobParametersBuilder = new JobParametersBuilder();
+        jobParametersBuilder.addString(JobParametersNames.DB_NAME, "dbName");
+        jobParametersBuilder.addString(JobParametersNames.OUTPUT_DIR_STATISTICS, temporaryFolderRule.getRoot().getCanonicalPath());
+        jobParametersBuilder.addString(JobParametersNames.INPUT_STUDY_ID, "inputStudyId");
 
         validator.validate(jobParametersBuilder.toJobParameters());
     }
