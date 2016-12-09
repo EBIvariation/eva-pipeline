@@ -21,10 +21,11 @@ import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.JobParametersInvalidException;
 
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
-import uk.ac.ebi.eva.pipeline.parameters.validation.ConfigRestartabilityAllowValidator;
 
 public class ConfigRestartabilityAllowValidatorTest {
+
     private ConfigRestartabilityAllowValidator validator;
+
     private JobParametersBuilder jobParametersBuilder;
 
     @Before

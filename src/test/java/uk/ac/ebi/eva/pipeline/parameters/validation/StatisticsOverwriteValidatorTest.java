@@ -22,54 +22,70 @@ import org.springframework.batch.core.JobParametersInvalidException;
 
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 
-public class VepNumForksValidatorTest {
-    private VepNumForksValidator validator;
+public class StatisticsOverwriteValidatorTest {
+    
+    private StatisticsOverwriteValidator validator;
+
     private JobParametersBuilder jobParametersBuilder;
 
     @Before
     public void setUp() throws Exception {
-        validator = new VepNumForksValidator();
+        validator = new StatisticsOverwriteValidator();
     }
 
     @Test
-    public void vepNumForksIsValid() throws JobParametersInvalidException {
+    public void statisticsOverwriteIsTrue() throws JobParametersInvalidException {
         jobParametersBuilder = new JobParametersBuilder();
-        jobParametersBuilder.addString(JobParametersNames.APP_VEP_NUMFORKS, "11");
+        jobParametersBuilder.addString(JobParametersNames.STATISTICS_OVERWRITE, "true");
+        validator.validate(jobParametersBuilder.toJobParameters());
+    }
+
+    @Test
+    public void statisticsOverwriteIsTrueAllCapital() throws JobParametersInvalidException {
+        jobParametersBuilder = new JobParametersBuilder();
+        jobParametersBuilder.addString(JobParametersNames.STATISTICS_OVERWRITE, "TRUE");
+        validator.validate(jobParametersBuilder.toJobParameters());
+    }
+
+    @Test
+    public void statisticsOverwriteIsFalse() throws JobParametersInvalidException {
+        jobParametersBuilder = new JobParametersBuilder();
+        jobParametersBuilder.addString(JobParametersNames.STATISTICS_OVERWRITE, "false");
+        validator.validate(jobParametersBuilder.toJobParameters());
+    }
+
+    @Test
+    public void statisticsOverwriteIsFalseAllCapital() throws JobParametersInvalidException {
+        jobParametersBuilder = new JobParametersBuilder();
+        jobParametersBuilder.addString(JobParametersNames.STATISTICS_OVERWRITE, "FALSE");
         validator.validate(jobParametersBuilder.toJobParameters());
     }
 
     @Test(expected = JobParametersInvalidException.class)
-    public void vepNumForksIsZero() throws JobParametersInvalidException {
+    public void statisticsOverwriteIsNotValid() throws JobParametersInvalidException {
         jobParametersBuilder = new JobParametersBuilder();
-        jobParametersBuilder.addString(JobParametersNames.APP_VEP_NUMFORKS, "0");
+        jobParametersBuilder.addString(JobParametersNames.STATISTICS_OVERWRITE, "blabla");
         validator.validate(jobParametersBuilder.toJobParameters());
     }
 
     @Test(expected = JobParametersInvalidException.class)
-    public void vepNumForksIsNegative() throws JobParametersInvalidException {
+    public void statisticsOverwriteIsEmpty() throws JobParametersInvalidException {
         jobParametersBuilder = new JobParametersBuilder();
-        jobParametersBuilder.addString(JobParametersNames.APP_VEP_NUMFORKS, "-1");
+        jobParametersBuilder.addString(JobParametersNames.STATISTICS_OVERWRITE, "");
         validator.validate(jobParametersBuilder.toJobParameters());
     }
 
     @Test(expected = JobParametersInvalidException.class)
-    public void vepNumForksIsNotValid() throws JobParametersInvalidException {
+    public void statisticsOverwriteIsWhitespace() throws JobParametersInvalidException {
         jobParametersBuilder = new JobParametersBuilder();
-        jobParametersBuilder.addString(JobParametersNames.APP_VEP_NUMFORKS, "hello");
+        jobParametersBuilder.addString(JobParametersNames.STATISTICS_OVERWRITE, " ");
         validator.validate(jobParametersBuilder.toJobParameters());
     }
 
     @Test(expected = JobParametersInvalidException.class)
-    public void vepNumForksIsEmpty() throws JobParametersInvalidException {
+    public void statisticsOverwriteIsNull() throws JobParametersInvalidException {
         jobParametersBuilder = new JobParametersBuilder();
-        jobParametersBuilder.addString(JobParametersNames.APP_VEP_NUMFORKS, "");
-        validator.validate(jobParametersBuilder.toJobParameters());
-    }
-
-    @Test(expected = JobParametersInvalidException.class)
-    public void vepNumForksIsNull() throws JobParametersInvalidException {
-        jobParametersBuilder = new JobParametersBuilder();
-        jobParametersBuilder.addString(JobParametersNames.APP_VEP_NUMFORKS, null);
+        jobParametersBuilder.addString(JobParametersNames.STATISTICS_OVERWRITE, null);
         validator.validate(jobParametersBuilder.toJobParameters());
     }
 }

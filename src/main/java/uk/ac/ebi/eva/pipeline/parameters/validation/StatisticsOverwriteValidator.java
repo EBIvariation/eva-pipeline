@@ -22,15 +22,20 @@ import org.springframework.batch.core.JobParametersValidator;
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 
 /**
- * Checks that the database name has been filled in.
+ * Checks that the option to overwrite statistics has been filled in and it is "true" or "false".
  *
- * @throws JobParametersInvalidException If the database name is null or empty
+ * @throws JobParametersInvalidException If the overwrite statistics option is null or empty or any text different
+ * from 'true' or 'false'
  */
-public class DbNameValidator implements JobParametersValidator {
-
+public class StatisticsOverwriteValidator implements JobParametersValidator {
+    
     @Override
     public void validate(JobParameters parameters) throws JobParametersInvalidException {
+        String statisticsOverwriteValue = parameters.getString(JobParametersNames.STATISTICS_OVERWRITE);
+
         ParametersValidatorUtil.checkIsNotNullOrEmptyString(
-        		parameters.getString(JobParametersNames.DB_NAME), JobParametersNames.DB_NAME);
+                statisticsOverwriteValue, JobParametersNames.STATISTICS_OVERWRITE);
+        ParametersValidatorUtil.checkIsBoolean(
+                statisticsOverwriteValue,JobParametersNames.STATISTICS_OVERWRITE);
     }
 }

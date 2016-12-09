@@ -21,53 +21,43 @@ import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.JobParametersInvalidException;
 
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
-import uk.ac.ebi.eva.test.utils.TestFileUtils;
 
-import java.io.File;
-import java.io.IOException;
+public class DbCollectionsFilesNameValidatorTest {
 
-public class VepPathValidatorTest {
-    private VepPathValidator validator;
+    private DbCollectionsFilesNameValidator validator;
+
     private JobParametersBuilder jobParametersBuilder;
 
     @Before
     public void setUp() throws Exception {
-        validator = new VepPathValidator();
+        validator = new DbCollectionsFilesNameValidator();
     }
 
     @Test
-    public void vepPathIsValid() throws JobParametersInvalidException, IOException {
+    public void collectionsVariantsNameIsValid() throws JobParametersInvalidException {
         jobParametersBuilder = new JobParametersBuilder();
-        jobParametersBuilder.addString(JobParametersNames.APP_VEP_PATH,
-                                       TestFileUtils.getResource(
-                                           "/parameters-validation/vepapp.pl").getCanonicalPath());
+        jobParametersBuilder.addString(JobParametersNames.DB_COLLECTIONS_FILES_NAME, "collectionsFilesName");
         validator.validate(jobParametersBuilder.toJobParameters());
     }
 
     @Test(expected = JobParametersInvalidException.class)
-    public void vepPathNotExist() throws JobParametersInvalidException {
+    public void collectionsVariantsNameIsEmpty() throws JobParametersInvalidException {
         jobParametersBuilder = new JobParametersBuilder();
-        jobParametersBuilder.addString(JobParametersNames.APP_VEP_PATH, "file://path/to/file.vcf");
+        jobParametersBuilder.addString(JobParametersNames.DB_COLLECTIONS_FILES_NAME, "");
         validator.validate(jobParametersBuilder.toJobParameters());
     }
 
     @Test(expected = JobParametersInvalidException.class)
-    public void vepPathNotReadable() throws JobParametersInvalidException, IOException {
-        File file = TestFileUtils.getResource("/parameters-validation/input_not_readable.vcf.gz");
-        file.setReadable(false);
-
+    public void collectionsVariantsNameIsWhitespace() throws JobParametersInvalidException {
         jobParametersBuilder = new JobParametersBuilder();
-        jobParametersBuilder.addString(JobParametersNames.APP_VEP_PATH, file.getCanonicalPath());
+        jobParametersBuilder.addString(JobParametersNames.DB_COLLECTIONS_FILES_NAME, " ");
         validator.validate(jobParametersBuilder.toJobParameters());
     }
 
     @Test(expected = JobParametersInvalidException.class)
-    public void vepPathIsADirectory() throws JobParametersInvalidException, IOException {
-        File file = TestFileUtils.getResource("/parameters-validation/");
-        file.setReadable(true);
-
+    public void collectionsVariantsNameIsNull() throws JobParametersInvalidException {
         jobParametersBuilder = new JobParametersBuilder();
-        jobParametersBuilder.addString(JobParametersNames.APP_VEP_PATH, file.getCanonicalPath());
+        jobParametersBuilder.addString(JobParametersNames.DB_COLLECTIONS_FILES_NAME, null);
         validator.validate(jobParametersBuilder.toJobParameters());
     }
 }

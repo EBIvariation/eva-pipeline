@@ -21,13 +21,13 @@ import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.JobParametersInvalidException;
 
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
-import uk.ac.ebi.eva.pipeline.parameters.validation.OutputDirAnnotationValidator;
-import uk.ac.ebi.eva.pipeline.parameters.validation.step.VepInputGeneratorStepParametersValidatorTest;
+import uk.ac.ebi.eva.test.utils.TestFileUtils;
 
 import java.io.File;
 import java.io.IOException;
 
 public class OutputDirAnnotationValidatorTest {
+
     private OutputDirAnnotationValidator validator;
 
     private JobParametersBuilder jobParametersBuilder;
@@ -39,8 +39,7 @@ public class OutputDirAnnotationValidatorTest {
 
     @Test
     public void outputDirAnnotationIsValid() throws JobParametersInvalidException, IOException {
-        File writableOutputDir = new File(
-                VepInputGeneratorStepParametersValidatorTest.class.getResource("/parameters-validation/").getFile());
+        File writableOutputDir = TestFileUtils.getResource("/parameters-validation/");
         writableOutputDir.setWritable(true);
 
         jobParametersBuilder = new JobParametersBuilder();
@@ -57,8 +56,7 @@ public class OutputDirAnnotationValidatorTest {
 
     @Test(expected = JobParametersInvalidException.class)
     public void outputDirAnnotationIsNotWritable() throws JobParametersInvalidException, IOException {
-        File notWritablefile = new File(
-                VepInputGeneratorStepParametersValidatorTest.class.getResource("/parameters-validation/").getFile());
+        File notWritablefile = TestFileUtils.getResource("/parameters-validation/");
         notWritablefile.setWritable(false);
 
         jobParametersBuilder = new JobParametersBuilder();
@@ -69,8 +67,9 @@ public class OutputDirAnnotationValidatorTest {
     @Test(expected = JobParametersInvalidException.class)
     public void outputDirAnnotationIsAFile() throws JobParametersInvalidException, IOException {
         jobParametersBuilder = new JobParametersBuilder();
-        jobParametersBuilder.addString(JobParametersNames.OUTPUT_DIR_ANNOTATION, OutputDirAnnotationValidatorTest.class.getResource(
-                "/parameters-validation/vepapp.pl").getFile());
+        jobParametersBuilder.addString(JobParametersNames.OUTPUT_DIR_ANNOTATION,
+                                       TestFileUtils.getResource(
+                                           "/parameters-validation/vepapp.pl").getCanonicalPath());
         validator.validate(jobParametersBuilder.toJobParameters());
     }
 }

@@ -21,9 +21,9 @@ import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.JobParametersInvalidException;
 
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
-import uk.ac.ebi.eva.pipeline.parameters.validation.DbCollectionsVariantsNameValidator;
 
 public class DbCollectionsVariantsNameValidatorTest {
+
     private DbCollectionsVariantsNameValidator validator;
     private JobParametersBuilder jobParametersBuilder;
 

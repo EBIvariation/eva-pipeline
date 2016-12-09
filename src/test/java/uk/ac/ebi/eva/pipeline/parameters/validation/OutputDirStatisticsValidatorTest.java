@@ -26,48 +26,50 @@ import uk.ac.ebi.eva.test.utils.TestFileUtils;
 import java.io.File;
 import java.io.IOException;
 
-public class VepPathValidatorTest {
-    private VepPathValidator validator;
+public class OutputDirStatisticsValidatorTest {
+
+    private OutputDirStatisticsValidator validator;
+
     private JobParametersBuilder jobParametersBuilder;
 
     @Before
     public void setUp() throws Exception {
-        validator = new VepPathValidator();
+        validator = new OutputDirStatisticsValidator();
     }
 
     @Test
-    public void vepPathIsValid() throws JobParametersInvalidException, IOException {
+    public void outputDirStatisticsIsValid() throws JobParametersInvalidException, IOException {
+        File writableOutputDir = TestFileUtils.getResource("/parameters-validation/");
+        writableOutputDir.setWritable(true);
+
         jobParametersBuilder = new JobParametersBuilder();
-        jobParametersBuilder.addString(JobParametersNames.APP_VEP_PATH,
+        jobParametersBuilder.addString(JobParametersNames.OUTPUT_DIR_STATISTICS, writableOutputDir.getCanonicalPath());
+        validator.validate(jobParametersBuilder.toJobParameters());
+    }
+
+    @Test(expected = JobParametersInvalidException.class)
+    public void outputDirStatisticsDoesNotExist() throws JobParametersInvalidException {
+        jobParametersBuilder = new JobParametersBuilder();
+        jobParametersBuilder.addString(JobParametersNames.OUTPUT_DIR_STATISTICS, "file://path/to/");
+        validator.validate(jobParametersBuilder.toJobParameters());
+    }
+
+    @Test(expected = JobParametersInvalidException.class)
+    public void outputDirStatisticsIsNotWritable() throws JobParametersInvalidException, IOException {
+        File notWritablefile = TestFileUtils.getResource("/parameters-validation/");
+        notWritablefile.setWritable(false);
+
+        jobParametersBuilder = new JobParametersBuilder();
+        jobParametersBuilder.addString(JobParametersNames.OUTPUT_DIR_STATISTICS, notWritablefile.getCanonicalPath());
+        validator.validate(jobParametersBuilder.toJobParameters());
+    }
+
+    @Test(expected = JobParametersInvalidException.class)
+    public void outputDirStatisticsIsNotADirectory() throws JobParametersInvalidException, IOException {
+        jobParametersBuilder = new JobParametersBuilder();
+        jobParametersBuilder.addString(JobParametersNames.OUTPUT_DIR_STATISTICS,
                                        TestFileUtils.getResource(
                                            "/parameters-validation/vepapp.pl").getCanonicalPath());
-        validator.validate(jobParametersBuilder.toJobParameters());
-    }
-
-    @Test(expected = JobParametersInvalidException.class)
-    public void vepPathNotExist() throws JobParametersInvalidException {
-        jobParametersBuilder = new JobParametersBuilder();
-        jobParametersBuilder.addString(JobParametersNames.APP_VEP_PATH, "file://path/to/file.vcf");
-        validator.validate(jobParametersBuilder.toJobParameters());
-    }
-
-    @Test(expected = JobParametersInvalidException.class)
-    public void vepPathNotReadable() throws JobParametersInvalidException, IOException {
-        File file = TestFileUtils.getResource("/parameters-validation/input_not_readable.vcf.gz");
-        file.setReadable(false);
-
-        jobParametersBuilder = new JobParametersBuilder();
-        jobParametersBuilder.addString(JobParametersNames.APP_VEP_PATH, file.getCanonicalPath());
-        validator.validate(jobParametersBuilder.toJobParameters());
-    }
-
-    @Test(expected = JobParametersInvalidException.class)
-    public void vepPathIsADirectory() throws JobParametersInvalidException, IOException {
-        File file = TestFileUtils.getResource("/parameters-validation/");
-        file.setReadable(true);
-
-        jobParametersBuilder = new JobParametersBuilder();
-        jobParametersBuilder.addString(JobParametersNames.APP_VEP_PATH, file.getCanonicalPath());
         validator.validate(jobParametersBuilder.toJobParameters());
     }
 }
