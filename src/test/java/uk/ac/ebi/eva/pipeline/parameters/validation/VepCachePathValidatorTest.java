@@ -16,14 +16,15 @@
 package uk.ac.ebi.eva.pipeline.parameters.validation;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.JobParametersInvalidException;
 
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
+import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 import uk.ac.ebi.eva.test.utils.TestFileUtils;
 
-import java.io.File;
 import java.io.IOException;
 
 public class VepCachePathValidatorTest {
@@ -32,6 +33,9 @@ public class VepCachePathValidatorTest {
 
     private JobParametersBuilder jobParametersBuilder;
 
+    @Rule
+    public PipelineTemporaryFolderRule temporaryFolder = new PipelineTemporaryFolderRule();
+
     @Before
     public void setUp() throws Exception {
         validator = new VepCachePathValidator();
@@ -39,11 +43,11 @@ public class VepCachePathValidatorTest {
 
     @Test
     public void vepCachePathIsValid() throws JobParametersInvalidException, IOException {
-        File writableVepCachePath = TestFileUtils.getResource("/parameters-validation/");
-        writableVepCachePath.setReadable(true);
+        temporaryFolder.getRoot().setReadable(true);
 
         jobParametersBuilder = new JobParametersBuilder();
-        jobParametersBuilder.addString(JobParametersNames.APP_VEP_CACHE_PATH, writableVepCachePath.getCanonicalPath());
+        jobParametersBuilder.addString(JobParametersNames.APP_VEP_CACHE_PATH,
+                                       temporaryFolder.getRoot().getCanonicalPath());
         validator.validate(jobParametersBuilder.toJobParameters());
     }
 
@@ -56,11 +60,11 @@ public class VepCachePathValidatorTest {
 
     @Test(expected = JobParametersInvalidException.class)
     public void vepCachePathIsNotReadable() throws JobParametersInvalidException, IOException {
-        File notWritablefile = TestFileUtils.getResource("/parameters-validation/");
-        notWritablefile.setReadable(false);
+        temporaryFolder.getRoot().setReadable(false);
 
         jobParametersBuilder = new JobParametersBuilder();
-        jobParametersBuilder.addString(JobParametersNames.APP_VEP_CACHE_PATH, notWritablefile.getCanonicalPath());
+        jobParametersBuilder.addString(JobParametersNames.APP_VEP_CACHE_PATH,
+                                       temporaryFolder.getRoot().getCanonicalPath());
         validator.validate(jobParametersBuilder.toJobParameters());
     }
 

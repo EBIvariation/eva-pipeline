@@ -15,8 +15,12 @@
  */
 package uk.ac.ebi.eva.pipeline.parameters.validation;
 
+import org.junit.Rule;
 import org.junit.Test;
 import org.springframework.batch.core.JobParametersInvalidException;
+
+import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
+import uk.ac.ebi.eva.test.utils.TestFileUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -27,6 +31,9 @@ import java.io.IOException;
 public class ParametersValidatorUtilTest {
 
     public static final String JOB_PARAMETER_NAME = "any-job-parameter-name";
+
+    @Rule
+    public PipelineTemporaryFolderRule temporaryFolder = new PipelineTemporaryFolderRule();
 
     @Test
     public void validString() throws JobParametersInvalidException {
@@ -91,11 +98,10 @@ public class ParametersValidatorUtilTest {
 
 
     @Test
-    public void directoryStringExist() throws JobParametersInvalidException {
+    public void directoryStringExist() throws JobParametersInvalidException, IOException {
         ParametersValidatorUtil
-                .checkDirectoryExists(
-                        ParametersValidatorUtilTest.class.getResource("/parameters-validation/").getFile(),
-                        JOB_PARAMETER_NAME);
+                .checkDirectoryExists(TestFileUtils.getResource("/parameters-validation/").getCanonicalPath(),
+                                      JOB_PARAMETER_NAME);
     }
 
     @Test(expected = JobParametersInvalidException.class)
@@ -105,17 +111,16 @@ public class ParametersValidatorUtilTest {
 
     @Test(expected = JobParametersInvalidException.class)
     public void directoryStringIsAFile() throws JobParametersInvalidException, IOException {
-        File file = new File(ParametersValidatorUtilTest.class.getResource(
-                "/parameters-validation/fasta_not_readable.fa").getFile());
+        File file = TestFileUtils.getResource("/parameters-validation/fasta.fa");
         ParametersValidatorUtil.checkDirectoryExists(file.getCanonicalPath(), JOB_PARAMETER_NAME);
     }
 
 
     @Test
-    public void fileStringExists() throws JobParametersInvalidException {
-        ParametersValidatorUtil.checkFileExists(
-                ParametersValidatorUtilTest.class.getResource("/parameters-validation/fasta.fa").getFile(),
-                JOB_PARAMETER_NAME);
+    public void fileStringExists() throws JobParametersInvalidException, IOException {
+        ParametersValidatorUtil
+                .checkFileExists(TestFileUtils.getResource("/parameters-validation/fasta.fa").getCanonicalPath(),
+                                 JOB_PARAMETER_NAME);
     }
 
     @Test(expected = JobParametersInvalidException.class)
@@ -124,51 +129,49 @@ public class ParametersValidatorUtilTest {
     }
 
     @Test(expected = JobParametersInvalidException.class)
-    public void fileStringIsADirectory() throws JobParametersInvalidException {
+    public void fileStringIsADirectory() throws JobParametersInvalidException, IOException {
         ParametersValidatorUtil
-                .checkFileExists(ParametersValidatorUtilTest.class.getResource("/parameters-validation/").getFile(),
+                .checkFileExists(TestFileUtils.getResource("/parameters-validation/").getCanonicalPath(),
                                  JOB_PARAMETER_NAME);
     }
 
 
     @Test
-    public void pathIsReadable() throws JobParametersInvalidException {
-        ParametersValidatorUtil.checkFileIsReadable(
-                ParametersValidatorUtilTest.class.getResource("/parameters-validation/fasta.fa").getFile(),
-                JOB_PARAMETER_NAME);
+    public void pathIsReadable() throws JobParametersInvalidException, IOException {
+        ParametersValidatorUtil
+                .checkFileIsReadable(TestFileUtils.getResource("/parameters-validation/fasta.fa").getCanonicalPath(),
+                                     JOB_PARAMETER_NAME);
     }
 
     @Test(expected = JobParametersInvalidException.class)
-    public void pathIsNorReadable() throws JobParametersInvalidException, IOException {
-        File file = new File(
-                ParametersValidatorUtilTest.class.getResource("/parameters-validation/fasta_not_readable.fa")
-                        .getFile());
+    public void pathIsNotReadable() throws JobParametersInvalidException, IOException {
+        File file = temporaryFolder.newFile("not_readable.fa");
         file.setReadable(false);
 
         ParametersValidatorUtil.checkFileIsReadable(file.getCanonicalPath(), JOB_PARAMETER_NAME);
     }
 
     @Test
-    public void pathIsWritable() throws JobParametersInvalidException {
-        ParametersValidatorUtil.checkFileIsWritable(
-                ParametersValidatorUtilTest.class.getResource("/parameters-validation/fasta.fa").getFile(),
-                JOB_PARAMETER_NAME);
+    public void pathIsWritable() throws JobParametersInvalidException, IOException {
+        ParametersValidatorUtil
+                .checkFileIsWritable(TestFileUtils.getResource("/parameters-validation/fasta.fa").getCanonicalPath(),
+                                     JOB_PARAMETER_NAME);
     }
 
     @Test(expected = JobParametersInvalidException.class)
-    public void pathIsNorWritable() throws JobParametersInvalidException, IOException {
-        File file = new File(
-                ParametersValidatorUtilTest.class.getResource("/parameters-validation/fasta_not_readable.fa")
-                        .getFile());
-        file.setReadable(false);
+    public void pathIsNotWritable() throws JobParametersInvalidException, IOException {
+        File file = temporaryFolder.newFile("not_writable.vcf");
+        file.setWritable(false);
 
-        ParametersValidatorUtil.checkFileIsReadable(file.getCanonicalPath(), JOB_PARAMETER_NAME);
+        ParametersValidatorUtil.checkFileIsWritable(file.getCanonicalPath(), JOB_PARAMETER_NAME);
     }
 
 
     @Test
     public void integerStringIsValid() throws JobParametersInvalidException {
+        ParametersValidatorUtil.checkIsPositiveInteger("1", JOB_PARAMETER_NAME);
         ParametersValidatorUtil.checkIsPositiveInteger("11", JOB_PARAMETER_NAME);
+        ParametersValidatorUtil.checkIsPositiveInteger(String.valueOf(Integer.MAX_VALUE), JOB_PARAMETER_NAME);
     }
 
     @Test(expected = JobParametersInvalidException.class)
