@@ -38,8 +38,8 @@ public class VcfLineMapper implements LineMapper<List<Variant>> {
     public VcfLineMapper(VariantSource source) {
         if (!VariantSource.Aggregation.NONE.equals(source.getAggregation())) {
             throw new IllegalArgumentException(
-                    this.getClass().getSimpleName() + " should not take aggregated " +
-                            "VCFs, but the VariantSource is not marked as Aggregation.NONE");
+                    this.getClass().getSimpleName() + " should be used to read genotyped VCFs only, " +
+                            "but the VariantSource.Aggregation set to " + source.getAggregation().toString());
         }
         this.source = source;
         this.factory = new VariantVcfFactory();
@@ -47,8 +47,8 @@ public class VcfLineMapper implements LineMapper<List<Variant>> {
 
     @Override
     public List<Variant> mapLine(String line, int lineNumber) {
-        assertNotNull("It is not allowed to use " + this.getClass().getSimpleName()
-                              + " with aggregated VCFs (hint: set VariantSource.Aggregation to NONE)",
+        assertNotNull(this.getClass().getSimpleName() + " should be used to read genotyped VCFs only," +
+                              " (hint: set VariantSource.Aggregation to NONE)",
                       factory);
         return factory.create(source, line);
     }

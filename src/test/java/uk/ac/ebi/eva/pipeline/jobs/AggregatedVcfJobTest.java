@@ -20,6 +20,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.opencb.biodata.models.variant.Variant;
 import org.opencb.biodata.models.variant.VariantSource;
 import org.opencb.datastore.core.QueryOptions;
 import org.opencb.opencga.lib.common.Config;
@@ -109,8 +110,8 @@ public class AggregatedVcfJobTest {
         Assert.assertEquals(lines, JobTestUtils.count(iterator));
 
         // check that stats are loaded properly
-        assertFalse(variantDBAdaptor.iterator(
-                new QueryOptions()).next().getSourceEntries().values().iterator().next().getCohortStats().isEmpty());
+        Variant variant = variantDBAdaptor.iterator(new QueryOptions()).next();
+        assertFalse(variant.getSourceEntries().values().iterator().next().getCohortStats().isEmpty());
     }
 
     @Test
