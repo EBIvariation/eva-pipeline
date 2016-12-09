@@ -34,6 +34,10 @@ import uk.ac.ebi.eva.pipeline.parameters.validation.StatisticsOverwriteValidator
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * Validates the job parameters necessary to execute a
+ * {@link uk.ac.ebi.eva.pipeline.jobs.steps.PopulationStatisticsLoaderStep}
+ */
 public class PopulationStatisticsLoaderStepParametersValidator extends DefaultJobParametersValidator {
 	
     public PopulationStatisticsLoaderStepParametersValidator() {

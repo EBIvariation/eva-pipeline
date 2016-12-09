@@ -43,8 +43,9 @@ public class VepInputGeneratorStepParametersValidator extends DefaultJobParamete
 
     public VepInputGeneratorStepParametersValidator() {
         super(new String[]{JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME, JobParametersNames.DB_NAME,
-                JobParametersNames.INPUT_STUDY_ID, JobParametersNames.INPUT_VCF_ID,
-                JobParametersNames.OUTPUT_DIR_ANNOTATION}, new String[]{});
+                           JobParametersNames.INPUT_STUDY_ID, JobParametersNames.INPUT_VCF_ID,
+                           JobParametersNames.OUTPUT_DIR_ANNOTATION},
+              new String[]{});
     }
 
     @Override
