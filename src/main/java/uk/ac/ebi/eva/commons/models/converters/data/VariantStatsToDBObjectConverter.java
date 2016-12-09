@@ -78,7 +78,7 @@ public class VariantStatsToDBObjectConverter implements Converter<VariantSourceE
      * @param fileId      of the source entry
      * @return list of VariantStats (as DBObjects)
      */
-    public List<DBObject> convertCohorts(Map<String, VariantStats> cohortStats, String studyId, String fileId) {
+    private List<DBObject> convertCohorts(Map<String, VariantStats> cohortStats, String studyId, String fileId) {
         List<DBObject> cohortsStatsList = new LinkedList<>();
         VariantStats variantStats;
         for (Map.Entry<String, VariantStats> variantStatsEntry : cohortStats.entrySet()) {
@@ -92,8 +92,7 @@ public class VariantStatsToDBObjectConverter implements Converter<VariantSourceE
         return cohortsStatsList;
     }
 
-    public DBObject convertStats(VariantStats variantStats) {
-
+    private DBObject convertStats(VariantStats variantStats) {
         // Basic fields
         BasicDBObject mongoStats = new BasicDBObject(MAF_FIELD, variantStats.getMaf());
         mongoStats.append(MGF_FIELD, variantStats.getMgf());

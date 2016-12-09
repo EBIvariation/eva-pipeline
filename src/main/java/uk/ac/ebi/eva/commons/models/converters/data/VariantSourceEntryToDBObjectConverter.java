@@ -53,16 +53,15 @@ public class VariantSourceEntryToDBObjectConverter implements Converter<VariantS
 
     /**
      * Create a converter between VariantSourceEntry and DBObject entities when
-     * there is no need to provide a list of samples or statistics.
+     * there is no need to add the samples data to the DBObject.
      */
     public VariantSourceEntryToDBObjectConverter() {
         this(null);
     }
 
     /**
-     * Create a converter from VariantSourceEntry to DBObject entities. A
-     * samples converter and a statistics converter may be provided in case those
-     * should be processed during the conversion.
+     * Create a converter from VariantSourceEntry to DBObject entities. A samples converter may be provided in case
+     * those should be processed during the conversion.
      *
      * @param samplesConverter The object used to convert the samples. If null, won't convert
      */

@@ -61,15 +61,13 @@ public class VariantToMongoDbObjectConverter implements Converter<Variant, DBObj
 
         variant.setAnnotation(null);
 
-        VariantSourceEntry variantSourceEntry = variant.getSourceEntries().entrySet().iterator().next().getValue();
+        VariantSourceEntry variantSourceEntry = variant.getSourceEntries().values().iterator().next();
 
         BasicDBObject addToSet = new BasicDBObject().append(VariantToDBObjectConverter.FILES_FIELD,
                                                             sourceEntryConverter.convert(variantSourceEntry));
 
         if (includeStats) {
-            List<DBObject> sourceEntryStats = statsConverter.convertCohorts(variantSourceEntry.getCohortStats(),
-                                                                            variantSourceEntry.getStudyId(),
-                                                                            variantSourceEntry.getFileId());
+            List<DBObject> sourceEntryStats = statsConverter.convert(variantSourceEntry);
             addToSet.put(VariantToDBObjectConverter.STATS_FIELD, new BasicDBObject("$each", sourceEntryStats));
         }
 
