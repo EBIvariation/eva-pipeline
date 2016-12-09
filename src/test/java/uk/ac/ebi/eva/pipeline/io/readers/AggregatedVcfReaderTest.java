@@ -35,16 +35,36 @@ public class AggregatedVcfReaderTest {
 
     private static final String INPUT_FILE_PATH = "/aggregated.vcf.gz";
 
+    private static final String INPUT_FILE_PATH_EXAC = "/aggregated.exac.vcf.gz";
+
+    private static final String INPUT_FILE_PATH_EVS = "/aggregated.evs.vcf.gz";
+
     @Test
     public void shouldReadAllLines() throws Exception {
+        shouldReadAllLinesHelper(VariantSource.Aggregation.BASIC, INPUT_FILE_PATH);
+    }
+
+    @Test
+    public void shouldReadAllLinesInExac() throws Exception {
+        shouldReadAllLinesHelper(VariantSource.Aggregation.EXAC, INPUT_FILE_PATH_EXAC);
+    }
+
+    @Test
+    public void shouldReadAllLinesInEvs() throws Exception {
+        shouldReadAllLinesHelper(VariantSource.Aggregation.EVS, INPUT_FILE_PATH_EVS);
+    }
+
+    private void shouldReadAllLinesHelper(VariantSource.Aggregation aggregationType,
+                                          String inputFilePath) throws Exception {
+        
         ExecutionContext executionContext = MetaDataInstanceFactory.createStepExecution().getExecutionContext();
 
         // input vcf
-        File input = TestFileUtils.getResource(INPUT_FILE_PATH);
+        File input = TestFileUtils.getResource(inputFilePath);
 
         VcfHeaderReader headerReader = new VcfHeaderReader(input, FILE_ID, STUDY_ID, STUDY_NAME,
                                                            VariantStudy.StudyType.COLLECTION,
-                                                           VariantSource.Aggregation.BASIC);
+                                                           aggregationType);
         VariantSource source = headerReader.read();
 
         AggregatedVcfReader vcfReader = new AggregatedVcfReader(source, input);
@@ -84,13 +104,8 @@ public class AggregatedVcfReaderTest {
             assertTrue(variants.size() > 0);
             assertTrue(variants.get(0).getSourceEntries().size() > 0);
             VariantSourceEntry sourceEntry = variants.get(0).getSourceEntries().entrySet().iterator().next().getValue();
-            assertTrue(sourceEntry.getSamplesData().isEmpty());
-            assertFalse(sourceEntry.getAttribute("AC").isEmpty());
-            assertFalse(sourceEntry.getAttribute("AF").isEmpty());
-            assertFalse(sourceEntry.getAttribute("AN").isEmpty());
-            assertFalse(sourceEntry.getAttribute("GTC").isEmpty());
-            assertFalse(sourceEntry.getAttribute("GTS").isEmpty());
-            assertFalse(sourceEntry.getCohortStats("ALL").getGenotypesCount().isEmpty());
+            assertTrue(sourceEntry.getSamplesData().isEmpty()); // by definition, aggregated VCFs don't have sample data
+            assertFalse(sourceEntry.getCohortStats(VariantSourceEntry.DEFAULT_COHORT).getGenotypesCount().isEmpty());
 
             count++;
         }
