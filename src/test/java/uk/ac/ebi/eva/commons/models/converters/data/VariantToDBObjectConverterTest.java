@@ -23,7 +23,7 @@ import static org.junit.Assert.assertFalse;
  * Input: {@link VariantSourceEntry}
  * output: DBObject representing the {@link VariantSourceEntry}
  */
-public class DBObjectToVariantConverterTest {
+public class VariantToDBObjectConverterTest {
 
     private BasicDBObject mongoVariant;
 

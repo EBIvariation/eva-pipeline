@@ -20,7 +20,7 @@ import static org.junit.Assert.assertEquals;
  * Input: {@link VariantSourceEntry}
  * output: DBObject representing the {@link VariantStats} inside the {@link VariantSourceEntry}
  */
-public class DBObjectToVariantStatsConverterTest {
+public class VariantStatsToDBObjectConverterTest {
 
     private static BasicDBObject mongoStats;
 

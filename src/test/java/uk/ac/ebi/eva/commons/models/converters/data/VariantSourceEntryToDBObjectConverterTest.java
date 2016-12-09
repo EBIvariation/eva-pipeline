@@ -19,7 +19,7 @@ import static org.junit.Assert.assertEquals;
  * Input: {@link VariantSourceEntry}
  * output: DBObject representing the {@link VariantSourceEntry}
  */
-public class DBObjectToVariantSourceEntryConverterTest {
+public class VariantSourceEntryToDBObjectConverterTest {
 
     private VariantSourceEntry file;
 
