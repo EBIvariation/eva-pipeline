@@ -318,7 +318,7 @@ public class VariantVcfFactory {
             }
 
             // Add sample to the variant entry in the source file
-            variant.getSourceEntry(source.getFileId(), source.getStudyId()).addSampleData(i - 9, map);
+            variant.getSourceEntry(source.getFileId(), source.getStudyId()).addSampleData(map);
         }
     }
 

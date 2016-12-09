@@ -134,8 +134,9 @@ public class VariantSourceEntry {
         return samplesData.get(sampleIndex);
     }
 
-    public void addSampleData(int sampleIndex, Map<String, String> sampleData) {
-        this.samplesData.add(sampleIndex, sampleData);
+    public int addSampleData(Map<String, String> sampleData) {
+        this.samplesData.add(sampleData);
+        return this.samplesData.size() - 1;
     }
 
     public VariantStats getStats() {
