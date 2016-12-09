@@ -16,14 +16,15 @@
 package uk.ac.ebi.eva.pipeline.parameters.validation;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.JobParametersInvalidException;
 
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
+import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 import uk.ac.ebi.eva.test.utils.TestFileUtils;
 
-import java.io.File;
 import java.io.IOException;
 
 public class OutputDirAnnotationValidatorTest {
@@ -32,6 +33,9 @@ public class OutputDirAnnotationValidatorTest {
 
     private JobParametersBuilder jobParametersBuilder;
 
+    @Rule
+    public PipelineTemporaryFolderRule temporaryFolder = new PipelineTemporaryFolderRule();
+
     @Before
     public void setUp() throws Exception {
         validator = new OutputDirAnnotationValidator();
@@ -39,11 +43,11 @@ public class OutputDirAnnotationValidatorTest {
 
     @Test
     public void outputDirAnnotationIsValid() throws JobParametersInvalidException, IOException {
-        File writableOutputDir = TestFileUtils.getResource("/parameters-validation/");
-        writableOutputDir.setWritable(true);
+        temporaryFolder.getRoot().setWritable(true);
 
         jobParametersBuilder = new JobParametersBuilder();
-        jobParametersBuilder.addString(JobParametersNames.OUTPUT_DIR_ANNOTATION, writableOutputDir.getCanonicalPath());
+        jobParametersBuilder.addString(JobParametersNames.OUTPUT_DIR_ANNOTATION,
+                                       temporaryFolder.getRoot().getCanonicalPath());
         validator.validate(jobParametersBuilder.toJobParameters());
     }
 
@@ -56,11 +60,11 @@ public class OutputDirAnnotationValidatorTest {
 
     @Test(expected = JobParametersInvalidException.class)
     public void outputDirAnnotationIsNotWritable() throws JobParametersInvalidException, IOException {
-        File notWritablefile = TestFileUtils.getResource("/parameters-validation/");
-        notWritablefile.setWritable(false);
+        temporaryFolder.getRoot().setWritable(false);
 
         jobParametersBuilder = new JobParametersBuilder();
-        jobParametersBuilder.addString(JobParametersNames.OUTPUT_DIR_ANNOTATION, notWritablefile.getCanonicalPath());
+        jobParametersBuilder.addString(JobParametersNames.OUTPUT_DIR_ANNOTATION,
+                                       temporaryFolder.getRoot().getCanonicalPath());
         validator.validate(jobParametersBuilder.toJobParameters());
     }
 

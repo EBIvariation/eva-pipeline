@@ -45,9 +45,10 @@ public class VepAnnotationGeneratorStepParametersValidator extends DefaultJobPar
 
     public VepAnnotationGeneratorStepParametersValidator() {
         super(new String[]{JobParametersNames.APP_VEP_CACHE_PATH, JobParametersNames.APP_VEP_CACHE_SPECIES,
-                      JobParametersNames.APP_VEP_CACHE_VERSION, JobParametersNames.APP_VEP_NUMFORKS,
-                      JobParametersNames.APP_VEP_PATH, JobParametersNames.INPUT_FASTA, JobParametersNames.INPUT_STUDY_ID,
-                      JobParametersNames.INPUT_VCF_ID, JobParametersNames.OUTPUT_DIR_ANNOTATION},
+                           JobParametersNames.APP_VEP_CACHE_VERSION, JobParametersNames.APP_VEP_NUMFORKS,
+                           JobParametersNames.APP_VEP_PATH, JobParametersNames.INPUT_FASTA,
+                           JobParametersNames.INPUT_STUDY_ID, JobParametersNames.INPUT_VCF_ID,
+                           JobParametersNames.OUTPUT_DIR_ANNOTATION},
               new String[]{});
     }
 

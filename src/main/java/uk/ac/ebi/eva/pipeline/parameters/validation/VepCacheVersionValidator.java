@@ -29,7 +29,8 @@ import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 public class VepCacheVersionValidator implements JobParametersValidator {
     @Override
     public void validate(JobParameters parameters) throws JobParametersInvalidException {
-        ParametersValidatorUtil.checkIsNotNullOrEmptyString(parameters.getString(JobParametersNames.APP_VEP_CACHE_VERSION),
-                                                            JobParametersNames.APP_VEP_CACHE_VERSION);
+        ParametersValidatorUtil
+                .checkIsNotNullOrEmptyString(parameters.getString(JobParametersNames.APP_VEP_CACHE_VERSION),
+                                             JobParametersNames.APP_VEP_CACHE_VERSION);
     }
 }

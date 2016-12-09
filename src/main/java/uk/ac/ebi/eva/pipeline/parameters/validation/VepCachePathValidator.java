@@ -32,6 +32,6 @@ public class VepCachePathValidator implements JobParametersValidator {
         ParametersValidatorUtil.checkDirectoryExists(parameters.getString(JobParametersNames.APP_VEP_CACHE_PATH),
                                                      JobParametersNames.APP_VEP_CACHE_PATH);
         ParametersValidatorUtil.checkFileIsReadable(parameters.getString(JobParametersNames.APP_VEP_CACHE_PATH),
-                                                     JobParametersNames.APP_VEP_CACHE_PATH);
+                                                    JobParametersNames.APP_VEP_CACHE_PATH);
     }
 }

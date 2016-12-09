@@ -25,6 +25,7 @@ import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 public class InputStudyIdValidatorTest {
 
     private InputStudyIdValidator validator;
+
     private JobParametersBuilder jobParametersBuilder;
 
     @Before

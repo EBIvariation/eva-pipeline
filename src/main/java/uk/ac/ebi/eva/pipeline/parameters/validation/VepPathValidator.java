@@ -30,8 +30,8 @@ public class VepPathValidator implements JobParametersValidator {
     @Override
     public void validate(JobParameters parameters) throws JobParametersInvalidException {
         ParametersValidatorUtil.checkFileExists(parameters.getString(JobParametersNames.APP_VEP_PATH),
-                                                             JobParametersNames.APP_VEP_PATH);
-        ParametersValidatorUtil.checkFileIsReadable(parameters.getString(JobParametersNames.APP_VEP_PATH),
                                                 JobParametersNames.APP_VEP_PATH);
+        ParametersValidatorUtil.checkFileIsReadable(parameters.getString(JobParametersNames.APP_VEP_PATH),
+                                                    JobParametersNames.APP_VEP_PATH);
     }
 }

@@ -16,29 +16,35 @@
 package uk.ac.ebi.eva.pipeline.parameters.validation.step;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.JobParametersInvalidException;
 
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
-import uk.ac.ebi.eva.pipeline.parameters.validation.step.VepInputGeneratorStepParametersValidator;
+import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
+
+import java.io.IOException;
 
 /**
  * Tests that the arguments necessary to run a {@link uk.ac.ebi.eva.pipeline.jobs.steps.VepInputGeneratorStep} are
  * correctly validated
  */
 public class VepInputGeneratorStepParametersValidatorTest {
+
     private VepInputGeneratorStepParametersValidator validator;
 
+    @Rule
+    public PipelineTemporaryFolderRule temporaryFolder = new PipelineTemporaryFolderRule();
+
     @Before
-    public void initialize() {
+    public void setUp() {
         validator = new VepInputGeneratorStepParametersValidator();
     }
 
     @Test
-    public void allJobParametersAreValid() throws JobParametersInvalidException {
-        final String DIR = VepAnnotationGeneratorStepParametersValidatorTest.class
-                .getResource("/parameters-validation/").getPath();
+    public void allJobParametersAreValid() throws JobParametersInvalidException, IOException {
+        final String dir = temporaryFolder.getRoot().getCanonicalPath();
 
         JobParametersBuilder jobParametersBuilder = new JobParametersBuilder();
         jobParametersBuilder.addString(JobParametersNames.CONFIG_RESTARTABILITY_ALLOW, "true");
@@ -46,22 +52,21 @@ public class VepInputGeneratorStepParametersValidatorTest {
         jobParametersBuilder.addString(JobParametersNames.DB_NAME, "dbName");
         jobParametersBuilder.addString(JobParametersNames.INPUT_STUDY_ID, "inputStudyId");
         jobParametersBuilder.addString(JobParametersNames.INPUT_VCF_ID, "inputVcfId");
-        jobParametersBuilder.addString(JobParametersNames.OUTPUT_DIR_ANNOTATION, DIR);
+        jobParametersBuilder.addString(JobParametersNames.OUTPUT_DIR_ANNOTATION, dir);
 
         validator.validate(jobParametersBuilder.toJobParameters());
     }
 
     @Test
-    public void optionalConfigRestartabilityAllowIsMissing() throws JobParametersInvalidException {
-        final String DIR = VepAnnotationGeneratorStepParametersValidatorTest.class
-                .getResource("/parameters-validation/").getPath();
+    public void optionalConfigRestartabilityAllowIsMissing() throws JobParametersInvalidException, IOException {
+        final String dir = temporaryFolder.getRoot().getCanonicalPath();
 
         JobParametersBuilder jobParametersBuilder = new JobParametersBuilder();
         jobParametersBuilder.addString(JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME, "dbCollectionsVariantName");
         jobParametersBuilder.addString(JobParametersNames.DB_NAME, "dbName");
         jobParametersBuilder.addString(JobParametersNames.INPUT_STUDY_ID, "inputStudyId");
         jobParametersBuilder.addString(JobParametersNames.INPUT_VCF_ID, "inputVcfId");
-        jobParametersBuilder.addString(JobParametersNames.OUTPUT_DIR_ANNOTATION, DIR);
+        jobParametersBuilder.addString(JobParametersNames.OUTPUT_DIR_ANNOTATION, dir);
 
         validator.validate(jobParametersBuilder.toJobParameters());
     }

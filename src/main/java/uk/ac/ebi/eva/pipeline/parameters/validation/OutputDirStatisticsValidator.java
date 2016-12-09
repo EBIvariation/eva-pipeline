@@ -34,6 +34,6 @@ public class OutputDirStatisticsValidator implements JobParametersValidator {
         ParametersValidatorUtil.checkDirectoryExists(parameters.getString(JobParametersNames.OUTPUT_DIR_STATISTICS),
                                                      JobParametersNames.OUTPUT_DIR_STATISTICS);
         ParametersValidatorUtil.checkFileIsWritable(parameters.getString(JobParametersNames.OUTPUT_DIR_STATISTICS),
-                                                     JobParametersNames.OUTPUT_DIR_STATISTICS);
+                                                    JobParametersNames.OUTPUT_DIR_STATISTICS);
     }
 }

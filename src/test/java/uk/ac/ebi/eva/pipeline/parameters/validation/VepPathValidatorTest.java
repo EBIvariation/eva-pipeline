@@ -16,19 +16,26 @@
 package uk.ac.ebi.eva.pipeline.parameters.validation;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.JobParametersInvalidException;
 
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
+import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 import uk.ac.ebi.eva.test.utils.TestFileUtils;
 
 import java.io.File;
 import java.io.IOException;
 
 public class VepPathValidatorTest {
+
     private VepPathValidator validator;
+
     private JobParametersBuilder jobParametersBuilder;
+
+    @Rule
+    public PipelineTemporaryFolderRule temporaryFolder = new PipelineTemporaryFolderRule();
 
     @Before
     public void setUp() throws Exception {
@@ -53,7 +60,7 @@ public class VepPathValidatorTest {
 
     @Test(expected = JobParametersInvalidException.class)
     public void vepPathNotReadable() throws JobParametersInvalidException, IOException {
-        File file = TestFileUtils.getResource("/parameters-validation/input_not_readable.vcf.gz");
+        File file = temporaryFolder.newFile("not_readable.vcf.gz");
         file.setReadable(false);
 
         jobParametersBuilder = new JobParametersBuilder();
@@ -63,11 +70,9 @@ public class VepPathValidatorTest {
 
     @Test(expected = JobParametersInvalidException.class)
     public void vepPathIsADirectory() throws JobParametersInvalidException, IOException {
-        File file = TestFileUtils.getResource("/parameters-validation/");
-        file.setReadable(true);
-
         jobParametersBuilder = new JobParametersBuilder();
-        jobParametersBuilder.addString(JobParametersNames.APP_VEP_PATH, file.getCanonicalPath());
+        jobParametersBuilder.addString(JobParametersNames.APP_VEP_PATH,
+                                       temporaryFolder.getRoot().getCanonicalPath());
         validator.validate(jobParametersBuilder.toJobParameters());
     }
 }

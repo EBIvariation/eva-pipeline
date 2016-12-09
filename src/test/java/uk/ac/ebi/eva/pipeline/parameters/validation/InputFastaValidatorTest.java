@@ -16,11 +16,13 @@
 package uk.ac.ebi.eva.pipeline.parameters.validation;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.JobParametersInvalidException;
 
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
+import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 import uk.ac.ebi.eva.test.utils.TestFileUtils;
 
 import java.io.File;
@@ -29,7 +31,11 @@ import java.io.IOException;
 public class InputFastaValidatorTest {
 
     private InputFastaValidator validator;
+
     private JobParametersBuilder jobParametersBuilder;
+
+    @Rule
+    public PipelineTemporaryFolderRule temporaryFolder = new PipelineTemporaryFolderRule();
 
     @Before
     public void setUp() throws Exception {
@@ -54,7 +60,7 @@ public class InputFastaValidatorTest {
 
     @Test(expected = JobParametersInvalidException.class)
     public void inputFastaNotReadable() throws JobParametersInvalidException, IOException {
-        File file = TestFileUtils.getResource("/parameters-validation/fasta_not_readable.fa");
+        File file = temporaryFolder.newFile("not_readable.fa");
         file.setReadable(false);
 
         jobParametersBuilder = new JobParametersBuilder();
@@ -64,11 +70,9 @@ public class InputFastaValidatorTest {
 
     @Test(expected = JobParametersInvalidException.class)
     public void inputFastaIsADirectory() throws JobParametersInvalidException, IOException {
-        File file = TestFileUtils.getResource("/parameters-validation/");
-        file.setReadable(true);
-
         jobParametersBuilder = new JobParametersBuilder();
-        jobParametersBuilder.addString(JobParametersNames.INPUT_FASTA, file.getCanonicalPath());
+        jobParametersBuilder.addString(JobParametersNames.INPUT_FASTA,
+                                       temporaryFolder.getRoot().getCanonicalPath());
         validator.validate(jobParametersBuilder.toJobParameters());
     }
 }

@@ -28,14 +28,14 @@ import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
  * from 'true' or 'false'
  */
 public class ConfigRestartabilityAllowValidator implements JobParametersValidator {
+
     @Override
     public void validate(JobParameters parameters) throws JobParametersInvalidException {
         String configRestartabilityAllowValue = parameters.getString(JobParametersNames.CONFIG_RESTARTABILITY_ALLOW);
 
-        ParametersValidatorUtil
-                .checkIsNotNullOrEmptyString(configRestartabilityAllowValue, JobParametersNames.CONFIG_RESTARTABILITY_ALLOW);
-        ParametersValidatorUtil
-                .checkIsBoolean(configRestartabilityAllowValue,
-                                JobParametersNames.CONFIG_RESTARTABILITY_ALLOW);
+        ParametersValidatorUtil.checkIsNotNullOrEmptyString(configRestartabilityAllowValue,
+                                                            JobParametersNames.CONFIG_RESTARTABILITY_ALLOW);
+        ParametersValidatorUtil.checkIsBoolean(configRestartabilityAllowValue,
+                                               JobParametersNames.CONFIG_RESTARTABILITY_ALLOW);
     }
 }

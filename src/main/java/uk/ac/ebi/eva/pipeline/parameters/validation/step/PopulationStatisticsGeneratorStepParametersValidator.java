@@ -22,29 +22,25 @@ import org.springframework.batch.core.job.CompositeJobParametersValidator;
 import org.springframework.batch.core.job.DefaultJobParametersValidator;
 
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
-import uk.ac.ebi.eva.pipeline.parameters.validation.ConfigRestartabilityAllowValidator;
-import uk.ac.ebi.eva.pipeline.parameters.validation.DbCollectionsVariantsNameValidator;
 import uk.ac.ebi.eva.pipeline.parameters.validation.DbNameValidator;
 import uk.ac.ebi.eva.pipeline.parameters.validation.InputStudyIdValidator;
 import uk.ac.ebi.eva.pipeline.parameters.validation.InputVcfIdValidator;
 import uk.ac.ebi.eva.pipeline.parameters.validation.OptionalValidator;
-import uk.ac.ebi.eva.pipeline.parameters.validation.OutputDirAnnotationValidator;
+import uk.ac.ebi.eva.pipeline.parameters.validation.OutputDirStatisticsValidator;
+import uk.ac.ebi.eva.pipeline.parameters.validation.StatisticsOverwriteValidator;
 
 import java.util.Arrays;
 import java.util.List;
 
 /**
- * Validates the job parameters necessary to execute a {@link uk.ac.ebi.eva.pipeline.jobs.steps.VepInputGeneratorStep}
- * <p>
- * The parameters OUTPUT_DIR_ANNOTATION, INPUT_STUDY_ID and INPUT_VCF_ID are used to build the VEP input option
- * {@see uk.ac.ebi.eva.pipeline.configuration.JobOptions#loadPipelineOptions()}
+ * Validates the job parameters necessary to execute a
+ * {@link uk.ac.ebi.eva.pipeline.jobs.steps.PopulationStatisticsGeneratorStep}
  */
-public class VepInputGeneratorStepParametersValidator extends DefaultJobParametersValidator {
+public class PopulationStatisticsGeneratorStepParametersValidator extends DefaultJobParametersValidator {
 
-    public VepInputGeneratorStepParametersValidator() {
-        super(new String[]{JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME, JobParametersNames.DB_NAME,
-                           JobParametersNames.INPUT_STUDY_ID, JobParametersNames.INPUT_VCF_ID,
-                           JobParametersNames.OUTPUT_DIR_ANNOTATION},
+    public PopulationStatisticsGeneratorStepParametersValidator() {
+        super(new String[]{JobParametersNames.DB_NAME, JobParametersNames.INPUT_STUDY_ID,
+                           JobParametersNames.INPUT_VCF_ID, JobParametersNames.OUTPUT_DIR_STATISTICS},
               new String[]{});
     }
 
@@ -56,18 +52,15 @@ public class VepInputGeneratorStepParametersValidator extends DefaultJobParamete
 
     private CompositeJobParametersValidator compositeJobParametersValidator() {
         final List<JobParametersValidator> jobParametersValidators = Arrays.asList(
-                new OptionalValidator(new ConfigRestartabilityAllowValidator(),
-                                      JobParametersNames.CONFIG_RESTARTABILITY_ALLOW),
-                new DbCollectionsVariantsNameValidator(),
+                new OptionalValidator(new StatisticsOverwriteValidator(), JobParametersNames.STATISTICS_OVERWRITE),
                 new DbNameValidator(),
                 new InputStudyIdValidator(),
                 new InputVcfIdValidator(),
-                new OutputDirAnnotationValidator()
+                new OutputDirStatisticsValidator()
         );
 
         CompositeJobParametersValidator compositeJobParametersValidator = new CompositeJobParametersValidator();
         compositeJobParametersValidator.setValidators(jobParametersValidators);
         return compositeJobParametersValidator;
     }
-
 }

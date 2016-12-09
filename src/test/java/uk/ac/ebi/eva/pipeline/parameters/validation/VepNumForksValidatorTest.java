@@ -24,6 +24,7 @@ import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 
 public class VepNumForksValidatorTest {
     private VepNumForksValidator validator;
+
     private JobParametersBuilder jobParametersBuilder;
 
     @Before

@@ -26,8 +26,9 @@ import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
  * Wrapper to make a {@link JobParametersValidator} optional. The validate method is triggered only if the key
  * {@link JobParametersNames} is present in {@link JobParameters}
  */
-public class OptionalValidator implements JobParametersValidator{
+public class OptionalValidator implements JobParametersValidator {
     private JobParametersValidator jobParametersValidator;
+
     private String jobParametersName;
 
     public OptionalValidator(JobParametersValidator jobParametersValidator, String jobParametersNames) {
@@ -37,7 +38,7 @@ public class OptionalValidator implements JobParametersValidator{
 
     @Override
     public void validate(JobParameters parameters) throws JobParametersInvalidException {
-        if(!Strings.isNullOrEmpty(parameters.getString(jobParametersName))){
+        if (!Strings.isNullOrEmpty(parameters.getString(jobParametersName))) {
             jobParametersValidator.validate(parameters);
         }
     }

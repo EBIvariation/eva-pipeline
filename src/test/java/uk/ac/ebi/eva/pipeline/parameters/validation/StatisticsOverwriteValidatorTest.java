@@ -23,7 +23,7 @@ import org.springframework.batch.core.JobParametersInvalidException;
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 
 public class StatisticsOverwriteValidatorTest {
-    
+
     private StatisticsOverwriteValidator validator;
 
     private JobParametersBuilder jobParametersBuilder;
