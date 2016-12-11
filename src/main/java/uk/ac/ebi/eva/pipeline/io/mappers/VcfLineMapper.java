@@ -47,8 +47,8 @@ public class VcfLineMapper implements LineMapper<List<Variant>> {
 
     @Override
     public List<Variant> mapLine(String line, int lineNumber) {
-        assertNotNull(this.getClass().getSimpleName() + " should be used to read genotyped VCFs only," +
-                              " (hint: set VariantSource.Aggregation to NONE)",
+        assertNotNull(this.getClass().getSimpleName() + " should be used to read genotyped VCFs only " +
+                              "(hint: set VariantSource.Aggregation to NONE)",
                       factory);
         return factory.create(source, line);
     }

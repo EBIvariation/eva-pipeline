@@ -39,9 +39,10 @@ import static org.junit.Assert.assertTrue;
  * Test {@link VariantToMongoDbObjectConverter}
  */
 public class VariantToMongoDbObjectConverterTest {
+
     private GenericConversionService conversionService = new GenericConversionService();
 
-    private Converter variantToMongoDbObjectConverter;
+    private Converter<Variant, DBObject> variantToMongoDbObjectConverter;
 
     private final String fileId = "fileId";
 
@@ -73,17 +74,16 @@ public class VariantToMongoDbObjectConverterTest {
         assertNotNull(dbObject);
         BasicDBObject addToSet = (BasicDBObject) dbObject.get("$addToSet");
         BasicDBObject files = (BasicDBObject) addToSet.get("files");
-        assertTrue(fileId.equals(files.get("fid")));
-        assertTrue(studyId.equals(files.get("sid")));
+        assertEquals(fileId, files.get("fid"));
+        assertEquals(studyId, files.get("sid"));
 
         BasicDBObject setOnInsert = (BasicDBObject) dbObject.get("$setOnInsert");
-        assertTrue(
-                String.format("%s_%s_%s_%s", chromosome, start, reference, alternate).equals(setOnInsert.get("_id")));
-        assertTrue(chromosome.equals(setOnInsert.get("chr")));
+        assertEquals(String.format("%s_%s_%s_%s", chromosome, start, reference, alternate), setOnInsert.get("_id"));
+        assertEquals(chromosome, setOnInsert.get("chr"));
         assertEquals(start, setOnInsert.get("start"));
         assertEquals(end, setOnInsert.get("end"));
-        assertTrue(reference.equals(setOnInsert.get("ref")));
-        assertTrue(alternate.equals(setOnInsert.get("alt")));
+        assertEquals(reference, setOnInsert.get("ref"));
+        assertEquals(alternate, setOnInsert.get("alt"));
     }
 
     @Test
@@ -152,8 +152,8 @@ public class VariantToMongoDbObjectConverterTest {
 
         Map<String, VariantSourceEntry> sourceEntries = new LinkedHashMap<>();
         VariantSourceEntry variantSourceEntry = new VariantSourceEntry(fileId, studyId);
-        variantSourceEntry
-                .setCohortStats("cohortStats", new VariantStats(reference, alternate, Variant.VariantType.SNV));
+        variantSourceEntry.setCohortStats("cohortStats",
+                                          new VariantStats(reference, alternate, Variant.VariantType.SNV));
         sourceEntries.put("variant", variantSourceEntry);
         variant.setSourceEntries(sourceEntries);
 

@@ -10,19 +10,21 @@ import static org.junit.Assert.assertEquals;
 public class MongoDBHelperTest {
 
     @Test
-    public void testBuildStorageId() {
+    public void testBuildStorageIdSnv() {
+        Variant variant = new Variant("1", 1000, 1000, "A", "C");
+        assertEquals("1_1000_A_C", MongoDBHelper.buildStorageId(variant));
+    }
 
-        // SNV
-        Variant v1 = new Variant("1", 1000, 1000, "A", "C");
-        assertEquals("1_1000_A_C", MongoDBHelper.buildStorageId(v1));
+    @Test
+    public void testBuildStorageIdIndel() {
+        Variant variant = new Variant("1", 1000, 1002, "", "CA");
+        assertEquals("1_1000__CA", MongoDBHelper.buildStorageId(variant));
+    }
 
-        // Indel
-        Variant v2 = new Variant("1", 1000, 1002, "", "CA");
-        assertEquals("1_1000__CA", MongoDBHelper.buildStorageId(v2));
-
-        // Structural
+    @Test
+    public void testBuildStorageIdStructural() {
         String alt = "ACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGT";
-        Variant v3 = new Variant("1", 1000, 1002, "TAG", alt);
-        assertEquals("1_1000_TAG_" + new String(CryptoUtils.encryptSha1(alt)), MongoDBHelper.buildStorageId(v3));
+        Variant variant = new Variant("1", 1000, 1002, "TAG", alt);
+        assertEquals("1_1000_TAG_" + new String(CryptoUtils.encryptSha1(alt)), MongoDBHelper.buildStorageId(variant));
     }
 }

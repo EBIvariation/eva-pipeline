@@ -97,14 +97,14 @@ public class VariantVcfExacFactory extends VariantAggregatedVcfFactory {
             }
         }
 
-        if (sourceEntry.hasAttribute(AN_ADJ) && sourceEntry
-                .hasAttribute(AC_ADJ)) { // inferring implicit refallele count
+        if (sourceEntry.hasAttribute(AN_ADJ) && sourceEntry.hasAttribute(AC_ADJ)) {
+            // inferring implicit reference allele count
             setRefAlleleCount(stats, Integer.parseInt(sourceEntry.getAttribute(AN_ADJ)),
                               sourceEntry.getAttribute(AC_ADJ).split(COMMA));
         }
 
-        if (sourceEntry.hasAttribute(AC_HOM) && sourceEntry.hasAttribute(AC_HET) && sourceEntry
-                .hasAttribute(AN_ADJ)) {   // inferring implicit 0/0 count
+        if (sourceEntry.hasAttribute(AC_HOM) && sourceEntry.hasAttribute(AC_HET) && sourceEntry.hasAttribute(AN_ADJ)) {
+            // inferring implicit homozygous reference genotype (0/0) count
             int an = Integer.parseInt(sourceEntry.getAttribute(AN_ADJ));
             addReferenceGenotype(variant, stats, an);
         }
@@ -177,6 +177,8 @@ public class VariantVcfExacFactory extends VariantAggregatedVcfFactory {
 
     /**
      * Infers the 0/0 genotype count, given that: sum(Heterozygous) + sum(Homozygous) + sum(Reference) = alleleNumber/2
+     * <p>
+     * TODO Assumes diploid samples, use carefully
      *
      * @param variant to retrieve the alleles to construct the genotype
      * @param stats where to add the 0/0 genotype count
@@ -188,8 +190,7 @@ public class VariantVcfExacFactory extends VariantAggregatedVcfFactory {
             gtSum += gtCounts;
         }
         Genotype genotype = new Genotype("0/0", variant.getReference(), variant.getAlternate());
-        stats.addGenotype(genotype,
-                          alleleNumber / 2 - gtSum);  // assuming diploid sample! be careful if you copy this code!
+        stats.addGenotype(genotype, alleleNumber / 2 - gtSum);
     }
 
     /**
