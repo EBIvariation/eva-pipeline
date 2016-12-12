@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.ac.ebi.eva.commons.readers;
+package uk.ac.ebi.eva.pipeline.io.mappers;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -77,7 +77,8 @@ public class VariantVcfFactory {
         String reference = fields[3].equals(".") ? "" : fields[3];
         String alternate = fields[4];
         if(fields[4].equals(".")) {
-            throw new NotAVariantException("Alternative allele is a '.'. This is not an actual variant but a reference position. Variant found as: "
+            throw new NotAVariantException(
+                    "Alternative allele is a '.'. This is not an actual variant but a reference position. Variant found as: "
                     + chromosome + ":" + position + ":" + reference + ">" + alternate);
         }
 //        String alternate = fields[4].equals(".") ? "" : fields[4];
@@ -89,7 +90,8 @@ public class VariantVcfFactory {
 
         List<VariantKeyFields> generatedKeyFields = new ArrayList<>();
 
-        for (int i = 0; i < alternateAlleles.length; i++) { // This index is necessary for getting the samples where the mutated allele is present
+        for (int i = 0; i < alternateAlleles.length; i++) {
+            // This 'i' index is necessary to get the samples where the mutated allele is present
             String alt = alternateAlleles[i];
             VariantKeyFields keyFields;
             int referenceLen = reference.length();
@@ -119,13 +121,15 @@ public class VariantVcfFactory {
             VariantKeyFields keyFields = generatedKeyFields.get(i);
             Variant variant = new Variant(chromosome, keyFields.start, keyFields.end, keyFields.reference, keyFields.alternate);
             String[] secondaryAlternates = getSecondaryAlternates(variant, keyFields.getNumAllele(), alternateAlleles);
-            VariantSourceEntry file = new VariantSourceEntry(source.getFileId(), source.getStudyId(), secondaryAlternates, format);
+            VariantSourceEntry file = new VariantSourceEntry(source.getFileId(), source.getStudyId(),
+                                                             secondaryAlternates, format);
             variant.addSourceEntry(file);
 
             try {
                 parseSplitSampleData(variant, source, fields, alternateAlleles, secondaryAlternates, i + 1);
                 // Fill the rest of fields (after samples because INFO depends on them)
-                setOtherFields(variant, source, ids, quality, filter, info, format, keyFields.getNumAllele(), alternateAlleles, line);
+                setOtherFields(variant, source, ids, quality, filter, info, format, keyFields.getNumAllele(),
+                               alternateAlleles, line);
                 variants.add(variant);
             } catch (NonStandardCompliantSampleField ex) {
                 Logger.getLogger(VariantFactory.class.getName()).log(Level.SEVERE,
@@ -240,9 +244,9 @@ public class VariantVcfFactory {
     }
 
     protected void parseSplitSampleData(Variant variant, VariantSource source, String[] fields, 
-            String[] alternateAlleles, String[] secondaryAlternates, int alleleIdx) throws NonStandardCompliantSampleField {
+            String[] alternateAlleles, String[] secondaryAlternates, int alleleIdx)
+                    throws NonStandardCompliantSampleField {
         String[] formatFields = variant.getSourceEntry(source.getFileId(), source.getStudyId()).getFormat().split(":");
-        List<String> samples = source.getSamples();
 
         for (int i = 9; i < fields.length; i++) {
             Map<String, String> map = new HashMap<>(5);
@@ -271,7 +275,8 @@ public class VariantVcfFactory {
                             genotypeStr.append(".");
                         } else {
                             // Replace numerical indexes when they refer to another alternate allele
-                            genotypeStr.append(String.valueOf(ArrayUtils.indexOf(secondaryAlternates, alternateAlleles[allele-1]) + 2));
+                            genotypeStr.append(String.valueOf(ArrayUtils.indexOf(secondaryAlternates,
+                                                                                 alternateAlleles[allele-1]) + 2));
                         }
                         genotypeStr.append(genotype.isPhased() ? "|" : "/");
                     }
@@ -301,7 +306,8 @@ public class VariantVcfFactory {
                             int maxAllele = allele1 >= allele2 ? allele1 : allele2;
                             int numValues = (int) (((float) maxAllele * (maxAllele + 1)) / 2) + maxAllele;
                             if (likelihoods.length < numValues) {
-                                throw new NonStandardCompliantSampleField(formatField, sampleField, String.format("It must contain %d values", numValues));
+                                throw new NonStandardCompliantSampleField(
+                                    formatField, sampleField, String.format("It must contain %d values", numValues));
                             }
 
                             // Genotype likelihood must be distributed following similar criteria as genotypes
@@ -457,9 +463,10 @@ public class VariantVcfFactory {
 
     /**
      * In multiallelic variants, we have a list of alternates, where numAllele is the one whose variant we are parsing now.
-     * If we are parsing the first variant (numAllele == 0) A1 refers to first alternative, (i.e. alternateAlleles[0]), A2 to 
-     * second alternative (alternateAlleles[1]), and so on.
-     * However, if numAllele == 1, A1 refers to second alternate (alternateAlleles[1]), A2 to first (alternateAlleles[0]) and higher alleles remain unchanged.
+     * If we are parsing the first variant (numAllele == 0) A1 refers to first alternative, (i.e. alternateAlleles[0]),
+     * A2 to second alternative (alternateAlleles[1]), and so on.
+     * However, if numAllele == 1, A1 refers to second alternate (alternateAlleles[1]), A2 to first (alternateAlleles[0])
+     * and higher alleles remain unchanged.
      * Moreover, if NumAllele == 2, A1 is third alternate, A2 is first alternate and A3 is second alternate.
      * It's also assumed that A0 would be the reference, so it remains unchanged too.
      *

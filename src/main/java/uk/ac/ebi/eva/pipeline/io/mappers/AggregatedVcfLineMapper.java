@@ -19,10 +19,6 @@ import org.opencb.biodata.models.variant.VariantSource;
 import org.springframework.batch.item.file.LineMapper;
 
 import uk.ac.ebi.eva.commons.models.data.Variant;
-import uk.ac.ebi.eva.commons.readers.VariantAggregatedVcfFactory;
-import uk.ac.ebi.eva.commons.readers.VariantVcfEVSFactory;
-import uk.ac.ebi.eva.commons.readers.VariantVcfExacFactory;
-import uk.ac.ebi.eva.commons.readers.VariantVcfFactory;
 
 import java.util.List;
 

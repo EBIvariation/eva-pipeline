@@ -19,7 +19,6 @@ import org.opencb.biodata.models.variant.VariantSource;
 import org.springframework.batch.item.file.LineMapper;
 
 import uk.ac.ebi.eva.commons.models.data.Variant;
-import uk.ac.ebi.eva.commons.readers.VariantVcfFactory;
 
 import java.util.List;
 
@@ -31,6 +30,7 @@ import static org.junit.Assert.assertNotNull;
  * The actual implementation is reused from {@link VariantVcfFactory}.
  */
 public class VcfLineMapper implements LineMapper<List<Variant>> {
+
     private final VariantSource source;
 
     private final VariantVcfFactory factory;
