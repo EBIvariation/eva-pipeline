@@ -17,6 +17,7 @@
 package uk.ac.ebi.eva.pipeline.io.mappers;
 
 import org.apache.commons.lang3.StringUtils;
+import org.opencb.biodata.models.feature.Genotype;
 import org.opencb.biodata.models.variant.VariantFactory;
 import org.opencb.biodata.models.variant.VariantSource;
 import org.opencb.biodata.models.variant.exceptions.NonStandardCompliantSampleField;
@@ -256,7 +257,7 @@ public class VariantVcfFactory {
             // so the loop iterates to sampleFields.length, not formatFields.length
             for (int j = 0; j < sampleFields.length; j++) {
                 String formatField = formatFields[j];
-                String sampleField = "GT".equals(formatField) ? sampleFields[j].intern() : sampleFields[j];
+                String sampleField = processSampleField(alleleIdx, formatField, sampleFields[j]);
 
                 map.put(formatField, sampleField);
             }
@@ -264,6 +265,41 @@ public class VariantVcfFactory {
             // Add sample to the variant entry in the source file
             variant.getSourceEntry(source.getFileId(), source.getStudyId()).addSampleData(map);
         }
+    }
+
+    /**
+     * If this is a field other than the genotype (GT), return unmodified.
+     *
+     * If this field is the genotype (GT) then, intern it into the String pool to avoid storing lots of "0/0". In case
+     * that the variant is multiallelic and we are currently processing one of the secondary alternates (alleleIdx >=2),
+     * change the allele codes to represent the current alternate as allele 1. {@see mapToMultiallelicIndex}
+     *
+     * @param alleleIdx current alternate being processed. 1 for first alternate, 2 or more for a secondary alternate.
+     * @param formatField as shown in the FORMAT column. most probably the GT field.
+     * @param sampleField parsed value in a column of a sample, such as a genotype, e.g. "0/0".
+     * @return
+     */
+    private String processSampleField(int alleleIdx, String formatField, String sampleField) {
+        if (formatField.equalsIgnoreCase("GT")) {
+            if (alleleIdx >= 2) {
+                Genotype genotype = new Genotype(sampleField);
+
+                StringBuilder genotypeStr = new StringBuilder();
+                for (int allele : genotype.getAllelesIdx()) {
+                    if (allele < 0) { // Missing
+                        genotypeStr.append(".");
+                    } else {
+                        // Replace numerical indexes when they refer to another alternate allele
+                        genotypeStr.append(String.valueOf(mapToMultiallelicIndex(allele, alleleIdx)));
+                    }
+                    genotypeStr.append(genotype.isPhased() ? "|" : "/");
+                }
+                sampleField = genotypeStr.substring(0, genotypeStr.length() - 1);
+            }
+
+            sampleField = sampleField.intern();
+        }
+        return sampleField;
     }
 
     protected void setOtherFields(Variant variant, VariantSource source, Set<String> ids, float quality, String filter,
