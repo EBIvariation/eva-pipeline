@@ -124,7 +124,7 @@ public class VariantVcfFactory {
             variant.addSourceEntry(file);
 
             try {
-                parseSplitSampleData(variant, source, fields, alternateAlleles, secondaryAlternates, i + 1);
+                parseSplitSampleData(variant, source, fields, alternateAlleles, secondaryAlternates, i);
                 // Fill the rest of fields (after samples because INFO depends on them)
                 setOtherFields(variant, source, ids, quality, filter, info, format, keyFields.getNumAllele(),
                                alternateAlleles, line);
@@ -271,7 +271,7 @@ public class VariantVcfFactory {
      * If this is a field other than the genotype (GT), return unmodified.
      *
      * If this field is the genotype (GT) then, intern it into the String pool to avoid storing lots of "0/0". In case
-     * that the variant is multiallelic and we are currently processing one of the secondary alternates (alleleIdx >=2),
+     * that the variant is multiallelic and we are currently processing one of the secondary alternates (alleleIdx >=1),
      * change the allele codes to represent the current alternate as allele 1. {@see mapToMultiallelicIndex}
      *
      * @param alleleIdx current alternate being processed. 1 for first alternate, 2 or more for a secondary alternate.
@@ -281,7 +281,7 @@ public class VariantVcfFactory {
      */
     private String processSampleField(int alleleIdx, String formatField, String sampleField) {
         if (formatField.equalsIgnoreCase("GT")) {
-            if (alleleIdx >= 2) {
+            if (alleleIdx >= 1) {
                 Genotype genotype = new Genotype(sampleField);
 
                 StringBuilder genotypeStr = new StringBuilder();

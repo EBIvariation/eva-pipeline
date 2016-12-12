@@ -1,26 +1,47 @@
-package org.opencb.biodata.models.variant;
+/*
+ * Copyright 2016 EMBL - European Bioinformatics Institute
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package uk.ac.ebi.eva.pipeline.io.mappers;
 
 import org.junit.Test;
 import org.opencb.biodata.models.feature.Genotype;
-import org.opencb.biodata.models.variant.stats.VariantStats;
+import org.opencb.biodata.models.variant.VariantSource;
 import org.opencb.commons.test.GenericTest;
+
+import uk.ac.ebi.eva.commons.models.data.Variant;
+import uk.ac.ebi.eva.commons.models.data.VariantSourceEntry;
+import uk.ac.ebi.eva.commons.models.data.VariantStats;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
- * Created by jmmut on 2015-03-25.
- *
- * @author Jose Miguel Mut Lopez &lt;jmmut@ebi.ac.uk&gt;
+ * {@link VariantVcfExacFactory}
+ * input: an Exac aggregated VCF
+ * output: a List of Variants
  */
 public class VariantVcfExacFactoryTest extends GenericTest {
 
     private VariantSource source = new VariantSource("Exac", "Exac", "Exac", "Exac");
-    private VariantFactory factory = new VariantVcfExacFactory();
+
+    private VariantVcfFactory factory = new VariantVcfExacFactory();
 
     @Test
     public void basicLine() {
@@ -51,7 +72,8 @@ public class VariantVcfExacFactoryTest extends GenericTest {
 
         Map<Genotype, Integer> genotypes = new HashMap<>();
 
-        genotypes.put(new Genotype("0/0", "G", "T"), (10890 - 22 * 2) / 2);    // AN - alleles_in_gt_0/1: how many ref alleles there are in the genotype 0/0, as there are no 1/1
+        genotypes.put(new Genotype("0/0", "G", "T"),
+                      (10890 - 22 * 2) / 2);    // AN - alleles_in_gt_0/1: how many ref alleles there are in the genotype 0/0, as there are no 1/1
         genotypes.put(new Genotype("0/1", "G", "T"), 22);
         genotypes.put(new Genotype("1/1", "G", "T"), 0);
 
@@ -99,7 +121,8 @@ public class VariantVcfExacFactoryTest extends GenericTest {
 
         Map<Genotype, Integer> genotypes = new HashMap<>();
 
-        genotypes.put(new Genotype("0/0", "G", "T"), (79012 - 4 * 2) / 2);    // AN - alleles_in_gt_0/1: how many ref alleles there are in the genotype 0/0, as there are no 1/1
+        genotypes.put(new Genotype("0/0", "G", "T"),
+                      (79012 - 4 * 2) / 2);    // AN - alleles_in_gt_0/1: how many ref alleles there are in the genotype 0/0, as there are no 1/1
         genotypes.put(new Genotype("0/1", "G", "T"), 1);
         genotypes.put(new Genotype("1/1", "G", "T"), 1);
         genotypes.put(new Genotype("0/2", "G", "T"), 1);
@@ -113,10 +136,12 @@ public class VariantVcfExacFactoryTest extends GenericTest {
         assertEquals(genotypes, sourceEntry.getStats().getGenotypesCount());
         assertEquals(3, sourceEntry.getStats().getAltAlleleCount());
         assertEquals(79012 - 1 - 2 - 1 - 2, sourceEntry.getStats().getRefAlleleCount());
-        assertEquals(0, sourceEntry.getStats().getMaf(), 0.00001);   // how can a multiallelic variant have an allele count of 0? the "Adjusted" just removed it
+        assertEquals(0, sourceEntry.getStats().getMaf(),
+                     0.00001);   // how can a multiallelic variant have an allele count of 0? the "Adjusted" just removed it
 
         genotypes.clear();
-        genotypes.put(new Genotype("0/0", "G", "A"), (79012 - 4 * 2) / 2);    // AN - alleles_in_gt_0/1: how many ref alleles there are in the genotype 0/0, as there are no 1/1
+        genotypes.put(new Genotype("0/0", "G", "A"),
+                      (79012 - 4 * 2) / 2);    // AN - alleles_in_gt_0/1: how many ref alleles there are in the genotype 0/0, as there are no 1/1
         genotypes.put(new Genotype("0/1", "G", "A"), 1);
         genotypes.put(new Genotype("1/1", "G", "A"), 1);
         genotypes.put(new Genotype("0/2", "G", "A"), 1);
@@ -134,7 +159,8 @@ public class VariantVcfExacFactoryTest extends GenericTest {
         assertEquals(79012 - 1 - 2 - 1 - 2, sourceEntry.getStats().getRefAlleleCount());
 
         genotypes.clear();
-        genotypes.put(new Genotype("0/0", "G", "C"), (79012 - 4 * 2) / 2);    // AN - alleles_in_gt_0/1: how many ref alleles there are in the genotype 0/0, as there are no 1/1
+        genotypes.put(new Genotype("0/0", "G", "C"),
+                      (79012 - 4 * 2) / 2);    // AN - alleles_in_gt_0/1: how many ref alleles there are in the genotype 0/0, as there are no 1/1
         genotypes.put(new Genotype("0/1", "G", "C"), 0);
         genotypes.put(new Genotype("1/1", "G", "C"), 0);
         genotypes.put(new Genotype("0/2", "G", "C"), 1);
@@ -186,39 +212,39 @@ public class VariantVcfExacFactoryTest extends GenericTest {
                 + "regulatory_region|||||||||||||||||||||||||||||||";
 
         Properties properties = new Properties();
-        properties.put("AFR.AC",   "AC_AFR");
-        properties.put("AFR.AN",   "AN_AFR");
+        properties.put("AFR.AC", "AC_AFR");
+        properties.put("AFR.AN", "AN_AFR");
         properties.put("AFR.HET", "Het_AFR");
         properties.put("AFR.HOM", "Hom_AFR");
-        properties.put("AMR.AC",   "AC_AMR");
-        properties.put("AMR.AN",   "AN_AMR");
+        properties.put("AMR.AC", "AC_AMR");
+        properties.put("AMR.AN", "AN_AMR");
         properties.put("AMR.HET", "Het_AMR");
         properties.put("AMR.HOM", "Hom_AMR");
-        properties.put("EAS.AC",   "AC_EAS");
-        properties.put("EAS.AN",   "AN_EAS");
+        properties.put("EAS.AC", "AC_EAS");
+        properties.put("EAS.AN", "AN_EAS");
         properties.put("EAS.HET", "Het_EAS");
         properties.put("EAS.HOM", "Hom_EAS");
-        properties.put("FIN.AC",   "AC_FIN");
-        properties.put("FIN.AN",   "AN_FIN");
+        properties.put("FIN.AC", "AC_FIN");
+        properties.put("FIN.AN", "AN_FIN");
         properties.put("FIN.HET", "Het_FIN");
         properties.put("FIN.HOM", "Hom_FIN");
-        properties.put("NFE.AC",   "AC_NFE");
-        properties.put("NFE.AN",   "AN_NFE");
+        properties.put("NFE.AC", "AC_NFE");
+        properties.put("NFE.AN", "AN_NFE");
         properties.put("NFE.HET", "Het_NFE");
         properties.put("NFE.HOM", "Hom_NFE");
-        properties.put("OTH.AC",   "AC_OTH");
-        properties.put("OTH.AN",   "AN_OTH");
+        properties.put("OTH.AC", "AC_OTH");
+        properties.put("OTH.AN", "AN_OTH");
         properties.put("OTH.HET", "Het_OTH");
         properties.put("OTH.HOM", "Hom_OTH");
-        properties.put("SAS.AC",   "AC_SAS");
-        properties.put("SAS.AN",   "AN_SAS");
+        properties.put("SAS.AC", "AC_SAS");
+        properties.put("SAS.AN", "AN_SAS");
         properties.put("SAS.HET", "Het_SAS");
         properties.put("SAS.HOM", "Hom_SAS");
-        properties.put("ALL.AC",  "AC_Adj");
-        properties.put("ALL.AN",  "AN_Adj");
+        properties.put("ALL.AC", "AC_Adj");
+        properties.put("ALL.AN", "AN_Adj");
         properties.put("ALL.HET", "AC_Het");
         properties.put("ALL.HOM", "AC_Hom");
-        VariantFactory exacFactory = new VariantVcfExacFactory(properties);
+        VariantVcfFactory exacFactory = new VariantVcfExacFactory(properties);
         List<Variant> res = exacFactory.create(source, line);
 
         assertTrue(res.size() == 2);
@@ -238,7 +264,7 @@ public class VariantVcfExacFactoryTest extends GenericTest {
         assertEquals(0, (int) sourceEntry.getCohortStats("SAS").getGenotypesCount().get(genotype));
         assertEquals(7025, sourceEntry.getCohortStats("SAS").getRefAlleleCount());
         assertEquals(0, sourceEntry.getCohortStats("SAS").getAltAlleleCount());
-        
+
         // Minor allele frequencies
         assertEquals(9 / 10426.0, sourceEntry.getCohortStats("ALL").getMaf(), 0.00001);
         assertEquals(0, sourceEntry.getCohortStats("SAS").getMaf(), 0.001);
@@ -264,7 +290,6 @@ public class VariantVcfExacFactoryTest extends GenericTest {
 
     @Test
     public void testGetHeterozygousGenotype() throws Exception {
-        VariantVcfExacFactory factory = new VariantVcfExacFactory();
         for (int i = 0; i < 11; i++) {
             Integer alleles[] = new Integer[2];
             VariantVcfExacFactory.getHeterozygousGenotype(i, 4, alleles);
@@ -282,7 +307,6 @@ public class VariantVcfExacFactoryTest extends GenericTest {
 
     @Test
     public void testGetHomozygousGenotype() throws Exception {
-        VariantVcfExacFactory factory = new VariantVcfExacFactory();
         for (int i = 0; i < 11; i++) {
             Integer alleles[] = new Integer[2];
             VariantVcfExacFactory.getHomozygousGenotype(i, alleles);
