@@ -15,7 +15,6 @@
  */
 package uk.ac.ebi.eva.pipeline.io.writers;
 
-import com.google.common.collect.Sets;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
 import org.junit.Rule;
@@ -30,7 +29,9 @@ import uk.ac.ebi.eva.utils.MongoDBHelper;
 
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -101,9 +102,10 @@ public class VariantMongoWriterTest {
 
         Set<String> createdIndexes = dbCollection.getIndexInfo().stream().map(o -> o.get("name").toString())
                 .collect(Collectors.toSet());
-        Set<String> expectedIndexes = Sets.newHashSet("annot.xrefs.id_1_background_", "ids_1_background_", "_id_",
-                                                      "files.sid_1_files.fid_1_background_",
-                                                      "chr_1_start_1_end_1_background_", "annot_1_background_");
+        Set<String> expectedIndexes = new HashSet<>();
+        expectedIndexes.addAll(Arrays.asList("annot.xrefs.id_1_background_", "ids_1_background_", "_id_",
+                                             "files.sid_1_files.fid_1_background_", "chr_1_start_1_end_1_background_",
+                                             "annot_1_background_"));
 
         assertEquals(expectedIndexes, createdIndexes);
     }
