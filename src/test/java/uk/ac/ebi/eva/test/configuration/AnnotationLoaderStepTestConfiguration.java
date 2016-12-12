@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.ac.ebi.eva.pipeline.configuration;
+package uk.ac.ebi.eva.test.configuration;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,11 +22,11 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 
 /**
- * Configuration init for VepInputGeneratorStep tests
+ * Configuration init for AnnotationLoaderStep tests
  */
 @Configuration
-@PropertySource({"vep-input-generator-step.properties"})
-public class VepInputGeneratorStepConfiguration {
+@PropertySource({"annotation-loader-step.properties"})
+public class AnnotationLoaderStepTestConfiguration {
 
     @Bean
     private static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {

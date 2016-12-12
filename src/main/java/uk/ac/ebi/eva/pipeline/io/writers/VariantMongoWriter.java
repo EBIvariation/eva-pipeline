@@ -18,13 +18,14 @@ package uk.ac.ebi.eva.pipeline.io.writers;
 import com.mongodb.BasicDBObject;
 import com.mongodb.BulkWriteOperation;
 import com.mongodb.DBObject;
-import org.opencb.biodata.models.variant.Variant;
 import org.opencb.opencga.storage.mongodb.variant.DBObjectToVariantConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.item.data.MongoItemWriter;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.util.Assert;
+
+import uk.ac.ebi.eva.commons.models.data.Variant;
 import uk.ac.ebi.eva.pipeline.model.converters.data.VariantToMongoDbObjectConverter;
 import uk.ac.ebi.eva.utils.MongoDBHelper;
 
@@ -51,6 +52,7 @@ public class VariantMongoWriter extends MongoItemWriter<Variant> {
         this.variantToMongoDbObjectConverter = variantToMongoDbObjectConverter;
         this.mongoOperations = mongoOperations;
         this.collection = collection;
+        setTemplate(mongoOperations);
     }
 
     @Override

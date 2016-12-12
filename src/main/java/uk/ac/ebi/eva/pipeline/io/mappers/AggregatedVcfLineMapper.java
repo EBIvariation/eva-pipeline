@@ -15,15 +15,14 @@
  */
 package uk.ac.ebi.eva.pipeline.io.mappers;
 
-import org.opencb.biodata.models.variant.Variant;
-import org.opencb.biodata.models.variant.VariantAggregatedVcfFactory;
 import org.opencb.biodata.models.variant.VariantSource;
-import org.opencb.biodata.models.variant.VariantVcfEVSFactory;
-import org.opencb.biodata.models.variant.VariantVcfExacFactory;
-import org.opencb.biodata.models.variant.VariantVcfFactory;
 import org.springframework.batch.item.file.LineMapper;
 
+import uk.ac.ebi.eva.commons.models.data.Variant;
+
 import java.util.List;
+
+import static org.junit.Assert.assertNotNull;
 
 /**
  * Maps a String (in VCF format, with aggregated samples) to a list of variants.
@@ -33,10 +32,9 @@ import java.util.List;
 public class AggregatedVcfLineMapper implements LineMapper<List<Variant>> {
     private final VariantSource source;
 
-    private final VariantVcfFactory factory;
+    private VariantVcfFactory factory;
 
     public AggregatedVcfLineMapper(VariantSource source) {
-        this.source = source;
         switch (source.getAggregation()) {
             case EVS:
                 factory = new VariantVcfEVSFactory();
@@ -44,15 +42,22 @@ public class AggregatedVcfLineMapper implements LineMapper<List<Variant>> {
             case EXAC:
                 factory = new VariantVcfExacFactory();
                 break;
-            default:
             case BASIC:
                 factory = new VariantAggregatedVcfFactory();
                 break;
+            case NONE:
+                throw new IllegalArgumentException(
+                        this.getClass().getSimpleName() + " should be used to read aggregated VCFs only, " +
+                                "but the VariantSource.Aggregation is set to NONE");
         }
+        this.source = source;
     }
 
     @Override
     public List<Variant> mapLine(String line, int lineNumber) throws Exception {
+        assertNotNull(this.getClass().getSimpleName() + " should be used to read aggregated VCFs only " +
+                              "(hint: do not set VariantSource.Aggregation to NONE)",
+                      factory);
         return factory.create(source, line);
     }
 }

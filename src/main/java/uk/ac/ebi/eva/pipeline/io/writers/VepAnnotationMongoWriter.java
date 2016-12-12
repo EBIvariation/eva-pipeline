@@ -147,7 +147,7 @@ public class VepAnnotationMongoWriter extends MongoItemWriter<VariantAnnotation>
     }
 
     private void writeVariantAnnotationInMongoDb(String storageId, VariantAnnotation variantAnnotation){
-        logger.debug("Writing annotations into mongo id: {}", storageId);
+        logger.trace("Writing annotations into mongo id: {}", storageId);
 
         DBObject storageVariantAnnotation = converter.convertToStorageType(variantAnnotation);
 

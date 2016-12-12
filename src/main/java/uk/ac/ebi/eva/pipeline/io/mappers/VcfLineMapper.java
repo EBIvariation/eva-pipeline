@@ -15,12 +15,14 @@
  */
 package uk.ac.ebi.eva.pipeline.io.mappers;
 
-import org.opencb.biodata.models.variant.Variant;
 import org.opencb.biodata.models.variant.VariantSource;
-import org.opencb.biodata.models.variant.VariantVcfFactory;
 import org.springframework.batch.item.file.LineMapper;
 
+import uk.ac.ebi.eva.commons.models.data.Variant;
+
 import java.util.List;
+
+import static org.junit.Assert.assertNotNull;
 
 /**
  * Maps a String (in VCF format) to a list of variants.
@@ -28,17 +30,26 @@ import java.util.List;
  * The actual implementation is reused from {@link VariantVcfFactory}.
  */
 public class VcfLineMapper implements LineMapper<List<Variant>> {
+
     private final VariantSource source;
 
     private final VariantVcfFactory factory;
 
     public VcfLineMapper(VariantSource source) {
+        if (!VariantSource.Aggregation.NONE.equals(source.getAggregation())) {
+            throw new IllegalArgumentException(
+                    this.getClass().getSimpleName() + " should be used to read genotyped VCFs only, " +
+                            "but the VariantSource.Aggregation set to " + source.getAggregation().toString());
+        }
         this.source = source;
         this.factory = new VariantVcfFactory();
     }
 
     @Override
-    public List<Variant> mapLine(String line, int lineNumber) throws Exception {
+    public List<Variant> mapLine(String line, int lineNumber) {
+        assertNotNull(this.getClass().getSimpleName() + " should be used to read genotyped VCFs only " +
+                              "(hint: set VariantSource.Aggregation to NONE)",
+                      factory);
         return factory.create(source, line);
     }
 }

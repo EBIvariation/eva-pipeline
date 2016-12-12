@@ -20,9 +20,9 @@ import com.mongodb.DBCollection;
 import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mockito;
-import org.opencb.biodata.models.variant.Variant;
 import org.springframework.data.mongodb.core.MongoOperations;
 
+import uk.ac.ebi.eva.commons.models.data.Variant;
 import uk.ac.ebi.eva.pipeline.model.converters.data.VariantToMongoDbObjectConverter;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 import uk.ac.ebi.eva.utils.MongoDBHelper;

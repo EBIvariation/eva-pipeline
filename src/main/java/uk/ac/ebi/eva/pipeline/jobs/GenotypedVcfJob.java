@@ -19,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecutionListener;
+import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.job.builder.FlowBuilder;
@@ -33,43 +34,56 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
+
 import uk.ac.ebi.eva.pipeline.jobs.flows.AnnotationFlow;
 import uk.ac.ebi.eva.pipeline.jobs.flows.PopulationStatisticsFlow;
 import uk.ac.ebi.eva.pipeline.jobs.steps.VariantLoaderStep;
 import uk.ac.ebi.eva.pipeline.listeners.VariantOptionsConfigurerListener;
+import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 
 /**
- *  Complete pipeline workflow:
- *
- *                       |--> (optionalStatisticsFlow: statsCreate --> statsLoad)
- *  transform ---> load -+
- *                       |--> (optionalAnnotationFlow: variantsAnnotGenerateInput --> (annotationCreate --> annotationLoad))
- *
- *  Steps in () are optional
+ * Complete pipeline workflow:
+ * <p>
+ * |--> (optionalStatisticsFlow: statsCreate --> statsLoad)
+ * transform ---> load -+
+ * |--> (optionalAnnotationFlow: variantsAnnotGenerateInput --> (annotationCreate --> annotationLoad))
+ * <p>
+ * Steps in () are optional
  */
 @Configuration
 @EnableBatchProcessing
 @Import({VariantLoaderStep.class, PopulationStatisticsFlow.class, AnnotationFlow.class})
-public class GenotypedVcfJob extends CommonJobStepInitialization{
+public class GenotypedVcfJob extends CommonJobStepInitialization {
     private static final Logger logger = LoggerFactory.getLogger(GenotypedVcfJob.class);
 
     public static final String jobName = "load-genotyped-vcf";
+
     public static final String PARALLEL_STATISTICS_AND_ANNOTATION = "Parallel statistics and annotation";
 
     //job default settings
     private static final boolean INCLUDE_SAMPLES = true;
+
     private static final boolean COMPRESS_GENOTYPES = true;
+
     private static final boolean CALCULATE_STATS = false;
+
     private static final boolean INCLUDE_STATS = false;
 
     @Autowired
     private JobBuilderFactory jobBuilderFactory;
+
     @Autowired
     private Flow annotationFlowOptional;
+
     @Autowired
     private Flow optionalStatisticsFlow;
+
     @Autowired
-    private VariantLoaderStep variantLoaderStep;
+    @Qualifier("variantsLoadStep")
+    private Step variantLoaderStep;
+
+    @Autowired
+    private JobOptions jobOptions;
 
     @Bean
     @Qualifier("genotypedJob")
@@ -87,8 +101,7 @@ public class GenotypedVcfJob extends CommonJobStepInitialization{
                 .build();
 
         FlowJobBuilder builder = jobBuilder
-                .flow(normalize())
-                .next(load(variantLoaderStep))
+                .flow(variantLoaderStep)
                 .next(parallelStatisticsAndAnnotation)
                 .end();
 
@@ -99,9 +112,8 @@ public class GenotypedVcfJob extends CommonJobStepInitialization{
     @Scope("prototype")
     public JobExecutionListener genotypedJobListener() {
         return new VariantOptionsConfigurerListener(INCLUDE_SAMPLES,
-                COMPRESS_GENOTYPES,
-                CALCULATE_STATS,
-                INCLUDE_STATS);
+                                                    COMPRESS_GENOTYPES,
+                                                    CALCULATE_STATS,
+                                                    INCLUDE_STATS);
     }
-
 }

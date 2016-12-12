@@ -38,10 +38,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
-import uk.ac.ebi.eva.pipeline.configuration.GenotypedVcfConfiguration;
+
 import uk.ac.ebi.eva.pipeline.jobs.steps.AnnotationLoaderStep;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
+import uk.ac.ebi.eva.test.configuration.GenotypedVcfConfiguration;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 
 import java.io.BufferedReader;
@@ -55,7 +56,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static uk.ac.ebi.eva.test.utils.JobTestUtils.count;
 import static uk.ac.ebi.eva.test.utils.JobTestUtils.getLines;
 import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResource;
@@ -80,6 +84,12 @@ public class GenotypedVcfJobTest {
 
     private static final String MOCK_VEP = "/mockvep.pl";
 
+    private static final int EXPECTED_VALID_ANNOTATIONS = 536;
+
+    private static final int EXPECTED_ANNOTATIONS = 537;
+
+    private static final int EXPECTED_VARIANTS = 300;
+
     @Rule
     public TemporaryMongoRule mongoRule = new TemporaryMongoRule();
 
@@ -88,12 +98,12 @@ public class GenotypedVcfJobTest {
 
     @Autowired
     private JobOptions jobOptions;
-
     private String input;
     private String outputDir;
     private String compressExtension;
     private String dbName;
     private String vepInput;
+
     private String vepOutput;
 
     private static String opencgaHome = System.getenv("OPENCGA_HOME") != null ? System.getenv("OPENCGA_HOME") : "/opt/opencga";
@@ -105,12 +115,6 @@ public class GenotypedVcfJobTest {
 
         Config.setOpenCGAHome(opencgaHome);
         mongoRule.getTemporaryDatabase(dbName);
-
-        // transformedVcf file init
-        String transformedVcf = outputDir + input + ".variants.json" + compressExtension;
-        File transformedVcfFile = new File(transformedVcf);
-        transformedVcfFile.delete();
-        assertFalse(transformedVcfFile.exists());
 
         //stats file init
         VariantSource source = (VariantSource) jobOptions.getVariantOptions().get(VariantStorageManager.VARIANT_SOURCE);
@@ -136,31 +140,27 @@ public class GenotypedVcfJobTest {
         assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
         assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());
 
-        // 1 transform step: check transformed file
-        long transformedLinesCount = getLines(new GZIPInputStream(new FileInputStream(transformedVcf)));
-        assertEquals(300, transformedLinesCount);
-
-        // 2 load step: check ((documents in DB) == (lines in transformed file))
+        // 1 load step: check ((documents in DB) == (lines in transformed file))
         //variantStorageManager = StorageManagerFactory.getVariantStorageManager();
         //variantDBAdaptor = variantStorageManager.getDBAdaptor(dbName, null);
         iterator = getVariantDBIterator();
-        assertEquals(transformedLinesCount, count(iterator));
+        assertEquals(EXPECTED_VARIANTS, count(iterator));
 
-        // 3 create stats step
+        // 2 create stats step
         assertTrue(statsFile.exists());
 
-        // 4 load stats step: check ((documents in DB) == (lines in transformed file))
+        // 3 load stats step: check ((documents in DB) == (lines in transformed file))
         //variantStorageManager = StorageManagerFactory.getVariantStorageManager();
         //variantDBAdaptor = variantStorageManager.getDBAdaptor(dbName, null);
         iterator = getVariantDBIterator();
-        assertEquals(transformedLinesCount, count(iterator));
+        assertEquals(EXPECTED_VARIANTS, count(iterator));
 
         // check the DB docs have the field "st"
         iterator = getVariantDBIterator();
 
         assertEquals(1, iterator.next().getSourceEntries().values().iterator().next().getCohortStats().size());
 
-        // 5 annotation flow
+        // 4 annotation flow
         // annotation input vep generate step
         BufferedReader testReader = new BufferedReader(new InputStreamReader(new FileInputStream(
                 getResource("/preannot.sorted"))));
@@ -182,14 +182,14 @@ public class GenotypedVcfJobTest {
         }
         assertNull(testLine); // if both files have the same length testReader should be after the last line
 
-        // 6 annotation create step
+        // 5 annotation create step
         assertTrue(vepInputFile.exists());
         assertTrue(vepOutputFile.exists());
 
         // Check output file length
-        assertEquals(537, getLines(new GZIPInputStream(new FileInputStream(vepOutput))));
+        assertEquals(EXPECTED_ANNOTATIONS, getLines(new GZIPInputStream(new FileInputStream(vepOutput))));
 
-        // 8 Annotation load step: check documents in DB have annotation (only consequence type)
+        // 6 Annotation load step: check documents in DB have annotation (only consequence type)
         iterator = getVariantDBIterator();
 
         int cnt = 0;
@@ -202,8 +202,8 @@ public class GenotypedVcfJobTest {
             }
         }
 
-        assertEquals(300, cnt);
-        assertEquals(536, consequenceTypeCount);
+        assertEquals(EXPECTED_VARIANTS, cnt);
+        assertEquals(EXPECTED_VALID_ANNOTATIONS, consequenceTypeCount);
 
         //check that one line is skipped because malformed
         List<StepExecution> variantAnnotationLoadStepExecution = jobExecution.getStepExecutions().stream()

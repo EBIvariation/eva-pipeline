@@ -19,39 +19,45 @@ import com.google.common.collect.Sets;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 import org.junit.Test;
-import org.opencb.biodata.models.variant.Variant;
-import org.opencb.biodata.models.variant.VariantSourceEntry;
-import org.opencb.biodata.models.variant.stats.VariantStats;
 import org.opencb.opencga.storage.core.variant.VariantStorageManager;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.support.GenericConversionService;
 
+import uk.ac.ebi.eva.commons.models.data.Variant;
+import uk.ac.ebi.eva.commons.models.data.VariantSourceEntry;
+import uk.ac.ebi.eva.commons.models.data.VariantStats;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
-import static org.junit.Assert.*;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Test {@link VariantToMongoDbObjectConverter}
  */
 public class VariantToMongoDbObjectConverterTest {
+
     private GenericConversionService conversionService = new GenericConversionService();
-    private Converter variantToMongoDbObjectConverter;
+
+    private Converter<Variant, DBObject> variantToMongoDbObjectConverter;
 
     private final String fileId = "fileId";
+
     private final String studyId = "studyId";
-    private final Map<String, Integer> samplesPosition = new LinkedHashMap<>();
+
     private final VariantStorageManager.IncludeSrc includeSrc = VariantStorageManager.IncludeSrc.FIRST_8_COLUMNS;
 
     @Test(expected = IllegalArgumentException.class)
-    public void convertNullVariantShouldThrowAnException(){
-        variantToMongoDbObjectConverter = new VariantToMongoDbObjectConverter(false, samplesPosition, false, true,
-                includeSrc);
+    public void convertNullVariantShouldThrowAnException() {
+        variantToMongoDbObjectConverter = new VariantToMongoDbObjectConverter(false, false, true, includeSrc);
         variantToMongoDbObjectConverter.convert(null);
     }
 
     @Test
-    public void allFieldsOfVariantShouldBeConverted(){
+    public void allFieldsOfVariantShouldBeConverted() {
         String chromosome = "12";
         int start = 3;
         int end = 4;
@@ -60,8 +66,7 @@ public class VariantToMongoDbObjectConverterTest {
 
         Variant variant = buildVariant(chromosome, start, end, reference, alternate, fileId, studyId);
 
-        variantToMongoDbObjectConverter = new VariantToMongoDbObjectConverter(false, samplesPosition, false, true,
-                includeSrc);
+        variantToMongoDbObjectConverter = new VariantToMongoDbObjectConverter(false, false, true, includeSrc);
         conversionService.addConverter(variantToMongoDbObjectConverter);
 
         DBObject dbObject = conversionService.convert(variant, DBObject.class);
@@ -69,24 +74,23 @@ public class VariantToMongoDbObjectConverterTest {
         assertNotNull(dbObject);
         BasicDBObject addToSet = (BasicDBObject) dbObject.get("$addToSet");
         BasicDBObject files = (BasicDBObject) addToSet.get("files");
-        assertTrue(fileId.equals(files.get("fid")));
-        assertTrue(studyId.equals(files.get("sid")));
+        assertEquals(fileId, files.get("fid"));
+        assertEquals(studyId, files.get("sid"));
 
         BasicDBObject setOnInsert = (BasicDBObject) dbObject.get("$setOnInsert");
-        assertTrue(String.format("%s_%s_%s_%s", chromosome, start, reference, alternate).equals(setOnInsert.get("_id")));
-        assertTrue(chromosome.equals(setOnInsert.get("chr")));
+        assertEquals(String.format("%s_%s_%s_%s", chromosome, start, reference, alternate), setOnInsert.get("_id"));
+        assertEquals(chromosome, setOnInsert.get("chr"));
         assertEquals(start, setOnInsert.get("start"));
         assertEquals(end, setOnInsert.get("end"));
-        assertTrue(reference.equals(setOnInsert.get("ref")));
-        assertTrue(alternate.equals(setOnInsert.get("alt")));
+        assertEquals(reference, setOnInsert.get("ref"));
+        assertEquals(alternate, setOnInsert.get("alt"));
     }
 
     @Test
     public void includeStatsTrueShouldIncludeStatistics() {
         Variant variant = buildVariant("12", 3, 4, "A", "T", fileId, studyId);
 
-        variantToMongoDbObjectConverter = new VariantToMongoDbObjectConverter(true, samplesPosition,
-                true, false, includeSrc);
+        variantToMongoDbObjectConverter = new VariantToMongoDbObjectConverter(true, true, false, includeSrc);
         conversionService.addConverter(variantToMongoDbObjectConverter);
 
         DBObject dbObject = conversionService.convert(variant, DBObject.class);
@@ -101,8 +105,7 @@ public class VariantToMongoDbObjectConverterTest {
     public void includeStatsFalseShouldNotIncludeStatistics() {
         Variant variant = buildVariant("12", 3, 4, "A", "T", fileId, studyId);
 
-        variantToMongoDbObjectConverter = new VariantToMongoDbObjectConverter(false, samplesPosition, false, true,
-                includeSrc);
+        variantToMongoDbObjectConverter = new VariantToMongoDbObjectConverter(false, false, true, includeSrc);
         conversionService.addConverter(variantToMongoDbObjectConverter);
 
         DBObject dbObject = conversionService.convert(variant, DBObject.class);
@@ -114,12 +117,11 @@ public class VariantToMongoDbObjectConverterTest {
     }
 
     @Test
-    public void idsIfPresentShouldBeWrittenIntoTheVariant()  {
+    public void idsIfPresentShouldBeWrittenIntoTheVariant() {
         Variant variant = buildVariant("12", 3, 4, "A", "T", fileId, studyId);
         variant.setIds(Sets.newHashSet("a", "b", "c"));
 
-        variantToMongoDbObjectConverter = new VariantToMongoDbObjectConverter(false, samplesPosition, false, true,
-                includeSrc);
+        variantToMongoDbObjectConverter = new VariantToMongoDbObjectConverter(false, false, true, includeSrc);
         conversionService.addConverter(variantToMongoDbObjectConverter);
 
         DBObject dbObject = conversionService.convert(variant, DBObject.class);
@@ -131,11 +133,10 @@ public class VariantToMongoDbObjectConverterTest {
     }
 
     @Test
-    public void idsIfNotPresentShouldNotBeWrittenIntoTheVariant()  {
+    public void idsIfNotPresentShouldNotBeWrittenIntoTheVariant() {
         Variant variant = buildVariant("12", 3, 4, "A", "T", fileId, studyId);
 
-        variantToMongoDbObjectConverter = new VariantToMongoDbObjectConverter(false, samplesPosition, false, true,
-                includeSrc);
+        variantToMongoDbObjectConverter = new VariantToMongoDbObjectConverter(false, false, true, includeSrc);
         conversionService.addConverter(variantToMongoDbObjectConverter);
 
         DBObject dbObject = conversionService.convert(variant, DBObject.class);
@@ -146,12 +147,13 @@ public class VariantToMongoDbObjectConverterTest {
     }
 
     private Variant buildVariant(String chromosome, int start, int end, String reference, String alternate,
-                                 String fileId, String studyId){
+                                 String fileId, String studyId) {
         Variant variant = new Variant(chromosome, start, end, reference, alternate);
 
         Map<String, VariantSourceEntry> sourceEntries = new LinkedHashMap<>();
         VariantSourceEntry variantSourceEntry = new VariantSourceEntry(fileId, studyId);
-        variantSourceEntry.setCohortStats("cohortStats", new VariantStats(reference, alternate, Variant.VariantType.SNV));
+        variantSourceEntry.setCohortStats("cohortStats",
+                                          new VariantStats(reference, alternate, Variant.VariantType.SNV));
         sourceEntries.put("variant", variantSourceEntry);
         variant.setSourceEntries(sourceEntries);
 

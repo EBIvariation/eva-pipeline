@@ -25,6 +25,8 @@ import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.SimpleMongoDbFactory;
 
+import uk.ac.ebi.eva.commons.models.data.Variant;
+
 import java.net.UnknownHostException;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -108,13 +110,15 @@ public class MongoDBHelper {
 
     }
 
+    public static String buildStorageId(Variant v) {
+        return buildStorageId(v.getChromosome(), v.getStart(), v.getReference(), v.getAlternate());
+    }
+
     /**
-     * From org.opencb.opencga.storage.mongodb.variant.DBObjectToVariantConverter
+     * From org.opencb.opencga.storage.mongodb.variant.VariantToDBObjectConverter
      * #buildStorageId(java.lang.String, int, java.lang.String, java.lang.String)
      * <p>
-     * To avoid the initialization of:
-     * - DBObjectToVariantSourceEntryConverter
-     * - DBObjectToVariantConverter
+     * To avoid the initialization of VariantSourceEntryToDBObjectConverter and VariantToDBObjectConverter
      */
     public static String buildStorageId(String chromosome, int start, String reference, String alternate) {
         StringBuilder builder = new StringBuilder(chromosome);

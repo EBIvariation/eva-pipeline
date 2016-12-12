@@ -17,20 +17,20 @@ package uk.ac.ebi.eva.pipeline.model.converters.data;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
-import org.opencb.biodata.models.variant.Variant;
-import org.opencb.biodata.models.variant.VariantSourceEntry;
 import org.opencb.opencga.storage.core.variant.VariantStorageManager;
-import org.opencb.opencga.storage.mongodb.variant.DBObjectToSamplesConverter;
-import org.opencb.opencga.storage.mongodb.variant.DBObjectToVariantConverter;
-import org.opencb.opencga.storage.mongodb.variant.DBObjectToVariantSourceEntryConverter;
-import org.opencb.opencga.storage.mongodb.variant.DBObjectToVariantStatsConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.util.Assert;
 
+import uk.ac.ebi.eva.commons.models.converters.data.VariantToDBObjectConverter;
+import uk.ac.ebi.eva.commons.models.converters.data.VariantSourceEntryToDBObjectConverter;
+import uk.ac.ebi.eva.commons.models.converters.data.SamplesToDBObjectConverter;
+import uk.ac.ebi.eva.commons.models.converters.data.VariantStatsToDBObjectConverter;
+import uk.ac.ebi.eva.commons.models.data.Variant;
+import uk.ac.ebi.eva.commons.models.data.VariantSourceEntry;
+
 import java.util.List;
-import java.util.Map;
 
 /**
  * Converts a {@link Variant} into mongoDb {@link DBObject}
@@ -38,48 +38,45 @@ import java.util.Map;
 public class VariantToMongoDbObjectConverter implements Converter<Variant, DBObject> {
     private static final Logger logger = LoggerFactory.getLogger(VariantToMongoDbObjectConverter.class);
 
-    private DBObjectToVariantConverter variantConverter;
-    private DBObjectToVariantStatsConverter statsConverter;
-    private DBObjectToVariantSourceEntryConverter sourceEntryConverter;
+    private VariantToDBObjectConverter variantConverter;
+    private VariantStatsToDBObjectConverter statsConverter;
+    private VariantSourceEntryToDBObjectConverter sourceEntryConverter;
 
     private boolean includeStats;
 
-    public VariantToMongoDbObjectConverter(boolean includeStats, Map<String, Integer> samplesPosition,
-                                           boolean calculateStats, boolean includeSample,
+    public VariantToMongoDbObjectConverter(boolean includeStats, boolean calculateStats, boolean includeSample,
                                            VariantStorageManager.IncludeSrc includeSrc) {
+        
         this.includeStats = includeStats;
-        this.statsConverter = calculateStats ? new DBObjectToVariantStatsConverter() : null;
-        DBObjectToSamplesConverter sampleConverter =
-                includeSample ? new DBObjectToSamplesConverter(true, samplesPosition) : null;
-        this.sourceEntryConverter = new DBObjectToVariantSourceEntryConverter(includeSrc, sampleConverter);
-        this.variantConverter = new DBObjectToVariantConverter(null, null);
+        this.statsConverter = calculateStats ? new VariantStatsToDBObjectConverter() : null;
+        SamplesToDBObjectConverter sampleConverter = includeSample ? new SamplesToDBObjectConverter() : null;
+        this.sourceEntryConverter = new VariantSourceEntryToDBObjectConverter(sampleConverter);
+        this.variantConverter = new VariantToDBObjectConverter(null, null, null);
     }
 
     @Override
     public DBObject convert(Variant variant) {
         Assert.notNull(variant, "Variant should not be null. Please provide a valid Variant object");
-        logger.debug("Convert variant {} into mongo object", variant);
+        logger.trace("Convert variant {} into mongo object", variant);
 
         variant.setAnnotation(null);
 
-        VariantSourceEntry variantSourceEntry = variant.getSourceEntries().entrySet().iterator().next().getValue();
+        VariantSourceEntry variantSourceEntry = variant.getSourceEntries().values().iterator().next();
 
-        BasicDBObject addToSet = new BasicDBObject().append(DBObjectToVariantConverter.FILES_FIELD,
-                        sourceEntryConverter.convertToStorageType(variantSourceEntry));
+        BasicDBObject addToSet = new BasicDBObject().append(VariantToDBObjectConverter.FILES_FIELD,
+                                                            sourceEntryConverter.convert(variantSourceEntry));
 
         if (includeStats) {
-            List<DBObject> sourceEntryStats =
-                    statsConverter.convertCohortsToStorageType(variantSourceEntry.getCohortStats(),
-                    variantSourceEntry.getStudyId(), variantSourceEntry.getFileId());
-            addToSet.put(DBObjectToVariantConverter.STATS_FIELD, new BasicDBObject("$each", sourceEntryStats));
+            List<DBObject> sourceEntryStats = statsConverter.convert(variantSourceEntry);
+            addToSet.put(VariantToDBObjectConverter.STATS_FIELD, new BasicDBObject("$each", sourceEntryStats));
         }
 
         if (variant.getIds() != null && !variant.getIds().isEmpty()) {
-            addToSet.put(DBObjectToVariantConverter.IDS_FIELD, new BasicDBObject("$each", variant.getIds()));
+            addToSet.put(VariantToDBObjectConverter.IDS_FIELD, new BasicDBObject("$each", variant.getIds()));
         }
 
         BasicDBObject update = new BasicDBObject();
-        update.append("$addToSet", addToSet).append("$setOnInsert", variantConverter.convertToStorageType(variant));
+        update.append("$addToSet", addToSet).append("$setOnInsert", variantConverter.convert(variant));
 
         return update;
     }
