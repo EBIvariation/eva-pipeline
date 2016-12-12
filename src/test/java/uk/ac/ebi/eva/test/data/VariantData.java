@@ -15,12 +15,11 @@
  */
 package uk.ac.ebi.eva.test.data;
 
-import uk.ac.ebi.eva.pipeline.jobs.AnnotationJobTest;
 import org.apache.commons.io.FileUtils;
 
-import java.io.File;
+import uk.ac.ebi.eva.test.utils.TestFileUtils;
+
 import java.io.IOException;
-import java.net.URL;
 
 public class VariantData {
 
@@ -29,18 +28,14 @@ public class VariantData {
     private static final String POPULATION_STATS_PATH = "/statistics/PopulationStatistics.json";
 
     public static String getVariantWithoutAnnotation() throws IOException {
-        URL variantWithNoAnnotationUrl = VariantData.class.getResource(VARIANT_WITHOUT_ANNOTATION_PATH);
-        return FileUtils.readFileToString(new File(variantWithNoAnnotationUrl.getFile()));
+        return FileUtils.readFileToString(TestFileUtils.getResource(VARIANT_WITHOUT_ANNOTATION_PATH));
     }
 
-
     public static String getVariantWithAnnotation() throws IOException {
-        URL variantWithAnnotationUrl = AnnotationJobTest.class.getResource(VARIANT_WITH_ANNOTATION_PATH);
-        return FileUtils.readFileToString(new File(variantWithAnnotationUrl.getFile()));
+        return FileUtils.readFileToString(TestFileUtils.getResource(VARIANT_WITH_ANNOTATION_PATH));
     }
 
     public static String getPopulationStatistics() throws IOException {
-        URL stats = AnnotationJobTest.class.getResource(POPULATION_STATS_PATH);
-        return FileUtils.readFileToString(new File(stats.getFile()));
+        return FileUtils.readFileToString(TestFileUtils.getResource(POPULATION_STATS_PATH));
     }
 }
