@@ -42,6 +42,10 @@ import java.util.List;
 public class VariantMongoWriter extends MongoItemWriter<Variant> {
     private static final Logger logger = LoggerFactory.getLogger(VariantMongoWriter.class);
 
+    public static final String BACKGROUND_INDEX = "background";
+
+    public static final String ANNOTATION_FIELD = "annot";
+
     private final MongoOperations mongoOperations;
 
     private final String collection;
@@ -91,21 +95,21 @@ public class VariantMongoWriter extends MongoItemWriter<Variant> {
 
     private void generateIndexes() {
         mongoOperations.getCollection(collection).createIndex(new BasicDBObject(
-                DBObjectToVariantConverter.CHROMOSOME_FIELD, 1)
-                                                                      .append(DBObjectToVariantConverter.START_FIELD, 1)
+                DBObjectToVariantConverter.CHROMOSOME_FIELD, 1).append(DBObjectToVariantConverter.START_FIELD, 1)
                                                                       .append(DBObjectToVariantConverter.END_FIELD, 1)
-                                                                      .append("background", true));
+                                                                      .append(BACKGROUND_INDEX, true));
         mongoOperations.getCollection(collection).createIndex(new BasicDBObject(
-                DBObjectToVariantConverter.IDS_FIELD, 1).append("background", true));
+                DBObjectToVariantConverter.IDS_FIELD, 1).append(BACKGROUND_INDEX, true));
 
         String filesStudyIdField = String.format("%s.%s", DBObjectToVariantConverter.FILES_FIELD,
                                                  DBObjectToVariantSourceEntryConverter.STUDYID_FIELD);
         String filesFileIdField = String.format("%s.%s", DBObjectToVariantConverter.FILES_FIELD,
                                                 DBObjectToVariantSourceEntryConverter.FILEID_FIELD);
         mongoOperations.getCollection(collection).createIndex(
-                new BasicDBObject(filesStudyIdField, 1).append(filesFileIdField, 1).append("background", true));
-        mongoOperations.getCollection(collection).createIndex(new BasicDBObject(
-                "annot.xrefs.id", 1).append("background", true));
-        mongoOperations.getCollection(collection).createIndex(new BasicDBObject("annot", 1).append("background", true));
+                new BasicDBObject(filesStudyIdField, 1).append(filesFileIdField, 1).append(BACKGROUND_INDEX, true));
+        mongoOperations.getCollection(collection)
+                .createIndex(new BasicDBObject("annot.xrefs.id", 1).append(BACKGROUND_INDEX, true));
+        mongoOperations.getCollection(collection)
+                .createIndex(new BasicDBObject(ANNOTATION_FIELD, 1).append(BACKGROUND_INDEX, true));
     }
 }
