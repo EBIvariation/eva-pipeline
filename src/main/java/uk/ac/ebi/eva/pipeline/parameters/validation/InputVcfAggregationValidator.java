@@ -21,16 +21,12 @@ import org.springframework.batch.core.JobParametersValidator;
 
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 
-/**
- * Checks that the database name has been filled in.
- *
- * @throws JobParametersInvalidException If the database name is null or empty
- */
-public class DbNameValidator implements JobParametersValidator {
+public class InputVcfAggregationValidator implements JobParametersValidator {
 
     @Override
     public void validate(JobParameters parameters) throws JobParametersInvalidException {
         ParametersValidatorUtil.checkIsNotNullOrEmptyString(
-                parameters.getString(JobParametersNames.DB_NAME), JobParametersNames.DB_NAME);
+                parameters.getString(JobParametersNames.INPUT_VCF_AGGREGATION),
+                JobParametersNames.INPUT_VCF_AGGREGATION);
     }
 }
