@@ -24,7 +24,7 @@ import org.springframework.batch.core.SkipListener;
  * Just logs skipped items into a different file (different logger)
  */
 public class SkippedItemListener implements SkipListener {
-    private static final Logger logger = LoggerFactory.getLogger("SkipLogging");
+    private static final Logger logger = LoggerFactory.getLogger(SkippedItemListener.class);
 
     @Override
     public void onSkipInRead(Throwable t) {
