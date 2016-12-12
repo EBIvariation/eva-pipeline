@@ -43,6 +43,8 @@ public class VariantMongoWriter extends MongoItemWriter<Variant> {
 
     private static final String ANNOTATION_FIELD = "annot";
 
+    private static final String ANNOTATION_XREF_ID_FIELD = "annot.xrefs.id";
+
     private final MongoOperations mongoOperations;
 
     private final String collection;
@@ -105,7 +107,7 @@ public class VariantMongoWriter extends MongoItemWriter<Variant> {
         mongoOperations.getCollection(collection).createIndex(
                 new BasicDBObject(filesStudyIdField, 1).append(filesFileIdField, 1).append(BACKGROUND_INDEX, true));
         mongoOperations.getCollection(collection)
-                .createIndex(new BasicDBObject("annot.xrefs.id", 1).append(BACKGROUND_INDEX, true));
+                .createIndex(new BasicDBObject(ANNOTATION_XREF_ID_FIELD, 1).append(BACKGROUND_INDEX, true));
         mongoOperations.getCollection(collection)
                 .createIndex(new BasicDBObject(ANNOTATION_FIELD, 1).append(BACKGROUND_INDEX, true));
     }
