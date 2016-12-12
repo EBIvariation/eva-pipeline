@@ -134,6 +134,12 @@ public class VariantSourceEntry {
         return samplesData.get(sampleIndex);
     }
 
+    /**
+     * Adds information about a new sample to associate to this VariantSourceEntry.
+     *
+     * @param sampleData Sample information to be added
+     * @return The index where the sample was inserted
+     */
     public int addSampleData(Map<String, String> sampleData) {
         this.samplesData.add(sampleData);
         return this.samplesData.size() - 1;
