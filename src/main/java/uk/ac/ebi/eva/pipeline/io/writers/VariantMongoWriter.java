@@ -27,24 +27,21 @@ import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.util.Assert;
 
 import uk.ac.ebi.eva.commons.models.data.Variant;
-
 import uk.ac.ebi.eva.pipeline.model.converters.data.VariantToMongoDbObjectConverter;
 import uk.ac.ebi.eva.utils.MongoDBHelper;
 
 import java.util.List;
 
 /**
- * @author Diego Poggioli
- * <p>
  * Write a list of {@link Variant} into MongoDB
  * See also {@link org.opencb.opencga.storage.mongodb.variant.VariantMongoDBWriter}
  */
 public class VariantMongoWriter extends MongoItemWriter<Variant> {
     private static final Logger logger = LoggerFactory.getLogger(VariantMongoWriter.class);
 
-    public static final String BACKGROUND_INDEX = "background";
+    private static final String BACKGROUND_INDEX = "background";
 
-    public static final String ANNOTATION_FIELD = "annot";
+    private static final String ANNOTATION_FIELD = "annot";
 
     private final MongoOperations mongoOperations;
 
