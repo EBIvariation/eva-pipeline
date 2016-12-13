@@ -31,8 +31,6 @@ import uk.ac.ebi.eva.pipeline.parameters.validation.InputVcfAggregationValidator
 import uk.ac.ebi.eva.pipeline.parameters.validation.InputVcfIdValidator;
 import uk.ac.ebi.eva.pipeline.parameters.validation.InputVcfValidator;
 import uk.ac.ebi.eva.pipeline.parameters.validation.OptionalValidator;
-import uk.ac.ebi.eva.pipeline.parameters.validation.OutputDirStatisticsValidator;
-import uk.ac.ebi.eva.pipeline.parameters.validation.StatisticsOverwriteValidator;
 
 import java.util.Arrays;
 import java.util.List;
