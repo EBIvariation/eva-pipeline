@@ -18,14 +18,14 @@ package uk.ac.ebi.eva.pipeline.io.writers;
 import com.mongodb.BasicDBObject;
 import com.mongodb.BulkWriteOperation;
 import com.mongodb.DBObject;
-import org.opencb.opencga.storage.mongodb.variant.DBObjectToVariantConverter;
-import org.opencb.opencga.storage.mongodb.variant.DBObjectToVariantSourceEntryConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.item.data.MongoItemWriter;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.util.Assert;
 
+import uk.ac.ebi.eva.commons.models.converters.data.VariantSourceEntryToDBObjectConverter;
+import uk.ac.ebi.eva.commons.models.converters.data.VariantToDBObjectConverter;
 import uk.ac.ebi.eva.commons.models.data.Variant;
 import uk.ac.ebi.eva.pipeline.model.converters.data.VariantToMongoDbObjectConverter;
 import uk.ac.ebi.eva.utils.MongoDBHelper;
@@ -74,8 +74,8 @@ public class VariantMongoWriter extends MongoItemWriter<Variant> {
 
             // the chromosome and start appear just as shard keys, in an unsharded cluster they wouldn't be needed
             BasicDBObject query = new BasicDBObject("_id", id)
-                    .append(DBObjectToVariantConverter.CHROMOSOME_FIELD, variant.getChromosome())
-                    .append(DBObjectToVariantConverter.START_FIELD, variant.getStart());
+                    .append(VariantToDBObjectConverter.CHROMOSOME_FIELD, variant.getChromosome())
+                    .append(VariantToDBObjectConverter.START_FIELD, variant.getStart());
 
             DBObject update = variantToMongoDbObjectConverter.convert(variant);
 
@@ -95,16 +95,16 @@ public class VariantMongoWriter extends MongoItemWriter<Variant> {
 
     private void generateIndexes() {
         mongoOperations.getCollection(collection).createIndex(new BasicDBObject(
-                DBObjectToVariantConverter.CHROMOSOME_FIELD, 1).append(DBObjectToVariantConverter.START_FIELD, 1)
-                                                               .append(DBObjectToVariantConverter.END_FIELD, 1)
+                VariantToDBObjectConverter.CHROMOSOME_FIELD, 1).append(VariantToDBObjectConverter.START_FIELD, 1)
+                                                               .append(VariantToDBObjectConverter.END_FIELD, 1)
                                                                .append(BACKGROUND_INDEX, true));
         mongoOperations.getCollection(collection).createIndex(new BasicDBObject(
-                DBObjectToVariantConverter.IDS_FIELD, 1).append(BACKGROUND_INDEX, true));
+                VariantToDBObjectConverter.IDS_FIELD, 1).append(BACKGROUND_INDEX, true));
 
-        String filesStudyIdField = String.format("%s.%s", DBObjectToVariantConverter.FILES_FIELD,
-                                                 DBObjectToVariantSourceEntryConverter.STUDYID_FIELD);
-        String filesFileIdField = String.format("%s.%s", DBObjectToVariantConverter.FILES_FIELD,
-                                                DBObjectToVariantSourceEntryConverter.FILEID_FIELD);
+        String filesStudyIdField = String.format("%s.%s", VariantToDBObjectConverter.FILES_FIELD,
+                                                 VariantSourceEntryToDBObjectConverter.STUDYID_FIELD);
+        String filesFileIdField = String.format("%s.%s", VariantToDBObjectConverter.FILES_FIELD,
+                                                 VariantSourceEntryToDBObjectConverter.FILEID_FIELD);
         mongoOperations.getCollection(collection).createIndex(
                 new BasicDBObject(filesStudyIdField, 1).append(filesFileIdField, 1).append(BACKGROUND_INDEX, true));
         mongoOperations.getCollection(collection)
