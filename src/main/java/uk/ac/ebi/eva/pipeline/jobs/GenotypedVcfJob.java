@@ -22,7 +22,6 @@ import org.springframework.batch.core.JobExecutionListener;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
-import org.springframework.batch.core.job.builder.FlowBuilder;
 import org.springframework.batch.core.job.builder.FlowJobBuilder;
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.job.flow.Flow;
@@ -33,10 +32,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
-import org.springframework.core.task.SimpleAsyncTaskExecutor;
-
-import uk.ac.ebi.eva.pipeline.jobs.flows.AnnotationFlow;
-import uk.ac.ebi.eva.pipeline.jobs.flows.PopulationStatisticsFlow;
+import uk.ac.ebi.eva.pipeline.jobs.flows.ParallelStatisticsAndAnnotationFlow;
 import uk.ac.ebi.eva.pipeline.jobs.steps.VariantLoaderStep;
 import uk.ac.ebi.eva.pipeline.listeners.VariantOptionsConfigurerListener;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
@@ -52,13 +48,11 @@ import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
  */
 @Configuration
 @EnableBatchProcessing
-@Import({VariantLoaderStep.class, PopulationStatisticsFlow.class, AnnotationFlow.class})
-public class GenotypedVcfJob extends CommonJobStepInitialization {
+@Import({VariantLoaderStep.class, ParallelStatisticsAndAnnotationFlow.class})
+public class GenotypedVcfJob{
     private static final Logger logger = LoggerFactory.getLogger(GenotypedVcfJob.class);
 
-    public static final String jobName = "load-genotyped-vcf";
-
-    public static final String PARALLEL_STATISTICS_AND_ANNOTATION = "Parallel statistics and annotation";
+    public static final String NAME_GENOTYPED_VCF_JOB = "genotyped-vcf-job";
 
     //job default settings
     private static final boolean INCLUDE_SAMPLES = true;
@@ -70,36 +64,24 @@ public class GenotypedVcfJob extends CommonJobStepInitialization {
     private static final boolean INCLUDE_STATS = false;
 
     @Autowired
-    private JobBuilderFactory jobBuilderFactory;
+    @Qualifier(ParallelStatisticsAndAnnotationFlow.PARALLEL_STATISTICS_AND_ANNOTATION)
+    private Flow parallelStatisticsAndAnnotation;
 
     @Autowired
-    private Flow annotationFlowOptional;
-
-    @Autowired
-    private Flow optionalStatisticsFlow;
-
-    @Autowired
-    @Qualifier("variantsLoadStep")
+    @Qualifier(VariantLoaderStep.NAME_LOAD_VARIANTS)
     private Step variantLoaderStep;
 
     @Autowired
     private JobOptions jobOptions;
 
-    @Bean
-    @Qualifier("genotypedJob")
-    public Job genotypedJob() {
-        logger.debug("Building variant genotyped job");
+    @Bean(NAME_GENOTYPED_VCF_JOB)
+    public Job genotypedVcfJob(JobBuilderFactory jobBuilderFactory) {
+        logger.debug("Building '" + NAME_GENOTYPED_VCF_JOB + "'");
 
         JobBuilder jobBuilder = jobBuilderFactory
-                .get(jobName)
+                .get(NAME_GENOTYPED_VCF_JOB)
                 .incrementer(new RunIdIncrementer())
                 .listener(genotypedJobListener());
-
-        Flow parallelStatisticsAndAnnotation = new FlowBuilder<Flow>(PARALLEL_STATISTICS_AND_ANNOTATION)
-                .split(new SimpleAsyncTaskExecutor())
-                .add(optionalStatisticsFlow, annotationFlowOptional)
-                .build();
-
         FlowJobBuilder builder = jobBuilder
                 .flow(variantLoaderStep)
                 .next(parallelStatisticsAndAnnotation)
@@ -112,8 +94,8 @@ public class GenotypedVcfJob extends CommonJobStepInitialization {
     @Scope("prototype")
     public JobExecutionListener genotypedJobListener() {
         return new VariantOptionsConfigurerListener(INCLUDE_SAMPLES,
-                                                    COMPRESS_GENOTYPES,
-                                                    CALCULATE_STATS,
-                                                    INCLUDE_STATS);
+                COMPRESS_GENOTYPES,
+                CALCULATE_STATS,
+                INCLUDE_STATS);
     }
 }

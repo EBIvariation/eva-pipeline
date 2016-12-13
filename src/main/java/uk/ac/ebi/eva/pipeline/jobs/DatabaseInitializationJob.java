@@ -43,24 +43,22 @@ import uk.ac.ebi.eva.pipeline.jobs.steps.IndexesGeneratorStep;
 public class DatabaseInitializationJob extends CommonJobStepInitialization {
 
     private static final Logger logger = LoggerFactory.getLogger(DatabaseInitializationJob.class);
-    public static final String jobName = "initialize-database";
+    private static final String NAME_INIT_DATABASE_JOB = "init-database-job";
     public static final String CREATE_DATABASE_INDEXES = "Create database indexes";
 
     @Autowired
-    JobBuilderFactory jobBuilderFactory;
-
-    @Qualifier("genesLoadStep")
-    @Autowired
+    @Qualifier(GeneLoaderStep.NAME_GENES_LOAD_STEP)
     private Step genesLoadStep;
 
     @Autowired
     private IndexesGeneratorStep indexesGeneratorStep;
 
-    @Bean
-    @Qualifier("initDBJob")
-    public Job initDBJob() {
+    @Bean(NAME_INIT_DATABASE_JOB)
+    public Job initDatabaseJob(JobBuilderFactory jobBuilderFactory) {
+        logger.debug("Building '"+NAME_INIT_DATABASE_JOB+"'");
+
         JobBuilder jobBuilder = jobBuilderFactory
-                .get(jobName)
+                .get(NAME_INIT_DATABASE_JOB)
                 .incrementer(new RunIdIncrementer());
 
         return jobBuilder

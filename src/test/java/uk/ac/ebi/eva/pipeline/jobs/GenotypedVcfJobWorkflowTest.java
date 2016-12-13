@@ -34,6 +34,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import uk.ac.ebi.eva.pipeline.jobs.flows.PopulationStatisticsFlow;
 import uk.ac.ebi.eva.pipeline.jobs.steps.AnnotationLoaderStep;
+import uk.ac.ebi.eva.pipeline.jobs.steps.VariantLoaderStep;
 import uk.ac.ebi.eva.pipeline.jobs.steps.VepAnnotationGeneratorStep;
 import uk.ac.ebi.eva.pipeline.jobs.steps.VepInputGeneratorStep;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
@@ -102,7 +103,7 @@ public class GenotypedVcfJobWorkflowTest {
             parallelStepsNameToStepExecution.put(steps.get(i).getStepName(), steps.get(i));
         }
 
-        assertEquals(GenotypedVcfJob.LOAD_VARIANTS, loadStep.getStepName());
+        assertEquals(VariantLoaderStep.NAME_LOAD_VARIANTS, loadStep.getStepName());
 
         Set<String> parallelStepNamesExecuted = parallelStepsNameToStepExecution.keySet();
         Set<String> parallelStepNamesToCheck = new HashSet<>(Arrays.asList(
@@ -143,7 +144,7 @@ public class GenotypedVcfJobWorkflowTest {
         List<StepExecution> steps = new ArrayList<>(execution.getStepExecutions());
         StepExecution loadStep = steps.get(0);
 
-        assertEquals(GenotypedVcfJob.LOAD_VARIANTS, loadStep.getStepName());
+        assertEquals(VariantLoaderStep.NAME_LOAD_VARIANTS, loadStep.getStepName());
     }
 
     @Test
@@ -164,7 +165,7 @@ public class GenotypedVcfJobWorkflowTest {
             parallelStepsNameToStepExecution.put(steps.get(i).getStepName(), steps.get(i));
         }
 
-        assertEquals(GenotypedVcfJob.LOAD_VARIANTS, loadStep.getStepName());
+        assertEquals(VariantLoaderStep.NAME_LOAD_VARIANTS, loadStep.getStepName());
 
         Set<String> parallelStepNamesExecuted = parallelStepsNameToStepExecution.keySet();
         Set<String> parallelStepNamesToCheck = new HashSet<>(Arrays.asList(
@@ -202,7 +203,7 @@ public class GenotypedVcfJobWorkflowTest {
             parallelStepsNameToStepExecution.put(steps.get(i).getStepName(), steps.get(i));
         }
 
-        assertEquals(GenotypedVcfJob.LOAD_VARIANTS, loadStep.getStepName());
+        assertEquals(VariantLoaderStep.NAME_LOAD_VARIANTS, loadStep.getStepName());
 
         Set<String> parallelStepNamesExecuted = parallelStepsNameToStepExecution.keySet();
         Set<String> parallelStepNamesToCheck = new HashSet<>(Arrays.asList(

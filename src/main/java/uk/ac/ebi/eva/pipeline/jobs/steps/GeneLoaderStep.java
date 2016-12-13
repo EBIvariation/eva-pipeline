@@ -21,12 +21,10 @@ import org.springframework.batch.core.configuration.annotation.EnableBatchProces
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.item.file.FlatFileParseException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.mongodb.core.MongoOperations;
-
 import uk.ac.ebi.eva.pipeline.io.mappers.GeneLineMapper;
 import uk.ac.ebi.eva.pipeline.io.readers.GeneReader;
 import uk.ac.ebi.eva.pipeline.io.writers.GeneWriter;
@@ -57,7 +55,7 @@ import java.io.IOException;
 @Import(JobOptions.class)
 public class GeneLoaderStep {
 
-    public static final String LOAD_FEATURES = "Load features";
+    public static final String NAME_GENES_LOAD_STEP = "Genes load step";
 
     @Autowired
     private StepBuilderFactory stepBuilderFactory;
@@ -65,15 +63,13 @@ public class GeneLoaderStep {
     @Autowired
     private JobOptions jobOptions;
 
-    @Bean
-    @Qualifier("genesLoadStep")
+    @Bean(NAME_GENES_LOAD_STEP)
     public Step genesLoadStep() throws IOException {
         MongoOperations mongoOperations = MongoDBHelper
                 .getMongoOperations(jobOptions.getDbName(), jobOptions.getMongoConnection());
 
-        return stepBuilderFactory.get(LOAD_FEATURES)
-                .<FeatureCoordinates, FeatureCoordinates>chunk(
-                        jobOptions.getPipelineOptions().getInt(JobParametersNames.CONFIG_CHUNK_SIZE))
+        return stepBuilderFactory.get(NAME_GENES_LOAD_STEP)
+                .<FeatureCoordinates, FeatureCoordinates>chunk(jobOptions.getPipelineOptions().getInt(JobParametersNames.CONFIG_CHUNK_SIZE))
                 .reader(new GeneReader(jobOptions.getPipelineOptions().getString(JobParametersNames.INPUT_GTF)))
                 .processor(new GeneFilterProcessor())
                 .writer(new GeneWriter(mongoOperations, jobOptions.getDbCollectionsFeaturesName()))
@@ -81,5 +77,5 @@ public class GeneLoaderStep {
                 .listener(new SkippedItemListener())
                 .build();
     }
-    
+
 }

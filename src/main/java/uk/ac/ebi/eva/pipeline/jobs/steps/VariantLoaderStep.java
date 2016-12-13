@@ -23,7 +23,6 @@ import org.springframework.batch.core.configuration.annotation.StepBuilderFactor
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.item.file.FlatFileParseException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -53,7 +52,7 @@ import java.io.IOException;
 @EnableBatchProcessing
 @Import(JobOptions.class)
 public class VariantLoaderStep {
-    public static final String LOAD_VARIANTS = "Load variants";
+    public static final String NAME_LOAD_VARIANTS = "Load variants";
 
     @Autowired
     private StepBuilderFactory stepBuilderFactory;
@@ -67,10 +66,9 @@ public class VariantLoaderStep {
     @Autowired
     private VariantMongoWriter variantMongoWriter;
 
-    @Bean
-    @Qualifier("variantsLoadStep")
-    public Step variantsLoadStep() throws Exception {
-        return stepBuilderFactory.get(LOAD_VARIANTS)
+    @Bean(NAME_LOAD_VARIANTS)
+    public Step loadVariantsStep() throws Exception {
+        return stepBuilderFactory.get(NAME_LOAD_VARIANTS)
                 .<Variant, Variant>chunk(jobOptions.getPipelineOptions().getInt(JobParametersNames.CONFIG_CHUNK_SIZE))
                 .reader(reader)
                 .writer(variantMongoWriter)

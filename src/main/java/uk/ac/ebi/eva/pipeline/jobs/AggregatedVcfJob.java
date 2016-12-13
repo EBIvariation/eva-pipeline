@@ -32,8 +32,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
-
 import uk.ac.ebi.eva.pipeline.jobs.flows.AnnotationFlow;
+import uk.ac.ebi.eva.pipeline.jobs.flows.AnnotationFlowOptional;
 import uk.ac.ebi.eva.pipeline.jobs.steps.VariantLoaderStep;
 import uk.ac.ebi.eva.pipeline.listeners.VariantOptionsConfigurerListener;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
@@ -48,12 +48,12 @@ import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
  */
 @Configuration
 @EnableBatchProcessing
-@Import({VariantLoaderStep.class, AnnotationFlow.class})
-public class AggregatedVcfJob extends CommonJobStepInitialization {
+@Import({VariantLoaderStep.class, AnnotationFlowOptional.class})
+public class AggregatedVcfJob {
 
     private static final Logger logger = LoggerFactory.getLogger(AggregatedVcfJob.class);
 
-    private static final String jobName = "load-aggregated-vcf";
+    public static final String NAME_AGGREGATED_VCF_JOB = "aggregated-vcf-job";
 
     //job default settings
     private static final boolean INCLUDE_SAMPLES = false;
@@ -65,25 +65,22 @@ public class AggregatedVcfJob extends CommonJobStepInitialization {
     private static final boolean INCLUDE_STATS = true;
 
     @Autowired
-    private JobBuilderFactory jobBuilderFactory;
+    private JobOptions jobOptions;
 
     @Autowired
+    @Qualifier(AnnotationFlowOptional.NAME_VEP_ANNOTATION_OPTIONAL_FLOW)
     private Flow annotationFlowOptional;
 
     @Autowired
-    @Qualifier("variantsLoadStep")
+    @Qualifier(VariantLoaderStep.NAME_LOAD_VARIANTS)
     private Step variantLoaderStep;
 
-    @Autowired
-    private JobOptions jobOptions;
-
-    @Bean
-    @Qualifier("aggregatedJob")
-    public Job aggregatedJob() {
-        logger.debug("Building variant aggregated job");
+    @Bean(NAME_AGGREGATED_VCF_JOB)
+    public Job aggregatedVcfJob(JobBuilderFactory jobBuilderFactory) {
+        logger.debug("Building '" + NAME_AGGREGATED_VCF_JOB + "'");
 
         JobBuilder jobBuilder = jobBuilderFactory
-                .get(jobName)
+                .get(NAME_AGGREGATED_VCF_JOB)
                 .incrementer(new RunIdIncrementer())
                 .listener(aggregatedJobListener());
 
@@ -97,10 +94,10 @@ public class AggregatedVcfJob extends CommonJobStepInitialization {
 
     @Bean
     @Scope("prototype")
-    public JobExecutionListener aggregatedJobListener() {
+    JobExecutionListener aggregatedJobListener() {
         return new VariantOptionsConfigurerListener(INCLUDE_SAMPLES,
-                                                    COMPRESS_GENOTYPES,
-                                                    CALCULATE_STATS,
-                                                    INCLUDE_STATS);
+                COMPRESS_GENOTYPES,
+                CALCULATE_STATS,
+                INCLUDE_STATS);
     }
 }

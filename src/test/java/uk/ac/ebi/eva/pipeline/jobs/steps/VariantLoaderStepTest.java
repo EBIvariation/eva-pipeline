@@ -92,7 +92,7 @@ public class VariantLoaderStepTest {
                 VariantSource.Aggregation.NONE));
 
         // When the execute method in variantsLoad is executed
-        JobExecution jobExecution = jobLauncherTestUtils.launchStep(GenotypedVcfJob.LOAD_VARIANTS);
+        JobExecution jobExecution = jobLauncherTestUtils.launchStep(VariantLoaderStep.NAME_LOAD_VARIANTS);
 
         //Then variantsLoad step should complete correctly
         assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());

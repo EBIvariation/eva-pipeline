@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-
 import uk.ac.ebi.eva.pipeline.jobs.CommonJobStepInitialization;
 import uk.ac.ebi.eva.pipeline.jobs.deciders.SkipStepDecider;
 import uk.ac.ebi.eva.pipeline.jobs.steps.PopulationStatisticsGeneratorStep;
@@ -21,9 +20,10 @@ import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 @Import({PopulationStatisticsGeneratorStep.class, PopulationStatisticsLoaderStep.class})
 public class PopulationStatisticsFlow extends CommonJobStepInitialization {
 
+    public static final String NAME_CALCULATE_STATISTICS_OPTIONAL_FLOW = "calculate-statistics-optional-flow";
     public static final String CALCULATE_STATISTICS = "Calculate statistics";
     public static final String LOAD_STATISTICS = "Load statistics";
-    private static final String STATS_FLOW = "statsFlow";
+
 
     @Autowired
     private PopulationStatisticsGeneratorStep populationStatisticsGeneratorStep;
@@ -31,11 +31,11 @@ public class PopulationStatisticsFlow extends CommonJobStepInitialization {
     @Autowired
     private PopulationStatisticsLoaderStep populationStatisticsLoaderStep;
 
-    @Bean
-    public Flow optionalStatisticsFlow() {
+    @Bean(NAME_CALCULATE_STATISTICS_OPTIONAL_FLOW)
+    public Flow calculateStatisticsOptionalFlow() {
         SkipStepDecider statisticsSkipStepDecider = new SkipStepDecider(getPipelineOptions(), JobParametersNames.STATISTICS_SKIP);
 
-        return new FlowBuilder<Flow>(STATS_FLOW)
+        return new FlowBuilder<Flow>(NAME_CALCULATE_STATISTICS_OPTIONAL_FLOW)
                 .start(statisticsSkipStepDecider).on(SkipStepDecider.DO_STEP)
                 .to(statsCreate())
                 .next(statsLoad())

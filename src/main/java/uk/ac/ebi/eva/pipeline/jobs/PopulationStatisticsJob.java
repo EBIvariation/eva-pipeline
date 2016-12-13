@@ -24,6 +24,7 @@ import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.job.flow.Flow;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -35,21 +36,21 @@ import uk.ac.ebi.eva.pipeline.jobs.flows.PopulationStatisticsFlow;
 @Configuration
 @EnableBatchProcessing
 @Import({PopulationStatisticsFlow.class})
-public class PopulationStatisticsJob extends CommonJobStepInitialization {
+public class PopulationStatisticsJob {
 
     private static final Logger logger = LoggerFactory.getLogger(PopulationStatisticsJob.class);
-    private static final String jobName = "calculate-statistics";
+    public static final String NAME_CALCULATE_STATISTICS = "calculate-statistics-job";
 
     @Autowired
-    private JobBuilderFactory jobBuilderFactory;
-
-    @Autowired
+    @Qualifier(PopulationStatisticsFlow.NAME_CALCULATE_STATISTICS_OPTIONAL_FLOW)
     private Flow optionalStatisticsFlow;
 
-    @Bean
-    public Job variantStatisticsJob() {
+    @Bean(NAME_CALCULATE_STATISTICS)
+    public Job calculateStatisticsJob(JobBuilderFactory jobBuilderFactory) {
+        logger.debug("Building '"+NAME_CALCULATE_STATISTICS+"'");
+
         JobBuilder jobBuilder = jobBuilderFactory
-                .get(jobName)
+                .get(NAME_CALCULATE_STATISTICS)
                 .incrementer(new RunIdIncrementer());
 
         return jobBuilder
