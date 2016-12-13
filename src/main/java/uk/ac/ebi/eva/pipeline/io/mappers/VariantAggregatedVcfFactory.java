@@ -98,7 +98,7 @@ public class VariantAggregatedVcfFactory extends VariantVcfFactory {
 
     @Override
     protected void parseSplitSampleData(Variant variant, VariantSource source, String[] fields,
-                                        String[] alternateAlleles, String[] secondaryAlternates, int alleleIdx)
+                                        String[] alternateAlleles, String[] secondaryAlternates, int alternateAlleleIdx)
             throws NonStandardCompliantSampleField {
         // Nothing to do
     }

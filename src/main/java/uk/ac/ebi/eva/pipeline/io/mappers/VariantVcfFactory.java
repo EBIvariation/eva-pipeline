@@ -114,8 +114,8 @@ public class VariantVcfFactory {
         }
 
         // Now create all the Variant objects read from the VCF record
-        for (int i = 0; i < alternateAlleles.length; i++) {
-            VariantKeyFields keyFields = generatedKeyFields.get(i);
+        for (int altAlleleIdx = 0; altAlleleIdx < alternateAlleles.length; altAlleleIdx++) {
+            VariantKeyFields keyFields = generatedKeyFields.get(altAlleleIdx);
             Variant variant = new Variant(chromosome, keyFields.start, keyFields.end, keyFields.reference,
                                           keyFields.alternate);
             String[] secondaryAlternates = getSecondaryAlternates(variant, keyFields.getNumAllele(), alternateAlleles);
@@ -124,7 +124,7 @@ public class VariantVcfFactory {
             variant.addSourceEntry(file);
 
             try {
-                parseSplitSampleData(variant, source, fields, alternateAlleles, secondaryAlternates, i);
+                parseSplitSampleData(variant, source, fields, alternateAlleles, secondaryAlternates, altAlleleIdx);
                 // Fill the rest of fields (after samples because INFO depends on them)
                 setOtherFields(variant, source, ids, quality, filter, info, format, keyFields.getNumAllele(),
                                alternateAlleles, line);
@@ -133,7 +133,7 @@ public class VariantVcfFactory {
                 Logger.getLogger(VariantFactory.class.getName())
                       .log(Level.SEVERE,
                            String.format("Variant %s:%d:%s>%s will not be saved\n%s", chromosome, position, reference,
-                                         alternateAlleles[i], ex.getMessage()));
+                                         alternateAlleles[altAlleleIdx], ex.getMessage()));
             }
         }
 
@@ -244,7 +244,7 @@ public class VariantVcfFactory {
 
     protected void parseSplitSampleData(Variant variant, VariantSource source, String[] fields,
                                         String[] alternateAlleles, String[] secondaryAlternates,
-                                        int alleleIdx) throws NonStandardCompliantSampleField {
+                                        int alternateAlleleIdx) throws NonStandardCompliantSampleField {
         String[] formatFields = variant.getSourceEntry(source.getFileId(), source.getStudyId()).getFormat().split(":");
 
         for (int i = 9; i < fields.length; i++) {
@@ -257,7 +257,7 @@ public class VariantVcfFactory {
             // so the loop iterates to sampleFields.length, not formatFields.length
             for (int j = 0; j < sampleFields.length; j++) {
                 String formatField = formatFields[j];
-                String sampleField = processSampleField(alleleIdx, formatField, sampleFields[j]);
+                String sampleField = processSampleField(alternateAlleleIdx, formatField, sampleFields[j]);
 
                 map.put(formatField, sampleField);
             }
@@ -268,38 +268,51 @@ public class VariantVcfFactory {
     }
 
     /**
-     * If this is a field other than the genotype (GT), return unmodified.
+     * If this is a field other than the genotype (GT), return unmodified. Otherwise,
+     * see {@link VariantVcfFactory#processGenotypeField(int, java.lang.String)}
      *
-     * If this field is the genotype (GT) then, intern it into the String pool to avoid storing lots of "0/0". In case
-     * that the variant is multiallelic and we are currently processing one of the secondary alternates (alleleIdx >=1),
-     * change the allele codes to represent the current alternate as allele 1. {@see mapToMultiallelicIndex}
-     *
-     * @param alleleIdx current alternate being processed. 1 for first alternate, 2 or more for a secondary alternate.
+     * @param alternateAlleleIdx current alternate being processed. 0 for first alternate, 1 or more for a secondary alternate.
      * @param formatField as shown in the FORMAT column. most probably the GT field.
      * @param sampleField parsed value in a column of a sample, such as a genotype, e.g. "0/0".
-     * @return
+     * @return processed sample field, ready to be stored.
      */
-    private String processSampleField(int alleleIdx, String formatField, String sampleField) {
+    private String processSampleField(int alternateAlleleIdx, String formatField, String sampleField) {
         if (formatField.equalsIgnoreCase("GT")) {
-            if (alleleIdx >= 1) {
-                Genotype genotype = new Genotype(sampleField);
-
-                StringBuilder genotypeStr = new StringBuilder();
-                for (int allele : genotype.getAllelesIdx()) {
-                    if (allele < 0) { // Missing
-                        genotypeStr.append(".");
-                    } else {
-                        // Replace numerical indexes when they refer to another alternate allele
-                        genotypeStr.append(String.valueOf(mapToMultiallelicIndex(allele, alleleIdx)));
-                    }
-                    genotypeStr.append(genotype.isPhased() ? "|" : "/");
-                }
-                sampleField = genotypeStr.substring(0, genotypeStr.length() - 1);
-            }
-
-            sampleField = sampleField.intern();
+            return processGenotypeField(alternateAlleleIdx, sampleField);
+        } else {
+            return sampleField;
         }
-        return sampleField;
+    }
+
+    /**
+     * Intern the genotype String into the String pool to avoid storing lots of "0/0". In case that the variant is
+     * multiallelic and we are currently processing one of the secondary alternates (T is the only secondary alternate
+     * in a variant like A -> C,T), change the allele codes to represent the current alternate as allele 1. For details
+     * on changing this indexes, see {@link VariantVcfFactory#mapToMultiallelicIndex(int, int)}
+     *
+     * @param alternateAlleleIdx current alternate being processed. 0 for first alternate, 1 or more for a secondary alternate.
+     * @param genotype first field in the samples column, e.g. "0/0"
+     * @return the processed genotype string, as described above (interned and changed if multiallelic).
+     */
+    private String processGenotypeField(int alternateAlleleIdx, String genotype) {
+        boolean isNotTheFirstAlternate = alternateAlleleIdx >= 1;
+        if (isNotTheFirstAlternate) {
+            Genotype parsedGenotype = new Genotype(genotype);
+
+            StringBuilder genotypeStr = new StringBuilder();
+            for (int allele : parsedGenotype.getAllelesIdx()) {
+                if (allele < 0) { // Missing
+                    genotypeStr.append(".");
+                } else {
+                    // Replace numerical indexes when they refer to another alternate allele
+                    genotypeStr.append(String.valueOf(mapToMultiallelicIndex(allele, alternateAlleleIdx)));
+                }
+                genotypeStr.append(parsedGenotype.isPhased() ? "|" : "/");
+            }
+            genotype = genotypeStr.substring(0, genotypeStr.length() - 1);
+        }
+
+        return genotype.intern();
     }
 
     protected void setOtherFields(Variant variant, VariantSource source, Set<String> ids, float quality, String filter,
