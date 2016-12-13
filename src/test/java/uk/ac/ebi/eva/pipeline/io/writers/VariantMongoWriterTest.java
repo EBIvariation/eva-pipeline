@@ -52,8 +52,8 @@ public class VariantMongoWriterTest {
 
     private VariantMongoWriter variantMongoWriter;
 
-    private VariantToMongoDbObjectConverter variantToMongoDbObjectConverter = Mockito
-            .mock(VariantToMongoDbObjectConverter.class);
+    private VariantToMongoDbObjectConverter variantToMongoDbObjectConverter =
+	    Mockito.mock(VariantToMongoDbObjectConverter.class);
 
     private final String collectionName = "variants";
 

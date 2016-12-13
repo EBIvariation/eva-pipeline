@@ -37,6 +37,7 @@ import java.util.List;
  * See also {@link org.opencb.opencga.storage.mongodb.variant.VariantMongoDBWriter}
  */
 public class VariantMongoWriter extends MongoItemWriter<Variant> {
+
     private static final Logger logger = LoggerFactory.getLogger(VariantMongoWriter.class);
 
     private static final String BACKGROUND_INDEX = "background";
@@ -95,8 +96,8 @@ public class VariantMongoWriter extends MongoItemWriter<Variant> {
     private void generateIndexes() {
         mongoOperations.getCollection(collection).createIndex(new BasicDBObject(
                 DBObjectToVariantConverter.CHROMOSOME_FIELD, 1).append(DBObjectToVariantConverter.START_FIELD, 1)
-                                                                      .append(DBObjectToVariantConverter.END_FIELD, 1)
-                                                                      .append(BACKGROUND_INDEX, true));
+                                                               .append(DBObjectToVariantConverter.END_FIELD, 1)
+                                                               .append(BACKGROUND_INDEX, true));
         mongoOperations.getCollection(collection).createIndex(new BasicDBObject(
                 DBObjectToVariantConverter.IDS_FIELD, 1).append(BACKGROUND_INDEX, true));
 
