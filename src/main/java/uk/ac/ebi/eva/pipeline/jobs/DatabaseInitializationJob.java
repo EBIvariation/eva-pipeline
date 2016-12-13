@@ -29,7 +29,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import uk.ac.ebi.eva.pipeline.jobs.steps.GeneLoaderStep;
-import uk.ac.ebi.eva.pipeline.jobs.steps.IndexesGeneratorStep;
+import uk.ac.ebi.eva.pipeline.jobs.steps.tasklets.IndexesGeneratorStep;
 
 /**
  * Job to initialize the databases that will be used in later jobs.
@@ -55,7 +55,7 @@ public class DatabaseInitializationJob extends CommonJobStepInitialization {
 
     @Bean(NAME_INIT_DATABASE_JOB)
     public Job initDatabaseJob(JobBuilderFactory jobBuilderFactory) {
-        logger.debug("Building '"+NAME_INIT_DATABASE_JOB+"'");
+        logger.debug("Building '" + NAME_INIT_DATABASE_JOB + "'");
 
         JobBuilder jobBuilder = jobBuilderFactory
                 .get(NAME_INIT_DATABASE_JOB)

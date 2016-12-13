@@ -49,7 +49,7 @@ import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 @Configuration
 @EnableBatchProcessing
 @Import({VariantLoaderStep.class, ParallelStatisticsAndAnnotationFlow.class})
-public class GenotypedVcfJob{
+public class GenotypedVcfJob {
     private static final Logger logger = LoggerFactory.getLogger(GenotypedVcfJob.class);
 
     public static final String NAME_GENOTYPED_VCF_JOB = "genotyped-vcf-job";
@@ -68,7 +68,7 @@ public class GenotypedVcfJob{
     private Flow parallelStatisticsAndAnnotation;
 
     @Autowired
-    @Qualifier(VariantLoaderStep.NAME_LOAD_VARIANTS)
+    @Qualifier(VariantLoaderStep.NAME_LOAD_VARIANTS_STEP)
     private Step variantLoaderStep;
 
     @Autowired

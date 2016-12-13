@@ -47,7 +47,7 @@ public class PopulationStatisticsJob {
 
     @Bean(NAME_CALCULATE_STATISTICS)
     public Job calculateStatisticsJob(JobBuilderFactory jobBuilderFactory) {
-        logger.debug("Building '"+NAME_CALCULATE_STATISTICS+"'");
+        logger.debug("Building '" + NAME_CALCULATE_STATISTICS + "'");
 
         JobBuilder jobBuilder = jobBuilderFactory
                 .get(NAME_CALCULATE_STATISTICS)

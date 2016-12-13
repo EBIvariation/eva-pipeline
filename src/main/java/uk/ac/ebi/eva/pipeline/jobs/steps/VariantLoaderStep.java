@@ -17,6 +17,8 @@ package uk.ac.ebi.eva.pipeline.jobs.steps;
 
 import org.opencb.biodata.models.variant.VariantSource;
 import org.opencb.opencga.storage.core.variant.VariantStorageManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
@@ -28,7 +30,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.mongodb.core.MongoOperations;
-
 import uk.ac.ebi.eva.commons.models.data.Variant;
 import uk.ac.ebi.eva.pipeline.io.readers.AggregatedVcfReader;
 import uk.ac.ebi.eva.pipeline.io.readers.UnwindingItemStreamReader;
@@ -52,10 +53,9 @@ import java.io.IOException;
 @EnableBatchProcessing
 @Import(JobOptions.class)
 public class VariantLoaderStep {
-    public static final String NAME_LOAD_VARIANTS = "Load variants";
+    private static final Logger logger = LoggerFactory.getLogger(VariantLoaderStep.class);
 
-    @Autowired
-    private StepBuilderFactory stepBuilderFactory;
+    public static final String NAME_LOAD_VARIANTS_STEP = "load-variants-step";
 
     @Autowired
     private JobOptions jobOptions;
@@ -66,9 +66,11 @@ public class VariantLoaderStep {
     @Autowired
     private VariantMongoWriter variantMongoWriter;
 
-    @Bean(NAME_LOAD_VARIANTS)
-    public Step loadVariantsStep() throws Exception {
-        return stepBuilderFactory.get(NAME_LOAD_VARIANTS)
+    @Bean(NAME_LOAD_VARIANTS_STEP)
+    public Step loadVariantsStep(StepBuilderFactory stepBuilderFactory) throws Exception {
+        logger.debug("Building '" + NAME_LOAD_VARIANTS_STEP + "'");
+
+        return stepBuilderFactory.get(NAME_LOAD_VARIANTS_STEP)
                 .<Variant, Variant>chunk(jobOptions.getPipelineOptions().getInt(JobParametersNames.CONFIG_CHUNK_SIZE))
                 .reader(reader)
                 .writer(variantMongoWriter)
@@ -84,8 +86,8 @@ public class VariantLoaderStep {
                 .getMongoOperations(jobOptions.getDbName(), jobOptions.getMongoConnection());
 
         return new VariantMongoWriter(jobOptions.getDbCollectionsVariantsName(),
-                                      mongoOperations,
-                                      variantToMongoDbObjectConverter());
+                mongoOperations,
+                variantToMongoDbObjectConverter());
     }
 
     @Bean
@@ -96,7 +98,7 @@ public class VariantLoaderStep {
                 jobOptions.getVariantOptions().getBoolean(VariantStorageManager.CALCULATE_STATS),
                 jobOptions.getVariantOptions().getBoolean(VariantStorageManager.INCLUDE_SAMPLES),
                 (VariantStorageManager.IncludeSrc) jobOptions.getVariantOptions()
-                                                             .get(VariantStorageManager.INCLUDE_SRC));
+                        .get(VariantStorageManager.INCLUDE_SRC));
     }
 
     @Bean

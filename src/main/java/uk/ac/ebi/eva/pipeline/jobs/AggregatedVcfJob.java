@@ -32,7 +32,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
-import uk.ac.ebi.eva.pipeline.jobs.flows.AnnotationFlow;
 import uk.ac.ebi.eva.pipeline.jobs.flows.AnnotationFlowOptional;
 import uk.ac.ebi.eva.pipeline.jobs.steps.VariantLoaderStep;
 import uk.ac.ebi.eva.pipeline.listeners.VariantOptionsConfigurerListener;
@@ -72,7 +71,7 @@ public class AggregatedVcfJob {
     private Flow annotationFlowOptional;
 
     @Autowired
-    @Qualifier(VariantLoaderStep.NAME_LOAD_VARIANTS)
+    @Qualifier(VariantLoaderStep.NAME_LOAD_VARIANTS_STEP)
     private Step variantLoaderStep;
 
     @Bean(NAME_AGGREGATED_VCF_JOB)

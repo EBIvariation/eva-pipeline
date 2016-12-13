@@ -22,11 +22,9 @@ import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-
 import uk.ac.ebi.eva.pipeline.io.readers.NonAnnotatedVariantsMongoReader;
 import uk.ac.ebi.eva.pipeline.io.writers.VepInputFlatFileWriter;
 import uk.ac.ebi.eva.pipeline.jobs.steps.processors.AnnotationProcessor;
@@ -49,7 +47,6 @@ import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
  * https://examples.javacodegeeks.com/core-java/io/fileinputstream/compress-a-file-in-gzip-format-in-java/
  * http://www.journaldev.com/966/java-gzip-example-compress-and-decompress-file-in-gzip-format-in-java
  */
-
 @Configuration
 @EnableBatchProcessing
 @Import(JobOptions.class)
@@ -57,23 +54,21 @@ public class VepInputGeneratorStep {
 
     private static final Logger logger = LoggerFactory.getLogger(VepInputGeneratorStep.class);
 
-    public static final String FIND_VARIANTS_TO_ANNOTATE = "Find variants to annotate";
-
-    @Autowired
-    private StepBuilderFactory stepBuilderFactory;
+    public static final String NAME_GENERATE_VEP_INPUT_STEP = "generate-vep-input-step";
 
     @Autowired
     private JobOptions jobOptions;
 
-    @Bean
-    @Qualifier("vepInputGeneratorStep")
-    public Step variantsAnnotGenerateInputBatchStep() throws Exception {
-        return stepBuilderFactory.get(FIND_VARIANTS_TO_ANNOTATE)
+    @Bean(NAME_GENERATE_VEP_INPUT_STEP)
+    public Step generateVepInputStep(StepBuilderFactory stepBuilderFactory) throws Exception {
+        logger.debug("Building '" + NAME_GENERATE_VEP_INPUT_STEP + "'");
+
+        return stepBuilderFactory.get(NAME_GENERATE_VEP_INPUT_STEP)
                 .<DBObject, VariantWrapper>chunk(
                         jobOptions.getPipelineOptions().getInt(JobParametersNames.CONFIG_CHUNK_SIZE))
-                .reader(new NonAnnotatedVariantsMongoReader(jobOptions.getDbName(), 
-                                                            jobOptions.getDbCollectionsVariantsName(),
-                                                            jobOptions.getMongoConnection()))
+                .reader(new NonAnnotatedVariantsMongoReader(jobOptions.getDbName(),
+                        jobOptions.getDbCollectionsVariantsName(),
+                        jobOptions.getMongoConnection()))
                 .processor(new AnnotationProcessor())
                 .writer(new VepInputFlatFileWriter(jobOptions.getVepInput()))
                 .allowStartIfComplete(

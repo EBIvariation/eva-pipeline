@@ -16,6 +16,8 @@
 
 package uk.ac.ebi.eva.pipeline.jobs.steps;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
@@ -54,17 +56,17 @@ import java.io.IOException;
 @EnableBatchProcessing
 @Import(JobOptions.class)
 public class GeneLoaderStep {
+    private static final Logger logger = LoggerFactory.getLogger(GeneLoaderStep.class);
 
-    public static final String NAME_GENES_LOAD_STEP = "Genes load step";
-
-    @Autowired
-    private StepBuilderFactory stepBuilderFactory;
+    public static final String NAME_GENES_LOAD_STEP = "genes-load-step";
 
     @Autowired
     private JobOptions jobOptions;
 
     @Bean(NAME_GENES_LOAD_STEP)
-    public Step genesLoadStep() throws IOException {
+    public Step genesLoadStep(StepBuilderFactory stepBuilderFactory) throws IOException {
+        logger.debug("Building '" + NAME_GENES_LOAD_STEP + "'");
+
         MongoOperations mongoOperations = MongoDBHelper
                 .getMongoOperations(jobOptions.getDbName(), jobOptions.getMongoConnection());
 

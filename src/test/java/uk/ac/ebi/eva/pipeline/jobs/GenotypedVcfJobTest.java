@@ -207,7 +207,7 @@ public class GenotypedVcfJobTest {
 
         //check that one line is skipped because malformed
         List<StepExecution> variantAnnotationLoadStepExecution = jobExecution.getStepExecutions().stream()
-                .filter(stepExecution -> stepExecution.getStepName().equals(AnnotationLoaderStep.LOAD_VEP_ANNOTATION))
+                .filter(stepExecution -> stepExecution.getStepName().equals(AnnotationLoaderStep.NAME_LOAD_VEP_ANNOTATION_STEP))
                 .collect(Collectors.toList());
         assertEquals(1, variantAnnotationLoadStepExecution.get(0).getReadSkipCount());
 

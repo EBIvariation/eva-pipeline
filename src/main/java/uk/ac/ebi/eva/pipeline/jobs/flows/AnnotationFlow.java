@@ -12,12 +12,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import uk.ac.ebi.eva.pipeline.jobs.CommonJobStepInitialization;
 import uk.ac.ebi.eva.pipeline.jobs.deciders.EmptyFileDecider;
-import uk.ac.ebi.eva.pipeline.jobs.deciders.SkipStepDecider;
 import uk.ac.ebi.eva.pipeline.jobs.steps.AnnotationLoaderStep;
-import uk.ac.ebi.eva.pipeline.jobs.steps.VepAnnotationGeneratorStep;
+import uk.ac.ebi.eva.pipeline.jobs.steps.tasklets.VepAnnotationGeneratorStep;
 import uk.ac.ebi.eva.pipeline.jobs.steps.VepInputGeneratorStep;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
-import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 
 @Configuration
 @EnableBatchProcessing
@@ -28,14 +26,13 @@ public class AnnotationFlow extends CommonJobStepInitialization {
 
     public static final String GENERATE_VEP_ANNOTATION = "Generate VEP annotation";
 
-
-    @Qualifier("vepInputGeneratorStep")
     @Autowired
-    public Step variantsAnnotGenerateInputBatchStep;
+    @Qualifier(VepInputGeneratorStep.NAME_GENERATE_VEP_INPUT_STEP)
+    public Step generateVepInputStep;
 
-    @Qualifier("annotationLoad")
     @Autowired
-    private Step annotationLoadBatchStep;
+    @Qualifier(AnnotationLoaderStep.NAME_LOAD_VEP_ANNOTATION_STEP)
+    private Step annotationLoadStep;
 
     @Autowired
     private VepAnnotationGeneratorStep vepAnnotationGeneratorStep;
@@ -45,10 +42,10 @@ public class AnnotationFlow extends CommonJobStepInitialization {
         EmptyFileDecider emptyFileDecider = new EmptyFileDecider(getPipelineOptions().getString(JobOptions.VEP_INPUT));
 
         return new FlowBuilder<Flow>(NAME_VEP_ANNOTATION_FLOW)
-                .start(variantsAnnotGenerateInputBatchStep)
+                .start(generateVepInputStep)
                 .next(emptyFileDecider).on(EmptyFileDecider.CONTINUE_FLOW)
                 .to(annotationCreate())
-                .next(annotationLoadBatchStep)
+                .next(annotationLoadStep)
                 .from(emptyFileDecider).on(EmptyFileDecider.STOP_FLOW)
                 .end(BatchStatus.COMPLETED.toString())
                 .build();

@@ -99,7 +99,7 @@ public class AggregatedVcfJobTest {
         List<StepExecution> steps = new ArrayList<>(jobExecution.getStepExecutions());
         StepExecution load = steps.get(0);
 
-        Assert.assertEquals(VariantLoaderStep.NAME_LOAD_VARIANTS, load.getStepName());
+        Assert.assertEquals(VariantLoaderStep.NAME_LOAD_VARIANTS_STEP, load.getStepName());
 
         // check ((documents in DB) == (lines in file))
         VariantStorageManager variantStorageManager = StorageManagerFactory.getVariantStorageManager();

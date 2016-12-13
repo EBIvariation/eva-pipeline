@@ -17,18 +17,18 @@
 package uk.ac.ebi.eva.pipeline.jobs.steps;
 
 import org.opencb.biodata.models.variant.annotation.VariantAnnotation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.file.FlatFileParseException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.mongodb.core.MongoOperations;
-
 import uk.ac.ebi.eva.pipeline.configuration.AnnotationLoaderStepConfiguration;
 import uk.ac.ebi.eva.pipeline.io.readers.AnnotationFlatFileReader;
 import uk.ac.ebi.eva.pipeline.io.writers.VepAnnotationMongoWriter;
@@ -58,11 +58,9 @@ import java.io.IOException;
 @EnableBatchProcessing
 @Import({JobOptions.class, AnnotationLoaderStepConfiguration.class})
 public class AnnotationLoaderStep {
+    private static final Logger logger = LoggerFactory.getLogger(AnnotationLoaderStep.class);
 
-    public static final String LOAD_VEP_ANNOTATION = "Load VEP annotation";
-
-    @Autowired
-    private StepBuilderFactory stepBuilderFactory;
+    public static final String NAME_LOAD_VEP_ANNOTATION_STEP = "load-vep-annotation-step";
 
     @Autowired
     private JobOptions jobOptions;
@@ -70,15 +68,16 @@ public class AnnotationLoaderStep {
     @Autowired
     private ItemWriter<VariantAnnotation> variantAnnotationItemWriter;
 
-    @Bean
-    @Qualifier("annotationLoad")
-    public Step annotationLoadBatchStep() throws IOException {
+    @Bean(NAME_LOAD_VEP_ANNOTATION_STEP)
+    public Step loadVepAnnotationStep(StepBuilderFactory stepBuilderFactory) throws IOException {
+        logger.debug("Building '" + NAME_LOAD_VEP_ANNOTATION_STEP + "'");
+
         MongoOperations mongoOperations = MongoDBHelper.getMongoOperations(
                 jobOptions.getDbName(), jobOptions.getMongoConnection());
         String collections = jobOptions.getDbCollectionsVariantsName();
         VepAnnotationMongoWriter writer = new VepAnnotationMongoWriter(mongoOperations, collections);
 
-        return stepBuilderFactory.get(LOAD_VEP_ANNOTATION)
+        return stepBuilderFactory.get(NAME_LOAD_VEP_ANNOTATION_STEP)
                 .<VariantAnnotation, VariantAnnotation>chunk(
                         jobOptions.getPipelineOptions().getInt(JobParametersNames.CONFIG_CHUNK_SIZE))
                 .reader(new AnnotationFlatFileReader(jobOptions.getPipelineOptions().getString(JobOptions.VEP_OUTPUT)))

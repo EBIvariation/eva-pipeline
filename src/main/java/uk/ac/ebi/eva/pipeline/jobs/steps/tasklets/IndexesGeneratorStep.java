@@ -13,11 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.ac.ebi.eva.pipeline.jobs.steps;
+package uk.ac.ebi.eva.pipeline.jobs.steps.tasklets;
 
-import org.opencb.biodata.formats.pedigree.io.PedigreePedReader;
-import org.opencb.biodata.formats.pedigree.io.PedigreeReader;
-import org.opencb.biodata.models.pedigree.Pedigree;
+import com.mongodb.BasicDBObject;
+import org.opencb.datastore.core.ObjectMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.StepContribution;
@@ -27,42 +26,34 @@ import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.stereotype.Component;
 
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
-import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
+import uk.ac.ebi.eva.utils.MongoDBHelper;
 
 /**
- * Tasklet that parse and load a PED file into Mongo
+ * This step initializes the indexes in the databases.
  * <p>
- * PED specs
- * http://pngu.mgh.harvard.edu/~purcell/plink/data.shtml#ped
- * <p>
- * TODO: only reading for now, to be completed..
+ * Currently it only has indexes for the features collection.
  */
 @Component
 @StepScope
 @Import({JobOptions.class})
-public class PedLoaderStep implements Tasklet {
-    private static final Logger logger = LoggerFactory.getLogger(PedLoaderStep.class);
+public class IndexesGeneratorStep implements Tasklet {
+    private static final Logger logger = LoggerFactory.getLogger(IndexesGeneratorStep.class);
 
     @Autowired
     private JobOptions jobOptions;
 
-    private Pedigree pedigree;
-
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
-        PedigreeReader pedigreeReader = new PedigreePedReader(jobOptions.getPipelineOptions().getString(JobParametersNames.INPUT_PEDIGREE));
-        pedigreeReader.open();
-        pedigree = pedigreeReader.read().get(0);
-        pedigreeReader.close();
+        ObjectMap pipelineOptions = jobOptions.getPipelineOptions();
+        MongoOperations operations = MongoDBHelper.getMongoOperations(jobOptions.getDbName(),
+                jobOptions.getMongoConnection());
+        operations.getCollection(jobOptions.getDbCollectionsFeaturesName())
+                .createIndex(new BasicDBObject("name", 1), new BasicDBObject("sparse", true).append("background", true));
 
         return RepeatStatus.FINISHED;
     }
-
-    public Pedigree getPedigree() {
-        return pedigree;
-    }
-
 }

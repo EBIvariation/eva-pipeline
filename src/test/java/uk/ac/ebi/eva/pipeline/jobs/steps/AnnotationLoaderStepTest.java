@@ -77,7 +77,7 @@ public class AnnotationLoaderStepTest {
     public void shouldLoadAllAnnotations() throws Exception {
         setUp();
 
-        JobExecution jobExecution = jobLauncherTestUtils.launchStep(AnnotationLoaderStep.LOAD_VEP_ANNOTATION);
+        JobExecution jobExecution = jobLauncherTestUtils.launchStep(AnnotationLoaderStep.NAME_LOAD_VEP_ANNOTATION_STEP);
 
         assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
         assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());

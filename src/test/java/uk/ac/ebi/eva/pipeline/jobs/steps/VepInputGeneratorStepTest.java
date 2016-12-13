@@ -73,7 +73,7 @@ public class VepInputGeneratorStepTest {
 
         assertFalse(vepInputFile.exists());
 
-        JobExecution jobExecution = jobLauncherTestUtils.launchStep(VepInputGeneratorStep.FIND_VARIANTS_TO_ANNOTATE);
+        JobExecution jobExecution = jobLauncherTestUtils.launchStep(VepInputGeneratorStep.NAME_GENERATE_VEP_INPUT_STEP);
 
         assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
         assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());

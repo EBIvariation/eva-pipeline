@@ -33,7 +33,7 @@ import uk.ac.ebi.eva.pipeline.jobs.flows.AnnotationFlow;
 
 /**
  * Batch class to wire together:
- * 1) variantsAnnotGenerateInputBatchStep - Dump a list of variants without annotations to be used as input for VEP
+ * 1) generateVepInputStep - Dump a list of variants without annotations to be used as input for VEP
  * 2) annotationCreate - run VEP
  * 3) annotationLoadBatchStep - Load VEP annotations into mongo
  * <p>
@@ -57,7 +57,7 @@ public class AnnotationJob {
 
     @Bean(NAME_ANNOTATE_VARIANTS_JOB)
     public Job annotateVariantsJob(JobBuilderFactory jobBuilderFactory) {
-        logger.debug("Building '"+NAME_ANNOTATE_VARIANTS_JOB+"'");
+        logger.debug("Building '" + NAME_ANNOTATE_VARIANTS_JOB + "'");
 
         JobBuilder jobBuilder = jobBuilderFactory
                 .get(NAME_ANNOTATE_VARIANTS_JOB)
