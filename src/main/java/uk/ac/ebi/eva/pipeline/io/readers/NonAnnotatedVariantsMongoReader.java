@@ -41,7 +41,7 @@ public class NonAnnotatedVariantsMongoReader extends MongoDbCursorItemReader {
         setDatabaseName(databaseName);
         setCollectionName(collectionsVariantsName);
 
-        DBObject refDbObject = BasicDBObjectBuilder.start().add("annot.ct.so", new BasicDBObject("$exists", false)).get();
+        DBObject refDbObject = BasicDBObjectBuilder.start().add("annot", new BasicDBObject("$exists", false)).get();
         setRefDbObject(refDbObject);
 
         String[] fields = {"chr", "start", "end", "ref", "alt"};

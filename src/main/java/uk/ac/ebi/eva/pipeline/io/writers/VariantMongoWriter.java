@@ -18,13 +18,14 @@ package uk.ac.ebi.eva.pipeline.io.writers;
 import com.mongodb.BasicDBObject;
 import com.mongodb.BulkWriteOperation;
 import com.mongodb.DBObject;
-import org.opencb.opencga.storage.mongodb.variant.DBObjectToVariantConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.item.data.MongoItemWriter;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.util.Assert;
 
+import uk.ac.ebi.eva.commons.models.converters.data.VariantSourceEntryToDBObjectConverter;
+import uk.ac.ebi.eva.commons.models.converters.data.VariantToDBObjectConverter;
 import uk.ac.ebi.eva.commons.models.data.Variant;
 import uk.ac.ebi.eva.pipeline.model.converters.data.VariantToMongoDbObjectConverter;
 import uk.ac.ebi.eva.utils.MongoDBHelper;
@@ -32,16 +33,23 @@ import uk.ac.ebi.eva.utils.MongoDBHelper;
 import java.util.List;
 
 /**
- * @author Diego Poggioli
- * <p>
  * Write a list of {@link Variant} into MongoDB
  * See also {@link org.opencb.opencga.storage.mongodb.variant.VariantMongoDBWriter}
  */
 public class VariantMongoWriter extends MongoItemWriter<Variant> {
+
     private static final Logger logger = LoggerFactory.getLogger(VariantMongoWriter.class);
 
+    private static final String BACKGROUND_INDEX = "background";
+
+    private static final String ANNOTATION_FIELD = "annot";
+
+    private static final String ANNOTATION_XREF_ID_FIELD = "annot.xrefs.id";
+
     private final MongoOperations mongoOperations;
+
     private final String collection;
+
     private final VariantToMongoDbObjectConverter variantToMongoDbObjectConverter;
 
     public VariantMongoWriter(String collection, MongoOperations mongoOperations,
@@ -53,6 +61,8 @@ public class VariantMongoWriter extends MongoItemWriter<Variant> {
         this.mongoOperations = mongoOperations;
         this.collection = collection;
         setTemplate(mongoOperations);
+
+        generateIndexes();
     }
 
     @Override
@@ -64,8 +74,8 @@ public class VariantMongoWriter extends MongoItemWriter<Variant> {
 
             // the chromosome and start appear just as shard keys, in an unsharded cluster they wouldn't be needed
             BasicDBObject query = new BasicDBObject("_id", id)
-                    .append(DBObjectToVariantConverter.CHROMOSOME_FIELD, variant.getChromosome())
-                    .append(DBObjectToVariantConverter.START_FIELD, variant.getStart());
+                    .append(VariantToDBObjectConverter.CHROMOSOME_FIELD, variant.getChromosome())
+                    .append(VariantToDBObjectConverter.START_FIELD, variant.getStart());
 
             DBObject update = variantToMongoDbObjectConverter.convert(variant);
 
@@ -83,4 +93,23 @@ public class VariantMongoWriter extends MongoItemWriter<Variant> {
         }
     }
 
+    private void generateIndexes() {
+        mongoOperations.getCollection(collection).createIndex(new BasicDBObject(
+                VariantToDBObjectConverter.CHROMOSOME_FIELD, 1).append(VariantToDBObjectConverter.START_FIELD, 1)
+                                                               .append(VariantToDBObjectConverter.END_FIELD, 1)
+                                                               .append(BACKGROUND_INDEX, true));
+        mongoOperations.getCollection(collection).createIndex(new BasicDBObject(
+                VariantToDBObjectConverter.IDS_FIELD, 1).append(BACKGROUND_INDEX, true));
+
+        String filesStudyIdField = String.format("%s.%s", VariantToDBObjectConverter.FILES_FIELD,
+                                                 VariantSourceEntryToDBObjectConverter.STUDYID_FIELD);
+        String filesFileIdField = String.format("%s.%s", VariantToDBObjectConverter.FILES_FIELD,
+                                                 VariantSourceEntryToDBObjectConverter.FILEID_FIELD);
+        mongoOperations.getCollection(collection).createIndex(
+                new BasicDBObject(filesStudyIdField, 1).append(filesFileIdField, 1).append(BACKGROUND_INDEX, true));
+        mongoOperations.getCollection(collection)
+                .createIndex(new BasicDBObject(ANNOTATION_XREF_ID_FIELD, 1).append(BACKGROUND_INDEX, true));
+        mongoOperations.getCollection(collection)
+                .createIndex(new BasicDBObject(ANNOTATION_FIELD, 1).append(BACKGROUND_INDEX, true));
+    }
 }
