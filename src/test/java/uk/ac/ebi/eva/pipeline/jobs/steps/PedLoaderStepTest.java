@@ -29,13 +29,13 @@ import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
-
 import uk.ac.ebi.eva.pipeline.jobs.steps.tasklets.PedLoaderStep;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
-import uk.ac.ebi.eva.test.configuration.CommonConfiguration;
+import uk.ac.ebi.eva.test.configuration.BaseTestConfiguration;
 
 import java.util.stream.Collectors;
 
@@ -52,11 +52,13 @@ import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResource;
  * http://docs.spring.io/spring-batch/apidocs/org/springframework/batch/test/StepRunner.html
  */
 @RunWith(SpringRunner.class)
-@ContextConfiguration(classes = {JobOptions.class, CommonConfiguration.class})
+@TestPropertySource({"classpath:common-configuration.properties"})
+@ContextConfiguration(classes = {BaseTestConfiguration.class})
 public class PedLoaderStepTest {
 
     private static final String PEDIGREE_FILE = "/ped/pedigree-test-file.ped";
     private static final String MALFORMED_PEDIGREE = "/ped/malformed-pedigree-test-file.ped";
+
     @Autowired
     private JobOptions jobOptions;
 

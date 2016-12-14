@@ -27,11 +27,11 @@ import org.springframework.batch.item.file.mapping.JsonLineMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-
 import uk.ac.ebi.eva.pipeline.model.PopulationStatistics;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
-import uk.ac.ebi.eva.test.configuration.CommonConfiguration;
+import uk.ac.ebi.eva.test.configuration.BaseTestConfiguration;
 import uk.ac.ebi.eva.test.data.VariantData;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 import uk.ac.ebi.eva.utils.MongoDBHelper;
@@ -52,7 +52,8 @@ import static org.junit.Assert.assertNotNull;
  * output: the FeatureCoordinates get written in mongo, with at least: chromosome, start and end.
  */
 @RunWith(SpringRunner.class)
-@ContextConfiguration(classes = {JobOptions.class, CommonConfiguration.class})
+@TestPropertySource({"classpath:common-configuration.properties"})
+@ContextConfiguration(classes = {BaseTestConfiguration.class})
 public class StatisticsMongoWriterTest {
 
     @Rule
@@ -109,20 +110,20 @@ public class StatisticsMongoWriterTest {
         // check there is an index in chr + start + ref + alt + sid + cid
         List<DBObject> indexes = new ArrayList<>();
         indexes.add(new BasicDBObject("v", 1)
-                            .append("key", new BasicDBObject("_id", 1))
-                            .append("name", "_id_")
-                            .append("ns", databaseName + ".populationStatistics")
+                .append("key", new BasicDBObject("_id", 1))
+                .append("name", "_id_")
+                .append("ns", databaseName + ".populationStatistics")
         );
         indexes.add(new BasicDBObject("v", 1)
-                            .append("unique", true)
-                            .append("key", new BasicDBObject("chr", 1)
-                                    .append("start", 1)
-                                    .append("ref", 1)
-                                    .append("alt", 1)
-                                    .append("sid", 1)
-                                    .append("cid", 1))
-                            .append("name", "vscid")
-                            .append("ns", databaseName + ".populationStatistics")
+                .append("unique", true)
+                .append("key", new BasicDBObject("chr", 1)
+                        .append("start", 1)
+                        .append("ref", 1)
+                        .append("alt", 1)
+                        .append("sid", 1)
+                        .append("cid", 1))
+                .append("name", "vscid")
+                .append("ns", databaseName + ".populationStatistics")
         );
 
         assertEquals(indexes, statsCollection.getIndexInfo());
@@ -162,7 +163,7 @@ public class StatisticsMongoWriterTest {
 
     public StatisticsMongoWriter getStatisticsMongoWriter(String databaseName) throws UnknownHostException {
         MongoOperations mongoOperations = MongoDBHelper.getMongoOperations(databaseName,
-                                                                           jobOptions.getMongoConnection());
+                jobOptions.getMongoConnection());
         StatisticsMongoWriter statisticsMongoWriter = new StatisticsMongoWriter(
                 mongoOperations, jobOptions.getDbCollectionsStatsName());
         return statisticsMongoWriter;

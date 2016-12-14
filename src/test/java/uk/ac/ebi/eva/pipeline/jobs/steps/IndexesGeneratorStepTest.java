@@ -28,11 +28,12 @@ import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.ac.ebi.eva.pipeline.jobs.DatabaseInitializationJob;
 import uk.ac.ebi.eva.pipeline.jobs.steps.tasklets.IndexesGeneratorStep;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
-import uk.ac.ebi.eva.test.configuration.DatabaseInitializationConfiguration;
+import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 
 import static org.junit.Assert.assertEquals;
@@ -42,7 +43,8 @@ import static org.junit.Assert.assertEquals;
  * Test {@link IndexesGeneratorStep}
  */
 @RunWith(SpringRunner.class)
-@ContextConfiguration(classes = {DatabaseInitializationJob.class, DatabaseInitializationConfiguration.class, JobLauncherTestUtils.class})
+@TestPropertySource({"classpath:initialize-database.properties"})
+@ContextConfiguration(classes = {DatabaseInitializationJob.class, BatchTestConfiguration.class})
 public class IndexesGeneratorStepTest {
 
     @Rule
