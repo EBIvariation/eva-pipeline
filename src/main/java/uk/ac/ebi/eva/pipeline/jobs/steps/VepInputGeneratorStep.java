@@ -49,7 +49,6 @@ import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
  */
 @Configuration
 @EnableBatchProcessing
-@Import(JobOptions.class)
 public class VepInputGeneratorStep {
 
     private static final Logger logger = LoggerFactory.getLogger(VepInputGeneratorStep.class);

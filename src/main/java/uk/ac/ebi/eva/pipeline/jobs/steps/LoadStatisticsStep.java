@@ -17,7 +17,6 @@ import static uk.ac.ebi.eva.pipeline.jobs.steps.CreateDatabaseIndexesStep.NAME_C
 
 @Configuration
 @EnableBatchProcessing
-@Import(JobOptions.class)
 public class LoadStatisticsStep {
 
     private static final Logger logger = LoggerFactory.getLogger(LoadStatisticsStep.class);

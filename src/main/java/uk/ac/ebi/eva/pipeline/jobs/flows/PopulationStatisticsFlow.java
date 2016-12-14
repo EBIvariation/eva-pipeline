@@ -18,7 +18,7 @@ import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 
 @Configuration
 @EnableBatchProcessing
-@Import({JobOptions.class, CalculateStatisticsStep.class, LoadStatisticsStep.class})
+@Import({CalculateStatisticsStep.class, LoadStatisticsStep.class})
 public class PopulationStatisticsFlow {
 
     public static final String NAME_CALCULATE_STATISTICS_OPTIONAL_FLOW = "calculate-statistics-optional-flow";

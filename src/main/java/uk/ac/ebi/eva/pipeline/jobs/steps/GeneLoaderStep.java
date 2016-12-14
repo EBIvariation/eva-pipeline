@@ -54,7 +54,6 @@ import java.io.IOException;
 
 @Configuration
 @EnableBatchProcessing
-@Import(JobOptions.class)
 public class GeneLoaderStep {
     private static final Logger logger = LoggerFactory.getLogger(GeneLoaderStep.class);
 

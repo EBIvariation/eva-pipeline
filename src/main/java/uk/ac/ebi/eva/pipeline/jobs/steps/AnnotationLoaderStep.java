@@ -56,7 +56,7 @@ import java.io.IOException;
 
 @Configuration
 @EnableBatchProcessing
-@Import({JobOptions.class, VariantAnnotationWriterConfiguration.class})
+@Import({VariantAnnotationWriterConfiguration.class})
 public class AnnotationLoaderStep {
     private static final Logger logger = LoggerFactory.getLogger(AnnotationLoaderStep.class);
 

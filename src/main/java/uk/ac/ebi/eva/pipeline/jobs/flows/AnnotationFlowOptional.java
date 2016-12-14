@@ -15,7 +15,7 @@ import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 
 @Configuration
 @EnableBatchProcessing
-@Import({JobOptions.class, AnnotationFlow.class})
+@Import({AnnotationFlow.class})
 public class AnnotationFlowOptional {
 
     public static final String NAME_VEP_ANNOTATION_OPTIONAL_FLOW = "VEP annotation optional flow";

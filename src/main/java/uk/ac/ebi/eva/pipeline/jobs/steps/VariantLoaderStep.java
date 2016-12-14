@@ -42,7 +42,7 @@ import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
  */
 @Configuration
 @EnableBatchProcessing
-@Import({VariantWriterConfiguration.class, JobOptions.class, VcfReaderConfiguration.class})
+@Import({VariantWriterConfiguration.class, VcfReaderConfiguration.class})
 public class VariantLoaderStep {
     private static final Logger logger = LoggerFactory.getLogger(VariantLoaderStep.class);
 

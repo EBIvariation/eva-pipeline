@@ -15,7 +15,6 @@ import uk.ac.ebi.eva.utils.TaskletUtils;
 
 @Configuration
 @EnableBatchProcessing
-@Import({JobOptions.class})
 public class CalculateStatisticsStep {
 
     private static final Logger logger = LoggerFactory.getLogger(CalculateStatisticsStep.class);
