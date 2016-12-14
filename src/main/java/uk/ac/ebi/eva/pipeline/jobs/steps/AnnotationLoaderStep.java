@@ -21,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
+import org.springframework.batch.core.configuration.annotation.JobScope;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.file.FlatFileParseException;
@@ -71,11 +72,6 @@ public class AnnotationLoaderStep {
     @Bean(NAME_LOAD_VEP_ANNOTATION_STEP)
     public Step loadVepAnnotationStep(StepBuilderFactory stepBuilderFactory) throws IOException {
         logger.debug("Building '" + NAME_LOAD_VEP_ANNOTATION_STEP + "'");
-
-        MongoOperations mongoOperations = MongoDBHelper.getMongoOperations(
-                jobOptions.getDbName(), jobOptions.getMongoConnection());
-        String collections = jobOptions.getDbCollectionsVariantsName();
-        VepAnnotationMongoWriter writer = new VepAnnotationMongoWriter(mongoOperations, collections);
 
         return stepBuilderFactory.get(NAME_LOAD_VEP_ANNOTATION_STEP)
                 .<VariantAnnotation, VariantAnnotation>chunk(

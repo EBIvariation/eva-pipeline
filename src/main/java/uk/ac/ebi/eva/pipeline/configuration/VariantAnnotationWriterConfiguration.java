@@ -27,5 +27,4 @@ public class VariantAnnotationWriterConfiguration {
         String collections = jobOptions.getPipelineOptions().getString(JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME);
         return new VepAnnotationMongoWriter(mongoOperations, collections);
     }
-
 }
