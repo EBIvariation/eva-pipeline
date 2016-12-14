@@ -75,6 +75,7 @@ public class GenotypedVcfJob {
     private JobOptions jobOptions;
 
     @Bean(NAME_GENOTYPED_VCF_JOB)
+    @Scope("prototype")
     public Job genotypedVcfJob(JobBuilderFactory jobBuilderFactory) {
         logger.debug("Building '" + NAME_GENOTYPED_VCF_JOB + "'");
 

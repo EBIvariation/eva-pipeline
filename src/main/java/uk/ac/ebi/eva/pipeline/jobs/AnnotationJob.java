@@ -29,6 +29,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Scope;
 import uk.ac.ebi.eva.pipeline.jobs.flows.AnnotationFlow;
 
 /**
@@ -56,6 +57,7 @@ public class AnnotationJob {
     private Flow annotation;
 
     @Bean(NAME_ANNOTATE_VARIANTS_JOB)
+    @Scope("prototype")
     public Job annotateVariantsJob(JobBuilderFactory jobBuilderFactory) {
         logger.debug("Building '" + NAME_ANNOTATE_VARIANTS_JOB + "'");
 

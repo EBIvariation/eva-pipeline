@@ -28,6 +28,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Scope;
 import uk.ac.ebi.eva.pipeline.jobs.flows.PopulationStatisticsFlow;
 
 /**
@@ -46,6 +47,7 @@ public class PopulationStatisticsJob {
     private Flow optionalStatisticsFlow;
 
     @Bean(NAME_CALCULATE_STATISTICS)
+    @Scope("prototype")
     public Job calculateStatisticsJob(JobBuilderFactory jobBuilderFactory) {
         logger.debug("Building '" + NAME_CALCULATE_STATISTICS + "'");
 

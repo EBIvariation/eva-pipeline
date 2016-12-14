@@ -75,6 +75,7 @@ public class AggregatedVcfJob {
     private Step variantLoaderStep;
 
     @Bean(NAME_AGGREGATED_VCF_JOB)
+    @Scope("prototype")
     public Job aggregatedVcfJob(JobBuilderFactory jobBuilderFactory) {
         logger.debug("Building '" + NAME_AGGREGATED_VCF_JOB + "'");
 
