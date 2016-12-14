@@ -29,7 +29,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.mongodb.core.MongoOperations;
-import uk.ac.ebi.eva.pipeline.configuration.AnnotationLoaderStepConfiguration;
+import uk.ac.ebi.eva.pipeline.configuration.VariantAnnotationWriterConfiguration;
 import uk.ac.ebi.eva.pipeline.io.readers.AnnotationFlatFileReader;
 import uk.ac.ebi.eva.pipeline.io.writers.VepAnnotationMongoWriter;
 import uk.ac.ebi.eva.pipeline.listeners.SkippedItemListener;
@@ -56,7 +56,7 @@ import java.io.IOException;
 
 @Configuration
 @EnableBatchProcessing
-@Import({JobOptions.class, AnnotationLoaderStepConfiguration.class})
+@Import({JobOptions.class, VariantAnnotationWriterConfiguration.class})
 public class AnnotationLoaderStep {
     private static final Logger logger = LoggerFactory.getLogger(AnnotationLoaderStep.class);
 

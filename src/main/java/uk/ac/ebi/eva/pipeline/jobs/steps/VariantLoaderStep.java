@@ -23,23 +23,21 @@ import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepScope;
+import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.file.FlatFileParseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.data.mongodb.core.MongoOperations;
 import uk.ac.ebi.eva.commons.models.data.Variant;
+import uk.ac.ebi.eva.pipeline.configuration.VariantWriterConfiguration;
 import uk.ac.ebi.eva.pipeline.io.readers.AggregatedVcfReader;
 import uk.ac.ebi.eva.pipeline.io.readers.UnwindingItemStreamReader;
 import uk.ac.ebi.eva.pipeline.io.readers.VcfReader;
-import uk.ac.ebi.eva.pipeline.io.writers.VariantMongoWriter;
 import uk.ac.ebi.eva.pipeline.listeners.SkippedItemListener;
-import uk.ac.ebi.eva.pipeline.model.converters.data.VariantToMongoDbObjectConverter;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
-import uk.ac.ebi.eva.utils.MongoDBHelper;
 
 import java.io.IOException;
 
@@ -51,7 +49,7 @@ import java.io.IOException;
  */
 @Configuration
 @EnableBatchProcessing
-@Import(JobOptions.class)
+@Import({VariantWriterConfiguration.class, JobOptions.class})
 public class VariantLoaderStep {
     private static final Logger logger = LoggerFactory.getLogger(VariantLoaderStep.class);
 
@@ -64,7 +62,7 @@ public class VariantLoaderStep {
     private UnwindingItemStreamReader<Variant> reader;
 
     @Autowired
-    private VariantMongoWriter variantMongoWriter;
+    private ItemWriter<Variant> variantWriter;
 
     @Bean(NAME_LOAD_VARIANTS_STEP)
     public Step loadVariantsStep(StepBuilderFactory stepBuilderFactory) throws Exception {
@@ -73,32 +71,10 @@ public class VariantLoaderStep {
         return stepBuilderFactory.get(NAME_LOAD_VARIANTS_STEP)
                 .<Variant, Variant>chunk(jobOptions.getPipelineOptions().getInt(JobParametersNames.CONFIG_CHUNK_SIZE))
                 .reader(reader)
-                .writer(variantMongoWriter)
+                .writer(variantWriter)
                 .faultTolerant().skipLimit(50).skip(FlatFileParseException.class)
                 .listener(new SkippedItemListener())
                 .build();
-    }
-
-    @Bean
-    @StepScope
-    public VariantMongoWriter variantMongoWriter() throws Exception {
-        MongoOperations mongoOperations = MongoDBHelper
-                .getMongoOperations(jobOptions.getDbName(), jobOptions.getMongoConnection());
-
-        return new VariantMongoWriter(jobOptions.getDbCollectionsVariantsName(),
-                mongoOperations,
-                variantToMongoDbObjectConverter());
-    }
-
-    @Bean
-    @StepScope
-    public VariantToMongoDbObjectConverter variantToMongoDbObjectConverter() throws Exception {
-        return new VariantToMongoDbObjectConverter(
-                jobOptions.getVariantOptions().getBoolean(VariantStorageManager.INCLUDE_STATS),
-                jobOptions.getVariantOptions().getBoolean(VariantStorageManager.CALCULATE_STATS),
-                jobOptions.getVariantOptions().getBoolean(VariantStorageManager.INCLUDE_SAMPLES),
-                (VariantStorageManager.IncludeSrc) jobOptions.getVariantOptions()
-                        .get(VariantStorageManager.INCLUDE_SRC));
     }
 
     @Bean

@@ -17,7 +17,7 @@ import uk.ac.ebi.eva.utils.MongoDBHelper;
 import java.net.UnknownHostException;
 
 @Configuration
-public class AnnotationLoaderStepConfiguration {
+public class VariantAnnotationWriterConfiguration {
 
     @Autowired
     private JobOptions jobOptions;

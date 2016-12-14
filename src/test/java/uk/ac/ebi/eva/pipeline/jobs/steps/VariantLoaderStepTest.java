@@ -32,10 +32,12 @@ import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
+import uk.ac.ebi.eva.pipeline.Application;
 import uk.ac.ebi.eva.pipeline.jobs.GenotypedVcfJob;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
@@ -52,7 +54,7 @@ import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResource;
  * Test for {@link VariantLoaderStep}
  */
 @RunWith(SpringRunner.class)
-@ActiveProfiles("variant-annotation-mongo")
+@ActiveProfiles({Application.VARIANT_WRITER_MONGO_PROFILE,Application.VARIANT_ANNOTATION_MONGO_PROFILE})
 @TestPropertySource({"classpath:genotyped-vcf.properties"})
 @ContextConfiguration(classes = {GenotypedVcfJob.class, BatchTestConfiguration.class})
 public class VariantLoaderStepTest {

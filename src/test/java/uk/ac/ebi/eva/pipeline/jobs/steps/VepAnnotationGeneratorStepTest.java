@@ -29,6 +29,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
+import uk.ac.ebi.eva.pipeline.Application;
 import uk.ac.ebi.eva.pipeline.jobs.AnnotationJob;
 import uk.ac.ebi.eva.pipeline.jobs.steps.tasklets.VepAnnotationGeneratorStep;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
@@ -48,7 +49,7 @@ import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResource;
  * Test for {@link VepAnnotationGeneratorStep}
  */
 @RunWith(SpringRunner.class)
-@ActiveProfiles("variant-annotation-mongo")
+@ActiveProfiles(Application.VARIANT_ANNOTATION_MONGO_PROFILE)
 @TestPropertySource("classpath:annotation.properties")
 @ContextConfiguration(classes = {AnnotationJob.class, BatchTestConfiguration.class})
 public class VepAnnotationGeneratorStepTest {
