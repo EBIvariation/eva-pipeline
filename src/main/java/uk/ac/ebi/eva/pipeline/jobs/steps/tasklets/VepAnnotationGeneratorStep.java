@@ -19,14 +19,10 @@ import org.opencb.datastore.core.ObjectMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.StepContribution;
-import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Import;
-import org.springframework.stereotype.Component;
-
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 
@@ -54,12 +50,8 @@ import java.util.zip.GZIPOutputStream;
  * 20_60479_C/T	20:60479	T	-	-	-	intergenic_variant	-	-	-	-	-	rs149529999	GMAF=T:0.0018;AFR_MAF=T:0.01;AMR_MAF=T:0.0028
  * ..
  */
-@Component
-@StepScope
-@Import({JobOptions.class})
 public class VepAnnotationGeneratorStep implements Tasklet {
     private static final Logger logger = LoggerFactory.getLogger(VepAnnotationGeneratorStep.class);
-    public static final String GENERATE_VEP_ANNOTATION = "Generate VEP annotation";
 
     @Autowired
     private JobOptions jobOptions;

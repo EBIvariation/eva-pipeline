@@ -46,9 +46,6 @@ import java.net.URI;
  * Input: variants loaded into mongodb
  * Output: file containing statistics (.variants.stats.json.gz)
  */
-@Component
-@StepScope
-@Import({JobOptions.class})
 public class PopulationStatisticsGeneratorStep implements Tasklet {
     private static final Logger logger = LoggerFactory.getLogger(PopulationStatisticsGeneratorStep.class);
 

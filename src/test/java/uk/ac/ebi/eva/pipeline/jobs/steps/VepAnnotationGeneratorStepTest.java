@@ -28,9 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
-
 import uk.ac.ebi.eva.pipeline.jobs.AnnotationJob;
-import uk.ac.ebi.eva.pipeline.jobs.flows.AnnotationFlow;
 import uk.ac.ebi.eva.pipeline.jobs.steps.tasklets.VepAnnotationGeneratorStep;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 import uk.ac.ebi.eva.test.configuration.AnnotationConfiguration;
@@ -76,7 +74,8 @@ public class VepAnnotationGeneratorStepTest {
         jobOptions.setVepOutput(vepOutputFile.getAbsolutePath());
 
         // When the execute method in variantsAnnotCreate is executed
-        JobExecution jobExecution = jobLauncherTestUtils.launchStep(AnnotationFlow.GENERATE_VEP_ANNOTATION);
+        JobExecution jobExecution = jobLauncherTestUtils.launchStep(
+                GenerateVepAnnotationStep.NAME_GENERATE_VEP_ANNOTATION_STEP);
 
         //Then variantsAnnotCreate step should complete correctly
         assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());

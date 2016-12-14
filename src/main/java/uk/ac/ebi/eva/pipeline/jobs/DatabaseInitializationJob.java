@@ -28,6 +28,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import uk.ac.ebi.eva.pipeline.jobs.steps.CreateDatabaseIndexesStep;
 import uk.ac.ebi.eva.pipeline.jobs.steps.GeneLoaderStep;
 import uk.ac.ebi.eva.pipeline.jobs.steps.tasklets.IndexesGeneratorStep;
 
@@ -39,16 +40,19 @@ import uk.ac.ebi.eva.pipeline.jobs.steps.tasklets.IndexesGeneratorStep;
  */
 @Configuration
 @EnableBatchProcessing
-@Import({IndexesGeneratorStep.class, GeneLoaderStep.class})
-public class DatabaseInitializationJob extends CommonJobStepInitialization {
+@Import({IndexesGeneratorStep.class, GeneLoaderStep.class, CreateDatabaseIndexesStep.class})
+public class DatabaseInitializationJob {
 
     private static final Logger logger = LoggerFactory.getLogger(DatabaseInitializationJob.class);
-    private static final String NAME_INIT_DATABASE_JOB = "init-database-job";
-    public static final String CREATE_DATABASE_INDEXES = "Create database indexes";
+    public static final String NAME_INIT_DATABASE_JOB = "init-database-job";
 
     @Autowired
     @Qualifier(GeneLoaderStep.NAME_GENES_LOAD_STEP)
     private Step genesLoadStep;
+
+    @Autowired
+    @Qualifier(CreateDatabaseIndexesStep.NAME_CREATE_DATABASE_INDEXES_STEP)
+    private Step createDatabaseIndexesStep;
 
     @Autowired
     private IndexesGeneratorStep indexesGeneratorStep;
@@ -62,12 +66,9 @@ public class DatabaseInitializationJob extends CommonJobStepInitialization {
                 .incrementer(new RunIdIncrementer());
 
         return jobBuilder
-                .start(indexesCreate())
+                .start(createDatabaseIndexesStep)
                 .next(genesLoadStep)
                 .build();
     }
 
-    public Step indexesCreate() {
-        return generateStep(CREATE_DATABASE_INDEXES, indexesGeneratorStep);
-    }
 }

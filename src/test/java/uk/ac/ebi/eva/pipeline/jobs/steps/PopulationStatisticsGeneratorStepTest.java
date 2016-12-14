@@ -30,7 +30,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.ac.ebi.eva.pipeline.jobs.PopulationStatisticsJob;
-import uk.ac.ebi.eva.pipeline.jobs.flows.PopulationStatisticsFlow;
 import uk.ac.ebi.eva.pipeline.jobs.steps.tasklets.PopulationStatisticsGeneratorStep;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
@@ -42,7 +41,9 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.opencb.opencga.storage.core.variant.VariantStorageManager.VARIANT_SOURCE;
 import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResourceUrl;
 
@@ -82,7 +83,8 @@ public class PopulationStatisticsGeneratorStepTest {
         assertFalse(statsFile.exists());  // ensure the stats file doesn't exist from previous executions
 
         // When the execute method in variantsStatsCreate is executed
-        JobExecution jobExecution = jobLauncherTestUtils.launchStep(PopulationStatisticsFlow.CALCULATE_STATISTICS);
+        JobExecution jobExecution = jobLauncherTestUtils.launchStep(
+                CalculateStatisticsStep.NAME_CALCULATE_STATISTICS_STEP);
 
         //Then variantsStatsCreate step should complete correctly
         assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
@@ -108,7 +110,8 @@ public class PopulationStatisticsGeneratorStepTest {
         assertFalse(statsFile.exists());  // ensure the stats file doesn't exist from previous executions
 
         // When the execute method in variantsStatsCreate is executed
-        JobExecution jobExecution = jobLauncherTestUtils.launchStep(PopulationStatisticsFlow.CALCULATE_STATISTICS);
+        JobExecution jobExecution = jobLauncherTestUtils.launchStep(
+                CalculateStatisticsStep.NAME_CALCULATE_STATISTICS_STEP);
         assertEquals(ExitStatus.FAILED.getExitCode(), jobExecution.getExitStatus().getExitCode());
     }
 

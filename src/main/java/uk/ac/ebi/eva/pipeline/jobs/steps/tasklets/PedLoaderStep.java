@@ -40,9 +40,6 @@ import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
  * <p>
  * TODO: only reading for now, to be completed..
  */
-@Component
-@StepScope
-@Import({JobOptions.class})
 public class PedLoaderStep implements Tasklet {
     private static final Logger logger = LoggerFactory.getLogger(PedLoaderStep.class);
 

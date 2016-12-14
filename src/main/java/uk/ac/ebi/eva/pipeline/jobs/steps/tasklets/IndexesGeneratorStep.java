@@ -20,15 +20,11 @@ import org.opencb.datastore.core.ObjectMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.StepContribution;
-import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Import;
 import org.springframework.data.mongodb.core.MongoOperations;
-import org.springframework.stereotype.Component;
-
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 import uk.ac.ebi.eva.utils.MongoDBHelper;
 
@@ -37,9 +33,6 @@ import uk.ac.ebi.eva.utils.MongoDBHelper;
  * <p>
  * Currently it only has indexes for the features collection.
  */
-@Component
-@StepScope
-@Import({JobOptions.class})
 public class IndexesGeneratorStep implements Tasklet {
     private static final Logger logger = LoggerFactory.getLogger(IndexesGeneratorStep.class);
 

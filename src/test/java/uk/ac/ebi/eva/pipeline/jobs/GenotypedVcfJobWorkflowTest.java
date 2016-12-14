@@ -31,11 +31,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
-
-import uk.ac.ebi.eva.pipeline.jobs.flows.PopulationStatisticsFlow;
 import uk.ac.ebi.eva.pipeline.jobs.steps.AnnotationLoaderStep;
+import uk.ac.ebi.eva.pipeline.jobs.steps.CalculateStatisticsStep;
+import uk.ac.ebi.eva.pipeline.jobs.steps.GenerateVepAnnotationStep;
+import uk.ac.ebi.eva.pipeline.jobs.steps.LoadStatisticsStep;
 import uk.ac.ebi.eva.pipeline.jobs.steps.VariantLoaderStep;
-import uk.ac.ebi.eva.pipeline.jobs.steps.tasklets.VepAnnotationGeneratorStep;
 import uk.ac.ebi.eva.pipeline.jobs.steps.VepInputGeneratorStep;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
@@ -107,26 +107,30 @@ public class GenotypedVcfJobWorkflowTest {
 
         Set<String> parallelStepNamesExecuted = parallelStepsNameToStepExecution.keySet();
         Set<String> parallelStepNamesToCheck = new HashSet<>(Arrays.asList(
-                PopulationStatisticsFlow.CALCULATE_STATISTICS,
-                PopulationStatisticsFlow.LOAD_STATISTICS,
+                CalculateStatisticsStep.NAME_CALCULATE_STATISTICS_STEP,
+                LoadStatisticsStep.NAME_LOAD_STATISTICS_STEP,
                 VepInputGeneratorStep.NAME_GENERATE_VEP_INPUT_STEP,
-                VepAnnotationGeneratorStep.GENERATE_VEP_ANNOTATION,
+                GenerateVepAnnotationStep.NAME_GENERATE_VEP_ANNOTATION_STEP,
                 AnnotationLoaderStep.NAME_LOAD_VEP_ANNOTATION_STEP));
 
         assertEquals(parallelStepNamesToCheck, parallelStepNamesExecuted);
 
-        assertTrue(loadStep.getEndTime().before(parallelStepsNameToStepExecution.get(PopulationStatisticsFlow
-                .CALCULATE_STATISTICS).getStartTime()));
+        assertTrue(loadStep.getEndTime().before(parallelStepsNameToStepExecution.get(CalculateStatisticsStep
+                .NAME_CALCULATE_STATISTICS_STEP).getStartTime()));
         assertTrue(loadStep.getEndTime().before(parallelStepsNameToStepExecution.get(VepInputGeneratorStep
                 .NAME_GENERATE_VEP_INPUT_STEP).getStartTime()));
 
-        assertTrue(parallelStepsNameToStepExecution.get(PopulationStatisticsFlow.CALCULATE_STATISTICS).getEndTime()
-                .before(parallelStepsNameToStepExecution.get(PopulationStatisticsFlow.LOAD_STATISTICS).getStartTime()));
-        assertTrue(parallelStepsNameToStepExecution.get(VepInputGeneratorStep.NAME_GENERATE_VEP_INPUT_STEP).getEndTime()
-                .before(parallelStepsNameToStepExecution.get(VepAnnotationGeneratorStep.GENERATE_VEP_ANNOTATION)
+        assertTrue(parallelStepsNameToStepExecution.get(CalculateStatisticsStep.NAME_CALCULATE_STATISTICS_STEP)
+                .getEndTime()
+                .before(parallelStepsNameToStepExecution.get(LoadStatisticsStep.NAME_LOAD_STATISTICS_STEP)
                         .getStartTime()));
-        assertTrue(parallelStepsNameToStepExecution.get(VepAnnotationGeneratorStep.GENERATE_VEP_ANNOTATION).getEndTime()
-                .before(parallelStepsNameToStepExecution.get(AnnotationLoaderStep.NAME_LOAD_VEP_ANNOTATION_STEP).getStartTime()));
+        assertTrue(parallelStepsNameToStepExecution.get(VepInputGeneratorStep.NAME_GENERATE_VEP_INPUT_STEP).getEndTime()
+                .before(parallelStepsNameToStepExecution.get(
+                        GenerateVepAnnotationStep.NAME_GENERATE_VEP_ANNOTATION_STEP).getStartTime()));
+        assertTrue(parallelStepsNameToStepExecution.get(GenerateVepAnnotationStep.NAME_GENERATE_VEP_ANNOTATION_STEP)
+                .getEndTime()
+                .before(parallelStepsNameToStepExecution.get(AnnotationLoaderStep.NAME_LOAD_VEP_ANNOTATION_STEP)
+                        .getStartTime()));
     }
 
     @Test
@@ -170,7 +174,7 @@ public class GenotypedVcfJobWorkflowTest {
         Set<String> parallelStepNamesExecuted = parallelStepsNameToStepExecution.keySet();
         Set<String> parallelStepNamesToCheck = new HashSet<>(Arrays.asList(
                 VepInputGeneratorStep.NAME_GENERATE_VEP_INPUT_STEP,
-                VepAnnotationGeneratorStep.GENERATE_VEP_ANNOTATION,
+                GenerateVepAnnotationStep.NAME_GENERATE_VEP_ANNOTATION_STEP,
                 AnnotationLoaderStep.NAME_LOAD_VEP_ANNOTATION_STEP));
 
         assertEquals(parallelStepNamesToCheck, parallelStepNamesExecuted);
@@ -179,10 +183,12 @@ public class GenotypedVcfJobWorkflowTest {
                 .NAME_GENERATE_VEP_INPUT_STEP).getStartTime()));
 
         assertTrue(parallelStepsNameToStepExecution.get(VepInputGeneratorStep.NAME_GENERATE_VEP_INPUT_STEP).getEndTime()
-                .before(parallelStepsNameToStepExecution.get(VepAnnotationGeneratorStep.GENERATE_VEP_ANNOTATION)
+                .before(parallelStepsNameToStepExecution.get(GenerateVepAnnotationStep.NAME_GENERATE_VEP_ANNOTATION_STEP)
                         .getStartTime()));
-        assertTrue(parallelStepsNameToStepExecution.get(VepAnnotationGeneratorStep.GENERATE_VEP_ANNOTATION).getEndTime()
-                .before(parallelStepsNameToStepExecution.get(AnnotationLoaderStep.NAME_LOAD_VEP_ANNOTATION_STEP).getStartTime()));
+        assertTrue(parallelStepsNameToStepExecution.get(GenerateVepAnnotationStep.NAME_GENERATE_VEP_ANNOTATION_STEP)
+                .getEndTime()
+                .before(parallelStepsNameToStepExecution.get(AnnotationLoaderStep.NAME_LOAD_VEP_ANNOTATION_STEP)
+                        .getStartTime()));
     }
 
     @Test
@@ -207,16 +213,18 @@ public class GenotypedVcfJobWorkflowTest {
 
         Set<String> parallelStepNamesExecuted = parallelStepsNameToStepExecution.keySet();
         Set<String> parallelStepNamesToCheck = new HashSet<>(Arrays.asList(
-                PopulationStatisticsFlow.CALCULATE_STATISTICS,
-                PopulationStatisticsFlow.LOAD_STATISTICS));
+                CalculateStatisticsStep.NAME_CALCULATE_STATISTICS_STEP,
+                LoadStatisticsStep.NAME_LOAD_STATISTICS_STEP));
 
         assertEquals(parallelStepNamesToCheck, parallelStepNamesExecuted);
 
-        assertTrue(loadStep.getEndTime().before(parallelStepsNameToStepExecution.get(PopulationStatisticsFlow
-                .CALCULATE_STATISTICS).getStartTime()));
+        assertTrue(loadStep.getEndTime().before(parallelStepsNameToStepExecution.get(
+                CalculateStatisticsStep.NAME_CALCULATE_STATISTICS_STEP).getStartTime()));
 
-        assertTrue(parallelStepsNameToStepExecution.get(PopulationStatisticsFlow.CALCULATE_STATISTICS).getEndTime()
-                .before(parallelStepsNameToStepExecution.get(PopulationStatisticsFlow.LOAD_STATISTICS).getStartTime()));
+        assertTrue(parallelStepsNameToStepExecution.get(CalculateStatisticsStep.NAME_CALCULATE_STATISTICS_STEP)
+                .getEndTime()
+                .before(parallelStepsNameToStepExecution.get(LoadStatisticsStep.NAME_LOAD_STATISTICS_STEP)
+                        .getStartTime()));
     }
 
     /**

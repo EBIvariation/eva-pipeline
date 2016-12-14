@@ -97,9 +97,6 @@ import java.util.zip.GZIPInputStream;
  *  }
  * }
  */
-@Component
-@StepScope
-@Import({JobOptions.class})
 public class PopulationStatisticsLoaderStep implements Tasklet {
     private static final Logger logger = LoggerFactory.getLogger(PopulationStatisticsLoaderStep.class);
 

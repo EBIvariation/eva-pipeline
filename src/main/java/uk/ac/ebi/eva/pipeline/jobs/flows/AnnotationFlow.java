@@ -10,21 +10,20 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import uk.ac.ebi.eva.pipeline.jobs.CommonJobStepInitialization;
 import uk.ac.ebi.eva.pipeline.jobs.deciders.EmptyFileDecider;
 import uk.ac.ebi.eva.pipeline.jobs.steps.AnnotationLoaderStep;
-import uk.ac.ebi.eva.pipeline.jobs.steps.tasklets.VepAnnotationGeneratorStep;
+import uk.ac.ebi.eva.pipeline.jobs.steps.GenerateVepAnnotationStep;
 import uk.ac.ebi.eva.pipeline.jobs.steps.VepInputGeneratorStep;
+import uk.ac.ebi.eva.pipeline.jobs.steps.tasklets.VepAnnotationGeneratorStep;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 
 @Configuration
 @EnableBatchProcessing
-@Import({VepAnnotationGeneratorStep.class, VepInputGeneratorStep.class, AnnotationLoaderStep.class})
-public class AnnotationFlow extends CommonJobStepInitialization {
+@Import({VepAnnotationGeneratorStep.class, VepInputGeneratorStep.class, AnnotationLoaderStep.class,
+        GenerateVepAnnotationStep.class})
+public class AnnotationFlow {
 
     public static final String NAME_VEP_ANNOTATION_FLOW = "VEP annotation flow";
-
-    public static final String GENERATE_VEP_ANNOTATION = "Generate VEP annotation";
 
     @Autowired
     @Qualifier(VepInputGeneratorStep.NAME_GENERATE_VEP_INPUT_STEP)
@@ -35,24 +34,25 @@ public class AnnotationFlow extends CommonJobStepInitialization {
     private Step annotationLoadStep;
 
     @Autowired
-    private VepAnnotationGeneratorStep vepAnnotationGeneratorStep;
+    @Qualifier(GenerateVepAnnotationStep.NAME_GENERATE_VEP_ANNOTATION_STEP)
+    private Step generateVepAnnotationStep;
+
+    @Autowired
+    private JobOptions jobOptions;
 
     @Bean(NAME_VEP_ANNOTATION_FLOW)
     Flow vepAnnotationFlow() {
-        EmptyFileDecider emptyFileDecider = new EmptyFileDecider(getPipelineOptions().getString(JobOptions.VEP_INPUT));
+        EmptyFileDecider emptyFileDecider = new EmptyFileDecider(jobOptions.getPipelineOptions().getString(JobOptions
+                .VEP_INPUT));
 
         return new FlowBuilder<Flow>(NAME_VEP_ANNOTATION_FLOW)
                 .start(generateVepInputStep)
                 .next(emptyFileDecider).on(EmptyFileDecider.CONTINUE_FLOW)
-                .to(annotationCreate())
+                .to(generateVepAnnotationStep)
                 .next(annotationLoadStep)
                 .from(emptyFileDecider).on(EmptyFileDecider.STOP_FLOW)
                 .end(BatchStatus.COMPLETED.toString())
                 .build();
-    }
-
-    private Step annotationCreate() {
-        return generateStep(GENERATE_VEP_ANNOTATION, vepAnnotationGeneratorStep);
     }
 
 }

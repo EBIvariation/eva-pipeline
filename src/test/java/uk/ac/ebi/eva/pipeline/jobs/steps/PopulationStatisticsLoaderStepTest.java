@@ -21,7 +21,6 @@ import org.springframework.boot.test.rule.OutputCapture;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.ac.ebi.eva.pipeline.jobs.PopulationStatisticsJob;
-import uk.ac.ebi.eva.pipeline.jobs.flows.PopulationStatisticsFlow;
 import uk.ac.ebi.eva.pipeline.jobs.steps.tasklets.PopulationStatisticsLoaderStep;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
@@ -84,7 +83,7 @@ public class PopulationStatisticsLoaderStepTest {
         copyFilesToOutpurDir(createTempDirectoryForStatistics());
 
         // When the execute method in variantsStatsLoad is executed
-        JobExecution jobExecution = jobLauncherTestUtils.launchStep(PopulationStatisticsFlow.LOAD_STATISTICS);
+        JobExecution jobExecution = jobLauncherTestUtils.launchStep(LoadStatisticsStep.NAME_LOAD_STATISTICS_STEP);
 
         // Then variantsStatsLoad step should complete correctly
         assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
@@ -122,7 +121,7 @@ public class PopulationStatisticsLoaderStepTest {
         jobOptions.getPipelineOptions().put(JobParametersNames.INPUT_VCF, input);
         jobOptions.getVariantOptions().put(VariantStorageManager.VARIANT_SOURCE, source);
 
-        JobExecution jobExecution = jobLauncherTestUtils.launchStep(PopulationStatisticsFlow.LOAD_STATISTICS);
+        JobExecution jobExecution = jobLauncherTestUtils.launchStep(LoadStatisticsStep.NAME_LOAD_STATISTICS_STEP);
         assertThat(capture.toString(), containsString(FILE_NOT_FOUND_EXCEPTION));
 
         assertEquals(input, jobOptions.getPipelineOptions().getString(JobParametersNames.INPUT_VCF));

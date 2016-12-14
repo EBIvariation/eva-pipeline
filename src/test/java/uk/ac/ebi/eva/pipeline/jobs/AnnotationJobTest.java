@@ -34,7 +34,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
-
+import uk.ac.ebi.eva.pipeline.jobs.steps.GenerateVepAnnotationStep;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 import uk.ac.ebi.eva.test.configuration.AnnotationJobConfiguration;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
@@ -51,7 +51,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static uk.ac.ebi.eva.pipeline.jobs.steps.AnnotationLoaderStep.NAME_LOAD_VEP_ANNOTATION_STEP;
-import static uk.ac.ebi.eva.pipeline.jobs.steps.tasklets.VepAnnotationGeneratorStep.GENERATE_VEP_ANNOTATION;
 import static uk.ac.ebi.eva.pipeline.jobs.steps.VepInputGeneratorStep.NAME_GENERATE_VEP_INPUT_STEP;
 import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResource;
 import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResourceUrl;
@@ -95,7 +94,7 @@ public class AnnotationJobTest {
         StepExecution loadVepAnnotationsStep = steps.get(2);
 
         assertEquals(NAME_GENERATE_VEP_INPUT_STEP, findVariantsToAnnotateStep.getStepName());
-        assertEquals(GENERATE_VEP_ANNOTATION, generateVepAnnotationsStep.getStepName());
+        assertEquals(GenerateVepAnnotationStep.NAME_GENERATE_VEP_ANNOTATION_STEP, generateVepAnnotationsStep.getStepName());
         assertEquals(NAME_LOAD_VEP_ANNOTATION_STEP, loadVepAnnotationsStep.getStepName());
 
         //check list of variants without annotation output file

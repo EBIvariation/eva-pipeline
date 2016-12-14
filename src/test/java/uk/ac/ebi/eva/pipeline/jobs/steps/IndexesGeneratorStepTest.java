@@ -29,7 +29,6 @@ import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
-
 import uk.ac.ebi.eva.pipeline.jobs.DatabaseInitializationJob;
 import uk.ac.ebi.eva.pipeline.jobs.steps.tasklets.IndexesGeneratorStep;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
@@ -65,7 +64,8 @@ public class IndexesGeneratorStepTest {
         jobOptions.setDbName(mongoRule.getRandomTemporaryDatabaseName());
 
         String dbCollectionGenesName = jobOptions.getDbCollectionsFeaturesName();
-        JobExecution jobExecution = jobLauncherTestUtils.launchStep(DatabaseInitializationJob.CREATE_DATABASE_INDEXES);
+        JobExecution jobExecution = jobLauncherTestUtils.launchStep(CreateDatabaseIndexesStep
+                .NAME_CREATE_DATABASE_INDEXES_STEP);
 
         assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
         assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());
@@ -82,7 +82,8 @@ public class IndexesGeneratorStepTest {
     public void testNoDuplicatesCanBeInserted() throws Exception {
         jobOptions.setDbName(mongoRule.getRandomTemporaryDatabaseName());
         String dbCollectionGenesName = jobOptions.getDbCollectionsFeaturesName();
-        JobExecution jobExecution = jobLauncherTestUtils.launchStep(DatabaseInitializationJob.CREATE_DATABASE_INDEXES);
+        JobExecution jobExecution = jobLauncherTestUtils.launchStep(CreateDatabaseIndexesStep
+                .NAME_CREATE_DATABASE_INDEXES_STEP);
 
         assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
         assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());
