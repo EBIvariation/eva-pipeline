@@ -3,7 +3,6 @@ package uk.ac.ebi.eva.pipeline.configuration;
 import org.opencb.opencga.storage.core.variant.VariantStorageManager;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.item.ItemWriter;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -18,24 +17,21 @@ import uk.ac.ebi.eva.utils.MongoDBHelper;
 @Configuration
 public class VariantWriterConfiguration {
 
-    @Autowired
-    private JobOptions jobOptions;
-
     @Bean
     @StepScope
     @Profile(Application.VARIANT_WRITER_MONGO_PROFILE)
-    public ItemWriter<Variant> variantMongoWriter() throws Exception {
+    public ItemWriter<Variant> variantMongoWriter(JobOptions jobOptions) throws Exception {
         MongoOperations mongoOperations = MongoDBHelper
                 .getMongoOperations(jobOptions.getDbName(), jobOptions.getMongoConnection());
 
         return new VariantMongoWriter(jobOptions.getDbCollectionsVariantsName(),
                 mongoOperations,
-                variantToMongoDbObjectConverter());
+                variantToMongoDbObjectConverter(jobOptions));
     }
 
     @Bean
     @StepScope
-    public VariantToMongoDbObjectConverter variantToMongoDbObjectConverter() throws Exception {
+    public VariantToMongoDbObjectConverter variantToMongoDbObjectConverter(JobOptions jobOptions) throws Exception {
         return new VariantToMongoDbObjectConverter(
                 jobOptions.getVariantOptions().getBoolean(VariantStorageManager.INCLUDE_STATS),
                 jobOptions.getVariantOptions().getBoolean(VariantStorageManager.CALCULATE_STATS),
