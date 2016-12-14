@@ -93,50 +93,5 @@ public class VariantLoaderStepParametersValidatorTest {
         validator.validate(jobParametersBuilder.toJobParameters());
     }
 
-    @Test
-    public void shouldFailIfAnyParameterIsMissing() throws JobParametersInvalidException, IOException {
-        final File dir = TestFileUtils.getResource("/parameters-validation/");
-        final File inputVcf = TestFileUtils.getResource("/parameters-validation/file.vcf.gz");
-
-        dir.setReadable(true);
-        dir.setWritable(true);
-        inputVcf.setReadable(true);
-
-        Map<String, String> parameters = new TreeMap<>();
-        parameters.put(JobParametersNames.DB_NAME, "database");
-        parameters.put(JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME, "variants");
-        parameters.put(JobParametersNames.DB_COLLECTIONS_FILES_NAME, "files");
-        parameters.put(JobParametersNames.INPUT_STUDY_ID, "inputStudyId");
-        parameters.put(JobParametersNames.INPUT_VCF_ID, "inputVcfId");
-        parameters.put(JobParametersNames.INPUT_VCF, inputVcf.getCanonicalPath());
-
-        allParametersAreRequired(parameters);
-    }
-
-    /**
-     * this method builds a complete JobParameters and for every parameter, tries to remove it and check that the
-     * jobParameters is not valid without that parameter
-     *
-     * @param parameters If any of them is not present, the validation should fail.
-     */
-    private void allParametersAreRequired(Map<String, String> parameters) {
-        Map<String, JobParameter> invalidParameters = new TreeMap<>();
-        for (Map.Entry<String, String> parameter : parameters.entrySet()) {
-            invalidParameters.put(parameter.getKey(), new JobParameter(parameter.getValue()));
-        }
-
-        for (Map.Entry<String, String> parameter : parameters.entrySet()) {
-            JobParameter removed = invalidParameters.remove(parameter.getKey());
-            JobParameters jobParameters = new JobParameters(invalidParameters);
-            try {
-                validator.validate(jobParameters);
-                fail("parameter " + parameter.getKey()
-                             + " should be required, but the validator didn't throw an exception");
-            } catch (JobParametersInvalidException ignored) {
-                // this was the expected behaviour
-            }
-            invalidParameters.put(parameter.getKey(), removed);
-        }
-    }
 
 }
