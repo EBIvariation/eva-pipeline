@@ -18,6 +18,8 @@ package uk.ac.ebi.eva.pipeline.parameters.validation.step;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.springframework.batch.core.JobParameter;
+import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.JobParametersInvalidException;
 
@@ -25,6 +27,8 @@ import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 
 import java.io.IOException;
+import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * Tests that the arguments necessary to run a {@link uk.ac.ebi.eva.pipeline.jobs.steps.VepInputGeneratorStep} are
@@ -37,48 +41,64 @@ public class VepInputGeneratorStepParametersValidatorTest {
     @Rule
     public PipelineTemporaryFolderRule temporaryFolder = new PipelineTemporaryFolderRule();
 
+    private Map<String, JobParameter> parameters;
+    private Map<String, JobParameter> optionalParameters;
+
     @Before
-    public void setUp() {
+    public void setUp() throws IOException {
         validator = new VepInputGeneratorStepParametersValidator();
+        final String dir = temporaryFolder.getRoot().getCanonicalPath();
+
+        parameters = new TreeMap<>();
+        parameters.put(JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME, new JobParameter("dbCollectionsVariantName"));
+        parameters.put(JobParametersNames.DB_NAME, new JobParameter("dbName"));
+        parameters.put(JobParametersNames.INPUT_STUDY_ID, new JobParameter("inputStudyId"));
+        parameters.put(JobParametersNames.INPUT_VCF_ID, new JobParameter("inputVcfId"));
+        parameters.put(JobParametersNames.OUTPUT_DIR_ANNOTATION, new JobParameter(dir));
+
+        optionalParameters = new TreeMap<>();
+        optionalParameters.put(JobParametersNames.CONFIG_RESTARTABILITY_ALLOW, new JobParameter("true"));
     }
 
     @Test
     public void allJobParametersAreValid() throws JobParametersInvalidException, IOException {
-        final String dir = temporaryFolder.getRoot().getCanonicalPath();
-
-        JobParametersBuilder jobParametersBuilder = new JobParametersBuilder();
-        jobParametersBuilder.addString(JobParametersNames.CONFIG_RESTARTABILITY_ALLOW, "true");
-        jobParametersBuilder.addString(JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME, "dbCollectionsVariantName");
-        jobParametersBuilder.addString(JobParametersNames.DB_NAME, "dbName");
-        jobParametersBuilder.addString(JobParametersNames.INPUT_STUDY_ID, "inputStudyId");
-        jobParametersBuilder.addString(JobParametersNames.INPUT_VCF_ID, "inputVcfId");
-        jobParametersBuilder.addString(JobParametersNames.OUTPUT_DIR_ANNOTATION, dir);
-
-        validator.validate(jobParametersBuilder.toJobParameters());
+        validator.validate(new JobParameters(parameters));
     }
 
     @Test
-    public void optionalConfigRestartabilityAllowIsMissing() throws JobParametersInvalidException, IOException {
-        final String dir = temporaryFolder.getRoot().getCanonicalPath();
-
-        JobParametersBuilder jobParametersBuilder = new JobParametersBuilder();
-        jobParametersBuilder.addString(JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME, "dbCollectionsVariantName");
-        jobParametersBuilder.addString(JobParametersNames.DB_NAME, "dbName");
-        jobParametersBuilder.addString(JobParametersNames.INPUT_STUDY_ID, "inputStudyId");
-        jobParametersBuilder.addString(JobParametersNames.INPUT_VCF_ID, "inputVcfId");
-        jobParametersBuilder.addString(JobParametersNames.OUTPUT_DIR_ANNOTATION, dir);
-
-        validator.validate(jobParametersBuilder.toJobParameters());
+    public void allJobParametersIncludingOptionalAreValid() throws JobParametersInvalidException, IOException {
+        parameters.putAll(optionalParameters);
+        validator.validate(new JobParameters(parameters));
     }
 
     @Test(expected = JobParametersInvalidException.class)
-    public void invalidAndMissingParameters() throws JobParametersInvalidException {
-        JobParametersBuilder jobParametersBuilder = new JobParametersBuilder();
-        jobParametersBuilder.addString(JobParametersNames.CONFIG_RESTARTABILITY_ALLOW, "maybe");
-        jobParametersBuilder.addString(JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME, "");
-        jobParametersBuilder.addString(JobParametersNames.INPUT_VCF_ID, "");
-        jobParametersBuilder.addString(JobParametersNames.OUTPUT_DIR_ANNOTATION, "file://path/to/");
-
-        validator.validate(jobParametersBuilder.toJobParameters());
+    public void DB_COLLECTIONS_VARIANTS_NAMEIsMissing() throws JobParametersInvalidException, IOException {
+        parameters.remove(JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME);
+        validator.validate(new JobParameters(parameters));
     }
+
+    @Test(expected = JobParametersInvalidException.class)
+    public void DB_NAMEIsMissing() throws JobParametersInvalidException, IOException {
+        parameters.remove(JobParametersNames.DB_NAME);
+        validator.validate(new JobParameters(parameters));
+    }
+
+    @Test(expected = JobParametersInvalidException.class)
+    public void INPUT_STUDY_IDIsMissing() throws JobParametersInvalidException, IOException {
+        parameters.remove(JobParametersNames.INPUT_STUDY_ID);
+        validator.validate(new JobParameters(parameters));
+    }
+
+    @Test(expected = JobParametersInvalidException.class)
+    public void INPUT_VCF_IDIsMissing() throws JobParametersInvalidException, IOException {
+        parameters.remove(JobParametersNames.INPUT_VCF_ID);
+        validator.validate(new JobParameters(parameters));
+    }
+
+    @Test(expected = JobParametersInvalidException.class)
+    public void OUTPUT_DIR_ANNOTATIONIsMissing() throws JobParametersInvalidException, IOException {
+        parameters.remove(JobParametersNames.OUTPUT_DIR_ANNOTATION);
+        validator.validate(new JobParameters(parameters));
+    }
+
 }

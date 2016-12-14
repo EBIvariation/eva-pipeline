@@ -17,7 +17,8 @@ package uk.ac.ebi.eva.pipeline.parameters.validation.step;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.batch.core.JobParametersBuilder;
+import org.springframework.batch.core.JobParameter;
+import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersInvalidException;
 
 import uk.ac.ebi.eva.pipeline.jobs.steps.tasklets.VepAnnotationGeneratorStep;
@@ -26,6 +27,8 @@ import uk.ac.ebi.eva.test.utils.TestFileUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * Tests that the arguments necessary to run a {@link VepAnnotationGeneratorStep} are
@@ -34,13 +37,12 @@ import java.io.IOException;
 public class VepAnnotationGeneratorStepParametersValidatorTest {
     private VepAnnotationGeneratorStepParametersValidator validator;
 
-    @Before
-    public void initialize() {
-        validator = new VepAnnotationGeneratorStepParametersValidator();
-    }
+    private Map<String, JobParameter> parameters;
 
-    @Test
-    public void allJobParametersAreValid() throws JobParametersInvalidException, IOException {
+    @Before
+    public void initialize() throws IOException {
+        validator = new VepAnnotationGeneratorStepParametersValidator();
+
         final File dir = TestFileUtils.getResource("/parameters-validation/");
         final File appVepPath = TestFileUtils.getResource("/parameters-validation/vepapp.pl");
         final File inputFasta = TestFileUtils.getResource("/parameters-validation/fasta.fa");
@@ -50,31 +52,63 @@ public class VepAnnotationGeneratorStepParametersValidatorTest {
         appVepPath.setReadable(true);
         inputFasta.setReadable(true);
 
-        JobParametersBuilder jobParametersBuilder = new JobParametersBuilder();
-        jobParametersBuilder.addString(JobParametersNames.APP_VEP_PATH, appVepPath.getCanonicalPath());
-        jobParametersBuilder.addString(JobParametersNames.APP_VEP_CACHE_VERSION, "100_A");
-        jobParametersBuilder.addString(JobParametersNames.APP_VEP_CACHE_PATH, dir.getCanonicalPath());
-        jobParametersBuilder.addString(JobParametersNames.APP_VEP_CACHE_SPECIES, "Human");
-        jobParametersBuilder.addString(JobParametersNames.INPUT_FASTA, inputFasta.getCanonicalPath());
-        jobParametersBuilder.addString(JobParametersNames.APP_VEP_NUMFORKS, "6");
-        jobParametersBuilder.addString(JobParametersNames.OUTPUT_DIR_ANNOTATION, dir.getCanonicalPath());
-        jobParametersBuilder.addString(JobParametersNames.INPUT_STUDY_ID, "inputStudyId");
-        jobParametersBuilder.addString(JobParametersNames.INPUT_VCF_ID, "inputVcfId");
+        parameters = new TreeMap<>();
+        parameters.put(JobParametersNames.APP_VEP_PATH, new JobParameter(appVepPath.getCanonicalPath()));
+        parameters.put(JobParametersNames.APP_VEP_CACHE_VERSION, new JobParameter("100_A"));
+        parameters.put(JobParametersNames.APP_VEP_CACHE_PATH, new JobParameter(dir.getCanonicalPath()));
+        parameters.put(JobParametersNames.APP_VEP_CACHE_SPECIES, new JobParameter("Human"));
+        parameters.put(JobParametersNames.INPUT_FASTA, new JobParameter(inputFasta.getCanonicalPath()));
+        parameters.put(JobParametersNames.APP_VEP_NUMFORKS, new JobParameter("6"));
+        parameters.put(JobParametersNames.OUTPUT_DIR_ANNOTATION, new JobParameter(dir.getCanonicalPath()));
+        parameters.put(JobParametersNames.INPUT_STUDY_ID, new JobParameter("inputStudyId"));
+        parameters.put(JobParametersNames.INPUT_VCF_ID, new JobParameter("inputVcfId"));
 
-        validator.validate(jobParametersBuilder.toJobParameters());
+    }
+
+    @Test
+    public void allJobParametersAreValid() throws JobParametersInvalidException, IOException {
+        validator.validate(new JobParameters(parameters));
     }
 
     @Test(expected = JobParametersInvalidException.class)
-    public void invalidAndMissingParameters() throws JobParametersInvalidException {
-        JobParametersBuilder jobParametersBuilder = new JobParametersBuilder();
-        jobParametersBuilder.addString(JobParametersNames.APP_VEP_PATH, "file://path/to/file.vcf");
-        jobParametersBuilder.addString(JobParametersNames.APP_VEP_CACHE_PATH, "file://path/to/");
-        jobParametersBuilder.addString(JobParametersNames.APP_VEP_CACHE_SPECIES, "");
-        jobParametersBuilder.addString(JobParametersNames.INPUT_FASTA, "file://path/to/file.vcf");
-        jobParametersBuilder.addString(JobParametersNames.OUTPUT_DIR_ANNOTATION, "file://path/to/");
-        jobParametersBuilder.addString(JobParametersNames.INPUT_STUDY_ID, "");
-        jobParametersBuilder.addString(JobParametersNames.INPUT_VCF_ID, "");
+    public void APP_VEP_PATHIsMissing() throws JobParametersInvalidException, IOException {
+        parameters.remove(JobParametersNames.APP_VEP_PATH);
+        validator.validate(new JobParameters(parameters));
+    }
 
-        validator.validate(jobParametersBuilder.toJobParameters());
+    @Test(expected = JobParametersInvalidException.class)
+    public void APP_VEP_CACHE_PATHIsMissing() throws JobParametersInvalidException, IOException {
+        parameters.remove(JobParametersNames.APP_VEP_CACHE_PATH);
+        validator.validate(new JobParameters(parameters));
+    }
+
+    @Test(expected = JobParametersInvalidException.class)
+    public void APP_VEP_CACHE_SPECIESIsMissing() throws JobParametersInvalidException, IOException {
+        parameters.remove(JobParametersNames.APP_VEP_CACHE_SPECIES);
+        validator.validate(new JobParameters(parameters));
+    }
+
+    @Test(expected = JobParametersInvalidException.class)
+    public void INPUT_FASTAIsMissing() throws JobParametersInvalidException, IOException {
+        parameters.remove(JobParametersNames.INPUT_FASTA);
+        validator.validate(new JobParameters(parameters));
+    }
+
+    @Test(expected = JobParametersInvalidException.class)
+    public void OUTPUT_DIR_ANNOTATIONIsMissing() throws JobParametersInvalidException, IOException {
+        parameters.remove(JobParametersNames.OUTPUT_DIR_ANNOTATION);
+        validator.validate(new JobParameters(parameters));
+    }
+
+    @Test(expected = JobParametersInvalidException.class)
+    public void INPUT_STUDY_IDIsMissing() throws JobParametersInvalidException, IOException {
+        parameters.remove(JobParametersNames.INPUT_STUDY_ID);
+        validator.validate(new JobParameters(parameters));
+    }
+
+    @Test(expected = JobParametersInvalidException.class)
+    public void INPUT_VCF_IDIsMissing() throws JobParametersInvalidException, IOException {
+        parameters.remove(JobParametersNames.INPUT_VCF_ID);
+        validator.validate(new JobParameters(parameters));
     }
 }
