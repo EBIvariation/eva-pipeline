@@ -23,7 +23,6 @@ import org.springframework.batch.core.JobParametersInvalidException;
 
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
-import uk.ac.ebi.eva.test.utils.TestFileUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -46,8 +45,7 @@ public class VepPathValidatorTest {
     public void vepPathIsValid() throws JobParametersInvalidException, IOException {
         jobParametersBuilder = new JobParametersBuilder();
         jobParametersBuilder.addString(JobParametersNames.APP_VEP_PATH,
-                                       TestFileUtils.getResource(
-                                           "/parameters-validation/vepapp.pl").getCanonicalPath());
+                                       temporaryFolder.newFile().getCanonicalPath());
         validator.validate(jobParametersBuilder.toJobParameters());
     }
 

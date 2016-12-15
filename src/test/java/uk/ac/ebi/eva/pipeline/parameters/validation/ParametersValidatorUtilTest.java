@@ -20,7 +20,6 @@ import org.junit.Test;
 import org.springframework.batch.core.JobParametersInvalidException;
 
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
-import uk.ac.ebi.eva.test.utils.TestFileUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -99,9 +98,7 @@ public class ParametersValidatorUtilTest {
 
     @Test
     public void directoryStringExist() throws JobParametersInvalidException, IOException {
-        ParametersValidatorUtil
-                .checkDirectoryExists(TestFileUtils.getResource("/parameters-validation/").getCanonicalPath(),
-                                      JOB_PARAMETER_NAME);
+        ParametersValidatorUtil.checkDirectoryExists(temporaryFolder.getRoot().getCanonicalPath(), JOB_PARAMETER_NAME);
     }
 
     @Test(expected = JobParametersInvalidException.class)
@@ -111,16 +108,13 @@ public class ParametersValidatorUtilTest {
 
     @Test(expected = JobParametersInvalidException.class)
     public void directoryStringIsAFile() throws JobParametersInvalidException, IOException {
-        File file = TestFileUtils.getResource("/parameters-validation/fasta.fa");
-        ParametersValidatorUtil.checkDirectoryExists(file.getCanonicalPath(), JOB_PARAMETER_NAME);
+        ParametersValidatorUtil.checkDirectoryExists(temporaryFolder.newFile().getCanonicalPath(), JOB_PARAMETER_NAME);
     }
 
 
     @Test
     public void fileStringExists() throws JobParametersInvalidException, IOException {
-        ParametersValidatorUtil
-                .checkFileExists(TestFileUtils.getResource("/parameters-validation/fasta.fa").getCanonicalPath(),
-                                 JOB_PARAMETER_NAME);
+        ParametersValidatorUtil.checkFileExists(temporaryFolder.newFile().getCanonicalPath(), JOB_PARAMETER_NAME);
     }
 
     @Test(expected = JobParametersInvalidException.class)
@@ -130,17 +124,13 @@ public class ParametersValidatorUtilTest {
 
     @Test(expected = JobParametersInvalidException.class)
     public void fileStringIsADirectory() throws JobParametersInvalidException, IOException {
-        ParametersValidatorUtil
-                .checkFileExists(TestFileUtils.getResource("/parameters-validation/").getCanonicalPath(),
-                                 JOB_PARAMETER_NAME);
+        ParametersValidatorUtil.checkFileExists(temporaryFolder.getRoot().getCanonicalPath(), JOB_PARAMETER_NAME);
     }
 
 
     @Test
     public void pathIsReadable() throws JobParametersInvalidException, IOException {
-        ParametersValidatorUtil
-                .checkFileIsReadable(TestFileUtils.getResource("/parameters-validation/fasta.fa").getCanonicalPath(),
-                                     JOB_PARAMETER_NAME);
+        ParametersValidatorUtil.checkFileIsReadable(temporaryFolder.newFile().getCanonicalPath(), JOB_PARAMETER_NAME);
     }
 
     @Test(expected = JobParametersInvalidException.class)
@@ -153,9 +143,7 @@ public class ParametersValidatorUtilTest {
 
     @Test
     public void pathIsWritable() throws JobParametersInvalidException, IOException {
-        ParametersValidatorUtil
-                .checkFileIsWritable(TestFileUtils.getResource("/parameters-validation/fasta.fa").getCanonicalPath(),
-                                     JOB_PARAMETER_NAME);
+        ParametersValidatorUtil.checkFileIsWritable(temporaryFolder.newFile().getCanonicalPath(), JOB_PARAMETER_NAME);
     }
 
     @Test(expected = JobParametersInvalidException.class)

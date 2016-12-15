@@ -69,8 +69,10 @@ public class PopulationStatisticsLoaderStepParametersValidatorTest {
 
     @Test
     public void allJobParametersIncludingOptionalAreValid() throws JobParametersInvalidException, IOException {
-        requiredParameters.putAll(optionalParameters);
-        validator.validate(new JobParameters(requiredParameters));
+        Map<String, JobParameter> parameters = new TreeMap<>();
+        parameters.putAll(requiredParameters);
+        parameters.putAll(optionalParameters);
+        validator.validate(new JobParameters(parameters));
     }
 
     @Test(expected = JobParametersInvalidException.class)

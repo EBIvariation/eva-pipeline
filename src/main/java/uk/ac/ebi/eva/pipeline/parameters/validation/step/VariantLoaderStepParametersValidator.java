@@ -23,7 +23,6 @@ import org.springframework.batch.core.job.DefaultJobParametersValidator;
 
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 import uk.ac.ebi.eva.pipeline.parameters.validation.ConfigChunkSizeValidator;
-import uk.ac.ebi.eva.pipeline.parameters.validation.DbCollectionsFilesNameValidator;
 import uk.ac.ebi.eva.pipeline.parameters.validation.DbCollectionsVariantsNameValidator;
 import uk.ac.ebi.eva.pipeline.parameters.validation.DbNameValidator;
 import uk.ac.ebi.eva.pipeline.parameters.validation.InputStudyIdValidator;
@@ -42,13 +41,12 @@ import java.util.List;
 public class VariantLoaderStepParametersValidator extends DefaultJobParametersValidator {
 
     public VariantLoaderStepParametersValidator() {
-        super(new String[]{
-                JobParametersNames.DB_NAME,
-                JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME,
-                JobParametersNames.INPUT_STUDY_ID,
-                JobParametersNames.INPUT_VCF_ID,
-                JobParametersNames.INPUT_VCF,
-        }, new String[]{});
+        super(new String[]{JobParametersNames.DB_NAME,
+                           JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME,
+                           JobParametersNames.INPUT_STUDY_ID,
+                           JobParametersNames.INPUT_VCF_ID,
+                           JobParametersNames.INPUT_VCF},
+              new String[]{});
 
     }
 

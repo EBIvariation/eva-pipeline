@@ -1,4 +1,4 @@
-package uk.ac.ebi.eva.pipeline.parameters.validation;/*
+/*
  * Copyright 2016 EMBL - European Bioinformatics Institute
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,6 +13,7 @@ package uk.ac.ebi.eva.pipeline.parameters.validation;/*
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package uk.ac.ebi.eva.pipeline.parameters.validation;
 
 import org.junit.Before;
 import org.junit.Rule;
