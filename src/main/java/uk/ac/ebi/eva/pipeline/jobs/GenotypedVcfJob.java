@@ -22,6 +22,7 @@ import org.springframework.batch.core.JobExecutionListener;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
+import org.springframework.batch.core.configuration.annotation.JobScope;
 import org.springframework.batch.core.job.builder.FlowJobBuilder;
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.job.flow.Flow;
@@ -92,7 +93,7 @@ public class GenotypedVcfJob {
     }
 
     @Bean
-    @Scope("prototype")
+    @JobScope
     public JobExecutionListener genotypedJobListener() {
         return new VariantOptionsConfigurerListener(INCLUDE_SAMPLES,
                 COMPRESS_GENOTYPES,
