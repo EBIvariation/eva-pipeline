@@ -4,14 +4,20 @@ import org.springframework.batch.core.configuration.annotation.EnableBatchProces
 import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 
 @Configuration
 @EnableBatchProcessing
-public class BatchTestConfiguration extends BaseTestConfiguration {
+public class BatchTestConfiguration {
 
     @Bean
     public JobLauncherTestUtils jobLauncherTestUtils() {
         return new JobLauncherTestUtils();
+    }
+
+    @Bean
+    public JobOptions jobOptions() {
+        return new JobOptions();
     }
 
 }
