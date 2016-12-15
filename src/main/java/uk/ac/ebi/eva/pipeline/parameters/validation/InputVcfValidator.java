@@ -21,7 +21,8 @@ import org.springframework.batch.core.JobParametersValidator;
 
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 
-public class InputVcfValidator  implements JobParametersValidator {
+public class InputVcfValidator implements JobParametersValidator {
+
     @Override
     public void validate(JobParameters parameters) throws JobParametersInvalidException {
         ParametersValidatorUtil.checkFileExists(parameters.getString(JobParametersNames.INPUT_VCF),

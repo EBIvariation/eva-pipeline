@@ -20,7 +20,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParameters;
-import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.JobParametersInvalidException;
 
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
@@ -41,7 +40,8 @@ public class VepInputGeneratorStepParametersValidatorTest {
     @Rule
     public PipelineTemporaryFolderRule temporaryFolder = new PipelineTemporaryFolderRule();
 
-    private Map<String, JobParameter> parameters;
+    private Map<String, JobParameter> requiredParameters;
+
     private Map<String, JobParameter> optionalParameters;
 
     @Before
@@ -49,12 +49,13 @@ public class VepInputGeneratorStepParametersValidatorTest {
         validator = new VepInputGeneratorStepParametersValidator();
         final String dir = temporaryFolder.getRoot().getCanonicalPath();
 
-        parameters = new TreeMap<>();
-        parameters.put(JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME, new JobParameter("dbCollectionsVariantName"));
-        parameters.put(JobParametersNames.DB_NAME, new JobParameter("dbName"));
-        parameters.put(JobParametersNames.INPUT_STUDY_ID, new JobParameter("inputStudyId"));
-        parameters.put(JobParametersNames.INPUT_VCF_ID, new JobParameter("inputVcfId"));
-        parameters.put(JobParametersNames.OUTPUT_DIR_ANNOTATION, new JobParameter(dir));
+        requiredParameters = new TreeMap<>();
+        requiredParameters.put(JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME,
+                               new JobParameter("dbCollectionsVariantName"));
+        requiredParameters.put(JobParametersNames.DB_NAME, new JobParameter("dbName"));
+        requiredParameters.put(JobParametersNames.INPUT_STUDY_ID, new JobParameter("inputStudyId"));
+        requiredParameters.put(JobParametersNames.INPUT_VCF_ID, new JobParameter("inputVcfId"));
+        requiredParameters.put(JobParametersNames.OUTPUT_DIR_ANNOTATION, new JobParameter(dir));
 
         optionalParameters = new TreeMap<>();
         optionalParameters.put(JobParametersNames.CONFIG_RESTARTABILITY_ALLOW, new JobParameter("true"));
@@ -62,43 +63,43 @@ public class VepInputGeneratorStepParametersValidatorTest {
 
     @Test
     public void allJobParametersAreValid() throws JobParametersInvalidException, IOException {
-        validator.validate(new JobParameters(parameters));
+        validator.validate(new JobParameters(requiredParameters));
     }
 
     @Test
     public void allJobParametersIncludingOptionalAreValid() throws JobParametersInvalidException, IOException {
-        parameters.putAll(optionalParameters);
-        validator.validate(new JobParameters(parameters));
+        requiredParameters.putAll(optionalParameters);
+        validator.validate(new JobParameters(requiredParameters));
     }
 
     @Test(expected = JobParametersInvalidException.class)
-    public void DB_COLLECTIONS_VARIANTS_NAMEIsMissing() throws JobParametersInvalidException, IOException {
-        parameters.remove(JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME);
-        validator.validate(new JobParameters(parameters));
+    public void DB_COLLECTIONS_VARIANTS_NAMEIsRequired() throws JobParametersInvalidException, IOException {
+        requiredParameters.remove(JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME);
+        validator.validate(new JobParameters(requiredParameters));
     }
 
     @Test(expected = JobParametersInvalidException.class)
-    public void DB_NAMEIsMissing() throws JobParametersInvalidException, IOException {
-        parameters.remove(JobParametersNames.DB_NAME);
-        validator.validate(new JobParameters(parameters));
+    public void DB_NAMEIsRequired() throws JobParametersInvalidException, IOException {
+        requiredParameters.remove(JobParametersNames.DB_NAME);
+        validator.validate(new JobParameters(requiredParameters));
     }
 
     @Test(expected = JobParametersInvalidException.class)
-    public void INPUT_STUDY_IDIsMissing() throws JobParametersInvalidException, IOException {
-        parameters.remove(JobParametersNames.INPUT_STUDY_ID);
-        validator.validate(new JobParameters(parameters));
+    public void INPUT_STUDY_IDIsRequired() throws JobParametersInvalidException, IOException {
+        requiredParameters.remove(JobParametersNames.INPUT_STUDY_ID);
+        validator.validate(new JobParameters(requiredParameters));
     }
 
     @Test(expected = JobParametersInvalidException.class)
-    public void INPUT_VCF_IDIsMissing() throws JobParametersInvalidException, IOException {
-        parameters.remove(JobParametersNames.INPUT_VCF_ID);
-        validator.validate(new JobParameters(parameters));
+    public void INPUT_VCF_IDIsRequired() throws JobParametersInvalidException, IOException {
+        requiredParameters.remove(JobParametersNames.INPUT_VCF_ID);
+        validator.validate(new JobParameters(requiredParameters));
     }
 
     @Test(expected = JobParametersInvalidException.class)
-    public void OUTPUT_DIR_ANNOTATIONIsMissing() throws JobParametersInvalidException, IOException {
-        parameters.remove(JobParametersNames.OUTPUT_DIR_ANNOTATION);
-        validator.validate(new JobParameters(parameters));
+    public void OUTPUT_DIR_ANNOTATIONIsRequired() throws JobParametersInvalidException, IOException {
+        requiredParameters.remove(JobParametersNames.OUTPUT_DIR_ANNOTATION);
+        validator.validate(new JobParameters(requiredParameters));
     }
 
 }

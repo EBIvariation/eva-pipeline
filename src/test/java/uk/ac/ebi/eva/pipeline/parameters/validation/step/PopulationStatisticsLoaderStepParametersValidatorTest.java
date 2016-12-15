@@ -41,7 +41,7 @@ public class PopulationStatisticsLoaderStepParametersValidatorTest {
     @Rule
     public PipelineTemporaryFolderRule temporaryFolderRule = new PipelineTemporaryFolderRule();
 
-    private Map<String, JobParameter> parameters;
+    private Map<String, JobParameter> requiredParameters;
 
     private Map<String, JobParameter> optionalParameters;
 
@@ -49,14 +49,14 @@ public class PopulationStatisticsLoaderStepParametersValidatorTest {
     public void setUp() throws IOException {
         validator = new PopulationStatisticsLoaderStepParametersValidator();
 
-        parameters = new TreeMap<>();
-        parameters.put(JobParametersNames.INPUT_STUDY_ID, new JobParameter("inputStudyId"));
-        parameters.put(JobParametersNames.INPUT_VCF_ID, new JobParameter("inputVcfId"));
-        parameters.put(JobParametersNames.DB_COLLECTIONS_FILES_NAME, new JobParameter("files"));
-        parameters.put(JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME, new JobParameter("variants"));
-        parameters.put(JobParametersNames.DB_NAME, new JobParameter("database"));
-        parameters.put(JobParametersNames.OUTPUT_DIR_STATISTICS,
-                       new JobParameter(temporaryFolderRule.getRoot().getCanonicalPath()));
+        requiredParameters = new TreeMap<>();
+        requiredParameters.put(JobParametersNames.INPUT_STUDY_ID, new JobParameter("inputStudyId"));
+        requiredParameters.put(JobParametersNames.INPUT_VCF_ID, new JobParameter("inputVcfId"));
+        requiredParameters.put(JobParametersNames.DB_COLLECTIONS_FILES_NAME, new JobParameter("files"));
+        requiredParameters.put(JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME, new JobParameter("variants"));
+        requiredParameters.put(JobParametersNames.DB_NAME, new JobParameter("database"));
+        requiredParameters.put(JobParametersNames.OUTPUT_DIR_STATISTICS,
+                               new JobParameter(temporaryFolderRule.getRoot().getCanonicalPath()));
 
         optionalParameters = new TreeMap<>();
         optionalParameters.put(JobParametersNames.STATISTICS_OVERWRITE, new JobParameter("true"));
@@ -64,49 +64,49 @@ public class PopulationStatisticsLoaderStepParametersValidatorTest {
 
     @Test
     public void allJobParametersAreValid() throws JobParametersInvalidException, IOException {
-        validator.validate(new JobParameters(parameters));
+        validator.validate(new JobParameters(requiredParameters));
     }
 
     @Test
     public void allJobParametersIncludingOptionalAreValid() throws JobParametersInvalidException, IOException {
-        parameters.putAll(optionalParameters);
-        validator.validate(new JobParameters(parameters));
+        requiredParameters.putAll(optionalParameters);
+        validator.validate(new JobParameters(requiredParameters));
     }
 
     @Test(expected = JobParametersInvalidException.class)
-    public void inputStudyIdIsMissing() throws JobParametersInvalidException, IOException {
-        parameters.remove(JobParametersNames.INPUT_STUDY_ID);
-        validator.validate(new JobParameters(parameters));
+    public void inputStudyIdIsRequired() throws JobParametersInvalidException, IOException {
+        requiredParameters.remove(JobParametersNames.INPUT_STUDY_ID);
+        validator.validate(new JobParameters(requiredParameters));
     }
 
     @Test(expected = JobParametersInvalidException.class)
-    public void inputVcfIdIsMissing() throws JobParametersInvalidException, IOException {
-        parameters.remove(JobParametersNames.INPUT_VCF_ID);
-        validator.validate(new JobParameters(parameters));
+    public void inputVcfIdIsRequired() throws JobParametersInvalidException, IOException {
+        requiredParameters.remove(JobParametersNames.INPUT_VCF_ID);
+        validator.validate(new JobParameters(requiredParameters));
     }
 
     @Test(expected = JobParametersInvalidException.class)
-    public void dbCollectionsFilesNameIsMissing() throws JobParametersInvalidException, IOException {
-        parameters.remove(JobParametersNames.DB_COLLECTIONS_FILES_NAME);
-        validator.validate(new JobParameters(parameters));
+    public void dbCollectionsFilesNameIsRequired() throws JobParametersInvalidException, IOException {
+        requiredParameters.remove(JobParametersNames.DB_COLLECTIONS_FILES_NAME);
+        validator.validate(new JobParameters(requiredParameters));
     }
 
     @Test(expected = JobParametersInvalidException.class)
-    public void dbCollectionsVariantsNameIsMissing() throws JobParametersInvalidException, IOException {
-        parameters.remove(JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME);
-        validator.validate(new JobParameters(parameters));
+    public void dbCollectionsVariantsNameIsRequired() throws JobParametersInvalidException, IOException {
+        requiredParameters.remove(JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME);
+        validator.validate(new JobParameters(requiredParameters));
     }
 
     @Test(expected = JobParametersInvalidException.class)
-    public void dbNameIsMissing() throws JobParametersInvalidException, IOException {
-        parameters.remove(JobParametersNames.DB_NAME);
-        validator.validate(new JobParameters(parameters));
+    public void dbNameIsRequired() throws JobParametersInvalidException, IOException {
+        requiredParameters.remove(JobParametersNames.DB_NAME);
+        validator.validate(new JobParameters(requiredParameters));
     }
 
     @Test(expected = JobParametersInvalidException.class)
-    public void outputDirStatisticsIsMissing() throws JobParametersInvalidException, IOException {
-        parameters.remove(JobParametersNames.OUTPUT_DIR_STATISTICS);
-        validator.validate(new JobParameters(parameters));
+    public void outputDirStatisticsIsRequired() throws JobParametersInvalidException, IOException {
+        requiredParameters.remove(JobParametersNames.OUTPUT_DIR_STATISTICS);
+        validator.validate(new JobParameters(requiredParameters));
     }
 
 }

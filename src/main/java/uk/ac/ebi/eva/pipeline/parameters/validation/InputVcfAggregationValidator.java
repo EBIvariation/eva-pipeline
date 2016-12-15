@@ -15,6 +15,7 @@
  */
 package uk.ac.ebi.eva.pipeline.parameters.validation;
 
+import org.opencb.biodata.models.variant.VariantSource;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersInvalidException;
 import org.springframework.batch.core.JobParametersValidator;
@@ -28,5 +29,10 @@ public class InputVcfAggregationValidator implements JobParametersValidator {
         ParametersValidatorUtil.checkIsNotNullOrEmptyString(
                 parameters.getString(JobParametersNames.INPUT_VCF_AGGREGATION),
                 JobParametersNames.INPUT_VCF_AGGREGATION);
+        try {
+            VariantSource.Aggregation.valueOf(parameters.getString(JobParametersNames.INPUT_VCF_AGGREGATION));
+        } catch (IllegalArgumentException e) {
+            throw new JobParametersInvalidException(e.getMessage());
+        }
     }
 }

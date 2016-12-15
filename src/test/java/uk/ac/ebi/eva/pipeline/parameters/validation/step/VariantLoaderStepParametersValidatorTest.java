@@ -25,9 +25,7 @@ import org.springframework.batch.core.JobParametersValidator;
 
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
-import uk.ac.ebi.eva.test.utils.TestFileUtils;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 import java.util.TreeMap;
@@ -43,27 +41,22 @@ public class VariantLoaderStepParametersValidatorTest {
     @Rule
     public PipelineTemporaryFolderRule temporaryFolderRule = new PipelineTemporaryFolderRule();
 
-    private Map<String, JobParameter> parameters;
+    private Map<String, JobParameter> requiredParameters;
 
     private Map<String, JobParameter> optionalParameters;
 
     @Before
     public void setUp() throws IOException {
         validator = new VariantLoaderStepParametersValidator();
-        final File dir = TestFileUtils.getResource("/parameters-validation/");
-        final File inputVcf = TestFileUtils.getResource("/parameters-validation/file.vcf.gz");
 
-        dir.setReadable(true);
-        dir.setWritable(true);
-        inputVcf.setReadable(true);
-
-        parameters = new TreeMap<>();
-        parameters.put(JobParametersNames.DB_NAME, new JobParameter("database"));
-        parameters.put(JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME, new JobParameter("variants"));
-        parameters.put(JobParametersNames.DB_COLLECTIONS_FILES_NAME, new JobParameter("files"));
-        parameters.put(JobParametersNames.INPUT_STUDY_ID, new JobParameter("inputStudyId"));
-        parameters.put(JobParametersNames.INPUT_VCF_ID, new JobParameter("inputVcfId"));
-        parameters.put(JobParametersNames.INPUT_VCF, new JobParameter(inputVcf.getCanonicalPath()));
+        requiredParameters = new TreeMap<>();
+        requiredParameters.put(JobParametersNames.DB_NAME, new JobParameter("database"));
+        requiredParameters.put(JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME, new JobParameter("variants"));
+        requiredParameters.put(JobParametersNames.DB_COLLECTIONS_FILES_NAME, new JobParameter("files"));
+        requiredParameters.put(JobParametersNames.INPUT_STUDY_ID, new JobParameter("inputStudyId"));
+        requiredParameters.put(JobParametersNames.INPUT_VCF_ID, new JobParameter("inputVcfId"));
+        requiredParameters.put(JobParametersNames.INPUT_VCF,
+                               new JobParameter(temporaryFolderRule.newFile().getCanonicalPath()));
 
         optionalParameters = new TreeMap<>();
         optionalParameters.put(JobParametersNames.INPUT_VCF_AGGREGATION, new JobParameter("NONE"));
@@ -72,43 +65,43 @@ public class VariantLoaderStepParametersValidatorTest {
 
     @Test
     public void allJobParametersAreValid() throws JobParametersInvalidException, IOException {
-        validator.validate(new JobParameters(parameters));
+        validator.validate(new JobParameters(requiredParameters));
     }
 
     @Test
     public void allJobParametersIncludingOptionalAreValid() throws JobParametersInvalidException, IOException {
-        parameters.putAll(optionalParameters);
-        validator.validate(new JobParameters(parameters));
+        requiredParameters.putAll(optionalParameters);
+        validator.validate(new JobParameters(requiredParameters));
     }
 
     @Test(expected = JobParametersInvalidException.class)
     public void dbNameIsRequired() throws Exception {
-        parameters.remove(JobParametersNames.DB_NAME);
-        validator.validate(new JobParameters(parameters));
+        requiredParameters.remove(JobParametersNames.DB_NAME);
+        validator.validate(new JobParameters(requiredParameters));
     }
 
     @Test(expected = JobParametersInvalidException.class)
     public void dbCollectionsVariantsNameIsRequired() throws Exception {
-        parameters.remove(JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME);
-        validator.validate(new JobParameters(parameters));
+        requiredParameters.remove(JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME);
+        validator.validate(new JobParameters(requiredParameters));
     }
 
     @Test(expected = JobParametersInvalidException.class)
     public void inputStudyIdIsRequired() throws Exception {
-        parameters.remove(JobParametersNames.INPUT_STUDY_ID);
-        validator.validate(new JobParameters(parameters));
+        requiredParameters.remove(JobParametersNames.INPUT_STUDY_ID);
+        validator.validate(new JobParameters(requiredParameters));
     }
 
     @Test(expected = JobParametersInvalidException.class)
     public void inputVcfIdIsRequired() throws Exception {
-        parameters.remove(JobParametersNames.INPUT_VCF_ID);
-        validator.validate(new JobParameters(parameters));
+        requiredParameters.remove(JobParametersNames.INPUT_VCF_ID);
+        validator.validate(new JobParameters(requiredParameters));
     }
 
     @Test(expected = JobParametersInvalidException.class)
     public void inputVcfIsRequired() throws Exception {
-        parameters.remove(JobParametersNames.INPUT_VCF);
-        validator.validate(new JobParameters(parameters));
+        requiredParameters.remove(JobParametersNames.INPUT_VCF);
+        validator.validate(new JobParameters(requiredParameters));
     }
 
 }
