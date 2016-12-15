@@ -49,16 +49,13 @@ public class VariantLoaderStep {
     public static final String NAME_LOAD_VARIANTS_STEP = "load-variants-step";
 
     @Autowired
-    private JobOptions jobOptions;
-
-    @Autowired
     private ItemStreamReader<Variant> reader;
 
     @Autowired
     private ItemWriter<Variant> variantWriter;
 
     @Bean(NAME_LOAD_VARIANTS_STEP)
-    public Step loadVariantsStep(StepBuilderFactory stepBuilderFactory) throws Exception {
+    public Step loadVariantsStep(StepBuilderFactory stepBuilderFactory, JobOptions jobOptions) {
         logger.debug("Building '" + NAME_LOAD_VARIANTS_STEP + "'");
 
         return stepBuilderFactory.get(NAME_LOAD_VARIANTS_STEP)

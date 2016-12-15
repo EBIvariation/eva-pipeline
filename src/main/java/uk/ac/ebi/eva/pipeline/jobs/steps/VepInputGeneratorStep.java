@@ -16,15 +16,19 @@
 package uk.ac.ebi.eva.pipeline.jobs.steps;
 
 import com.mongodb.DBObject;
+import org.opencb.datastore.core.ObjectMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
+import org.springframework.batch.item.ItemStreamWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import uk.ac.ebi.eva.pipeline.configuration.NonAnnotatedVariantsMongoReaderConfiguration;
+import uk.ac.ebi.eva.pipeline.configuration.VepInputFlatFileWriterConfiguration;
 import uk.ac.ebi.eva.pipeline.io.readers.NonAnnotatedVariantsMongoReader;
 import uk.ac.ebi.eva.pipeline.io.writers.VepInputFlatFileWriter;
 import uk.ac.ebi.eva.pipeline.jobs.steps.processors.AnnotationProcessor;
@@ -49,6 +53,7 @@ import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
  */
 @Configuration
 @EnableBatchProcessing
+@Import({NonAnnotatedVariantsMongoReaderConfiguration.class, VepInputFlatFileWriterConfiguration.class})
 public class VepInputGeneratorStep {
 
     private static final Logger logger = LoggerFactory.getLogger(VepInputGeneratorStep.class);
@@ -56,22 +61,25 @@ public class VepInputGeneratorStep {
     public static final String NAME_GENERATE_VEP_INPUT_STEP = "generate-vep-input-step";
 
     @Autowired
-    private JobOptions jobOptions;
+    private NonAnnotatedVariantsMongoReader reader;
+
+    @Autowired
+    private ItemStreamWriter<VariantWrapper> writer;
 
     @Bean(NAME_GENERATE_VEP_INPUT_STEP)
-    public Step generateVepInputStep(StepBuilderFactory stepBuilderFactory) throws Exception {
+    public Step generateVepInputStep(StepBuilderFactory stepBuilderFactory, JobOptions jobOptions) {
         logger.debug("Building '" + NAME_GENERATE_VEP_INPUT_STEP + "'");
 
+        ObjectMap pipelineOptions = jobOptions.getPipelineOptions();
+        boolean startIfcomplete = pipelineOptions.getBoolean(JobParametersNames.CONFIG_RESTARTABILITY_ALLOW);
+        int chunkSize = pipelineOptions.getInt(JobParametersNames.CONFIG_CHUNK_SIZE);
+
         return stepBuilderFactory.get(NAME_GENERATE_VEP_INPUT_STEP)
-                .<DBObject, VariantWrapper>chunk(
-                        jobOptions.getPipelineOptions().getInt(JobParametersNames.CONFIG_CHUNK_SIZE))
-                .reader(new NonAnnotatedVariantsMongoReader(jobOptions.getDbName(),
-                        jobOptions.getDbCollectionsVariantsName(),
-                        jobOptions.getMongoConnection()))
+                .<DBObject, VariantWrapper>chunk(chunkSize)
+                .reader(reader)
                 .processor(new AnnotationProcessor())
-                .writer(new VepInputFlatFileWriter(jobOptions.getVepInput()))
-                .allowStartIfComplete(
-                        jobOptions.getPipelineOptions().getBoolean(JobParametersNames.CONFIG_RESTARTABILITY_ALLOW))
+                .writer(writer)
+                .allowStartIfComplete(startIfcomplete)
                 .build();
     }
 }

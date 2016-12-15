@@ -20,11 +20,9 @@ public class AnnotationFlowOptional {
 
     public static final String NAME_VEP_ANNOTATION_OPTIONAL_FLOW = "VEP annotation optional flow";
 
-    @Autowired
-    private JobOptions jobOptions;
-
     @Bean(NAME_VEP_ANNOTATION_OPTIONAL_FLOW)
-    Flow vepAnnotationOptionalFlow(@Qualifier(AnnotationFlow.NAME_VEP_ANNOTATION_FLOW) Flow vepAnnotationFlow) {
+    Flow vepAnnotationOptionalFlow(@Qualifier(AnnotationFlow.NAME_VEP_ANNOTATION_FLOW) Flow vepAnnotationFlow,
+                                   JobOptions jobOptions) {
         SkipStepDecider annotationSkipStepDecider = new SkipStepDecider(jobOptions.getPipelineOptions(),
                 JobParametersNames.ANNOTATION_SKIP);
 

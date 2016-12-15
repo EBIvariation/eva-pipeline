@@ -37,11 +37,8 @@ public class AnnotationFlow {
     @Qualifier(GenerateVepAnnotationStep.NAME_GENERATE_VEP_ANNOTATION_STEP)
     private Step generateVepAnnotationStep;
 
-    @Autowired
-    private JobOptions jobOptions;
-
     @Bean(NAME_VEP_ANNOTATION_FLOW)
-    Flow vepAnnotationFlow() {
+    public Flow vepAnnotationFlow(JobOptions jobOptions) {
         EmptyFileDecider emptyFileDecider = new EmptyFileDecider(jobOptions.getPipelineOptions().getString(JobOptions
                 .VEP_INPUT));
 

@@ -31,11 +31,8 @@ public class PopulationStatisticsFlow {
     @Qualifier(LoadStatisticsStep.NAME_LOAD_STATISTICS_STEP)
     private Step loadStatisticsStep;
 
-    @Autowired
-    private JobOptions jobOptions;
-
     @Bean(NAME_CALCULATE_STATISTICS_OPTIONAL_FLOW)
-    public Flow calculateStatisticsOptionalFlow() {
+    public Flow calculateStatisticsOptionalFlow(JobOptions jobOptions) {
         SkipStepDecider statisticsSkipStepDecider = new SkipStepDecider(jobOptions.getPipelineOptions(),
                 JobParametersNames.STATISTICS_SKIP);
 

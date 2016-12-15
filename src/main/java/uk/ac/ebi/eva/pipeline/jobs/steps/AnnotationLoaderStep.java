@@ -21,24 +21,21 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
-import org.springframework.batch.core.configuration.annotation.JobScope;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
+import org.springframework.batch.item.ItemStreamReader;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.file.FlatFileParseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.data.mongodb.core.MongoOperations;
 import uk.ac.ebi.eva.pipeline.configuration.VariantAnnotationWriterConfiguration;
+import uk.ac.ebi.eva.pipeline.configuration.VariantannotationReaderConfiguration;
 import uk.ac.ebi.eva.pipeline.io.readers.AnnotationFlatFileReader;
 import uk.ac.ebi.eva.pipeline.io.writers.VepAnnotationMongoWriter;
 import uk.ac.ebi.eva.pipeline.listeners.SkippedItemListener;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
-import uk.ac.ebi.eva.utils.MongoDBHelper;
-
-import java.io.IOException;
 
 /**
  * This step loads annotations into MongoDB.
@@ -57,26 +54,25 @@ import java.io.IOException;
 
 @Configuration
 @EnableBatchProcessing
-@Import({VariantAnnotationWriterConfiguration.class})
+@Import({VariantannotationReaderConfiguration.class, VariantAnnotationWriterConfiguration.class})
 public class AnnotationLoaderStep {
     private static final Logger logger = LoggerFactory.getLogger(AnnotationLoaderStep.class);
 
     public static final String NAME_LOAD_VEP_ANNOTATION_STEP = "load-vep-annotation-step";
 
     @Autowired
-    private JobOptions jobOptions;
+    private ItemStreamReader<VariantAnnotation> variantAnnotationReader;
 
     @Autowired
     private ItemWriter<VariantAnnotation> variantAnnotationItemWriter;
 
     @Bean(NAME_LOAD_VEP_ANNOTATION_STEP)
-    public Step loadVepAnnotationStep(StepBuilderFactory stepBuilderFactory) throws IOException {
+    public Step loadVepAnnotationStep(StepBuilderFactory stepBuilderFactory, JobOptions jobOptions) {
         logger.debug("Building '" + NAME_LOAD_VEP_ANNOTATION_STEP + "'");
 
         return stepBuilderFactory.get(NAME_LOAD_VEP_ANNOTATION_STEP)
-                .<VariantAnnotation, VariantAnnotation>chunk(
-                        jobOptions.getPipelineOptions().getInt(JobParametersNames.CONFIG_CHUNK_SIZE))
-                .reader(new AnnotationFlatFileReader(jobOptions.getPipelineOptions().getString(JobOptions.VEP_OUTPUT)))
+                .<VariantAnnotation, VariantAnnotation>chunk(jobOptions.getPipelineOptions().getInt(JobParametersNames.CONFIG_CHUNK_SIZE))
+                .reader(variantAnnotationReader)
                 .writer(variantAnnotationItemWriter)
                 .faultTolerant().skipLimit(50).skip(FlatFileParseException.class)
                 .listener(new SkippedItemListener())
