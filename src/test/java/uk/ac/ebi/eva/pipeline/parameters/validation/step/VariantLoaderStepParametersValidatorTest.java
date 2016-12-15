@@ -52,7 +52,6 @@ public class VariantLoaderStepParametersValidatorTest {
         requiredParameters = new TreeMap<>();
         requiredParameters.put(JobParametersNames.DB_NAME, new JobParameter("database"));
         requiredParameters.put(JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME, new JobParameter("variants"));
-        requiredParameters.put(JobParametersNames.DB_COLLECTIONS_FILES_NAME, new JobParameter("files"));
         requiredParameters.put(JobParametersNames.INPUT_STUDY_ID, new JobParameter("inputStudyId"));
         requiredParameters.put(JobParametersNames.INPUT_VCF_ID, new JobParameter("inputVcfId"));
         requiredParameters.put(JobParametersNames.INPUT_VCF,

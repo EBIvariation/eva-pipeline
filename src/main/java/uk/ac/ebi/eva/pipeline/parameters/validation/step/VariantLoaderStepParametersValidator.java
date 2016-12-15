@@ -45,7 +45,6 @@ public class VariantLoaderStepParametersValidator extends DefaultJobParametersVa
         super(new String[]{
                 JobParametersNames.DB_NAME,
                 JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME,
-                JobParametersNames.DB_COLLECTIONS_FILES_NAME,
                 JobParametersNames.INPUT_STUDY_ID,
                 JobParametersNames.INPUT_VCF_ID,
                 JobParametersNames.INPUT_VCF,
@@ -63,7 +62,6 @@ public class VariantLoaderStepParametersValidator extends DefaultJobParametersVa
         final List<JobParametersValidator> jobParametersValidators = Arrays.asList(
                 new DbNameValidator(),
                 new DbCollectionsVariantsNameValidator(),
-                new DbCollectionsFilesNameValidator(),
                 new InputStudyIdValidator(),
                 new InputVcfIdValidator(),
                 new InputVcfValidator(),
