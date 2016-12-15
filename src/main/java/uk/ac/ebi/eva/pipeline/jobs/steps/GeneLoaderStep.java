@@ -25,11 +25,12 @@ import org.springframework.batch.item.ItemStreamReader;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.file.FlatFileParseException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import uk.ac.ebi.eva.pipeline.configuration.GeneReaderConfiguration;
-import uk.ac.ebi.eva.pipeline.configuration.GeneWriterConfiguration;
+import uk.ac.ebi.eva.pipeline.configuration.readers.GeneReaderConfiguration;
+import uk.ac.ebi.eva.pipeline.configuration.writers.GeneWriterConfiguration;
 import uk.ac.ebi.eva.pipeline.io.mappers.GeneLineMapper;
 import uk.ac.ebi.eva.pipeline.io.readers.GeneReader;
 import uk.ac.ebi.eva.pipeline.io.writers.GeneWriter;
@@ -38,6 +39,10 @@ import uk.ac.ebi.eva.pipeline.listeners.SkippedItemListener;
 import uk.ac.ebi.eva.pipeline.model.FeatureCoordinates;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
+
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.GENES_LOAD_STEP;
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.GENE_READER;
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.GENE_WRITER;
 
 /**
  * This step loads a list of genomic features from a species into a DB. This DB is intended to be used as a mapping
@@ -59,19 +64,19 @@ public class GeneLoaderStep {
 
     private static final Logger logger = LoggerFactory.getLogger(GeneLoaderStep.class);
 
-    public static final String NAME_GENES_LOAD_STEP = "genes-load-step";
-
     @Autowired
+    @Qualifier(GENE_READER)
     private ItemStreamReader<FeatureCoordinates> reader;
 
     @Autowired
+    @Qualifier(GENE_WRITER)
     private ItemWriter<FeatureCoordinates> writer;
 
-    @Bean(NAME_GENES_LOAD_STEP)
+    @Bean(GENES_LOAD_STEP)
     public Step genesLoadStep(StepBuilderFactory stepBuilderFactory, JobOptions jobOptions) {
-        logger.debug("Building '" + NAME_GENES_LOAD_STEP + "'");
+        logger.debug("Building '" + GENES_LOAD_STEP + "'");
 
-        return stepBuilderFactory.get(NAME_GENES_LOAD_STEP)
+        return stepBuilderFactory.get(GENES_LOAD_STEP)
                 .<FeatureCoordinates, FeatureCoordinates>chunk(jobOptions.getPipelineOptions().getInt(JobParametersNames.CONFIG_CHUNK_SIZE))
                 .reader(reader)
                 .processor(new GeneFilterProcessor())

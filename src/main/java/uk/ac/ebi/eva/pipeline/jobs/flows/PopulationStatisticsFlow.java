@@ -16,27 +16,29 @@ import uk.ac.ebi.eva.pipeline.jobs.steps.LoadStatisticsStep;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.CALCULATE_STATISTICS_OPTIONAL_FLOW;
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.CALCULATE_STATISTICS_STEP;
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.LOAD_STATISTICS_STEP;
+
 @Configuration
 @EnableBatchProcessing
 @Import({CalculateStatisticsStep.class, LoadStatisticsStep.class})
 public class PopulationStatisticsFlow {
 
-    public static final String NAME_CALCULATE_STATISTICS_OPTIONAL_FLOW = "calculate-statistics-optional-flow";
-
     @Autowired
-    @Qualifier(CalculateStatisticsStep.NAME_CALCULATE_STATISTICS_STEP)
+    @Qualifier(CALCULATE_STATISTICS_STEP)
     private Step calculateStatisticsStep;
 
     @Autowired
-    @Qualifier(LoadStatisticsStep.NAME_LOAD_STATISTICS_STEP)
+    @Qualifier(LOAD_STATISTICS_STEP)
     private Step loadStatisticsStep;
 
-    @Bean(NAME_CALCULATE_STATISTICS_OPTIONAL_FLOW)
+    @Bean(CALCULATE_STATISTICS_OPTIONAL_FLOW)
     public Flow calculateStatisticsOptionalFlow(JobOptions jobOptions) {
         SkipStepDecider statisticsSkipStepDecider = new SkipStepDecider(jobOptions.getPipelineOptions(),
                 JobParametersNames.STATISTICS_SKIP);
 
-        return new FlowBuilder<Flow>(NAME_CALCULATE_STATISTICS_OPTIONAL_FLOW)
+        return new FlowBuilder<Flow>(CALCULATE_STATISTICS_OPTIONAL_FLOW)
                 .start(statisticsSkipStepDecider).on(SkipStepDecider.DO_STEP)
                 .to(calculateStatisticsStep)
                 .next(loadStatisticsStep)

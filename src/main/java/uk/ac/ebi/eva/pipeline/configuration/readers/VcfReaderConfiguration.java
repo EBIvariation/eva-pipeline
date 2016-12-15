@@ -13,12 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.ac.ebi.eva.pipeline.configuration;
+package uk.ac.ebi.eva.pipeline.configuration.readers;
 
 import org.opencb.biodata.models.variant.VariantSource;
 import org.opencb.opencga.storage.core.variant.VariantStorageManager;
 import org.springframework.batch.core.configuration.annotation.StepScope;
-import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemStreamReader;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -31,12 +30,13 @@ import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 
 import java.io.IOException;
-import java.util.List;
+
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VARIANT_READER;
 
 @Configuration
 public class VcfReaderConfiguration {
 
-    @Bean
+    @Bean(VARIANT_READER)
     @StepScope
     public ItemStreamReader<Variant> unwindingReader(VcfReader vcfReader) throws Exception {
         return new UnwindingItemStreamReader<>(vcfReader);
@@ -53,8 +53,8 @@ public class VcfReaderConfiguration {
     @Bean
     @StepScope
     public VcfReader vcfReader(@Value("${" + JobParametersNames.INPUT_VCF_AGGREGATION + "}")
-                                                       String aggregationType,
-                                               JobOptions jobOptions) throws IOException {
+                                       String aggregationType,
+                               JobOptions jobOptions) throws IOException {
         VariantSource.Aggregation aggregation = VariantSource.Aggregation.valueOf(aggregationType);
         if (VariantSource.Aggregation.NONE.equals(aggregation)) {
             return new VcfReader(

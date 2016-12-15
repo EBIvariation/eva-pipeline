@@ -35,6 +35,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
+import uk.ac.ebi.eva.pipeline.configuration.BeanNames;
 import uk.ac.ebi.eva.pipeline.jobs.steps.GenerateVepAnnotationStep;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
@@ -51,8 +52,6 @@ import java.util.stream.Collectors;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static uk.ac.ebi.eva.pipeline.jobs.steps.AnnotationLoaderStep.NAME_LOAD_VEP_ANNOTATION_STEP;
-import static uk.ac.ebi.eva.pipeline.jobs.steps.VepInputGeneratorStep.NAME_GENERATE_VEP_INPUT_STEP;
 import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResource;
 import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResourceUrl;
 
@@ -95,9 +94,9 @@ public class AnnotationJobTest {
         StepExecution generateVepAnnotationsStep = steps.get(1);
         StepExecution loadVepAnnotationsStep = steps.get(2);
 
-        assertEquals(NAME_GENERATE_VEP_INPUT_STEP, findVariantsToAnnotateStep.getStepName());
-        assertEquals(GenerateVepAnnotationStep.NAME_GENERATE_VEP_ANNOTATION_STEP, generateVepAnnotationsStep.getStepName());
-        assertEquals(NAME_LOAD_VEP_ANNOTATION_STEP, loadVepAnnotationsStep.getStepName());
+        assertEquals(BeanNames.GENERATE_VEP_INPUT_STEP, findVariantsToAnnotateStep.getStepName());
+        assertEquals(BeanNames.GENERATE_VEP_ANNOTATION_STEP, generateVepAnnotationsStep.getStepName());
+        assertEquals(BeanNames.LOAD_VEP_ANNOTATION_STEP, loadVepAnnotationsStep.getStepName());
 
         //check list of variants without annotation output file
         assertTrue(vepInputFile.exists());
@@ -124,7 +123,7 @@ public class AnnotationJobTest {
 
         //check that one line is skipped because malformed
         List<StepExecution> variantAnnotationLoadStepExecution = jobExecution.getStepExecutions().stream()
-                .filter(stepExecution -> stepExecution.getStepName().equals(NAME_LOAD_VEP_ANNOTATION_STEP))
+                .filter(stepExecution -> stepExecution.getStepName().equals(BeanNames.LOAD_VEP_ANNOTATION_STEP))
                 .collect(Collectors.toList());
         assertEquals(1, variantAnnotationLoadStepExecution.get(0).getReadSkipCount());
     }
@@ -139,7 +138,7 @@ public class AnnotationJobTest {
         assertEquals(1, jobExecution.getStepExecutions().size());
         StepExecution findVariantsToAnnotateStep = new ArrayList<>(jobExecution.getStepExecutions()).get(0);
 
-        assertEquals(NAME_GENERATE_VEP_INPUT_STEP, findVariantsToAnnotateStep.getStepName());
+        assertEquals(BeanNames.GENERATE_VEP_INPUT_STEP, findVariantsToAnnotateStep.getStepName());
 
         assertTrue(vepInputFile.exists());
         assertTrue(Files.size(Paths.get(vepInputFile.toPath().toUri())) == 0);

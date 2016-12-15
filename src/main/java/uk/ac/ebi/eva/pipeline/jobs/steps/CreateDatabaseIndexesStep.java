@@ -8,17 +8,17 @@ import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.step.tasklet.TaskletStep;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 import uk.ac.ebi.eva.pipeline.jobs.steps.tasklets.IndexesGeneratorStep;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 import uk.ac.ebi.eva.utils.TaskletUtils;
+
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.CREATE_DATABASE_INDEXES_STEP;
 
 @Configuration
 @EnableBatchProcessing
 public class CreateDatabaseIndexesStep {
 
     private static final Logger logger = LoggerFactory.getLogger(CreateDatabaseIndexesStep.class);
-    public static final String NAME_CREATE_DATABASE_INDEXES_STEP = "create-database-indexes-step";
 
     @Bean
     @StepScope
@@ -26,10 +26,10 @@ public class CreateDatabaseIndexesStep {
         return new IndexesGeneratorStep();
     }
 
-    @Bean(NAME_CREATE_DATABASE_INDEXES_STEP)
+    @Bean(CREATE_DATABASE_INDEXES_STEP)
     public TaskletStep createDatabaseIndexesStep(StepBuilderFactory stepBuilderFactory, JobOptions jobOptions) {
-        logger.debug("Building '" + NAME_CREATE_DATABASE_INDEXES_STEP + "'");
-        return TaskletUtils.generateStep(stepBuilderFactory, NAME_CREATE_DATABASE_INDEXES_STEP, indexesGeneratorStep(),
+        logger.debug("Building '" + CREATE_DATABASE_INDEXES_STEP + "'");
+        return TaskletUtils.generateStep(stepBuilderFactory, CREATE_DATABASE_INDEXES_STEP, indexesGeneratorStep(),
                 jobOptions);
     }
 

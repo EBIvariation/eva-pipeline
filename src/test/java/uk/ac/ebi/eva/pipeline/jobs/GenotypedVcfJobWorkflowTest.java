@@ -32,6 +32,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
+import uk.ac.ebi.eva.pipeline.configuration.BeanNames;
 import uk.ac.ebi.eva.pipeline.jobs.steps.AnnotationLoaderStep;
 import uk.ac.ebi.eva.pipeline.jobs.steps.CalculateStatisticsStep;
 import uk.ac.ebi.eva.pipeline.jobs.steps.GenerateVepAnnotationStep;
@@ -104,33 +105,33 @@ public class GenotypedVcfJobWorkflowTest {
             parallelStepsNameToStepExecution.put(steps.get(i).getStepName(), steps.get(i));
         }
 
-        assertEquals(VariantLoaderStep.NAME_LOAD_VARIANTS_STEP, loadStep.getStepName());
+        assertEquals(BeanNames.LOAD_VARIANTS_STEP, loadStep.getStepName());
 
         Set<String> parallelStepNamesExecuted = parallelStepsNameToStepExecution.keySet();
         Set<String> parallelStepNamesToCheck = new HashSet<>(Arrays.asList(
-                CalculateStatisticsStep.NAME_CALCULATE_STATISTICS_STEP,
-                LoadStatisticsStep.NAME_LOAD_STATISTICS_STEP,
-                VepInputGeneratorStep.NAME_GENERATE_VEP_INPUT_STEP,
-                GenerateVepAnnotationStep.NAME_GENERATE_VEP_ANNOTATION_STEP,
-                AnnotationLoaderStep.NAME_LOAD_VEP_ANNOTATION_STEP));
+                BeanNames.CALCULATE_STATISTICS_STEP,
+                BeanNames.LOAD_STATISTICS_STEP,
+                BeanNames.GENERATE_VEP_INPUT_STEP,
+                BeanNames.GENERATE_VEP_ANNOTATION_STEP,
+                BeanNames.LOAD_VEP_ANNOTATION_STEP));
 
         assertEquals(parallelStepNamesToCheck, parallelStepNamesExecuted);
 
-        assertTrue(loadStep.getEndTime().before(parallelStepsNameToStepExecution.get(CalculateStatisticsStep
-                .NAME_CALCULATE_STATISTICS_STEP).getStartTime()));
-        assertTrue(loadStep.getEndTime().before(parallelStepsNameToStepExecution.get(VepInputGeneratorStep
-                .NAME_GENERATE_VEP_INPUT_STEP).getStartTime()));
+        assertTrue(loadStep.getEndTime().before(parallelStepsNameToStepExecution.get(
+                BeanNames.CALCULATE_STATISTICS_STEP).getStartTime()));
+        assertTrue(loadStep.getEndTime().before(parallelStepsNameToStepExecution.get(
+                BeanNames.GENERATE_VEP_INPUT_STEP).getStartTime()));
 
-        assertTrue(parallelStepsNameToStepExecution.get(CalculateStatisticsStep.NAME_CALCULATE_STATISTICS_STEP)
+        assertTrue(parallelStepsNameToStepExecution.get(BeanNames.CALCULATE_STATISTICS_STEP)
                 .getEndTime()
-                .before(parallelStepsNameToStepExecution.get(LoadStatisticsStep.NAME_LOAD_STATISTICS_STEP)
+                .before(parallelStepsNameToStepExecution.get(BeanNames.LOAD_STATISTICS_STEP)
                         .getStartTime()));
-        assertTrue(parallelStepsNameToStepExecution.get(VepInputGeneratorStep.NAME_GENERATE_VEP_INPUT_STEP).getEndTime()
+        assertTrue(parallelStepsNameToStepExecution.get(BeanNames.GENERATE_VEP_INPUT_STEP).getEndTime()
                 .before(parallelStepsNameToStepExecution.get(
-                        GenerateVepAnnotationStep.NAME_GENERATE_VEP_ANNOTATION_STEP).getStartTime()));
-        assertTrue(parallelStepsNameToStepExecution.get(GenerateVepAnnotationStep.NAME_GENERATE_VEP_ANNOTATION_STEP)
+                        BeanNames.GENERATE_VEP_ANNOTATION_STEP).getStartTime()));
+        assertTrue(parallelStepsNameToStepExecution.get(BeanNames.GENERATE_VEP_ANNOTATION_STEP)
                 .getEndTime()
-                .before(parallelStepsNameToStepExecution.get(AnnotationLoaderStep.NAME_LOAD_VEP_ANNOTATION_STEP)
+                .before(parallelStepsNameToStepExecution.get(BeanNames.LOAD_VEP_ANNOTATION_STEP)
                         .getStartTime()));
     }
 
@@ -149,7 +150,7 @@ public class GenotypedVcfJobWorkflowTest {
         List<StepExecution> steps = new ArrayList<>(execution.getStepExecutions());
         StepExecution loadStep = steps.get(0);
 
-        assertEquals(VariantLoaderStep.NAME_LOAD_VARIANTS_STEP, loadStep.getStepName());
+        assertEquals(BeanNames.LOAD_VARIANTS_STEP, loadStep.getStepName());
     }
 
     @Test
@@ -170,26 +171,23 @@ public class GenotypedVcfJobWorkflowTest {
             parallelStepsNameToStepExecution.put(steps.get(i).getStepName(), steps.get(i));
         }
 
-        assertEquals(VariantLoaderStep.NAME_LOAD_VARIANTS_STEP, loadStep.getStepName());
+        assertEquals(BeanNames.LOAD_VARIANTS_STEP, loadStep.getStepName());
 
         Set<String> parallelStepNamesExecuted = parallelStepsNameToStepExecution.keySet();
         Set<String> parallelStepNamesToCheck = new HashSet<>(Arrays.asList(
-                VepInputGeneratorStep.NAME_GENERATE_VEP_INPUT_STEP,
-                GenerateVepAnnotationStep.NAME_GENERATE_VEP_ANNOTATION_STEP,
-                AnnotationLoaderStep.NAME_LOAD_VEP_ANNOTATION_STEP));
+                BeanNames.GENERATE_VEP_INPUT_STEP,
+                BeanNames.GENERATE_VEP_ANNOTATION_STEP,
+                BeanNames.LOAD_VEP_ANNOTATION_STEP));
 
         assertEquals(parallelStepNamesToCheck, parallelStepNamesExecuted);
 
-        assertTrue(loadStep.getEndTime().before(parallelStepsNameToStepExecution.get(VepInputGeneratorStep
-                .NAME_GENERATE_VEP_INPUT_STEP).getStartTime()));
+        assertTrue(loadStep.getEndTime().before(parallelStepsNameToStepExecution.get(
+                BeanNames.GENERATE_VEP_INPUT_STEP).getStartTime()));
 
-        assertTrue(parallelStepsNameToStepExecution.get(VepInputGeneratorStep.NAME_GENERATE_VEP_INPUT_STEP).getEndTime()
-                .before(parallelStepsNameToStepExecution.get(GenerateVepAnnotationStep.NAME_GENERATE_VEP_ANNOTATION_STEP)
-                        .getStartTime()));
-        assertTrue(parallelStepsNameToStepExecution.get(GenerateVepAnnotationStep.NAME_GENERATE_VEP_ANNOTATION_STEP)
-                .getEndTime()
-                .before(parallelStepsNameToStepExecution.get(AnnotationLoaderStep.NAME_LOAD_VEP_ANNOTATION_STEP)
-                        .getStartTime()));
+        assertTrue(parallelStepsNameToStepExecution.get(BeanNames.GENERATE_VEP_INPUT_STEP).getEndTime()
+                .before(parallelStepsNameToStepExecution.get(BeanNames.GENERATE_VEP_ANNOTATION_STEP).getStartTime()));
+        assertTrue(parallelStepsNameToStepExecution.get(BeanNames.GENERATE_VEP_ANNOTATION_STEP).getEndTime()
+                .before(parallelStepsNameToStepExecution.get(BeanNames.LOAD_VEP_ANNOTATION_STEP).getStartTime()));
     }
 
     @Test
@@ -210,21 +208,21 @@ public class GenotypedVcfJobWorkflowTest {
             parallelStepsNameToStepExecution.put(steps.get(i).getStepName(), steps.get(i));
         }
 
-        assertEquals(VariantLoaderStep.NAME_LOAD_VARIANTS_STEP, loadStep.getStepName());
+        assertEquals(BeanNames.LOAD_VARIANTS_STEP, loadStep.getStepName());
 
         Set<String> parallelStepNamesExecuted = parallelStepsNameToStepExecution.keySet();
         Set<String> parallelStepNamesToCheck = new HashSet<>(Arrays.asList(
-                CalculateStatisticsStep.NAME_CALCULATE_STATISTICS_STEP,
-                LoadStatisticsStep.NAME_LOAD_STATISTICS_STEP));
+                BeanNames.CALCULATE_STATISTICS_STEP,
+                BeanNames.LOAD_STATISTICS_STEP));
 
         assertEquals(parallelStepNamesToCheck, parallelStepNamesExecuted);
 
         assertTrue(loadStep.getEndTime().before(parallelStepsNameToStepExecution.get(
-                CalculateStatisticsStep.NAME_CALCULATE_STATISTICS_STEP).getStartTime()));
+                BeanNames.CALCULATE_STATISTICS_STEP).getStartTime()));
 
-        assertTrue(parallelStepsNameToStepExecution.get(CalculateStatisticsStep.NAME_CALCULATE_STATISTICS_STEP)
+        assertTrue(parallelStepsNameToStepExecution.get(BeanNames.CALCULATE_STATISTICS_STEP)
                 .getEndTime()
-                .before(parallelStepsNameToStepExecution.get(LoadStatisticsStep.NAME_LOAD_STATISTICS_STEP)
+                .before(parallelStepsNameToStepExecution.get(BeanNames.LOAD_STATISTICS_STEP)
                         .getStartTime()));
     }
 

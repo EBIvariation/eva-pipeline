@@ -30,7 +30,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import uk.ac.ebi.eva.pipeline.io.mappers.GeneLineMapper;
 import uk.ac.ebi.eva.pipeline.model.FeatureCoordinates;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
-import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
+import uk.ac.ebi.eva.test.configuration.BaseTestConfiguration;
 import uk.ac.ebi.eva.test.data.GtfStaticTestData;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 
@@ -48,7 +48,7 @@ import static uk.ac.ebi.eva.utils.MongoDBHelper.getMongoOperations;
  */
 @RunWith(SpringRunner.class)
 @TestPropertySource({"classpath:initialize-database.properties"})
-@ContextConfiguration(classes = {BatchTestConfiguration.class})
+@ContextConfiguration(classes = {BaseTestConfiguration.class})
 public class GeneWriterTest {
 
     @Rule

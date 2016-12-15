@@ -29,7 +29,6 @@ import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
  * running job should be set. This avoids setting incompatible settings for jobs that won't even be executed.
  * This is achieved with a `beforeJob` listener, which only gets called when a job is going to be executed.
  */
-@Import({JobOptions.class})
 public class VariantOptionsConfigurerListener implements JobExecutionListener {
 
     private static final Logger logger = LoggerFactory.getLogger(VariantOptionsConfigurerListener.class);

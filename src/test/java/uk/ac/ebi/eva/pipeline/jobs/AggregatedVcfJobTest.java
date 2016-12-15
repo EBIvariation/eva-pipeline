@@ -38,6 +38,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
+import uk.ac.ebi.eva.pipeline.configuration.BeanNames;
 import uk.ac.ebi.eva.pipeline.jobs.steps.VariantLoaderStep;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
@@ -100,7 +101,7 @@ public class AggregatedVcfJobTest {
         List<StepExecution> steps = new ArrayList<>(jobExecution.getStepExecutions());
         StepExecution load = steps.get(0);
 
-        Assert.assertEquals(VariantLoaderStep.NAME_LOAD_VARIANTS_STEP, load.getStepName());
+        Assert.assertEquals(BeanNames.LOAD_VARIANTS_STEP, load.getStepName());
 
         // check ((documents in DB) == (lines in file))
         VariantStorageManager variantStorageManager = StorageManagerFactory.getVariantStorageManager();

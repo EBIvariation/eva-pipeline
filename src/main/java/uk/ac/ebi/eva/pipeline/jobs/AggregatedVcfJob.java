@@ -37,6 +37,10 @@ import uk.ac.ebi.eva.pipeline.jobs.steps.VariantLoaderStep;
 import uk.ac.ebi.eva.pipeline.listeners.VariantOptionsConfigurerListener;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.AGGREGATED_VCF_JOB;
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.LOAD_VARIANTS_STEP;
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VEP_ANNOTATION_OPTIONAL_FLOW;
+
 /**
  * Complete pipeline workflow for aggregated VCF. Aggregated statistics are provided in the VCF instead of the
  * genotypes.
@@ -52,8 +56,6 @@ public class AggregatedVcfJob {
 
     private static final Logger logger = LoggerFactory.getLogger(AggregatedVcfJob.class);
 
-    public static final String NAME_AGGREGATED_VCF_JOB = "aggregated-vcf-job";
-
     //job default settings
     private static final boolean INCLUDE_SAMPLES = false;
 
@@ -67,20 +69,20 @@ public class AggregatedVcfJob {
     private JobOptions jobOptions;
 
     @Autowired
-    @Qualifier(AnnotationFlowOptional.NAME_VEP_ANNOTATION_OPTIONAL_FLOW)
+    @Qualifier(VEP_ANNOTATION_OPTIONAL_FLOW)
     private Flow annotationFlowOptional;
 
     @Autowired
-    @Qualifier(VariantLoaderStep.NAME_LOAD_VARIANTS_STEP)
+    @Qualifier(LOAD_VARIANTS_STEP)
     private Step variantLoaderStep;
 
-    @Bean(NAME_AGGREGATED_VCF_JOB)
+    @Bean(AGGREGATED_VCF_JOB)
     @Scope("prototype")
     public Job aggregatedVcfJob(JobBuilderFactory jobBuilderFactory) {
-        logger.debug("Building '" + NAME_AGGREGATED_VCF_JOB + "'");
+        logger.debug("Building '" + AGGREGATED_VCF_JOB + "'");
 
         JobBuilder jobBuilder = jobBuilderFactory
-                .get(NAME_AGGREGATED_VCF_JOB)
+                .get(AGGREGATED_VCF_JOB)
                 .incrementer(new RunIdIncrementer())
                 .listener(aggregatedJobListener());
 

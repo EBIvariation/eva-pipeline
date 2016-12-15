@@ -38,6 +38,10 @@ import uk.ac.ebi.eva.pipeline.jobs.steps.VariantLoaderStep;
 import uk.ac.ebi.eva.pipeline.listeners.VariantOptionsConfigurerListener;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.GENOTYPED_VCF_JOB;
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.LOAD_VARIANTS_STEP;
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.PARALLEL_STATISTICS_AND_ANNOTATION;
+
 /**
  * Complete pipeline workflow:
  * <p>
@@ -53,8 +57,6 @@ import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 public class GenotypedVcfJob {
     private static final Logger logger = LoggerFactory.getLogger(GenotypedVcfJob.class);
 
-    public static final String NAME_GENOTYPED_VCF_JOB = "genotyped-vcf-job";
-
     //job default settings
     private static final boolean INCLUDE_SAMPLES = true;
 
@@ -65,23 +67,23 @@ public class GenotypedVcfJob {
     private static final boolean INCLUDE_STATS = false;
 
     @Autowired
-    @Qualifier(ParallelStatisticsAndAnnotationFlow.PARALLEL_STATISTICS_AND_ANNOTATION)
+    @Qualifier(PARALLEL_STATISTICS_AND_ANNOTATION)
     private Flow parallelStatisticsAndAnnotation;
 
     @Autowired
-    @Qualifier(VariantLoaderStep.NAME_LOAD_VARIANTS_STEP)
+    @Qualifier(LOAD_VARIANTS_STEP)
     private Step variantLoaderStep;
 
     @Autowired
     private JobOptions jobOptions;
 
-    @Bean(NAME_GENOTYPED_VCF_JOB)
+    @Bean(GENOTYPED_VCF_JOB)
     @Scope("prototype")
     public Job genotypedVcfJob(JobBuilderFactory jobBuilderFactory) {
-        logger.debug("Building '" + NAME_GENOTYPED_VCF_JOB + "'");
+        logger.debug("Building '" + GENOTYPED_VCF_JOB + "'");
 
         JobBuilder jobBuilder = jobBuilderFactory
-                .get(NAME_GENOTYPED_VCF_JOB)
+                .get(GENOTYPED_VCF_JOB)
                 .incrementer(new RunIdIncrementer())
                 .listener(genotypedJobListener());
         FlowJobBuilder builder = jobBuilder

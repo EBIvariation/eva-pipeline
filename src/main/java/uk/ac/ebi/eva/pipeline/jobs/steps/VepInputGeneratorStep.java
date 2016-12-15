@@ -24,17 +24,22 @@ import org.springframework.batch.core.configuration.annotation.EnableBatchProces
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.item.ItemStreamWriter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import uk.ac.ebi.eva.pipeline.configuration.NonAnnotatedVariantsMongoReaderConfiguration;
-import uk.ac.ebi.eva.pipeline.configuration.VepInputFlatFileWriterConfiguration;
+import uk.ac.ebi.eva.pipeline.configuration.readers.NonAnnotatedVariantsMongoReaderConfiguration;
+import uk.ac.ebi.eva.pipeline.configuration.writers.VepInputFlatFileWriterConfiguration;
 import uk.ac.ebi.eva.pipeline.io.readers.NonAnnotatedVariantsMongoReader;
 import uk.ac.ebi.eva.pipeline.io.writers.VepInputFlatFileWriter;
 import uk.ac.ebi.eva.pipeline.jobs.steps.processors.AnnotationProcessor;
 import uk.ac.ebi.eva.pipeline.model.VariantWrapper;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
+
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.GENERATE_VEP_INPUT_STEP;
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.NON_ANNOTATED_VARIANTS_READER;
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VEP_INPUT_WRITER;
 
 /**
  * This step dumps a list of variants without annotations from mongo.
@@ -58,23 +63,23 @@ public class VepInputGeneratorStep {
 
     private static final Logger logger = LoggerFactory.getLogger(VepInputGeneratorStep.class);
 
-    public static final String NAME_GENERATE_VEP_INPUT_STEP = "generate-vep-input-step";
-
     @Autowired
+    @Qualifier(NON_ANNOTATED_VARIANTS_READER)
     private NonAnnotatedVariantsMongoReader reader;
 
     @Autowired
+    @Qualifier(VEP_INPUT_WRITER)
     private ItemStreamWriter<VariantWrapper> writer;
 
-    @Bean(NAME_GENERATE_VEP_INPUT_STEP)
+    @Bean(GENERATE_VEP_INPUT_STEP)
     public Step generateVepInputStep(StepBuilderFactory stepBuilderFactory, JobOptions jobOptions) {
-        logger.debug("Building '" + NAME_GENERATE_VEP_INPUT_STEP + "'");
+        logger.debug("Building '" + GENERATE_VEP_INPUT_STEP + "'");
 
         ObjectMap pipelineOptions = jobOptions.getPipelineOptions();
         boolean startIfcomplete = pipelineOptions.getBoolean(JobParametersNames.CONFIG_RESTARTABILITY_ALLOW);
         int chunkSize = pipelineOptions.getInt(JobParametersNames.CONFIG_CHUNK_SIZE);
 
-        return stepBuilderFactory.get(NAME_GENERATE_VEP_INPUT_STEP)
+        return stepBuilderFactory.get(GENERATE_VEP_INPUT_STEP)
                 .<DBObject, VariantWrapper>chunk(chunkSize)
                 .reader(reader)
                 .processor(new AnnotationProcessor())

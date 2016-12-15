@@ -32,6 +32,9 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
 import uk.ac.ebi.eva.pipeline.jobs.flows.AnnotationFlow;
 
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.ANNOTATE_VARIANTS_JOB;
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VEP_ANNOTATION_FLOW;
+
 /**
  * Batch class to wire together:
  * 1) generateVepInputStep - Dump a list of variants without annotations to be used as input for VEP
@@ -50,19 +53,17 @@ public class AnnotationJob {
 
     private static final Logger logger = LoggerFactory.getLogger(AnnotationJob.class);
 
-    public static final String NAME_ANNOTATE_VARIANTS_JOB = "annotate-variants-job";
-
     @Autowired
-    @Qualifier(AnnotationFlow.NAME_VEP_ANNOTATION_FLOW)
+    @Qualifier(VEP_ANNOTATION_FLOW)
     private Flow annotation;
 
-    @Bean(NAME_ANNOTATE_VARIANTS_JOB)
+    @Bean(ANNOTATE_VARIANTS_JOB)
     @Scope("prototype")
     public Job annotateVariantsJob(JobBuilderFactory jobBuilderFactory) {
-        logger.debug("Building '" + NAME_ANNOTATE_VARIANTS_JOB + "'");
+        logger.debug("Building '" + ANNOTATE_VARIANTS_JOB + "'");
 
         JobBuilder jobBuilder = jobBuilderFactory
-                .get(NAME_ANNOTATE_VARIANTS_JOB)
+                .get(ANNOTATE_VARIANTS_JOB)
                 .incrementer(new RunIdIncrementer());
         return jobBuilder.start(annotation).build().build();
     }

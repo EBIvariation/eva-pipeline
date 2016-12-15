@@ -8,17 +8,17 @@ import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.step.tasklet.TaskletStep;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 import uk.ac.ebi.eva.pipeline.jobs.steps.tasklets.VepAnnotationGeneratorStep;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 import uk.ac.ebi.eva.utils.TaskletUtils;
+
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.GENERATE_VEP_ANNOTATION_STEP;
 
 @Configuration
 @EnableBatchProcessing
 public class GenerateVepAnnotationStep {
 
     private static final Logger logger = LoggerFactory.getLogger(GenerateVepAnnotationStep.class);
-    public static final String NAME_GENERATE_VEP_ANNOTATION_STEP = "generate-vep-annotation";
 
     @Bean
     @StepScope
@@ -26,10 +26,10 @@ public class GenerateVepAnnotationStep {
         return new VepAnnotationGeneratorStep();
     }
 
-    @Bean(NAME_GENERATE_VEP_ANNOTATION_STEP)
+    @Bean(GENERATE_VEP_ANNOTATION_STEP)
     public TaskletStep generateVepAnnotationStep(StepBuilderFactory stepBuilderFactory, JobOptions jobOptions) {
-        logger.debug("Building '" + NAME_GENERATE_VEP_ANNOTATION_STEP + "'");
-        return TaskletUtils.generateStep(stepBuilderFactory, NAME_GENERATE_VEP_ANNOTATION_STEP,
+        logger.debug("Building '" + GENERATE_VEP_ANNOTATION_STEP + "'");
+        return TaskletUtils.generateStep(stepBuilderFactory, GENERATE_VEP_ANNOTATION_STEP,
                 vepAnnotationGeneratorStep(), jobOptions);
     }
 

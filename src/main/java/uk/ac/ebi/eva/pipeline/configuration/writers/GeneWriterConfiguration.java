@@ -13,24 +13,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.ac.ebi.eva.pipeline.configuration;
+package uk.ac.ebi.eva.pipeline.configuration.writers;
 
 import org.springframework.batch.core.configuration.annotation.StepScope;
-import org.springframework.batch.item.ItemStreamReader;
+import org.springframework.batch.item.ItemWriter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import uk.ac.ebi.eva.pipeline.io.readers.GeneReader;
+import org.springframework.data.mongodb.core.MongoOperations;
+import uk.ac.ebi.eva.pipeline.io.writers.GeneWriter;
 import uk.ac.ebi.eva.pipeline.model.FeatureCoordinates;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
-import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
+import uk.ac.ebi.eva.utils.MongoDBHelper;
+
+import java.net.UnknownHostException;
+
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.GENE_WRITER;
 
 @Configuration
-public class GeneReaderConfiguration {
+public class GeneWriterConfiguration {
 
-    @Bean
+    @Bean(GENE_WRITER)
     @StepScope
-    public ItemStreamReader<FeatureCoordinates> geneReader(JobOptions jobOptions) {
-        return new GeneReader(jobOptions.getPipelineOptions().getString(JobParametersNames.INPUT_GTF));
+    public ItemWriter<FeatureCoordinates> geneWriter(JobOptions jobOptions) throws UnknownHostException {
+        MongoOperations mongoOperations = MongoDBHelper
+                .getMongoOperations(jobOptions.getDbName(), jobOptions.getMongoConnection());
+        return new GeneWriter(mongoOperations, jobOptions.getDbCollectionsFeaturesName());
     }
 
 }

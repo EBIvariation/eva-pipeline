@@ -13,29 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.ac.ebi.eva.pipeline.configuration;
+package uk.ac.ebi.eva.pipeline.configuration.writers;
 
 import org.springframework.batch.core.configuration.annotation.StepScope;
-import org.springframework.batch.item.ItemWriter;
+import org.springframework.batch.item.ItemStreamWriter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.mongodb.core.MongoOperations;
-import uk.ac.ebi.eva.pipeline.io.writers.GeneWriter;
-import uk.ac.ebi.eva.pipeline.model.FeatureCoordinates;
+import uk.ac.ebi.eva.pipeline.io.writers.VepInputFlatFileWriter;
+import uk.ac.ebi.eva.pipeline.model.VariantWrapper;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
-import uk.ac.ebi.eva.utils.MongoDBHelper;
 
-import java.net.UnknownHostException;
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VEP_INPUT_WRITER;
 
 @Configuration
-public class GeneWriterConfiguration {
+public class VepInputFlatFileWriterConfiguration {
 
-    @Bean
+    @Bean(VEP_INPUT_WRITER)
     @StepScope
-    public ItemWriter<FeatureCoordinates> geneWriter(JobOptions jobOptions) throws UnknownHostException {
-        MongoOperations mongoOperations = MongoDBHelper
-                .getMongoOperations(jobOptions.getDbName(), jobOptions.getMongoConnection());
-        return new GeneWriter(mongoOperations, jobOptions.getDbCollectionsFeaturesName());
+    public ItemStreamWriter<VariantWrapper> vepInputFlatFileWriter(JobOptions jobOptions) {
+        return new VepInputFlatFileWriter(jobOptions.getVepInput());
     }
 
 }

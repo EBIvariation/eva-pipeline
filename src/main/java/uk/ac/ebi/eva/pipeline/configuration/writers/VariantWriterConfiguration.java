@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.ac.ebi.eva.pipeline.configuration;
+package uk.ac.ebi.eva.pipeline.configuration.writers;
 
 import org.opencb.opencga.storage.core.variant.VariantStorageManager;
 import org.springframework.batch.core.configuration.annotation.StepScope;
@@ -29,10 +29,12 @@ import uk.ac.ebi.eva.pipeline.model.converters.data.VariantToMongoDbObjectConver
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 import uk.ac.ebi.eva.utils.MongoDBHelper;
 
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VARIANT_WRITER;
+
 @Configuration
 public class VariantWriterConfiguration {
 
-    @Bean
+    @Bean(VARIANT_WRITER)
     @StepScope
     @Profile(Application.VARIANT_WRITER_MONGO_PROFILE)
     public ItemWriter<Variant> variantMongoWriter(JobOptions jobOptions) throws Exception {

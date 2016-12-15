@@ -17,32 +17,35 @@ import uk.ac.ebi.eva.pipeline.jobs.steps.VepInputGeneratorStep;
 import uk.ac.ebi.eva.pipeline.jobs.steps.tasklets.VepAnnotationGeneratorStep;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.GENERATE_VEP_ANNOTATION_STEP;
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.GENERATE_VEP_INPUT_STEP;
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.LOAD_VEP_ANNOTATION_STEP;
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VEP_ANNOTATION_FLOW;
+
 @Configuration
 @EnableBatchProcessing
 @Import({VepAnnotationGeneratorStep.class, VepInputGeneratorStep.class, AnnotationLoaderStep.class,
         GenerateVepAnnotationStep.class})
 public class AnnotationFlow {
 
-    public static final String NAME_VEP_ANNOTATION_FLOW = "VEP annotation flow";
-
     @Autowired
-    @Qualifier(VepInputGeneratorStep.NAME_GENERATE_VEP_INPUT_STEP)
+    @Qualifier(GENERATE_VEP_INPUT_STEP)
     public Step generateVepInputStep;
 
     @Autowired
-    @Qualifier(AnnotationLoaderStep.NAME_LOAD_VEP_ANNOTATION_STEP)
+    @Qualifier(LOAD_VEP_ANNOTATION_STEP)
     private Step annotationLoadStep;
 
     @Autowired
-    @Qualifier(GenerateVepAnnotationStep.NAME_GENERATE_VEP_ANNOTATION_STEP)
+    @Qualifier(GENERATE_VEP_ANNOTATION_STEP)
     private Step generateVepAnnotationStep;
 
-    @Bean(NAME_VEP_ANNOTATION_FLOW)
+    @Bean(VEP_ANNOTATION_FLOW)
     public Flow vepAnnotationFlow(JobOptions jobOptions) {
         EmptyFileDecider emptyFileDecider = new EmptyFileDecider(jobOptions.getPipelineOptions().getString(JobOptions
                 .VEP_INPUT));
 
-        return new FlowBuilder<Flow>(NAME_VEP_ANNOTATION_FLOW)
+        return new FlowBuilder<Flow>(VEP_ANNOTATION_FLOW)
                 .start(generateVepInputStep)
                 .next(emptyFileDecider).on(EmptyFileDecider.CONTINUE_FLOW)
                 .to(generateVepAnnotationStep)

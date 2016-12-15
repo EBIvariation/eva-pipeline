@@ -31,6 +31,9 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
 import uk.ac.ebi.eva.pipeline.jobs.flows.PopulationStatisticsFlow;
 
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.CALCULATE_STATISTICS_JOB;
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.CALCULATE_STATISTICS_OPTIONAL_FLOW;
+
 /**
  * Configuration to run a full Statistics job: variantStatsFlow: statsCreate --> statsLoad
  */
@@ -40,19 +43,18 @@ import uk.ac.ebi.eva.pipeline.jobs.flows.PopulationStatisticsFlow;
 public class PopulationStatisticsJob {
 
     private static final Logger logger = LoggerFactory.getLogger(PopulationStatisticsJob.class);
-    public static final String NAME_CALCULATE_STATISTICS = "calculate-statistics-job";
 
     @Autowired
-    @Qualifier(PopulationStatisticsFlow.NAME_CALCULATE_STATISTICS_OPTIONAL_FLOW)
+    @Qualifier(CALCULATE_STATISTICS_OPTIONAL_FLOW)
     private Flow optionalStatisticsFlow;
 
-    @Bean(NAME_CALCULATE_STATISTICS)
+    @Bean(CALCULATE_STATISTICS_JOB)
     @Scope("prototype")
     public Job calculateStatisticsJob(JobBuilderFactory jobBuilderFactory) {
-        logger.debug("Building '" + NAME_CALCULATE_STATISTICS + "'");
+        logger.debug("Building '" + CALCULATE_STATISTICS_JOB + "'");
 
         JobBuilder jobBuilder = jobBuilderFactory
-                .get(NAME_CALCULATE_STATISTICS)
+                .get(CALCULATE_STATISTICS_JOB)
                 .incrementer(new RunIdIncrementer());
 
         return jobBuilder

@@ -13,24 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.ac.ebi.eva.pipeline.configuration;
+package uk.ac.ebi.eva.pipeline.configuration.readers;
 
 import org.springframework.batch.core.configuration.annotation.StepScope;
-import org.springframework.batch.item.ItemStreamWriter;
-import org.springframework.batch.item.file.FlatFileItemWriter;
+import org.springframework.batch.item.ItemStreamReader;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import uk.ac.ebi.eva.pipeline.io.writers.VepInputFlatFileWriter;
-import uk.ac.ebi.eva.pipeline.model.VariantWrapper;
+import uk.ac.ebi.eva.pipeline.io.readers.GeneReader;
+import uk.ac.ebi.eva.pipeline.model.FeatureCoordinates;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
+import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
+
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.GENE_READER;
 
 @Configuration
-public class VepInputFlatFileWriterConfiguration {
+public class GeneReaderConfiguration {
 
-    @Bean
+    @Bean(GENE_READER)
     @StepScope
-    public ItemStreamWriter<VariantWrapper> vepInputFlatFileWriter(JobOptions jobOptions) {
-        return new VepInputFlatFileWriter(jobOptions.getVepInput());
+    public ItemStreamReader<FeatureCoordinates> geneReader(JobOptions jobOptions) {
+        return new GeneReader(jobOptions.getPipelineOptions().getString(JobParametersNames.INPUT_GTF));
     }
 
 }

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.ac.ebi.eva.pipeline.configuration;
+package uk.ac.ebi.eva.pipeline.configuration.writers;
 
 import org.opencb.biodata.models.variant.annotation.VariantAnnotation;
 import org.springframework.batch.core.configuration.annotation.StepScope;
@@ -30,10 +30,12 @@ import uk.ac.ebi.eva.utils.MongoDBHelper;
 
 import java.net.UnknownHostException;
 
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VARIANT_ANNOTATION_WRITER;
+
 @Configuration
 public class VariantAnnotationWriterConfiguration {
 
-    @Bean
+    @Bean(VARIANT_ANNOTATION_WRITER)
     @StepScope
     @Profile(Application.VARIANT_ANNOTATION_MONGO_PROFILE)
     public ItemWriter<VariantAnnotation> variantAnnotationItemWriter(JobOptions jobOptions) throws UnknownHostException {

@@ -33,6 +33,10 @@ import uk.ac.ebi.eva.pipeline.jobs.steps.CreateDatabaseIndexesStep;
 import uk.ac.ebi.eva.pipeline.jobs.steps.GeneLoaderStep;
 import uk.ac.ebi.eva.pipeline.jobs.steps.tasklets.IndexesGeneratorStep;
 
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.CREATE_DATABASE_INDEXES_STEP;
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.GENES_LOAD_STEP;
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.INIT_DATABASE_JOB;
+
 /**
  * Job to initialize the databases that will be used in later jobs.
  * <p>
@@ -45,26 +49,25 @@ import uk.ac.ebi.eva.pipeline.jobs.steps.tasklets.IndexesGeneratorStep;
 public class DatabaseInitializationJob {
 
     private static final Logger logger = LoggerFactory.getLogger(DatabaseInitializationJob.class);
-    public static final String NAME_INIT_DATABASE_JOB = "init-database-job";
 
     @Autowired
-    @Qualifier(GeneLoaderStep.NAME_GENES_LOAD_STEP)
+    @Qualifier(GENES_LOAD_STEP)
     private Step genesLoadStep;
 
     @Autowired
-    @Qualifier(CreateDatabaseIndexesStep.NAME_CREATE_DATABASE_INDEXES_STEP)
+    @Qualifier(CREATE_DATABASE_INDEXES_STEP)
     private Step createDatabaseIndexesStep;
 
     @Autowired
     private IndexesGeneratorStep indexesGeneratorStep;
 
-    @Bean(NAME_INIT_DATABASE_JOB)
+    @Bean(INIT_DATABASE_JOB)
     @Scope("prototype")
     public Job initDatabaseJob(JobBuilderFactory jobBuilderFactory) {
-        logger.debug("Building '" + NAME_INIT_DATABASE_JOB + "'");
+        logger.debug("Building '" + INIT_DATABASE_JOB + "'");
 
         JobBuilder jobBuilder = jobBuilderFactory
-                .get(NAME_INIT_DATABASE_JOB)
+                .get(INIT_DATABASE_JOB)
                 .incrementer(new RunIdIncrementer());
 
         return jobBuilder

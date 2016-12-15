@@ -13,27 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.ac.ebi.eva.pipeline.configuration;
+package uk.ac.ebi.eva.pipeline.configuration.readers;
 
+import org.opencb.biodata.models.variant.annotation.VariantAnnotation;
 import org.springframework.batch.core.configuration.annotation.StepScope;
+import org.springframework.batch.item.ItemStreamReader;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import uk.ac.ebi.eva.pipeline.io.readers.NonAnnotatedVariantsMongoReader;
-import uk.ac.ebi.eva.pipeline.jobs.steps.processors.AnnotationProcessor;
+import uk.ac.ebi.eva.pipeline.io.readers.AnnotationFlatFileReader;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 
-import java.net.UnknownHostException;
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VARIANT_ANNOTATION_READER;
 
-@Configuration
-public class NonAnnotatedVariantsMongoReaderConfiguration {
+public class VariantAnnotationReaderConfiguration {
 
-    @Bean
+    @Bean(VARIANT_ANNOTATION_READER)
     @StepScope
-    public NonAnnotatedVariantsMongoReader nonAnnotatedVariantsMongoReader(JobOptions jobOptions)
-            throws UnknownHostException {
-        return new NonAnnotatedVariantsMongoReader(jobOptions.getDbName(),
-                jobOptions.getDbCollectionsVariantsName(),
-                jobOptions.getMongoConnection());
+    public ItemStreamReader<VariantAnnotation> variantAnnotationReader(JobOptions jobOptions) {
+        return new AnnotationFlatFileReader(jobOptions.getPipelineOptions().getString(JobOptions.VEP_OUTPUT));
     }
 
 }

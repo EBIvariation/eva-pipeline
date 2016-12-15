@@ -10,19 +10,21 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.CALCULATE_STATISTICS_OPTIONAL_FLOW;
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VEP_ANNOTATION_OPTIONAL_FLOW;
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.PARALLEL_STATISTICS_AND_ANNOTATION;
+
 @Configuration
 @EnableBatchProcessing
 @Import({AnnotationFlowOptional.class, PopulationStatisticsFlow.class})
 public class ParallelStatisticsAndAnnotationFlow {
 
-    public static final String PARALLEL_STATISTICS_AND_ANNOTATION = "Parallel statistics and annotation";
-
     @Autowired
-    @Qualifier(AnnotationFlowOptional.NAME_VEP_ANNOTATION_OPTIONAL_FLOW)
+    @Qualifier(VEP_ANNOTATION_OPTIONAL_FLOW)
     private Flow annotationFlowOptional;
 
     @Autowired
-    @Qualifier(PopulationStatisticsFlow.NAME_CALCULATE_STATISTICS_OPTIONAL_FLOW)
+    @Qualifier(CALCULATE_STATISTICS_OPTIONAL_FLOW)
     private Flow optionalStatisticsFlow;
 
     @Bean(PARALLEL_STATISTICS_AND_ANNOTATION)

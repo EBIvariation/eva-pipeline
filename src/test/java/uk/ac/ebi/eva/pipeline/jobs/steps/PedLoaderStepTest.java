@@ -35,7 +35,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import uk.ac.ebi.eva.pipeline.jobs.steps.tasklets.PedLoaderStep;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
-import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
+import uk.ac.ebi.eva.test.configuration.BaseTestConfiguration;
 
 import java.util.stream.Collectors;
 
@@ -53,7 +53,7 @@ import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResource;
  */
 @RunWith(SpringRunner.class)
 @TestPropertySource({"classpath:common-configuration.properties"})
-@ContextConfiguration(classes = {BatchTestConfiguration.class})
+@ContextConfiguration(classes = {BaseTestConfiguration.class})
 public class PedLoaderStepTest {
 
     private static final String PEDIGREE_FILE = "/ped/pedigree-test-file.ped";

@@ -24,15 +24,20 @@ import org.springframework.batch.item.ItemStreamReader;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.file.FlatFileParseException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import uk.ac.ebi.eva.commons.models.data.Variant;
-import uk.ac.ebi.eva.pipeline.configuration.VariantWriterConfiguration;
-import uk.ac.ebi.eva.pipeline.configuration.VcfReaderConfiguration;
+import uk.ac.ebi.eva.pipeline.configuration.readers.VcfReaderConfiguration;
+import uk.ac.ebi.eva.pipeline.configuration.writers.VariantWriterConfiguration;
 import uk.ac.ebi.eva.pipeline.listeners.SkippedItemListener;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
+
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.LOAD_VARIANTS_STEP;
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VARIANT_READER;
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VARIANT_WRITER;
 
 /**
  * Step that normalizes variants during the reading and loads them into MongoDB
@@ -44,21 +49,22 @@ import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 @EnableBatchProcessing
 @Import({VariantWriterConfiguration.class, VcfReaderConfiguration.class})
 public class VariantLoaderStep {
+
     private static final Logger logger = LoggerFactory.getLogger(VariantLoaderStep.class);
 
-    public static final String NAME_LOAD_VARIANTS_STEP = "load-variants-step";
-
     @Autowired
+    @Qualifier(VARIANT_READER)
     private ItemStreamReader<Variant> reader;
 
     @Autowired
+    @Qualifier(VARIANT_WRITER)
     private ItemWriter<Variant> variantWriter;
 
-    @Bean(NAME_LOAD_VARIANTS_STEP)
+    @Bean(LOAD_VARIANTS_STEP)
     public Step loadVariantsStep(StepBuilderFactory stepBuilderFactory, JobOptions jobOptions) {
-        logger.debug("Building '" + NAME_LOAD_VARIANTS_STEP + "'");
+        logger.debug("Building '" + LOAD_VARIANTS_STEP + "'");
 
-        return stepBuilderFactory.get(NAME_LOAD_VARIANTS_STEP)
+        return stepBuilderFactory.get(LOAD_VARIANTS_STEP)
                 .<Variant, Variant>chunk(jobOptions.getPipelineOptions().getInt(JobParametersNames.CONFIG_CHUNK_SIZE))
                 .reader(reader)
                 .writer(variantWriter)
