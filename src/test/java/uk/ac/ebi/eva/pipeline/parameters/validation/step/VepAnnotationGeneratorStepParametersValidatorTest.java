@@ -70,43 +70,43 @@ public class VepAnnotationGeneratorStepParametersValidatorTest {
     }
 
     @Test(expected = JobParametersInvalidException.class)
-    public void APP_VEP_PATHIsRequired() throws JobParametersInvalidException, IOException {
+    public void AppVepPathIsRequired() throws JobParametersInvalidException, IOException {
         requiredParameters.remove(JobParametersNames.APP_VEP_PATH);
         validator.validate(new JobParameters(requiredParameters));
     }
 
     @Test(expected = JobParametersInvalidException.class)
-    public void APP_VEP_CACHE_PATHIsRequired() throws JobParametersInvalidException, IOException {
+    public void appVepCachePathIsRequired() throws JobParametersInvalidException, IOException {
         requiredParameters.remove(JobParametersNames.APP_VEP_CACHE_PATH);
         validator.validate(new JobParameters(requiredParameters));
     }
 
     @Test(expected = JobParametersInvalidException.class)
-    public void APP_VEP_CACHE_SPECIESIsRequired() throws JobParametersInvalidException, IOException {
+    public void appVepCacheSeciesIsRequired() throws JobParametersInvalidException, IOException {
         requiredParameters.remove(JobParametersNames.APP_VEP_CACHE_SPECIES);
         validator.validate(new JobParameters(requiredParameters));
     }
 
     @Test(expected = JobParametersInvalidException.class)
-    public void INPUT_FASTAIsRequired() throws JobParametersInvalidException, IOException {
+    public void inputFastaIsRequired() throws JobParametersInvalidException, IOException {
         requiredParameters.remove(JobParametersNames.INPUT_FASTA);
         validator.validate(new JobParameters(requiredParameters));
     }
 
     @Test(expected = JobParametersInvalidException.class)
-    public void OUTPUT_DIR_ANNOTATIONIsRequired() throws JobParametersInvalidException, IOException {
+    public void outputDirAnnotationIsRequired() throws JobParametersInvalidException, IOException {
         requiredParameters.remove(JobParametersNames.OUTPUT_DIR_ANNOTATION);
         validator.validate(new JobParameters(requiredParameters));
     }
 
     @Test(expected = JobParametersInvalidException.class)
-    public void INPUT_STUDY_IDIsRequired() throws JobParametersInvalidException, IOException {
+    public void inputStudyIdIsRequired() throws JobParametersInvalidException, IOException {
         requiredParameters.remove(JobParametersNames.INPUT_STUDY_ID);
         validator.validate(new JobParameters(requiredParameters));
     }
 
     @Test(expected = JobParametersInvalidException.class)
-    public void INPUT_VCF_IDIsRequired() throws JobParametersInvalidException, IOException {
+    public void inputVcfIdIsRequired() throws JobParametersInvalidException, IOException {
         requiredParameters.remove(JobParametersNames.INPUT_VCF_ID);
         validator.validate(new JobParameters(requiredParameters));
     }

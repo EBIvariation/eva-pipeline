@@ -73,31 +73,31 @@ public class VepInputGeneratorStepParametersValidatorTest {
     }
 
     @Test(expected = JobParametersInvalidException.class)
-    public void DB_COLLECTIONS_VARIANTS_NAMEIsRequired() throws JobParametersInvalidException, IOException {
+    public void dbCollectionsVariantsNameIsRequired() throws JobParametersInvalidException, IOException {
         requiredParameters.remove(JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME);
         validator.validate(new JobParameters(requiredParameters));
     }
 
     @Test(expected = JobParametersInvalidException.class)
-    public void DB_NAMEIsRequired() throws JobParametersInvalidException, IOException {
+    public void dbNameIsRequired() throws JobParametersInvalidException, IOException {
         requiredParameters.remove(JobParametersNames.DB_NAME);
         validator.validate(new JobParameters(requiredParameters));
     }
 
     @Test(expected = JobParametersInvalidException.class)
-    public void INPUT_STUDY_IDIsRequired() throws JobParametersInvalidException, IOException {
+    public void inputStudyIdIsRequired() throws JobParametersInvalidException, IOException {
         requiredParameters.remove(JobParametersNames.INPUT_STUDY_ID);
         validator.validate(new JobParameters(requiredParameters));
     }
 
     @Test(expected = JobParametersInvalidException.class)
-    public void INPUT_VCF_IDIsRequired() throws JobParametersInvalidException, IOException {
+    public void inputVcfIdIsRequired() throws JobParametersInvalidException, IOException {
         requiredParameters.remove(JobParametersNames.INPUT_VCF_ID);
         validator.validate(new JobParameters(requiredParameters));
     }
 
     @Test(expected = JobParametersInvalidException.class)
-    public void OUTPUT_DIR_ANNOTATIONIsRequired() throws JobParametersInvalidException, IOException {
+    public void outputDirAnnotationIsRequired() throws JobParametersInvalidException, IOException {
         requiredParameters.remove(JobParametersNames.OUTPUT_DIR_ANNOTATION);
         validator.validate(new JobParameters(requiredParameters));
     }
