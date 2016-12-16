@@ -27,50 +27,46 @@ import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 import java.io.File;
 import java.io.IOException;
 
-public class VepPathValidatorTest {
+public class InputVcfValidatorTest {
 
-    private VepPathValidator validator;
-
-    private JobParametersBuilder jobParametersBuilder;
+    private InputVcfValidator validator;
 
     @Rule
     public PipelineTemporaryFolderRule temporaryFolder = new PipelineTemporaryFolderRule();
 
     @Before
     public void setUp() throws Exception {
-        validator = new VepPathValidator();
+        validator = new InputVcfValidator();
     }
 
     @Test
-    public void vepPathIsValid() throws JobParametersInvalidException, IOException {
-        jobParametersBuilder = new JobParametersBuilder();
-        jobParametersBuilder.addString(JobParametersNames.APP_VEP_PATH,
-                                       temporaryFolder.newFile().getCanonicalPath());
+    public void inputVcfIsValid() throws JobParametersInvalidException, IOException {
+        JobParametersBuilder jobParametersBuilder = new JobParametersBuilder();
+        jobParametersBuilder.addString(JobParametersNames.INPUT_VCF, temporaryFolder.newFile().getCanonicalPath());
         validator.validate(jobParametersBuilder.toJobParameters());
     }
 
     @Test(expected = JobParametersInvalidException.class)
-    public void vepPathNotExist() throws JobParametersInvalidException {
-        jobParametersBuilder = new JobParametersBuilder();
-        jobParametersBuilder.addString(JobParametersNames.APP_VEP_PATH, "file://path/to/file.vcf");
+    public void inputVcfNotExist() throws JobParametersInvalidException {
+        JobParametersBuilder jobParametersBuilder = new JobParametersBuilder();
+        jobParametersBuilder.addString(JobParametersNames.INPUT_VCF, "file://path/to/file.vcf");
         validator.validate(jobParametersBuilder.toJobParameters());
     }
 
     @Test(expected = JobParametersInvalidException.class)
-    public void vepPathNotReadable() throws JobParametersInvalidException, IOException {
-        File file = temporaryFolder.newFile("not_readable.vcf.gz");
+    public void inputVcfNotReadable() throws JobParametersInvalidException, IOException {
+        File file = temporaryFolder.newFile("not_readable.vcf");
         file.setReadable(false);
 
-        jobParametersBuilder = new JobParametersBuilder();
-        jobParametersBuilder.addString(JobParametersNames.APP_VEP_PATH, file.getCanonicalPath());
+        JobParametersBuilder jobParametersBuilder = new JobParametersBuilder();
+        jobParametersBuilder.addString(JobParametersNames.INPUT_VCF, file.getCanonicalPath());
         validator.validate(jobParametersBuilder.toJobParameters());
     }
 
     @Test(expected = JobParametersInvalidException.class)
-    public void vepPathIsADirectory() throws JobParametersInvalidException, IOException {
-        jobParametersBuilder = new JobParametersBuilder();
-        jobParametersBuilder.addString(JobParametersNames.APP_VEP_PATH,
-                                       temporaryFolder.getRoot().getCanonicalPath());
+    public void inputVcfIsADirectory() throws JobParametersInvalidException, IOException {
+        JobParametersBuilder jobParametersBuilder = new JobParametersBuilder();
+        jobParametersBuilder.addString(JobParametersNames.INPUT_VCF, temporaryFolder.getRoot().getCanonicalPath());
         validator.validate(jobParametersBuilder.toJobParameters());
     }
 }

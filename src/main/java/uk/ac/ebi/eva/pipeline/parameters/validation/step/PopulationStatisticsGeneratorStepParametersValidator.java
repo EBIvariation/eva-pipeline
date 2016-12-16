@@ -40,8 +40,10 @@ import java.util.List;
 public class PopulationStatisticsGeneratorStepParametersValidator extends DefaultJobParametersValidator {
 
     public PopulationStatisticsGeneratorStepParametersValidator() {
-        super(new String[]{JobParametersNames.DB_NAME, JobParametersNames.INPUT_STUDY_ID,
-                           JobParametersNames.INPUT_VCF_ID, JobParametersNames.OUTPUT_DIR_STATISTICS},
+        super(new String[]{JobParametersNames.DB_NAME,
+                           JobParametersNames.INPUT_STUDY_ID,
+                           JobParametersNames.INPUT_VCF_ID,
+                           JobParametersNames.OUTPUT_DIR_STATISTICS},
               new String[]{});
     }
 

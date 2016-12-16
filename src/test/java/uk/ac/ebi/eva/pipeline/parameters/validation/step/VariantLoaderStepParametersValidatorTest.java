@@ -21,8 +21,8 @@ import org.junit.Test;
 import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersInvalidException;
+import org.springframework.batch.core.JobParametersValidator;
 
-import uk.ac.ebi.eva.pipeline.jobs.steps.tasklets.PopulationStatisticsLoaderStep;
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 
@@ -31,12 +31,12 @@ import java.util.Map;
 import java.util.TreeMap;
 
 /**
- * Tests that the arguments necessary to run a {@link PopulationStatisticsLoaderStep} are
- * correctly validated
+ * Tests that the arguments necessary to run a {@link uk.ac.ebi.eva.pipeline.jobs.steps.VariantLoaderStep} are correctly
+ * validated
  */
-public class PopulationStatisticsLoaderStepParametersValidatorTest {
+public class VariantLoaderStepParametersValidatorTest {
 
-    private PopulationStatisticsLoaderStepParametersValidator validator;
+    private JobParametersValidator validator;
 
     @Rule
     public PipelineTemporaryFolderRule temporaryFolderRule = new PipelineTemporaryFolderRule();
@@ -47,19 +47,19 @@ public class PopulationStatisticsLoaderStepParametersValidatorTest {
 
     @Before
     public void setUp() throws IOException {
-        validator = new PopulationStatisticsLoaderStepParametersValidator();
+        validator = new VariantLoaderStepParametersValidator();
 
         requiredParameters = new TreeMap<>();
+        requiredParameters.put(JobParametersNames.DB_NAME, new JobParameter("database"));
+        requiredParameters.put(JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME, new JobParameter("variants"));
         requiredParameters.put(JobParametersNames.INPUT_STUDY_ID, new JobParameter("inputStudyId"));
         requiredParameters.put(JobParametersNames.INPUT_VCF_ID, new JobParameter("inputVcfId"));
-        requiredParameters.put(JobParametersNames.DB_COLLECTIONS_FILES_NAME, new JobParameter("files"));
-        requiredParameters.put(JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME, new JobParameter("variants"));
-        requiredParameters.put(JobParametersNames.DB_NAME, new JobParameter("database"));
-        requiredParameters.put(JobParametersNames.OUTPUT_DIR_STATISTICS,
-                               new JobParameter(temporaryFolderRule.getRoot().getCanonicalPath()));
+        requiredParameters.put(JobParametersNames.INPUT_VCF_AGGREGATION, new JobParameter("NONE"));
+        requiredParameters.put(JobParametersNames.INPUT_VCF,
+                               new JobParameter(temporaryFolderRule.newFile().getCanonicalPath()));
 
         optionalParameters = new TreeMap<>();
-        optionalParameters.put(JobParametersNames.STATISTICS_OVERWRITE, new JobParameter("true"));
+        optionalParameters.put(JobParametersNames.CONFIG_CHUNK_SIZE, new JobParameter("100"));
     }
 
     @Test
@@ -76,38 +76,38 @@ public class PopulationStatisticsLoaderStepParametersValidatorTest {
     }
 
     @Test(expected = JobParametersInvalidException.class)
-    public void inputStudyIdIsRequired() throws JobParametersInvalidException, IOException {
-        requiredParameters.remove(JobParametersNames.INPUT_STUDY_ID);
-        validator.validate(new JobParameters(requiredParameters));
-    }
-
-    @Test(expected = JobParametersInvalidException.class)
-    public void inputVcfIdIsRequired() throws JobParametersInvalidException, IOException {
-        requiredParameters.remove(JobParametersNames.INPUT_VCF_ID);
-        validator.validate(new JobParameters(requiredParameters));
-    }
-
-    @Test(expected = JobParametersInvalidException.class)
-    public void dbCollectionsFilesNameIsRequired() throws JobParametersInvalidException, IOException {
-        requiredParameters.remove(JobParametersNames.DB_COLLECTIONS_FILES_NAME);
-        validator.validate(new JobParameters(requiredParameters));
-    }
-
-    @Test(expected = JobParametersInvalidException.class)
-    public void dbCollectionsVariantsNameIsRequired() throws JobParametersInvalidException, IOException {
-        requiredParameters.remove(JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME);
-        validator.validate(new JobParameters(requiredParameters));
-    }
-
-    @Test(expected = JobParametersInvalidException.class)
-    public void dbNameIsRequired() throws JobParametersInvalidException, IOException {
+    public void dbNameIsRequired() throws Exception {
         requiredParameters.remove(JobParametersNames.DB_NAME);
         validator.validate(new JobParameters(requiredParameters));
     }
 
     @Test(expected = JobParametersInvalidException.class)
-    public void outputDirStatisticsIsRequired() throws JobParametersInvalidException, IOException {
-        requiredParameters.remove(JobParametersNames.OUTPUT_DIR_STATISTICS);
+    public void dbCollectionsVariantsNameIsRequired() throws Exception {
+        requiredParameters.remove(JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME);
+        validator.validate(new JobParameters(requiredParameters));
+    }
+
+    @Test(expected = JobParametersInvalidException.class)
+    public void inputStudyIdIsRequired() throws Exception {
+        requiredParameters.remove(JobParametersNames.INPUT_STUDY_ID);
+        validator.validate(new JobParameters(requiredParameters));
+    }
+
+    @Test(expected = JobParametersInvalidException.class)
+    public void inputVcfIdIsRequired() throws Exception {
+        requiredParameters.remove(JobParametersNames.INPUT_VCF_ID);
+        validator.validate(new JobParameters(requiredParameters));
+    }
+
+    @Test(expected = JobParametersInvalidException.class)
+    public void inputVcfIsRequired() throws Exception {
+        requiredParameters.remove(JobParametersNames.INPUT_VCF);
+        validator.validate(new JobParameters(requiredParameters));
+    }
+
+    @Test(expected = JobParametersInvalidException.class)
+    public void inputVcfAggregationIsRequired() throws Exception {
+        requiredParameters.remove(JobParametersNames.INPUT_VCF_AGGREGATION);
         validator.validate(new JobParameters(requiredParameters));
     }
 
