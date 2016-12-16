@@ -253,6 +253,10 @@ public class JobOptions {
         return getPipelineOptions().getString(JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME);
     }
 
+    public String getDbCollectionsFilesName() {
+        return getPipelineOptions().getString(JobParametersNames.DB_COLLECTIONS_FILES_NAME);
+    }
+
     public String getDbCollectionsStatsName() {
         return getPipelineOptions().getString(JobParametersNames.DB_COLLECTIONS_STATISTICS_NAME);
     }
@@ -295,5 +299,4 @@ public class JobOptions {
     public MongoConnection getMongoConnection() {
         return new MongoConnection(dbHosts, dbAuthenticationDb, dbUser, dbPassword, readPreference);
     }
-
 }

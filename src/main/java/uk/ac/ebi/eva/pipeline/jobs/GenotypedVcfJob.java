@@ -33,12 +33,14 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
+
 import uk.ac.ebi.eva.pipeline.jobs.flows.ParallelStatisticsAndAnnotationFlow;
+import uk.ac.ebi.eva.pipeline.jobs.steps.LoadFileStep;
 import uk.ac.ebi.eva.pipeline.jobs.steps.VariantLoaderStep;
 import uk.ac.ebi.eva.pipeline.listeners.VariantOptionsConfigurerListener;
-import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.GENOTYPED_VCF_JOB;
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.LOAD_FILE_STEP;
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.LOAD_VARIANTS_STEP;
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.PARALLEL_STATISTICS_AND_ANNOTATION;
 
@@ -53,7 +55,7 @@ import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.PARALLEL_STATISTICS
  */
 @Configuration
 @EnableBatchProcessing
-@Import({VariantLoaderStep.class, ParallelStatisticsAndAnnotationFlow.class})
+@Import({VariantLoaderStep.class, LoadFileStep.class, ParallelStatisticsAndAnnotationFlow.class})
 public class GenotypedVcfJob {
     private static final Logger logger = LoggerFactory.getLogger(GenotypedVcfJob.class);
 
@@ -75,7 +77,8 @@ public class GenotypedVcfJob {
     private Step variantLoaderStep;
 
     @Autowired
-    private JobOptions jobOptions;
+    @Qualifier(LOAD_FILE_STEP)
+    private Step loadFileStep;
 
     @Bean(GENOTYPED_VCF_JOB)
     @Scope("prototype")
@@ -88,6 +91,7 @@ public class GenotypedVcfJob {
                 .listener(genotypedJobListener());
         FlowJobBuilder builder = jobBuilder
                 .flow(variantLoaderStep)
+                .next(loadFileStep)
                 .next(parallelStatisticsAndAnnotation)
                 .end();
 

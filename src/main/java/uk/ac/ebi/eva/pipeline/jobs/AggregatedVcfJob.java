@@ -32,12 +32,14 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
+
 import uk.ac.ebi.eva.pipeline.jobs.flows.AnnotationFlowOptional;
+import uk.ac.ebi.eva.pipeline.jobs.steps.LoadFileStep;
 import uk.ac.ebi.eva.pipeline.jobs.steps.VariantLoaderStep;
 import uk.ac.ebi.eva.pipeline.listeners.VariantOptionsConfigurerListener;
-import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.AGGREGATED_VCF_JOB;
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.LOAD_FILE_STEP;
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.LOAD_VARIANTS_STEP;
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VEP_ANNOTATION_OPTIONAL_FLOW;
 
@@ -51,7 +53,7 @@ import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VEP_ANNOTATION_OPTI
  */
 @Configuration
 @EnableBatchProcessing
-@Import({VariantLoaderStep.class, AnnotationFlowOptional.class})
+@Import({VariantLoaderStep.class, LoadFileStep.class, AnnotationFlowOptional.class})
 public class AggregatedVcfJob {
 
     private static final Logger logger = LoggerFactory.getLogger(AggregatedVcfJob.class);
@@ -66,15 +68,16 @@ public class AggregatedVcfJob {
     private static final boolean INCLUDE_STATS = true;
 
     @Autowired
-    private JobOptions jobOptions;
-
-    @Autowired
     @Qualifier(VEP_ANNOTATION_OPTIONAL_FLOW)
     private Flow annotationFlowOptional;
 
     @Autowired
     @Qualifier(LOAD_VARIANTS_STEP)
     private Step variantLoaderStep;
+
+    @Autowired
+    @Qualifier(LOAD_FILE_STEP)
+    private Step loadFileStep;
 
     @Bean(AGGREGATED_VCF_JOB)
     @Scope("prototype")
@@ -88,6 +91,7 @@ public class AggregatedVcfJob {
 
         FlowJobBuilder builder = jobBuilder
                 .flow(variantLoaderStep)
+                .next(loadFileStep)
                 .next(annotationFlowOptional)
                 .end();
 

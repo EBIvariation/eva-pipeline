@@ -56,16 +56,15 @@ public class AggregatedVcfReaderTest {
 
     private void shouldReadAllLinesHelper(VariantSource.Aggregation aggregationType,
                                           String inputFilePath) throws Exception {
-        
+
         ExecutionContext executionContext = MetaDataInstanceFactory.createStepExecution().getExecutionContext();
 
         // input vcf
         File input = TestFileUtils.getResource(inputFilePath);
 
-        VcfHeaderReader headerReader = new VcfHeaderReader(input, FILE_ID, STUDY_ID, STUDY_NAME,
-                                                           VariantStudy.StudyType.COLLECTION,
-                                                           aggregationType);
-        VariantSource source = headerReader.read();
+        VariantSource source = new VariantSource(input.getAbsolutePath(), FILE_ID, STUDY_ID, STUDY_NAME,
+                                                 VariantStudy.StudyType.COLLECTION,
+                                                 aggregationType);
 
         AggregatedVcfReader vcfReader = new AggregatedVcfReader(source, input);
         vcfReader.setSaveState(false);
@@ -79,20 +78,19 @@ public class AggregatedVcfReaderTest {
         ExecutionContext executionContext = MetaDataInstanceFactory.createStepExecution().getExecutionContext();
 
         // uncompress the input VCF into a temporal file
-        File inputFile = TestFileUtils.getResource(INPUT_FILE_PATH);
+        File input = TestFileUtils.getResource(INPUT_FILE_PATH);
         File tempFile = JobTestUtils.createTempFile();
-        JobTestUtils.uncompress(inputFile.getAbsolutePath(), tempFile);
+        JobTestUtils.uncompress(input.getAbsolutePath(), tempFile);
 
-        VcfHeaderReader headerReader = new VcfHeaderReader(inputFile, FILE_ID, STUDY_ID, STUDY_NAME,
-                                                           VariantStudy.StudyType.COLLECTION,
-                                                           VariantSource.Aggregation.BASIC);
-        VariantSource source = headerReader.read();
+        VariantSource source = new VariantSource(input.getAbsolutePath(), FILE_ID, STUDY_ID, STUDY_NAME,
+                                                 VariantStudy.StudyType.COLLECTION,
+                                                 VariantSource.Aggregation.BASIC);
 
         AggregatedVcfReader vcfReader = new AggregatedVcfReader(source, tempFile);
         vcfReader.setSaveState(false);
         vcfReader.open(executionContext);
 
-        consumeReader(inputFile, vcfReader);
+        consumeReader(input, vcfReader);
     }
 
     private void consumeReader(File inputFile, AggregatedVcfReader vcfReader) throws Exception {

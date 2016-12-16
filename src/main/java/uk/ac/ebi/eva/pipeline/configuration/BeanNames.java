@@ -46,6 +46,7 @@ public class BeanNames {
     public static final String GENERATE_VEP_ANNOTATION_STEP = "generate-vep-annotation";
     public static final String LOAD_STATISTICS_STEP = "load-statistics-step";
     public static final String LOAD_VARIANTS_STEP = "load-variants-step";
+    public static final String LOAD_FILE_STEP = "load-file-step";
     public static final String GENERATE_VEP_INPUT_STEP = "generate-vep-input-step";
 
     public static final String AGGREGATED_VCF_JOB = "aggregated-vcf-job";
