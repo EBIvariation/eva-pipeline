@@ -19,6 +19,7 @@ import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.job.builder.FlowBuilder;
 import org.springframework.batch.core.job.flow.Flow;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -28,35 +29,41 @@ import uk.ac.ebi.eva.pipeline.jobs.deciders.SkipStepDecider;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 
-import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VEP_ANNOTATION_FLOW;
-import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VEP_ANNOTATION_OPTIONAL_FLOW;
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.CALCULATE_STATISTICS_FLOW;
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.CALCULATE_STATISTICS_OPTIONAL_FLOW;
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.STATISTICS_SKIP_STEP_DECIDER;
 
 /**
- * Configuration class that defines an annotation process that can be skipped.
- * <p>
- * The flow uses the skipStepDecider to execute or not the pipeline depending 'annotation.skip' flag. In the case
- * that the annotation flag is enabled, then the annotation flow proceeds as described in {@link AnnotationFlow}
+ * Configuration that defines a calculate statistics flow that can be skipped depending on property 'statistics.skip'
+ * In the case that the property is set to false, then the process executes the flow at {@link PopulationStatisticsFlow}
  */
 @Configuration
 @EnableBatchProcessing
-@Import({AnnotationFlow.class})
-public class AnnotationFlowOptional {
+@Import({PopulationStatisticsFlow.class})
+public class PopulationStatisticsOptionalFlow {
 
-    @Bean(VEP_ANNOTATION_OPTIONAL_FLOW)
-    Flow vepAnnotationOptionalFlow(@Qualifier(VEP_ANNOTATION_FLOW) Flow vepAnnotationFlow,
-                                   SkipStepDecider skipStepDecider) {
-        return new FlowBuilder<Flow>(VEP_ANNOTATION_OPTIONAL_FLOW)
+    @Autowired
+    @Qualifier(CALCULATE_STATISTICS_FLOW)
+    private Flow calculateStatisticsflow;
+
+    @Autowired
+    @Qualifier(STATISTICS_SKIP_STEP_DECIDER)
+    private SkipStepDecider skipStepDecider;
+
+    @Bean(CALCULATE_STATISTICS_OPTIONAL_FLOW)
+    public Flow calculateStatisticsOptionalFlow() {
+        return new FlowBuilder<Flow>(CALCULATE_STATISTICS_OPTIONAL_FLOW)
                 .start(skipStepDecider).on(SkipStepDecider.DO_STEP)
-                .to(vepAnnotationFlow)
+                .to(calculateStatisticsflow)
                 .from(skipStepDecider).on(SkipStepDecider.SKIP_STEP)
                 .end(BatchStatus.COMPLETED.toString())
                 .build();
     }
 
-    @Bean
+    @Bean(STATISTICS_SKIP_STEP_DECIDER)
     @Scope("prototype")
     SkipStepDecider skipStepDecider(JobOptions jobOptions) {
-        return new SkipStepDecider(jobOptions.getPipelineOptions(), JobParametersNames.ANNOTATION_SKIP);
+        return new SkipStepDecider(jobOptions.getPipelineOptions(), JobParametersNames.STATISTICS_SKIP);
     }
 
 }

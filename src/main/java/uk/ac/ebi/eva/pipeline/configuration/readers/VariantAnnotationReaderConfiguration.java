@@ -24,6 +24,9 @@ import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VARIANT_ANNOTATION_READER;
 
+/**
+ * Configuration to inject a AnnotationFlatFileReader as a Variant Annotation Reader in the pipeline.
+ */
 public class VariantAnnotationReaderConfiguration {
 
     @Bean(VARIANT_ANNOTATION_READER)

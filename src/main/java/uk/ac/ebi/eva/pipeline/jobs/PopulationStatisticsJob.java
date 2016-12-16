@@ -31,6 +31,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
 import uk.ac.ebi.eva.pipeline.jobs.flows.PopulationStatisticsFlow;
 
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.CALCULATE_STATISTICS_FLOW;
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.CALCULATE_STATISTICS_JOB;
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.CALCULATE_STATISTICS_OPTIONAL_FLOW;
 
@@ -45,7 +46,7 @@ public class PopulationStatisticsJob {
     private static final Logger logger = LoggerFactory.getLogger(PopulationStatisticsJob.class);
 
     @Autowired
-    @Qualifier(CALCULATE_STATISTICS_OPTIONAL_FLOW)
+    @Qualifier(CALCULATE_STATISTICS_FLOW)
     private Flow optionalStatisticsFlow;
 
     @Bean(CALCULATE_STATISTICS_JOB)

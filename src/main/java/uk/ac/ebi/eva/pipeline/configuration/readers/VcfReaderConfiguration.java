@@ -33,6 +33,9 @@ import java.io.IOException;
 
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VARIANT_READER;
 
+/**
+ * Configuration to inject a VcfReader as a Variant Reader bean.
+ */
 @Configuration
 public class VcfReaderConfiguration {
 

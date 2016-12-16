@@ -25,6 +25,9 @@ import java.net.UnknownHostException;
 
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.NON_ANNOTATED_VARIANTS_READER;
 
+/**
+ * Configuration to inject a NonannotatedVariants bean that reads from a mongo database in the pipeline
+ */
 @Configuration
 public class NonAnnotatedVariantsMongoReaderConfiguration {
 

@@ -26,6 +26,9 @@ import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.GENE_READER;
 
+/**
+ * Configuration to inject GeneReader as in the pipeline.
+ */
 @Configuration
 public class GeneReaderConfiguration {
 
