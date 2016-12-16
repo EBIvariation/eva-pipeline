@@ -45,7 +45,8 @@ public class VariantLoaderStepParametersValidator extends DefaultJobParametersVa
                            JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME,
                            JobParametersNames.INPUT_STUDY_ID,
                            JobParametersNames.INPUT_VCF_ID,
-                           JobParametersNames.INPUT_VCF},
+                           JobParametersNames.INPUT_VCF,
+                           JobParametersNames.INPUT_VCF_AGGREGATION},
               new String[]{});
 
     }
@@ -63,7 +64,7 @@ public class VariantLoaderStepParametersValidator extends DefaultJobParametersVa
                 new InputStudyIdValidator(),
                 new InputVcfIdValidator(),
                 new InputVcfValidator(),
-                new OptionalValidator(new InputVcfAggregationValidator(), JobParametersNames.INPUT_VCF_AGGREGATION),
+                new InputVcfAggregationValidator(),
                 new OptionalValidator(new ConfigChunkSizeValidator(), JobParametersNames.CONFIG_CHUNK_SIZE)
         );
 

@@ -54,11 +54,11 @@ public class VariantLoaderStepParametersValidatorTest {
         requiredParameters.put(JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME, new JobParameter("variants"));
         requiredParameters.put(JobParametersNames.INPUT_STUDY_ID, new JobParameter("inputStudyId"));
         requiredParameters.put(JobParametersNames.INPUT_VCF_ID, new JobParameter("inputVcfId"));
+        requiredParameters.put(JobParametersNames.INPUT_VCF_AGGREGATION, new JobParameter("NONE"));
         requiredParameters.put(JobParametersNames.INPUT_VCF,
                                new JobParameter(temporaryFolderRule.newFile().getCanonicalPath()));
 
         optionalParameters = new TreeMap<>();
-        optionalParameters.put(JobParametersNames.INPUT_VCF_AGGREGATION, new JobParameter("NONE"));
         optionalParameters.put(JobParametersNames.CONFIG_CHUNK_SIZE, new JobParameter("100"));
     }
 
@@ -102,6 +102,12 @@ public class VariantLoaderStepParametersValidatorTest {
     @Test(expected = JobParametersInvalidException.class)
     public void inputVcfIsRequired() throws Exception {
         requiredParameters.remove(JobParametersNames.INPUT_VCF);
+        validator.validate(new JobParameters(requiredParameters));
+    }
+
+    @Test(expected = JobParametersInvalidException.class)
+    public void inputVcfAggregationIsRequired() throws Exception {
+        requiredParameters.remove(JobParametersNames.INPUT_VCF_AGGREGATION);
         validator.validate(new JobParameters(requiredParameters));
     }
 
