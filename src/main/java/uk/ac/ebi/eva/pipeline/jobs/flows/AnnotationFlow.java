@@ -14,7 +14,6 @@ import uk.ac.ebi.eva.pipeline.jobs.deciders.EmptyFileDecider;
 import uk.ac.ebi.eva.pipeline.jobs.steps.AnnotationLoaderStep;
 import uk.ac.ebi.eva.pipeline.jobs.steps.GenerateVepAnnotationStep;
 import uk.ac.ebi.eva.pipeline.jobs.steps.VepInputGeneratorStep;
-import uk.ac.ebi.eva.pipeline.jobs.steps.tasklets.VepAnnotationGeneratorStep;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.GENERATE_VEP_ANNOTATION_STEP;
@@ -24,8 +23,7 @@ import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VEP_ANNOTATION_FLOW
 
 @Configuration
 @EnableBatchProcessing
-@Import({VepAnnotationGeneratorStep.class, VepInputGeneratorStep.class, AnnotationLoaderStep.class,
-        GenerateVepAnnotationStep.class})
+@Import({VepInputGeneratorStep.class, AnnotationLoaderStep.class, GenerateVepAnnotationStep.class})
 public class AnnotationFlow {
 
     @Autowired

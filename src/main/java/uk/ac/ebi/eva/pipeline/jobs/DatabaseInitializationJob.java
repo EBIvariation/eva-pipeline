@@ -31,7 +31,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
 import uk.ac.ebi.eva.pipeline.jobs.steps.CreateDatabaseIndexesStep;
 import uk.ac.ebi.eva.pipeline.jobs.steps.GeneLoaderStep;
-import uk.ac.ebi.eva.pipeline.jobs.steps.tasklets.IndexesGeneratorStep;
 
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.CREATE_DATABASE_INDEXES_STEP;
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.GENES_LOAD_STEP;
@@ -45,7 +44,7 @@ import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.INIT_DATABASE_JOB;
  */
 @Configuration
 @EnableBatchProcessing
-@Import({IndexesGeneratorStep.class, GeneLoaderStep.class, CreateDatabaseIndexesStep.class})
+@Import({GeneLoaderStep.class, CreateDatabaseIndexesStep.class})
 public class DatabaseInitializationJob {
 
     private static final Logger logger = LoggerFactory.getLogger(DatabaseInitializationJob.class);
@@ -57,9 +56,6 @@ public class DatabaseInitializationJob {
     @Autowired
     @Qualifier(CREATE_DATABASE_INDEXES_STEP)
     private Step createDatabaseIndexesStep;
-
-    @Autowired
-    private IndexesGeneratorStep indexesGeneratorStep;
 
     @Bean(INIT_DATABASE_JOB)
     @Scope("prototype")

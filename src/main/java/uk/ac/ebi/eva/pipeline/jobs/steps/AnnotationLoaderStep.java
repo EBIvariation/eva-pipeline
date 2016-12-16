@@ -75,8 +75,10 @@ public class AnnotationLoaderStep {
     public Step loadVepAnnotationStep(StepBuilderFactory stepBuilderFactory, JobOptions jobOptions) {
         logger.debug("Building '" + LOAD_VEP_ANNOTATION_STEP + "'");
 
+        final int chunkSize = jobOptions.getPipelineOptions().getInt(JobParametersNames.CONFIG_CHUNK_SIZE);
+
         return stepBuilderFactory.get(LOAD_VEP_ANNOTATION_STEP)
-                .<VariantAnnotation, VariantAnnotation>chunk(jobOptions.getPipelineOptions().getInt(JobParametersNames.CONFIG_CHUNK_SIZE))
+                .<VariantAnnotation, VariantAnnotation>chunk(chunkSize)
                 .reader(variantAnnotationReader)
                 .writer(variantAnnotationItemWriter)
                 .faultTolerant().skipLimit(50).skip(FlatFileParseException.class)
