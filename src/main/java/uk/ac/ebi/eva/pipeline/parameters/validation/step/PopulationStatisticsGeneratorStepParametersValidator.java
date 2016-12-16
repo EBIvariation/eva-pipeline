@@ -21,6 +21,7 @@ import org.springframework.batch.core.JobParametersValidator;
 import org.springframework.batch.core.job.CompositeJobParametersValidator;
 import org.springframework.batch.core.job.DefaultJobParametersValidator;
 
+import uk.ac.ebi.eva.pipeline.jobs.steps.tasklets.PopulationStatisticsGeneratorStep;
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 import uk.ac.ebi.eva.pipeline.parameters.validation.DbNameValidator;
 import uk.ac.ebi.eva.pipeline.parameters.validation.InputStudyIdValidator;
@@ -34,7 +35,7 @@ import java.util.List;
 
 /**
  * Validates the job parameters necessary to execute a
- * {@link uk.ac.ebi.eva.pipeline.jobs.steps.PopulationStatisticsGeneratorStep}
+ * {@link PopulationStatisticsGeneratorStep}
  */
 public class PopulationStatisticsGeneratorStepParametersValidator extends DefaultJobParametersValidator {
 

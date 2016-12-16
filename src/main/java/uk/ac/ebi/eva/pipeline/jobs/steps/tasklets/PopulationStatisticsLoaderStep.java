@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.ac.ebi.eva.pipeline.jobs.steps;
+package uk.ac.ebi.eva.pipeline.jobs.steps.tasklets;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
@@ -35,14 +35,10 @@ import org.opencb.opencga.storage.mongodb.variant.VariantMongoDBAdaptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.StepContribution;
-import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Import;
-import org.springframework.stereotype.Component;
-
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 import uk.ac.ebi.eva.utils.MongoDBHelper;
@@ -61,45 +57,42 @@ import java.util.zip.GZIPInputStream;
 
 /**
  * Tasklet that loads statistics into mongoDB.
- *
+ * <p>
  * Input: file containing statistics (.variants.stats.json.gz)
  * Output: stats loaded into mongodb
- *
+ * <p>
  * Example:
  * {
  * "chromosome":"20",
  * "position":67765,
  * "cohortStats":{
- *  "ALL":{
- *      "refAllele":"C",
- *      "altAllele":"T",
- *      "variantType":"SNV",
- *      "refAlleleCount":4996,
- *      "altAlleleCount":12,
- *      "genotypesCount":{"0|0":2492,"0|1":12},
- *      "missingAlleles":0,
- *      "missingGenotypes":0,
- *      "refAlleleFreq":0.99760383,
- *      "altAlleleFreq":0.002396166,
- *      "genotypesFreq":{"0/0":0.0,"0/1":0.0,"1/1":0.0,"0|0":0.99520767,"0|1":0.004792332},
- *      "maf":0.002396166,
- *      "mgf":0.0,
- *      "mafAllele":"T",
- *      "mgfGenotype":"0/0",
- *      "mendelianErrors":-1,
- *      "casesPercentDominant":-1.0,
- *      "controlsPercentDominant":-1.0,
- *      "casesPercentRecessive":-1.0,
- *      "controlsPercentRecessive":-1.0,
- *      "quality":100.0,
- *      "numSamples":2504
- *      }
- *  }
+ * "ALL":{
+ * "refAllele":"C",
+ * "altAllele":"T",
+ * "variantType":"SNV",
+ * "refAlleleCount":4996,
+ * "altAlleleCount":12,
+ * "genotypesCount":{"0|0":2492,"0|1":12},
+ * "missingAlleles":0,
+ * "missingGenotypes":0,
+ * "refAlleleFreq":0.99760383,
+ * "altAlleleFreq":0.002396166,
+ * "genotypesFreq":{"0/0":0.0,"0/1":0.0,"1/1":0.0,"0|0":0.99520767,"0|1":0.004792332},
+ * "maf":0.002396166,
+ * "mgf":0.0,
+ * "mafAllele":"T",
+ * "mgfGenotype":"0/0",
+ * "mendelianErrors":-1,
+ * "casesPercentDominant":-1.0,
+ * "controlsPercentDominant":-1.0,
+ * "casesPercentRecessive":-1.0,
+ * "controlsPercentRecessive":-1.0,
+ * "quality":100.0,
+ * "numSamples":2504
+ * }
+ * }
  * }
  */
-@Component
-@StepScope
-@Import({JobOptions.class})
 public class PopulationStatisticsLoaderStep implements Tasklet {
     private static final Logger logger = LoggerFactory.getLogger(PopulationStatisticsLoaderStep.class);
 
@@ -109,9 +102,9 @@ public class PopulationStatisticsLoaderStep implements Tasklet {
 
     @Autowired
     private JobOptions jobOptions;
-    
+
     private JsonFactory jsonFactory;
-    
+
     private ObjectMapper jsonObjectMapper;
 
     public PopulationStatisticsLoaderStep() {
@@ -119,7 +112,7 @@ public class PopulationStatisticsLoaderStep implements Tasklet {
         jsonObjectMapper = new ObjectMapper(jsonFactory);
         jsonObjectMapper.addMixIn(VariantStats.class, VariantStatsJsonMixin.class);
     }
-    
+
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
         ObjectMap variantOptions = jobOptions.getVariantOptions();
@@ -132,7 +125,7 @@ public class PopulationStatisticsLoaderStep implements Tasklet {
 
         VariantDBAdaptor dbAdaptor = getDbAdaptor(pipelineOptions);
         QueryOptions statsOptions = new QueryOptions(variantOptions);
-        
+
         // Load statistics for variants and the file
         loadVariantStats(dbAdaptor, statsOutputUri, statsOptions);
         loadSourceStats(dbAdaptor, statsOutputUri);
@@ -184,9 +177,9 @@ public class PopulationStatisticsLoaderStep implements Tasklet {
             if (statsBatch.size() == batchSize) {
                 QueryResult<?> writeResult = variantDBAdaptor.updateStats(statsBatch, options);
                 writes += writeResult.getNumResults();
-                logger.info("stats loaded up to position {}:{}", 
-                            statsBatch.get(statsBatch.size()-1).getChromosome(),
-                            statsBatch.get(statsBatch.size()-1).getPosition());
+                logger.info("stats loaded up to position {}:{}",
+                        statsBatch.get(statsBatch.size() - 1).getChromosome(),
+                        statsBatch.get(statsBatch.size() - 1).getPosition());
                 statsBatch.clear();
             }
         }
@@ -194,9 +187,9 @@ public class PopulationStatisticsLoaderStep implements Tasklet {
         if (!statsBatch.isEmpty()) {
             QueryResult<?> writeResult = variantDBAdaptor.updateStats(statsBatch, options);
             writes += writeResult.getNumResults();
-            logger.info("stats loaded up to position {}:{}", 
-                        statsBatch.get(statsBatch.size()-1).getChromosome(),
-                        statsBatch.get(statsBatch.size()-1).getPosition());
+            logger.info("stats loaded up to position {}:{}",
+                    statsBatch.get(statsBatch.size() - 1).getChromosome(),
+                    statsBatch.get(statsBatch.size() - 1).getPosition());
             statsBatch.clear();
         }
 

@@ -19,12 +19,14 @@ import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.rule.OutputCapture;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
+import uk.ac.ebi.eva.pipeline.configuration.BeanNames;
 import uk.ac.ebi.eva.pipeline.jobs.PopulationStatisticsJob;
-import uk.ac.ebi.eva.pipeline.jobs.flows.PopulationStatisticsFlow;
+import uk.ac.ebi.eva.pipeline.jobs.steps.tasklets.PopulationStatisticsLoaderStep;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
-import uk.ac.ebi.eva.test.configuration.CommonConfiguration;
+import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 
@@ -42,7 +44,8 @@ import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResourceUrl;
  * Test for {@link PopulationStatisticsLoaderStep}
  */
 @RunWith(SpringRunner.class)
-@ContextConfiguration(classes = {JobOptions.class, PopulationStatisticsJob.class, CommonConfiguration.class, JobLauncherTestUtils.class})
+@TestPropertySource({"classpath:common-configuration.properties"})
+@ContextConfiguration(classes = {PopulationStatisticsJob.class, BatchTestConfiguration.class})
 public class PopulationStatisticsLoaderStepTest {
 
     private static final String SMALL_VCF_FILE = "/small20.vcf.gz";
@@ -83,7 +86,7 @@ public class PopulationStatisticsLoaderStepTest {
         copyFilesToOutpurDir(createTempDirectoryForStatistics());
 
         // When the execute method in variantsStatsLoad is executed
-        JobExecution jobExecution = jobLauncherTestUtils.launchStep(PopulationStatisticsFlow.LOAD_STATISTICS);
+        JobExecution jobExecution = jobLauncherTestUtils.launchStep(BeanNames.LOAD_STATISTICS_STEP);
 
         // Then variantsStatsLoad step should complete correctly
         assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
@@ -121,7 +124,7 @@ public class PopulationStatisticsLoaderStepTest {
         jobOptions.getPipelineOptions().put(JobParametersNames.INPUT_VCF, input);
         jobOptions.getVariantOptions().put(VariantStorageManager.VARIANT_SOURCE, source);
 
-        JobExecution jobExecution = jobLauncherTestUtils.launchStep(PopulationStatisticsFlow.LOAD_STATISTICS);
+        JobExecution jobExecution = jobLauncherTestUtils.launchStep(BeanNames.LOAD_STATISTICS_STEP);
         assertThat(capture.toString(), containsString(FILE_NOT_FOUND_EXCEPTION));
 
         assertEquals(input, jobOptions.getPipelineOptions().getString(JobParametersNames.INPUT_VCF));

@@ -13,24 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package uk.ac.ebi.eva.pipeline.configuration.writers;
 
-package uk.ac.ebi.eva.test.configuration;
-
+import org.springframework.batch.core.configuration.annotation.StepScope;
+import org.springframework.batch.item.ItemStreamWriter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
-import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
+import uk.ac.ebi.eva.pipeline.io.writers.VepInputFlatFileWriter;
+import uk.ac.ebi.eva.pipeline.model.VariantWrapper;
+import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 
-/**
- * Configuration init for AnnotationJob tests
- */
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VEP_INPUT_WRITER;
+
 @Configuration
-@PropertySource({"annotation-job.properties"})
-public class AnnotationJobConfiguration {
+public class VepInputFlatFileWriterConfiguration {
 
-    @Bean
-    private static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
-        return new PropertySourcesPlaceholderConfigurer();
+    @Bean(VEP_INPUT_WRITER)
+    @StepScope
+    public ItemStreamWriter<VariantWrapper> vepInputFlatFileWriter(JobOptions jobOptions) {
+        return new VepInputFlatFileWriter(jobOptions.getVepInput());
     }
 
 }

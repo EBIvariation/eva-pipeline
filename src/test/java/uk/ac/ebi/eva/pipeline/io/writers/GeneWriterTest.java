@@ -25,12 +25,12 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-
 import uk.ac.ebi.eva.pipeline.io.mappers.GeneLineMapper;
 import uk.ac.ebi.eva.pipeline.model.FeatureCoordinates;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
-import uk.ac.ebi.eva.test.configuration.DatabaseInitializationConfiguration;
+import uk.ac.ebi.eva.test.configuration.BaseTestConfiguration;
 import uk.ac.ebi.eva.test.data.GtfStaticTestData;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 
@@ -47,7 +47,8 @@ import static uk.ac.ebi.eva.utils.MongoDBHelper.getMongoOperations;
  * output: the FeatureCoordinates get written in mongo, with at least: chromosome, start and end.
  */
 @RunWith(SpringRunner.class)
-@ContextConfiguration(classes = {JobOptions.class, DatabaseInitializationConfiguration.class,})
+@TestPropertySource({"classpath:initialize-database.properties"})
+@ContextConfiguration(classes = {BaseTestConfiguration.class})
 public class GeneWriterTest {
 
     @Rule

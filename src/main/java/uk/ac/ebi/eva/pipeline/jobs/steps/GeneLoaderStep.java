@@ -16,17 +16,21 @@
 
 package uk.ac.ebi.eva.pipeline.jobs.steps;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
+import org.springframework.batch.item.ItemStreamReader;
+import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.file.FlatFileParseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.data.mongodb.core.MongoOperations;
-
+import uk.ac.ebi.eva.pipeline.configuration.readers.GeneReaderConfiguration;
+import uk.ac.ebi.eva.pipeline.configuration.writers.GeneWriterConfiguration;
 import uk.ac.ebi.eva.pipeline.io.mappers.GeneLineMapper;
 import uk.ac.ebi.eva.pipeline.io.readers.GeneReader;
 import uk.ac.ebi.eva.pipeline.io.writers.GeneWriter;
@@ -35,9 +39,10 @@ import uk.ac.ebi.eva.pipeline.listeners.SkippedItemListener;
 import uk.ac.ebi.eva.pipeline.model.FeatureCoordinates;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
-import uk.ac.ebi.eva.utils.MongoDBHelper;
 
-import java.io.IOException;
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.GENES_LOAD_STEP;
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.GENE_READER;
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.GENE_WRITER;
 
 /**
  * This step loads a list of genomic features from a species into a DB. This DB is intended to be used as a mapping
@@ -54,32 +59,31 @@ import java.io.IOException;
 
 @Configuration
 @EnableBatchProcessing
-@Import(JobOptions.class)
+@Import({GeneReaderConfiguration.class, GeneWriterConfiguration.class})
 public class GeneLoaderStep {
 
-    public static final String LOAD_FEATURES = "Load features";
+    private static final Logger logger = LoggerFactory.getLogger(GeneLoaderStep.class);
 
     @Autowired
-    private StepBuilderFactory stepBuilderFactory;
+    @Qualifier(GENE_READER)
+    private ItemStreamReader<FeatureCoordinates> reader;
 
     @Autowired
-    private JobOptions jobOptions;
+    @Qualifier(GENE_WRITER)
+    private ItemWriter<FeatureCoordinates> writer;
 
-    @Bean
-    @Qualifier("genesLoadStep")
-    public Step genesLoadStep() throws IOException {
-        MongoOperations mongoOperations = MongoDBHelper
-                .getMongoOperations(jobOptions.getDbName(), jobOptions.getMongoConnection());
+    @Bean(GENES_LOAD_STEP)
+    public Step genesLoadStep(StepBuilderFactory stepBuilderFactory, JobOptions jobOptions) {
+        logger.debug("Building '" + GENES_LOAD_STEP + "'");
 
-        return stepBuilderFactory.get(LOAD_FEATURES)
-                .<FeatureCoordinates, FeatureCoordinates>chunk(
-                        jobOptions.getPipelineOptions().getInt(JobParametersNames.CONFIG_CHUNK_SIZE))
-                .reader(new GeneReader(jobOptions.getPipelineOptions().getString(JobParametersNames.INPUT_GTF)))
+        return stepBuilderFactory.get(GENES_LOAD_STEP)
+                .<FeatureCoordinates, FeatureCoordinates>chunk(jobOptions.getPipelineOptions().getInt(JobParametersNames.CONFIG_CHUNK_SIZE))
+                .reader(reader)
                 .processor(new GeneFilterProcessor())
-                .writer(new GeneWriter(mongoOperations, jobOptions.getDbCollectionsFeaturesName()))
+                .writer(writer)
                 .faultTolerant().skipLimit(50).skip(FlatFileParseException.class)
                 .listener(new SkippedItemListener())
                 .build();
     }
-    
+
 }

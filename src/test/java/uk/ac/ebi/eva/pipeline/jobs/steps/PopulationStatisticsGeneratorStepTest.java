@@ -28,12 +28,14 @@ import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
+import uk.ac.ebi.eva.pipeline.configuration.BeanNames;
 import uk.ac.ebi.eva.pipeline.jobs.PopulationStatisticsJob;
-import uk.ac.ebi.eva.pipeline.jobs.flows.PopulationStatisticsFlow;
+import uk.ac.ebi.eva.pipeline.jobs.steps.tasklets.PopulationStatisticsGeneratorStep;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
-import uk.ac.ebi.eva.test.configuration.CommonConfiguration;
+import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 
@@ -41,7 +43,9 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.opencb.opencga.storage.core.variant.VariantStorageManager.VARIANT_SOURCE;
 import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResourceUrl;
 
@@ -49,7 +53,8 @@ import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResourceUrl;
  * Test for {@link PopulationStatisticsGeneratorStep}
  */
 @RunWith(SpringRunner.class)
-@ContextConfiguration(classes = {JobOptions.class, PopulationStatisticsJob.class, CommonConfiguration.class, JobLauncherTestUtils.class})
+@TestPropertySource({"classpath:common-configuration.properties"})
+@ContextConfiguration(classes = {PopulationStatisticsJob.class, BatchTestConfiguration.class})
 public class PopulationStatisticsGeneratorStepTest {
 
     private static final String SMALL_VCF_FILE = "/small20.vcf.gz";
@@ -81,7 +86,7 @@ public class PopulationStatisticsGeneratorStepTest {
         assertFalse(statsFile.exists());  // ensure the stats file doesn't exist from previous executions
 
         // When the execute method in variantsStatsCreate is executed
-        JobExecution jobExecution = jobLauncherTestUtils.launchStep(PopulationStatisticsFlow.CALCULATE_STATISTICS);
+        JobExecution jobExecution = jobLauncherTestUtils.launchStep(BeanNames.CALCULATE_STATISTICS_STEP);
 
         //Then variantsStatsCreate step should complete correctly
         assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
@@ -107,7 +112,7 @@ public class PopulationStatisticsGeneratorStepTest {
         assertFalse(statsFile.exists());  // ensure the stats file doesn't exist from previous executions
 
         // When the execute method in variantsStatsCreate is executed
-        JobExecution jobExecution = jobLauncherTestUtils.launchStep(PopulationStatisticsFlow.CALCULATE_STATISTICS);
+        JobExecution jobExecution = jobLauncherTestUtils.launchStep(BeanNames.CALCULATE_STATISTICS_STEP);
         assertEquals(ExitStatus.FAILED.getExitCode(), jobExecution.getExitStatus().getExitCode());
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 EMBL - European Bioinformatics Institute
+ * Copyright 2016 EMBL - European Bioinformatics Institute
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,20 +23,18 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.env.Environment;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
+import uk.ac.ebi.eva.pipeline.Application;
 
 /**
  * Configuration will be loaded from the file "application-production.properties".
  */
 @Configuration
-@Profile("production")
+@Profile(Application.PRODUCTION_PROFILE)
 public class PostgreDataSourceConfiguration {
-
-    @Autowired
-    private Environment env;
 
     @Bean
     @Primary
-    public DataSource postgreDataSource() {
+    public DataSource postgreDataSource(Environment env) {
         DriverManagerDataSource dataSource = new DriverManagerDataSource();
         dataSource.setDriverClassName(env.getProperty("job.repository.driverClassName"));
         dataSource.setUrl(env.getProperty("job.repository.url"));

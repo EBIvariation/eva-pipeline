@@ -16,6 +16,8 @@
 
 package uk.ac.ebi.eva.pipeline.jobs;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
@@ -23,14 +25,19 @@ import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.job.flow.Flow;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Scope;
 import uk.ac.ebi.eva.pipeline.jobs.flows.AnnotationFlow;
+
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.ANNOTATE_VARIANTS_JOB;
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VEP_ANNOTATION_FLOW;
 
 /**
  * Batch class to wire together:
- * 1) variantsAnnotGenerateInputBatchStep - Dump a list of variants without annotations to be used as input for VEP
+ * 1) generateVepInputStep - Dump a list of variants without annotations to be used as input for VEP
  * 2) annotationCreate - run VEP
  * 3) annotationLoadBatchStep - Load VEP annotations into mongo
  * <p>
@@ -42,22 +49,23 @@ import uk.ac.ebi.eva.pipeline.jobs.flows.AnnotationFlow;
 @Configuration
 @EnableBatchProcessing
 @Import({AnnotationFlow.class})
-public class AnnotationJob extends CommonJobStepInitialization {
-    public static final String jobName = "annotate-variants";
+public class AnnotationJob {
+
+    private static final Logger logger = LoggerFactory.getLogger(AnnotationJob.class);
 
     @Autowired
-    private JobBuilderFactory jobBuilderFactory;
+    @Qualifier(VEP_ANNOTATION_FLOW)
+    private Flow annotation;
 
-    @Autowired
-    private Flow annotationFlowBasic;
+    @Bean(ANNOTATE_VARIANTS_JOB)
+    @Scope("prototype")
+    public Job annotateVariantsJob(JobBuilderFactory jobBuilderFactory) {
+        logger.debug("Building '" + ANNOTATE_VARIANTS_JOB + "'");
 
-    @Bean
-    public Job variantAnnotationBatchJob() {
         JobBuilder jobBuilder = jobBuilderFactory
-                .get(jobName)
+                .get(ANNOTATE_VARIANTS_JOB)
                 .incrementer(new RunIdIncrementer());
-
-        return jobBuilder.start(annotationFlowBasic).build().build();
+        return jobBuilder.start(annotation).build().build();
     }
 
 }

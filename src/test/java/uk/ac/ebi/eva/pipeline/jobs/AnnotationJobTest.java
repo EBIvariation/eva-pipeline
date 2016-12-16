@@ -33,10 +33,12 @@ import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-
+import uk.ac.ebi.eva.pipeline.configuration.BeanNames;
+import uk.ac.ebi.eva.pipeline.jobs.steps.GenerateVepAnnotationStep;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
-import uk.ac.ebi.eva.test.configuration.AnnotationJobConfiguration;
+import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
 
@@ -50,9 +52,6 @@ import java.util.stream.Collectors;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static uk.ac.ebi.eva.pipeline.jobs.steps.AnnotationLoaderStep.LOAD_VEP_ANNOTATION;
-import static uk.ac.ebi.eva.pipeline.jobs.steps.VepAnnotationGeneratorStep.GENERATE_VEP_ANNOTATION;
-import static uk.ac.ebi.eva.pipeline.jobs.steps.VepInputGeneratorStep.FIND_VARIANTS_TO_ANNOTATE;
 import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResource;
 import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResourceUrl;
 
@@ -61,7 +60,8 @@ import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResourceUrl;
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest
-@ContextConfiguration(classes = {JobOptions.class, AnnotationJob.class, AnnotationJobConfiguration.class, JobLauncherTestUtils.class})
+@TestPropertySource({"classpath:annotation-job.properties"})
+@ContextConfiguration(classes = {AnnotationJob.class, BatchTestConfiguration.class})
 public class AnnotationJobTest {
     private static final String MOCK_VEP = "/mockvep.pl";
     private static final String MONGO_DUMP = "/dump/VariantStatsConfigurationTest_vl";
@@ -94,9 +94,9 @@ public class AnnotationJobTest {
         StepExecution generateVepAnnotationsStep = steps.get(1);
         StepExecution loadVepAnnotationsStep = steps.get(2);
 
-        assertEquals(FIND_VARIANTS_TO_ANNOTATE, findVariantsToAnnotateStep.getStepName());
-        assertEquals(GENERATE_VEP_ANNOTATION, generateVepAnnotationsStep.getStepName());
-        assertEquals(LOAD_VEP_ANNOTATION, loadVepAnnotationsStep.getStepName());
+        assertEquals(BeanNames.GENERATE_VEP_INPUT_STEP, findVariantsToAnnotateStep.getStepName());
+        assertEquals(BeanNames.GENERATE_VEP_ANNOTATION_STEP, generateVepAnnotationsStep.getStepName());
+        assertEquals(BeanNames.LOAD_VEP_ANNOTATION_STEP, loadVepAnnotationsStep.getStepName());
 
         //check list of variants without annotation output file
         assertTrue(vepInputFile.exists());
@@ -123,7 +123,7 @@ public class AnnotationJobTest {
 
         //check that one line is skipped because malformed
         List<StepExecution> variantAnnotationLoadStepExecution = jobExecution.getStepExecutions().stream()
-                .filter(stepExecution -> stepExecution.getStepName().equals(LOAD_VEP_ANNOTATION))
+                .filter(stepExecution -> stepExecution.getStepName().equals(BeanNames.LOAD_VEP_ANNOTATION_STEP))
                 .collect(Collectors.toList());
         assertEquals(1, variantAnnotationLoadStepExecution.get(0).getReadSkipCount());
     }
@@ -138,7 +138,7 @@ public class AnnotationJobTest {
         assertEquals(1, jobExecution.getStepExecutions().size());
         StepExecution findVariantsToAnnotateStep = new ArrayList<>(jobExecution.getStepExecutions()).get(0);
 
-        assertEquals(FIND_VARIANTS_TO_ANNOTATE, findVariantsToAnnotateStep.getStepName());
+        assertEquals(BeanNames.GENERATE_VEP_INPUT_STEP, findVariantsToAnnotateStep.getStepName());
 
         assertTrue(vepInputFile.exists());
         assertTrue(Files.size(Paths.get(vepInputFile.toPath().toUri())) == 0);

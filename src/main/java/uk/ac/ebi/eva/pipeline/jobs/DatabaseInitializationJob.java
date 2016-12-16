@@ -28,8 +28,13 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Scope;
+import uk.ac.ebi.eva.pipeline.jobs.steps.CreateDatabaseIndexesStep;
 import uk.ac.ebi.eva.pipeline.jobs.steps.GeneLoaderStep;
-import uk.ac.ebi.eva.pipeline.jobs.steps.IndexesGeneratorStep;
+
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.CREATE_DATABASE_INDEXES_STEP;
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.GENES_LOAD_STEP;
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.INIT_DATABASE_JOB;
 
 /**
  * Job to initialize the databases that will be used in later jobs.
@@ -39,37 +44,32 @@ import uk.ac.ebi.eva.pipeline.jobs.steps.IndexesGeneratorStep;
  */
 @Configuration
 @EnableBatchProcessing
-@Import({IndexesGeneratorStep.class, GeneLoaderStep.class})
-public class DatabaseInitializationJob extends CommonJobStepInitialization {
+@Import({GeneLoaderStep.class, CreateDatabaseIndexesStep.class})
+public class DatabaseInitializationJob {
 
     private static final Logger logger = LoggerFactory.getLogger(DatabaseInitializationJob.class);
-    public static final String jobName = "initialize-database";
-    public static final String CREATE_DATABASE_INDEXES = "Create database indexes";
 
     @Autowired
-    JobBuilderFactory jobBuilderFactory;
-
-    @Qualifier("genesLoadStep")
-    @Autowired
+    @Qualifier(GENES_LOAD_STEP)
     private Step genesLoadStep;
 
     @Autowired
-    private IndexesGeneratorStep indexesGeneratorStep;
+    @Qualifier(CREATE_DATABASE_INDEXES_STEP)
+    private Step createDatabaseIndexesStep;
 
-    @Bean
-    @Qualifier("initDBJob")
-    public Job initDBJob() {
+    @Bean(INIT_DATABASE_JOB)
+    @Scope("prototype")
+    public Job initDatabaseJob(JobBuilderFactory jobBuilderFactory) {
+        logger.debug("Building '" + INIT_DATABASE_JOB + "'");
+
         JobBuilder jobBuilder = jobBuilderFactory
-                .get(jobName)
+                .get(INIT_DATABASE_JOB)
                 .incrementer(new RunIdIncrementer());
 
         return jobBuilder
-                .start(indexesCreate())
+                .start(createDatabaseIndexesStep)
                 .next(genesLoadStep)
                 .build();
     }
 
-    public Step indexesCreate() {
-        return generateStep(CREATE_DATABASE_INDEXES, indexesGeneratorStep);
-    }
 }

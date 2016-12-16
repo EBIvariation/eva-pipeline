@@ -15,33 +15,29 @@
  */
 package uk.ac.ebi.eva.pipeline.jobs.steps;
 
-import org.opencb.biodata.models.variant.VariantSource;
-import org.opencb.opencga.storage.core.variant.VariantStorageManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
-import org.springframework.batch.core.configuration.annotation.StepScope;
+import org.springframework.batch.item.ItemStreamReader;
+import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.file.FlatFileParseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.data.mongodb.core.MongoOperations;
-
 import uk.ac.ebi.eva.commons.models.data.Variant;
-import uk.ac.ebi.eva.pipeline.io.readers.AggregatedVcfReader;
-import uk.ac.ebi.eva.pipeline.io.readers.UnwindingItemStreamReader;
-import uk.ac.ebi.eva.pipeline.io.readers.VcfReader;
-import uk.ac.ebi.eva.pipeline.io.writers.VariantMongoWriter;
+import uk.ac.ebi.eva.pipeline.configuration.readers.VcfReaderConfiguration;
+import uk.ac.ebi.eva.pipeline.configuration.writers.VariantWriterConfiguration;
 import uk.ac.ebi.eva.pipeline.listeners.SkippedItemListener;
-import uk.ac.ebi.eva.pipeline.model.converters.data.VariantToMongoDbObjectConverter;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
-import uk.ac.ebi.eva.utils.MongoDBHelper;
 
-import java.io.IOException;
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.LOAD_VARIANTS_STEP;
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VARIANT_READER;
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VARIANT_WRITER;
 
 /**
  * Step that normalizes variants during the reading and loads them into MongoDB
@@ -51,83 +47,30 @@ import java.io.IOException;
  */
 @Configuration
 @EnableBatchProcessing
-@Import(JobOptions.class)
+@Import({VariantWriterConfiguration.class, VcfReaderConfiguration.class})
 public class VariantLoaderStep {
-    public static final String LOAD_VARIANTS = "Load variants";
+
+    private static final Logger logger = LoggerFactory.getLogger(VariantLoaderStep.class);
 
     @Autowired
-    private StepBuilderFactory stepBuilderFactory;
+    @Qualifier(VARIANT_READER)
+    private ItemStreamReader<Variant> reader;
 
     @Autowired
-    private JobOptions jobOptions;
+    @Qualifier(VARIANT_WRITER)
+    private ItemWriter<Variant> variantWriter;
 
-    @Autowired
-    private UnwindingItemStreamReader<Variant> reader;
+    @Bean(LOAD_VARIANTS_STEP)
+    public Step loadVariantsStep(StepBuilderFactory stepBuilderFactory, JobOptions jobOptions) {
+        logger.debug("Building '" + LOAD_VARIANTS_STEP + "'");
 
-    @Autowired
-    private VariantMongoWriter variantMongoWriter;
-
-    @Bean
-    @Qualifier("variantsLoadStep")
-    public Step variantsLoadStep() throws Exception {
-        return stepBuilderFactory.get(LOAD_VARIANTS)
+        return stepBuilderFactory.get(LOAD_VARIANTS_STEP)
                 .<Variant, Variant>chunk(jobOptions.getPipelineOptions().getInt(JobParametersNames.CONFIG_CHUNK_SIZE))
                 .reader(reader)
-                .writer(variantMongoWriter)
+                .writer(variantWriter)
                 .faultTolerant().skipLimit(50).skip(FlatFileParseException.class)
                 .listener(new SkippedItemListener())
                 .build();
     }
 
-    @Bean
-    @StepScope
-    public VariantMongoWriter variantMongoWriter() throws Exception {
-        MongoOperations mongoOperations = MongoDBHelper
-                .getMongoOperations(jobOptions.getDbName(), jobOptions.getMongoConnection());
-
-        return new VariantMongoWriter(jobOptions.getDbCollectionsVariantsName(),
-                                      mongoOperations,
-                                      variantToMongoDbObjectConverter());
-    }
-
-    @Bean
-    @StepScope
-    public VariantToMongoDbObjectConverter variantToMongoDbObjectConverter() throws Exception {
-        return new VariantToMongoDbObjectConverter(
-                jobOptions.getVariantOptions().getBoolean(VariantStorageManager.INCLUDE_STATS),
-                jobOptions.getVariantOptions().getBoolean(VariantStorageManager.CALCULATE_STATS),
-                jobOptions.getVariantOptions().getBoolean(VariantStorageManager.INCLUDE_SAMPLES),
-                (VariantStorageManager.IncludeSrc) jobOptions.getVariantOptions()
-                                                             .get(VariantStorageManager.INCLUDE_SRC));
-    }
-
-    @Bean
-    @StepScope
-    public UnwindingItemStreamReader<Variant> unwindingReader(VcfReader vcfReader) throws Exception {
-        return new UnwindingItemStreamReader<>(vcfReader);
-    }
-
-    /**
-     * The aggregation type is passed so that spring won't cache the instance of VcfReader if it is already built
-     * with other aggregation type.
-     *
-     * @param aggregationType to decide whether to instantiate a VcfReader or AggregatedVcfReader.
-     * @return a VcfReader for the given aggregation type.
-     * @throws IOException if the file doesn't exist, because it has to be read to see if it's compressed.
-     */
-    @Bean
-    @StepScope
-    public VcfReader vcfReader(@Value("${" + JobParametersNames.INPUT_VCF_AGGREGATION + "}")
-                                       String aggregationType) throws IOException {
-        VariantSource.Aggregation aggregation = VariantSource.Aggregation.valueOf(aggregationType);
-        if (VariantSource.Aggregation.NONE.equals(aggregation)) {
-            return new VcfReader(
-                    (VariantSource) jobOptions.getVariantOptions().get(VariantStorageManager.VARIANT_SOURCE),
-                    jobOptions.getPipelineOptions().getString(JobParametersNames.INPUT_VCF));
-        } else {
-            return new AggregatedVcfReader(
-                    (VariantSource) jobOptions.getVariantOptions().get(VariantStorageManager.VARIANT_SOURCE),
-                    jobOptions.getPipelineOptions().getString(JobParametersNames.INPUT_VCF));
-        }
-    }
 }

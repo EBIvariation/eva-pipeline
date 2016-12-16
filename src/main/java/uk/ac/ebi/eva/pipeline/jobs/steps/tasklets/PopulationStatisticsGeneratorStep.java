@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.ac.ebi.eva.pipeline.jobs.steps;
+package uk.ac.ebi.eva.pipeline.jobs.steps.tasklets;
 
 import org.opencb.biodata.models.variant.VariantSource;
 import org.opencb.datastore.core.ObjectMap;
@@ -46,9 +46,6 @@ import java.net.URI;
  * Input: variants loaded into mongodb
  * Output: file containing statistics (.variants.stats.json.gz)
  */
-@Component
-@StepScope
-@Import({JobOptions.class})
 public class PopulationStatisticsGeneratorStep implements Tasklet {
     private static final Logger logger = LoggerFactory.getLogger(PopulationStatisticsGeneratorStep.class);
 

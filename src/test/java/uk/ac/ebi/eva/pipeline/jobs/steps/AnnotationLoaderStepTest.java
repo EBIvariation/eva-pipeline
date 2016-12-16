@@ -30,11 +30,13 @@ import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-
+import uk.ac.ebi.eva.pipeline.Application;
+import uk.ac.ebi.eva.pipeline.configuration.BeanNames;
 import uk.ac.ebi.eva.pipeline.jobs.AnnotationJob;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
-import uk.ac.ebi.eva.test.configuration.AnnotationLoaderStepTestConfiguration;
+import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
 import uk.ac.ebi.eva.test.data.VepOutputContent;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
@@ -53,8 +55,9 @@ import static uk.ac.ebi.eva.test.utils.TestFileUtils.makeGzipFile;
  * to run properly.
  */
 @RunWith(SpringRunner.class)
-@ActiveProfiles("variant-annotation-mongo")
-@ContextConfiguration(classes = {AnnotationJob.class, AnnotationLoaderStepTestConfiguration.class, JobLauncherTestUtils.class})
+@ActiveProfiles(Application.VARIANT_ANNOTATION_MONGO_PROFILE)
+@TestPropertySource({"classpath:annotation-loader-step.properties"})
+@ContextConfiguration(classes = {AnnotationJob.class, BatchTestConfiguration.class})
 public class AnnotationLoaderStepTest {
     // TODO vep Output must be passed as a job parameter to allow temporary files. Database name can't be changed to a
     // random one.
@@ -77,7 +80,7 @@ public class AnnotationLoaderStepTest {
     public void shouldLoadAllAnnotations() throws Exception {
         setUp();
 
-        JobExecution jobExecution = jobLauncherTestUtils.launchStep(AnnotationLoaderStep.LOAD_VEP_ANNOTATION);
+        JobExecution jobExecution = jobLauncherTestUtils.launchStep(BeanNames.LOAD_VEP_ANNOTATION_STEP);
 
         assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
         assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());

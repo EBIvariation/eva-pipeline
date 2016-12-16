@@ -25,11 +25,12 @@ import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-
+import uk.ac.ebi.eva.pipeline.configuration.BeanNames;
 import uk.ac.ebi.eva.pipeline.jobs.AnnotationJob;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
-import uk.ac.ebi.eva.test.configuration.VepInputGeneratorStepConfiguration;
+import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 
 import java.io.File;
@@ -44,7 +45,8 @@ import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResourceUrl;
  * Test {@link VepInputGeneratorStep}
  */
 @RunWith(SpringRunner.class)
-@ContextConfiguration(classes = {AnnotationJob.class, VepInputGeneratorStepConfiguration.class, JobLauncherTestUtils.class})
+@TestPropertySource({"classpath:vep-input-generator-step.properties"})
+@ContextConfiguration(classes = {AnnotationJob.class, BatchTestConfiguration.class})
 public class VepInputGeneratorStepTest {
 
     private static final String MONGO_DUMP = "/dump/VariantStatsConfigurationTest_vl";
@@ -73,7 +75,7 @@ public class VepInputGeneratorStepTest {
 
         assertFalse(vepInputFile.exists());
 
-        JobExecution jobExecution = jobLauncherTestUtils.launchStep(VepInputGeneratorStep.FIND_VARIANTS_TO_ANNOTATE);
+        JobExecution jobExecution = jobLauncherTestUtils.launchStep(BeanNames.GENERATE_VEP_INPUT_STEP);
 
         assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
         assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());

@@ -37,12 +37,13 @@ import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-
+import uk.ac.ebi.eva.pipeline.configuration.BeanNames;
 import uk.ac.ebi.eva.pipeline.jobs.steps.AnnotationLoaderStep;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
-import uk.ac.ebi.eva.test.configuration.GenotypedVcfConfiguration;
+import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 
 import java.io.BufferedReader;
@@ -68,7 +69,7 @@ import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResource;
  * Test for {@link GenotypedVcfJob}
  * <p>
  * JobLauncherTestUtils is initialized in @Before because in GenotypedVcfJob there are two Job beans:
- * genotypedJob and variantAnnotationBatchJob (used by test). In this way it is possible to specify the Job to run
+ * genotypedVcfJob and annotateVariantsJob (used by test). In this way it is possible to specify the Job to run
  * and avoid NoUniqueBeanDefinitionException. There are also other solutions like:
  * - http://stackoverflow.com/questions/29655796/how-can-i-qualify-an-autowired-setter-that-i-dont-own
  * - https://jira.spring.io/browse/BATCH-2366
@@ -78,7 +79,8 @@ import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResource;
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest
-@ContextConfiguration(classes = {JobOptions.class, GenotypedVcfJob.class, GenotypedVcfConfiguration.class, JobLauncherTestUtils.class})
+@TestPropertySource({"classpath:genotyped-vcf.properties"})
+@ContextConfiguration(classes = {GenotypedVcfJob.class, BatchTestConfiguration.class})
 public class GenotypedVcfJobTest {
     //TODO check later to substitute files for temporary ones / pay attention to vep Input file
 
@@ -207,7 +209,7 @@ public class GenotypedVcfJobTest {
 
         //check that one line is skipped because malformed
         List<StepExecution> variantAnnotationLoadStepExecution = jobExecution.getStepExecutions().stream()
-                .filter(stepExecution -> stepExecution.getStepName().equals(AnnotationLoaderStep.LOAD_VEP_ANNOTATION))
+                .filter(stepExecution -> stepExecution.getStepName().equals(BeanNames.LOAD_VEP_ANNOTATION_STEP))
                 .collect(Collectors.toList());
         assertEquals(1, variantAnnotationLoadStepExecution.get(0).getReadSkipCount());
 

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.ac.ebi.eva.pipeline.jobs.steps;
+package uk.ac.ebi.eva.pipeline.jobs.steps.tasklets;
 
 import org.opencb.biodata.formats.pedigree.io.PedigreePedReader;
 import org.opencb.biodata.formats.pedigree.io.PedigreeReader;
@@ -40,9 +40,6 @@ import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
  * <p>
  * TODO: only reading for now, to be completed..
  */
-@Component
-@StepScope
-@Import({JobOptions.class})
 public class PedLoaderStep implements Tasklet {
     private static final Logger logger = LoggerFactory.getLogger(PedLoaderStep.class);
 
