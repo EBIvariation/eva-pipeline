@@ -15,17 +15,21 @@
  */
 package uk.ac.ebi.eva.pipeline.model;
 
+import org.springframework.context.annotation.Profile;
 import org.springframework.data.annotation.PersistenceConstructor;
 import org.springframework.data.mongodb.core.index.CompoundIndex;
 import org.springframework.data.mongodb.core.index.CompoundIndexes;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
+import uk.ac.ebi.eva.pipeline.Application;
+
 import java.util.Map;
 
 /**
  * setters have package visibility, the user should use the constructor.
  */
+@Profile(Application.MONGO_EXPERIMENTAL)
 @Document
 @CompoundIndexes({
     @CompoundIndex(name = "vscid", def = "{'chr': 1, 'start': 1, 'ref': 1, 'alt': 1, 'sid': 1, 'cid': 1}", unique = true)
