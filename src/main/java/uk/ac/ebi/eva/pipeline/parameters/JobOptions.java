@@ -20,6 +20,7 @@ import org.opencb.biodata.models.variant.VariantStudy;
 import org.opencb.datastore.core.ObjectMap;
 import org.opencb.opencga.lib.common.Config;
 import org.opencb.opencga.storage.core.variant.VariantStorageManager;
+import org.opencb.opencga.storage.core.variant.stats.VariantStatisticsManager;
 import org.opencb.opencga.storage.mongodb.variant.MongoDBVariantStorageManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -178,6 +179,7 @@ public class JobOptions {
         variantOptions.put(VariantStorageManager.INCLUDE_SRC, includeSourceLine);
         variantOptions.put("compressExtension", compressExtension);
         variantOptions.put(VariantStorageManager.ANNOTATE, annotate);
+        variantOptions.put(VariantStatisticsManager.BATCH_SIZE, chunkSize);
 
         variantOptions.put(VariantStorageManager.DB_NAME, dbName);
         variantOptions.put(MongoDBVariantStorageManager.OPENCGA_STORAGE_MONGODB_VARIANT_DB_NAME, dbName);
