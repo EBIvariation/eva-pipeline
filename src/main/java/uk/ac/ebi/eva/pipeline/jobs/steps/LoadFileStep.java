@@ -30,6 +30,9 @@ import uk.ac.ebi.eva.utils.TaskletUtils;
 
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.LOAD_FILE_STEP;
 
+/**
+ * Configuration class that inject a step created with the tasklet {@link FileLoaderStep}
+ */
 @Configuration
 @EnableBatchProcessing
 public class LoadFileStep {
@@ -43,7 +46,7 @@ public class LoadFileStep {
     }
 
     @Bean(LOAD_FILE_STEP)
-    public TaskletStep createDatabaseIndexesStep(StepBuilderFactory stepBuilderFactory, JobOptions jobOptions) {
+    public TaskletStep loadFileStep(StepBuilderFactory stepBuilderFactory, JobOptions jobOptions) {
         logger.debug("Building '" + LOAD_FILE_STEP + "'");
         return TaskletUtils.generateStep(stepBuilderFactory, LOAD_FILE_STEP, fileLoaderStep(), jobOptions);
     }

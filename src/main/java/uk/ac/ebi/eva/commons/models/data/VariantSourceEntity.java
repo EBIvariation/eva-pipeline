@@ -28,7 +28,7 @@ import java.util.Map;
 /**
  * Represents a file (VariantSource) in a database.
  * <p>
- * TODO jmmut: VariantSource also has aggregation and pedigree
+ * TODO jmmut: VariantSource also has pedigree
  */
 @Document
 public class VariantSourceEntity {

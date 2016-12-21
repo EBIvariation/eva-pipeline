@@ -38,8 +38,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
+
 import uk.ac.ebi.eva.pipeline.configuration.BeanNames;
-import uk.ac.ebi.eva.pipeline.jobs.steps.VariantLoaderStep;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
@@ -50,7 +50,6 @@ import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
@@ -94,7 +93,6 @@ public class AggregatedVcfJobTest {
     public static final Set<String> EXPECTED_REQUIRED_STEP_NAMES = new TreeSet<>(
             Arrays.asList(BeanNames.LOAD_VARIANTS_STEP, BeanNames.LOAD_FILE_STEP));
 
-
     @Test
     public void aggregatedTransformAndLoadShouldBeExecuted() throws Exception {
         Config.setOpenCGAHome(opencgaHome);
@@ -110,7 +108,7 @@ public class AggregatedVcfJobTest {
 
         Collection<StepExecution> stepExecutions = jobExecution.getStepExecutions();
         Set<String> names = stepExecutions.stream().map(StepExecution::getStepName)
-                .collect(Collectors.toSet());
+                                          .collect(Collectors.toSet());
 
         assertEquals(EXPECTED_REQUIRED_STEP_NAMES, names);
 
@@ -152,7 +150,6 @@ public class AggregatedVcfJobTest {
         assertEquals(ExitStatus.FAILED, jobExecution.getExitStatus());
         assertEquals(BatchStatus.FAILED, jobExecution.getStatus());
     }
-
 
     @Before
     public void setUp() throws Exception {
