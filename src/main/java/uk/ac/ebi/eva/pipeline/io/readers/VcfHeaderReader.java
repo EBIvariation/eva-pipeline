@@ -20,9 +20,11 @@ import org.opencb.biodata.models.variant.VariantSource;
 import org.opencb.biodata.models.variant.VariantStudy;
 import org.springframework.batch.item.ItemReader;
 
+import uk.ac.ebi.eva.commons.models.data.VariantSourceEntity;
+
 import java.io.File;
 
-public class VcfHeaderReader implements ItemReader<VariantSource> {
+public class VcfHeaderReader implements ItemReader<VariantSourceEntity> {
 
     /**
      * The header of the VCF can be retrieved using `source.getMetadata().get(VARIANT_FILE_HEADER_KEY)`.
@@ -44,6 +46,11 @@ public class VcfHeaderReader implements ItemReader<VariantSource> {
                            VariantSource.Aggregation aggregation) {
         this.file = file;
         this.source = new VariantSource(file.getName(), fileId, studyId, studyName, type, aggregation);
+    }
+
+    public VcfHeaderReader(File file, VariantSource source) {
+        this.file = file;
+        this.source = source;
     }
 
     /**
@@ -68,7 +75,7 @@ public class VcfHeaderReader implements ItemReader<VariantSource> {
      * Look at the test to see how is this checked.
      */
     @Override
-    public VariantSource read() throws Exception {
+    public VariantSourceEntity read() throws Exception {
         VariantVcfReader reader = new VariantVcfReader(source, file.getPath());
         reader.open();
         reader.pre();
@@ -76,6 +83,6 @@ public class VcfHeaderReader implements ItemReader<VariantSource> {
         reader.close();
 
         source.addMetadata(VARIANT_FILE_HEADER_KEY, reader.getHeader());
-        return source;
+        return new VariantSourceEntity(source);
     }
 }

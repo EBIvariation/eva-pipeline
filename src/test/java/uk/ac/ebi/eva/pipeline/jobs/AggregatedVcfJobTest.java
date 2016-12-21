@@ -38,8 +38,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
+
 import uk.ac.ebi.eva.pipeline.configuration.BeanNames;
-import uk.ac.ebi.eva.pipeline.jobs.steps.VariantLoaderStep;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
@@ -48,7 +48,11 @@ import uk.ac.ebi.eva.test.utils.JobTestUtils;
 
 import java.io.FileInputStream;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
 
 import static org.junit.Assert.assertEquals;
@@ -86,6 +90,9 @@ public class AggregatedVcfJobTest {
     private static String opencgaHome = System.getenv("OPENCGA_HOME") != null ? System
             .getenv("OPENCGA_HOME") : "/opt/opencga";
 
+    public static final Set<String> EXPECTED_REQUIRED_STEP_NAMES = new TreeSet<>(
+            Arrays.asList(BeanNames.LOAD_VARIANTS_STEP, BeanNames.LOAD_FILE_STEP));
+
     @Test
     public void aggregatedTransformAndLoadShouldBeExecuted() throws Exception {
         Config.setOpenCGAHome(opencgaHome);
@@ -97,11 +104,16 @@ public class AggregatedVcfJobTest {
         assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());
 
         // check execution flow
-        Assert.assertEquals(1, jobExecution.getStepExecutions().size());
-        List<StepExecution> steps = new ArrayList<>(jobExecution.getStepExecutions());
-        StepExecution load = steps.get(0);
+        assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
 
-        Assert.assertEquals(BeanNames.LOAD_VARIANTS_STEP, load.getStepName());
+        Collection<StepExecution> stepExecutions = jobExecution.getStepExecutions();
+        Set<String> names = stepExecutions.stream().map(StepExecution::getStepName)
+                                          .collect(Collectors.toSet());
+
+        assertEquals(EXPECTED_REQUIRED_STEP_NAMES, names);
+
+        StepExecution lastRequiredStep = new ArrayList<>(stepExecutions).get(EXPECTED_REQUIRED_STEP_NAMES.size() - 1);
+        assertEquals(BeanNames.LOAD_FILE_STEP, lastRequiredStep.getStepName());
 
         // check ((documents in DB) == (lines in file))
         VariantStorageManager variantStorageManager = StorageManagerFactory.getVariantStorageManager();
@@ -138,7 +150,6 @@ public class AggregatedVcfJobTest {
         assertEquals(ExitStatus.FAILED, jobExecution.getExitStatus());
         assertEquals(BatchStatus.FAILED, jobExecution.getStatus());
     }
-
 
     @Before
     public void setUp() throws Exception {

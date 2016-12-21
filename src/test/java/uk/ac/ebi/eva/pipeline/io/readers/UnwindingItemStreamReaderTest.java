@@ -60,10 +60,10 @@ public class UnwindingItemStreamReaderTest {
         // input vcf
         File input = TestFileUtils.getResource(INPUT_FILE_PATH);
 
-        VcfHeaderReader headerReader = new VcfHeaderReader(input, FILE_ID, STUDY_ID, STUDY_NAME,
-                VariantStudy.StudyType.COLLECTION,
-                VariantSource.Aggregation.NONE);
-        VariantSource source = headerReader.read();
+        VariantSource source = new VariantSource(input.getAbsolutePath(), FILE_ID, STUDY_ID, STUDY_NAME,
+                                                 VariantStudy.StudyType.COLLECTION,
+                                                 VariantSource.Aggregation.NONE);
+
 
         VcfReader vcfReader = new VcfReader(source, input);
         vcfReader.setSaveState(false);
@@ -81,10 +81,9 @@ public class UnwindingItemStreamReaderTest {
         // input vcf
         File input = TestFileUtils.getResource(INPUT_WRONG_FILE_PATH);
 
-        VcfHeaderReader headerReader = new VcfHeaderReader(input, FILE_ID, STUDY_ID, STUDY_NAME,
-                VariantStudy.StudyType.COLLECTION,
-                VariantSource.Aggregation.NONE);
-        VariantSource source = headerReader.read();
+        VariantSource source = new VariantSource(input.getAbsolutePath(), FILE_ID, STUDY_ID, STUDY_NAME,
+                                                 VariantStudy.StudyType.COLLECTION,
+                                                 VariantSource.Aggregation.NONE);
 
         VcfReader vcfReader = new VcfReader(source, input);
         vcfReader.setSaveState(false);
@@ -107,10 +106,9 @@ public class UnwindingItemStreamReaderTest {
         File tempFile = JobTestUtils.createTempFile();  // TODO replace with temporary rules
         JobTestUtils.uncompress(input.getAbsolutePath(), tempFile);
 
-        VcfHeaderReader headerReader = new VcfHeaderReader(input, FILE_ID, STUDY_ID, STUDY_NAME,
-                VariantStudy.StudyType.COLLECTION,
-                VariantSource.Aggregation.NONE);
-        VariantSource source = headerReader.read();
+        VariantSource source = new VariantSource(input.getAbsolutePath(), FILE_ID, STUDY_ID, STUDY_NAME,
+                                                 VariantStudy.StudyType.COLLECTION,
+                                                 VariantSource.Aggregation.NONE);
 
         VcfReader vcfReader = new VcfReader(source, tempFile);
         vcfReader.setSaveState(false);

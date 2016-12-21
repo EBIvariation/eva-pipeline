@@ -8,6 +8,7 @@ import org.junit.Test;
 import org.opencb.biodata.models.variant.VariantSource;
 import org.opencb.biodata.models.variant.VariantStudy;
 
+import uk.ac.ebi.eva.commons.models.data.VariantSourceEntity;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
 import uk.ac.ebi.eva.test.utils.TestFileUtils;
 
@@ -50,7 +51,7 @@ public class VcfHeaderReaderTest {
 
         VcfHeaderReader headerReader = new VcfHeaderReader(input, FILE_ID, STUDY_ID, STUDY_NAME,
                                                            studyType, aggregation);
-        VariantSource source = headerReader.read();
+        VariantSourceEntity source = headerReader.read();
 
         assertEquals(FILE_ID, source.getFileId());
         assertEquals(STUDY_ID, source.getStudyId());
@@ -58,7 +59,7 @@ public class VcfHeaderReaderTest {
         assertEquals(studyType, source.getType());
         assertEquals(aggregation, source.getAggregation());
 
-        assertFalse(source.getSamples().isEmpty());
+        assertFalse(source.getSamplesPosition().isEmpty());
         assertFalse(source.getMetadata().isEmpty());
         assertTrue(source.getMetadata().containsKey(VcfHeaderReader.VARIANT_FILE_HEADER_KEY));
         assertFalse(((String) source.getMetadata().get(VcfHeaderReader.VARIANT_FILE_HEADER_KEY)).isEmpty());
@@ -84,7 +85,7 @@ public class VcfHeaderReaderTest {
         VcfHeaderReader headerReader = new VcfHeaderReader(input, FILE_ID, STUDY_ID, STUDY_NAME,
                                                            VariantStudy.StudyType.COLLECTION,
                                                            VariantSource.Aggregation.NONE);
-        VariantSource source = headerReader.read();
+        VariantSourceEntity source = headerReader.read();
 
         char CHARACTER_TO_REPLACE_DOTS = (char) 163;
         Map<String, Object> meta = source.getMetadata();
@@ -114,7 +115,7 @@ public class VcfHeaderReaderTest {
         VcfHeaderReader headerReader = new VcfHeaderReader(input, FILE_ID, STUDY_ID, STUDY_NAME,
                                                            VariantStudy.StudyType.COLLECTION,
                                                            VariantSource.Aggregation.NONE);
-        VariantSource source = headerReader.read();
+        VariantSourceEntity source = headerReader.read();
 
         char CHARACTER_TO_REPLACE_DOTS = (char) 163;
         Map<String, Object> meta = source.getMetadata();
