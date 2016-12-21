@@ -22,6 +22,7 @@ import org.springframework.batch.core.job.CompositeJobParametersValidator;
 import org.springframework.batch.core.job.DefaultJobParametersValidator;
 
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
+import uk.ac.ebi.eva.pipeline.parameters.validation.ConfigChunkSizeValidator;
 import uk.ac.ebi.eva.pipeline.parameters.validation.ConfigRestartabilityAllowValidator;
 import uk.ac.ebi.eva.pipeline.parameters.validation.DbCollectionsVariantsNameValidator;
 import uk.ac.ebi.eva.pipeline.parameters.validation.DbNameValidator;
@@ -58,13 +59,13 @@ public class VepInputGeneratorStepParametersValidator extends DefaultJobParamete
 
     private CompositeJobParametersValidator compositeJobParametersValidator() {
         final List<JobParametersValidator> jobParametersValidators = Arrays.asList(
-                new OptionalValidator(new ConfigRestartabilityAllowValidator(),
-                                      JobParametersNames.CONFIG_RESTARTABILITY_ALLOW),
                 new DbCollectionsVariantsNameValidator(),
                 new DbNameValidator(),
                 new InputStudyIdValidator(),
                 new InputVcfIdValidator(),
-                new OutputDirAnnotationValidator()
+                new OutputDirAnnotationValidator(),
+                new OptionalValidator(new ConfigChunkSizeValidator(), JobParametersNames.CONFIG_CHUNK_SIZE),
+                new OptionalValidator(new ConfigRestartabilityAllowValidator(), JobParametersNames.CONFIG_RESTARTABILITY_ALLOW)
         );
 
         CompositeJobParametersValidator compositeJobParametersValidator = new CompositeJobParametersValidator();
