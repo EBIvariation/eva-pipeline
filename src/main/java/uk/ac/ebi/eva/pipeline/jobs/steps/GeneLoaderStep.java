@@ -16,6 +16,7 @@
 
 package uk.ac.ebi.eva.pipeline.jobs.steps;
 
+import org.opencb.datastore.core.ObjectMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.Step;
@@ -76,12 +77,16 @@ public class GeneLoaderStep {
     public Step genesLoadStep(StepBuilderFactory stepBuilderFactory, JobOptions jobOptions) {
         logger.debug("Building '" + GENES_LOAD_STEP + "'");
 
+        ObjectMap pipelineOptions = jobOptions.getPipelineOptions();
+        boolean startIfcomplete = pipelineOptions.getBoolean(JobParametersNames.CONFIG_RESTARTABILITY_ALLOW);
+
         return stepBuilderFactory.get(GENES_LOAD_STEP)
                 .<FeatureCoordinates, FeatureCoordinates>chunk(jobOptions.getPipelineOptions().getInt(JobParametersNames.CONFIG_CHUNK_SIZE))
                 .reader(reader)
                 .processor(new GeneFilterProcessor())
                 .writer(writer)
                 .faultTolerant().skipLimit(50).skip(FlatFileParseException.class)
+                .allowStartIfComplete(startIfcomplete)
                 .listener(new SkippedItemListener())
                 .build();
     }
