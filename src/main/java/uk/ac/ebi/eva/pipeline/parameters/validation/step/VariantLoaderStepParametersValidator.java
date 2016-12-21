@@ -23,6 +23,7 @@ import org.springframework.batch.core.job.DefaultJobParametersValidator;
 
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 import uk.ac.ebi.eva.pipeline.parameters.validation.ConfigChunkSizeValidator;
+import uk.ac.ebi.eva.pipeline.parameters.validation.ConfigRestartabilityAllowValidator;
 import uk.ac.ebi.eva.pipeline.parameters.validation.DbCollectionsVariantsNameValidator;
 import uk.ac.ebi.eva.pipeline.parameters.validation.DbNameValidator;
 import uk.ac.ebi.eva.pipeline.parameters.validation.InputStudyIdValidator;
@@ -36,7 +37,7 @@ import java.util.List;
 
 /**
  * Validates the job parameters necessary to execute a
- * {@link uk.ac.ebi.eva.pipeline.jobs.steps.PopulationStatisticsGeneratorStep}
+ * {@link uk.ac.ebi.eva.pipeline.jobs.steps.VariantLoaderStep}
  */
 public class VariantLoaderStepParametersValidator extends DefaultJobParametersValidator {
 
@@ -65,7 +66,8 @@ public class VariantLoaderStepParametersValidator extends DefaultJobParametersVa
                 new InputVcfIdValidator(),
                 new InputVcfValidator(),
                 new InputVcfAggregationValidator(),
-                new OptionalValidator(new ConfigChunkSizeValidator(), JobParametersNames.CONFIG_CHUNK_SIZE)
+                new OptionalValidator(new ConfigChunkSizeValidator(), JobParametersNames.CONFIG_CHUNK_SIZE),
+                new OptionalValidator(new ConfigRestartabilityAllowValidator(), JobParametersNames.CONFIG_RESTARTABILITY_ALLOW)
         );
 
         CompositeJobParametersValidator compositeJobParametersValidator = new CompositeJobParametersValidator();

@@ -60,6 +60,7 @@ public class VariantLoaderStepParametersValidatorTest {
 
         optionalParameters = new TreeMap<>();
         optionalParameters.put(JobParametersNames.CONFIG_CHUNK_SIZE, new JobParameter("100"));
+        optionalParameters.put(JobParametersNames.CONFIG_RESTARTABILITY_ALLOW, new JobParameter("true"));
     }
 
     @Test
