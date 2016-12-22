@@ -105,7 +105,7 @@ public class VariantMongoWriterTest {
         Set<String> expectedIndexes = new HashSet<>();
         expectedIndexes.addAll(Arrays.asList("annot.xrefs.id_1_background_", "ids_1_background_", "_id_",
                                              "files.sid_1_files.fid_1_background_", "chr_1_start_1_end_1_background_",
-                                             "annot_1_background_"));
+                                             "annot.ct.so_1_background_"));
 
         assertEquals(expectedIndexes, createdIndexes);
     }

@@ -42,7 +42,7 @@ public class VariantMongoWriter extends MongoItemWriter<Variant> {
 
     private static final String BACKGROUND_INDEX = "background";
 
-    private static final String ANNOTATION_FIELD = "annot";
+    private static final String ANNOTATION_FIELD = "annot.ct.so";
 
     private static final String ANNOTATION_XREF_ID_FIELD = "annot.xrefs.id";
 
