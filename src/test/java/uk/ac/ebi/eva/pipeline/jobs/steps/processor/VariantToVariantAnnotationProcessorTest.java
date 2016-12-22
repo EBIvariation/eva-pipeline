@@ -27,7 +27,6 @@ import org.springframework.batch.test.MetaDataInstanceFactory;
 
 import uk.ac.ebi.eva.commons.models.data.Variant;
 import uk.ac.ebi.eva.commons.models.data.VariantSourceEntry;
-import uk.ac.ebi.eva.pipeline.io.readers.VcfHeaderReader;
 import uk.ac.ebi.eva.pipeline.io.readers.VcfReader;
 import uk.ac.ebi.eva.pipeline.jobs.steps.processors.VariantToVariantAnnotationProcessor;
 import uk.ac.ebi.eva.test.data.VariantToVariantAnnotationProcessorTestData;
@@ -246,10 +245,9 @@ public class VariantToVariantAnnotationProcessorTest {
 
         File input = TestFileUtils.getResource(INPUT_FILE_PATH);
 
-        VcfHeaderReader headerReader = new VcfHeaderReader(input, FILE_ID, STUDY_ID, STUDY_NAME,
-                                                           VariantStudy.StudyType.COLLECTION,
-                                                           VariantSource.Aggregation.NONE);
-        VariantSource source = headerReader.read();
+        VariantSource source = new VariantSource(input.getAbsolutePath(), FILE_ID, STUDY_ID, STUDY_NAME,
+                                                 VariantStudy.StudyType.COLLECTION,
+                                                 VariantSource.Aggregation.NONE);
 
         VcfReader vcfReader = new VcfReader(source, input);
         vcfReader.setSaveState(false);
