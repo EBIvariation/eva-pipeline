@@ -103,9 +103,8 @@ public class VariantMongoWriterTest {
         Set<String> createdIndexes = dbCollection.getIndexInfo().stream().map(o -> o.get("name").toString())
                 .collect(Collectors.toSet());
         Set<String> expectedIndexes = new HashSet<>();
-        expectedIndexes.addAll(Arrays.asList("annot.xrefs.id_1_background_", "ids_1_background_", "_id_",
-                                             "files.sid_1_files.fid_1_background_", "chr_1_start_1_end_1_background_",
-                                             "annot.ct.so_1_background_"));
+        expectedIndexes.addAll(Arrays.asList("annot.ct.so_1", "annot.xrefs.id_1", "chr_1_start_1_end_1",
+                                             "files.sid_1_files.fid_1", "_id_", "ids_1"));
 
         assertEquals(expectedIndexes, createdIndexes);
     }
