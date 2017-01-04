@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 EMBL - European Bioinformatics Institute
+ * Copyright 2016-2017 EMBL - European Bioinformatics Institute
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,9 +27,11 @@ import uk.ac.ebi.eva.pipeline.Application;
 import java.util.Map;
 
 /**
- * setters have package visibility, the user should use the constructor.
+ * Statistics related to a set of samples for a given variant.
+ * <p>
+ * Setters have package visibility, the user should use the constructor to instantiate valid objects.
  */
-@Profile(Application.MONGO_EXPERIMENTAL)
+@Profile(Application.MONGO_EXPERIMENTAL_PROFILE)
 @Document
 @CompoundIndexes({
     @CompoundIndex(name = "vscid", def = "{'chr': 1, 'start': 1, 'ref': 1, 'alt': 1, 'sid': 1, 'cid': 1}", unique = true)
@@ -130,6 +132,7 @@ public class PopulationStatistics {
     void setAlternate(String alternate) {
         this.alternate = alternate;
     }
+
     public String getCohortId() {
         return cohortId;
     }
