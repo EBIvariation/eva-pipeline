@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 EMBL - European Bioinformatics Institute
+ * Copyright 2016-2017 EMBL - European Bioinformatics Institute
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,8 +52,6 @@ public class AnnotationLoaderStepParametersValidatorTest {
         requiredParameters.put(JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME,
                                new JobParameter("dbCollectionsVariantName"));
         requiredParameters.put(JobParametersNames.DB_NAME, new JobParameter("dbName"));
-        requiredParameters.put(JobParametersNames.INPUT_STUDY_ID, new JobParameter("inputStudyId"));
-        requiredParameters.put(JobParametersNames.INPUT_VCF_ID, new JobParameter("inputVcfId"));
         requiredParameters.put(JobParametersNames.OUTPUT_DIR_ANNOTATION, new JobParameter(dir));
 
         optionalParameters = new TreeMap<>();
@@ -83,18 +81,6 @@ public class AnnotationLoaderStepParametersValidatorTest {
     @Test(expected = JobParametersInvalidException.class)
     public void dbNameIsRequired() throws JobParametersInvalidException, IOException {
         requiredParameters.remove(JobParametersNames.DB_NAME);
-        validator.validate(new JobParameters(requiredParameters));
-    }
-
-    @Test(expected = JobParametersInvalidException.class)
-    public void inputStudyIdIsRequired() throws JobParametersInvalidException, IOException {
-        requiredParameters.remove(JobParametersNames.INPUT_STUDY_ID);
-        validator.validate(new JobParameters(requiredParameters));
-    }
-
-    @Test(expected = JobParametersInvalidException.class)
-    public void inputVcfIdIsRequired() throws JobParametersInvalidException, IOException {
-        requiredParameters.remove(JobParametersNames.INPUT_VCF_ID);
         validator.validate(new JobParameters(requiredParameters));
     }
 

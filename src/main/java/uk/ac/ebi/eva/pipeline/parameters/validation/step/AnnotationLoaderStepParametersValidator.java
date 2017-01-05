@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 EMBL - European Bioinformatics Institute
+ * Copyright 2016-2017 EMBL - European Bioinformatics Institute
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,8 +26,6 @@ import uk.ac.ebi.eva.pipeline.parameters.validation.ConfigChunkSizeValidator;
 import uk.ac.ebi.eva.pipeline.parameters.validation.ConfigRestartabilityAllowValidator;
 import uk.ac.ebi.eva.pipeline.parameters.validation.DbCollectionsVariantsNameValidator;
 import uk.ac.ebi.eva.pipeline.parameters.validation.DbNameValidator;
-import uk.ac.ebi.eva.pipeline.parameters.validation.InputStudyIdValidator;
-import uk.ac.ebi.eva.pipeline.parameters.validation.InputVcfIdValidator;
 import uk.ac.ebi.eva.pipeline.parameters.validation.OptionalValidator;
 import uk.ac.ebi.eva.pipeline.parameters.validation.OutputDirAnnotationValidator;
 
@@ -35,18 +33,14 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Validates the job parameters necessary to execute a {@link uk.ac.ebi.eva.pipeline.jobs.steps.AnnotationLoaderStep}
- * <p>
- * The parameters OUTPUT_DIR_ANNOTATION, INPUT_STUDY_ID and INPUT_VCF_ID are used to build the VEP input option
- * {@see uk.ac.ebi.eva.pipeline.configuration.JobOptions#loadPipelineOptions()}
+ * Validates the job parameters necessary to execute an {@link uk.ac.ebi.eva.pipeline.jobs.steps.AnnotationLoaderStep}
  */
 public class AnnotationLoaderStepParametersValidator extends DefaultJobParametersValidator {
+
     public AnnotationLoaderStepParametersValidator() {
         super(new String[]{JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME,
-                      JobParametersNames.DB_NAME,
-                      JobParametersNames.INPUT_STUDY_ID,
-                      JobParametersNames.INPUT_VCF_ID,
-                      JobParametersNames.OUTPUT_DIR_ANNOTATION},
+                           JobParametersNames.DB_NAME,
+                           JobParametersNames.OUTPUT_DIR_ANNOTATION},
               new String[]{});
     }
 
@@ -60,8 +54,6 @@ public class AnnotationLoaderStepParametersValidator extends DefaultJobParameter
         final List<JobParametersValidator> jobParametersValidators = Arrays.asList(
                 new DbCollectionsVariantsNameValidator(),
                 new DbNameValidator(),
-                new InputStudyIdValidator(),
-                new InputVcfIdValidator(),
                 new OutputDirAnnotationValidator(),
                 new OptionalValidator(new ConfigRestartabilityAllowValidator(),
                                       JobParametersNames.CONFIG_RESTARTABILITY_ALLOW),

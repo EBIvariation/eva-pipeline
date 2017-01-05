@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 EMBL - European Bioinformatics Institute
+ * Copyright 2016-2017 EMBL - European Bioinformatics Institute
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ public class VariantAnnotationReaderConfiguration {
     @Bean(VARIANT_ANNOTATION_READER)
     @StepScope
     public ItemStreamReader<VariantAnnotation> variantAnnotationReader(JobOptions jobOptions) {
-        return new AnnotationFlatFileReader(jobOptions.getPipelineOptions().getString(JobOptions.VEP_OUTPUT));
+        return new AnnotationFlatFileReader(jobOptions.getVepOutput());
     }
 
 }
