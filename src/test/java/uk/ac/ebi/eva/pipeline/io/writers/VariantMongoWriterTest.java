@@ -18,6 +18,8 @@ package uk.ac.ebi.eva.pipeline.io.writers;
 import com.mongodb.BasicDBObject;
 import com.mongodb.BulkWriteException;
 import com.mongodb.DBCollection;
+import com.mongodb.DBObject;
+
 import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -93,20 +95,24 @@ public class VariantMongoWriterTest {
     }
 
     @Test
-    public void indexesShouldBeCreated() throws UnknownHostException {
+    public void indexesShouldBeCreatedInBackground() throws UnknownHostException {
         String dbName = mongoRule.getRandomTemporaryDatabaseName();
         MongoOperations mongoOperations = MongoDBHelper.getDefaultMongoOperations(dbName);
         DBCollection dbCollection = mongoOperations.getCollection(collectionName);
 
         variantMongoWriter = new VariantMongoWriter(collectionName, mongoOperations, variantToMongoDbObjectConverter);
 
-        Set<String> createdIndexes = dbCollection.getIndexInfo().stream().map(o -> o.get("name").toString())
+        List<DBObject> indexInfo = dbCollection.getIndexInfo();
+
+        Set<String> createdIndexes = indexInfo.stream().map(index -> index.get("name").toString())
                 .collect(Collectors.toSet());
         Set<String> expectedIndexes = new HashSet<>();
         expectedIndexes.addAll(Arrays.asList("annot.ct.so_1", "annot.xrefs.id_1", "chr_1_start_1_end_1",
                                              "files.sid_1_files.fid_1", "_id_", "ids_1"));
-
         assertEquals(expectedIndexes, createdIndexes);
+
+        indexInfo.stream().filter(index -> !("_id_".equals(index.get("name").toString())))
+                          .forEach(index -> assertEquals("true", index.get("background").toString()));
     }
 
     @Test
