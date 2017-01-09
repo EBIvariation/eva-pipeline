@@ -17,6 +17,7 @@
 package uk.ac.ebi.eva.pipeline.jobs.steps;
 
 import org.opencb.biodata.models.variant.annotation.VariantAnnotation;
+import org.opencb.datastore.core.ObjectMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.Step;
@@ -75,13 +76,16 @@ public class AnnotationLoaderStep {
     public Step loadVepAnnotationStep(StepBuilderFactory stepBuilderFactory, JobOptions jobOptions) {
         logger.debug("Building '" + LOAD_VEP_ANNOTATION_STEP + "'");
 
-        final int chunkSize = jobOptions.getPipelineOptions().getInt(JobParametersNames.CONFIG_CHUNK_SIZE);
+        ObjectMap pipelineOptions = jobOptions.getPipelineOptions();
+        boolean startIfcomplete = pipelineOptions.getBoolean(JobParametersNames.CONFIG_RESTARTABILITY_ALLOW);
+        final int chunkSize = pipelineOptions.getInt(JobParametersNames.CONFIG_CHUNK_SIZE);
 
         return stepBuilderFactory.get(LOAD_VEP_ANNOTATION_STEP)
                 .<VariantAnnotation, VariantAnnotation>chunk(chunkSize)
                 .reader(variantAnnotationReader)
                 .writer(variantAnnotationItemWriter)
                 .faultTolerant().skipLimit(50).skip(FlatFileParseException.class)
+                .allowStartIfComplete(startIfcomplete)
                 .listener(new SkippedItemListener())
                 .build();
     }

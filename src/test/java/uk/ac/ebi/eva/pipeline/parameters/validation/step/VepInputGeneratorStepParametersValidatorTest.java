@@ -58,6 +58,7 @@ public class VepInputGeneratorStepParametersValidatorTest {
         requiredParameters.put(JobParametersNames.OUTPUT_DIR_ANNOTATION, new JobParameter(dir));
 
         optionalParameters = new TreeMap<>();
+        optionalParameters.put(JobParametersNames.CONFIG_CHUNK_SIZE, new JobParameter("100"));
         optionalParameters.put(JobParametersNames.CONFIG_RESTARTABILITY_ALLOW, new JobParameter("true"));
     }
 

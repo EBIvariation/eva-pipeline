@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 EMBL - European Bioinformatics Institute
+ * Copyright 2016-2017 EMBL - European Bioinformatics Institute
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import org.junit.Test;
 import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersInvalidException;
-import org.springframework.batch.core.JobParametersValidator;
 
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
@@ -31,32 +30,29 @@ import java.util.Map;
 import java.util.TreeMap;
 
 /**
- * Tests that the arguments necessary to run a {@link uk.ac.ebi.eva.pipeline.jobs.steps.VariantLoaderStep} are correctly
- * validated
+ * Tests that the arguments necessary to run a {@link uk.ac.ebi.eva.pipeline.jobs.steps.AnnotationLoaderStep} are
+ * correctly validated
  */
-public class VariantLoaderStepParametersValidatorTest {
-
-    private JobParametersValidator validator;
+public class AnnotationLoaderStepParametersValidatorTest {
+    private AnnotationLoaderStepParametersValidator validator;
 
     @Rule
-    public PipelineTemporaryFolderRule temporaryFolderRule = new PipelineTemporaryFolderRule();
+    public PipelineTemporaryFolderRule temporaryFolder = new PipelineTemporaryFolderRule();
 
     private Map<String, JobParameter> requiredParameters;
 
     private Map<String, JobParameter> optionalParameters;
 
     @Before
-    public void setUp() throws IOException {
-        validator = new VariantLoaderStepParametersValidator();
+    public void setUp() throws Exception {
+        validator = new AnnotationLoaderStepParametersValidator();
+        final String dir = temporaryFolder.getRoot().getCanonicalPath();
 
         requiredParameters = new TreeMap<>();
-        requiredParameters.put(JobParametersNames.DB_NAME, new JobParameter("database"));
-        requiredParameters.put(JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME, new JobParameter("variants"));
-        requiredParameters.put(JobParametersNames.INPUT_STUDY_ID, new JobParameter("inputStudyId"));
-        requiredParameters.put(JobParametersNames.INPUT_VCF_ID, new JobParameter("inputVcfId"));
-        requiredParameters.put(JobParametersNames.INPUT_VCF_AGGREGATION, new JobParameter("NONE"));
-        requiredParameters.put(JobParametersNames.INPUT_VCF,
-                               new JobParameter(temporaryFolderRule.newFile().getCanonicalPath()));
+        requiredParameters.put(JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME,
+                               new JobParameter("dbCollectionsVariantName"));
+        requiredParameters.put(JobParametersNames.DB_NAME, new JobParameter("dbName"));
+        requiredParameters.put(JobParametersNames.OUTPUT_DIR_ANNOTATION, new JobParameter(dir));
 
         optionalParameters = new TreeMap<>();
         optionalParameters.put(JobParametersNames.CONFIG_CHUNK_SIZE, new JobParameter("100"));
@@ -77,39 +73,20 @@ public class VariantLoaderStepParametersValidatorTest {
     }
 
     @Test(expected = JobParametersInvalidException.class)
-    public void dbNameIsRequired() throws Exception {
-        requiredParameters.remove(JobParametersNames.DB_NAME);
-        validator.validate(new JobParameters(requiredParameters));
-    }
-
-    @Test(expected = JobParametersInvalidException.class)
-    public void dbCollectionsVariantsNameIsRequired() throws Exception {
+    public void dbCollectionsVariantsNameIsRequired() throws JobParametersInvalidException, IOException {
         requiredParameters.remove(JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME);
         validator.validate(new JobParameters(requiredParameters));
     }
 
     @Test(expected = JobParametersInvalidException.class)
-    public void inputStudyIdIsRequired() throws Exception {
-        requiredParameters.remove(JobParametersNames.INPUT_STUDY_ID);
+    public void dbNameIsRequired() throws JobParametersInvalidException, IOException {
+        requiredParameters.remove(JobParametersNames.DB_NAME);
         validator.validate(new JobParameters(requiredParameters));
     }
 
     @Test(expected = JobParametersInvalidException.class)
-    public void inputVcfIdIsRequired() throws Exception {
-        requiredParameters.remove(JobParametersNames.INPUT_VCF_ID);
+    public void outputDirAnnotationIsRequired() throws JobParametersInvalidException, IOException {
+        requiredParameters.remove(JobParametersNames.OUTPUT_DIR_ANNOTATION);
         validator.validate(new JobParameters(requiredParameters));
     }
-
-    @Test(expected = JobParametersInvalidException.class)
-    public void inputVcfIsRequired() throws Exception {
-        requiredParameters.remove(JobParametersNames.INPUT_VCF);
-        validator.validate(new JobParameters(requiredParameters));
-    }
-
-    @Test(expected = JobParametersInvalidException.class)
-    public void inputVcfAggregationIsRequired() throws Exception {
-        requiredParameters.remove(JobParametersNames.INPUT_VCF_AGGREGATION);
-        validator.validate(new JobParameters(requiredParameters));
-    }
-
 }
