@@ -21,14 +21,17 @@ import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.batch.JobLauncherCommandLineRunner;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
+import uk.ac.ebi.eva.pipeline.parameters.ParametersFromProperties;
 
 /**
  * Custom JobLauncherCommandLineRunner that retrieves all known jobParameters from the application context
  * and injects them in the running instance of the job.a
  */
 @Component
-public class CustomJobLauncherCommandLineRunner extends JobLauncherCommandLineRunner {
+@Profile("integration-test")
+public class IntegrationTestJobLauncherCommandLineRunner extends JobLauncherCommandLineRunner {
 
     @Value("${spring.batch.job.names:#{null}}")
     private String springBatchJob;
@@ -36,7 +39,7 @@ public class CustomJobLauncherCommandLineRunner extends JobLauncherCommandLineRu
     @Autowired
     private ParametersFromProperties parametersFromProperties;
 
-    public CustomJobLauncherCommandLineRunner(JobLauncher jobLauncher, JobExplorer jobExplorer) {
+    public IntegrationTestJobLauncherCommandLineRunner(JobLauncher jobLauncher, JobExplorer jobExplorer) {
         super(jobLauncher, jobExplorer);
     }
 

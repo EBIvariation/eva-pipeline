@@ -13,13 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.ac.ebi.eva.pipeline;
+package uk.ac.ebi.eva.pipeline.parameters;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 
 import java.lang.reflect.Field;
 import java.util.Properties;
