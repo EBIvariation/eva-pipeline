@@ -17,7 +17,6 @@ package uk.ac.ebi.eva.pipeline.io.mappers;
 
 import org.opencb.biodata.models.variant.VariantSource;
 import org.springframework.batch.item.file.LineMapper;
-
 import uk.ac.ebi.eva.commons.models.data.Variant;
 
 import java.util.List;
@@ -31,25 +30,21 @@ import static org.junit.Assert.assertNotNull;
  */
 public class VcfLineMapper implements LineMapper<List<Variant>> {
 
-    private final VariantSource source;
+    private final String fileId;
+    private final String studyId;
 
     private final VariantVcfFactory factory;
 
-    public VcfLineMapper(VariantSource source) {
-        if (!VariantSource.Aggregation.NONE.equals(source.getAggregation())) {
-            throw new IllegalArgumentException(
-                    this.getClass().getSimpleName() + " should be used to read genotyped VCFs only, " +
-                            "but the VariantSource.Aggregation set to " + source.getAggregation().toString());
-        }
-        this.source = source;
+    public VcfLineMapper(String fileId, String studyId) {
+        this.fileId = fileId;
+        this.studyId = studyId;
         this.factory = new VariantVcfFactory();
     }
 
     @Override
     public List<Variant> mapLine(String line, int lineNumber) {
         assertNotNull(this.getClass().getSimpleName() + " should be used to read genotyped VCFs only " +
-                              "(hint: set VariantSource.Aggregation to NONE)",
-                      factory);
-        return factory.create(source, line);
+                        "(hint: set VariantSource.Aggregation to NONE)", factory);
+        return factory.create(fileId, studyId, line);
     }
 }
