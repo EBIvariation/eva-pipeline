@@ -31,8 +31,6 @@ public class AggregatedVcfReaderTest {
 
     private static final String STUDY_ID = "7";
 
-    private static final String STUDY_NAME = "study name";
-
     private static final String INPUT_FILE_PATH = "/aggregated.vcf.gz";
 
     private static final String INPUT_FILE_PATH_EXAC = "/aggregated.exac.vcf.gz";
@@ -62,11 +60,7 @@ public class AggregatedVcfReaderTest {
         // input vcf
         File input = TestFileUtils.getResource(inputFilePath);
 
-        VariantSource source = new VariantSource(input.getAbsolutePath(), FILE_ID, STUDY_ID, STUDY_NAME,
-                                                 VariantStudy.StudyType.COLLECTION,
-                                                 aggregationType);
-
-        AggregatedVcfReader vcfReader = new AggregatedVcfReader(source, input);
+        AggregatedVcfReader vcfReader = new AggregatedVcfReader(FILE_ID, STUDY_ID, aggregationType, input);
         vcfReader.setSaveState(false);
         vcfReader.open(executionContext);
 
@@ -82,11 +76,8 @@ public class AggregatedVcfReaderTest {
         File tempFile = JobTestUtils.createTempFile();
         JobTestUtils.uncompress(input.getAbsolutePath(), tempFile);
 
-        VariantSource source = new VariantSource(input.getAbsolutePath(), FILE_ID, STUDY_ID, STUDY_NAME,
-                                                 VariantStudy.StudyType.COLLECTION,
-                                                 VariantSource.Aggregation.BASIC);
-
-        AggregatedVcfReader vcfReader = new AggregatedVcfReader(source, tempFile);
+        AggregatedVcfReader vcfReader = new AggregatedVcfReader(FILE_ID, STUDY_ID, VariantSource.Aggregation.BASIC,
+                tempFile);
         vcfReader.setSaveState(false);
         vcfReader.open(executionContext);
 

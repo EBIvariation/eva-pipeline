@@ -32,19 +32,21 @@ import org.opencb.opencga.storage.core.variant.adaptors.VariantDBIterator;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.JobExecution;
+import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
+import uk.ac.ebi.eva.pipeline.Application;
 import uk.ac.ebi.eva.pipeline.configuration.BeanNames;
-import uk.ac.ebi.eva.pipeline.jobs.steps.AnnotationLoaderStep;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
+import uk.ac.ebi.eva.utils.EvaJobParameterBuilder;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -68,18 +70,12 @@ import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResource;
 /**
  * Test for {@link GenotypedVcfJob}
  * <p>
- * JobLauncherTestUtils is initialized in @Before because in GenotypedVcfJob there are two Job beans:
- * genotypedVcfJob and annotateVariantsJob (used by test). In this way it is possible to specify the Job to run
- * and avoid NoUniqueBeanDefinitionException. There are also other solutions like:
- * - http://stackoverflow.com/questions/29655796/how-can-i-qualify-an-autowired-setter-that-i-dont-own
- * - https://jira.spring.io/browse/BATCH-2366
- * <p>
  * TODO:
  * FILE_WRONG_NO_ALT should be renamed because the alt allele is not missing but is the same as the reference
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest
-@TestPropertySource({"classpath:genotyped-vcf.properties"})
+@ActiveProfiles({Application.VARIANT_WRITER_MONGO_PROFILE,Application.VARIANT_ANNOTATION_MONGO_PROFILE})
+@TestPropertySource({"classpath:genotyped-vcf.properties", "classpath:test-mongo.properties"})
 @ContextConfiguration(classes = {GenotypedVcfJob.class, BatchTestConfiguration.class})
 public class GenotypedVcfJobTest {
     //TODO check later to substitute files for temporary ones / pay attention to vep Input file
@@ -137,7 +133,13 @@ public class GenotypedVcfJobTest {
         VariantDBIterator iterator;
 
         // Run the Job
-        JobExecution jobExecution = jobLauncherTestUtils.launchJob();
+        JobParameters jobParameters = new EvaJobParameterBuilder().inputVcf(getResource(input).getAbsolutePath())
+                .databaseName(dbName)
+                .collectionVariantsName("variants")
+                .inputVcfId("1")
+                .inputStudyId("genotyped-job")
+                .inputVcfAggregation("NONE").toJobParameters();
+        JobExecution jobExecution = jobLauncherTestUtils.launchJob(jobParameters);
 
         assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
         assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());

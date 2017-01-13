@@ -51,11 +51,12 @@ public class VariantVcfFactory {
      * as Ensembl does, except for insertions, where start is greater than end:
      * http://www.ensembl.org/info/docs/tools/vep/vep_formats.html#vcf
      *
-     * @param source context of the variant: studyId, fileId, etc
+     * @param fileId,
+     * @param studyId
      * @param line Contents of the line in the file
      * @return The list of Variant objects that can be created using the fields from a VCF record
      */
-    public List<Variant> create(VariantSource source,
+    public List<Variant> create(String fileId, String studyId,
                                 String line) throws IllegalArgumentException, NotAVariantException {
         String[] fields = line.split("\t");
         if (fields.length < 8) {
@@ -119,14 +120,14 @@ public class VariantVcfFactory {
             Variant variant = new Variant(chromosome, keyFields.start, keyFields.end, keyFields.reference,
                                           keyFields.alternate);
             String[] secondaryAlternates = getSecondaryAlternates(variant, keyFields.getNumAllele(), alternateAlleles);
-            VariantSourceEntry file = new VariantSourceEntry(source.getFileId(), source.getStudyId(),
+            VariantSourceEntry file = new VariantSourceEntry(fileId, studyId,
                                                              secondaryAlternates, format);
             variant.addSourceEntry(file);
 
             try {
-                parseSplitSampleData(variant, source, fields, alternateAlleles, secondaryAlternates, altAlleleIdx);
+                parseSplitSampleData(variant, fileId, studyId, fields, alternateAlleles, secondaryAlternates, altAlleleIdx);
                 // Fill the rest of fields (after samples because INFO depends on them)
-                setOtherFields(variant, source, ids, quality, filter, info, format, keyFields.getNumAllele(),
+                setOtherFields(variant, fileId, studyId, ids, quality, filter, info, format, keyFields.getNumAllele(),
                                alternateAlleles, line);
                 variants.add(variant);
             } catch (NonStandardCompliantSampleField ex) {
@@ -242,10 +243,10 @@ public class VariantVcfFactory {
         return secondaryAlternates;
     }
 
-    protected void parseSplitSampleData(Variant variant, VariantSource source, String[] fields,
+    protected void parseSplitSampleData(Variant variant, String fileId, String studyId, String[] fields,
                                         String[] alternateAlleles, String[] secondaryAlternates,
                                         int alternateAlleleIdx) throws NonStandardCompliantSampleField {
-        String[] formatFields = variant.getSourceEntry(source.getFileId(), source.getStudyId()).getFormat().split(":");
+        String[] formatFields = variant.getSourceEntry(fileId, studyId).getFormat().split(":");
 
         for (int i = 9; i < fields.length; i++) {
             Map<String, String> map = new TreeMap<>();
@@ -263,7 +264,7 @@ public class VariantVcfFactory {
             }
 
             // Add sample to the variant entry in the source file
-            variant.getSourceEntry(source.getFileId(), source.getStudyId()).addSampleData(map);
+            variant.getSourceEntry(fileId, studyId).addSampleData(map);
         }
     }
 
@@ -315,22 +316,22 @@ public class VariantVcfFactory {
         return genotype.intern();
     }
 
-    protected void setOtherFields(Variant variant, VariantSource source, Set<String> ids, float quality, String filter,
+    protected void setOtherFields(Variant variant, String fileId, String studyId, Set<String> ids, float quality, String filter,
                                   String info, String format, int numAllele, String[] alternateAlleles, String line) {
         // Fields not affected by the structure of REF and ALT fields
         variant.setIds(ids);
 
         if (quality > -1) {
-            variant.getSourceEntry(source.getFileId(), source.getStudyId())
+            variant.getSourceEntry(fileId, studyId)
                    .addAttribute("QUAL", String.valueOf(quality));
         }
         if (!filter.isEmpty()) {
-            variant.getSourceEntry(source.getFileId(), source.getStudyId()).addAttribute("FILTER", filter);
+            variant.getSourceEntry(fileId, studyId).addAttribute("FILTER", filter);
         }
         if (!info.isEmpty()) {
-            parseInfo(variant, source.getFileId(), source.getStudyId(), info, numAllele);
+            parseInfo(variant, fileId, studyId, info, numAllele);
         }
-        variant.getSourceEntry(source.getFileId(), source.getStudyId()).addAttribute("src", line);
+        variant.getSourceEntry(fileId, studyId).addAttribute("src", line);
     }
 
     protected void parseInfo(Variant variant, String fileId, String studyId, String info, int numAllele) {
