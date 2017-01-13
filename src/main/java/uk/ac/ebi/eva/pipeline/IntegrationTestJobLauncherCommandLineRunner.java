@@ -27,10 +27,10 @@ import uk.ac.ebi.eva.pipeline.parameters.ParametersFromProperties;
 
 /**
  * Custom JobLauncherCommandLineRunner that retrieves all known jobParameters from the application context
- * and injects them in the running instance of the job.a
+ * and injects them in the running instance of the job. Used for integration tests.
  */
 @Component
-@Profile("integration-test")
+@Profile("integrationTest")
 public class IntegrationTestJobLauncherCommandLineRunner extends JobLauncherCommandLineRunner {
 
     @Value("${spring.batch.job.names:#{null}}")
