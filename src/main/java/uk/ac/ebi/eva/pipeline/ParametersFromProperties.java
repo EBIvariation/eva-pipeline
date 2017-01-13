@@ -1,3 +1,18 @@
+/*
+ * Copyright 2015-2017 EMBL - European Bioinformatics Institute
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package uk.ac.ebi.eva.pipeline;
 
 import org.slf4j.Logger;
@@ -11,10 +26,15 @@ import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * This class resolves all parameters to be used in the jobs from the application context
+ * (They can be loaded from properties, environmental values...) and can create a
+ * @see org.springframework.batch.core.JobParameters
+ */
 @Service
-public class ParameterFromProperties {
+public class ParametersFromProperties {
 
-    private static final Logger logger = LoggerFactory.getLogger(ParameterFromProperties.class);
+    private static final Logger logger = LoggerFactory.getLogger(ParametersFromProperties.class);
     private static final String PROPERTY = "${";
     private static final String OR_NULL = ":#{null}}";
     private static final String PROPERTY_ID_REGEX = "(?<=\\$\\{).*(?=:#\\{null})";
@@ -27,12 +47,6 @@ public class ParameterFromProperties {
 
     @Value(PROPERTY + JobParametersNames.INPUT_STUDY_ID + OR_NULL)
     private String studyId;
-
-    @Value(PROPERTY + JobParametersNames.INPUT_STUDY_NAME + OR_NULL)
-    private String studyName;
-
-    @Value(PROPERTY + JobParametersNames.INPUT_STUDY_TYPE + OR_NULL)
-    private String studyType;
 
     @Value(PROPERTY + JobParametersNames.INPUT_VCF_ID + OR_NULL)
     private String vcfId;
