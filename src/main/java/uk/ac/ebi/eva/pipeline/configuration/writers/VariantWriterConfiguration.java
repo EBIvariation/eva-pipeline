@@ -26,6 +26,7 @@ import uk.ac.ebi.eva.commons.models.data.Variant;
 import uk.ac.ebi.eva.pipeline.Application;
 import uk.ac.ebi.eva.pipeline.io.writers.VariantMongoWriter;
 import uk.ac.ebi.eva.pipeline.model.converters.data.VariantToMongoDbObjectConverter;
+import uk.ac.ebi.eva.pipeline.parameters.DatabaseParameters;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 import uk.ac.ebi.eva.utils.MongoDBHelper;
 
@@ -37,11 +38,10 @@ public class VariantWriterConfiguration {
     @Bean(VARIANT_WRITER)
     @StepScope
     @Profile(Application.VARIANT_WRITER_MONGO_PROFILE)
-    public ItemWriter<Variant> variantMongoWriter(JobOptions jobOptions) throws Exception {
-        MongoOperations mongoOperations = MongoDBHelper
-                .getMongoOperations(jobOptions.getDbName(), jobOptions.getMongoConnection());
-
-        return new VariantMongoWriter(jobOptions.getDbCollectionsVariantsName(),
+    public ItemWriter<Variant> variantMongoWriter(JobOptions jobOptions, DatabaseParameters databaseParameters) throws
+            Exception {
+        MongoOperations mongoOperations = databaseParameters.getMongoOperations();
+        return new VariantMongoWriter(databaseParameters.getCollectionVariantsName(),
                 mongoOperations,
                 variantToMongoDbObjectConverter(jobOptions));
     }

@@ -19,7 +19,6 @@ package uk.ac.ebi.eva.pipeline.io.mappers;
 import org.opencb.biodata.models.feature.Genotype;
 import org.opencb.biodata.models.variant.VariantSource;
 import org.opencb.biodata.models.variant.exceptions.NonStandardCompliantSampleField;
-
 import uk.ac.ebi.eva.commons.models.data.Variant;
 import uk.ac.ebi.eva.commons.models.data.VariantSourceEntry;
 import uk.ac.ebi.eva.commons.models.data.VariantStats;
@@ -64,25 +63,25 @@ public class VariantAggregatedVcfFactory extends VariantVcfFactory {
 
     /**
      * @param tagMap Properties that contains case-sensitive tag mapping for aggregation data. A valid example structure
-     * of this file is:
-     * <pre>
-     * {@code
+     *               of this file is:
+     *               <pre>
+     *               {@code
      *
-     * EUR.AF=EUR_AF
-     * EUR.AC=AC_EUR
-     * EUR.AN=EUR_AN
-     * EUR.GTC=EUR_GTC
-     * ALL.AF=AF
-     * ALL.AC=TAC
-     * ALL.AN=AN
-     * ALL.GTC=GTC
-     * }
-     * </pre>
-     * <p>
-     * <p>
-     * where the right side of the '=' is how the values appear in the vcf, and left side is how it will loaded. It must
-     * be a bijection, i.e. there must not be repeated entries in any side. The part before the '.' can be any string
-     * naming the group. The part after the '.' must be one of AF, AC, AN or GTC.
+     *               EUR.AF=EUR_AF
+     *               EUR.AC=AC_EUR
+     *               EUR.AN=EUR_AN
+     *               EUR.GTC=EUR_GTC
+     *               ALL.AF=AF
+     *               ALL.AC=TAC
+     *               ALL.AN=AN
+     *               ALL.GTC=GTC
+     *               }
+     *               </pre>
+     *               <p>
+     *               <p>
+     *               where the right side of the '=' is how the values appear in the vcf, and left side is how it will loaded. It must
+     *               be a bijection, i.e. there must not be repeated entries in any side. The part before the '.' can be any string
+     *               naming the group. The part after the '.' must be one of AF, AC, AN or GTC.
      */
     public VariantAggregatedVcfFactory(Properties tagMap) {
         this.tagMap = tagMap;
@@ -97,18 +96,19 @@ public class VariantAggregatedVcfFactory extends VariantVcfFactory {
     }
 
     @Override
-    protected void parseSplitSampleData(Variant variant, VariantSource source, String[] fields,
+    protected void parseSplitSampleData(Variant variant, String fileId, String studyId, String[] fields,
                                         String[] alternateAlleles, String[] secondaryAlternates, int alternateAlleleIdx)
             throws NonStandardCompliantSampleField {
         // Nothing to do
     }
 
     @Override
-    protected void setOtherFields(Variant variant, VariantSource source, Set<String> ids, float quality, String filter,
-                                  String info, String format, int numAllele, String[] alternateAlleles, String line) {
+    protected void setOtherFields(Variant variant, String fileId, String studyId, Set<String> ids, float quality,
+                                  String filter, String info, String format, int numAllele, String[] alternateAlleles,
+                                  String line) {
         // Fields not affected by the structure of REF and ALT fields
         variant.setIds(ids);
-        VariantSourceEntry sourceEntry = variant.getSourceEntry(source.getFileId(), source.getStudyId());
+        VariantSourceEntry sourceEntry = variant.getSourceEntry(fileId, studyId);
         if (quality > -1) {
             sourceEntry.addAttribute("QUAL", String.valueOf(quality));
         }
@@ -116,22 +116,22 @@ public class VariantAggregatedVcfFactory extends VariantVcfFactory {
             sourceEntry.addAttribute("FILTER", filter);
         }
         if (!info.isEmpty()) {
-            parseInfo(variant, source.getFileId(), source.getStudyId(), info, numAllele);
+            parseInfo(variant, fileId, studyId, info, numAllele);
         }
         sourceEntry.setFormat(format);
         sourceEntry.addAttribute("src", line);
 
 
         if (tagMap == null) {
-            parseStats(variant, source, numAllele, alternateAlleles, info);
+            parseStats(variant, fileId, studyId, numAllele, alternateAlleles, info);
         } else {
-            parseCohortStats(variant, source, numAllele, alternateAlleles, info);
+            parseCohortStats(variant, fileId, studyId, numAllele, alternateAlleles, info);
         }
     }
 
-    protected void parseStats(Variant variant, VariantSource source, int numAllele, String[] alternateAlleles,
+    protected void parseStats(Variant variant, String fileId, String studyId, int numAllele, String[] alternateAlleles,
                               String info) {
-        VariantSourceEntry file = variant.getSourceEntry(source.getFileId(), source.getStudyId());
+        VariantSourceEntry file = variant.getSourceEntry(fileId, studyId);
         VariantStats vs = new VariantStats(variant);
         Map<String, String> stats = new LinkedHashMap<>();
         String[] splittedInfo = info.split(";");
@@ -149,9 +149,9 @@ public class VariantAggregatedVcfFactory extends VariantVcfFactory {
         file.setStats(vs);
     }
 
-    protected void parseCohortStats(Variant variant, VariantSource source, int numAllele, String[] alternateAlleles,
+    protected void parseCohortStats(Variant variant, String fileId, String studyId, int numAllele, String[] alternateAlleles,
                                     String info) {
-        VariantSourceEntry file = variant.getSourceEntry(source.getFileId(), source.getStudyId());
+        VariantSourceEntry file = variant.getSourceEntry(fileId, studyId);
         Map<String, Map<String, String>> cohortStats = new LinkedHashMap<>();   // cohortName -> (statsName -> statsValue): EUR->(AC->3,2)
         String[] splittedInfo = info.split(";");
         for (String attribute : splittedInfo) {
@@ -268,7 +268,7 @@ public class VariantAggregatedVcfFactory extends VariantVcfFactory {
                         getGenotype(i, alleles);
                         gtc = Integer.parseInt(gtcs[i]);
                         gt = mapToMultiallelicIndex(alleles[0], numAllele) + "/" + mapToMultiallelicIndex(alleles[1],
-                                                                                                          numAllele);
+                                numAllele);
                     } else {    // GTC=0/0:0,0/1:5,1/1:8
                         Matcher matcher = numNum.matcher(gtcSplit[0]);
                         if (matcher.matches()) {    // number/number:number
@@ -302,7 +302,7 @@ public class VariantAggregatedVcfFactory extends VariantVcfFactory {
      * returns in alleles[] the genotype specified in index in the sequence:
      * 0/0, 0/1, 1/1, 0/2, 1/2, 2/2, 0/3...
      *
-     * @param index in this sequence, starting in 0
+     * @param index   in this sequence, starting in 0
      * @param alleles returned genotype.
      */
     public static void getGenotype(int index, Integer alleles[]) {
@@ -333,7 +333,7 @@ public class VariantAggregatedVcfFactory extends VariantVcfFactory {
         m = singleRef.matcher(gt);
         if (m.matches()) { // R
             g = new Genotype(variant.getReference() + "/" + variant.getReference(), variant.getReference(),
-                             variant.getAlternate());
+                    variant.getAlternate());
             return g;
         }
 
@@ -354,7 +354,7 @@ public class VariantAggregatedVcfFactory extends VariantVcfFactory {
         m = refRef.matcher(gt);
         if (m.matches()) { // RR
             g = new Genotype(variant.getReference() + "/" + variant.getReference(), variant.getReference(),
-                             variant.getAlternate());
+                    variant.getAlternate());
             return g;
         }
 
