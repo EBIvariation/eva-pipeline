@@ -34,9 +34,38 @@ public class InputStudyNameValidatorTest {
     }
 
     @Test
-    public void inputStudyNameIsValid() throws JobParametersInvalidException {
+    public void inputStudyNameSingleWordIsValid() throws JobParametersInvalidException {
         jobParametersBuilder = new JobParametersBuilder();
         jobParametersBuilder.addString(JobParametersNames.INPUT_STUDY_NAME, "inputStudyName");
+        validator.validate(jobParametersBuilder.toJobParameters());
+    }
+
+    @Test
+    public void inputStudyNameWithWhiteSpacesIsValid() throws JobParametersInvalidException {
+        jobParametersBuilder = new JobParametersBuilder();
+        jobParametersBuilder.addString(JobParametersNames.INPUT_STUDY_NAME,
+                                       "Illumina Platinum Genomes calls for NA12877 and NA12878 against GRCh38");
+        validator.validate(jobParametersBuilder.toJobParameters());
+    }
+
+    @Test
+    public void inputStudyNameWithDigitsIsValid() throws JobParametersInvalidException {
+        jobParametersBuilder = new JobParametersBuilder();
+        jobParametersBuilder.addString(JobParametersNames.INPUT_STUDY_NAME, "123456");
+        validator.validate(jobParametersBuilder.toJobParameters());
+    }
+
+    @Test
+    public void inputStudyNameWithDigitsAndWhiteSpacesIsValid() throws JobParametersInvalidException {
+        jobParametersBuilder = new JobParametersBuilder();
+        jobParametersBuilder.addString(JobParametersNames.INPUT_STUDY_NAME, "12 34 56");
+        validator.validate(jobParametersBuilder.toJobParameters());
+    }
+
+    @Test
+    public void inputStudyNameWithSymbolsIsValid() throws JobParametersInvalidException {
+        jobParametersBuilder = new JobParametersBuilder();
+        jobParametersBuilder.addString(JobParametersNames.INPUT_STUDY_NAME, "@£ %! ()");
         validator.validate(jobParametersBuilder.toJobParameters());
     }
 
