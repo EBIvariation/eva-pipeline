@@ -51,11 +51,7 @@ public class VcfReaderTest {
         // input vcf
         File input = TestFileUtils.getResource(INPUT_FILE_PATH);
 
-        VariantSource source = new VariantSource(input.getAbsolutePath(), FILE_ID, STUDY_ID, STUDY_NAME,
-                                                 VariantStudy.StudyType.COLLECTION,
-                                                 VariantSource.Aggregation.NONE);
-
-        VcfReader vcfReader = new VcfReader(source, input);
+        VcfReader vcfReader = new VcfReader(FILE_ID, STUDY_ID, input);
         vcfReader.setSaveState(false);
         vcfReader.open(executionContext);
 
@@ -69,11 +65,7 @@ public class VcfReaderTest {
         // input vcf
         File input = TestFileUtils.getResource(INPUT_WRONG_FILE_PATH);
 
-        VariantSource source = new VariantSource(input.getAbsolutePath(), FILE_ID, STUDY_ID, STUDY_NAME,
-                                                 VariantStudy.StudyType.COLLECTION,
-                                                 VariantSource.Aggregation.NONE);
-
-        VcfReader vcfReader = new VcfReader(source, input);
+        VcfReader vcfReader = new VcfReader(FILE_ID, STUDY_ID, input);
         vcfReader.setSaveState(false);
         vcfReader.open(executionContext);
 
@@ -92,11 +84,7 @@ public class VcfReaderTest {
         File tempFile = JobTestUtils.createTempFile();  // TODO replace with temporary rules
         JobTestUtils.uncompress(input.getAbsolutePath(), tempFile);
 
-        VariantSource source = new VariantSource(input.getAbsolutePath(), FILE_ID, STUDY_ID, STUDY_NAME,
-                                                 VariantStudy.StudyType.COLLECTION,
-                                                 VariantSource.Aggregation.NONE);
-
-        VcfReader vcfReader = new VcfReader(source, tempFile);
+        VcfReader vcfReader = new VcfReader(FILE_ID, STUDY_ID, tempFile);
         vcfReader.setSaveState(false);
         vcfReader.open(executionContext);
 

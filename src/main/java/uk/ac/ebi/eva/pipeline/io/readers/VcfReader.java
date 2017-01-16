@@ -38,12 +38,14 @@ import java.util.List;
  */
 public class VcfReader extends FlatFileItemReader<List<Variant>> {
 
-    public VcfReader(VariantSource source, String file) throws IOException {
-        this(source, new File(file));
+    public VcfReader(String fileId, String studyId, String file)
+            throws IOException {
+        this(fileId, studyId, new File(file));
     }
 
-    public VcfReader(VariantSource source, File file) throws IOException {
-        this(new VcfLineMapper(source), file);
+    public VcfReader(String fileId, String studyId, File file)
+            throws IOException {
+        this(new VcfLineMapper(fileId, studyId), file);
     }
 
     public VcfReader(LineMapper<List<Variant>> lineMapper, File file) throws IOException {

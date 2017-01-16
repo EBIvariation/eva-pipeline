@@ -51,8 +51,6 @@ public class UnwindingItemStreamReaderTest {
 
     private static final String STUDY_ID = "7";
 
-    private static final String STUDY_NAME = "study name";
-
     @Test
     public void shouldReadAllLines() throws Exception {
         ExecutionContext executionContext = MetaDataInstanceFactory.createStepExecution().getExecutionContext();
@@ -60,12 +58,7 @@ public class UnwindingItemStreamReaderTest {
         // input vcf
         File input = TestFileUtils.getResource(INPUT_FILE_PATH);
 
-        VariantSource source = new VariantSource(input.getAbsolutePath(), FILE_ID, STUDY_ID, STUDY_NAME,
-                                                 VariantStudy.StudyType.COLLECTION,
-                                                 VariantSource.Aggregation.NONE);
-
-
-        VcfReader vcfReader = new VcfReader(source, input);
+        VcfReader vcfReader = new VcfReader(FILE_ID, STUDY_ID, input);
         vcfReader.setSaveState(false);
 
         UnwindingItemStreamReader<Variant> unwindingItemStreamReader = new UnwindingItemStreamReader<>(vcfReader);
@@ -81,11 +74,7 @@ public class UnwindingItemStreamReaderTest {
         // input vcf
         File input = TestFileUtils.getResource(INPUT_WRONG_FILE_PATH);
 
-        VariantSource source = new VariantSource(input.getAbsolutePath(), FILE_ID, STUDY_ID, STUDY_NAME,
-                                                 VariantStudy.StudyType.COLLECTION,
-                                                 VariantSource.Aggregation.NONE);
-
-        VcfReader vcfReader = new VcfReader(source, input);
+        VcfReader vcfReader = new VcfReader(FILE_ID, STUDY_ID, input);
         vcfReader.setSaveState(false);
 
         UnwindingItemStreamReader<Variant> unwindingItemStreamReader = new UnwindingItemStreamReader<>(vcfReader);
@@ -106,11 +95,7 @@ public class UnwindingItemStreamReaderTest {
         File tempFile = JobTestUtils.createTempFile();  // TODO replace with temporary rules
         JobTestUtils.uncompress(input.getAbsolutePath(), tempFile);
 
-        VariantSource source = new VariantSource(input.getAbsolutePath(), FILE_ID, STUDY_ID, STUDY_NAME,
-                                                 VariantStudy.StudyType.COLLECTION,
-                                                 VariantSource.Aggregation.NONE);
-
-        VcfReader vcfReader = new VcfReader(source, tempFile);
+        VcfReader vcfReader = new VcfReader(FILE_ID, STUDY_ID, tempFile);
         vcfReader.setSaveState(false);
 
         UnwindingItemStreamReader<Variant> unwindingItemStreamReader = new UnwindingItemStreamReader<>(vcfReader);
