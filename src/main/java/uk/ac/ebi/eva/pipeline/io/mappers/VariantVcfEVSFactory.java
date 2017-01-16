@@ -63,11 +63,11 @@ public class VariantVcfEVSFactory extends VariantAggregatedVcfFactory {
 
 
     @Override
-    protected void setOtherFields(Variant variant, VariantSource source, Set<String> ids, float quality, String filter,
+    protected void setOtherFields(Variant variant, String fileId, String studyId, Set<String> ids, float quality, String filter,
                                   String info, String format, int numAllele, String[] alternateAlleles, String line) {
         // Fields not affected by the structure of REF and ALT fields
         variant.setIds(ids);
-        VariantSourceEntry sourceEntry = variant.getSourceEntry(source.getFileId(), source.getStudyId());
+        VariantSourceEntry sourceEntry = variant.getSourceEntry(fileId, studyId);
         if (quality > -1) {
             sourceEntry.addAttribute("QUAL", String.valueOf(quality));
         }
@@ -75,21 +75,21 @@ public class VariantVcfEVSFactory extends VariantAggregatedVcfFactory {
             sourceEntry.addAttribute("FILTER", filter);
         }
         if (!info.isEmpty()) {
-            parseInfo(variant, source.getFileId(), source.getStudyId(), info, numAllele);
+            parseInfo(variant, fileId, studyId, info, numAllele);
         }
         sourceEntry.setFormat(format);
         sourceEntry.addAttribute("src", line);
 
 
         if (tagMap == null) {   // whether we can parse population stats or not
-            parseEVSAttributes(variant, source, numAllele, alternateAlleles);
+            parseEVSAttributes(variant, fileId, studyId, numAllele, alternateAlleles);
         } else {
             parseCohortEVSInfo(variant, sourceEntry, numAllele, alternateAlleles);
         }
     }
 
-    private void parseEVSAttributes(Variant variant, VariantSource source, int numAllele, String[] alternateAlleles) {
-        VariantSourceEntry file = variant.getSourceEntry(source.getFileId(), source.getStudyId());
+    private void parseEVSAttributes(Variant variant, String fileId, String studyId, int numAllele, String[] alternateAlleles) {
+        VariantSourceEntry file = variant.getSourceEntry(fileId, studyId);
         VariantStats stats = new VariantStats(variant);
         if (file.hasAttribute("MAF")) {
             String splitsMAF[] = file.getAttribute("MAF").split(",");

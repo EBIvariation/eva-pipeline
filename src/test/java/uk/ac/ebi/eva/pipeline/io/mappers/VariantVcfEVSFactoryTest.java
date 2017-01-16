@@ -17,9 +17,7 @@ package uk.ac.ebi.eva.pipeline.io.mappers;
 
 import org.junit.Test;
 import org.opencb.biodata.models.feature.Genotype;
-import org.opencb.biodata.models.variant.VariantSource;
 import org.opencb.commons.test.GenericTest;
-
 import uk.ac.ebi.eva.commons.models.data.Variant;
 import uk.ac.ebi.eva.commons.models.data.VariantSourceEntry;
 
@@ -42,7 +40,8 @@ import static org.junit.Assert.assertTrue;
  */
 public class VariantVcfEVSFactoryTest extends GenericTest {
 
-    private VariantSource source = new VariantSource("EVS", "EVS", "EVS", "EVS");
+    private static final String FILE_ID = "EVS";
+    private static final String STUDY_ID = "EVS";
 
     private VariantVcfFactory factory = new VariantVcfEVSFactory();
 
@@ -51,12 +50,12 @@ public class VariantVcfEVSFactoryTest extends GenericTest {
 
         String line = "1\t69428\trs140739101\tT\tG\t.\tPASS\tMAF=4.5707,0.3663,3.0647;GTS=GG,GT,TT;GTC=93,141,5101";
 
-        List<Variant> res = factory.create(source, line);
+        List<Variant> res = factory.create(FILE_ID, STUDY_ID, line);
 
         assertTrue(res.size() == 1);
 
         Variant v = res.get(0);
-        VariantSourceEntry avf = v.getSourceEntry(source.getFileId(), source.getStudyId());
+        VariantSourceEntry avf = v.getSourceEntry(FILE_ID, STUDY_ID);
 
         Map<Genotype, Integer> genotypes = new HashMap<>();
 
@@ -72,12 +71,12 @@ public class VariantVcfEVSFactoryTest extends GenericTest {
     public void testCreate_A_C_T_G() { // A,C,T,G
 
         String line = "Y\t25375759\trs373156833\tT\tA\t.\tPASS\tMAF=0.0,0.1751,0.0409;GTS=A,T;GTC=1,2442";
-        List<Variant> res = factory.create(source, line);
+        List<Variant> res = factory.create(FILE_ID, STUDY_ID, line);
 
         assertTrue(res.size() == 1);
 
         Variant v = res.get(0);
-        VariantSourceEntry avf = v.getSourceEntry(source.getFileId(), source.getStudyId());
+        VariantSourceEntry avf = v.getSourceEntry(FILE_ID, STUDY_ID);
 
         Map<Genotype, Integer> genotypes = new HashMap<>();
 
@@ -92,7 +91,7 @@ public class VariantVcfEVSFactoryTest extends GenericTest {
     public void testCreate_R_RR_A1R_A1A1() { // R, RR, A1R, A1A1
         String line = "X\t100117423\t.\tAG\tA\t.\tPASS\tMAF=0.0308,0.0269,0.0294;GTS=A1A1,A1R,RR,R;GTC=1,1,3947,2306;";
 
-        List<Variant> res = factory.create(source, line);
+        List<Variant> res = factory.create(FILE_ID, STUDY_ID, line);
 
         assertTrue(res.size() == 1);
 
@@ -102,7 +101,7 @@ public class VariantVcfEVSFactoryTest extends GenericTest {
         assertEquals(v.getAlternate(), "");
 
 
-        VariantSourceEntry avf = v.getSourceEntry(source.getFileId(), source.getStudyId());
+        VariantSourceEntry avf = v.getSourceEntry(FILE_ID, STUDY_ID);
 
         Map<Genotype, Integer> genotypes = new HashMap<>();
 
@@ -119,7 +118,7 @@ public class VariantVcfEVSFactoryTest extends GenericTest {
         String line = "X\t106362078\trs3216052\tCT\tC\t.\tPASS\tMAF=18.1215,25.2889,38.7555;GTS=A1A1,A1R,A1,RR,R;GTC=960,1298,737,1691,1570";
 
 
-        List<Variant> res = factory.create(source, line);
+        List<Variant> res = factory.create(FILE_ID, STUDY_ID, line);
 
         assertTrue(res.size() == 1);
 
@@ -129,7 +128,7 @@ public class VariantVcfEVSFactoryTest extends GenericTest {
         assertEquals(v.getAlternate(), "");
 
 
-        VariantSourceEntry avf = v.getSourceEntry(source.getFileId(), source.getStudyId());
+        VariantSourceEntry avf = v.getSourceEntry(FILE_ID, STUDY_ID);
 
         Map<Genotype, Integer> genotypes = new HashMap<>();
 
@@ -145,7 +144,7 @@ public class VariantVcfEVSFactoryTest extends GenericTest {
 
         String line = "X\t14039552\t.\tCA\tCAA,C\t.\tPASS\tMAF=5.3453,4.2467,4.9459;GTS=A1A1,A1A2,A1R,A1,A2A2,A2R,A2,RR,R;GTC=0,0,134,162,4,92,107,3707,2027;";
 
-        List<Variant> res = factory.create(source, line);
+        List<Variant> res = factory.create(FILE_ID, STUDY_ID, line);
 
         assertTrue(res.size() == 2);
 
@@ -155,7 +154,7 @@ public class VariantVcfEVSFactoryTest extends GenericTest {
         assertEquals(v.getAlternate(), "A");
 
 
-        VariantSourceEntry avf = v.getSourceEntry(source.getFileId(), source.getStudyId());
+        VariantSourceEntry avf = v.getSourceEntry(FILE_ID, STUDY_ID);
 
         Map<Genotype, Integer> genotypes = new HashMap<>();
 
@@ -175,7 +174,7 @@ public class VariantVcfEVSFactoryTest extends GenericTest {
         assertEquals(v.getAlternate(), "");
 
 
-        avf = v.getSourceEntry(source.getFileId(), source.getStudyId());
+        avf = v.getSourceEntry(FILE_ID, STUDY_ID);
 
         genotypes = new HashMap<>();
 
@@ -208,7 +207,7 @@ public class VariantVcfEVSFactoryTest extends GenericTest {
         properties.put("GROUPS_ORDER", "EA,AA,ALL");
         VariantVcfFactory evsFactory = new VariantVcfEVSFactory(properties);
 
-        List<Variant> res = evsFactory.create(source, line);
+        List<Variant> res = evsFactory.create(FILE_ID, STUDY_ID, line);
 
         // Allele count
         assertEquals(res.get(0).getSourceEntry("EVS", "EVS").getCohortStats("EA").getAltAlleleCount(), 1);
@@ -237,7 +236,7 @@ public class VariantVcfEVSFactoryTest extends GenericTest {
         // -------------- SNV, (GTS are expressed in another way)
         line = "21\t10862547\trs373689868\tG\tA\t.\tPASS\tDBSNP=dbSNP_138;EA_AC=0,3182;AA_AC=6,1378;TAC=6,4560;MAF=0.0,0.4335,0.1314;GTS=AA,AG,GG;EA_GTC=0,0,1591;AA_GTC=0,6,686;GTC=0,6,2277;DP=93;GL=.;CP=0.0;CG=-1.5;AA=G;CA=.;EXOME_CHIP=no;GWAS_PUBMED=.;FG=intergenic;HGVS_CDNA_VAR=.;HGVS_PROTEIN_VAR=.;CDS_SIZES=.;GS=.;PH=.;EA_AGE=.;AA_AGE=.";
 
-        res = evsFactory.create(source, line);
+        res = evsFactory.create(FILE_ID, STUDY_ID, line);
 
         genotypes = new LinkedList<>();
         genotypes.add(new Genotype("1/1", "G", "A"));
@@ -266,7 +265,7 @@ public class VariantVcfEVSFactoryTest extends GenericTest {
         properties.put("GROUPS_ORDER", "EA,AA,ALL");
         VariantVcfFactory evsFactory = new VariantVcfEVSFactory(properties);
 
-        List<Variant> res = evsFactory.create(source, line);
+        List<Variant> res = evsFactory.create(FILE_ID, STUDY_ID, line);
 
         // testing multiallelic AC 
         assertEquals(res.get(0).getSourceEntry("EVS", "EVS").getCohortStats("AA").getAltAlleleCount(), 172);
@@ -352,7 +351,7 @@ public class VariantVcfEVSFactoryTest extends GenericTest {
         // --------------------- testing multiallelic SNV
         line = "9\t17579190\trs4961573\tC\tG,A\t.\tPASS\tDBSNP=dbSNP_111;EA_AC=8156,0,0;AA_AC=4110,10,0;TAC=12266,10,0;MAF=0.0,0.2427,0.0815;GTS=GG,GA,GC,AA,AC,CC;EA_GTC=1,2,3,4,5,6;AA_GTC=2050,10,0,0,0,0;GTC=6128,10,0,0,0,0;DP=6;GL=SH3GL2;CP=0.0;CG=-1.8;AA=G;CA=.;EXOME_CHIP=no;GWAS_PUBMED=.;FG=NM_003026.2:utr-5,NM_003026.2:utr-5;HGVS_CDNA_VAR=NM_003026.2:c.-51C>A,NM_003026.2:c.-51C>G;HGVS_PROTEIN_VAR=.,.;CDS_SIZES=NM_003026.2:1059,NM_003026.2:1059;GS=.,.;PH=.,.;EA_AGE=.;AA_AGE=.";
 
-        res = evsFactory.create(source, line);
+        res = evsFactory.create(FILE_ID, STUDY_ID, line);
 
         // testing AC
         assertEquals(res.get(0).getSourceEntry("EVS", "EVS").getCohortStats("AA").getAltAlleleCount(), 4110);

@@ -39,7 +39,8 @@ import static org.junit.Assert.assertTrue;
  */
 public class VariantVcfExacFactoryTest extends GenericTest {
 
-    private VariantSource source = new VariantSource("Exac", "Exac", "Exac", "Exac");
+    private static final String FILE_ID = "Exac";
+    private static final String STUDY_ID = "Exac";
 
     private VariantVcfFactory factory = new VariantVcfExacFactory();
 
@@ -63,12 +64,12 @@ public class VariantVcfExacFactoryTest extends GenericTest {
                 + "non_coding_transcript_variant|604||||||1||1|DDX11L1|HGNC|37102|transcribed_unprocessed_pseudogene|||||||||3/4|||"
                 + "ENST00000518655.2:n.604G>T|||||||||||||||||||,T||ENSR00000528767|RegulatoryFeature|regulatory_region_variant|||||||"
                 + "1||||||regulatory_region|||||||||||||||||||||||||||||||";
-        List<Variant> res = factory.create(source, line);
+        List<Variant> res = factory.create(FILE_ID, STUDY_ID, line);
 
         assertTrue(res.size() == 1);
 
         Variant v = res.get(0);
-        VariantSourceEntry sourceEntry = v.getSourceEntry(source.getFileId(), source.getStudyId());
+        VariantSourceEntry sourceEntry = v.getSourceEntry(FILE_ID, FILE_ID);
 
         Map<Genotype, Integer> genotypes = new HashMap<>();
 
@@ -112,12 +113,12 @@ public class VariantVcfExacFactoryTest extends GenericTest {
                 + "||regulatory_region|||||||||||||||||||||||||||||||,C||ENSR00000278218|RegulatoryFeature|regulatory_region_variant||"
                 + "||||rs55874132|3||||||regulatory_region|||||||||||||||||||||||||||||||";
 
-        List<Variant> res = factory.create(source, line);
+        List<Variant> res = factory.create(FILE_ID, STUDY_ID, line);
 
         assertTrue(res.size() == 3);
 
         Variant v = res.get(0);
-        VariantSourceEntry sourceEntry = v.getSourceEntry(source.getFileId(), source.getStudyId());
+        VariantSourceEntry sourceEntry = v.getSourceEntry(FILE_ID, STUDY_ID);
 
         Map<Genotype, Integer> genotypes = new HashMap<>();
 
@@ -152,7 +153,7 @@ public class VariantVcfExacFactoryTest extends GenericTest {
         genotypes.put(new Genotype("2/3", "G", "A"), 0);
         genotypes.put(new Genotype("3/3", "G", "A"), 0);
 
-        sourceEntry = res.get(1).getSourceEntry(source.getFileId(), source.getStudyId());
+        sourceEntry = res.get(1).getSourceEntry(FILE_ID, STUDY_ID);
 
         assertEquals(genotypes, sourceEntry.getStats().getGenotypesCount());
         assertEquals(3, sourceEntry.getStats().getAltAlleleCount());
@@ -171,7 +172,7 @@ public class VariantVcfExacFactoryTest extends GenericTest {
         genotypes.put(new Genotype("2/3", "G", "C"), 0);
         genotypes.put(new Genotype("3/3", "G", "C"), 1);
 
-        sourceEntry = res.get(2).getSourceEntry(source.getFileId(), source.getStudyId());
+        sourceEntry = res.get(2).getSourceEntry(FILE_ID, STUDY_ID);
 
         assertEquals(genotypes, sourceEntry.getStats().getGenotypesCount());
         assertEquals(0, sourceEntry.getStats().getAltAlleleCount());
@@ -245,12 +246,12 @@ public class VariantVcfExacFactoryTest extends GenericTest {
         properties.put("ALL.HET", "AC_Het");
         properties.put("ALL.HOM", "AC_Hom");
         VariantVcfFactory exacFactory = new VariantVcfExacFactory(properties);
-        List<Variant> res = exacFactory.create(source, line);
+        List<Variant> res = exacFactory.create(FILE_ID, STUDY_ID, line);
 
         assertTrue(res.size() == 2);
 
         Variant v = res.get(0);
-        VariantSourceEntry sourceEntry = v.getSourceEntry(source.getFileId(), source.getStudyId());
+        VariantSourceEntry sourceEntry = v.getSourceEntry(FILE_ID, STUDY_ID);
 
         // Allele and genotype counts
         assertEquals(12, sourceEntry.getCohortStats("AFR").getAltAlleleCount());
@@ -274,7 +275,7 @@ public class VariantVcfExacFactoryTest extends GenericTest {
         System.out.println("genotypes for C -> G in SAS: " + sourceEntry.getCohortStats("SAS").getGenotypesCount());
 
         v = res.get(1);
-        sourceEntry = v.getSourceEntry(source.getFileId(), source.getStudyId());
+        sourceEntry = v.getSourceEntry(FILE_ID, STUDY_ID);
 
         assertEquals(2, sourceEntry.getCohortStats("NFE").getAltAlleleCount());
         genotype = new Genotype("0/2", v.getReference(), v.getAlternate());
