@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 EMBL - European Bioinformatics Institute
+ * Copyright 2016-2017 EMBL - European Bioinformatics Institute
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ import java.io.File;
 import java.util.Collections;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertNotNull;
 import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResource;
 import static uk.ac.ebi.eva.utils.MongoDBHelper.getMongoOperations;
 
@@ -86,15 +86,23 @@ public class VariantSourceEntityMongoWriterTest {
         while (cursor.hasNext()) {
             count++;
             DBObject next = cursor.next();
-            assertTrue(next.get("fname") != null);
-            assertTrue(next.get("fid") != null);
-            assertTrue(next.get("sid") != null);
-            assertTrue(next.get("sname") != null);
-            assertTrue(next.get("samp") != null);
-            assertTrue(next.get("meta") != null);
-            assertTrue(next.get("stype") != null);
-            assertTrue(next.get("date") != null);
-            assertTrue(next.get("aggregation") != null);
+            assertNotNull(next.get("fname"));
+            assertNotNull(next.get("fid"));
+            assertNotNull(next.get("sid"));
+            assertNotNull(next.get("sname"));
+            assertNotNull(next.get("samp"));
+            assertNotNull(next.get("stype"));
+            assertNotNull(next.get("date"));
+            assertNotNull(next.get("aggregation"));
+
+            DBObject meta = (DBObject) next.get("meta");
+            assertNotNull(meta);
+            assertNotNull(meta.get("fileformat"));
+            assertNotNull(meta.get("header"));
+            assertNotNull(meta.get("ALT"));
+            assertNotNull(meta.get("FILTER"));
+            assertNotNull(meta.get("INFO"));
+            assertNotNull(meta.get("FORMAT"));
         }
         assertEquals(1, count);
     }
