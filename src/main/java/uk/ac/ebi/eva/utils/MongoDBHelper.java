@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 EMBL - European Bioinformatics Institute
+ * Copyright 2016-2017 EMBL - European Bioinformatics Institute
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,42 +16,62 @@
 
 package uk.ac.ebi.eva.utils;
 
-import com.mongodb.MongoClient;
-import com.mongodb.MongoCredential;
-import com.mongodb.ReadPreference;
-import com.mongodb.ServerAddress;
-import org.opencb.commons.utils.CryptoUtils;
-import org.springframework.data.mongodb.core.MongoOperations;
-import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.SimpleMongoDbFactory;
-
-import uk.ac.ebi.eva.commons.models.data.Variant;
-
 import java.net.UnknownHostException;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.opencb.commons.utils.CryptoUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.data.mongodb.MongoDbFactory;
+import org.springframework.data.mongodb.core.MongoOperations;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.SimpleMongoDbFactory;
+import org.springframework.data.mongodb.core.convert.DbRefResolver;
+import org.springframework.data.mongodb.core.convert.DefaultDbRefResolver;
+import org.springframework.data.mongodb.core.convert.MappingMongoConverter;
+import org.springframework.data.mongodb.core.mapping.MongoMappingContext;
+
+import com.mongodb.MongoClient;
+import com.mongodb.MongoCredential;
+import com.mongodb.ReadPreference;
+import com.mongodb.ServerAddress;
+
+import uk.ac.ebi.eva.commons.models.data.Variant;
+
 /**
  * Utility class dealing with MongoDB connections using pipeline options
  */
+@Configuration
 public class MongoDBHelper {
 
-    public static MongoOperations getDefaultMongoOperations(String database) throws UnknownHostException {
+    @Autowired
+    private MongoMappingContext mongoMappingContext;
+
+    @Bean
+    public MongoMappingContext mongoMappingContext() {
+        return new MongoMappingContext();
+    }
+
+    public MongoOperations getDefaultMongoOperations(String database) throws UnknownHostException {
         MongoClient mongoClient = new MongoClient();
         mongoClient.setReadPreference(ReadPreference.primary());
-        MongoTemplate mongoTemplate = new MongoTemplate(new SimpleMongoDbFactory(mongoClient, database));
+        MongoDbFactory mongoFactory = getMongoDbFactory(mongoClient, database);
+        MongoTemplate mongoTemplate = new MongoTemplate(mongoFactory, getMappingMongoConverter(mongoFactory));
         return mongoTemplate;
     }
 
-    public static MongoOperations getMongoOperations(String database, MongoConnection connection) 
+    public MongoOperations getMongoOperations(String database, MongoConnection connection) 
             throws UnknownHostException {
-        MongoClient client = getMongoClient(connection);
-        MongoTemplate mongoTemplate = new MongoTemplate(new SimpleMongoDbFactory(client, database));
+        MongoClient mongoClient = getMongoClient(connection);
+        MongoDbFactory mongoFactory = getMongoDbFactory(mongoClient, database);
+        MongoTemplate mongoTemplate = new MongoTemplate(mongoFactory, getMappingMongoConverter(mongoFactory));
         return mongoTemplate;
     }
     
-    public static MongoClient getMongoClient(MongoConnection connection) throws UnknownHostException {
+    public MongoClient getMongoClient(MongoConnection connection) throws UnknownHostException {
         String authenticationDatabase = null;
         String user = null;
         String password = null;
@@ -81,7 +101,21 @@ public class MongoDBHelper {
         return mongoClient;
     }
 
-    private static List<ServerAddress> parseServerAddresses(String hosts) throws UnknownHostException {
+    private MongoDbFactory getMongoDbFactory(MongoClient client, String database) {
+        return new SimpleMongoDbFactory(client, database);
+    }
+
+    private MappingMongoConverter getMappingMongoConverter(MongoDbFactory mongoFactory) {
+        DbRefResolver dbRefResolver = new DefaultDbRefResolver(mongoFactory);
+        MappingMongoConverter mongoConverter = new MappingMongoConverter(dbRefResolver, mongoMappingContext);
+
+        // Customization: replace dots with pound sign
+        mongoConverter.setMapKeyDotReplacement("£");
+
+        return mongoConverter;
+    }
+
+    private List<ServerAddress> parseServerAddresses(String hosts) throws UnknownHostException {
         List<ServerAddress> serverAddresses = new LinkedList<>();
         for (String hostPort : hosts.split(",")) {
             if (hostPort.contains(":")) {
@@ -96,7 +130,7 @@ public class MongoDBHelper {
     }
 
 
-    private static ReadPreference getMongoTemplateReadPreferences(String readPreference) {
+    private ReadPreference getMongoTemplateReadPreferences(String readPreference) {
         switch (readPreference) {
             case "primary":
                 return ReadPreference.primary();

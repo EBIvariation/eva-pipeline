@@ -36,7 +36,7 @@ public class NonAnnotatedVariantsMongoReader extends MongoDbCursorItemReader {
                                            MongoConnection connection) throws UnknownHostException {
         super();
 
-        setMongo(MongoDBHelper.getMongoClient(connection));
+        setMongo(new MongoDBHelper().getMongoClient(connection));
 
         setDatabaseName(databaseName);
         setCollectionName(collectionsVariantsName);

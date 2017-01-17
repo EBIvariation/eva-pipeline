@@ -39,8 +39,8 @@ public class VariantAnnotationWriterConfiguration {
     @StepScope
     @Profile(Application.VARIANT_ANNOTATION_MONGO_PROFILE)
     public ItemWriter<VariantAnnotation> variantAnnotationItemWriter(JobOptions jobOptions) throws UnknownHostException {
-        MongoOperations mongoOperations = MongoDBHelper.getMongoOperations(jobOptions
-                .getDbName(), jobOptions.getMongoConnection());
+        MongoOperations mongoOperations = new MongoDBHelper().getMongoOperations(jobOptions.getDbName(),
+                                                                                 jobOptions.getMongoConnection());
         String collections = jobOptions.getPipelineOptions().getString(JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME);
         return new VepAnnotationMongoWriter(mongoOperations, collections);
     }

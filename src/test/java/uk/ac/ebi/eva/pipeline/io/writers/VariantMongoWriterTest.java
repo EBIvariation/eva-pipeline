@@ -65,7 +65,7 @@ public class VariantMongoWriterTest {
     @Test
     public void noVariantsNothingShouldBeWritten() throws UnknownHostException {
         String dbName = mongoRule.getRandomTemporaryDatabaseName();
-        MongoOperations mongoOperations = MongoDBHelper.getDefaultMongoOperations(dbName);
+        MongoOperations mongoOperations = new MongoDBHelper().getDefaultMongoOperations(dbName);
         DBCollection dbCollection = mongoOperations.getCollection(collectionName);
 
         variantMongoWriter = new VariantMongoWriter(collectionName, mongoOperations, variantToMongoDbObjectConverter);
@@ -80,7 +80,7 @@ public class VariantMongoWriterTest {
         Variant variant2 = new Variant("2", 3, 4, "C", "G");
 
         String dbName = mongoRule.getRandomTemporaryDatabaseName();
-        MongoOperations mongoOperations = MongoDBHelper.getDefaultMongoOperations(dbName);
+        MongoOperations mongoOperations = new MongoDBHelper().getDefaultMongoOperations(dbName);
         DBCollection dbCollection = mongoOperations.getCollection(collectionName);
 
         BasicDBObject dbObject = new BasicDBObject();
@@ -97,7 +97,7 @@ public class VariantMongoWriterTest {
     @Test
     public void indexesShouldBeCreatedInBackground() throws UnknownHostException {
         String dbName = mongoRule.getRandomTemporaryDatabaseName();
-        MongoOperations mongoOperations = MongoDBHelper.getDefaultMongoOperations(dbName);
+        MongoOperations mongoOperations = new MongoDBHelper().getDefaultMongoOperations(dbName);
         DBCollection dbCollection = mongoOperations.getCollection(collectionName);
 
         variantMongoWriter = new VariantMongoWriter(collectionName, mongoOperations, variantToMongoDbObjectConverter);
@@ -120,7 +120,7 @@ public class VariantMongoWriterTest {
         Variant variant1 = new Variant("1", 1, 2, "A", "T");
 
         String dbName = mongoRule.getRandomTemporaryDatabaseName();
-        MongoOperations mongoOperations = MongoDBHelper.getDefaultMongoOperations(dbName);
+        MongoOperations mongoOperations = new MongoDBHelper().getDefaultMongoOperations(dbName);
 
         BasicDBObject dbObject = new BasicDBObject();
 

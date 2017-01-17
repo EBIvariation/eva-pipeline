@@ -38,8 +38,8 @@ public class VariantWriterConfiguration {
     @StepScope
     @Profile(Application.VARIANT_WRITER_MONGO_PROFILE)
     public ItemWriter<Variant> variantMongoWriter(JobOptions jobOptions) throws Exception {
-        MongoOperations mongoOperations = MongoDBHelper
-                .getMongoOperations(jobOptions.getDbName(), jobOptions.getMongoConnection());
+        MongoOperations mongoOperations = new MongoDBHelper().getMongoOperations(jobOptions.getDbName(),
+                                                                                 jobOptions.getMongoConnection());
 
         return new VariantMongoWriter(jobOptions.getDbCollectionsVariantsName(),
                 mongoOperations,

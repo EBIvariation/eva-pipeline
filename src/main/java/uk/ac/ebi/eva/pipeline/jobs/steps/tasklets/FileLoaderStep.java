@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2016 EMBL - European Bioinformatics Institute
+ * Copyright 2016-2017 EMBL - European Bioinformatics Institute
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,17 +18,12 @@ package uk.ac.ebi.eva.pipeline.jobs.steps.tasklets;
 import org.opencb.biodata.models.variant.VariantSource;
 import org.opencb.datastore.core.ObjectMap;
 import org.opencb.opencga.storage.core.variant.VariantStorageManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.StepContribution;
-import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Import;
 import org.springframework.data.mongodb.core.MongoOperations;
-import org.springframework.stereotype.Component;
 
 import uk.ac.ebi.eva.commons.models.data.VariantSourceEntity;
 import uk.ac.ebi.eva.pipeline.io.readers.VcfHeaderReader;
@@ -50,8 +45,6 @@ import java.util.Collections;
  */
 public class FileLoaderStep implements Tasklet {
 
-    private static final Logger logger = LoggerFactory.getLogger(FileLoaderStep.class);
-
     @Autowired
     private JobOptions jobOptions;
 
@@ -66,8 +59,8 @@ public class FileLoaderStep implements Tasklet {
         VcfHeaderReader vcfHeaderReader = new VcfHeaderReader(file, variantSource);
         VariantSourceEntity variantSourceEntity = vcfHeaderReader.read();
 
-        MongoOperations mongoOperations = MongoDBHelper.getMongoOperations(
-                jobOptions.getDbName(), jobOptions.getMongoConnection());
+        MongoOperations mongoOperations = new MongoDBHelper().getMongoOperations(jobOptions.getDbName(),
+                                                                                 jobOptions.getMongoConnection());
         VariantSourceEntityMongoWriter variantSourceEntityMongoWriter = new VariantSourceEntityMongoWriter(
                 mongoOperations, jobOptions.getDbCollectionsFilesName());
         variantSourceEntityMongoWriter.write(Collections.singletonList(variantSourceEntity));

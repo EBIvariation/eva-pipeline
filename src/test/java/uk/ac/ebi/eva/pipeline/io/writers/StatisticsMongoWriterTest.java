@@ -162,7 +162,7 @@ public class StatisticsMongoWriterTest {
     }
 
     public StatisticsMongoWriter getStatisticsMongoWriter(String databaseName) throws UnknownHostException {
-        MongoOperations mongoOperations = MongoDBHelper.getMongoOperations(databaseName,
+        MongoOperations mongoOperations = new MongoDBHelper().getMongoOperations(databaseName,
                 jobOptions.getMongoConnection());
         StatisticsMongoWriter statisticsMongoWriter = new StatisticsMongoWriter(
                 mongoOperations, jobOptions.getDbCollectionsStatsName());

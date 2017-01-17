@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 EMBL - European Bioinformatics Institute
+ * Copyright 2016-2017 EMBL - European Bioinformatics Institute
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,6 @@
 package uk.ac.ebi.eva.pipeline.jobs.steps.tasklets;
 
 import com.mongodb.BasicDBObject;
-import org.opencb.datastore.core.ObjectMap;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
@@ -34,16 +31,14 @@ import uk.ac.ebi.eva.utils.MongoDBHelper;
  * Currently it only has indexes for the features collection.
  */
 public class IndexesGeneratorStep implements Tasklet {
-    private static final Logger logger = LoggerFactory.getLogger(IndexesGeneratorStep.class);
 
     @Autowired
     private JobOptions jobOptions;
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
-        ObjectMap pipelineOptions = jobOptions.getPipelineOptions();
-        MongoOperations operations = MongoDBHelper.getMongoOperations(jobOptions.getDbName(),
-                jobOptions.getMongoConnection());
+        MongoOperations operations = new MongoDBHelper().getMongoOperations(jobOptions.getDbName(),
+                                                                            jobOptions.getMongoConnection());
         operations.getCollection(jobOptions.getDbCollectionsFeaturesName())
                 .createIndex(new BasicDBObject("name", 1), new BasicDBObject("sparse", true).append("background", true));
 

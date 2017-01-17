@@ -15,9 +15,18 @@
  */
 package uk.ac.ebi.eva.pipeline.io.writers;
 
-import com.mongodb.DBCollection;
-import com.mongodb.DBCursor;
-import com.mongodb.DBObject;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResource;
+
+import java.io.File;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
+
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -31,20 +40,17 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import com.mongodb.DBCollection;
+import com.mongodb.DBCursor;
+import com.mongodb.DBObject;
+
 import uk.ac.ebi.eva.commons.models.data.VariantSourceEntity;
 import uk.ac.ebi.eva.pipeline.io.readers.VcfHeaderReader;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 import uk.ac.ebi.eva.test.configuration.BaseTestConfiguration;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
-
-import java.io.File;
-import java.util.Collections;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResource;
-import static uk.ac.ebi.eva.utils.MongoDBHelper.getMongoOperations;
+import uk.ac.ebi.eva.utils.MongoDBHelper;
 
 /**
  * {@link VariantSourceEntityMongoWriter}
@@ -63,14 +69,15 @@ public class VariantSourceEntityMongoWriterTest {
     @Autowired
     private JobOptions jobOptions;
 
-    private String input;
+    @Autowired
+    private MongoDBHelper mongoDbHelper;
 
-    private MongoOperations mongoOperations;
+    private String input;
 
     @Test
     public void shouldWriteAllFieldsIntoMongoDb() throws Exception {
         String databaseName = mongoRule.getRandomTemporaryDatabaseName();
-        mongoOperations = getMongoOperations(databaseName, jobOptions.getMongoConnection());
+        MongoOperations mongoOperations = mongoDbHelper.getMongoOperations(databaseName, jobOptions.getMongoConnection());
         DBCollection fileCollection = mongoRule.getCollection(databaseName, jobOptions.getDbCollectionsFilesName());
 
         VariantSourceEntityMongoWriter filesWriter = new VariantSourceEntityMongoWriter(
@@ -79,10 +86,9 @@ public class VariantSourceEntityMongoWriterTest {
         VariantSourceEntity variantSourceEntity = getVariantSourceEntity();
         filesWriter.write(Collections.singletonList(variantSourceEntity));
 
-        // count documents in DB and check they have region (chr + start + end)
         DBCursor cursor = fileCollection.find();
-
         int count = 0;
+
         while (cursor.hasNext()) {
             count++;
             DBObject next = cursor.next();
@@ -105,6 +111,36 @@ public class VariantSourceEntityMongoWriterTest {
             assertNotNull(meta.get("FORMAT"));
         }
         assertEquals(1, count);
+    }
+
+    @Test
+    public void shouldWriteSamplesWithDotsInName() throws Exception {
+        String databaseName = mongoRule.getRandomTemporaryDatabaseName();
+        MongoOperations mongoOperations = mongoDbHelper.getMongoOperations(databaseName, jobOptions.getMongoConnection());
+        DBCollection fileCollection = mongoRule.getCollection(databaseName, jobOptions.getDbCollectionsFilesName());
+
+        VariantSourceEntityMongoWriter filesWriter = new VariantSourceEntityMongoWriter(
+                mongoOperations, jobOptions.getDbCollectionsFilesName());
+
+        VariantSourceEntity variantSourceEntity = getVariantSourceEntity();
+        Map<String, Integer> samplesPosition = new HashMap<>();
+        samplesPosition.put("EUnothing", 1);
+        samplesPosition.put("NA.dot", 2);
+        samplesPosition.put("JP-dash", 3);
+        variantSourceEntity.setSamplesPosition(samplesPosition);
+
+        filesWriter.write(Collections.singletonList(variantSourceEntity));
+
+        DBCursor cursor = fileCollection.find();
+
+        while (cursor.hasNext()) {
+            DBObject next = cursor.next();
+            DBObject samples = (DBObject) next.get(VariantSourceEntity.SAMPLES_FIELD);
+            Set<String> keySet = samples.keySet();
+
+            Set<String> expectedKeySet = new TreeSet<>(Arrays.asList("EUnothing", "NA£dot", "JP-dash"));
+            assertEquals(expectedKeySet, keySet);
+        }
     }
 
     private VariantSourceEntity getVariantSourceEntity() throws Exception {

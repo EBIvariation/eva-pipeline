@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 EMBL - European Bioinformatics Institute
+ * Copyright 2016-2017 EMBL - European Bioinformatics Institute
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,8 +35,8 @@ public class GeneWriterConfiguration {
     @Bean(GENE_WRITER)
     @StepScope
     public ItemWriter<FeatureCoordinates> geneWriter(JobOptions jobOptions) throws UnknownHostException {
-        MongoOperations mongoOperations = MongoDBHelper
-                .getMongoOperations(jobOptions.getDbName(), jobOptions.getMongoConnection());
+        MongoOperations mongoOperations = new MongoDBHelper().getMongoOperations(jobOptions.getDbName(),
+                                                                                 jobOptions.getMongoConnection());
         return new GeneWriter(mongoOperations, jobOptions.getDbCollectionsFeaturesName());
     }
 

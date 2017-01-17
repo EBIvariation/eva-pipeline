@@ -35,7 +35,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import uk.ac.ebi.eva.pipeline.io.mappers.AnnotationLineMapper;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 import uk.ac.ebi.eva.test.configuration.BaseTestConfiguration;
-import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 import uk.ac.ebi.eva.utils.MongoDBHelper;
 
@@ -88,7 +87,7 @@ public class VepAnnotationMongoWriterTest {
         writeIdsIntoMongo(annotations, variants);
 
         // now, load the annotation
-        MongoOperations mongoOperations = MongoDBHelper.getMongoOperations(databaseName,
+        MongoOperations mongoOperations = new MongoDBHelper().getMongoOperations(databaseName,
                 jobOptions.getMongoConnection());
         annotationWriter = new VepAnnotationMongoWriter(mongoOperations, dbCollectionVariantsName);
         annotationWriter.write(annotations);
@@ -147,7 +146,7 @@ public class VepAnnotationMongoWriterTest {
         }
 
         // now, load the annotation
-        MongoOperations mongoOperations = MongoDBHelper.getMongoOperations(databaseName,
+        MongoOperations mongoOperations = new MongoDBHelper().getMongoOperations(databaseName,
                 jobOptions.getMongoConnection());
         annotationWriter = new VepAnnotationMongoWriter(mongoOperations, dbCollectionVariantsName);
 

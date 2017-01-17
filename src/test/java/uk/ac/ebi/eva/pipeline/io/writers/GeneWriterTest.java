@@ -33,13 +33,13 @@ import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 import uk.ac.ebi.eva.test.configuration.BaseTestConfiguration;
 import uk.ac.ebi.eva.test.data.GtfStaticTestData;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
+import uk.ac.ebi.eva.utils.MongoDBHelper;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static uk.ac.ebi.eva.utils.MongoDBHelper.getMongoOperations;
 
 /**
  * {@link GeneWriter}
@@ -61,7 +61,7 @@ public class GeneWriterTest {
     public void shouldWriteAllFieldsIntoMongoDb() throws Exception {
         String databaseName = mongoRule.getRandomTemporaryDatabaseName();
 
-        MongoOperations mongoOperations = getMongoOperations(databaseName,
+        MongoOperations mongoOperations = new MongoDBHelper().getMongoOperations(databaseName,
                 jobOptions.getMongoConnection());
 
         GeneWriter geneWriter = new GeneWriter(mongoOperations, jobOptions.getDbCollectionsFeaturesName());
