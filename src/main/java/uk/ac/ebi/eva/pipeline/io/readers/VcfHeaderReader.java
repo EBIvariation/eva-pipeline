@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 EMBL - European Bioinformatics Institute
+ * Copyright 2016-2017 EMBL - European Bioinformatics Institute
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,11 +28,8 @@ public class VcfHeaderReader implements ItemReader<VariantSourceEntity> {
 
     /**
      * The header of the VCF can be retrieved using `source.getMetadata().get(VARIANT_FILE_HEADER_KEY)`.
-     * The "variantFileHeader" is required by the converter
-     * {@link org.opencb.opencga.storage.mongodb.variant.DBObjectToVariantSourceConverter}, which will
-     * store it in mongo as "header".
      */
-    public static final String VARIANT_FILE_HEADER_KEY = "variantFileHeader";
+    public static final String VARIANT_FILE_HEADER_KEY = "header";
 
     private final File file;
 

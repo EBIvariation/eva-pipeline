@@ -33,65 +33,82 @@ import java.util.Map;
 @Document
 public class VariantSourceEntity {
 
-    @Field(value = "fname")
-    private String fileName;
+    public final static String FILEID_FIELD = "fid";
+    public final static String FILENAME_FIELD = "fname";
+    public final static String STUDYID_FIELD = "sid";
+    public final static String STUDYNAME_FIELD = "sname";
+    public final static String STUDYTYPE_FIELD = "stype";
+    public final static String AGGREGATION_FIELD = "aggregation";
+    public final static String DATE_FIELD = "date";
+    public final static String SAMPLES_FIELD = "samp";
 
-    @Field(value = "fid")
+    public final static String STATISTICS_FIELD = "st";
+    public final static String STATISTICS_NUMSAMPLES_FIELD = "nSamp";
+    public final static String STATISTICS_NUMVARIANTS_FIELD = "nVar";
+    public final static String STATISTICS_NUMSNPS_FIELD = "nSnp";
+    public final static String STATISTICS_NUMINDELS_FIELD = "nIndel";
+    public final static String STATISTICS_NUMSTRUCTURAL_FIELD = "nSv";
+    public final static String STATISTICS_NUMPASSFILTERS_FIELD = "nPass";
+    public final static String STATISTICS_NUMTRANSITIONS_FIELD = "nTi";
+    public final static String STATISTICS_NUMTRANSVERSIONS_FIELD = "nTv";
+    public final static String STATISTICS_MEANQUALITY_FIELD = "meanQ";
+
+    public final static String METADATA_FIELD = "meta";
+    public final static String METADATA_FILEFORMAT_FIELD = "fileformat";
+    public final static String METADATA_HEADER_FIELD = "header";
+
+
+    @Field(value = FILEID_FIELD)
     private String fileId;
 
-    @Field(value = "sid")
+    @Field(value = FILENAME_FIELD)
+    private String fileName;
+
+    @Field(value = STUDYID_FIELD)
     private String studyId;
 
-    @Field(value = "sname")
+    @Field(value = STUDYNAME_FIELD)
     private String studyName;
 
-    @Field(value = "samp")
-    private Map<String, Integer> samplesPosition;
-
-    @Field(value = "meta")
-    private Map<String, Object> metadata;
-
-    @Field(value = "stype")
+    @Field(value = STUDYTYPE_FIELD)
     private VariantStudy.StudyType type;
 
-    @Field(value = "st")
-    private VariantGlobalStats stats;
-
-    @Field(value = "date")
-    private Date date;
-
-    @Field(value = "aggregation")
+    @Field(value = AGGREGATION_FIELD)
     private VariantSource.Aggregation aggregation;
 
-    public VariantSourceEntity(String fileName, String fileId, String studyId, String studyName,
-                               Map<String, Integer> samplesPosition,
-                               Map<String, Object> metadata, VariantStudy.StudyType type,
-                               VariantGlobalStats stats,
-                               VariantSource.Aggregation aggregation) {
-        this.fileName = fileName;
+    @Field(value = DATE_FIELD)
+    private Date date;
+
+    @Field(value = SAMPLES_FIELD)
+    private Map<String, Integer> samplesPosition;
+
+    @Field(value = METADATA_FIELD)
+    private Map<String, Object> metadata;
+
+    @Field(value = STATISTICS_FIELD)
+    private VariantGlobalStats stats;
+
+
+    public VariantSourceEntity(String fileId, String fileName, String studyId, String studyName,
+                               VariantStudy.StudyType type, VariantSource.Aggregation aggregation,
+                               Map<String, Integer> samplesPosition, Map<String, Object> metadata,
+                               VariantGlobalStats stats) {
         this.fileId = fileId;
+        this.fileName = fileName;
         this.studyId = studyId;
         this.studyName = studyName;
+        this.type = type;
+        this.aggregation = aggregation;
         this.samplesPosition = samplesPosition;
         this.metadata = metadata;
-        this.type = type;
         this.stats = stats;
-        this.aggregation = aggregation;
         this.date = Calendar.getInstance().getTime();
     }
 
     public VariantSourceEntity(VariantSource source) {
-        this(source.getFileName(), source.getFileId(), source.getStudyId(), source.getStudyName(),
-             source.getSamplesPosition(), source.getMetadata(), source.getType(), source.getStats(),
-             source.getAggregation());
-    }
-
-    public String getFileName() {
-        return fileName;
-    }
-
-    public void setFileName(String fileName) {
-        this.fileName = fileName;
+        this(source.getFileId(), source.getFileName(), source.getStudyId(), source.getStudyName(),
+             source.getType(), source.getAggregation(), source.getSamplesPosition(), source.getMetadata(),
+             source.getStats());
     }
 
     public String getFileId() {
@@ -100,6 +117,14 @@ public class VariantSourceEntity {
 
     public void setFileId(String fileId) {
         this.fileId = fileId;
+    }
+
+    public String getFileName() {
+        return fileName;
+    }
+
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
     }
 
     public String getStudyId() {
@@ -118,6 +143,30 @@ public class VariantSourceEntity {
         this.studyName = studyName;
     }
 
+    public VariantStudy.StudyType getType() {
+        return type;
+    }
+
+    public void setType(VariantStudy.StudyType type) {
+        this.type = type;
+    }
+
+    public VariantSource.Aggregation getAggregation() {
+        return aggregation;
+    }
+
+    public void setAggregation(VariantSource.Aggregation aggregation) {
+        this.aggregation = aggregation;
+    }
+
+    public Date getDate() {
+        return date;
+    }
+
+    public void setDate(Date date) {
+        this.date = date;
+    }
+
     public Map<String, Integer> getSamplesPosition() {
         return samplesPosition;
     }
@@ -134,14 +183,6 @@ public class VariantSourceEntity {
         this.metadata = metadata;
     }
 
-    public VariantStudy.StudyType getType() {
-        return type;
-    }
-
-    public void setType(VariantStudy.StudyType type) {
-        this.type = type;
-    }
-
     public VariantGlobalStats getStats() {
         return stats;
     }
@@ -150,19 +191,4 @@ public class VariantSourceEntity {
         this.stats = stats;
     }
 
-    public Date getDate() {
-        return date;
-    }
-
-    public void setDate(Date date) {
-        this.date = date;
-    }
-
-    public VariantSource.Aggregation getAggregation() {
-        return aggregation;
-    }
-
-    public void setAggregation(VariantSource.Aggregation aggregation) {
-        this.aggregation = aggregation;
-    }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 EMBL - European Bioinformatics Institute
+ * Copyright 2016-2017 EMBL - European Bioinformatics Institute
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ import java.io.File;
 import java.util.Collections;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertNotNull;
 import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResource;
 import static uk.ac.ebi.eva.utils.MongoDBHelper.getMongoOperations;
 
@@ -86,15 +86,23 @@ public class VariantSourceEntityMongoWriterTest {
         while (cursor.hasNext()) {
             count++;
             DBObject next = cursor.next();
-            assertTrue(next.get("fname") != null);
-            assertTrue(next.get("fid") != null);
-            assertTrue(next.get("sid") != null);
-            assertTrue(next.get("sname") != null);
-            assertTrue(next.get("samp") != null);
-            assertTrue(next.get("meta") != null);
-            assertTrue(next.get("stype") != null);
-            assertTrue(next.get("date") != null);
-            assertTrue(next.get("aggregation") != null);
+            assertNotNull(next.get(VariantSourceEntity.FILEID_FIELD));
+            assertNotNull(next.get(VariantSourceEntity.FILENAME_FIELD));
+            assertNotNull(next.get(VariantSourceEntity.STUDYID_FIELD));
+            assertNotNull(next.get(VariantSourceEntity.STUDYNAME_FIELD));
+            assertNotNull(next.get(VariantSourceEntity.STUDYTYPE_FIELD));
+            assertNotNull(next.get(VariantSourceEntity.AGGREGATION_FIELD));
+            assertNotNull(next.get(VariantSourceEntity.SAMPLES_FIELD));
+            assertNotNull(next.get(VariantSourceEntity.DATE_FIELD));
+
+            DBObject meta = (DBObject) next.get(VariantSourceEntity.METADATA_FIELD);
+            assertNotNull(meta);
+            assertNotNull(meta.get(VariantSourceEntity.METADATA_FILEFORMAT_FIELD));
+            assertNotNull(meta.get(VariantSourceEntity.METADATA_HEADER_FIELD));
+            assertNotNull(meta.get("ALT"));
+            assertNotNull(meta.get("FILTER"));
+            assertNotNull(meta.get("INFO"));
+            assertNotNull(meta.get("FORMAT"));
         }
         assertEquals(1, count);
     }
