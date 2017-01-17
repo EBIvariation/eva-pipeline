@@ -17,45 +17,51 @@ package uk.ac.ebi.eva.utils;
 
 import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParametersBuilder;
+
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 
 import java.sql.Timestamp;
 import java.util.Date;
 
-public class EvaJobParameterBuilder extends JobParametersBuilder{
+public class EvaJobParameterBuilder extends JobParametersBuilder {
 
-    public EvaJobParameterBuilder inputStudyId(String inputStudyId){
-        addParameter(JobParametersNames.INPUT_STUDY_ID, new JobParameter(inputStudyId));
+    public EvaJobParameterBuilder inputStudyId(String inputStudyId) {
+        super.addParameter(JobParametersNames.INPUT_STUDY_ID, new JobParameter(inputStudyId));
         return this;
     }
 
-    public EvaJobParameterBuilder inputVcfId(String inputVcfId){
-        addParameter(JobParametersNames.INPUT_VCF_ID, new JobParameter(inputVcfId));
+    public EvaJobParameterBuilder inputVcfId(String inputVcfId) {
+        super.addParameter(JobParametersNames.INPUT_VCF_ID, new JobParameter(inputVcfId));
         return this;
     }
 
-    public EvaJobParameterBuilder inputVcf(String inputVcf){
-        addParameter(JobParametersNames.INPUT_VCF, new JobParameter(inputVcf));
+    public EvaJobParameterBuilder inputVcf(String inputVcf) {
+        super.addParameter(JobParametersNames.INPUT_VCF, new JobParameter(inputVcf));
         return this;
     }
 
-    public EvaJobParameterBuilder inputVcfAggregation(String inputVcfAggregation){
-        addParameter(JobParametersNames.INPUT_VCF_AGGREGATION, new JobParameter(inputVcfAggregation));
+    public EvaJobParameterBuilder inputVcfAggregation(String inputVcfAggregation) {
+        super.addParameter(JobParametersNames.INPUT_VCF_AGGREGATION, new JobParameter(inputVcfAggregation));
         return this;
     }
 
     public EvaJobParameterBuilder timestamp() {
-        addParameter("timestamp", new JobParameter(new Timestamp(new Date().getTime())));
+        super.addParameter("timestamp", new JobParameter(new Timestamp(new Date().getTime())));
         return this;
     }
 
     public EvaJobParameterBuilder databaseName(String databaseName) {
-        addParameter(JobParametersNames.DB_NAME, new JobParameter(databaseName));
+        super.addParameter(JobParametersNames.DB_NAME, new JobParameter(databaseName));
         return this;
     }
 
     public EvaJobParameterBuilder collectionVariantsName(String collectionVariantsName) {
-        addParameter(JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME, new JobParameter(collectionVariantsName));
+        super.addParameter(JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME, new JobParameter(collectionVariantsName));
+        return this;
+    }
+
+    public EvaJobParameterBuilder addParameter(String name, String value) {
+        super.addParameter(name, new JobParameter(value));
         return this;
     }
 

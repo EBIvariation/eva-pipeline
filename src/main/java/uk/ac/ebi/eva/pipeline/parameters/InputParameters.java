@@ -45,6 +45,12 @@ public class InputParameters {
     @Value(PARAMETER + JobParametersNames.INPUT_VCF_AGGREGATION + "']?:'NONE'}")
     private String vcfAggregation;
 
+    @Value(PARAMETER + JobParametersNames.INPUT_STUDY_NAME + END)
+    private String studyName;
+
+    @Value(PARAMETER + JobParametersNames.INPUT_STUDY_TYPE + END)
+    private VariantStudy.StudyType studyType;
+
     public String getVcf() {
         return vcf;
     }
@@ -61,4 +67,11 @@ public class InputParameters {
         return vcfId;
     }
 
+    public String getStudyName() {
+        return studyName;
+    }
+
+    public VariantStudy.StudyType getStudyType() {
+        return studyType;
+    }
 }

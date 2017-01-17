@@ -15,9 +15,6 @@
  */
 package uk.ac.ebi.eva.pipeline.jobs.steps.tasklets;
 
-import org.opencb.biodata.models.variant.VariantSource;
-import org.opencb.datastore.core.ObjectMap;
-import org.opencb.opencga.storage.core.variant.VariantStorageManager;
 import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
@@ -29,8 +26,8 @@ import uk.ac.ebi.eva.commons.models.data.VariantSourceEntity;
 import uk.ac.ebi.eva.pipeline.configuration.MongoConfiguration;
 import uk.ac.ebi.eva.pipeline.io.readers.VcfHeaderReader;
 import uk.ac.ebi.eva.pipeline.io.writers.VariantSourceEntityMongoWriter;
-import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
-import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
+import uk.ac.ebi.eva.pipeline.parameters.DatabaseParameters;
+import uk.ac.ebi.eva.pipeline.parameters.InputParameters;
 
 import java.io.File;
 import java.util.Collections;
@@ -49,23 +46,29 @@ public class FileLoaderStep implements Tasklet {
     private MongoConfiguration mongoConfiguration;
 
     @Autowired
-    private JobOptions jobOptions;
+    private InputParameters inputParameters;
+
+    @Autowired
+    private DatabaseParameters dbParameters;
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
-        ObjectMap variantOptions = jobOptions.getVariantOptions();
-        ObjectMap pipelineOptions = jobOptions.getPipelineOptions();
+        File file = new File(inputParameters.getVcf());
 
-        VariantSource variantSource = variantOptions.get(VariantStorageManager.VARIANT_SOURCE, VariantSource.class);
-        File file = new File(pipelineOptions.getString(JobParametersNames.INPUT_VCF));
+        VcfHeaderReader vcfHeaderReader = new VcfHeaderReader(file,
+                inputParameters.getVcfId(),
+                inputParameters.getStudyId(),
+                inputParameters.getStudyName(),
+                inputParameters.getStudyType(),
+                inputParameters.getVcfAggregation());
 
-        VcfHeaderReader vcfHeaderReader = new VcfHeaderReader(file, variantSource);
         VariantSourceEntity variantSourceEntity = vcfHeaderReader.read();
 
         MongoOperations mongoOperations = mongoConfiguration.getMongoOperations(
-                jobOptions.getDbName(), jobOptions.getMongoConnection());
+                dbParameters.getDatabaseName(), dbParameters.getMongoConnection());
+
         VariantSourceEntityMongoWriter variantSourceEntityMongoWriter = new VariantSourceEntityMongoWriter(
-                mongoOperations, jobOptions.getDbCollectionsFilesName());
+                mongoOperations, dbParameters.getCollectionFilesName());
         variantSourceEntityMongoWriter.write(Collections.singletonList(variantSourceEntity));
 
         return RepeatStatus.FINISHED;
