@@ -86,19 +86,19 @@ public class VariantSourceEntityMongoWriterTest {
         while (cursor.hasNext()) {
             count++;
             DBObject next = cursor.next();
-            assertNotNull(next.get("fname"));
-            assertNotNull(next.get("fid"));
-            assertNotNull(next.get("sid"));
-            assertNotNull(next.get("sname"));
-            assertNotNull(next.get("samp"));
-            assertNotNull(next.get("stype"));
-            assertNotNull(next.get("date"));
-            assertNotNull(next.get("aggregation"));
+            assertNotNull(next.get(VariantSourceEntity.FILEID_FIELD));
+            assertNotNull(next.get(VariantSourceEntity.FILENAME_FIELD));
+            assertNotNull(next.get(VariantSourceEntity.STUDYID_FIELD));
+            assertNotNull(next.get(VariantSourceEntity.STUDYNAME_FIELD));
+            assertNotNull(next.get(VariantSourceEntity.STUDYTYPE_FIELD));
+            assertNotNull(next.get(VariantSourceEntity.AGGREGATION_FIELD));
+            assertNotNull(next.get(VariantSourceEntity.SAMPLES_FIELD));
+            assertNotNull(next.get(VariantSourceEntity.DATE_FIELD));
 
-            DBObject meta = (DBObject) next.get("meta");
+            DBObject meta = (DBObject) next.get(VariantSourceEntity.METADATA_FIELD);
             assertNotNull(meta);
-            assertNotNull(meta.get("fileformat"));
-            assertNotNull(meta.get("header"));
+            assertNotNull(meta.get(VariantSourceEntity.METADATA_FILEFORMAT_FIELD));
+            assertNotNull(meta.get(VariantSourceEntity.METADATA_HEADER_FIELD));
             assertNotNull(meta.get("ALT"));
             assertNotNull(meta.get("FILTER"));
             assertNotNull(meta.get("INFO"));
