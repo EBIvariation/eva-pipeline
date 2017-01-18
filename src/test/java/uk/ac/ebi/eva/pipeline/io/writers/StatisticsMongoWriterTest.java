@@ -50,10 +50,12 @@ import static org.junit.Assert.assertNotNull;
  * {@link StatisticsMongoWriter}
  * input: a List of {@link PopulationStatistics} to each call of `.write()`
  * output: the FeatureCoordinates get written in mongo, with at least: chromosome, start and end.
+ *
+ * TODO Replace MongoDBHelper with StatisticsMongoWriterConfiguration in ContextConfiguration when the class exists
  */
 @RunWith(SpringRunner.class)
 @TestPropertySource({"classpath:common-configuration.properties"})
-@ContextConfiguration(classes = {BaseTestConfiguration.class})
+@ContextConfiguration(classes = {BaseTestConfiguration.class, MongoDBHelper.class})
 public class StatisticsMongoWriterTest {
 
     @Autowired

@@ -20,6 +20,7 @@ import org.springframework.batch.item.ItemWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.mongodb.core.MongoOperations;
 import uk.ac.ebi.eva.pipeline.io.writers.GeneWriter;
 import uk.ac.ebi.eva.pipeline.model.FeatureCoordinates;
@@ -31,6 +32,7 @@ import java.net.UnknownHostException;
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.GENE_WRITER;
 
 @Configuration
+@Import({ MongoDBHelper.class })
 public class GeneWriterConfiguration {
 
     @Autowired

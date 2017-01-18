@@ -32,6 +32,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import uk.ac.ebi.eva.pipeline.configuration.writers.VariantAnnotationWriterConfiguration;
 import uk.ac.ebi.eva.pipeline.io.mappers.AnnotationLineMapper;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 import uk.ac.ebi.eva.test.configuration.BaseTestConfiguration;
@@ -58,7 +59,7 @@ import static uk.ac.ebi.eva.test.data.VepOutputContent.vepOutputContent;
 @RunWith(SpringRunner.class)
 @ActiveProfiles("variant-annotation-mongo")
 @TestPropertySource("classpath:annotation.properties")
-@ContextConfiguration(classes = {BaseTestConfiguration.class})
+@ContextConfiguration(classes = {BaseTestConfiguration.class, VariantAnnotationWriterConfiguration.class})
 public class VepAnnotationMongoWriterTest {
 
     @Autowired

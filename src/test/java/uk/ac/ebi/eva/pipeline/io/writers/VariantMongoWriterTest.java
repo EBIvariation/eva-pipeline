@@ -30,6 +30,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import uk.ac.ebi.eva.commons.models.data.Variant;
+import uk.ac.ebi.eva.pipeline.configuration.writers.VariantWriterConfiguration;
 import uk.ac.ebi.eva.pipeline.model.converters.data.VariantToMongoDbObjectConverter;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 import uk.ac.ebi.eva.utils.MongoDBHelper;
@@ -53,7 +54,7 @@ import static org.mockito.Mockito.when;
  * Testing {@link VariantMongoWriter}
  */
 @RunWith(SpringRunner.class)
-@ContextConfiguration(classes = { MongoDBHelper.class })
+@ContextConfiguration(classes = { VariantWriterConfiguration.class })
 public class VariantMongoWriterTest {
 
     @Autowired

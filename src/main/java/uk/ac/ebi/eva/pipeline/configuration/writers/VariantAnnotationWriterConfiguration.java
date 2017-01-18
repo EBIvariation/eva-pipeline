@@ -21,6 +21,7 @@ import org.springframework.batch.item.ItemWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.mongodb.core.MongoOperations;
 import uk.ac.ebi.eva.pipeline.Application;
@@ -34,6 +35,7 @@ import java.net.UnknownHostException;
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VARIANT_ANNOTATION_WRITER;
 
 @Configuration
+@Import({ MongoDBHelper.class })
 public class VariantAnnotationWriterConfiguration {
 
     @Autowired

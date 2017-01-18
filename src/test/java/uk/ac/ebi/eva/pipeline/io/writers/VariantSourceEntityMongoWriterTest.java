@@ -15,18 +15,9 @@
  */
 package uk.ac.ebi.eva.pipeline.io.writers;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResource;
-
-import java.io.File;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
-
+import com.mongodb.DBCollection;
+import com.mongodb.DBCursor;
+import com.mongodb.DBObject;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -40,17 +31,26 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import com.mongodb.DBCollection;
-import com.mongodb.DBCursor;
-import com.mongodb.DBObject;
-
 import uk.ac.ebi.eva.commons.models.data.VariantSourceEntity;
 import uk.ac.ebi.eva.pipeline.io.readers.VcfHeaderReader;
+import uk.ac.ebi.eva.pipeline.jobs.steps.LoadFileStep;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 import uk.ac.ebi.eva.test.configuration.BaseTestConfiguration;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 import uk.ac.ebi.eva.utils.MongoDBHelper;
+
+import java.io.File;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResource;
 
 /**
  * {@link VariantSourceEntityMongoWriter}
@@ -60,8 +60,10 @@ import uk.ac.ebi.eva.utils.MongoDBHelper;
  */
 @RunWith(SpringRunner.class)
 @TestPropertySource({"classpath:genotyped-vcf.properties"})
-@ContextConfiguration(classes = {BaseTestConfiguration.class})
+@ContextConfiguration(classes = {BaseTestConfiguration.class, LoadFileStep.class})
 public class VariantSourceEntityMongoWriterTest {
+
+    private static final String SMALL_VCF_FILE = "/small20.vcf.gz";
 
     @Rule
     public TemporaryMongoRule mongoRule = new TemporaryMongoRule();
@@ -160,7 +162,7 @@ public class VariantSourceEntityMongoWriterTest {
 
     @Before
     public void setUp() throws Exception {
-        input = getResource(jobOptions.getPipelineOptions().getString(JobParametersNames.INPUT_VCF)).getAbsolutePath();
+        input = getResource(SMALL_VCF_FILE).getAbsolutePath();
         jobOptions.getPipelineOptions().put(JobParametersNames.INPUT_VCF, input);
     }
 }

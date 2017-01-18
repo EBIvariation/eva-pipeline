@@ -27,6 +27,8 @@ import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
+
+import uk.ac.ebi.eva.pipeline.configuration.writers.GeneWriterConfiguration;
 import uk.ac.ebi.eva.pipeline.io.mappers.GeneLineMapper;
 import uk.ac.ebi.eva.pipeline.model.FeatureCoordinates;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
@@ -48,7 +50,7 @@ import static org.junit.Assert.assertTrue;
  */
 @RunWith(SpringRunner.class)
 @TestPropertySource({"classpath:initialize-database.properties"})
-@ContextConfiguration(classes = {BaseTestConfiguration.class})
+@ContextConfiguration(classes = {BaseTestConfiguration.class, GeneWriterConfiguration.class})
 public class GeneWriterTest {
 
     @Rule

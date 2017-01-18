@@ -27,9 +27,10 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-import uk.ac.ebi.eva.pipeline.jobs.AnnotationJob;
+
+import uk.ac.ebi.eva.pipeline.configuration.readers.NonAnnotatedVariantsMongoReaderConfiguration;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
-import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
+import uk.ac.ebi.eva.test.configuration.BaseTestConfiguration;
 import uk.ac.ebi.eva.test.data.VariantData;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 
@@ -47,7 +48,7 @@ import static org.junit.Assert.assertTrue;
 @RunWith(SpringRunner.class)
 @ActiveProfiles("variant-annotation-mongo")
 @TestPropertySource("classpath:annotation.properties")
-@ContextConfiguration(classes = {AnnotationJob.class, BatchTestConfiguration.class})
+@ContextConfiguration(classes = {NonAnnotatedVariantsMongoReaderConfiguration.class, BaseTestConfiguration.class})
 public class NonAnnotatedVariantsMongoReaderTest {
 
     private static final String DOC_CHR = "chr";
