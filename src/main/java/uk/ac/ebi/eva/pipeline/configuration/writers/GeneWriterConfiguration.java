@@ -17,6 +17,7 @@ package uk.ac.ebi.eva.pipeline.configuration.writers;
 
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.item.ItemWriter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mongodb.core.MongoOperations;
@@ -32,11 +33,14 @@ import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.GENE_WRITER;
 @Configuration
 public class GeneWriterConfiguration {
 
+    @Autowired
+    private MongoDBHelper mongoDbHelper;
+
     @Bean(GENE_WRITER)
     @StepScope
     public ItemWriter<FeatureCoordinates> geneWriter(JobOptions jobOptions) throws UnknownHostException {
-        MongoOperations mongoOperations = new MongoDBHelper().getMongoOperations(jobOptions.getDbName(),
-                                                                                 jobOptions.getMongoConnection());
+        MongoOperations mongoOperations = mongoDbHelper.getMongoOperations(jobOptions.getDbName(),
+                                                                           jobOptions.getMongoConnection());
         return new GeneWriter(mongoOperations, jobOptions.getDbCollectionsFeaturesName());
     }
 

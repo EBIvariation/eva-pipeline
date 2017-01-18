@@ -46,6 +46,9 @@ import java.util.Collections;
 public class FileLoaderStep implements Tasklet {
 
     @Autowired
+    private MongoDBHelper mongoDbHelper;
+
+    @Autowired
     private JobOptions jobOptions;
 
     @Override
@@ -59,8 +62,8 @@ public class FileLoaderStep implements Tasklet {
         VcfHeaderReader vcfHeaderReader = new VcfHeaderReader(file, variantSource);
         VariantSourceEntity variantSourceEntity = vcfHeaderReader.read();
 
-        MongoOperations mongoOperations = new MongoDBHelper().getMongoOperations(jobOptions.getDbName(),
-                                                                                 jobOptions.getMongoConnection());
+        MongoOperations mongoOperations = mongoDbHelper.getMongoOperations(jobOptions.getDbName(),
+                                                                           jobOptions.getMongoConnection());
         VariantSourceEntityMongoWriter variantSourceEntityMongoWriter = new VariantSourceEntityMongoWriter(
                 mongoOperations, jobOptions.getDbCollectionsFilesName());
         variantSourceEntityMongoWriter.write(Collections.singletonList(variantSourceEntity));

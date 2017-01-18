@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 EMBL - European Bioinformatics Institute
+ * Copyright 2016-2017 EMBL - European Bioinformatics Institute
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,6 +61,9 @@ import static uk.ac.ebi.eva.test.data.VepOutputContent.vepOutputContent;
 @ContextConfiguration(classes = {BaseTestConfiguration.class})
 public class VepAnnotationMongoWriterTest {
 
+    @Autowired
+    private MongoDBHelper mongoDbHelper;
+
     @Rule
     public TemporaryMongoRule mongoRule = new TemporaryMongoRule();
 
@@ -87,9 +90,8 @@ public class VepAnnotationMongoWriterTest {
         writeIdsIntoMongo(annotations, variants);
 
         // now, load the annotation
-        MongoOperations mongoOperations = new MongoDBHelper().getMongoOperations(databaseName,
-                jobOptions.getMongoConnection());
-        annotationWriter = new VepAnnotationMongoWriter(mongoOperations, dbCollectionVariantsName);
+        MongoOperations operations = mongoDbHelper.getMongoOperations(databaseName, jobOptions.getMongoConnection());
+        annotationWriter = new VepAnnotationMongoWriter(operations, dbCollectionVariantsName);
         annotationWriter.write(annotations);
 
         // and finally check that documents in DB have annotation (only consequence type)
@@ -146,9 +148,8 @@ public class VepAnnotationMongoWriterTest {
         }
 
         // now, load the annotation
-        MongoOperations mongoOperations = new MongoDBHelper().getMongoOperations(databaseName,
-                jobOptions.getMongoConnection());
-        annotationWriter = new VepAnnotationMongoWriter(mongoOperations, dbCollectionVariantsName);
+        MongoOperations operations = mongoDbHelper.getMongoOperations(databaseName, jobOptions.getMongoConnection());
+        annotationWriter = new VepAnnotationMongoWriter(operations, dbCollectionVariantsName);
 
         annotationWriter.write(annotationSet1);
         annotationWriter.write(annotationSet2);

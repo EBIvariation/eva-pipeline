@@ -57,11 +57,14 @@ public class GeneWriterTest {
     @Autowired
     private JobOptions jobOptions;
 
+    @Autowired
+    private MongoDBHelper mongoDbHelper;
+
     @Test
     public void shouldWriteAllFieldsIntoMongoDb() throws Exception {
         String databaseName = mongoRule.getRandomTemporaryDatabaseName();
 
-        MongoOperations mongoOperations = new MongoDBHelper().getMongoOperations(databaseName,
+        MongoOperations mongoOperations = mongoDbHelper.getMongoOperations(databaseName,
                 jobOptions.getMongoConnection());
 
         GeneWriter geneWriter = new GeneWriter(mongoOperations, jobOptions.getDbCollectionsFeaturesName());

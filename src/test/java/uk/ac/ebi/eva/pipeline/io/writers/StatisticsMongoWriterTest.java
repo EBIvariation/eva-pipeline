@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 EMBL - European Bioinformatics Institute
+ * Copyright 2016-2017 EMBL - European Bioinformatics Institute
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,6 +55,9 @@ import static org.junit.Assert.assertNotNull;
 @TestPropertySource({"classpath:common-configuration.properties"})
 @ContextConfiguration(classes = {BaseTestConfiguration.class})
 public class StatisticsMongoWriterTest {
+
+    @Autowired
+    private MongoDBHelper mongoDbHelper;
 
     @Rule
     public TemporaryMongoRule mongoRule = new TemporaryMongoRule();
@@ -162,10 +165,9 @@ public class StatisticsMongoWriterTest {
     }
 
     public StatisticsMongoWriter getStatisticsMongoWriter(String databaseName) throws UnknownHostException {
-        MongoOperations mongoOperations = new MongoDBHelper().getMongoOperations(databaseName,
-                jobOptions.getMongoConnection());
+        MongoOperations operations = mongoDbHelper.getMongoOperations(databaseName, jobOptions.getMongoConnection());
         StatisticsMongoWriter statisticsMongoWriter = new StatisticsMongoWriter(
-                mongoOperations, jobOptions.getDbCollectionsStatsName());
+                operations, jobOptions.getDbCollectionsStatsName());
         return statisticsMongoWriter;
     }
 }

@@ -33,12 +33,15 @@ import uk.ac.ebi.eva.utils.MongoDBHelper;
 public class IndexesGeneratorStep implements Tasklet {
 
     @Autowired
+    private MongoDBHelper mongoDbHelper;
+
+    @Autowired
     private JobOptions jobOptions;
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
-        MongoOperations operations = new MongoDBHelper().getMongoOperations(jobOptions.getDbName(),
-                                                                            jobOptions.getMongoConnection());
+        MongoOperations operations = mongoDbHelper.getMongoOperations(jobOptions.getDbName(),
+                                                                      jobOptions.getMongoConnection());
         operations.getCollection(jobOptions.getDbCollectionsFeaturesName())
                 .createIndex(new BasicDBObject("name", 1), new BasicDBObject("sparse", true).append("background", true));
 
