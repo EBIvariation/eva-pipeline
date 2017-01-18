@@ -23,7 +23,7 @@ import org.springframework.batch.core.job.DefaultJobParametersValidator;
 
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 import uk.ac.ebi.eva.pipeline.parameters.validation.step.AnnotationLoaderStepParametersValidator;
-import uk.ac.ebi.eva.pipeline.parameters.validation.step.LoadFileStepParametersValidator;
+import uk.ac.ebi.eva.pipeline.parameters.validation.step.FileLoaderStepParametersValidator;
 import uk.ac.ebi.eva.pipeline.parameters.validation.step.VariantLoaderStepParametersValidator;
 import uk.ac.ebi.eva.pipeline.parameters.validation.step.VepAnnotationGeneratorStepParametersValidator;
 import uk.ac.ebi.eva.pipeline.parameters.validation.step.VepInputGeneratorStepParametersValidator;
@@ -45,7 +45,7 @@ public class AggregatedVcfJobParametersValidator extends DefaultJobParametersVal
         List<JobParametersValidator> jobParametersValidators = new ArrayList<>();
 
         jobParametersValidators.add(new VariantLoaderStepParametersValidator());
-        jobParametersValidators.add(new LoadFileStepParametersValidator());
+        jobParametersValidators.add(new FileLoaderStepParametersValidator());
 
         Boolean skipAnnotation = Boolean.valueOf(jobParameters.getString(JobParametersNames.ANNOTATION_SKIP));
         if (!skipAnnotation) {
