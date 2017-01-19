@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 EMBL - European Bioinformatics Institute
+ * Copyright 2016-2017 EMBL - European Bioinformatics Institute
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -241,7 +241,6 @@ public class GenotypedVcfJobWorkflowTest {
         mongoRule.getTemporaryDatabase(jobOptions.getDbName());
         jobOptions.getPipelineOptions().put(JobParametersNames.INPUT_VCF,
                                             getResource(inputFileResouce).getAbsolutePath());
-        jobOptions.getPipelineOptions().put(JobParametersNames.APP_VEP_PATH, getResource(MOCK_VEP).getAbsolutePath());
 
         Config.setOpenCGAHome(opencgaHome);
 
@@ -251,7 +250,15 @@ public class GenotypedVcfJobWorkflowTest {
                 .collectionVariantsName("variants")
                 .inputVcfId("1")
                 .inputStudyId("genotyped-job-workflow")
-                .inputVcfAggregation("NONE").timestamp().toJobParameters();
+                .inputVcfAggregation("NONE")
+                .vepPath(getResource(MOCK_VEP).getPath())
+                .vepCacheVersion("")
+                .vepCachePath("")
+                .vepCacheSpecies("")
+                .inputFasta("")
+                .vepNumForks("")
+                .outputDirAnnotation("/tmp/")
+                .timestamp().toJobParameters();
 
         // transformedVcf file init
         String transformedVcf = outputDir + inputFileResouce + ".variants.json" + compressExtension;
