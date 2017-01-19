@@ -17,6 +17,7 @@ package uk.ac.ebi.eva.pipeline.jobs.steps.tasklets;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
@@ -55,25 +56,25 @@ public class VepAnnotationGeneratorStep implements Tasklet {
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
-        final Map<String, Object> jobParameters = chunkContext.getStepContext().getJobParameters();
+        JobParameters jobParameters = chunkContext.getStepContext().getStepExecution().getJobParameters();
 
-        final String outputDirAnnotation = jobParameters.get(JobParametersNames.OUTPUT_DIR_ANNOTATION).toString();
+        final String outputDirAnnotation = jobParameters.getString(JobParametersNames.OUTPUT_DIR_ANNOTATION);
 
         final String vepInput = VepUtils
-                .resolveVepInput(outputDirAnnotation, jobParameters.get(JobParametersNames.INPUT_STUDY_ID).toString(),
-                                 jobParameters.get(JobParametersNames.INPUT_VCF_ID).toString());
+                .resolveVepInput(outputDirAnnotation, jobParameters.getString(JobParametersNames.INPUT_STUDY_ID),
+                                 jobParameters.getString(JobParametersNames.INPUT_VCF_ID));
         final String vepOutput = VepUtils
-                .resolveVepOutput(outputDirAnnotation, jobParameters.get(JobParametersNames.INPUT_STUDY_ID).toString(),
-                                  jobParameters.get(JobParametersNames.INPUT_VCF_ID).toString());
+                .resolveVepOutput(outputDirAnnotation, jobParameters.getString(JobParametersNames.INPUT_STUDY_ID),
+                                  jobParameters.getString(JobParametersNames.INPUT_VCF_ID));
 
         ProcessBuilder processBuilder = new ProcessBuilder("perl",
-                jobParameters.get(JobParametersNames.APP_VEP_PATH).toString(),
+                jobParameters.getString(JobParametersNames.APP_VEP_PATH),
                 "--cache",
-                "--cache_version", jobParameters.get(JobParametersNames.APP_VEP_CACHE_VERSION).toString(),
-                "-dir", jobParameters.get(JobParametersNames.APP_VEP_CACHE_PATH).toString(),
-                "--species", jobParameters.get(JobParametersNames.APP_VEP_CACHE_SPECIES).toString(),
-                "--fasta", jobParameters.get(JobParametersNames.INPUT_FASTA).toString(),
-                "--fork", jobParameters.get(JobParametersNames.APP_VEP_NUMFORKS).toString(),
+                "--cache_version", jobParameters.getString(JobParametersNames.APP_VEP_CACHE_VERSION),
+                "-dir", jobParameters.getString(JobParametersNames.APP_VEP_CACHE_PATH),
+                "--species", jobParameters.getString(JobParametersNames.APP_VEP_CACHE_SPECIES),
+                "--fasta", jobParameters.getString(JobParametersNames.INPUT_FASTA),
+                "--fork", jobParameters.getString(JobParametersNames.APP_VEP_NUMFORKS),
                 "-i", vepInput,
                 "-o", "STDOUT",
                 "--force_overwrite",
