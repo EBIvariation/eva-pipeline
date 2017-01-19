@@ -73,17 +73,16 @@ public class VepAnnotationGeneratorStepTest {
         File vepOutputFolder = temporaryFolderRule.newFolder();
 
         JobParameters jobParameters = new EvaJobParameterBuilder()
-                .vepPath(getResource(MOCKVEP).getPath())
-                .vepCacheVersion("")
-                .vepCachePath("")
-                .vepCacheSpecies("")
                 .inputFasta("")
-                .vepNumForks("")
-                .outputDirAnnotation(vepOutputFolder.getAbsolutePath())
                 .inputStudyId(STUDY_ID)
                 .inputVcfId(FILE_ID)
+                .outputDirAnnotation(vepOutputFolder.getAbsolutePath())
+                .vepCachePath("")
+                .vepCacheSpecies("")
+                .vepCacheVersion("")
+                .vepNumForks("")
+                .vepPath(getResource(MOCKVEP).getPath())
                 .toJobParameters();
-
 
         // When the execute method in variantsAnnotCreate is executed
         JobExecution jobExecution = jobLauncherTestUtils
