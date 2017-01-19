@@ -88,15 +88,15 @@ public class AnnotationJobTest {
         mongoRule.restoreDump(getResourceUrl(MONGO_DUMP), jobOptions.getDbName());
 
         JobParameters jobParameters = new EvaJobParameterBuilder()
-                .vepPath(getResource(MOCK_VEP).getPath())
-                .vepCacheVersion("")
-                .vepCachePath("")
-                .vepCacheSpecies("")
                 .inputFasta("")
-                .vepNumForks("")
-                .outputDirAnnotation(OUTPUT_DIR_ANNOTATION)
                 .inputStudyId(INPUT_STUDY_ID)
                 .inputVcfId(INPUT_VCF_ID)
+                .outputDirAnnotation(OUTPUT_DIR_ANNOTATION)
+                .vepCachePath("")
+                .vepCacheSpecies("")
+                .vepCacheVersion("")
+                .vepNumForks("")
+                .vepPath(getResource(MOCK_VEP).getPath())
                 .toJobParameters();
 
         JobExecution jobExecution = jobLauncherTestUtils.launchJob(jobParameters);
