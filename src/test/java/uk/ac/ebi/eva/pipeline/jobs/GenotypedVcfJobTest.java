@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 EMBL - European Bioinformatics Institute
+ * Copyright 2016-2017 EMBL - European Bioinformatics Institute
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -96,12 +96,12 @@ public class GenotypedVcfJobTest {
 
     @Autowired
     private JobOptions jobOptions;
+
     private String input;
     private String outputDir;
     private String compressExtension;
     private String dbName;
     private String vepInput;
-
     private String vepOutput;
 
     private static String opencgaHome = System.getenv("OPENCGA_HOME") != null ? System.getenv("OPENCGA_HOME") : "/opt/opencga";
@@ -109,7 +109,6 @@ public class GenotypedVcfJobTest {
     @Test
     public void fullGenotypedVcfJob() throws Exception {
         jobOptions.getPipelineOptions().put(JobParametersNames.INPUT_VCF, getResource(input).getAbsolutePath());
-        jobOptions.getPipelineOptions().put(JobParametersNames.APP_VEP_PATH, getResource(MOCK_VEP).getAbsolutePath());
 
         Config.setOpenCGAHome(opencgaHome);
         mongoRule.getTemporaryDatabase(dbName);
@@ -138,7 +137,15 @@ public class GenotypedVcfJobTest {
                 .collectionVariantsName("variants")
                 .inputVcfId("1")
                 .inputStudyId("genotyped-job")
-                .inputVcfAggregation("NONE").toJobParameters();
+                .inputVcfAggregation("NONE")
+                .vepPath(getResource(MOCK_VEP).getPath())
+                .vepCacheVersion("")
+                .vepCachePath("")
+                .vepCacheSpecies("")
+                .inputFasta("")
+                .vepNumForks("")
+                .outputDirAnnotation("/tmp/")
+                .toJobParameters();
         JobExecution jobExecution = jobLauncherTestUtils.launchJob(jobParameters);
 
         assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());

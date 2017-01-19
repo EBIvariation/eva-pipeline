@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2016 EMBL - European Bioinformatics Institute
+ * Copyright 2015-2017 EMBL - European Bioinformatics Institute
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,16 +15,15 @@
  */
 package uk.ac.ebi.eva.pipeline.jobs.steps.tasklets;
 
-import org.opencb.datastore.core.ObjectMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
-import org.springframework.beans.factory.annotation.Autowired;
-import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
+
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
+import uk.ac.ebi.eva.utils.VepUtils;
 
 import java.io.BufferedInputStream;
 import java.io.FileOutputStream;
@@ -32,6 +31,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.zip.GZIPOutputStream;
 
 /**
@@ -53,22 +53,28 @@ import java.util.zip.GZIPOutputStream;
 public class VepAnnotationGeneratorStep implements Tasklet {
     private static final Logger logger = LoggerFactory.getLogger(VepAnnotationGeneratorStep.class);
 
-    @Autowired
-    private JobOptions jobOptions;
-
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
-        ObjectMap pipelineOptions = jobOptions.getPipelineOptions();
+        final Map<String, Object> jobParameters = chunkContext.getStepContext().getJobParameters();
+
+        final String outputDirAnnotation = jobParameters.get(JobParametersNames.OUTPUT_DIR_ANNOTATION).toString();
+
+        final String vepInput = VepUtils
+                .resolveVepInput(outputDirAnnotation, jobParameters.get(JobParametersNames.INPUT_STUDY_ID).toString(),
+                                 jobParameters.get(JobParametersNames.INPUT_VCF_ID).toString());
+        final String vepOutput = VepUtils
+                .resolveVepOutput(outputDirAnnotation, jobParameters.get(JobParametersNames.INPUT_STUDY_ID).toString(),
+                                  jobParameters.get(JobParametersNames.INPUT_VCF_ID).toString());
 
         ProcessBuilder processBuilder = new ProcessBuilder("perl",
-                pipelineOptions.getString(JobParametersNames.APP_VEP_PATH),
+                jobParameters.get(JobParametersNames.APP_VEP_PATH).toString(),
                 "--cache",
-                "--cache_version", pipelineOptions.getString(JobParametersNames.APP_VEP_CACHE_VERSION),
-                "-dir", pipelineOptions.getString(JobParametersNames.APP_VEP_CACHE_PATH),
-                "--species", pipelineOptions.getString(JobParametersNames.APP_VEP_CACHE_SPECIES),
-                "--fasta", pipelineOptions.getString(JobParametersNames.INPUT_FASTA),
-                "--fork", pipelineOptions.getString(JobParametersNames.APP_VEP_NUMFORKS),
-                "-i", pipelineOptions.getString(JobOptions.VEP_INPUT),
+                "--cache_version", jobParameters.get(JobParametersNames.APP_VEP_CACHE_VERSION).toString(),
+                "-dir", jobParameters.get(JobParametersNames.APP_VEP_CACHE_PATH).toString(),
+                "--species", jobParameters.get(JobParametersNames.APP_VEP_CACHE_SPECIES).toString(),
+                "--fasta", jobParameters.get(JobParametersNames.INPUT_FASTA).toString(),
+                "--fork", jobParameters.get(JobParametersNames.APP_VEP_NUMFORKS).toString(),
+                "-i", vepInput,
                 "-o", "STDOUT",
                 "--force_overwrite",
                 "--offline",
@@ -80,15 +86,14 @@ public class VepAnnotationGeneratorStep implements Tasklet {
         logger.info("Starting read from VEP output");
         Process process = processBuilder.start();
 
-        long written = connectStreams(
-                new BufferedInputStream(process.getInputStream()),
-                new GZIPOutputStream(new FileOutputStream(pipelineOptions.getString(JobOptions.VEP_OUTPUT))));
+        long written = connectStreams(new BufferedInputStream(process.getInputStream()),
+                                      new GZIPOutputStream(new FileOutputStream(vepOutput)));
 
         int exitValue = process.waitFor();
         logger.info("Finishing read from VEP output, bytes written: " + written);
 
         if (exitValue > 0) {
-            String errorLog = pipelineOptions.getString(JobOptions.VEP_OUTPUT) + ".errors.txt";
+            String errorLog = vepOutput + ".errors.txt";
             connectStreams(new BufferedInputStream(process.getErrorStream()), new FileOutputStream(errorLog));
             throw new Exception("Error while running VEP (exit status " + exitValue + "). See "
                     + errorLog + " for the errors description from VEP.");
