@@ -132,19 +132,21 @@ public class GenotypedVcfJobTest {
         VariantDBIterator iterator;
 
         // Run the Job
-        JobParameters jobParameters = new EvaJobParameterBuilder().inputVcf(getResource(input).getAbsolutePath())
-                .databaseName(dbName)
+        JobParameters jobParameters = new EvaJobParameterBuilder()
                 .collectionVariantsName("variants")
-                .inputVcfId("1")
+                .databaseName(dbName)
+                .inputFasta("")
                 .inputStudyId("genotyped-job")
+                .inputVcf(getResource(input).getAbsolutePath())
                 .inputVcfAggregation("NONE")
-                .vepPath(getResource(MOCK_VEP).getPath())
-                .vepCacheVersion("")
+                .inputVcfId("1")
+                .outputDirAnnotation("/tmp/")
                 .vepCachePath("")
                 .vepCacheSpecies("")
-                .inputFasta("")
+                .vepCacheVersion("")
                 .vepNumForks("")
-                .outputDirAnnotation("/tmp/")
+                .vepPath(getResource(MOCK_VEP).getPath())
+
                 .toJobParameters();
         JobExecution jobExecution = jobLauncherTestUtils.launchJob(jobParameters);
 
