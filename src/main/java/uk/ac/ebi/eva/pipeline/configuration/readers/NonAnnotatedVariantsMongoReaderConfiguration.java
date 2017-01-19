@@ -16,9 +16,11 @@
 package uk.ac.ebi.eva.pipeline.configuration.readers;
 
 import org.springframework.batch.core.configuration.annotation.StepScope;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.mongodb.core.MongoOperations;
 
 import uk.ac.ebi.eva.pipeline.io.readers.NonAnnotatedVariantsMongoReader;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
@@ -35,13 +37,16 @@ import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.NON_ANNOTATED_VARIA
 @Import({ MongoDBHelper.class })
 public class NonAnnotatedVariantsMongoReaderConfiguration {
 
+    @Autowired
+    private MongoDBHelper mongoDbHelper;
+
     @Bean(NON_ANNOTATED_VARIANTS_READER)
     @StepScope
     public NonAnnotatedVariantsMongoReader nonAnnotatedVariantsMongoReader(JobOptions jobOptions)
             throws UnknownHostException {
-        return new NonAnnotatedVariantsMongoReader(jobOptions.getDbName(),
-                jobOptions.getDbCollectionsVariantsName(),
-                jobOptions.getMongoConnection());
+        MongoOperations mongoOperations = mongoDbHelper.getMongoOperations(jobOptions.getDbName(),
+                                                                           jobOptions.getMongoConnection());
+        return new NonAnnotatedVariantsMongoReader(mongoOperations, jobOptions.getDbCollectionsVariantsName());
     }
 
 }
