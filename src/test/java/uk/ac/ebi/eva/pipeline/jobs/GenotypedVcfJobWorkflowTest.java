@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 EMBL - European Bioinformatics Institute
+ * Copyright 2016-2017 EMBL - European Bioinformatics Institute
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,6 +60,8 @@ import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResource;
 
 /**
  * Workflow test for {@link GenotypedVcfJob}
+ *
+ * TODO The test should fail when we will integrate the JobParameter validation since there are empty parameters for VEP
  */
 @RunWith(SpringRunner.class)
 @ActiveProfiles({Application.VARIANT_WRITER_MONGO_PROFILE,Application.VARIANT_ANNOTATION_MONGO_PROFILE})
@@ -241,17 +243,24 @@ public class GenotypedVcfJobWorkflowTest {
         mongoRule.getTemporaryDatabase(jobOptions.getDbName());
         jobOptions.getPipelineOptions().put(JobParametersNames.INPUT_VCF,
                                             getResource(inputFileResouce).getAbsolutePath());
-        jobOptions.getPipelineOptions().put(JobParametersNames.APP_VEP_PATH, getResource(MOCK_VEP).getAbsolutePath());
 
         Config.setOpenCGAHome(opencgaHome);
 
         JobParameters jobParameters = new EvaJobParameterBuilder()
-                .inputVcf(getResource(inputFileResouce).getAbsolutePath())
-                .databaseName(jobOptions.getDbName())
                 .collectionVariantsName("variants")
-                .inputVcfId("1")
+                .databaseName(jobOptions.getDbName())
+                .inputFasta("")
                 .inputStudyId("genotyped-job-workflow")
-                .inputVcfAggregation("NONE").timestamp().toJobParameters();
+                .inputVcf(getResource(inputFileResouce).getAbsolutePath())
+                .inputVcfAggregation("NONE")
+                .inputVcfId("1")
+                .outputDirAnnotation("/tmp/")
+                .vepCachePath("")
+                .vepCacheSpecies("")
+                .vepCacheVersion("")
+                .vepNumForks("")
+                .vepPath(getResource(MOCK_VEP).getPath())
+                .timestamp().toJobParameters();
 
         // transformedVcf file init
         String transformedVcf = outputDir + inputFileResouce + ".variants.json" + compressExtension;

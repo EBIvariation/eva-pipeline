@@ -16,15 +16,11 @@
 package uk.ac.ebi.eva.utils;
 
 import org.springframework.batch.core.JobParameter;
-import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 
 import java.sql.Timestamp;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-
 
 public class EvaJobParameterBuilder extends JobParametersBuilder{
 
@@ -63,4 +59,38 @@ public class EvaJobParameterBuilder extends JobParametersBuilder{
         return this;
     }
 
+    public EvaJobParameterBuilder vepPath(String vepPath) {
+        addParameter(JobParametersNames.APP_VEP_PATH, new JobParameter(vepPath));
+        return this;
+    }
+
+    public EvaJobParameterBuilder vepCacheVersion(String vepCacheVersion) {
+        addParameter(JobParametersNames.APP_VEP_CACHE_VERSION, new JobParameter(vepCacheVersion));
+        return this;
+    }
+
+    public EvaJobParameterBuilder vepCachePath(String vepCachePath) {
+        addParameter(JobParametersNames.APP_VEP_CACHE_PATH, new JobParameter(vepCachePath));
+        return this;
+    }
+
+    public EvaJobParameterBuilder vepCacheSpecies(String vepCacheSpecies) {
+        addParameter(JobParametersNames.APP_VEP_CACHE_SPECIES, new JobParameter(vepCacheSpecies));
+        return this;
+    }
+
+    public EvaJobParameterBuilder vepNumForks(String vepNumForks) {
+        addParameter(JobParametersNames.APP_VEP_NUMFORKS, new JobParameter(vepNumForks));
+        return this;
+    }
+
+    public EvaJobParameterBuilder inputFasta(String inputFasta) {
+        addParameter(JobParametersNames.INPUT_FASTA, new JobParameter(inputFasta));
+        return this;
+    }
+
+    public EvaJobParameterBuilder outputDirAnnotation(String outputDirAnnotation) {
+        addParameter(JobParametersNames.OUTPUT_DIR_ANNOTATION, new JobParameter(outputDirAnnotation));
+        return this;
+    }
 }
