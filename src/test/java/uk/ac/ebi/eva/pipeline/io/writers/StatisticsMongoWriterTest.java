@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 EMBL - European Bioinformatics Institute
+ * Copyright 2016-2017 EMBL - European Bioinformatics Institute
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,12 +29,13 @@ import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
+
+import uk.ac.ebi.eva.pipeline.configuration.MongoConfiguration;
 import uk.ac.ebi.eva.pipeline.model.PopulationStatistics;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 import uk.ac.ebi.eva.test.configuration.BaseTestConfiguration;
 import uk.ac.ebi.eva.test.data.VariantData;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
-import uk.ac.ebi.eva.utils.MongoDBHelper;
 
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -50,11 +51,16 @@ import static org.junit.Assert.assertNotNull;
  * {@link StatisticsMongoWriter}
  * input: a List of {@link PopulationStatistics} to each call of `.write()`
  * output: the FeatureCoordinates get written in mongo, with at least: chromosome, start and end.
+ *
+ * TODO Replace MongoDBHelper with StatisticsMongoWriterConfiguration in ContextConfiguration when the class exists
  */
 @RunWith(SpringRunner.class)
 @TestPropertySource({"classpath:common-configuration.properties"})
-@ContextConfiguration(classes = {BaseTestConfiguration.class})
+@ContextConfiguration(classes = {BaseTestConfiguration.class, MongoConfiguration.class})
 public class StatisticsMongoWriterTest {
+
+    @Autowired
+    private MongoConfiguration mongoConfiguration;
 
     @Rule
     public TemporaryMongoRule mongoRule = new TemporaryMongoRule();
@@ -162,10 +168,10 @@ public class StatisticsMongoWriterTest {
     }
 
     public StatisticsMongoWriter getStatisticsMongoWriter(String databaseName) throws UnknownHostException {
-        MongoOperations mongoOperations = MongoDBHelper.getMongoOperations(databaseName,
-                jobOptions.getMongoConnection());
+        MongoOperations operations = mongoConfiguration.getMongoOperations(
+                databaseName, jobOptions.getMongoConnection());
         StatisticsMongoWriter statisticsMongoWriter = new StatisticsMongoWriter(
-                mongoOperations, jobOptions.getDbCollectionsStatsName());
+                operations, jobOptions.getDbCollectionsStatsName());
         return statisticsMongoWriter;
     }
 }

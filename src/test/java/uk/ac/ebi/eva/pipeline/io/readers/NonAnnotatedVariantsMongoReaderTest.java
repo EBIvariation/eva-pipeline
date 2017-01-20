@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 EMBL - European Bioinformatics Institute
+ * Copyright 2016-2017 EMBL - European Bioinformatics Institute
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,13 +23,16 @@ import org.junit.runner.RunWith;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.test.MetaDataInstanceFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-import uk.ac.ebi.eva.pipeline.jobs.AnnotationJob;
+
+import uk.ac.ebi.eva.pipeline.configuration.MongoConfiguration;
+import uk.ac.ebi.eva.pipeline.configuration.readers.NonAnnotatedVariantsMongoReaderConfiguration;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
-import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
+import uk.ac.ebi.eva.test.configuration.BaseTestConfiguration;
 import uk.ac.ebi.eva.test.data.VariantData;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 
@@ -47,7 +50,7 @@ import static org.junit.Assert.assertTrue;
 @RunWith(SpringRunner.class)
 @ActiveProfiles("variant-annotation-mongo")
 @TestPropertySource("classpath:annotation.properties")
-@ContextConfiguration(classes = {AnnotationJob.class, BatchTestConfiguration.class})
+@ContextConfiguration(classes = {NonAnnotatedVariantsMongoReaderConfiguration.class, BaseTestConfiguration.class})
 public class NonAnnotatedVariantsMongoReaderTest {
 
     private static final String DOC_CHR = "chr";
@@ -60,6 +63,9 @@ public class NonAnnotatedVariantsMongoReaderTest {
     @Autowired
     private JobOptions jobOptions;
 
+    @Autowired
+    private MongoConfiguration mongoConfiguration;
+
     @Before
     public void setUp() throws Exception {
         jobOptions.loadArgs();
@@ -70,8 +76,11 @@ public class NonAnnotatedVariantsMongoReaderTest {
         ExecutionContext executionContext = MetaDataInstanceFactory.createStepExecution().getExecutionContext();
         String databaseName = insertDocuments(jobOptions.getDbCollectionsVariantsName());
 
-        NonAnnotatedVariantsMongoReader mongoItemReader = new NonAnnotatedVariantsMongoReader(databaseName,
-                jobOptions.getDbCollectionsVariantsName(), jobOptions.getMongoConnection());
+        MongoOperations mongoOperations = mongoConfiguration.getMongoOperations(databaseName,
+                jobOptions.getMongoConnection());
+
+        NonAnnotatedVariantsMongoReader mongoItemReader = new NonAnnotatedVariantsMongoReader(
+                mongoOperations, jobOptions.getDbCollectionsVariantsName());
         mongoItemReader.open(executionContext);
 
         int itemCount = 0;

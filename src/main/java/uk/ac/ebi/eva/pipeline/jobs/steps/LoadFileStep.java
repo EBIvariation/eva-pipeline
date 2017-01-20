@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 EMBL - European Bioinformatics Institute
+ * Copyright 2016-2017 EMBL - European Bioinformatics Institute
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,9 @@ import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.step.tasklet.TaskletStep;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 
+import uk.ac.ebi.eva.pipeline.configuration.MongoConfiguration;
 import uk.ac.ebi.eva.pipeline.jobs.steps.tasklets.FileLoaderStep;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 import uk.ac.ebi.eva.utils.TaskletUtils;
@@ -35,6 +37,7 @@ import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.LOAD_FILE_STEP;
  */
 @Configuration
 @EnableBatchProcessing
+@Import({ MongoConfiguration.class })
 public class LoadFileStep {
 
     private static final Logger logger = LoggerFactory.getLogger(LoadFileStep.class);
