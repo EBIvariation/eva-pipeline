@@ -60,6 +60,8 @@ import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResource;
 
 /**
  * Workflow test for {@link GenotypedVcfJob}
+ *
+ * TODO The test should fail when we will integrate the JobParameter validation since there are empty parameters for VEP
  */
 @RunWith(SpringRunner.class)
 @ActiveProfiles({Application.VARIANT_WRITER_MONGO_PROFILE,Application.VARIANT_ANNOTATION_MONGO_PROFILE})
