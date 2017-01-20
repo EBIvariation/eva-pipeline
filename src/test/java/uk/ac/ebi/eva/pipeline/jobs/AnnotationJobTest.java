@@ -58,6 +58,8 @@ import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResourceUrl;
 
 /**
  * Test for {@link AnnotationJob}
+ *
+ * TODO The test should fail when we will integrate the JobParameter validation since there are empty parameters for VEP
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest
