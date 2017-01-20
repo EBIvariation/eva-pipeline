@@ -25,9 +25,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
+import uk.ac.ebi.eva.pipeline.configuration.MongoConfiguration;
 import uk.ac.ebi.eva.pipeline.jobs.steps.tasklets.FileLoaderStep;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
-import uk.ac.ebi.eva.utils.MongoDBHelper;
 import uk.ac.ebi.eva.utils.TaskletUtils;
 
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.LOAD_FILE_STEP;
@@ -37,7 +37,7 @@ import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.LOAD_FILE_STEP;
  */
 @Configuration
 @EnableBatchProcessing
-@Import({ MongoDBHelper.class })
+@Import({ MongoConfiguration.class })
 public class LoadFileStep {
 
     private static final Logger logger = LoggerFactory.getLogger(LoadFileStep.class);

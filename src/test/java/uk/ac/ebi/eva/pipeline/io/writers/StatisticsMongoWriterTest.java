@@ -29,12 +29,13 @@ import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
+
+import uk.ac.ebi.eva.pipeline.configuration.MongoConfiguration;
 import uk.ac.ebi.eva.pipeline.model.PopulationStatistics;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 import uk.ac.ebi.eva.test.configuration.BaseTestConfiguration;
 import uk.ac.ebi.eva.test.data.VariantData;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
-import uk.ac.ebi.eva.utils.MongoDBHelper;
 
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -55,11 +56,11 @@ import static org.junit.Assert.assertNotNull;
  */
 @RunWith(SpringRunner.class)
 @TestPropertySource({"classpath:common-configuration.properties"})
-@ContextConfiguration(classes = {BaseTestConfiguration.class, MongoDBHelper.class})
+@ContextConfiguration(classes = {BaseTestConfiguration.class, MongoConfiguration.class})
 public class StatisticsMongoWriterTest {
 
     @Autowired
-    private MongoDBHelper mongoDbHelper;
+    private MongoConfiguration mongoConfiguration;
 
     @Rule
     public TemporaryMongoRule mongoRule = new TemporaryMongoRule();
@@ -167,7 +168,8 @@ public class StatisticsMongoWriterTest {
     }
 
     public StatisticsMongoWriter getStatisticsMongoWriter(String databaseName) throws UnknownHostException {
-        MongoOperations operations = mongoDbHelper.getMongoOperations(databaseName, jobOptions.getMongoConnection());
+        MongoOperations operations = mongoConfiguration.getMongoOperations(
+                databaseName, jobOptions.getMongoConnection());
         StatisticsMongoWriter statisticsMongoWriter = new StatisticsMongoWriter(
                 operations, jobOptions.getDbCollectionsStatsName());
         return statisticsMongoWriter;

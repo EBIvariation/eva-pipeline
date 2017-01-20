@@ -29,12 +29,12 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import uk.ac.ebi.eva.pipeline.configuration.MongoConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.readers.NonAnnotatedVariantsMongoReaderConfiguration;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 import uk.ac.ebi.eva.test.configuration.BaseTestConfiguration;
 import uk.ac.ebi.eva.test.data.VariantData;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
-import uk.ac.ebi.eva.utils.MongoDBHelper;
 
 import java.io.IOException;
 
@@ -64,7 +64,7 @@ public class NonAnnotatedVariantsMongoReaderTest {
     private JobOptions jobOptions;
 
     @Autowired
-    private MongoDBHelper mongoDbHelper;
+    private MongoConfiguration mongoConfiguration;
 
     @Before
     public void setUp() throws Exception {
@@ -76,7 +76,7 @@ public class NonAnnotatedVariantsMongoReaderTest {
         ExecutionContext executionContext = MetaDataInstanceFactory.createStepExecution().getExecutionContext();
         String databaseName = insertDocuments(jobOptions.getDbCollectionsVariantsName());
 
-        MongoOperations mongoOperations = mongoDbHelper.getMongoOperations(databaseName,
+        MongoOperations mongoOperations = mongoConfiguration.getMongoOperations(databaseName,
                 jobOptions.getMongoConnection());
 
         NonAnnotatedVariantsMongoReader mongoItemReader = new NonAnnotatedVariantsMongoReader(

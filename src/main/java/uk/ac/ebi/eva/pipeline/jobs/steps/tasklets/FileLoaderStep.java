@@ -26,11 +26,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoOperations;
 
 import uk.ac.ebi.eva.commons.models.data.VariantSourceEntity;
+import uk.ac.ebi.eva.pipeline.configuration.MongoConfiguration;
 import uk.ac.ebi.eva.pipeline.io.readers.VcfHeaderReader;
 import uk.ac.ebi.eva.pipeline.io.writers.VariantSourceEntityMongoWriter;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
-import uk.ac.ebi.eva.utils.MongoDBHelper;
 
 import java.io.File;
 import java.util.Collections;
@@ -46,7 +46,7 @@ import java.util.Collections;
 public class FileLoaderStep implements Tasklet {
 
     @Autowired
-    private MongoDBHelper mongoDbHelper;
+    private MongoConfiguration mongoConfiguration;
 
     @Autowired
     private JobOptions jobOptions;
@@ -62,8 +62,8 @@ public class FileLoaderStep implements Tasklet {
         VcfHeaderReader vcfHeaderReader = new VcfHeaderReader(file, variantSource);
         VariantSourceEntity variantSourceEntity = vcfHeaderReader.read();
 
-        MongoOperations mongoOperations = mongoDbHelper.getMongoOperations(jobOptions.getDbName(),
-                                                                           jobOptions.getMongoConnection());
+        MongoOperations mongoOperations = mongoConfiguration.getMongoOperations(
+                jobOptions.getDbName(), jobOptions.getMongoConnection());
         VariantSourceEntityMongoWriter variantSourceEntityMongoWriter = new VariantSourceEntityMongoWriter(
                 mongoOperations, jobOptions.getDbCollectionsFilesName());
         variantSourceEntityMongoWriter.write(Collections.singletonList(variantSourceEntity));
