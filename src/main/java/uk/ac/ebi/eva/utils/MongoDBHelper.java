@@ -15,9 +15,7 @@
  */
 package uk.ac.ebi.eva.utils;
 
-import com.mongodb.ReadPreference;
 import com.mongodb.ServerAddress;
-
 import org.opencb.commons.utils.CryptoUtils;
 
 import uk.ac.ebi.eva.commons.models.data.Variant;
@@ -45,20 +43,6 @@ public class MongoDBHelper {
             }
         }
         return serverAddresses;
-    }
-
-    public static ReadPreference getMongoTemplateReadPreferences(String readPreference) {
-        switch (readPreference) {
-            case "primary":
-                return ReadPreference.primary();
-            case "secondary":
-                return ReadPreference.secondary();
-            default:
-                throw new IllegalArgumentException(
-                        String.format("%s is not a valid ReadPreference type, please use \"primary\" or \"secondary\"",
-                                readPreference));
-        }
-
     }
 
     public static String buildStorageId(Variant v) {

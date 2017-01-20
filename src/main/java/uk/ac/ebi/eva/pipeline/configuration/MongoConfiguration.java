@@ -92,7 +92,7 @@ public class MongoConfiguration {
                     Collections.singletonList(MongoCredential.createCredential(connection.getUser(),
                             authenticationDatabase, connection.getPassword().toCharArray())));
         }
-        mongoClient.setReadPreference(MongoDBHelper.getMongoTemplateReadPreferences(connection.getReadPreference()));
+        mongoClient.setReadPreference(connection.getReadPreference());
 
         return mongoClient;
     }
