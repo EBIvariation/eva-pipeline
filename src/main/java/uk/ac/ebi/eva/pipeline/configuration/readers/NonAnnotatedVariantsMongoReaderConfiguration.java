@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 EMBL - European Bioinformatics Institute
+ * Copyright 2016-2017 EMBL - European Bioinformatics Institute
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,13 @@
 package uk.ac.ebi.eva.pipeline.configuration.readers;
 
 import org.springframework.batch.core.configuration.annotation.StepScope;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
+import org.springframework.data.mongodb.core.MongoOperations;
+
+import uk.ac.ebi.eva.pipeline.configuration.MongoConfiguration;
 import uk.ac.ebi.eva.pipeline.io.readers.NonAnnotatedVariantsMongoReader;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 
@@ -29,15 +34,19 @@ import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.NON_ANNOTATED_VARIA
  * Configuration to inject a NonannotatedVariants bean that reads from a mongo database in the pipeline
  */
 @Configuration
+@Import({ MongoConfiguration.class })
 public class NonAnnotatedVariantsMongoReaderConfiguration {
+
+    @Autowired
+    private MongoConfiguration mongoConfiguration;
 
     @Bean(NON_ANNOTATED_VARIANTS_READER)
     @StepScope
     public NonAnnotatedVariantsMongoReader nonAnnotatedVariantsMongoReader(JobOptions jobOptions)
             throws UnknownHostException {
-        return new NonAnnotatedVariantsMongoReader(jobOptions.getDbName(),
-                jobOptions.getDbCollectionsVariantsName(),
-                jobOptions.getMongoConnection());
+        MongoOperations mongoOperations = mongoConfiguration.getMongoOperations(
+                jobOptions.getDbName(), jobOptions.getMongoConnection());
+        return new NonAnnotatedVariantsMongoReader(mongoOperations, jobOptions.getDbCollectionsVariantsName());
     }
 
 }

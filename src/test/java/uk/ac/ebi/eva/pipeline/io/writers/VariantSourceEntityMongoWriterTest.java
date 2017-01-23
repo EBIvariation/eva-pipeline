@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 EMBL - European Bioinformatics Institute
+ * Copyright 2016-2017 EMBL - European Bioinformatics Institute
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,19 +32,25 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import uk.ac.ebi.eva.commons.models.data.VariantSourceEntity;
+import uk.ac.ebi.eva.pipeline.configuration.MongoConfiguration;
 import uk.ac.ebi.eva.pipeline.io.readers.VcfHeaderReader;
+import uk.ac.ebi.eva.pipeline.jobs.steps.LoadFileStep;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 import uk.ac.ebi.eva.test.configuration.BaseTestConfiguration;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertNotNull;
 import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResource;
-import static uk.ac.ebi.eva.utils.MongoDBHelper.getMongoOperations;
 
 /**
  * {@link VariantSourceEntityMongoWriter}
@@ -54,8 +60,10 @@ import static uk.ac.ebi.eva.utils.MongoDBHelper.getMongoOperations;
  */
 @RunWith(SpringRunner.class)
 @TestPropertySource({"classpath:genotyped-vcf.properties"})
-@ContextConfiguration(classes = {BaseTestConfiguration.class})
+@ContextConfiguration(classes = {BaseTestConfiguration.class, LoadFileStep.class})
 public class VariantSourceEntityMongoWriterTest {
+
+    private static final String SMALL_VCF_FILE = "/small20.vcf.gz";
 
     @Rule
     public TemporaryMongoRule mongoRule = new TemporaryMongoRule();
@@ -63,14 +71,16 @@ public class VariantSourceEntityMongoWriterTest {
     @Autowired
     private JobOptions jobOptions;
 
-    private String input;
+    @Autowired
+    private MongoConfiguration mongoConfiguration;
 
-    private MongoOperations mongoOperations;
+    private String input;
 
     @Test
     public void shouldWriteAllFieldsIntoMongoDb() throws Exception {
         String databaseName = mongoRule.getRandomTemporaryDatabaseName();
-        mongoOperations = getMongoOperations(databaseName, jobOptions.getMongoConnection());
+        MongoOperations mongoOperations = mongoConfiguration.getMongoOperations(
+                databaseName, jobOptions.getMongoConnection());
         DBCollection fileCollection = mongoRule.getCollection(databaseName, jobOptions.getDbCollectionsFilesName());
 
         VariantSourceEntityMongoWriter filesWriter = new VariantSourceEntityMongoWriter(
@@ -79,24 +89,62 @@ public class VariantSourceEntityMongoWriterTest {
         VariantSourceEntity variantSourceEntity = getVariantSourceEntity();
         filesWriter.write(Collections.singletonList(variantSourceEntity));
 
-        // count documents in DB and check they have region (chr + start + end)
         DBCursor cursor = fileCollection.find();
-
         int count = 0;
+
         while (cursor.hasNext()) {
             count++;
             DBObject next = cursor.next();
-            assertTrue(next.get("fname") != null);
-            assertTrue(next.get("fid") != null);
-            assertTrue(next.get("sid") != null);
-            assertTrue(next.get("sname") != null);
-            assertTrue(next.get("samp") != null);
-            assertTrue(next.get("meta") != null);
-            assertTrue(next.get("stype") != null);
-            assertTrue(next.get("date") != null);
-            assertTrue(next.get("aggregation") != null);
+            assertNotNull(next.get(VariantSourceEntity.FILEID_FIELD));
+            assertNotNull(next.get(VariantSourceEntity.FILENAME_FIELD));
+            assertNotNull(next.get(VariantSourceEntity.STUDYID_FIELD));
+            assertNotNull(next.get(VariantSourceEntity.STUDYNAME_FIELD));
+            assertNotNull(next.get(VariantSourceEntity.STUDYTYPE_FIELD));
+            assertNotNull(next.get(VariantSourceEntity.AGGREGATION_FIELD));
+            assertNotNull(next.get(VariantSourceEntity.SAMPLES_FIELD));
+            assertNotNull(next.get(VariantSourceEntity.DATE_FIELD));
+
+            DBObject meta = (DBObject) next.get(VariantSourceEntity.METADATA_FIELD);
+            assertNotNull(meta);
+            assertNotNull(meta.get(VariantSourceEntity.METADATA_FILEFORMAT_FIELD));
+            assertNotNull(meta.get(VariantSourceEntity.METADATA_HEADER_FIELD));
+            assertNotNull(meta.get("ALT"));
+            assertNotNull(meta.get("FILTER"));
+            assertNotNull(meta.get("INFO"));
+            assertNotNull(meta.get("FORMAT"));
         }
         assertEquals(1, count);
+    }
+
+    @Test
+    public void shouldWriteSamplesWithDotsInName() throws Exception {
+        String databaseName = mongoRule.getRandomTemporaryDatabaseName();
+        MongoOperations mongoOperations = mongoConfiguration.getMongoOperations(
+                databaseName, jobOptions.getMongoConnection());
+        DBCollection fileCollection = mongoRule.getCollection(databaseName, jobOptions.getDbCollectionsFilesName());
+
+        VariantSourceEntityMongoWriter filesWriter = new VariantSourceEntityMongoWriter(
+                mongoOperations, jobOptions.getDbCollectionsFilesName());
+
+        VariantSourceEntity variantSourceEntity = getVariantSourceEntity();
+        Map<String, Integer> samplesPosition = new HashMap<>();
+        samplesPosition.put("EUnothing", 1);
+        samplesPosition.put("NA.dot", 2);
+        samplesPosition.put("JP-dash", 3);
+        variantSourceEntity.setSamplesPosition(samplesPosition);
+
+        filesWriter.write(Collections.singletonList(variantSourceEntity));
+
+        DBCursor cursor = fileCollection.find();
+
+        while (cursor.hasNext()) {
+            DBObject next = cursor.next();
+            DBObject samples = (DBObject) next.get(VariantSourceEntity.SAMPLES_FIELD);
+            Set<String> keySet = samples.keySet();
+
+            Set<String> expectedKeySet = new TreeSet<>(Arrays.asList("EUnothing", "NA£dot", "JP-dash"));
+            assertEquals(expectedKeySet, keySet);
+        }
     }
 
     private VariantSourceEntity getVariantSourceEntity() throws Exception {
@@ -116,7 +164,7 @@ public class VariantSourceEntityMongoWriterTest {
 
     @Before
     public void setUp() throws Exception {
-        input = getResource(jobOptions.getPipelineOptions().getString(JobParametersNames.INPUT_VCF)).getAbsolutePath();
+        input = getResource(SMALL_VCF_FILE).getAbsolutePath();
         jobOptions.getPipelineOptions().put(JobParametersNames.INPUT_VCF, input);
     }
 }

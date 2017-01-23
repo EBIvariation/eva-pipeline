@@ -25,13 +25,12 @@ import org.springframework.core.convert.converter.Converter;
 
 import uk.ac.ebi.eva.commons.models.data.Variant;
 import uk.ac.ebi.eva.commons.models.data.VariantSourceEntry;
+import uk.ac.ebi.eva.utils.MongoDBHelper;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import static uk.ac.ebi.eva.utils.MongoDBHelper.buildStorageId;
 
 /**
  * Converts Variants into MongoDb objects. Implements spring's interface of converter.
@@ -117,7 +116,7 @@ public class VariantToDBObjectConverter implements Converter<Variant, DBObject> 
 
     @Override
     public DBObject convert(Variant object) {
-        String id = buildStorageId(object.getChromosome(), object.getStart(), object.getReference(),
+        String id = MongoDBHelper.buildStorageId(object.getChromosome(), object.getStart(), object.getReference(),
                                    object.getAlternate());
 
         BasicDBObject mongoVariant = new BasicDBObject("_id", id)

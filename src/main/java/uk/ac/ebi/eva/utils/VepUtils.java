@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2017 EMBL - European Bioinformatics Institute
+ * Copyright 2017 EMBL - European Bioinformatics Institute
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,19 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.ac.ebi.eva.test.configuration;
+package uk.ac.ebi.eva.utils;
 
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+public class VepUtils {
 
-import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
+    public static String resolveVepInput(String outputDirAnnotation, String studyId, String vcfId){
+        return outputDirAnnotation + "/" + studyId + "_" + vcfId + "_variants_to_annotate.tsv";
+    }
 
-@Configuration
-public class BaseTestConfiguration {
-
-    @Bean
-    public JobOptions jobOptions() {
-        return new JobOptions();
+    public static String resolveVepOutput(String outputDirAnnotation, String studyId, String vcfId){
+        return outputDirAnnotation + "/" + studyId + "_" + vcfId + "_vep_annotation.tsv.gz";
     }
 
 }

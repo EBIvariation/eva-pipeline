@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 EMBL - European Bioinformatics Institute
+ * Copyright 2016-2017 EMBL - European Bioinformatics Institute
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,10 +32,11 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import uk.ac.ebi.eva.pipeline.configuration.MongoConfiguration;
+import uk.ac.ebi.eva.pipeline.configuration.writers.VariantAnnotationWriterConfiguration;
 import uk.ac.ebi.eva.pipeline.io.mappers.AnnotationLineMapper;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 import uk.ac.ebi.eva.test.configuration.BaseTestConfiguration;
-import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 import uk.ac.ebi.eva.utils.MongoDBHelper;
 
@@ -59,8 +60,11 @@ import static uk.ac.ebi.eva.test.data.VepOutputContent.vepOutputContent;
 @RunWith(SpringRunner.class)
 @ActiveProfiles("variant-annotation-mongo")
 @TestPropertySource("classpath:annotation.properties")
-@ContextConfiguration(classes = {BaseTestConfiguration.class})
+@ContextConfiguration(classes = {BaseTestConfiguration.class, VariantAnnotationWriterConfiguration.class})
 public class VepAnnotationMongoWriterTest {
+
+    @Autowired
+    private MongoConfiguration mongoConfiguration;
 
     @Rule
     public TemporaryMongoRule mongoRule = new TemporaryMongoRule();
@@ -88,9 +92,9 @@ public class VepAnnotationMongoWriterTest {
         writeIdsIntoMongo(annotations, variants);
 
         // now, load the annotation
-        MongoOperations mongoOperations = MongoDBHelper.getMongoOperations(databaseName,
-                jobOptions.getMongoConnection());
-        annotationWriter = new VepAnnotationMongoWriter(mongoOperations, dbCollectionVariantsName);
+        MongoOperations operations = mongoConfiguration.getMongoOperations(
+                databaseName, jobOptions.getMongoConnection());
+        annotationWriter = new VepAnnotationMongoWriter(operations, dbCollectionVariantsName);
         annotationWriter.write(annotations);
 
         // and finally check that documents in DB have annotation (only consequence type)
@@ -147,9 +151,9 @@ public class VepAnnotationMongoWriterTest {
         }
 
         // now, load the annotation
-        MongoOperations mongoOperations = MongoDBHelper.getMongoOperations(databaseName,
-                jobOptions.getMongoConnection());
-        annotationWriter = new VepAnnotationMongoWriter(mongoOperations, dbCollectionVariantsName);
+        MongoOperations operations = mongoConfiguration.getMongoOperations(
+                databaseName, jobOptions.getMongoConnection());
+        annotationWriter = new VepAnnotationMongoWriter(operations, dbCollectionVariantsName);
 
         annotationWriter.write(annotationSet1);
         annotationWriter.write(annotationSet2);

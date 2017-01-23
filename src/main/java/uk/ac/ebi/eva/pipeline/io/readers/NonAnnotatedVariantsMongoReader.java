@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 EMBL - European Bioinformatics Institute
+ * Copyright 2016-2017 EMBL - European Bioinformatics Institute
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,33 +18,32 @@ package uk.ac.ebi.eva.pipeline.io.readers;
 import com.mongodb.BasicDBObject;
 import com.mongodb.BasicDBObjectBuilder;
 import com.mongodb.DBObject;
-import uk.ac.ebi.eva.utils.MongoConnection;
-import uk.ac.ebi.eva.utils.MongoDBHelper;
 
 import javax.annotation.PostConstruct;
+
+import org.springframework.data.mongodb.core.MongoOperations;
 
 import java.net.UnknownHostException;
 
 /**
- * Mongo variant reader using an ItemReader cursor based. This is speeding up the reading of the variant in big
- * collections. The {@link org.springframework.batch.item.data.MongoItemReader} is using pagination and it is slow with
- * large collections
+ * Mongo variant reader using an ItemReader cursor based. This is speeding up
+ * the reading of the variant in big collections. The
+ * {@link org.springframework.batch.item.data.MongoItemReader} is using
+ * pagination and it is slow with large collections
  */
 public class NonAnnotatedVariantsMongoReader extends MongoDbCursorItemReader {
 
-    public NonAnnotatedVariantsMongoReader(String databaseName, String collectionsVariantsName,
-                                           MongoConnection connection) throws UnknownHostException {
+    public NonAnnotatedVariantsMongoReader(MongoOperations template, String collectionsVariantsName)
+            throws UnknownHostException {
         super();
 
-        setMongo(MongoDBHelper.getMongoClient(connection));
+        setTemplate(template);
+        setCollection(collectionsVariantsName);
 
-        setDatabaseName(databaseName);
-        setCollectionName(collectionsVariantsName);
+        DBObject query = BasicDBObjectBuilder.start().add("annot.ct.so", new BasicDBObject("$exists", false)).get();
+        setQuery(query);
 
-        DBObject refDbObject = BasicDBObjectBuilder.start().add("annot.ct.so", new BasicDBObject("$exists", false)).get();
-        setRefDbObject(refDbObject);
-
-        String[] fields = {"chr", "start", "end", "ref", "alt"};
+        String[] fields = { "chr", "start", "end", "ref", "alt" };
         setFields(fields);
     }
 

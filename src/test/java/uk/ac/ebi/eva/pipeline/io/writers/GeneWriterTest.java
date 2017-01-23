@@ -27,6 +27,9 @@ import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
+
+import uk.ac.ebi.eva.pipeline.configuration.MongoConfiguration;
+import uk.ac.ebi.eva.pipeline.configuration.writers.GeneWriterConfiguration;
 import uk.ac.ebi.eva.pipeline.io.mappers.GeneLineMapper;
 import uk.ac.ebi.eva.pipeline.model.FeatureCoordinates;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
@@ -39,7 +42,6 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static uk.ac.ebi.eva.utils.MongoDBHelper.getMongoOperations;
 
 /**
  * {@link GeneWriter}
@@ -48,7 +50,7 @@ import static uk.ac.ebi.eva.utils.MongoDBHelper.getMongoOperations;
  */
 @RunWith(SpringRunner.class)
 @TestPropertySource({"classpath:initialize-database.properties"})
-@ContextConfiguration(classes = {BaseTestConfiguration.class})
+@ContextConfiguration(classes = {BaseTestConfiguration.class, GeneWriterConfiguration.class})
 public class GeneWriterTest {
 
     @Rule
@@ -57,11 +59,14 @@ public class GeneWriterTest {
     @Autowired
     private JobOptions jobOptions;
 
+    @Autowired
+    private MongoConfiguration mongoConfiguration;
+
     @Test
     public void shouldWriteAllFieldsIntoMongoDb() throws Exception {
         String databaseName = mongoRule.getRandomTemporaryDatabaseName();
 
-        MongoOperations mongoOperations = getMongoOperations(databaseName,
+        MongoOperations mongoOperations = mongoConfiguration.getMongoOperations(databaseName,
                 jobOptions.getMongoConnection());
 
         GeneWriter geneWriter = new GeneWriter(mongoOperations, jobOptions.getDbCollectionsFeaturesName());

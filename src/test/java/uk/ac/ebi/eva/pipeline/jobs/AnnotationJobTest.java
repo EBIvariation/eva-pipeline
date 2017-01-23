@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 EMBL - European Bioinformatics Institute
+ * Copyright 2016-2017 EMBL - European Bioinformatics Institute
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import org.opencb.opencga.storage.mongodb.variant.DBObjectToVariantAnnotationCon
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.JobExecution;
+import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,11 +37,11 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.ac.ebi.eva.pipeline.configuration.BeanNames;
-import uk.ac.ebi.eva.pipeline.jobs.steps.GenerateVepAnnotationStep;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
+import uk.ac.ebi.eva.utils.EvaJobParameterBuilder;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -57,6 +58,8 @@ import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResourceUrl;
 
 /**
  * Test for {@link AnnotationJob}
+ *
+ * TODO The test should fail when we will integrate the JobParameter validation since there are empty parameters for VEP
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -65,6 +68,9 @@ import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResourceUrl;
 public class AnnotationJobTest {
     private static final String MOCK_VEP = "/mockvep.pl";
     private static final String MONGO_DUMP = "/dump/VariantStatsConfigurationTest_vl";
+    private static final String OUTPUT_DIR_ANNOTATION = "/tmp/";
+    private static final String INPUT_STUDY_ID = "annotation-job";
+    private static final String INPUT_VCF_ID = "1";
     //TODO check later to substitute files for temporary ones / pay attention to vep Input file
 
     @Rule
@@ -83,7 +89,19 @@ public class AnnotationJobTest {
     public void allAnnotationStepsShouldBeExecuted() throws Exception {
         mongoRule.restoreDump(getResourceUrl(MONGO_DUMP), jobOptions.getDbName());
 
-        JobExecution jobExecution = jobLauncherTestUtils.launchJob();
+        JobParameters jobParameters = new EvaJobParameterBuilder()
+                .inputFasta("")
+                .inputStudyId(INPUT_STUDY_ID)
+                .inputVcfId(INPUT_VCF_ID)
+                .outputDirAnnotation(OUTPUT_DIR_ANNOTATION)
+                .vepCachePath("")
+                .vepCacheSpecies("")
+                .vepCacheVersion("")
+                .vepNumForks("")
+                .vepPath(getResource(MOCK_VEP).getPath())
+                .toJobParameters();
+
+        JobExecution jobExecution = jobLauncherTestUtils.launchJob(jobParameters);
 
         assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
         assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());

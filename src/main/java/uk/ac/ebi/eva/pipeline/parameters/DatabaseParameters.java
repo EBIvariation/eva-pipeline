@@ -17,12 +17,9 @@ package uk.ac.ebi.eva.pipeline.parameters;
 
 import org.springframework.batch.core.configuration.annotation.JobScope;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.stereotype.Service;
-import uk.ac.ebi.eva.utils.MongoConnection;
-import uk.ac.ebi.eva.utils.MongoDBHelper;
 
-import java.net.UnknownHostException;
+import uk.ac.ebi.eva.utils.MongoConnection;
 
 /**
  * Service that holds access to the values for database. This include the configuration
@@ -66,9 +63,5 @@ public class DatabaseParameters {
 
     public String getCollectionVariantsName() {
         return collectionVariantsName;
-    }
-
-    public MongoOperations getMongoOperations() throws UnknownHostException {
-        return MongoDBHelper.getMongoOperations(getDatabaseName(), getMongoConnection());
     }
 }

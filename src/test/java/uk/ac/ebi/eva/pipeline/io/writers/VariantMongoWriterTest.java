@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 EMBL - European Bioinformatics Institute
+ * Copyright 2016-2017 EMBL - European Bioinformatics Institute
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,13 +22,18 @@ import com.mongodb.DBObject;
 
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoOperations;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import uk.ac.ebi.eva.commons.models.data.Variant;
+import uk.ac.ebi.eva.pipeline.configuration.MongoConfiguration;
+import uk.ac.ebi.eva.pipeline.configuration.writers.VariantWriterConfiguration;
 import uk.ac.ebi.eva.pipeline.model.converters.data.VariantToMongoDbObjectConverter;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
-import uk.ac.ebi.eva.utils.MongoDBHelper;
 
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -48,11 +53,14 @@ import static org.mockito.Mockito.when;
 /**
  * Testing {@link VariantMongoWriter}
  */
+@RunWith(SpringRunner.class)
+@ContextConfiguration(classes = { VariantWriterConfiguration.class })
 public class VariantMongoWriterTest {
 
-    private static final List<? extends Variant> EMPTY_LIST = new ArrayList<>();
+    @Autowired
+    private MongoConfiguration mongoConfiguration;
 
-    private VariantMongoWriter variantMongoWriter;
+    private static final List<? extends Variant> EMPTY_LIST = new ArrayList<>();
 
     private VariantToMongoDbObjectConverter variantToMongoDbObjectConverter =
 	    Mockito.mock(VariantToMongoDbObjectConverter.class);
@@ -65,10 +73,11 @@ public class VariantMongoWriterTest {
     @Test
     public void noVariantsNothingShouldBeWritten() throws UnknownHostException {
         String dbName = mongoRule.getRandomTemporaryDatabaseName();
-        MongoOperations mongoOperations = MongoDBHelper.getDefaultMongoOperations(dbName);
+        MongoOperations mongoOperations = mongoConfiguration.getDefaultMongoOperations(dbName);
         DBCollection dbCollection = mongoOperations.getCollection(collectionName);
 
-        variantMongoWriter = new VariantMongoWriter(collectionName, mongoOperations, variantToMongoDbObjectConverter);
+        VariantMongoWriter variantMongoWriter = new VariantMongoWriter(collectionName, mongoOperations,
+                                                                       variantToMongoDbObjectConverter);
         variantMongoWriter.doWrite(EMPTY_LIST);
 
         assertEquals(0, dbCollection.count());
@@ -80,14 +89,15 @@ public class VariantMongoWriterTest {
         Variant variant2 = new Variant("2", 3, 4, "C", "G");
 
         String dbName = mongoRule.getRandomTemporaryDatabaseName();
-        MongoOperations mongoOperations = MongoDBHelper.getDefaultMongoOperations(dbName);
+        MongoOperations mongoOperations = mongoConfiguration.getDefaultMongoOperations(dbName);
         DBCollection dbCollection = mongoOperations.getCollection(collectionName);
 
         BasicDBObject dbObject = new BasicDBObject();
 
         when(variantToMongoDbObjectConverter.convert(any(Variant.class))).thenReturn(dbObject).thenReturn(dbObject);
 
-        variantMongoWriter = new VariantMongoWriter(collectionName, mongoOperations, variantToMongoDbObjectConverter);
+        VariantMongoWriter variantMongoWriter = new VariantMongoWriter(collectionName, mongoOperations,
+                                                                       variantToMongoDbObjectConverter);
         variantMongoWriter.write(Collections.singletonList(variant1));
         variantMongoWriter.write(Collections.singletonList(variant2));
 
@@ -97,10 +107,11 @@ public class VariantMongoWriterTest {
     @Test
     public void indexesShouldBeCreatedInBackground() throws UnknownHostException {
         String dbName = mongoRule.getRandomTemporaryDatabaseName();
-        MongoOperations mongoOperations = MongoDBHelper.getDefaultMongoOperations(dbName);
+        MongoOperations mongoOperations = mongoConfiguration.getDefaultMongoOperations(dbName);
         DBCollection dbCollection = mongoOperations.getCollection(collectionName);
 
-        variantMongoWriter = new VariantMongoWriter(collectionName, mongoOperations, variantToMongoDbObjectConverter);
+        VariantMongoWriter variantMongoWriter = new VariantMongoWriter(collectionName, mongoOperations,
+                                                                       variantToMongoDbObjectConverter);
 
         List<DBObject> indexInfo = dbCollection.getIndexInfo();
 
@@ -120,13 +131,14 @@ public class VariantMongoWriterTest {
         Variant variant1 = new Variant("1", 1, 2, "A", "T");
 
         String dbName = mongoRule.getRandomTemporaryDatabaseName();
-        MongoOperations mongoOperations = MongoDBHelper.getDefaultMongoOperations(dbName);
+        MongoOperations mongoOperations = mongoConfiguration.getDefaultMongoOperations(dbName);
 
         BasicDBObject dbObject = new BasicDBObject();
 
         when(variantToMongoDbObjectConverter.convert(any(Variant.class))).thenReturn(dbObject).thenReturn(dbObject);
 
-        variantMongoWriter = new VariantMongoWriter(collectionName, mongoOperations, variantToMongoDbObjectConverter);
+        VariantMongoWriter variantMongoWriter = new VariantMongoWriter(collectionName, mongoOperations,
+                                                                       variantToMongoDbObjectConverter);
         variantMongoWriter.write(Collections.singletonList(variant1));
 
         try {
