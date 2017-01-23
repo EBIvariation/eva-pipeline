@@ -89,7 +89,7 @@ public class LoadFileStepTest {
                 .inputVcfId("1")
                 .inputStudyId("1")
                 .inputVcfAggregation("NONE")
-                .addParameter(JobParametersNames.DB_COLLECTIONS_FILES_NAME, "files")
+                .addString(JobParametersNames.DB_COLLECTIONS_FILES_NAME, "files")
                 .toJobParameters();
 
         // When the execute method in variantsLoad is executed
