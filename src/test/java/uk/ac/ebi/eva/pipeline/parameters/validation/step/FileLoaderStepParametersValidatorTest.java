@@ -33,9 +33,9 @@ import java.util.TreeMap;
  * Tests that the arguments necessary to run a {@link uk.ac.ebi.eva.pipeline.jobs.steps.LoadFileStep} are
  * correctly validated
  */
-public class LoadFileStepParametersValidatorTest {
+public class FileLoaderStepParametersValidatorTest {
 
-    private LoadFileStepParametersValidator validator;
+    private FileLoaderStepParametersValidator validator;
 
     @Rule
     public PipelineTemporaryFolderRule temporaryFolderRule = new PipelineTemporaryFolderRule();
@@ -44,7 +44,7 @@ public class LoadFileStepParametersValidatorTest {
 
     @Before
     public void setUp() throws Exception {
-        validator = new LoadFileStepParametersValidator();
+        validator = new FileLoaderStepParametersValidator();
 
         requiredParameters = new TreeMap<>();
         requiredParameters.put(JobParametersNames.DB_NAME, new JobParameter("database"));

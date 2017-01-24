@@ -37,9 +37,9 @@ import java.util.List;
 /**
  * Validates the job parameters necessary to execute a {@link uk.ac.ebi.eva.pipeline.jobs.steps.LoadFileStep}
  */
-public class LoadFileStepParametersValidator extends DefaultJobParametersValidator {
+public class FileLoaderStepParametersValidator extends DefaultJobParametersValidator {
 
-    public LoadFileStepParametersValidator() {
+    public FileLoaderStepParametersValidator() {
         super(new String[]{JobParametersNames.DB_NAME,
                       JobParametersNames.DB_COLLECTIONS_FILES_NAME,
                       JobParametersNames.INPUT_STUDY_ID,
