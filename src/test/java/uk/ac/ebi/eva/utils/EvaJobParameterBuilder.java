@@ -17,29 +17,30 @@ package uk.ac.ebi.eva.utils;
 
 import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParametersBuilder;
+
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 
 import java.sql.Timestamp;
 import java.util.Date;
 
-public class EvaJobParameterBuilder extends JobParametersBuilder{
+public class EvaJobParameterBuilder extends JobParametersBuilder {
 
-    public EvaJobParameterBuilder inputStudyId(String inputStudyId){
+    public EvaJobParameterBuilder inputStudyId(String inputStudyId) {
         addParameter(JobParametersNames.INPUT_STUDY_ID, new JobParameter(inputStudyId));
         return this;
     }
 
-    public EvaJobParameterBuilder inputVcfId(String inputVcfId){
+    public EvaJobParameterBuilder inputVcfId(String inputVcfId) {
         addParameter(JobParametersNames.INPUT_VCF_ID, new JobParameter(inputVcfId));
         return this;
     }
 
-    public EvaJobParameterBuilder inputVcf(String inputVcf){
+    public EvaJobParameterBuilder inputVcf(String inputVcf) {
         addParameter(JobParametersNames.INPUT_VCF, new JobParameter(inputVcf));
         return this;
     }
 
-    public EvaJobParameterBuilder inputVcfAggregation(String inputVcfAggregation){
+    public EvaJobParameterBuilder inputVcfAggregation(String inputVcfAggregation) {
         addParameter(JobParametersNames.INPUT_VCF_AGGREGATION, new JobParameter(inputVcfAggregation));
         return this;
     }

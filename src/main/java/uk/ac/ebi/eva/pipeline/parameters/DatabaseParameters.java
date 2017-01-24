@@ -38,6 +38,9 @@ public class DatabaseParameters {
     @Value(PARAMETER + JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME + END)
     private String collectionVariantsName;
 
+    @Value(PARAMETER + JobParametersNames.DB_COLLECTIONS_FILES_NAME + END)
+    private String collectionFilesName;
+
     @Value("${" + JobParametersNames.CONFIG_DB_HOSTS + ":#{null}}")
     private String hosts;
 
@@ -63,5 +66,9 @@ public class DatabaseParameters {
 
     public String getCollectionVariantsName() {
         return collectionVariantsName;
+    }
+
+    public String getCollectionFilesName() {
+        return collectionFilesName;
     }
 }

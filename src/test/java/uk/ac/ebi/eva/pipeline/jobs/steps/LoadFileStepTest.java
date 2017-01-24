@@ -26,6 +26,7 @@ import org.opencb.biodata.models.variant.VariantStudy;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.JobExecution;
+import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ActiveProfiles;
@@ -41,6 +42,7 @@ import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
+import uk.ac.ebi.eva.utils.EvaJobParameterBuilder;
 
 import static org.junit.Assert.assertEquals;
 import static org.opencb.opencga.storage.core.variant.VariantStorageManager.VARIANT_SOURCE;
@@ -52,7 +54,7 @@ import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResource;
  */
 @RunWith(SpringRunner.class)
 @ActiveProfiles({Application.VARIANT_WRITER_MONGO_PROFILE, Application.VARIANT_ANNOTATION_MONGO_PROFILE})
-@TestPropertySource({"classpath:genotyped-vcf.properties"})
+@TestPropertySource({"classpath:genotyped-vcf.properties", "classpath:test-mongo.properties"})
 @ContextConfiguration(classes = {GenotypedVcfJob.class, BatchTestConfiguration.class})
 public class LoadFileStepTest {
 
@@ -80,17 +82,18 @@ public class LoadFileStepTest {
         jobOptions.getPipelineOptions().put(JobParametersNames.OUTPUT_DIR, outputDir);
 
         String databaseName = mongoRule.getRandomTemporaryDatabaseName();
-        jobOptions.setDbName(databaseName);
-        jobOptions.getVariantOptions().put(VARIANT_SOURCE, new VariantSource(
-                input,
-                "1",
-                "1",
-                "studyName",
-                VariantStudy.StudyType.COLLECTION,
-                VariantSource.Aggregation.NONE));
+        JobParameters jobParameters = new EvaJobParameterBuilder()
+                .inputVcf(input)
+                .databaseName(databaseName)
+                .collectionVariantsName("variants")
+                .inputVcfId("1")
+                .inputStudyId("1")
+                .inputVcfAggregation("NONE")
+                .addString(JobParametersNames.DB_COLLECTIONS_FILES_NAME, "files")
+                .toJobParameters();
 
         // When the execute method in variantsLoad is executed
-        JobExecution jobExecution = jobLauncherTestUtils.launchStep(BeanNames.LOAD_FILE_STEP);
+        JobExecution jobExecution = jobLauncherTestUtils.launchStep(BeanNames.LOAD_FILE_STEP, jobParameters);
 
         //Then variantsLoad step should complete correctly
         assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
