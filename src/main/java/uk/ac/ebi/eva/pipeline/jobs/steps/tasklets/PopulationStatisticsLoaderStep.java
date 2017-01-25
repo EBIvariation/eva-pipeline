@@ -29,8 +29,10 @@ import org.opencb.opencga.lib.auth.IllegalOpenCGACredentialsException;
 import org.opencb.opencga.storage.core.variant.VariantStorageManager;
 import org.opencb.opencga.storage.core.variant.adaptors.VariantDBAdaptor;
 import org.opencb.opencga.storage.core.variant.io.json.VariantStatsJsonMixin;
+import org.opencb.opencga.storage.core.variant.stats.VariantStatisticsManager;
 import org.opencb.opencga.storage.core.variant.stats.VariantStatsWrapper;
 import org.opencb.opencga.storage.mongodb.utils.MongoCredentials;
+import org.opencb.opencga.storage.mongodb.variant.MongoDBVariantStorageManager;
 import org.opencb.opencga.storage.mongodb.variant.VariantMongoDBAdaptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,9 +42,9 @@ import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
-import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
-import uk.ac.ebi.eva.utils.MongoDBHelper;
+import uk.ac.ebi.eva.pipeline.parameters.DatabaseParameters;
+import uk.ac.ebi.eva.pipeline.parameters.InputParameters;
+import uk.ac.ebi.eva.pipeline.parameters.OutputParameters;
 import uk.ac.ebi.eva.utils.URLHelper;
 
 import java.io.FileInputStream;
@@ -50,7 +52,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.UnknownHostException;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
@@ -98,7 +99,15 @@ public class PopulationStatisticsLoaderStep implements Tasklet {
     private static final Logger logger = LoggerFactory.getLogger(PopulationStatisticsLoaderStep.class);
 
     @Autowired
-    private JobOptions jobOptions;
+    private InputParameters inputParameters;
+
+    @Autowired
+    private OutputParameters outputParameters;
+
+    @Autowired
+    private DatabaseParameters dbParameters;
+//    @Autowired
+//    private JobOptions jobOptions;
 
     private JsonFactory jsonFactory;
 
@@ -112,18 +121,13 @@ public class PopulationStatisticsLoaderStep implements Tasklet {
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
-        ObjectMap variantOptions = jobOptions.getVariantOptions();
-        ObjectMap pipelineOptions = jobOptions.getPipelineOptions();
-
-        VariantSource variantSource = variantOptions.get(VariantStorageManager.VARIANT_SOURCE, VariantSource.class);
-        String outputDir = pipelineOptions.getString(JobParametersNames.OUTPUT_DIR_STATISTICS);
-        URI variantStatsOutputUri = URLHelper.getVariantsStatsUri(outputDir,
-                variantSource.getStudyId(), variantSource.getFileId());
-        URI sourceStatsOutputUri = URLHelper.getSourceStatsUri(outputDir,
-                variantSource.getStudyId(), variantSource.getFileId());
-
-        VariantDBAdaptor dbAdaptor = getDbAdaptor(pipelineOptions);
-        QueryOptions statsOptions = new QueryOptions(variantOptions);
+        VariantDBAdaptor dbAdaptor = getDbAdaptor();
+        VariantSource source = getVariantSource();
+        URI variantStatsOutputUri = URLHelper.getVariantsStatsUri(
+                outputParameters.getOutputDirStatistics(), source.getStudyId(), source.getFileId());
+        URI sourceStatsOutputUri = URLHelper.getSourceStatsUri(
+                outputParameters.getOutputDirStatistics(), source.getStudyId(), source.getFileId());
+        QueryOptions statsOptions = new QueryOptions(getVariantOptions());
 
         // Load statistics for variants and the file
         loadVariantStats(dbAdaptor, variantStatsOutputUri, statsOptions);
@@ -132,26 +136,66 @@ public class PopulationStatisticsLoaderStep implements Tasklet {
         return RepeatStatus.FINISHED;
     }
 
-    private VariantDBAdaptor getDbAdaptor(ObjectMap properties) throws UnknownHostException, IllegalOpenCGACredentialsException {
-        MongoCredentials credentials = getMongoCredentials(properties);
-        String variantsCollectionName = properties.getString(JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME);
-        String filesCollectionName = properties.getString(JobParametersNames.DB_COLLECTIONS_FILES_NAME);
+    private ObjectMap getVariantOptions() {
+
+        VariantSource source = getVariantSource();
+
+        // OpenCGA options with default values (non-customizable)
+        String compressExtension = ".gz";
+        boolean annotate = false;
+        VariantStorageManager.IncludeSrc includeSourceLine = VariantStorageManager.IncludeSrc.FIRST_8_COLUMNS;
+
+        ObjectMap variantOptions = new ObjectMap();
+        variantOptions.put(VariantStorageManager.VARIANT_SOURCE, source);
+        variantOptions.put(VariantStorageManager.OVERWRITE_STATS, outputParameters.getStatisticsOverwrite());
+        variantOptions.put(VariantStorageManager.INCLUDE_SRC, includeSourceLine);
+        variantOptions.put("compressExtension", compressExtension);
+        variantOptions.put(VariantStorageManager.ANNOTATE, annotate);
+        variantOptions.put(VariantStatisticsManager.BATCH_SIZE, inputParameters.getChunkSize());
+
+        variantOptions.put(VariantStorageManager.DB_NAME, dbParameters.getDatabaseName());
+        variantOptions.put(MongoDBVariantStorageManager.OPENCGA_STORAGE_MONGODB_VARIANT_DB_NAME,
+                dbParameters.getDatabaseName());
+        variantOptions.put(MongoDBVariantStorageManager.OPENCGA_STORAGE_MONGODB_VARIANT_DB_HOSTS,
+                dbParameters.getHosts());
+        variantOptions.put(MongoDBVariantStorageManager.OPENCGA_STORAGE_MONGODB_VARIANT_DB_AUTHENTICATION_DB,
+                dbParameters.getAuthenticationDatabase());
+        variantOptions.put(MongoDBVariantStorageManager.OPENCGA_STORAGE_MONGODB_VARIANT_DB_USER,
+                dbParameters.getUser());
+        variantOptions.put(MongoDBVariantStorageManager.OPENCGA_STORAGE_MONGODB_VARIANT_DB_PASS,
+                dbParameters.getPassword());
+
+        return variantOptions;
+    }
+
+    private VariantSource getVariantSource() {
+        return new VariantSource(
+                    Paths.get(inputParameters.getVcf()).getFileName().toString(),
+                    inputParameters.getVcfId(),
+                    inputParameters.getStudyId(),
+                    inputParameters.getStudyName(),
+                    inputParameters.getStudyType(),
+                    inputParameters.getVcfAggregation());
+    }
+    private VariantDBAdaptor getDbAdaptor() throws UnknownHostException, IllegalOpenCGACredentialsException {
+        MongoCredentials credentials = getMongoCredentials();
+        String variantsCollectionName = dbParameters.getCollectionVariantsName();
+        String filesCollectionName = dbParameters.getCollectionFilesName();
 
         logger.debug("Getting DBAdaptor to database '{}'", credentials.getMongoDbName());
         return new VariantMongoDBAdaptor(credentials, variantsCollectionName, filesCollectionName);
     }
 
-    private MongoCredentials getMongoCredentials(ObjectMap properties) throws IllegalOpenCGACredentialsException {
-        String hosts = properties.getString(JobParametersNames.CONFIG_DB_HOSTS);
+    private MongoCredentials getMongoCredentials() throws IllegalOpenCGACredentialsException {
+        String hosts = dbParameters.getHosts();
         List<DataStoreServerAddress> dataStoreServerAddresses = MongoCredentials.parseDataStoreServerAddresses(hosts);
 
-        String dbName = properties.getString(JobParametersNames.DB_NAME);
-        String authenticationDatabase = properties.getString(JobParametersNames.CONFIG_DB_AUTHENTICATIONDB, null);
-        String user = properties.getString(JobParametersNames.CONFIG_DB_USER, null);
-        String pass = properties.getString(JobParametersNames.CONFIG_DB_PASSWORD, null);
+        String dbName = dbParameters.getDatabaseName();
+        String user = dbParameters.getUser();
+        String pass = dbParameters.getPassword();
 
         MongoCredentials mongoCredentials = new MongoCredentials(dataStoreServerAddresses, dbName, user, pass);
-        mongoCredentials.setAuthenticationDatabase(authenticationDatabase);
+        mongoCredentials.setAuthenticationDatabase(dbParameters.getAuthenticationDatabase());
         return mongoCredentials;
     }
 
