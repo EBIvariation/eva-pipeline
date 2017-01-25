@@ -86,11 +86,11 @@ public class AnnotationParameters {
         return inputFasta;
     }
 
-    public String getVepInput(){
+    public String getVepInput() {
         return VepUtils.resolveVepInput(outputDirAnnotation, studyId, fileId);
     }
 
-    public String getVepOuput(){
+    public String getVepOuput() {
         return VepUtils.resolveVepOutput(outputDirAnnotation, studyId, fileId);
     }
 
