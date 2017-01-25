@@ -248,12 +248,14 @@ public class GenotypedVcfJobWorkflowTest {
 
         JobParameters jobParameters = new EvaJobParameterBuilder()
                 .collectionVariantsName("variants")
+                .collectionFilesName("files")
                 .databaseName(jobOptions.getDbName())
                 .inputFasta("")
                 .inputStudyId("genotyped-job-workflow")
                 .inputVcf(getResource(inputFileResouce).getAbsolutePath())
                 .inputVcfAggregation("NONE")
                 .inputVcfId("1")
+                .outputDirStats(outputDir)
                 .outputDirAnnotation("/tmp/")
                 .vepCachePath("")
                 .vepCacheSpecies("")
@@ -261,8 +263,6 @@ public class GenotypedVcfJobWorkflowTest {
                 .vepNumForks("")
                 .vepPath(getResource(MOCK_VEP).getPath())
                 .timestamp()
-                .addString(JobParametersNames.OUTPUT_DIR_STATISTICS, outputDir)
-                .addString(JobParametersNames.DB_COLLECTIONS_FILES_NAME, "files")
                 .toJobParameters();
 
         // transformedVcf file init

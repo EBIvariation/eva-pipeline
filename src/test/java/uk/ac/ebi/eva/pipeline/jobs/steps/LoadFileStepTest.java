@@ -86,10 +86,10 @@ public class LoadFileStepTest {
                 .inputVcf(input)
                 .databaseName(databaseName)
                 .collectionVariantsName("variants")
+                .collectionFilesName("files")
                 .inputVcfId("1")
                 .inputStudyId("1")
                 .inputVcfAggregation("NONE")
-                .addString(JobParametersNames.DB_COLLECTIONS_FILES_NAME, "files")
                 .toJobParameters();
 
         // When the execute method in variantsLoad is executed

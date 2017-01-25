@@ -101,7 +101,8 @@ public class AggregatedVcfJobTest {
         Config.setOpenCGAHome(opencgaHome);
         mongoRule.getTemporaryDatabase(dbName);
 
-        JobParameters jobParameters = new EvaJobParameterBuilder().inputVcf(getResource(input).getAbsolutePath())
+        JobParameters jobParameters = new EvaJobParameterBuilder()
+                .inputVcf(getResource(input).getAbsolutePath())
                 .databaseName(dbName)
                 .collectionVariantsName("variants")
                 .inputVcfId("1")

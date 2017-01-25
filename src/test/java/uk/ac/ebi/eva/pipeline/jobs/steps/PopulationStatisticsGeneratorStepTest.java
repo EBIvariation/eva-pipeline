@@ -120,7 +120,8 @@ public class PopulationStatisticsGeneratorStepTest {
                 .databaseName(databaseName)
                 .inputStudyId(sid)
                 .inputVcfId(fid)
-                .addString(JobParametersNames.OUTPUT_DIR_STATISTICS, statsDir).toJobParameters();
+                .outputDirStats(statsDir)
+                .toJobParameters();
 
         //and a valid variants load step already completed
         mongoRule.restoreDump(getResourceUrl(MONGO_DUMP), databaseName);

@@ -106,8 +106,6 @@ public class PopulationStatisticsLoaderStep implements Tasklet {
 
     @Autowired
     private DatabaseParameters dbParameters;
-//    @Autowired
-//    private JobOptions jobOptions;
 
     private JsonFactory jsonFactory;
 
@@ -137,34 +135,11 @@ public class PopulationStatisticsLoaderStep implements Tasklet {
     }
 
     private ObjectMap getVariantOptions() {
-
         VariantSource source = getVariantSource();
-
-        // OpenCGA options with default values (non-customizable)
-        String compressExtension = ".gz";
-        boolean annotate = false;
-        VariantStorageManager.IncludeSrc includeSourceLine = VariantStorageManager.IncludeSrc.FIRST_8_COLUMNS;
 
         ObjectMap variantOptions = new ObjectMap();
         variantOptions.put(VariantStorageManager.VARIANT_SOURCE, source);
         variantOptions.put(VariantStorageManager.OVERWRITE_STATS, outputParameters.getStatisticsOverwrite());
-        variantOptions.put(VariantStorageManager.INCLUDE_SRC, includeSourceLine);
-        variantOptions.put("compressExtension", compressExtension);
-        variantOptions.put(VariantStorageManager.ANNOTATE, annotate);
-        variantOptions.put(VariantStatisticsManager.BATCH_SIZE, inputParameters.getChunkSize());
-
-        variantOptions.put(VariantStorageManager.DB_NAME, dbParameters.getDatabaseName());
-        variantOptions.put(MongoDBVariantStorageManager.OPENCGA_STORAGE_MONGODB_VARIANT_DB_NAME,
-                dbParameters.getDatabaseName());
-        variantOptions.put(MongoDBVariantStorageManager.OPENCGA_STORAGE_MONGODB_VARIANT_DB_HOSTS,
-                dbParameters.getHosts());
-        variantOptions.put(MongoDBVariantStorageManager.OPENCGA_STORAGE_MONGODB_VARIANT_DB_AUTHENTICATION_DB,
-                dbParameters.getAuthenticationDatabase());
-        variantOptions.put(MongoDBVariantStorageManager.OPENCGA_STORAGE_MONGODB_VARIANT_DB_USER,
-                dbParameters.getUser());
-        variantOptions.put(MongoDBVariantStorageManager.OPENCGA_STORAGE_MONGODB_VARIANT_DB_PASS,
-                dbParameters.getPassword());
-
         return variantOptions;
     }
 

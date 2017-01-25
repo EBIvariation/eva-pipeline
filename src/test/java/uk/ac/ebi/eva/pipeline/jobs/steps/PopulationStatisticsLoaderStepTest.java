@@ -83,8 +83,8 @@ public class PopulationStatisticsLoaderStepTest {
                 .inputStudyId(studyId)
                 .inputVcfId(fileId)
                 .collectionVariantsName("variants")
-                .addString(JobParametersNames.OUTPUT_DIR_STATISTICS, statsDir)
-                .addString(JobParametersNames.DB_COLLECTIONS_FILES_NAME, "files")
+                .collectionFilesName("files")
+                .outputDirStats(statsDir)
                 .toJobParameters();
 
         //and a valid variants load and stats create steps already completed
@@ -126,8 +126,8 @@ public class PopulationStatisticsLoaderStepTest {
                 .inputStudyId(studyId)
                 .inputVcfId(fileId)
                 .collectionVariantsName("variants")
-                .addString(JobParametersNames.OUTPUT_DIR_STATISTICS, statsDir)
-                .addString(JobParametersNames.DB_COLLECTIONS_FILES_NAME, "files")
+                .collectionFilesName("files")
+                .outputDirStats(statsDir)
                 .toJobParameters();
 
         JobExecution jobExecution = jobLauncherTestUtils.launchStep(BeanNames.LOAD_STATISTICS_STEP, jobParameters);
