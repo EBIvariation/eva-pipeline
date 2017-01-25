@@ -80,12 +80,12 @@ public class PopulationStatisticsJobTest {
                 .inputVcf(getResource(input).getAbsolutePath())
                 .databaseName(dbName)
                 .collectionVariantsName("variants")
+                .collectionFilesName("files")
                 .inputVcfId(fileId)
                 .inputStudyId(studyId)
                 .inputVcfAggregation("BASIC")
+                .outputDirStats(statsDir)
                 .timestamp()
-                .addString(JobParametersNames.OUTPUT_DIR_STATISTICS, statsDir)
-                .addString(JobParametersNames.DB_COLLECTIONS_FILES_NAME, "files")
                 .toJobParameters();
 
         JobExecution jobExecution = jobLauncherTestUtils.launchJob(jobParameters);
