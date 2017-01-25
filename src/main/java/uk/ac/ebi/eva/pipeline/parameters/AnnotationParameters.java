@@ -31,7 +31,7 @@ import uk.ac.ebi.eva.utils.VepUtils;
  */
 @Service
 @StepScope
-public class AnnotationParameter {
+public class AnnotationParameters {
     private static final String PARAMETER = "#{jobParameters['";
     private static final String END = "']}";
 
