@@ -53,7 +53,7 @@ public class VepAnnotationGeneratorStep implements Tasklet {
     private static final Logger logger = LoggerFactory.getLogger(VepAnnotationGeneratorStep.class);
 
     @Autowired
-    AnnotationParameter annotationParameter;
+    private AnnotationParameter annotationParameter;
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
