@@ -23,7 +23,7 @@ import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import uk.ac.ebi.eva.pipeline.parameters.AnnotationParameter;
+import uk.ac.ebi.eva.pipeline.parameters.AnnotationParameters;
 
 import java.io.BufferedInputStream;
 import java.io.FileOutputStream;
@@ -53,19 +53,19 @@ public class VepAnnotationGeneratorStep implements Tasklet {
     private static final Logger logger = LoggerFactory.getLogger(VepAnnotationGeneratorStep.class);
 
     @Autowired
-    private AnnotationParameter annotationParameter;
+    private AnnotationParameters annotationParameters;
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
 
-        ProcessBuilder processBuilder = new ProcessBuilder("perl", annotationParameter.getVepPath(),
+        ProcessBuilder processBuilder = new ProcessBuilder("perl", annotationParameters.getVepPath(),
                                                            "--cache",
-                                                           "--cache_version", annotationParameter.getVepCacheVersion(),
-                                                           "-dir", annotationParameter.getVepCachePath(),
-                                                           "--species", annotationParameter.getVepCacheSpecies(),
-                                                           "--fasta", annotationParameter.getInputFasta(),
-                                                           "--fork", annotationParameter.getVepNumForks(),
-                                                           "-i", annotationParameter.getVepInput(),
+                                                           "--cache_version", annotationParameters.getVepCacheVersion(),
+                                                           "-dir", annotationParameters.getVepCachePath(),
+                                                           "--species", annotationParameters.getVepCacheSpecies(),
+                                                           "--fasta", annotationParameters.getInputFasta(),
+                                                           "--fork", annotationParameters.getVepNumForks(),
+                                                           "-i", annotationParameters.getVepInput(),
                                                            "-o", "STDOUT",
                                                            "--force_overwrite",
                                                            "--offline",
@@ -78,13 +78,13 @@ public class VepAnnotationGeneratorStep implements Tasklet {
         Process process = processBuilder.start();
 
         long written = connectStreams(new BufferedInputStream(process.getInputStream()),
-                                      new GZIPOutputStream(new FileOutputStream(annotationParameter.getVepOuput())));
+                                      new GZIPOutputStream(new FileOutputStream(annotationParameters.getVepOuput())));
 
         int exitValue = process.waitFor();
         logger.info("Finishing read from VEP output, bytes written: " + written);
 
         if (exitValue > 0) {
-            String errorLog = annotationParameter.getVepOuput() + ".errors.txt";
+            String errorLog = annotationParameters.getVepOuput() + ".errors.txt";
             connectStreams(new BufferedInputStream(process.getErrorStream()), new FileOutputStream(errorLog));
             throw new Exception("Error while running VEP (exit status " + exitValue + "). See "
                                         + errorLog + " for the errors description from VEP.");
