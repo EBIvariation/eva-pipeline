@@ -260,7 +260,9 @@ public class GenotypedVcfJobWorkflowTest {
                 .vepCacheVersion("")
                 .vepNumForks("")
                 .vepPath(getResource(MOCK_VEP).getPath())
-                .timestamp().toJobParameters();
+                .timestamp()
+                .addString(JobParametersNames.OUTPUT_DIR_STATISTICS, outputDir)
+                .toJobParameters();
 
         // transformedVcf file init
         String transformedVcf = outputDir + inputFileResouce + ".variants.json" + compressExtension;

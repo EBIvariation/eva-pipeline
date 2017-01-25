@@ -23,6 +23,9 @@ import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.step.tasklet.TaskletStep;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
+
+import uk.ac.ebi.eva.pipeline.configuration.MongoConfiguration;
 import uk.ac.ebi.eva.pipeline.jobs.steps.tasklets.PopulationStatisticsGeneratorStep;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 import uk.ac.ebi.eva.utils.TaskletUtils;
@@ -34,6 +37,7 @@ import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.CALCULATE_STATISTIC
  */
 @Configuration
 @EnableBatchProcessing
+@Import({ MongoConfiguration.class })
 public class CalculateStatisticsStep {
 
     private static final Logger logger = LoggerFactory.getLogger(CalculateStatisticsStep.class);

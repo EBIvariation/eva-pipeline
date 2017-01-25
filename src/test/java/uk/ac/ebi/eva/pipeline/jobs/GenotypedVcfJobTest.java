@@ -146,6 +146,7 @@ public class GenotypedVcfJobTest {
                 .vepCacheVersion("")
                 .vepNumForks("")
                 .vepPath(getResource(MOCK_VEP).getPath())
+                .addString(JobParametersNames.OUTPUT_DIR_STATISTICS, outputDir)
 
                 .toJobParameters();
         JobExecution jobExecution = jobLauncherTestUtils.launchJob(jobParameters);

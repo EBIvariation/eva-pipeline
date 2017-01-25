@@ -56,6 +56,9 @@ public class ParametersFromProperties {
     @Value(PROPERTY + JobParametersNames.INPUT_VCF_AGGREGATION + OR_NULL)
     private String vcfAggregation;
 
+    @Value(PROPERTY + JobParametersNames.OUTPUT_DIR_STATISTICS + OR_NULL)
+    private String outputDirStats;
+
     public Properties getProperties() {
         Properties properties = new Properties();
 
