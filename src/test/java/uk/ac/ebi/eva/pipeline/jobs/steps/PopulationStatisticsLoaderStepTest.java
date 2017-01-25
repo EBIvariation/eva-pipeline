@@ -15,6 +15,7 @@ import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobExecutionException;
+import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.rule.OutputCapture;
@@ -29,6 +30,7 @@ import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
+import uk.ac.ebi.eva.utils.EvaJobParameterBuilder;
 
 import java.io.File;
 import java.io.IOException;
@@ -44,7 +46,7 @@ import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResourceUrl;
  * Test for {@link PopulationStatisticsLoaderStep}
  */
 @RunWith(SpringRunner.class)
-@TestPropertySource({"classpath:common-configuration.properties"})
+@TestPropertySource({"classpath:common-configuration.properties", "classpath:test-mongo.properties"})
 @ContextConfiguration(classes = {PopulationStatisticsJob.class, BatchTestConfiguration.class})
 public class PopulationStatisticsLoaderStepTest {
 
@@ -75,18 +77,31 @@ public class PopulationStatisticsLoaderStepTest {
             ClassNotFoundException, InstantiationException, IOException, InterruptedException {
         //Given a valid VCF input file
         String input = getResource(SMALL_VCF_FILE).getAbsolutePath();
-        VariantSource source = new VariantSource(input, "1", "1", "studyName");
+        String fileId = "1";
+        String studyId = "1";
+        VariantSource source = new VariantSource(input, fileId, studyId, "studyName");
+        String dbName = mongoRule.restoreDumpInTemporaryDatabase(getResourceUrl(MONGO_DUMP));
+        String statsDir = createTempDirectoryForStatistics();
 
         jobOptions.getPipelineOptions().put(JobParametersNames.INPUT_VCF, input);
         jobOptions.getVariantOptions().put(VariantStorageManager.VARIANT_SOURCE, source);
+        jobOptions.setDbName(dbName);
+
+        JobParameters jobParameters = new EvaJobParameterBuilder()
+                .inputVcf(input)
+                .databaseName(dbName)
+                .inputStudyId(studyId)
+                .inputVcfId(fileId)
+                .collectionVariantsName("variants")
+                .addString(JobParametersNames.OUTPUT_DIR_STATISTICS, statsDir)
+                .addString(JobParametersNames.DB_COLLECTIONS_FILES_NAME, "files")
+                .toJobParameters();
 
         //and a valid variants load and stats create steps already completed
-        jobOptions.setDbName(mongoRule.restoreDumpInTemporaryDatabase(getResourceUrl(MONGO_DUMP)));
-
-        copyFilesToOutpurDir(createTempDirectoryForStatistics());
+        copyFilesToOutpurDir(statsDir);
 
         // When the execute method in variantsStatsLoad is executed
-        JobExecution jobExecution = jobLauncherTestUtils.launchStep(BeanNames.LOAD_STATISTICS_STEP);
+        JobExecution jobExecution = jobLauncherTestUtils.launchStep(BeanNames.LOAD_STATISTICS_STEP, jobParameters);
 
         // Then variantsStatsLoad step should complete correctly
         assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
@@ -104,8 +119,6 @@ public class PopulationStatisticsLoaderStepTest {
         copyResource(VARIANTS_FILE_NAME, outputDir);
         // copy source file to load
         copyResource(SOURCE_FILE_NAME, outputDir);
-        // copy transformed vcf
-        copyResource(VCF_FILE_NAME, outputDir);
     }
 
     private String createTempDirectoryForStatistics() {
