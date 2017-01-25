@@ -262,6 +262,7 @@ public class GenotypedVcfJobWorkflowTest {
                 .vepPath(getResource(MOCK_VEP).getPath())
                 .timestamp()
                 .addString(JobParametersNames.OUTPUT_DIR_STATISTICS, outputDir)
+                .addString(JobParametersNames.DB_COLLECTIONS_FILES_NAME, "files")
                 .toJobParameters();
 
         // transformedVcf file init

@@ -44,6 +44,9 @@ public class ParametersFromProperties {
     @Value(PROPERTY + JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME + OR_NULL)
     private String collectionVariantsName;
 
+    @Value(PROPERTY + JobParametersNames.DB_COLLECTIONS_FILES_NAME + OR_NULL)
+    private String collectionFilesName;
+
     @Value(PROPERTY + JobParametersNames.INPUT_STUDY_ID + OR_NULL)
     private String studyId;
 
