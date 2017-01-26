@@ -26,7 +26,13 @@ import java.util.List;
 
 
 public class MongoDBHelper {
-    
+
+    public static final String BACKGROUND_INDEX = "background";
+
+    public static final String UNIQUE_INDEX = "unique";
+
+    public static final String INDEX_NAME = "name";
+
     private MongoDBHelper() {
         // Can't be instantiated
     }
