@@ -82,13 +82,13 @@ public class VepAnnotationGeneratorStep implements Tasklet {
         Process process = processBuilder.start();
 
         long written = connectStreams(new BufferedInputStream(process.getInputStream()),
-                                      new GZIPOutputStream(new FileOutputStream(annotationParameters.getVepOuput())));
+                                      new GZIPOutputStream(new FileOutputStream(annotationParameters.getVepOutput())));
 
         int exitValue = process.waitFor();
         logger.info("Finishing read from VEP output, bytes written: " + written);
 
         if (exitValue > 0) {
-            String errorLog = annotationParameters.getVepOuput() + ".errors.txt";
+            String errorLog = annotationParameters.getVepOutput() + ".errors.txt";
             connectStreams(new BufferedInputStream(process.getErrorStream()), new FileOutputStream(errorLog));
             throw new Exception("Error while running VEP (exit status " + exitValue + "). See "
                                         + errorLog + " for the errors description from VEP.");

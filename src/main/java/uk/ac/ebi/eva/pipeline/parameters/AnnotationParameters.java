@@ -90,7 +90,7 @@ public class AnnotationParameters {
         return VepUtils.resolveVepInput(outputDirAnnotation, studyId, fileId);
     }
 
-    public String getVepOuput() {
+    public String getVepOutput() {
         return VepUtils.resolveVepOutput(outputDirAnnotation, studyId, fileId);
     }
 
