@@ -72,7 +72,7 @@ public class VcfHeaderReader implements ItemReader<VariantSourceEntity> {
      * Look at the test to see how is this checked.
      */
     @Override
-    public VariantSourceEntity read() throws Exception {
+    public VariantSourceEntity read() {
         VariantVcfReader reader = new VariantVcfReader(source, file.getPath());
         reader.open();
         reader.pre();

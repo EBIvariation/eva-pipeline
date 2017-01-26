@@ -62,7 +62,7 @@ public class VariantMongoWriter extends MongoItemWriter<Variant> {
         this.collection = collection;
         setTemplate(mongoOperations);
 
-        generateIndexes();
+        createIndexes();
     }
 
     @Override
@@ -93,7 +93,7 @@ public class VariantMongoWriter extends MongoItemWriter<Variant> {
         }
     }
 
-    private void generateIndexes() {
+    private void createIndexes() {
         mongoOperations.getCollection(collection).createIndex(
                 new BasicDBObject(VariantToDBObjectConverter.CHROMOSOME_FIELD, 1)
                     .append(VariantToDBObjectConverter.START_FIELD, 1).append(VariantToDBObjectConverter.END_FIELD, 1),

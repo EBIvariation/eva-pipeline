@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 EMBL - European Bioinformatics Institute
+ * Copyright 2016-2017 EMBL - European Bioinformatics Institute
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,11 @@
  */
 package uk.ac.ebi.eva.pipeline.io.writers;
 
+import com.mongodb.BasicDBObject;
+
 import org.springframework.batch.item.data.MongoItemWriter;
 import org.springframework.data.mongodb.core.MongoOperations;
+import org.springframework.util.Assert;
 
 import uk.ac.ebi.eva.commons.models.data.VariantSourceEntity;
 
@@ -25,9 +28,34 @@ import uk.ac.ebi.eva.commons.models.data.VariantSourceEntity;
  */
 public class VariantSourceEntityMongoWriter extends MongoItemWriter<VariantSourceEntity> {
 
+    private static final String BACKGROUND_INDEX = "background";
+
+    private static final String UNIQUE_INDEX = "unique";
+
+    private static final String INDEX_NAME = "name";
+
+    private MongoOperations mongoOperations;
+
+    private String collection;
+
     public VariantSourceEntityMongoWriter(MongoOperations mongoOperations, String collection) {
         super();
+        Assert.notNull(mongoOperations, "A Mongo instance is required");
+        Assert.hasText(collection, "A collection name is required");
         setCollection(collection);
         setTemplate(mongoOperations);
+
+        this.mongoOperations = mongoOperations;
+        this.collection = collection;
+
+        createIndexes();
+    }
+
+    private void createIndexes() {
+        mongoOperations.getCollection(collection).createIndex(
+                new BasicDBObject(VariantSourceEntity.STUDYID_FIELD, 1).append(VariantSourceEntity.FILEID_FIELD, 1)
+                    .append(VariantSourceEntity.FILENAME_FIELD, 1),
+                new BasicDBObject(BACKGROUND_INDEX, true).append(UNIQUE_INDEX, true)
+                    .append(INDEX_NAME, "unique_file"));
     }
 }

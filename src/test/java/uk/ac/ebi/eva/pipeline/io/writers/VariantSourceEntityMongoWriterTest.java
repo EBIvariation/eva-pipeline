@@ -15,9 +15,6 @@
  */
 package uk.ac.ebi.eva.pipeline.io.writers;
 
-import com.mongodb.DBCollection;
-import com.mongodb.DBCursor;
-import com.mongodb.DBObject;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -30,6 +27,10 @@ import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
+
+import com.mongodb.DBCollection;
+import com.mongodb.DBCursor;
+import com.mongodb.DBObject;
 
 import uk.ac.ebi.eva.commons.models.data.VariantSourceEntity;
 import uk.ac.ebi.eva.pipeline.configuration.MongoConfiguration;
@@ -44,9 +45,13 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
+
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -79,8 +84,7 @@ public class VariantSourceEntityMongoWriterTest {
     @Test
     public void shouldWriteAllFieldsIntoMongoDb() throws Exception {
         String databaseName = mongoRule.getRandomTemporaryDatabaseName();
-        MongoOperations mongoOperations = mongoConfiguration.getMongoOperations(
-                databaseName, jobOptions.getMongoConnection());
+        MongoOperations mongoOperations = mongoConfiguration.getDefaultMongoOperations(databaseName);
         DBCollection fileCollection = mongoRule.getCollection(databaseName, jobOptions.getDbCollectionsFilesName());
 
         VariantSourceEntityMongoWriter filesWriter = new VariantSourceEntityMongoWriter(
@@ -119,8 +123,7 @@ public class VariantSourceEntityMongoWriterTest {
     @Test
     public void shouldWriteSamplesWithDotsInName() throws Exception {
         String databaseName = mongoRule.getRandomTemporaryDatabaseName();
-        MongoOperations mongoOperations = mongoConfiguration.getMongoOperations(
-                databaseName, jobOptions.getMongoConnection());
+        MongoOperations mongoOperations = mongoConfiguration.getDefaultMongoOperations(databaseName);
         DBCollection fileCollection = mongoRule.getCollection(databaseName, jobOptions.getDbCollectionsFilesName());
 
         VariantSourceEntityMongoWriter filesWriter = new VariantSourceEntityMongoWriter(
@@ -147,7 +150,34 @@ public class VariantSourceEntityMongoWriterTest {
         }
     }
 
-    private VariantSourceEntity getVariantSourceEntity() throws Exception {
+    @Test
+    public void shouldCreateUniqueFileIndex() throws Exception {
+        String databaseName = mongoRule.getRandomTemporaryDatabaseName();
+        MongoOperations mongoOperations = mongoConfiguration.getDefaultMongoOperations(databaseName);
+        DBCollection fileCollection = mongoRule.getCollection(databaseName, jobOptions.getDbCollectionsFilesName());
+
+        VariantSourceEntityMongoWriter filesWriter = new VariantSourceEntityMongoWriter(
+                mongoOperations, jobOptions.getDbCollectionsFilesName());
+
+        VariantSourceEntity variantSourceEntity = getVariantSourceEntity();
+        filesWriter.write(Collections.singletonList(variantSourceEntity));
+
+        List<DBObject> indexInfo = fileCollection.getIndexInfo();
+
+        Set<String> createdIndexes = indexInfo.stream().map(index -> index.get("name").toString())
+                .collect(Collectors.toSet());
+        Set<String> expectedIndexes = new HashSet<>();
+        expectedIndexes.addAll(Arrays.asList("unique_file", "_id_"));
+        assertEquals(expectedIndexes, createdIndexes);
+
+        DBObject uniqueIndex = indexInfo.stream().filter(
+                index -> ("unique_file".equals(index.get("name").toString()))).findFirst().get();
+        assertNotNull(uniqueIndex);
+        assertEquals("true", uniqueIndex.get("unique").toString());
+        assertEquals("true", uniqueIndex.get("background").toString());
+    }
+
+    private VariantSourceEntity getVariantSourceEntity() {
         VariantSource source = (VariantSource) jobOptions.getVariantOptions().get(
                 VariantStorageManager.VARIANT_SOURCE);
         String fileId = source.getFileId();
