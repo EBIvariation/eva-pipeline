@@ -60,10 +60,6 @@ public class PopulationStatisticsGeneratorStep implements Tasklet {
     @Autowired
     private DatabaseParameters dbParameters;
 
-    public static String VARIANT_STATS_SUFFIX = ".variants.stats.json.gz";
-
-    public static String SOURCE_STATS_SUFFIX = ".source.stats.json.gz";
-
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
 //                HashMap<String, Set<String>> samples = new HashMap<>(); // TODO fill properly. if this is null overwrite will take on
@@ -83,24 +79,10 @@ public class PopulationStatisticsGeneratorStep implements Tasklet {
         return RepeatStatus.FINISHED;
     }
 
-    public static URI getStatsBaseUri(String outputDirStatistics, String studyId, String fileId) throws URISyntaxException {
-        URI outdirUri = URLHelper.createUri(outputDirStatistics);
-        return outdirUri.resolve(MongoDBHelper.buildStorageFileId(studyId, fileId));
-    }
-
-    public static URI getVariantsStatsUri(String outputDirStatistics, String studyId, String fileId) throws URISyntaxException {
-        return URLHelper.createUri(
-                getStatsBaseUri(outputDirStatistics, studyId, fileId).getPath() + VARIANT_STATS_SUFFIX);
-    }
-
-    public static URI getSourceStatsUri(String outputDirStatistics, String studyId, String fileId) throws URISyntaxException {
-        return URLHelper.createUri(
-                getStatsBaseUri(outputDirStatistics, studyId, fileId).getPath() + SOURCE_STATS_SUFFIX);
-    }
-
     private URI getStatsBaseUri() throws URISyntaxException {
         VariantSource source = getVariantSource();
-        return getStatsBaseUri(outputParameters.getOutputDirStatistics(), source.getStudyId(), source.getFileId());
+        return URLHelper.getStatsBaseUri(
+                outputParameters.getOutputDirStatistics(), source.getStudyId(), source.getFileId());
     }
 
     private ObjectMap getVariantOptions() {

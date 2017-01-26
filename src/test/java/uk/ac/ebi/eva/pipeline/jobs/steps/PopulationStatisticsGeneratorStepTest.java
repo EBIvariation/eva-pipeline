@@ -36,6 +36,7 @@ import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 import uk.ac.ebi.eva.utils.EvaJobParameterBuilder;
+import uk.ac.ebi.eva.utils.URLHelper;
 
 import java.io.File;
 import java.io.IOException;
@@ -85,9 +86,9 @@ public class PopulationStatisticsGeneratorStepTest {
         mongoRule.restoreDump(getResourceUrl(MONGO_DUMP), databaseName);
 
         // and non-existent variants stats file and variantSource stats file
-        File statsFile = new File(PopulationStatisticsGeneratorStep.getVariantsStatsUri(statsDir, studyId, fileId));
+        File statsFile = new File(URLHelper.getVariantsStatsUri(statsDir, studyId, fileId));
         assertFalse(statsFile.exists());
-        File sourceStatsFile = new File(PopulationStatisticsGeneratorStep.getSourceStatsUri(statsDir, studyId, fileId));
+        File sourceStatsFile = new File(URLHelper.getSourceStatsUri(statsDir, studyId, fileId));
         assertFalse(sourceStatsFile.exists());
 
         // When the execute method in variantsStatsCreate is executed
@@ -125,9 +126,9 @@ public class PopulationStatisticsGeneratorStepTest {
         mongoRule.restoreDump(getResourceUrl(MONGO_DUMP), databaseName);
 
         // and non-existent variants stats file and variantSource stats file
-        File statsFile = new File(PopulationStatisticsGeneratorStep.getVariantsStatsUri(statsDir, sid, fid));
+        File statsFile = new File(URLHelper.getVariantsStatsUri(statsDir, sid, fid));
         assertFalse(statsFile.exists());
-        File sourceStatsFile = new File(PopulationStatisticsGeneratorStep.getSourceStatsUri(statsDir, sid, fid));
+        File sourceStatsFile = new File(URLHelper.getSourceStatsUri(statsDir, sid, fid));
         assertFalse(sourceStatsFile.exists());
 
         // When the execute method in variantsStatsCreate is executed
