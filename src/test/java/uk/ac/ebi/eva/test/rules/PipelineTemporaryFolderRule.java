@@ -46,4 +46,22 @@ public class PipelineTemporaryFolderRule extends TemporaryFolder {
         }
         return tempFile;
     }
+
+    /**
+     * Creates a temporary GzipFile withe the content at {@param content}. This file is marked to be deleted by java
+     * after finishing the test process.
+     * @param content
+     * @param name how the temporal file will be called under the temporal folder
+     * @return
+     * @throws IOException
+     */
+    public File newGzipFile(String content, String name) throws IOException {
+        File tempFile = newFile(name);
+        try (FileOutputStream output = new FileOutputStream(tempFile)) {
+            try (Writer writer = new OutputStreamWriter(new GZIPOutputStream(output), "UTF-8")) {
+                writer.write(content);
+            }
+        }
+        return tempFile;
+    }
 }

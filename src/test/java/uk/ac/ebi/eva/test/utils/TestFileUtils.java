@@ -8,6 +8,7 @@ import java.util.zip.GZIPOutputStream;
 
 public abstract class TestFileUtils {
 
+    /** use {@link uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule#newGzipFile(java.lang.String)} instead */
     @Deprecated
     public static File makeGzipFile(String content, String vepOutput) throws IOException {
         File tempFile = new File(vepOutput);
