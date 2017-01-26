@@ -18,7 +18,6 @@ package uk.ac.ebi.eva.pipeline.configuration.readers;
 import org.opencb.biodata.models.variant.annotation.VariantAnnotation;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.item.ItemStreamReader;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import uk.ac.ebi.eva.pipeline.io.readers.AnnotationFlatFileReader;
 import uk.ac.ebi.eva.pipeline.parameters.AnnotationParameters;
@@ -30,12 +29,9 @@ import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VARIANT_ANNOTATION_
  */
 public class VariantAnnotationReaderConfiguration {
 
-    @Autowired
-    private AnnotationParameters annotationParameters;
-
     @Bean(VARIANT_ANNOTATION_READER)
     @StepScope
-    public ItemStreamReader<VariantAnnotation> variantAnnotationReader() {
+    public ItemStreamReader<VariantAnnotation> variantAnnotationReader(AnnotationParameters annotationParameters) {
         return new AnnotationFlatFileReader(annotationParameters.getVepOutput());
     }
 

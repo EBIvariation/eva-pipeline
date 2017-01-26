@@ -58,6 +58,8 @@ public class VepInputGeneratorStepTest {
 
     private static final String FILE_ID = "5";
 
+    private static final String COLLECTION_VARIANTS_NAME = "variants";
+
     @Rule
     public TemporaryMongoRule mongoRule = new TemporaryMongoRule();
 
@@ -70,29 +72,30 @@ public class VepInputGeneratorStepTest {
     @Test
     public void shouldGenerateVepInput() throws Exception {
         String randomTemporaryDatabaseName = mongoRule.restoreDumpInTemporaryDatabase(getResourceUrl(MONGO_DUMP));
-
-        File vepOutputFolder = temporaryFolderRule.newFolder();
-        File vepInputFile = new File(VepUtils.resolveVepInput(vepOutputFolder.getAbsolutePath(), STUDY_ID, FILE_ID));
-
-        if (vepInputFile.exists())
-            vepInputFile.delete();
-
-        assertFalse(vepInputFile.exists());
+        String outputDirAnnot = temporaryFolderRule.getRoot().getAbsolutePath();
+        File vepInput = new File(VepUtils.resolveVepInput(outputDirAnnot, STUDY_ID, FILE_ID));
+        temporaryFolderRule.newFile(vepInput.getName());
 
         JobParameters jobParameters = new EvaJobParameterBuilder()
-                .collectionVariantsName("variants")
+                .collectionVariantsName(COLLECTION_VARIANTS_NAME)
                 .databaseName(randomTemporaryDatabaseName)
                 .inputStudyId(STUDY_ID)
                 .inputVcfId(FILE_ID)
-                .outputDirAnnotation(vepOutputFolder.getAbsolutePath())
+                .outputDirAnnotation(outputDirAnnot)
                 .toJobParameters();
+
+        if (vepInput.exists()) {
+            vepInput.delete();
+        }
+
+        assertFalse(vepInput.exists());
 
         JobExecution jobExecution = jobLauncherTestUtils.launchStep(BeanNames.GENERATE_VEP_INPUT_STEP, jobParameters);
 
         assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
         assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());
 
-        assertTrue(vepInputFile.exists());
-        assertEquals("20\t60343\t60343\tG/A\t+", readFirstLine(vepInputFile));
+        assertTrue(vepInput.exists());
+        assertEquals("20\t60343\t60343\tG/A\t+", readFirstLine(vepInput));
     }
 }
