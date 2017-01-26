@@ -63,7 +63,7 @@ import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResourceUrl;
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest
-@TestPropertySource({"classpath:annotation-job.properties"})
+@TestPropertySource({"classpath:annotation-job.properties", "classpath:test-mongo.properties"})
 @ContextConfiguration(classes = {AnnotationJob.class, BatchTestConfiguration.class})
 public class AnnotationJobTest {
     private static final String MOCK_VEP = "/mockvep.pl";
@@ -71,6 +71,8 @@ public class AnnotationJobTest {
     private static final String OUTPUT_DIR_ANNOTATION = "/tmp/";
     private static final String INPUT_STUDY_ID = "annotation-job";
     private static final String INPUT_VCF_ID = "1";
+    private static final String COLLECTION_VARIANTS_NAME = "variants";
+    private static final String DATABASE_NAME = "AnnotationJobTest";
     //TODO check later to substitute files for temporary ones / pay attention to vep Input file
 
     @Rule
@@ -90,6 +92,8 @@ public class AnnotationJobTest {
         mongoRule.restoreDump(getResourceUrl(MONGO_DUMP), jobOptions.getDbName());
 
         JobParameters jobParameters = new EvaJobParameterBuilder()
+                .collectionVariantsName(COLLECTION_VARIANTS_NAME)
+                .databaseName(DATABASE_NAME)
                 .inputFasta("")
                 .inputStudyId(INPUT_STUDY_ID)
                 .inputVcfId(INPUT_VCF_ID)
@@ -148,7 +152,15 @@ public class AnnotationJobTest {
 
     @Test
     public void noVariantsToAnnotateOnlyFindVariantsToAnnotateStepShouldRun() throws Exception {
-        JobExecution jobExecution = jobLauncherTestUtils.launchJob();
+        JobParameters jobParameters = new EvaJobParameterBuilder()
+                .collectionVariantsName(COLLECTION_VARIANTS_NAME)
+                .databaseName(DATABASE_NAME)
+                .inputStudyId(INPUT_STUDY_ID)
+                .inputVcfId(INPUT_VCF_ID)
+                .outputDirAnnotation(OUTPUT_DIR_ANNOTATION)
+                .toJobParameters();
+
+        JobExecution jobExecution = jobLauncherTestUtils.launchJob(jobParameters);
 
         assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
         assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());

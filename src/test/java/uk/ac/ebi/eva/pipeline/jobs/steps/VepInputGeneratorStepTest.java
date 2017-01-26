@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 EMBL - European Bioinformatics Institute
+ * Copyright 2016-2017 EMBL - European Bioinformatics Institute
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,16 +22,21 @@ import org.junit.runner.RunWith;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.JobExecution;
+import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
+
 import uk.ac.ebi.eva.pipeline.configuration.BeanNames;
 import uk.ac.ebi.eva.pipeline.jobs.AnnotationJob;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
+import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
+import uk.ac.ebi.eva.utils.EvaJobParameterBuilder;
+import uk.ac.ebi.eva.utils.VepUtils;
 
 import java.io.File;
 
@@ -45,16 +50,25 @@ import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResourceUrl;
  * Test {@link VepInputGeneratorStep}
  */
 @RunWith(SpringRunner.class)
-@TestPropertySource({"classpath:vep-input-generator-step.properties"})
+@TestPropertySource({"classpath:vep-input-generator-step.properties", "classpath:test-mongo.properties"})
 @ContextConfiguration(classes = {AnnotationJob.class, BatchTestConfiguration.class})
 public class VepInputGeneratorStepTest {
 
     private static final String MONGO_DUMP = "/dump/VariantStatsConfigurationTest_vl";
+
+    private static final String STUDY_ID = "7";
+
+    private static final String FILE_ID = "5";
+
     @Rule
     public TemporaryMongoRule mongoRule = new TemporaryMongoRule();
 
+    @Rule
+    public PipelineTemporaryFolderRule temporaryFolderRule = new PipelineTemporaryFolderRule();
+
     @Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
+
     @Autowired
     private JobOptions jobOptions;
 
@@ -65,17 +79,25 @@ public class VepInputGeneratorStepTest {
 
     @Test
     public void shouldGenerateVepInput() throws Exception {
-        // TODO This test can't be changed to use temporary directory right now, as vepInput is a composite parameter
-        // that is not being recalculated at execution time.
         mongoRule.restoreDump(getResourceUrl(MONGO_DUMP), jobOptions.getDbName());
-        File vepInputFile = new File(jobOptions.getVepInput());
+
+        File vepOutputFolder = temporaryFolderRule.newFolder();
+        File vepInputFile = new File(VepUtils.resolveVepInput(vepOutputFolder.getAbsolutePath(), STUDY_ID, FILE_ID));
 
         if (vepInputFile.exists())
             vepInputFile.delete();
 
         assertFalse(vepInputFile.exists());
 
-        JobExecution jobExecution = jobLauncherTestUtils.launchStep(BeanNames.GENERATE_VEP_INPUT_STEP);
+        JobParameters jobParameters = new EvaJobParameterBuilder()
+                .collectionVariantsName("variants")
+                .databaseName("VepInputGeneratorStepTest")
+                .inputStudyId(STUDY_ID)
+                .inputVcfId(FILE_ID)
+                .outputDirAnnotation(vepOutputFolder.getAbsolutePath())
+                .toJobParameters();
+
+        JobExecution jobExecution = jobLauncherTestUtils.launchStep(BeanNames.GENERATE_VEP_INPUT_STEP, jobParameters);
 
         assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
         assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());
