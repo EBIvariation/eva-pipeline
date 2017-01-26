@@ -34,6 +34,7 @@ import uk.ac.ebi.eva.pipeline.configuration.MongoConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.writers.VariantWriterConfiguration;
 import uk.ac.ebi.eva.pipeline.model.converters.data.VariantToMongoDbObjectConverter;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
+import uk.ac.ebi.eva.utils.MongoDBHelper;
 
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -123,7 +124,8 @@ public class VariantMongoWriterTest {
         assertEquals(expectedIndexes, createdIndexes);
 
         indexInfo.stream().filter(index -> !("_id_".equals(index.get("name").toString())))
-                          .forEach(index -> assertEquals("true", index.get("background").toString()));
+                          .forEach(index -> assertEquals("true",
+                                                         index.get(MongoDBHelper.BACKGROUND_INDEX).toString()));
     }
 
     @Test

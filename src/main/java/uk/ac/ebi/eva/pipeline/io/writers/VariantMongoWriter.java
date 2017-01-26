@@ -40,8 +40,6 @@ public class VariantMongoWriter extends MongoItemWriter<Variant> {
 
     private static final Logger logger = LoggerFactory.getLogger(VariantMongoWriter.class);
 
-    private static final String BACKGROUND_INDEX = "background";
-
     private static final String ANNOTATION_CT_SO_FIELD = "annot.ct.so";
 
     private static final String ANNOTATION_XREF_ID_FIELD = "annot.xrefs.id";
@@ -97,11 +95,11 @@ public class VariantMongoWriter extends MongoItemWriter<Variant> {
         mongoOperations.getCollection(collection).createIndex(
                 new BasicDBObject(VariantToDBObjectConverter.CHROMOSOME_FIELD, 1)
                     .append(VariantToDBObjectConverter.START_FIELD, 1).append(VariantToDBObjectConverter.END_FIELD, 1),
-                new BasicDBObject(BACKGROUND_INDEX, true));
+                new BasicDBObject(MongoDBHelper.BACKGROUND_INDEX, true));
 
         mongoOperations.getCollection(collection).createIndex(
                 new BasicDBObject(VariantToDBObjectConverter.IDS_FIELD, 1),
-                new BasicDBObject(BACKGROUND_INDEX, true));
+                new BasicDBObject(MongoDBHelper.BACKGROUND_INDEX, true));
 
         String filesStudyIdField = String.format("%s.%s", VariantToDBObjectConverter.FILES_FIELD,
                                                  VariantSourceEntryToDBObjectConverter.STUDYID_FIELD);
@@ -109,13 +107,13 @@ public class VariantMongoWriter extends MongoItemWriter<Variant> {
                                                  VariantSourceEntryToDBObjectConverter.FILEID_FIELD);
         mongoOperations.getCollection(collection).createIndex(
                 new BasicDBObject(filesStudyIdField, 1).append(filesFileIdField, 1),
-                new BasicDBObject(BACKGROUND_INDEX, true));
+                new BasicDBObject(MongoDBHelper.BACKGROUND_INDEX, true));
 
         mongoOperations.getCollection(collection).createIndex(
                 new BasicDBObject(ANNOTATION_XREF_ID_FIELD, 1),
-                new BasicDBObject(BACKGROUND_INDEX, true));
+                new BasicDBObject(MongoDBHelper.BACKGROUND_INDEX, true));
         mongoOperations.getCollection(collection).createIndex(
                 new BasicDBObject(ANNOTATION_CT_SO_FIELD, 1),
-                new BasicDBObject(BACKGROUND_INDEX, true));
+                new BasicDBObject(MongoDBHelper.BACKGROUND_INDEX, true));
     }
 }

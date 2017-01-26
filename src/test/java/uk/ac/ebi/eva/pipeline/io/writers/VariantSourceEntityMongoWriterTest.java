@@ -40,6 +40,7 @@ import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 import uk.ac.ebi.eva.test.configuration.BaseTestConfiguration;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
+import uk.ac.ebi.eva.utils.MongoDBHelper;
 
 import java.io.File;
 import java.util.Arrays;
@@ -167,14 +168,15 @@ public class VariantSourceEntityMongoWriterTest {
         Set<String> createdIndexes = indexInfo.stream().map(index -> index.get("name").toString())
                 .collect(Collectors.toSet());
         Set<String> expectedIndexes = new HashSet<>();
-        expectedIndexes.addAll(Arrays.asList("unique_file", "_id_"));
+        expectedIndexes.addAll(Arrays.asList(VariantSourceEntityMongoWriter.UNIQUE_FILE_INDEX_NAME, "_id_"));
         assertEquals(expectedIndexes, createdIndexes);
 
         DBObject uniqueIndex = indexInfo.stream().filter(
-                index -> ("unique_file".equals(index.get("name").toString()))).findFirst().get();
+                index -> (VariantSourceEntityMongoWriter.UNIQUE_FILE_INDEX_NAME.equals(index.get("name").toString())))
+                        .findFirst().get();
         assertNotNull(uniqueIndex);
-        assertEquals("true", uniqueIndex.get("unique").toString());
-        assertEquals("true", uniqueIndex.get("background").toString());
+        assertEquals("true", uniqueIndex.get(MongoDBHelper.UNIQUE_INDEX).toString());
+        assertEquals("true", uniqueIndex.get(MongoDBHelper.BACKGROUND_INDEX).toString());
     }
 
     private VariantSourceEntity getVariantSourceEntity() {

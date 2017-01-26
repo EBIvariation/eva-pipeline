@@ -22,17 +22,14 @@ import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.util.Assert;
 
 import uk.ac.ebi.eva.commons.models.data.VariantSourceEntity;
+import uk.ac.ebi.eva.utils.MongoDBHelper;
 
 /**
  * Write a list of {@link VariantSourceEntity} into MongoDB
  */
 public class VariantSourceEntityMongoWriter extends MongoItemWriter<VariantSourceEntity> {
 
-    private static final String BACKGROUND_INDEX = "background";
-
-    private static final String UNIQUE_INDEX = "unique";
-
-    private static final String INDEX_NAME = "name";
+    public static final String UNIQUE_FILE_INDEX_NAME = "unique_file";
 
     private MongoOperations mongoOperations;
 
@@ -55,7 +52,7 @@ public class VariantSourceEntityMongoWriter extends MongoItemWriter<VariantSourc
         mongoOperations.getCollection(collection).createIndex(
                 new BasicDBObject(VariantSourceEntity.STUDYID_FIELD, 1).append(VariantSourceEntity.FILEID_FIELD, 1)
                     .append(VariantSourceEntity.FILENAME_FIELD, 1),
-                new BasicDBObject(BACKGROUND_INDEX, true).append(UNIQUE_INDEX, true)
-                    .append(INDEX_NAME, "unique_file"));
+                new BasicDBObject(MongoDBHelper.BACKGROUND_INDEX, true).append(MongoDBHelper.UNIQUE_INDEX, true)
+                    .append(MongoDBHelper.INDEX_NAME, UNIQUE_FILE_INDEX_NAME));
     }
 }
