@@ -37,13 +37,13 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import uk.ac.ebi.eva.pipeline.jobs.steps.tasklets.PopulationStatisticsGeneratorStep;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 import uk.ac.ebi.eva.utils.EvaJobParameterBuilder;
+import uk.ac.ebi.eva.utils.URLHelper;
 
 import java.io.File;
 
@@ -118,9 +118,9 @@ public class PopulationStatisticsJobTest {
         assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());
 
         //and the file containing statistics should exist
-        File statsFile = new File(PopulationStatisticsGeneratorStep.getVariantsStatsUri(statsDir, studyId, fileId));
+        File statsFile = new File(URLHelper.getVariantsStatsUri(statsDir, studyId, fileId));
         assertTrue(statsFile.exists());
-        File sourceStatsFile = new File(PopulationStatisticsGeneratorStep.getSourceStatsUri(statsDir, studyId, fileId));
+        File sourceStatsFile = new File(URLHelper.getSourceStatsUri(statsDir, studyId, fileId));
         assertTrue(sourceStatsFile.exists());
 
         // The DB docs should have the field "st"
