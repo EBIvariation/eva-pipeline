@@ -76,11 +76,12 @@ public class PopulationStatisticsGeneratorStepTest {
         String fileId = "1";
 
         JobParameters jobParameters = new EvaJobParameterBuilder()
-                .inputVcf(SMALL_VCF_FILE)
                 .databaseName(databaseName)
+                .inputVcf(SMALL_VCF_FILE)
                 .inputStudyId(studyId)
                 .inputVcfId(fileId)
-                .addString(JobParametersNames.OUTPUT_DIR_STATISTICS, statsDir).toJobParameters();
+                .addString(JobParametersNames.OUTPUT_DIR_STATISTICS, statsDir)
+                .toJobParameters();
 
         //and a valid variants load step already completed
         mongoRule.restoreDump(getResourceUrl(MONGO_DUMP), databaseName);
@@ -116,11 +117,12 @@ public class PopulationStatisticsGeneratorStepTest {
         String fid = "fid";
 
         JobParameters jobParameters = new EvaJobParameterBuilder()
-                .inputVcf(SMALL_VCF_FILE)
                 .databaseName(databaseName)
+                .inputVcf(SMALL_VCF_FILE)
                 .inputStudyId(sid)
                 .inputVcfId(fid)
-                .addString(JobParametersNames.OUTPUT_DIR_STATISTICS, statsDir).toJobParameters();
+                .outputDirStats(statsDir)
+                .toJobParameters();
 
         //and a valid variants load step already completed
         mongoRule.restoreDump(getResourceUrl(MONGO_DUMP), databaseName);

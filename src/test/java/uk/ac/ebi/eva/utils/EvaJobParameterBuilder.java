@@ -59,6 +59,10 @@ public class EvaJobParameterBuilder extends JobParametersBuilder {
         addParameter(JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME, new JobParameter(collectionVariantsName));
         return this;
     }
+    public EvaJobParameterBuilder collectionFilesName(String collectionFilesName) {
+        addParameter(JobParametersNames.DB_COLLECTIONS_FILES_NAME, new JobParameter(collectionFilesName));
+        return this;
+    }
 
     public EvaJobParameterBuilder vepPath(String vepPath) {
         addParameter(JobParametersNames.APP_VEP_PATH, new JobParameter(vepPath));
@@ -92,6 +96,11 @@ public class EvaJobParameterBuilder extends JobParametersBuilder {
 
     public EvaJobParameterBuilder outputDirAnnotation(String outputDirAnnotation) {
         addParameter(JobParametersNames.OUTPUT_DIR_ANNOTATION, new JobParameter(outputDirAnnotation));
+        return this;
+    }
+
+    public EvaJobParameterBuilder outputDirStats(String outputDirStats) {
+        addParameter(JobParametersNames.OUTPUT_DIR_STATISTICS, new JobParameter(outputDirStats));
         return this;
     }
 }

@@ -83,13 +83,13 @@ public class LoadFileStepTest {
 
         String databaseName = mongoRule.getRandomTemporaryDatabaseName();
         JobParameters jobParameters = new EvaJobParameterBuilder()
-                .inputVcf(input)
-                .databaseName(databaseName)
+                .collectionFilesName("files")
                 .collectionVariantsName("variants")
-                .inputVcfId("1")
+                .databaseName(databaseName)
                 .inputStudyId("1")
+                .inputVcf(input)
                 .inputVcfAggregation("NONE")
-                .addString(JobParametersNames.DB_COLLECTIONS_FILES_NAME, "files")
+                .inputVcfId("1")
                 .toJobParameters();
 
         // When the execute method in variantsLoad is executed

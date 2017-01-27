@@ -15,13 +15,9 @@
  */
 package uk.ac.ebi.eva.pipeline.jobs;
 
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.opencb.biodata.models.variant.VariantSource;
-import org.opencb.biodata.models.variant.VariantStudy;
-import org.opencb.datastore.core.ObjectMap;
 import org.opencb.datastore.core.QueryOptions;
 import org.opencb.opencga.storage.core.StorageManagerFactory;
 import org.opencb.opencga.storage.core.variant.VariantStorageManager;
@@ -37,7 +33,6 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
@@ -49,7 +44,6 @@ import java.io.File;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.opencb.opencga.storage.core.variant.VariantStorageManager.VARIANT_SOURCE;
 import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResource;
 import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResourceUrl;
 
@@ -72,11 +66,6 @@ public class PopulationStatisticsJobTest {
 
     @Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
-    @Autowired
-    private JobOptions jobOptions;
-
-    private ObjectMap variantOptions;
-    private ObjectMap pipelineOptions;
 
     @Test
     public void fullPopulationStatisticsJob() throws Exception {
@@ -87,30 +76,16 @@ public class PopulationStatisticsJobTest {
         String fileId = "1";
         String studyId = "1";
 
-        // TODO remove when statisticsLoadStep uses job parameter ↓
-        pipelineOptions.put(JobParametersNames.INPUT_VCF, input);
-        pipelineOptions.put(JobParametersNames.OUTPUT_DIR_STATISTICS, statsDir);
-        jobOptions.setDbName(dbName);
-
-        VariantSource source = new VariantSource(
-                input,
-                fileId,
-                studyId,
-                "studyName",
-                VariantStudy.StudyType.COLLECTION,
-                VariantSource.Aggregation.NONE);
-        variantOptions.put(VARIANT_SOURCE, source);
-        // TODO end section to remove when statisticsLoadStep uses job parameter ↑
-
         JobParameters jobParameters = new EvaJobParameterBuilder()
-                .inputVcf(getResource(input).getAbsolutePath())
-                .databaseName(dbName)
+                .collectionFilesName("files")
                 .collectionVariantsName("variants")
-                .inputVcfId(fileId)
+                .databaseName(dbName)
                 .inputStudyId(studyId)
+                .inputVcf(getResource(input).getAbsolutePath())
                 .inputVcfAggregation("BASIC")
+                .inputVcfId(fileId)
+                .outputDirStats(statsDir)
                 .timestamp()
-                .addString(JobParametersNames.OUTPUT_DIR_STATISTICS, statsDir)
                 .toJobParameters();
 
         JobExecution jobExecution = jobLauncherTestUtils.launchJob(jobParameters);
@@ -129,14 +104,6 @@ public class PopulationStatisticsJobTest {
         VariantDBIterator iterator = variantDBAdaptor.iterator(new QueryOptions());
         assertEquals(1, iterator.next().getSourceEntries().values().iterator().next().getCohortStats().size());
 
-    }
-
-    @Before
-    public void setUp() throws Exception {
-        //re-initialize common config before each test
-        jobOptions.loadArgs();
-        pipelineOptions = jobOptions.getPipelineOptions();
-        variantOptions = jobOptions.getVariantOptions();
     }
 
 }

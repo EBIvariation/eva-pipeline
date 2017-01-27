@@ -100,12 +100,15 @@ public class VariantLoaderStepTest {
                 VariantSource.Aggregation.NONE));
 
         // When the execute method in variantsLoad is executed
-        JobParameters jobParameters = new EvaJobParameterBuilder().inputVcf(input)
-                .databaseName(databaseName)
+        JobParameters jobParameters = new EvaJobParameterBuilder()
                 .collectionVariantsName("variants")
-                .inputVcfId("1")
+                .databaseName(databaseName)
                 .inputStudyId("1")
-                .inputVcfAggregation("NONE").toJobParameters();
+                .inputVcf(input)
+                .inputVcfAggregation("NONE")
+                .inputVcfId("1")
+                .toJobParameters();
+
         JobExecution jobExecution = jobLauncherTestUtils.launchStep(BeanNames.LOAD_VARIANTS_STEP, jobParameters);
 
         //Then variantsLoad step should complete correctly

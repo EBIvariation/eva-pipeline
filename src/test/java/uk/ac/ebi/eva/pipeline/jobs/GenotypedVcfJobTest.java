@@ -133,6 +133,7 @@ public class GenotypedVcfJobTest {
 
         // Run the Job
         JobParameters jobParameters = new EvaJobParameterBuilder()
+                .collectionFilesName("files")
                 .collectionVariantsName("variants")
                 .databaseName(dbName)
                 .inputFasta("")
@@ -141,14 +142,14 @@ public class GenotypedVcfJobTest {
                 .inputVcfAggregation("NONE")
                 .inputVcfId("1")
                 .outputDirAnnotation("/tmp/")
+                .outputDirStats(outputDir)
                 .vepCachePath("")
                 .vepCacheSpecies("")
                 .vepCacheVersion("")
                 .vepNumForks("")
                 .vepPath(getResource(MOCK_VEP).getPath())
-                .addString(JobParametersNames.OUTPUT_DIR_STATISTICS, outputDir)
-
                 .toJobParameters();
+
         JobExecution jobExecution = jobLauncherTestUtils.launchJob(jobParameters);
 
         assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
