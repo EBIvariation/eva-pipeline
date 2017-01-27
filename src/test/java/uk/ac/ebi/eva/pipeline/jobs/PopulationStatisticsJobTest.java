@@ -77,13 +77,13 @@ public class PopulationStatisticsJobTest {
         String studyId = "1";
 
         JobParameters jobParameters = new EvaJobParameterBuilder()
-                .inputVcf(getResource(input).getAbsolutePath())
-                .databaseName(dbName)
-                .collectionVariantsName("variants")
                 .collectionFilesName("files")
-                .inputVcfId(fileId)
+                .collectionVariantsName("variants")
+                .databaseName(dbName)
                 .inputStudyId(studyId)
+                .inputVcf(getResource(input).getAbsolutePath())
                 .inputVcfAggregation("BASIC")
+                .inputVcfId(fileId)
                 .outputDirStats(statsDir)
                 .timestamp()
                 .toJobParameters();

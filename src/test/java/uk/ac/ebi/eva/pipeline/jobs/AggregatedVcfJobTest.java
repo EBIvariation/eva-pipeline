@@ -102,12 +102,13 @@ public class AggregatedVcfJobTest {
         mongoRule.getTemporaryDatabase(dbName);
 
         JobParameters jobParameters = new EvaJobParameterBuilder()
-                .inputVcf(getResource(input).getAbsolutePath())
-                .databaseName(dbName)
                 .collectionVariantsName("variants")
-                .inputVcfId("1")
+                .databaseName(dbName)
                 .inputStudyId("aggregated-job")
-                .inputVcfAggregation("BASIC").timestamp()
+                .inputVcf(getResource(input).getAbsolutePath())
+                .inputVcfAggregation("BASIC")
+                .inputVcfId("1")
+                .timestamp()
                 .toJobParameters();
         JobExecution jobExecution = jobLauncherTestUtils.launchJob(jobParameters);
 
