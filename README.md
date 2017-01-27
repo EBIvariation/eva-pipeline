@@ -1,22 +1,22 @@
 # European Variation Archive (EVA) Pipeline v2 [![Build Status](https://travis-ci.org/EBIvariation/eva-pipeline.svg)](https://travis-ci.org/EBIvariation/eva-pipeline)
 
-The European Variation Archive pipeline processes VCF files and stores the variants contained within them in a database, in a format that supports efficient searching. The EVA pipeline produces and stores the following information:
+The European Variation Archive pipeline processes Variant Call Format (VCF) files and stores the variants contained within them in a database, in a format that supports efficient searching. The EVA pipeline produces and stores the following information:
 
 * A normalized representation of the variants contained within a VCF file
 * Variant annotation: consequence type, SIFT and Polyphen scores, etc
 * Statistics: allele and genotype counts and frequencies
 
-You can find a more detailed description of these operations in the [project wiki](https://github.com/EBIvariation/eva-pipeline/wiki/Jobs). Please visit the [EVA website](http://www.ebi.ac.uk/eva/?Variant Browser) to see a public service depending on this pipeline, or the [EVA web services repository](https://github.com/EBIvariation/eva-ws) for more information on the API.
+You can find a more detailed description of these operations in the [project wiki](https://github.com/EBIvariation/eva-pipeline/wiki/Jobs). Please visit the [EVA website](http://www.ebi.ac.uk/eva/?Variant Browser) to see a public service depending on this pipeline, and the [EVA web services repository](https://github.com/EBIvariation/eva-ws) for more information on the API.
 
 The pipeline automatically tracks the job status, and avoids waste of computation by resuming a job in the exact point where it failed; successful steps already executed are automatically skipped.
 
 ## Dependencies
 
-The pipeline is implemented purely in Java and uses the Maven build system.
+The pipeline has been implemented in Java and uses the Maven build system.
 
 In order to run, the pipeline needs access to a MongoDB database instance. The easiest way to set one up in a local machine is [using Docker](https://hub.docker.com/_/mongo/).
 
-If you want to generate and store variant annotations you will also need to [download Ensembl VEP](http://www.ensembl.org/info/docs/tools/vep/script/vep_download.html). Please note this software requires Perl.
+If you want to generate and store variant annotations you will also need to [download Ensembl VEP](http://www.ensembl.org/info/docs/tools/vep/script/vep_download.html). Please note this software requires Perl to be installed.
 
 Finally, before compiling the pipeline itself, you will need to clone and build its dependencies running these commands from a folder of your choice:
 
@@ -32,21 +32,13 @@ cd opencga && mvn clean install -DskipTests
 
 The latest stable version can be found in the [master](https://github.com/EBIvariation/eva-pipeline/tree/master) branch. [develop](https://github.com/EBIvariation/eva-pipeline/tree/develop) contains work in progress, which is fully tested but could be more unstable.
 
-If a MongoDB instance is available in the machine where you are running the build, you can test and build the application with `mvn test package`.
-
-If a MongoDB instance is not available, please run `mvn package -DskipTests`.
+If a MongoDB instance is available in the machine where you are running the build, you can test and build the application with `mvn test package`, otherwise please run `mvn package -DskipTests`.
 
 ## Run
 
 Once successfully built, you can simply run the produced JAR file with `java -jar target/eva-pipeline-2.0-beta2-SNAPSHOT.jar`.
 
-We did not implement a custom command line, we are using the
-`org.springframework.boot.autoconfigure.batch.JobLauncherCommandLineRunner` class to obtain all the parameters from
-command line. Almost all the parameters you can use are showed in the `example-launch.sh` script.
-
-### Examples
-
-Skeletons to load genotyped and aggregated VCF files are provided in the `examples` folder.
+Arguments to run the pipeline can be provided either using the command line or a properties file. Skeletons to load genotyped and aggregated VCF files are provided in the `examples` folder.
 
 `application.properties` is used to configure database connections and applications the pipeline depends on (OpenCGA and Ensembl VEP, see _Dependencies_ section).
 
