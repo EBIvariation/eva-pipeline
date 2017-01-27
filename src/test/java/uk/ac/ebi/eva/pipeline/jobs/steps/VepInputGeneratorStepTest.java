@@ -15,7 +15,6 @@
  */
 package uk.ac.ebi.eva.pipeline.jobs.steps;
 
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -31,7 +30,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import uk.ac.ebi.eva.pipeline.configuration.BeanNames;
 import uk.ac.ebi.eva.pipeline.jobs.AnnotationJob;
-import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
@@ -69,17 +67,10 @@ public class VepInputGeneratorStepTest {
     @Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
 
-    @Autowired
-    private JobOptions jobOptions;
-
-    @Before
-    public void setUp() throws Exception {
-        jobOptions.loadArgs();
-    }
-
     @Test
     public void shouldGenerateVepInput() throws Exception {
-        mongoRule.restoreDump(getResourceUrl(MONGO_DUMP), jobOptions.getDbName());
+        String randomTemporaryDatabaseName = mongoRule.getRandomTemporaryDatabaseName();
+        mongoRule.restoreDump(getResourceUrl(MONGO_DUMP), randomTemporaryDatabaseName);
 
         File vepOutputFolder = temporaryFolderRule.newFolder();
         File vepInputFile = new File(VepUtils.resolveVepInput(vepOutputFolder.getAbsolutePath(), STUDY_ID, FILE_ID));
@@ -91,7 +82,7 @@ public class VepInputGeneratorStepTest {
 
         JobParameters jobParameters = new EvaJobParameterBuilder()
                 .collectionVariantsName("variants")
-                .databaseName("VepInputGeneratorStepTest")
+                .databaseName(randomTemporaryDatabaseName)
                 .inputStudyId(STUDY_ID)
                 .inputVcfId(FILE_ID)
                 .outputDirAnnotation(vepOutputFolder.getAbsolutePath())
