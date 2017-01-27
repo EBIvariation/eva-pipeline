@@ -24,14 +24,14 @@ import org.springframework.data.mongodb.core.MongoOperations;
 
 import uk.ac.ebi.eva.pipeline.configuration.MongoConfiguration;
 import uk.ac.ebi.eva.pipeline.io.readers.NonAnnotatedVariantsMongoReader;
-import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
+import uk.ac.ebi.eva.pipeline.parameters.DatabaseParameters;
 
 import java.net.UnknownHostException;
 
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.NON_ANNOTATED_VARIANTS_READER;
 
 /**
- * Configuration to inject a NonannotatedVariants bean that reads from a mongo database in the pipeline
+ * Configuration to inject a NonAnnotatedVariantsMongoReader bean that reads from a mongo database in the pipeline
  */
 @Configuration
 @Import({ MongoConfiguration.class })
@@ -42,11 +42,11 @@ public class NonAnnotatedVariantsMongoReaderConfiguration {
 
     @Bean(NON_ANNOTATED_VARIANTS_READER)
     @StepScope
-    public NonAnnotatedVariantsMongoReader nonAnnotatedVariantsMongoReader(JobOptions jobOptions)
+    public NonAnnotatedVariantsMongoReader nonAnnotatedVariantsMongoReader(DatabaseParameters databaseParameters)
             throws UnknownHostException {
         MongoOperations mongoOperations = mongoConfiguration.getMongoOperations(
-                jobOptions.getDbName(), jobOptions.getMongoConnection());
-        return new NonAnnotatedVariantsMongoReader(mongoOperations, jobOptions.getDbCollectionsVariantsName());
+                databaseParameters.getDatabaseName(), databaseParameters.getMongoConnection());
+        return new NonAnnotatedVariantsMongoReader(mongoOperations, databaseParameters.getCollectionVariantsName());
     }
 
 }
