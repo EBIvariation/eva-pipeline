@@ -15,7 +15,7 @@
  */
 package uk.ac.ebi.eva.pipeline.parameters;
 
-import org.springframework.batch.core.configuration.annotation.JobScope;
+import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -26,7 +26,7 @@ import uk.ac.ebi.eva.utils.MongoConnection;
  * values for database connection that are got as values not parameters.
  */
 @Service
-@JobScope
+@StepScope
 public class DatabaseParameters {
 
     private static final String PARAMETER = "#{jobParameters['";
@@ -70,5 +70,25 @@ public class DatabaseParameters {
 
     public String getCollectionFilesName() {
         return collectionFilesName;
+    }
+
+    public String getHosts() {
+        return hosts;
+    }
+
+    public String getAuthenticationDatabase() {
+        return authenticationDatabase;
+    }
+
+    public String getUser() {
+        return user;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public String getReadPreference() {
+        return readPreference;
     }
 }

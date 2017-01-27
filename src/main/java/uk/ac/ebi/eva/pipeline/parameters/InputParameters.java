@@ -17,17 +17,15 @@ package uk.ac.ebi.eva.pipeline.parameters;
 
 import org.opencb.biodata.models.variant.VariantSource;
 import org.opencb.biodata.models.variant.VariantStudy;
-import org.springframework.batch.core.configuration.annotation.JobScope;
+import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-
-import java.nio.file.Paths;
 
 /**
  * Service that holds access to Job input parameters.
  */
 @Service
-@JobScope
+@StepScope
 public class InputParameters {
 
     private static final String PARAMETER = "#{jobParameters['";
@@ -51,6 +49,17 @@ public class InputParameters {
     @Value(PARAMETER + JobParametersNames.INPUT_STUDY_TYPE + END)
     private VariantStudy.StudyType studyType;
 
+    // maybe the next three could go into a ConfigurationParameters?
+
+    @Value(PARAMETER + JobParametersNames.APP_OPENCGA_PATH  + END)
+    private String opencgaAppHome;
+
+    @Value(PARAMETER + JobParametersNames.CONFIG_RESTARTABILITY_ALLOW + "']?:false}")
+    private boolean allowStartIfComplete;
+
+    @Value(PARAMETER + JobParametersNames.CONFIG_CHUNK_SIZE + "']?:1000}")
+    private int chunkSize;
+
     public String getVcf() {
         return vcf;
     }
@@ -73,5 +82,17 @@ public class InputParameters {
 
     public VariantStudy.StudyType getStudyType() {
         return studyType;
+    }
+
+    public String getOpencgaAppHome() {
+        return opencgaAppHome;
+    }
+
+    public boolean isAllowStartIfComplete() {
+        return allowStartIfComplete;
+    }
+
+    public int getChunkSize() {
+        return chunkSize;
     }
 }

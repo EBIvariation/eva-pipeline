@@ -30,39 +30,39 @@ import org.opencb.opencga.storage.core.variant.adaptors.VariantDBIterator;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.JobExecution;
+import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
+
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
+import uk.ac.ebi.eva.utils.EvaJobParameterBuilder;
+import uk.ac.ebi.eva.utils.URLHelper;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Paths;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.opencb.opencga.storage.core.variant.VariantStorageManager.VARIANT_SOURCE;
-import static uk.ac.ebi.eva.test.utils.TestFileUtils.copyResource;
+import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResource;
 import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResourceUrl;
 
 /**
  * Test for {@link PopulationStatisticsJob}
  */
 @RunWith(SpringRunner.class)
-@TestPropertySource({"classpath:common-configuration.properties"})
+@TestPropertySource({"classpath:common-configuration.properties", "classpath:test-mongo.properties"})
 @ContextConfiguration(classes = {PopulationStatisticsJob.class, BatchTestConfiguration.class})
 public class PopulationStatisticsJobTest {
     private static final String SMALL_VCF_FILE = "/small20.vcf.gz";
+
     private static final String MONGO_DUMP = "/dump/VariantStatsConfigurationTest_vl";
-    private static final String VARIANTS_FILE_NAME = "/1_1.variants.stats.json.gz";
-    private static final String SOURCE_FILE_NAME = "/1_1.source.stats.json.gz";
-    private static final String VCF_FILE_NAME = "/small20.vcf.gz.variants.json.gz";
 
     @Rule
     public PipelineTemporaryFolderRule temporaryFolderRule = new PipelineTemporaryFolderRule();
@@ -82,53 +82,53 @@ public class PopulationStatisticsJobTest {
     public void fullPopulationStatisticsJob() throws Exception {
         //Given a valid VCF input file
         String input = SMALL_VCF_FILE;
+        String statsDir = temporaryFolderRule.getRoot().getPath();
+        String dbName = mongoRule.restoreDumpInTemporaryDatabase(getResourceUrl(MONGO_DUMP));
+        String fileId = "1";
+        String studyId = "1";
 
+        // TODO remove when statisticsLoadStep uses job parameter ↓
         pipelineOptions.put(JobParametersNames.INPUT_VCF, input);
+        pipelineOptions.put(JobParametersNames.OUTPUT_DIR_STATISTICS, statsDir);
+        jobOptions.setDbName(dbName);
 
         VariantSource source = new VariantSource(
                 input,
-                "1",
-                "1",
+                fileId,
+                studyId,
                 "studyName",
                 VariantStudy.StudyType.COLLECTION,
                 VariantSource.Aggregation.NONE);
-
         variantOptions.put(VARIANT_SOURCE, source);
+        // TODO end section to remove when statisticsLoadStep uses job parameter ↑
 
-        initStatsLoadStepFiles();
+        JobParameters jobParameters = new EvaJobParameterBuilder()
+                .inputVcf(getResource(input).getAbsolutePath())
+                .databaseName(dbName)
+                .collectionVariantsName("variants")
+                .inputVcfId(fileId)
+                .inputStudyId(studyId)
+                .inputVcfAggregation("BASIC")
+                .timestamp()
+                .addString(JobParametersNames.OUTPUT_DIR_STATISTICS, statsDir)
+                .toJobParameters();
 
-        JobExecution jobExecution = jobLauncherTestUtils.launchJob();
+        JobExecution jobExecution = jobLauncherTestUtils.launchJob(jobParameters);
         assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
         assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());
 
         //and the file containing statistics should exist
-        File statsFile = new File(Paths.get(pipelineOptions.getString(JobParametersNames.OUTPUT_DIR_STATISTICS))
-                .resolve(VariantStorageManager.buildFilename(source)) + ".variants.stats.json.gz");
+        File statsFile = new File(URLHelper.getVariantsStatsUri(statsDir, studyId, fileId));
         assertTrue(statsFile.exists());
+        File sourceStatsFile = new File(URLHelper.getSourceStatsUri(statsDir, studyId, fileId));
+        assertTrue(sourceStatsFile.exists());
 
         // The DB docs should have the field "st"
         VariantStorageManager variantStorageManager = StorageManagerFactory.getVariantStorageManager();
-        VariantDBAdaptor variantDBAdaptor = variantStorageManager.getDBAdaptor(jobOptions.getDbName(), null);
+        VariantDBAdaptor variantDBAdaptor = variantStorageManager.getDBAdaptor(dbName, null);
         VariantDBIterator iterator = variantDBAdaptor.iterator(new QueryOptions());
         assertEquals(1, iterator.next().getSourceEntries().values().iterator().next().getCohortStats().size());
 
-    }
-
-    private void initStatsLoadStepFiles() throws IOException, InterruptedException {
-        String mongoDatabase = mongoRule.restoreDumpInTemporaryDatabase(getResourceUrl(MONGO_DUMP));
-        jobOptions.setDbName(mongoDatabase);
-
-        String outputDir = temporaryFolderRule.getRoot().getAbsolutePath();
-        pipelineOptions.put(JobParametersNames.OUTPUT_DIR_STATISTICS, outputDir);
-
-        // copy stat file to load
-        copyResource(VARIANTS_FILE_NAME, outputDir);
-
-        // copy source file to load
-        copyResource(SOURCE_FILE_NAME, outputDir);
-
-        // copy transformed vcf
-        copyResource(VCF_FILE_NAME, outputDir);
     }
 
     @Before

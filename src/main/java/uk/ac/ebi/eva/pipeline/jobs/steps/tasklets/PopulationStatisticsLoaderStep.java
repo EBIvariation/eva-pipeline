@@ -97,10 +97,6 @@ import java.util.zip.GZIPInputStream;
 public class PopulationStatisticsLoaderStep implements Tasklet {
     private static final Logger logger = LoggerFactory.getLogger(PopulationStatisticsLoaderStep.class);
 
-    private static final String VARIANT_STATS_SUFFIX = ".variants.stats.json.gz";
-
-    private static final String SOURCE_STATS_SUFFIX = ".source.stats.json.gz";
-
     @Autowired
     private JobOptions jobOptions;
 
@@ -120,16 +116,18 @@ public class PopulationStatisticsLoaderStep implements Tasklet {
         ObjectMap pipelineOptions = jobOptions.getPipelineOptions();
 
         VariantSource variantSource = variantOptions.get(VariantStorageManager.VARIANT_SOURCE, VariantSource.class);
-        URI outdirUri = URLHelper.createUri(pipelineOptions.getString(JobParametersNames.OUTPUT_DIR_STATISTICS));
-        URI statsOutputUri = outdirUri.resolve(MongoDBHelper.buildStorageFileId(
-                variantSource.getStudyId(), variantSource.getFileId()));
+        String outputDir = pipelineOptions.getString(JobParametersNames.OUTPUT_DIR_STATISTICS);
+        URI variantStatsOutputUri = URLHelper.getVariantsStatsUri(outputDir,
+                variantSource.getStudyId(), variantSource.getFileId());
+        URI sourceStatsOutputUri = URLHelper.getSourceStatsUri(outputDir,
+                variantSource.getStudyId(), variantSource.getFileId());
 
         VariantDBAdaptor dbAdaptor = getDbAdaptor(pipelineOptions);
         QueryOptions statsOptions = new QueryOptions(variantOptions);
 
         // Load statistics for variants and the file
-        loadVariantStats(dbAdaptor, statsOutputUri, statsOptions);
-        loadSourceStats(dbAdaptor, statsOutputUri);
+        loadVariantStats(dbAdaptor, variantStatsOutputUri, statsOptions);
+        loadSourceStats(dbAdaptor, sourceStatsOutputUri);
 
         return RepeatStatus.FINISHED;
     }
@@ -157,10 +155,11 @@ public class PopulationStatisticsLoaderStep implements Tasklet {
         return mongoCredentials;
     }
 
-    private void loadVariantStats(VariantDBAdaptor variantDBAdaptor, URI uri, QueryOptions options) throws IOException {
+    private void loadVariantStats(VariantDBAdaptor variantDBAdaptor, URI variantsStatsUri, QueryOptions options)
+            throws IOException {
+
         // Open input stream
-        Path variantInput = Paths.get(uri.getPath() + VARIANT_STATS_SUFFIX);
-        InputStream variantInputStream = new GZIPInputStream(new FileInputStream(variantInput.toFile()));
+        InputStream variantInputStream = new GZIPInputStream(new FileInputStream(variantsStatsUri.getPath()));
 
         // Initialize JSON parser
         JsonParser parser = jsonFactory.createParser(variantInputStream);
@@ -196,14 +195,14 @@ public class PopulationStatisticsLoaderStep implements Tasklet {
 
         if (writes < variantsNumber) {
             logger.warn("provided statistics of {} variants, but only {} were updated", variantsNumber, writes);
-            logger.info("note: maybe those variants didn't had the proper study? maybe the new and the old stats were the same?");
+            logger.info(
+                    "note: maybe those variants didn't had the proper study? maybe the new and the old stats were the same?");
         }
     }
 
-    private void loadSourceStats(VariantDBAdaptor variantDBAdaptor, URI uri) throws IOException {
+    private void loadSourceStats(VariantDBAdaptor variantDBAdaptor, URI sourceStatsUri) throws IOException {
         // Open input stream
-        Path sourceInput = Paths.get(uri.getPath() + SOURCE_STATS_SUFFIX);
-        InputStream sourceInputStream = new GZIPInputStream(new FileInputStream(sourceInput.toFile()));
+        InputStream sourceInputStream = new GZIPInputStream(new FileInputStream(sourceStatsUri.getPath()));
 
         // Read from JSON file
         JsonParser sourceParser = jsonFactory.createParser(sourceInputStream);

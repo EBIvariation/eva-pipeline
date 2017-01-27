@@ -15,50 +15,47 @@
  */
 package uk.ac.ebi.eva.pipeline.jobs.steps;
 
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.opencb.biodata.models.variant.VariantSource;
-import org.opencb.biodata.models.variant.VariantStudy;
-import org.opencb.opencga.storage.core.variant.VariantStorageManager;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.JobExecution;
+import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
+
 import uk.ac.ebi.eva.pipeline.configuration.BeanNames;
 import uk.ac.ebi.eva.pipeline.jobs.PopulationStatisticsJob;
 import uk.ac.ebi.eva.pipeline.jobs.steps.tasklets.PopulationStatisticsGeneratorStep;
-import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
+import uk.ac.ebi.eva.utils.EvaJobParameterBuilder;
+import uk.ac.ebi.eva.utils.URLHelper;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Paths;
+import java.net.URISyntaxException;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.opencb.opencga.storage.core.variant.VariantStorageManager.VARIANT_SOURCE;
 import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResourceUrl;
 
 /**
  * Test for {@link PopulationStatisticsGeneratorStep}
  */
 @RunWith(SpringRunner.class)
-@TestPropertySource({"classpath:common-configuration.properties"})
+@TestPropertySource({"classpath:common-configuration.properties", "classpath:test-mongo.properties"})
 @ContextConfiguration(classes = {PopulationStatisticsJob.class, BatchTestConfiguration.class})
 public class PopulationStatisticsGeneratorStepTest {
-
     private static final String SMALL_VCF_FILE = "/small20.vcf.gz";
-    private static final String STATS_FILE_SUFFIX = ".variants.stats.json.gz";
+
     private static final String MONGO_DUMP = "/dump/VariantStatsConfigurationTest_vl";
 
     @Rule
@@ -69,24 +66,33 @@ public class PopulationStatisticsGeneratorStepTest {
 
     @Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
-    @Autowired
-    private JobOptions jobOptions;
 
     @Test
-    public void statisticsGeneratorStepShouldCalculateStats() throws IOException, InterruptedException {
+    public void statisticsGeneratorStepShouldCalculateStats() throws IOException, InterruptedException, URISyntaxException {
         //Given a valid VCF input file
-        jobOptions.getPipelineOptions().put(JobParametersNames.INPUT_VCF, SMALL_VCF_FILE);
+        String databaseName = mongoRule.getRandomTemporaryDatabaseName();
+        String statsDir = temporaryFolderRule.getRoot().getAbsolutePath();
+        String studyId = "1";
+        String fileId = "1";
+
+        JobParameters jobParameters = new EvaJobParameterBuilder()
+                .inputVcf(SMALL_VCF_FILE)
+                .databaseName(databaseName)
+                .inputStudyId(studyId)
+                .inputVcfId(fileId)
+                .addString(JobParametersNames.OUTPUT_DIR_STATISTICS, statsDir).toJobParameters();
+
         //and a valid variants load step already completed
-        mongoRule.restoreDump(getResourceUrl(MONGO_DUMP), jobOptions.getDbName());
+        mongoRule.restoreDump(getResourceUrl(MONGO_DUMP), databaseName);
 
-        VariantSource source = configureVariantSource();
-        configureTempOutput();
-
-        File statsFile = getStatsFile(source);
-        assertFalse(statsFile.exists());  // ensure the stats file doesn't exist from previous executions
+        // and non-existent variants stats file and variantSource stats file
+        File statsFile = new File(URLHelper.getVariantsStatsUri(statsDir, studyId, fileId));
+        assertFalse(statsFile.exists());
+        File sourceStatsFile = new File(URLHelper.getSourceStatsUri(statsDir, studyId, fileId));
+        assertFalse(sourceStatsFile.exists());
 
         // When the execute method in variantsStatsCreate is executed
-        JobExecution jobExecution = jobLauncherTestUtils.launchStep(BeanNames.CALCULATE_STATISTICS_STEP);
+        JobExecution jobExecution = jobLauncherTestUtils.launchStep(BeanNames.CALCULATE_STATISTICS_STEP, jobParameters);
 
         //Then variantsStatsCreate step should complete correctly
         assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
@@ -94,6 +100,7 @@ public class PopulationStatisticsGeneratorStepTest {
 
         //and the file containing statistics should exist
         assertTrue(statsFile.exists());
+        assertTrue(sourceStatsFile.exists());
     }
 
     /**
@@ -103,47 +110,30 @@ public class PopulationStatisticsGeneratorStepTest {
     @Test
     public void statisticsGeneratorStepShouldFailIfVariantLoadStepIsNotCompleted() throws Exception {
         //Given a valid VCF input file
-        jobOptions.getPipelineOptions().put(JobParametersNames.INPUT_VCF, SMALL_VCF_FILE);
+        String databaseName = mongoRule.getRandomTemporaryDatabaseName();
+        String statsDir = temporaryFolderRule.getRoot().getAbsolutePath();
+        String sid = "sid";
+        String fid = "fid";
 
-        VariantSource source = configureVariantSource();
-        configureTempOutput();
+        JobParameters jobParameters = new EvaJobParameterBuilder()
+                .inputVcf(SMALL_VCF_FILE)
+                .databaseName(databaseName)
+                .inputStudyId(sid)
+                .inputVcfId(fid)
+                .addString(JobParametersNames.OUTPUT_DIR_STATISTICS, statsDir).toJobParameters();
 
-        File statsFile = getStatsFile(source);
-        assertFalse(statsFile.exists());  // ensure the stats file doesn't exist from previous executions
+        //and a valid variants load step already completed
+        mongoRule.restoreDump(getResourceUrl(MONGO_DUMP), databaseName);
+
+        // and non-existent variants stats file and variantSource stats file
+        File statsFile = new File(URLHelper.getVariantsStatsUri(statsDir, sid, fid));
+        assertFalse(statsFile.exists());
+        File sourceStatsFile = new File(URLHelper.getSourceStatsUri(statsDir, sid, fid));
+        assertFalse(sourceStatsFile.exists());
 
         // When the execute method in variantsStatsCreate is executed
-        JobExecution jobExecution = jobLauncherTestUtils.launchStep(BeanNames.CALCULATE_STATISTICS_STEP);
+        JobExecution jobExecution = jobLauncherTestUtils.launchStep(BeanNames.CALCULATE_STATISTICS_STEP, jobParameters);
         assertEquals(ExitStatus.FAILED.getExitCode(), jobExecution.getExitStatus().getExitCode());
     }
 
-    private void configureTempOutput() throws IOException {
-        String tempFolder = temporaryFolderRule.newFolder().getAbsolutePath();
-        jobOptions.getPipelineOptions().put(JobParametersNames.OUTPUT_DIR_STATISTICS, tempFolder);
-    }
-
-    private VariantSource configureVariantSource() {
-        VariantSource source = new VariantSource(
-                SMALL_VCF_FILE,
-                "1",
-                "1",
-                "studyName",
-                VariantStudy.StudyType.COLLECTION,
-                VariantSource.Aggregation.NONE);
-        jobOptions.getVariantOptions().put(VARIANT_SOURCE, source);
-        return source;
-    }
-
-    @Before
-    public void setUp() throws Exception {
-        jobOptions.loadArgs();
-        jobOptions.setDbName(getClass().getSimpleName());
-    }
-
-    private File getStatsFile(VariantSource source) {
-        return new File(
-                Paths.get(jobOptions.getPipelineOptions().getString(JobParametersNames.OUTPUT_DIR_STATISTICS))
-                        .resolve(VariantStorageManager.buildFilename(source))
-                        + STATS_FILE_SUFFIX
-        );
-    }
 }
