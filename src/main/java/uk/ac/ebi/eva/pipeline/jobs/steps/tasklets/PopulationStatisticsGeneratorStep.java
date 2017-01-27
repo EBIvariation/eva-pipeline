@@ -80,9 +80,8 @@ public class PopulationStatisticsGeneratorStep implements Tasklet {
     }
 
     private URI getStatsBaseUri() throws URISyntaxException {
-        VariantSource source = getVariantSource();
         return URLHelper.getStatsBaseUri(
-                outputParameters.getOutputDirStatistics(), source.getStudyId(), source.getFileId());
+                outputParameters.getOutputDirStatistics(), inputParameters.getStudyId(), inputParameters.getVcfId());
     }
 
     private ObjectMap getVariantOptions() {
