@@ -69,8 +69,7 @@ public class VepInputGeneratorStepTest {
 
     @Test
     public void shouldGenerateVepInput() throws Exception {
-        String randomTemporaryDatabaseName = mongoRule.getRandomTemporaryDatabaseName();
-        mongoRule.restoreDump(getResourceUrl(MONGO_DUMP), randomTemporaryDatabaseName);
+        String randomTemporaryDatabaseName = mongoRule.restoreDumpInTemporaryDatabase(getResourceUrl(MONGO_DUMP));
 
         File vepOutputFolder = temporaryFolderRule.newFolder();
         File vepInputFile = new File(VepUtils.resolveVepInput(vepOutputFolder.getAbsolutePath(), STUDY_ID, FILE_ID));
