@@ -78,12 +78,12 @@ public class PopulationStatisticsLoaderStepTest {
         String statsDir = temporaryFolderRule.getRoot().getAbsolutePath();
 
         JobParameters jobParameters = new EvaJobParameterBuilder()
-                .inputVcf(input)
+                .collectionFilesName("files")
+                .collectionVariantsName("variants")
                 .databaseName(dbName)
                 .inputStudyId(studyId)
+                .inputVcf(input)
                 .inputVcfId(fileId)
-                .collectionVariantsName("variants")
-                .collectionFilesName("files")
                 .outputDirStats(statsDir)
                 .toJobParameters();
 
@@ -121,12 +121,12 @@ public class PopulationStatisticsLoaderStepTest {
         String statsDir = temporaryFolderRule.getRoot().getAbsolutePath();
 
         JobParameters jobParameters = new EvaJobParameterBuilder()
-                .inputVcf(input)
+                .collectionFilesName("files")
+                .collectionVariantsName("variants")
                 .databaseName(dbName)
                 .inputStudyId(studyId)
+                .inputVcf(input)
                 .inputVcfId(fileId)
-                .collectionVariantsName("variants")
-                .collectionFilesName("files")
                 .outputDirStats(statsDir)
                 .toJobParameters();
 

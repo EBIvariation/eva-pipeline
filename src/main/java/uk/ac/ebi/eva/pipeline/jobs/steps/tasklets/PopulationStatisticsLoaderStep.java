@@ -120,11 +120,10 @@ public class PopulationStatisticsLoaderStep implements Tasklet {
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
         VariantDBAdaptor dbAdaptor = getDbAdaptor();
-        VariantSource source = getVariantSource();
         URI variantStatsOutputUri = URLHelper.getVariantsStatsUri(
-                outputParameters.getOutputDirStatistics(), source.getStudyId(), source.getFileId());
+                outputParameters.getOutputDirStatistics(), inputParameters.getStudyId(), inputParameters.getVcfId());
         URI sourceStatsOutputUri = URLHelper.getSourceStatsUri(
-                outputParameters.getOutputDirStatistics(), source.getStudyId(), source.getFileId());
+                outputParameters.getOutputDirStatistics(), inputParameters.getStudyId(), inputParameters.getVcfId());
         QueryOptions statsOptions = new QueryOptions(getVariantOptions());
 
         // Load statistics for variants and the file
@@ -135,10 +134,8 @@ public class PopulationStatisticsLoaderStep implements Tasklet {
     }
 
     private ObjectMap getVariantOptions() {
-        VariantSource source = getVariantSource();
-
         ObjectMap variantOptions = new ObjectMap();
-        variantOptions.put(VariantStorageManager.VARIANT_SOURCE, source);
+        variantOptions.put(VariantStorageManager.VARIANT_SOURCE, getVariantSource());
         variantOptions.put(VariantStorageManager.OVERWRITE_STATS, outputParameters.getStatisticsOverwrite());
         return variantOptions;
     }

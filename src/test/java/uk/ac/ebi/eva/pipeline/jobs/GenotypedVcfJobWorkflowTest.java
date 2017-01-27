@@ -247,22 +247,22 @@ public class GenotypedVcfJobWorkflowTest {
         Config.setOpenCGAHome(opencgaHome);
 
         JobParameters jobParameters = new EvaJobParameterBuilder()
-                .collectionVariantsName("variants")
                 .collectionFilesName("files")
+                .collectionVariantsName("variants")
                 .databaseName(jobOptions.getDbName())
                 .inputFasta("")
                 .inputStudyId("genotyped-job-workflow")
                 .inputVcf(getResource(inputFileResouce).getAbsolutePath())
                 .inputVcfAggregation("NONE")
                 .inputVcfId("1")
-                .outputDirStats(outputDir)
                 .outputDirAnnotation("/tmp/")
+                .outputDirStats(outputDir)
+                .timestamp()
                 .vepCachePath("")
                 .vepCacheSpecies("")
                 .vepCacheVersion("")
                 .vepNumForks("")
                 .vepPath(getResource(MOCK_VEP).getPath())
-                .timestamp()
                 .toJobParameters();
 
         // transformedVcf file init
