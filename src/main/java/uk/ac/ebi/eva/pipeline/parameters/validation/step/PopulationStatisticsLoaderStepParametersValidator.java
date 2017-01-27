@@ -40,7 +40,7 @@ import java.util.List;
  * {@link PopulationStatisticsLoaderStep}
  */
 public class PopulationStatisticsLoaderStepParametersValidator extends DefaultJobParametersValidator {
-	
+
     public PopulationStatisticsLoaderStepParametersValidator() {
         super(new String[]{JobParametersNames.INPUT_STUDY_ID,
                            JobParametersNames.INPUT_VCF_ID,

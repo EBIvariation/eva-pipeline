@@ -32,9 +32,9 @@ import java.util.TreeMap;
  * Tests that the arguments necessary to run a {@link uk.ac.ebi.eva.pipeline.jobs.AggregatedVcfJob} are
  * correctly validated
  */
-public class AggregatedVcfJobParametersValidatorTest {
+public class GenotypedVcfJobParametersValidatorTest {
 
-    private AggregatedVcfJobParametersValidator validator;
+    private GenotypedVcfJobParametersValidator validator;
 
     @Rule
     public PipelineTemporaryFolderRule temporaryFolder = new PipelineTemporaryFolderRule();
@@ -43,11 +43,13 @@ public class AggregatedVcfJobParametersValidatorTest {
 
     private Map<String, JobParameter> annotationParameters;
 
+    private Map<String, JobParameter> statsParameters;
+
     private Map<String, JobParameter> optionalParameters;
 
     @Before
     public void setUp() throws Exception {
-        validator = new AggregatedVcfJobParametersValidator();
+        validator = new GenotypedVcfJobParametersValidator();
         final String dir = temporaryFolder.getRoot().getCanonicalPath();
 
         requiredParameters = new TreeMap<>();
@@ -66,9 +68,11 @@ public class AggregatedVcfJobParametersValidatorTest {
         requiredParameters.put(JobParametersNames.INPUT_STUDY_NAME, new JobParameter("inputStudyName"));
         requiredParameters.put(JobParametersNames.INPUT_STUDY_TYPE, new JobParameter("COLLECTION"));
 
-        // annotation
+        // skips
         requiredParameters.put(JobParametersNames.ANNOTATION_SKIP, new JobParameter("false"));
+        requiredParameters.put(JobParametersNames.STATISTICS_SKIP, new JobParameter("false"));
 
+        // annotation
         annotationParameters = new TreeMap<>();
         annotationParameters.put(JobParametersNames.OUTPUT_DIR_ANNOTATION, new JobParameter(dir));
         annotationParameters.put(JobParametersNames.APP_VEP_CACHE_SPECIES, new JobParameter("Human"));
@@ -81,11 +85,16 @@ public class AggregatedVcfJobParametersValidatorTest {
         annotationParameters.put(JobParametersNames.INPUT_FASTA,
                 new JobParameter(temporaryFolder.newFile().getCanonicalPath()));
 
+        // statistics
+        statsParameters = new TreeMap<>();
+        statsParameters.put(JobParametersNames.OUTPUT_DIR_STATISTICS, new JobParameter(dir));
+
 
         // optionals
         optionalParameters = new TreeMap<>();
         optionalParameters.put(JobParametersNames.CONFIG_CHUNK_SIZE, new JobParameter("100"));
         optionalParameters.put(JobParametersNames.CONFIG_RESTARTABILITY_ALLOW, new JobParameter("true"));
+        optionalParameters.put(JobParametersNames.STATISTICS_OVERWRITE, new JobParameter("true"));
     }
 
     // The next tests show behaviour about the required parameters
@@ -94,25 +103,29 @@ public class AggregatedVcfJobParametersValidatorTest {
     public void allJobParametersAreValid() throws JobParametersInvalidException {
         Map<String, JobParameter> parameters = new TreeMap<>();
         parameters.putAll(requiredParameters);
-        parameters.putAll(annotationParameters);
         parameters.putAll(optionalParameters);
+        parameters.putAll(annotationParameters);
+        parameters.putAll(statsParameters);
         validator.validate(new JobParameters(parameters));
     }
+
     @Test
     public void allRequiredJobParametersAreValid() throws JobParametersInvalidException {
         Map<String, JobParameter> parameters = new TreeMap<>();
         parameters.putAll(requiredParameters);
         parameters.putAll(annotationParameters);
+        parameters.putAll(statsParameters);
         validator.validate(new JobParameters(parameters));
     }
 
     @Test(expected = JobParametersInvalidException.class)
-    public void dbNameIsRequiredSkippingAnnotation() throws JobParametersInvalidException {
+    public void dbNameIsRequiredSkippingAnnotationAndStats() throws JobParametersInvalidException {
         Map<String, JobParameter> parameters = new TreeMap<>();
         parameters.putAll(requiredParameters);
         parameters.putAll(optionalParameters);
         parameters.remove(JobParametersNames.DB_NAME);
         parameters.put(JobParametersNames.ANNOTATION_SKIP, new JobParameter("true"));
+        parameters.put(JobParametersNames.STATISTICS_SKIP, new JobParameter("true"));
         validator.validate(new JobParameters(parameters));
     }
 
@@ -122,6 +135,29 @@ public class AggregatedVcfJobParametersValidatorTest {
         parameters.putAll(requiredParameters);
         parameters.putAll(optionalParameters);
         parameters.putAll(annotationParameters);
+        parameters.remove(JobParametersNames.DB_NAME);
+        parameters.put(JobParametersNames.STATISTICS_SKIP, new JobParameter("true"));
+        validator.validate(new JobParameters(parameters));
+    }
+
+    @Test(expected = JobParametersInvalidException.class)
+    public void dbNameIsRequiredWithoutSkippingStats() throws JobParametersInvalidException {
+        Map<String, JobParameter> parameters = new TreeMap<>();
+        parameters.putAll(requiredParameters);
+        parameters.putAll(optionalParameters);
+        parameters.putAll(statsParameters);
+        parameters.put(JobParametersNames.ANNOTATION_SKIP, new JobParameter("true"));
+        parameters.remove(JobParametersNames.DB_NAME);
+        validator.validate(new JobParameters(parameters));
+    }
+
+    @Test(expected = JobParametersInvalidException.class)
+    public void dbNameIsRequiredWithoutSkippingAnnotationAndStats() throws JobParametersInvalidException {
+        Map<String, JobParameter> parameters = new TreeMap<>();
+        parameters.putAll(requiredParameters);
+        parameters.putAll(optionalParameters);
+        parameters.putAll(annotationParameters);
+        parameters.putAll(statsParameters);
         parameters.remove(JobParametersNames.DB_NAME);
         validator.validate(new JobParameters(parameters));
     }
@@ -133,6 +169,7 @@ public class AggregatedVcfJobParametersValidatorTest {
         Map<String, JobParameter> parameters = new TreeMap<>();
         parameters.putAll(requiredParameters);
         parameters.putAll(optionalParameters);
+        parameters.putAll(statsParameters);
         parameters.put(JobParametersNames.ANNOTATION_SKIP, new JobParameter("true"));
         validator.validate(new JobParameters(parameters));
     }
@@ -142,6 +179,7 @@ public class AggregatedVcfJobParametersValidatorTest {
         Map<String, JobParameter> parameters = new TreeMap<>();
         parameters.putAll(requiredParameters);
         parameters.putAll(optionalParameters);
+        parameters.putAll(statsParameters);
         validator.validate(new JobParameters(parameters));
     }
 
@@ -155,9 +193,42 @@ public class AggregatedVcfJobParametersValidatorTest {
     public void appVepCacheSpeciesIsRequiredIfAnnotationIsNotSkipped() throws JobParametersInvalidException {
         Map<String, JobParameter> parameters = new TreeMap<>();
         parameters.putAll(requiredParameters);
-        parameters.putAll(annotationParameters);
         parameters.putAll(optionalParameters);
+        parameters.putAll(annotationParameters);
+        parameters.putAll(statsParameters);
         parameters.remove(JobParametersNames.APP_VEP_CACHE_SPECIES);
+        validator.validate(new JobParameters(parameters));
+    }
+
+    // The next tests show what happens when not all the stats parameters are present
+
+    @Test
+    public void statsParametersAreNotRequiredIfStatsIsSkipped() throws JobParametersInvalidException {
+        Map<String, JobParameter> parameters = new TreeMap<>();
+        parameters.putAll(requiredParameters);
+        parameters.putAll(optionalParameters);
+        parameters.putAll(annotationParameters);
+        parameters.put(JobParametersNames.STATISTICS_SKIP, new JobParameter("true"));
+        validator.validate(new JobParameters(parameters));
+    }
+
+    @Test(expected = JobParametersInvalidException.class)
+    public void statsParametersAreRequiredIfStatsIsNotSkipped() throws JobParametersInvalidException {
+        Map<String, JobParameter> parameters = new TreeMap<>();
+        parameters.putAll(requiredParameters);
+        parameters.putAll(optionalParameters);
+        parameters.putAll(annotationParameters);
+        validator.validate(new JobParameters(parameters));
+    }
+
+    @Test(expected = JobParametersInvalidException.class)
+    public void outputDirStatistitcsIsRequiredIfStatsIsNotSkipped() throws JobParametersInvalidException {
+        Map<String, JobParameter> parameters = new TreeMap<>();
+        parameters.putAll(requiredParameters);
+        parameters.putAll(optionalParameters);
+        parameters.putAll(annotationParameters);
+        parameters.putAll(statsParameters);
+        parameters.remove(JobParametersNames.OUTPUT_DIR_STATISTICS);
         validator.validate(new JobParameters(parameters));
     }
 }
