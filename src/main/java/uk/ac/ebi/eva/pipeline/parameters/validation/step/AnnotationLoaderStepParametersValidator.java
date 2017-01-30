@@ -22,12 +22,7 @@ import org.springframework.batch.core.job.CompositeJobParametersValidator;
 import org.springframework.batch.core.job.DefaultJobParametersValidator;
 
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
-import uk.ac.ebi.eva.pipeline.parameters.validation.ConfigChunkSizeValidator;
-import uk.ac.ebi.eva.pipeline.parameters.validation.ConfigRestartabilityAllowValidator;
-import uk.ac.ebi.eva.pipeline.parameters.validation.DbCollectionsVariantsNameValidator;
-import uk.ac.ebi.eva.pipeline.parameters.validation.DbNameValidator;
-import uk.ac.ebi.eva.pipeline.parameters.validation.OptionalValidator;
-import uk.ac.ebi.eva.pipeline.parameters.validation.OutputDirAnnotationValidator;
+import uk.ac.ebi.eva.pipeline.parameters.validation.*;
 
 import java.util.Arrays;
 import java.util.List;
@@ -40,8 +35,10 @@ public class AnnotationLoaderStepParametersValidator extends DefaultJobParameter
     public AnnotationLoaderStepParametersValidator() {
         super(new String[]{JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME,
                            JobParametersNames.DB_NAME,
-                           JobParametersNames.OUTPUT_DIR_ANNOTATION},
-              new String[]{});
+                           JobParametersNames.OUTPUT_DIR_ANNOTATION,
+                           JobParametersNames.INPUT_STUDY_ID,
+                           JobParametersNames.INPUT_VCF_ID},
+                new String[]{});
     }
 
     @Override
@@ -55,6 +52,8 @@ public class AnnotationLoaderStepParametersValidator extends DefaultJobParameter
                 new DbCollectionsVariantsNameValidator(),
                 new DbNameValidator(),
                 new OutputDirAnnotationValidator(),
+                new InputStudyIdValidator(),
+                new InputVcfIdValidator(),
                 new OptionalValidator(new ConfigRestartabilityAllowValidator(),
                                       JobParametersNames.CONFIG_RESTARTABILITY_ALLOW),
                 new OptionalValidator(new ConfigChunkSizeValidator(), JobParametersNames.CONFIG_CHUNK_SIZE)
