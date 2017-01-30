@@ -18,7 +18,6 @@ package uk.ac.ebi.eva.pipeline.jobs;
 
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -37,11 +36,12 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.ac.ebi.eva.pipeline.configuration.BeanNames;
-import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
+import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
 import uk.ac.ebi.eva.utils.EvaJobParameterBuilder;
+import uk.ac.ebi.eva.utils.URLHelper;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -68,36 +68,42 @@ import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResourceUrl;
 public class AnnotationJobTest {
     private static final String MOCK_VEP = "/mockvep.pl";
     private static final String MONGO_DUMP = "/dump/VariantStatsConfigurationTest_vl";
-    private static final String OUTPUT_DIR_ANNOTATION = "/tmp/";
     private static final String INPUT_STUDY_ID = "annotation-job";
     private static final String INPUT_VCF_ID = "1";
     private static final String COLLECTION_VARIANTS_NAME = "variants";
-    private static final String DATABASE_NAME = "AnnotationJobTest";
     //TODO check later to substitute files for temporary ones / pay attention to vep Input file
 
     @Rule
     public TemporaryMongoRule mongoRule = new TemporaryMongoRule();
 
+    @Rule
+    public PipelineTemporaryFolderRule temporaryFolderRule = new PipelineTemporaryFolderRule();
+
     @Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
 
-    @Autowired
-    private JobOptions jobOptions;
-
-    private File vepInputFile;
     private DBObjectToVariantAnnotationConverter converter;
 
     @Test
     public void allAnnotationStepsShouldBeExecuted() throws Exception {
-        mongoRule.restoreDump(getResourceUrl(MONGO_DUMP), jobOptions.getDbName());
+        String dbName = mongoRule.restoreDumpInTemporaryDatabase(getResourceUrl(MONGO_DUMP));
+        String outputDirAnnot = temporaryFolderRule.getRoot().getAbsolutePath();
+
+        File vepInput = new File(URLHelper.resolveVepInput(outputDirAnnot, INPUT_STUDY_ID, INPUT_VCF_ID));
+        String vepInputName = vepInput.getName();
+        temporaryFolderRule.newFile(vepInputName);
+
+        File vepOutput = new File(URLHelper.resolveVepOutput(outputDirAnnot, INPUT_STUDY_ID, INPUT_VCF_ID));
+        String vepOutputName = vepOutput.getName();
+        temporaryFolderRule.newFile(vepOutputName);
 
         JobParameters jobParameters = new EvaJobParameterBuilder()
                 .collectionVariantsName(COLLECTION_VARIANTS_NAME)
-                .databaseName(DATABASE_NAME)
+                .databaseName(dbName)
                 .inputFasta("")
                 .inputStudyId(INPUT_STUDY_ID)
                 .inputVcfId(INPUT_VCF_ID)
-                .outputDirAnnotation(OUTPUT_DIR_ANNOTATION)
+                .outputDirAnnotation(outputDirAnnot)
                 .vepCachePath("")
                 .vepCacheSpecies("")
                 .vepCacheVersion("")
@@ -121,12 +127,11 @@ public class AnnotationJobTest {
         assertEquals(BeanNames.LOAD_VEP_ANNOTATION_STEP, loadVepAnnotationsStep.getStepName());
 
         //check list of variants without annotation output file
-        assertTrue(vepInputFile.exists());
-        assertEquals("20\t60343\t60343\tG/A\t+", JobTestUtils.readFirstLine(vepInputFile));
+        assertTrue(vepInput.exists());
+        assertEquals("20\t60343\t60343\tG/A\t+", JobTestUtils.readFirstLine(vepInput));
 
         //check that documents have the annotation
-        DBCursor cursor = mongoRule.getCollection(jobOptions.getDbName(), jobOptions.getDbCollectionsVariantsName())
-                .find();
+        DBCursor cursor = mongoRule.getCollection(dbName, COLLECTION_VARIANTS_NAME).find();
 
         int cnt = 0;
         int consequenceTypeCount = 0;
@@ -152,12 +157,25 @@ public class AnnotationJobTest {
 
     @Test
     public void noVariantsToAnnotateOnlyFindVariantsToAnnotateStepShouldRun() throws Exception {
+        String dbName = mongoRule.getRandomTemporaryDatabaseName();
+        String outputDirAnnot = temporaryFolderRule.getRoot().getAbsolutePath();
+
+        File vepInput = new File(URLHelper.resolveVepInput(outputDirAnnot, INPUT_STUDY_ID, INPUT_VCF_ID));
+        String vepInputName = vepInput.getName();
+        temporaryFolderRule.newFile(vepInputName);
+
         JobParameters jobParameters = new EvaJobParameterBuilder()
                 .collectionVariantsName(COLLECTION_VARIANTS_NAME)
-                .databaseName(DATABASE_NAME)
+                .databaseName(dbName)
+                .inputFasta("")
                 .inputStudyId(INPUT_STUDY_ID)
                 .inputVcfId(INPUT_VCF_ID)
-                .outputDirAnnotation(OUTPUT_DIR_ANNOTATION)
+                .outputDirAnnotation(outputDirAnnot)
+                .vepCachePath("")
+                .vepCacheSpecies("")
+                .vepCacheVersion("")
+                .vepNumForks("")
+                .vepPath(getResource(MOCK_VEP).getPath())
                 .toJobParameters();
 
         JobExecution jobExecution = jobLauncherTestUtils.launchJob(jobParameters);
@@ -170,27 +188,13 @@ public class AnnotationJobTest {
 
         assertEquals(BeanNames.GENERATE_VEP_INPUT_STEP, findVariantsToAnnotateStep.getStepName());
 
-        assertTrue(vepInputFile.exists());
-        assertTrue(Files.size(Paths.get(vepInputFile.toPath().toUri())) == 0);
+        assertTrue(vepInput.exists());
+        assertTrue(Files.size(Paths.get(vepInput.toPath().toUri())) == 0);
     }
 
     @Before
     public void setUp() throws Exception {
-        jobOptions.loadArgs();
-
-        vepInputFile = new File(jobOptions.getVepInput());
-        jobOptions.setAppVepPath(getResource(MOCK_VEP));
-
         converter = new DBObjectToVariantAnnotationConverter();
-    }
-
-    /**
-     * Release resources and delete the temporary output file
-     */
-    @After
-    public void tearDown() throws Exception {
-        vepInputFile.delete();
-        new File(jobOptions.getVepOutput()).delete();
     }
 
 }

@@ -24,18 +24,18 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.mongodb.core.MongoOperations;
+
 import uk.ac.ebi.eva.pipeline.Application;
 import uk.ac.ebi.eva.pipeline.configuration.MongoConfiguration;
 import uk.ac.ebi.eva.pipeline.io.writers.VepAnnotationMongoWriter;
-import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
-import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
+import uk.ac.ebi.eva.pipeline.parameters.DatabaseParameters;
 
 import java.net.UnknownHostException;
 
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VARIANT_ANNOTATION_WRITER;
 
 @Configuration
-@Import({ MongoConfiguration.class })
+@Import({MongoConfiguration.class})
 public class VariantAnnotationWriterConfiguration {
 
     @Autowired
@@ -44,10 +44,10 @@ public class VariantAnnotationWriterConfiguration {
     @Bean(VARIANT_ANNOTATION_WRITER)
     @StepScope
     @Profile(Application.VARIANT_ANNOTATION_MONGO_PROFILE)
-    public ItemWriter<VariantAnnotation> variantAnnotationItemWriter(JobOptions jobOptions) throws UnknownHostException {
+    public ItemWriter<VariantAnnotation> variantAnnotationItemWriter(DatabaseParameters databaseParameters)
+            throws UnknownHostException {
         MongoOperations mongoOperations = mongoConfiguration.getMongoOperations(
-                jobOptions.getDbName(), jobOptions.getMongoConnection());
-        String collections = jobOptions.getPipelineOptions().getString(JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME);
-        return new VepAnnotationMongoWriter(mongoOperations, collections);
+                databaseParameters.getDatabaseName(), databaseParameters.getMongoConnection());
+        return new VepAnnotationMongoWriter(mongoOperations, databaseParameters.getCollectionVariantsName());
     }
 }

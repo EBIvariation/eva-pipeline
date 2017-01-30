@@ -19,7 +19,7 @@ import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import uk.ac.ebi.eva.utils.VepUtils;
+import uk.ac.ebi.eva.utils.URLHelper;
 
 /**
  * Service that holds access to the values for annotatation steps like VEP etc.
@@ -87,11 +87,11 @@ public class AnnotationParameters {
     }
 
     public String getVepInput() {
-        return VepUtils.resolveVepInput(outputDirAnnotation, studyId, fileId);
+        return URLHelper.resolveVepInput(outputDirAnnotation, studyId, fileId);
     }
 
-    public String getVepOuput() {
-        return VepUtils.resolveVepOutput(outputDirAnnotation, studyId, fileId);
+    public String getVepOutput() {
+        return URLHelper.resolveVepOutput(outputDirAnnotation, studyId, fileId);
     }
 
 }
