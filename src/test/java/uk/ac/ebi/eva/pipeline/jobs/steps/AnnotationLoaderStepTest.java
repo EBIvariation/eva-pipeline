@@ -42,7 +42,7 @@ import uk.ac.ebi.eva.test.data.VepOutputContent;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 import uk.ac.ebi.eva.utils.EvaJobParameterBuilder;
-import uk.ac.ebi.eva.utils.VepUtils;
+import uk.ac.ebi.eva.utils.URLHelper;
 
 import java.nio.file.Paths;
 
@@ -75,15 +75,13 @@ public class AnnotationLoaderStepTest {
     @Test
     public void shouldLoadAllAnnotations() throws Exception {
         String annotationFolder = temporaryFolderRule.getRoot().getAbsolutePath();
-        String dbName = mongoRule.getRandomTemporaryDatabaseName();
+        String dbName = mongoRule.restoreDumpInTemporaryDatabase(getResourceUrl(MONGO_DUMP));
         String collectionVariantsName = "variants";
         String studyId = "1";
         String fileId = "1";
-        String vepOutput = VepUtils.resolveVepOutput(annotationFolder, studyId, fileId);
+        String vepOutput = URLHelper.resolveVepOutput(annotationFolder, studyId, fileId);
         String vepOutputName = Paths.get(vepOutput).getFileName().toString();
         temporaryFolderRule.newGzipFile(VepOutputContent.vepOutputContent, vepOutputName);
-
-        mongoRule.restoreDump(getResourceUrl(MONGO_DUMP), dbName);
 
         JobParameters jobParameters = new EvaJobParameterBuilder()
                 .collectionVariantsName(collectionVariantsName)

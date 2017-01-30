@@ -41,7 +41,7 @@ import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
 import uk.ac.ebi.eva.utils.EvaJobParameterBuilder;
-import uk.ac.ebi.eva.utils.VepUtils;
+import uk.ac.ebi.eva.utils.URLHelper;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -89,11 +89,11 @@ public class AnnotationJobTest {
         String dbName = mongoRule.restoreDumpInTemporaryDatabase(getResourceUrl(MONGO_DUMP));
         String outputDirAnnot = temporaryFolderRule.getRoot().getAbsolutePath();
 
-        File vepInput = new File(VepUtils.resolveVepInput(outputDirAnnot, INPUT_STUDY_ID, INPUT_VCF_ID));
+        File vepInput = new File(URLHelper.resolveVepInput(outputDirAnnot, INPUT_STUDY_ID, INPUT_VCF_ID));
         String vepInputName = vepInput.getName();
         temporaryFolderRule.newFile(vepInputName);
 
-        File vepOutput = new File(VepUtils.resolveVepOutput(outputDirAnnot, INPUT_STUDY_ID, INPUT_VCF_ID));
+        File vepOutput = new File(URLHelper.resolveVepOutput(outputDirAnnot, INPUT_STUDY_ID, INPUT_VCF_ID));
         String vepOutputName = vepOutput.getName();
         temporaryFolderRule.newFile(vepOutputName);
 
@@ -160,7 +160,7 @@ public class AnnotationJobTest {
         String dbName = mongoRule.getRandomTemporaryDatabaseName();
         String outputDirAnnot = temporaryFolderRule.getRoot().getAbsolutePath();
 
-        File vepInput = new File(VepUtils.resolveVepInput(outputDirAnnot, INPUT_STUDY_ID, INPUT_VCF_ID));
+        File vepInput = new File(URLHelper.resolveVepInput(outputDirAnnot, INPUT_STUDY_ID, INPUT_VCF_ID));
         String vepInputName = vepInput.getName();
         temporaryFolderRule.newFile(vepInputName);
 

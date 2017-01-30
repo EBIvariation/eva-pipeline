@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 EMBL - European Bioinformatics Institute
+ * Copyright 2017 EMBL - European Bioinformatics Institute
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,14 +24,14 @@ import org.springframework.batch.core.job.flow.FlowExecutionStatus;
 import org.springframework.batch.core.job.flow.JobExecutionDecider;
 
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
-import uk.ac.ebi.eva.utils.VepUtils;
+import uk.ac.ebi.eva.utils.URLHelper;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
 /**
- * Decider used to skip step(s) in case a previous step is generating an empty file
+ * Decider used to skip step(s) if the file vepInput is empty
  */
 public class EmptyVepInputDecider implements JobExecutionDecider {
     private static final Logger logger = LoggerFactory.getLogger(EmptyVepInputDecider.class);
@@ -55,7 +55,7 @@ public class EmptyVepInputDecider implements JobExecutionDecider {
     private String getVepInput(JobExecution jobExecution) {
         JobParameters jobParameters = jobExecution.getJobParameters();
 
-        return VepUtils.resolveVepInput(
+        return URLHelper.resolveVepInput(
                 jobParameters.getString(JobParametersNames.OUTPUT_DIR_ANNOTATION),
                 jobParameters.getString(JobParametersNames.INPUT_STUDY_ID),
                 jobParameters.getString(JobParametersNames.INPUT_VCF_ID));
