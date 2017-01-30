@@ -37,7 +37,7 @@ import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
 import uk.ac.ebi.eva.utils.EvaJobParameterBuilder;
-import uk.ac.ebi.eva.utils.VepUtils;
+import uk.ac.ebi.eva.utils.URLHelper;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -93,7 +93,7 @@ public class VepAnnotationGeneratorStepTest {
         assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());
 
         // And VEP output should exist and annotations should be in the file
-        File vepOutputFile = new File(VepUtils.resolveVepOutput(vepOutputFolder.getAbsolutePath(), STUDY_ID, FILE_ID));
+        File vepOutputFile = new File(URLHelper.resolveVepOutput(vepOutputFolder.getAbsolutePath(), STUDY_ID, FILE_ID));
 
         assertTrue(vepOutputFile.exists());
         assertEquals(537, JobTestUtils.getLines(new GZIPInputStream(new FileInputStream(vepOutputFile))));

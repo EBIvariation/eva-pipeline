@@ -34,7 +34,7 @@ import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 import uk.ac.ebi.eva.utils.EvaJobParameterBuilder;
-import uk.ac.ebi.eva.utils.VepUtils;
+import uk.ac.ebi.eva.utils.URLHelper;
 
 import java.io.File;
 
@@ -73,7 +73,7 @@ public class VepInputGeneratorStepTest {
     public void shouldGenerateVepInput() throws Exception {
         String randomTemporaryDatabaseName = mongoRule.restoreDumpInTemporaryDatabase(getResourceUrl(MONGO_DUMP));
         String outputDirAnnot = temporaryFolderRule.getRoot().getAbsolutePath();
-        File vepInput = new File(VepUtils.resolveVepInput(outputDirAnnot, STUDY_ID, FILE_ID));
+        File vepInput = new File(URLHelper.resolveVepInput(outputDirAnnot, STUDY_ID, FILE_ID));
         temporaryFolderRule.newFile(vepInput.getName());
 
         JobParameters jobParameters = new EvaJobParameterBuilder()
