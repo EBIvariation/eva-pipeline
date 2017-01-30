@@ -51,6 +51,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResource;
@@ -71,7 +72,6 @@ public class AnnotationJobTest {
     private static final String INPUT_STUDY_ID = "annotation-job";
     private static final String INPUT_VCF_ID = "1";
     private static final String COLLECTION_VARIANTS_NAME = "variants";
-    //TODO check later to substitute files for temporary ones / pay attention to vep Input file
 
     @Rule
     public TemporaryMongoRule mongoRule = new TemporaryMongoRule();
@@ -133,10 +133,10 @@ public class AnnotationJobTest {
         //check that documents have the annotation
         DBCursor cursor = mongoRule.getCollection(dbName, COLLECTION_VARIANTS_NAME).find();
 
-        int cnt = 0;
+        int count = 0;
         int consequenceTypeCount = 0;
         while (cursor.hasNext()) {
-            cnt++;
+            count++;
             DBObject dbObject = (DBObject) cursor.next().get("annot");
             if (dbObject != null) {
                 VariantAnnotation annot = converter.convertToDataModelType(dbObject);
@@ -145,7 +145,7 @@ public class AnnotationJobTest {
             }
         }
 
-        assertEquals(300, cnt);
+        assertEquals(300, count);
         assertEquals(536, consequenceTypeCount);
 
         //check that one line is skipped because malformed
