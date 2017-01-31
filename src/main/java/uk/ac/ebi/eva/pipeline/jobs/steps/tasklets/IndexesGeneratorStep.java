@@ -24,7 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoOperations;
 
 import uk.ac.ebi.eva.pipeline.configuration.MongoConfiguration;
-import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
+import uk.ac.ebi.eva.pipeline.parameters.DatabaseParameters;
 
 /**
  * This step initializes the indexes in the databases.
@@ -37,13 +37,13 @@ public class IndexesGeneratorStep implements Tasklet {
     private MongoConfiguration mongoConfiguration;
 
     @Autowired
-    private JobOptions jobOptions;
+    private DatabaseParameters databaseParameters;
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
         MongoOperations operations = mongoConfiguration.getMongoOperations(
-                jobOptions.getDbName(), jobOptions.getMongoConnection());
-        operations.getCollection(jobOptions.getDbCollectionsFeaturesName())
+                databaseParameters.getDatabaseName(), databaseParameters.getMongoConnection());
+        operations.getCollection(databaseParameters.getCollectionFeaturesName())
                 .createIndex(new BasicDBObject("name", 1), new BasicDBObject("sparse", true).append("background", true));
 
         return RepeatStatus.FINISHED;
