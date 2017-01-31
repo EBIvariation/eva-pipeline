@@ -19,10 +19,10 @@ import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.item.ItemStreamReader;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
 import uk.ac.ebi.eva.pipeline.io.readers.GeneReader;
 import uk.ac.ebi.eva.pipeline.model.FeatureCoordinates;
-import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
-import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
+import uk.ac.ebi.eva.pipeline.parameters.InputParameters;
 
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.GENE_READER;
 
@@ -34,8 +34,8 @@ public class GeneReaderConfiguration {
 
     @Bean(GENE_READER)
     @StepScope
-    public ItemStreamReader<FeatureCoordinates> geneReader(JobOptions jobOptions) {
-        return new GeneReader(jobOptions.getPipelineOptions().getString(JobParametersNames.INPUT_GTF));
+    public ItemStreamReader<FeatureCoordinates> geneReader(InputParameters inputParameters) {
+        return new GeneReader(inputParameters.getGtf());
     }
 
 }

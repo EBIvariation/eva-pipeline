@@ -40,6 +40,9 @@ public class InputParameters {
     @Value(PARAMETER + JobParametersNames.INPUT_VCF + END)
     private String vcf;
 
+    @Value(PARAMETER + JobParametersNames.INPUT_GTF + END)
+    private String gtf;
+
     @Value(PARAMETER + JobParametersNames.INPUT_VCF_AGGREGATION + "']?:'NONE'}")
     private String vcfAggregation;
 
@@ -59,6 +62,7 @@ public class InputParameters {
 
     @Value(PARAMETER + JobParametersNames.CONFIG_CHUNK_SIZE + "']?:1000}")
     private int chunkSize;
+
 
     public String getVcf() {
         return vcf;
@@ -94,5 +98,9 @@ public class InputParameters {
 
     public int getChunkSize() {
         return chunkSize;
+    }
+
+    public String getGtf() {
+        return gtf;
     }
 }
