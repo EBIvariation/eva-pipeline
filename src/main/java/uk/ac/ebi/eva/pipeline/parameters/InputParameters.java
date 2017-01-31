@@ -63,7 +63,6 @@ public class InputParameters {
     @Value(PARAMETER + JobParametersNames.CONFIG_CHUNK_SIZE + "']?:1000}")
     private int chunkSize;
 
-
     public String getVcf() {
         return vcf;
     }

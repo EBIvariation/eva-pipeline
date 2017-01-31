@@ -32,7 +32,7 @@ import uk.ac.ebi.eva.pipeline.configuration.MongoConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.writers.GeneWriterConfiguration;
 import uk.ac.ebi.eva.pipeline.io.mappers.GeneLineMapper;
 import uk.ac.ebi.eva.pipeline.model.FeatureCoordinates;
-import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
+import uk.ac.ebi.eva.pipeline.parameters.MongoConnection;
 import uk.ac.ebi.eva.test.configuration.BaseTestConfiguration;
 import uk.ac.ebi.eva.test.data.GtfStaticTestData;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
@@ -49,15 +49,17 @@ import static org.junit.Assert.assertTrue;
  * output: the FeatureCoordinates get written in mongo, with at least: chromosome, start and end.
  */
 @RunWith(SpringRunner.class)
-@TestPropertySource({"classpath:initialize-database.properties"})
+@TestPropertySource({"classpath:initialize-database.properties", "classpath:test-mongo.properties"})
 @ContextConfiguration(classes = {BaseTestConfiguration.class, GeneWriterConfiguration.class})
 public class GeneWriterTest {
+
+    private static final String COLLECTION_FEATURES_NAME = "features";
 
     @Rule
     public TemporaryMongoRule mongoRule = new TemporaryMongoRule();
 
     @Autowired
-    private JobOptions jobOptions;
+    private MongoConnection mongoConnection;
 
     @Autowired
     private MongoConfiguration mongoConfiguration;
@@ -66,10 +68,9 @@ public class GeneWriterTest {
     public void shouldWriteAllFieldsIntoMongoDb() throws Exception {
         String databaseName = mongoRule.getRandomTemporaryDatabaseName();
 
-        MongoOperations mongoOperations = mongoConfiguration.getMongoOperations(databaseName,
-                jobOptions.getMongoConnection());
+        MongoOperations mongoOperations = mongoConfiguration.getMongoOperations(databaseName, mongoConnection);
 
-        GeneWriter geneWriter = new GeneWriter(mongoOperations, jobOptions.getDbCollectionsFeaturesName());
+        GeneWriter geneWriter = new GeneWriter(mongoOperations, COLLECTION_FEATURES_NAME);
 
         GeneLineMapper lineMapper = new GeneLineMapper();
         List<FeatureCoordinates> genes = new ArrayList<>();
@@ -80,7 +81,7 @@ public class GeneWriterTest {
         }
         geneWriter.write(genes);
 
-        DBCollection genesCollection = mongoRule.getCollection(databaseName, jobOptions.getDbCollectionsFeaturesName());
+        DBCollection genesCollection = mongoRule.getCollection(databaseName, COLLECTION_FEATURES_NAME);
 
         // count documents in DB and check they have region (chr + start + end)
         DBCursor cursor = genesCollection.find();

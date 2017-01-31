@@ -16,10 +16,9 @@
 package uk.ac.ebi.eva.pipeline.parameters;
 
 import org.springframework.batch.core.configuration.annotation.StepScope;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-
-import uk.ac.ebi.eva.utils.MongoConnection;
 
 /**
  * Service that holds access to the values for database. This include the configuration
@@ -44,24 +43,11 @@ public class DatabaseParameters {
     @Value(PARAMETER + JobParametersNames.DB_COLLECTIONS_FEATURES_NAME + END)
     private String collectionFeaturesName;
 
-    @Value("${" + JobParametersNames.CONFIG_DB_HOSTS + ":#{null}}")
-    private String hosts;
-
-    @Value("${" + JobParametersNames.CONFIG_DB_AUTHENTICATIONDB + ":#{null}}")
-    private String authenticationDatabase;
-
-    @Value("${" + JobParametersNames.CONFIG_DB_USER + ":#{null}}")
-    private String user;
-
-    @Value("${" + JobParametersNames.CONFIG_DB_PASSWORD + ":#{null}}")
-    private String password;
-
-    @Value("${" + JobParametersNames.CONFIG_DB_READPREFERENCE + ":#{null}}")
-    private String readPreference;
-
+    @Autowired
+    private MongoConnection mongoConnection;
 
     public MongoConnection getMongoConnection() {
-        return new MongoConnection(hosts, authenticationDatabase, user, password, readPreference);
+        return mongoConnection;
     }
 
     public String getDatabaseName() {
@@ -74,26 +60,6 @@ public class DatabaseParameters {
 
     public String getCollectionFilesName() {
         return collectionFilesName;
-    }
-
-    public String getHosts() {
-        return hosts;
-    }
-
-    public String getAuthenticationDatabase() {
-        return authenticationDatabase;
-    }
-
-    public String getUser() {
-        return user;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public String getReadPreference() {
-        return readPreference;
     }
 
     public String getCollectionFeaturesName() {

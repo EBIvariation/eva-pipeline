@@ -32,7 +32,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import uk.ac.ebi.eva.pipeline.configuration.MongoConfiguration;
 import uk.ac.ebi.eva.pipeline.model.PopulationStatistics;
-import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
+import uk.ac.ebi.eva.pipeline.parameters.MongoConnection;
 import uk.ac.ebi.eva.test.configuration.BaseTestConfiguration;
 import uk.ac.ebi.eva.test.data.VariantData;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
@@ -59,6 +59,8 @@ import static org.junit.Assert.assertNotNull;
 @ContextConfiguration(classes = {BaseTestConfiguration.class, MongoConfiguration.class})
 public class StatisticsMongoWriterTest {
 
+    private static final String COLLECTION_STATS_NAME = "populationStatistics";
+
     @Autowired
     private MongoConfiguration mongoConfiguration;
 
@@ -66,7 +68,7 @@ public class StatisticsMongoWriterTest {
     public TemporaryMongoRule mongoRule = new TemporaryMongoRule();
 
     @Autowired
-    private JobOptions jobOptions;
+    private MongoConnection mongoConnection;
 
     @Test
     public void shouldWriteAllFieldsIntoMongoDb() throws Exception {
@@ -81,7 +83,7 @@ public class StatisticsMongoWriterTest {
         }
 
         // do the checks
-        DBCollection statsCollection = mongoRule.getCollection(databaseName, jobOptions.getDbCollectionsStatsName());
+        DBCollection statsCollection = mongoRule.getCollection(databaseName, COLLECTION_STATS_NAME);
         // count documents in DB and check they have at least the index fields (vid, sid, cid) and maf and genotypeCount
         DBCursor cursor = statsCollection.find();
 
@@ -111,7 +113,7 @@ public class StatisticsMongoWriterTest {
         statisticsMongoWriter.write(populationStatisticsList);
 
         // do the checks
-        DBCollection statsCollection = mongoRule.getCollection(databaseName, jobOptions.getDbCollectionsStatsName());
+        DBCollection statsCollection = mongoRule.getCollection(databaseName, COLLECTION_STATS_NAME);
 
         // check there is an index in chr + start + ref + alt + sid + cid
         List<DBObject> indexes = new ArrayList<>();
@@ -168,10 +170,8 @@ public class StatisticsMongoWriterTest {
     }
 
     public StatisticsMongoWriter getStatisticsMongoWriter(String databaseName) throws UnknownHostException {
-        MongoOperations operations = mongoConfiguration.getMongoOperations(
-                databaseName, jobOptions.getMongoConnection());
-        StatisticsMongoWriter statisticsMongoWriter = new StatisticsMongoWriter(
-                operations, jobOptions.getDbCollectionsStatsName());
+        MongoOperations operations = mongoConfiguration.getMongoOperations(databaseName, mongoConnection);
+        StatisticsMongoWriter statisticsMongoWriter = new StatisticsMongoWriter(operations, COLLECTION_STATS_NAME);
         return statisticsMongoWriter;
     }
 }
