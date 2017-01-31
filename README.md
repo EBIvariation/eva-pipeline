@@ -14,7 +14,7 @@ The pipeline automatically tracks the job status, and avoids waste of computatio
 
 The pipeline has been implemented in Java and uses the Maven build system.
 
-In order to run, the pipeline needs access to a MongoDB database instance. The easiest way to set one up in a local machine is [using Docker](https://hub.docker.com/_/mongo/).
+In order to run, the pipeline needs access to a MongoDB 3.x database instance. The easiest way to set one up in a local machine is [using Docker](https://hub.docker.com/_/mongo/).
 
 If you want to generate and store variant annotations you will also need to [download Ensembl VEP](http://www.ensembl.org/info/docs/tools/vep/script/vep_download.html). Please note this software requires Perl to be installed.
 
@@ -28,15 +28,13 @@ git clone https://github.com/EBIvariation/opencga.git
 cd opencga && mvn clean install -DskipTests
 ```
 
-### Build
+## Build
 
 The latest stable version can be found in the [master](https://github.com/EBIvariation/eva-pipeline/tree/master) branch. [develop](https://github.com/EBIvariation/eva-pipeline/tree/develop) contains work in progress, which is fully tested but could be more unstable.
 
 If a MongoDB instance is available in the machine where you are running the build, you can test and build the application with `mvn test package`, otherwise please run `mvn package -DskipTests`.
 
 ## Run
-
-Once successfully built, you can simply run the produced JAR file with `java -jar target/eva-pipeline-2.0-beta2-SNAPSHOT.jar`.
 
 Arguments to run the pipeline can be provided either using the command line or a properties file. Skeletons to load genotyped and aggregated VCF files are provided in the `examples` folder.
 
@@ -46,15 +44,16 @@ Arguments to run the pipeline can be provided either using the command line or a
 
 If more convenient for your use case, the global configuration and job parameters files can be merged into one.
 
-It is likely that you will need to change some parameters to fit your installation and/or or configure your job. For instance, 
-the location of your MongoDB databases, your OpenCGA/VEP installation directory, the folder were your files are, the type of job to run, etc.
+It is likely that you will need to edit some parameters to match your environment and/or configure your job. For instance, connection details to MongoDB databases, OpenCGA/VEP installation directories, the folder containing the input files, the type of job to run, etc.
+
+**Note:** Most of the environment configuration can be provided directly to the application, but MongoDB connection details also need to be filled in the OpenCGA configuration file. The installation folder is by default located in `<OpenCGA root folder>/opencga-app/build`, but can be moved to any destination of your choice. The configuration is located in `<OpenCGA installation folder>/conf/storage-mongodb.properties`.
 
 By using these properties files, a job can be launched with a single command like:
 
     java -jar target/eva-pipeline-2.0-beta2-SNAPSHOT.jar \
         --spring.config.location=file:examples/application.properties,file:examples/load-genotyped-vcf.properties
 
-The contents from the configuration files can be provided directly as command-line arguments, like the following:
+The contents from the configuration files can be also provided directly as command-line arguments, like the following:
 
     java -jar target/eva-pipeline-2.0-beta2-SNAPSHOT.jar \
         --spring.batch.job.names=load-genotyped-vcf \
