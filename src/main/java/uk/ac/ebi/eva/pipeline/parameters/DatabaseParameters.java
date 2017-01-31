@@ -41,6 +41,9 @@ public class DatabaseParameters {
     @Value(PARAMETER + JobParametersNames.DB_COLLECTIONS_FILES_NAME + END)
     private String collectionFilesName;
 
+    @Value(PARAMETER + JobParametersNames.DB_COLLECTIONS_FEATURES_NAME + END)
+    private String collectionFeaturesName;
+
     @Value("${" + JobParametersNames.CONFIG_DB_HOSTS + ":#{null}}")
     private String hosts;
 
@@ -55,6 +58,7 @@ public class DatabaseParameters {
 
     @Value("${" + JobParametersNames.CONFIG_DB_READPREFERENCE + ":#{null}}")
     private String readPreference;
+
 
     public MongoConnection getMongoConnection() {
         return new MongoConnection(hosts, authenticationDatabase, user, password, readPreference);
@@ -90,5 +94,9 @@ public class DatabaseParameters {
 
     public String getReadPreference() {
         return readPreference;
+    }
+
+    public String getCollectionFeaturesName() {
+        return collectionFeaturesName;
     }
 }

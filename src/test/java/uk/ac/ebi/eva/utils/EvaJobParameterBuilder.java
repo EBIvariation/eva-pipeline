@@ -64,6 +64,11 @@ public class EvaJobParameterBuilder extends JobParametersBuilder {
         return this;
     }
 
+    public EvaJobParameterBuilder collectionFeaturesName(String collectionFeaturesName) {
+        addParameter(JobParametersNames.DB_COLLECTIONS_FEATURES_NAME, new JobParameter(collectionFeaturesName));
+        return this;
+    }
+
     public EvaJobParameterBuilder vepPath(String vepPath) {
         addParameter(JobParametersNames.APP_VEP_PATH, new JobParameter(vepPath));
         return this;
