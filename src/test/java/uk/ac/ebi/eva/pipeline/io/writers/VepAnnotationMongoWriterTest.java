@@ -36,6 +36,7 @@ import uk.ac.ebi.eva.pipeline.configuration.MongoConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.writers.VariantAnnotationWriterConfiguration;
 import uk.ac.ebi.eva.pipeline.io.mappers.AnnotationLineMapper;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
+import uk.ac.ebi.eva.pipeline.parameters.MongoConnection;
 import uk.ac.ebi.eva.test.configuration.BaseTestConfiguration;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 import uk.ac.ebi.eva.utils.MongoDBHelper;
@@ -59,7 +60,7 @@ import static uk.ac.ebi.eva.test.data.VepOutputContent.vepOutputContent;
  */
 @RunWith(SpringRunner.class)
 @ActiveProfiles("variant-annotation-mongo")
-@TestPropertySource("classpath:annotation.properties")
+@TestPropertySource({"classpath:annotation.properties", "classpath:test-mongo.properties"})
 @ContextConfiguration(classes = {BaseTestConfiguration.class, VariantAnnotationWriterConfiguration.class})
 public class VepAnnotationMongoWriterTest {
 
@@ -71,6 +72,10 @@ public class VepAnnotationMongoWriterTest {
 
     @Autowired
     private JobOptions jobOptions;
+
+    @Autowired
+    private MongoConnection mongoConnection;
+
 
     private DBObjectToVariantAnnotationConverter converter;
     private VepAnnotationMongoWriter annotationWriter;
@@ -92,8 +97,7 @@ public class VepAnnotationMongoWriterTest {
         writeIdsIntoMongo(annotations, variants);
 
         // now, load the annotation
-        MongoOperations operations = mongoConfiguration.getMongoOperations(
-                databaseName, jobOptions.getMongoConnection());
+        MongoOperations operations = mongoConfiguration.getMongoOperations(databaseName, mongoConnection);
         annotationWriter = new VepAnnotationMongoWriter(operations, dbCollectionVariantsName);
         annotationWriter.write(annotations);
 
@@ -151,8 +155,7 @@ public class VepAnnotationMongoWriterTest {
         }
 
         // now, load the annotation
-        MongoOperations operations = mongoConfiguration.getMongoOperations(
-                databaseName, jobOptions.getMongoConnection());
+        MongoOperations operations = mongoConfiguration.getMongoOperations(databaseName, mongoConnection);
         annotationWriter = new VepAnnotationMongoWriter(operations, dbCollectionVariantsName);
 
         annotationWriter.write(annotationSet1);

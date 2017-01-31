@@ -21,6 +21,7 @@ import org.junit.Test;
 import org.opencb.opencga.storage.mongodb.variant.DBObjectToVariantConverter;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.test.MetaDataInstanceFactory;
+
 import uk.ac.ebi.eva.pipeline.model.VariantWrapper;
 import uk.ac.ebi.eva.test.data.VariantData;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;

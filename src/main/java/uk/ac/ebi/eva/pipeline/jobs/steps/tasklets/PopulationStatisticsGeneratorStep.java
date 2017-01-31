@@ -33,6 +33,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import uk.ac.ebi.eva.pipeline.parameters.DatabaseParameters;
 import uk.ac.ebi.eva.pipeline.parameters.InputParameters;
+import uk.ac.ebi.eva.pipeline.parameters.MongoConnection;
 import uk.ac.ebi.eva.pipeline.parameters.OutputParameters;
 import uk.ac.ebi.eva.utils.MongoDBHelper;
 import uk.ac.ebi.eva.utils.URLHelper;
@@ -102,16 +103,17 @@ public class PopulationStatisticsGeneratorStep implements Tasklet {
         variantOptions.put(VariantStatisticsManager.BATCH_SIZE, inputParameters.getChunkSize());
 
         variantOptions.put(VariantStorageManager.DB_NAME, dbParameters.getDatabaseName());
+        MongoConnection mongoConnection = dbParameters.getMongoConnection();
         variantOptions.put(MongoDBVariantStorageManager.OPENCGA_STORAGE_MONGODB_VARIANT_DB_NAME,
                 dbParameters.getDatabaseName());
         variantOptions.put(MongoDBVariantStorageManager.OPENCGA_STORAGE_MONGODB_VARIANT_DB_HOSTS,
-                dbParameters.getHosts());
+                mongoConnection.getHosts());
         variantOptions.put(MongoDBVariantStorageManager.OPENCGA_STORAGE_MONGODB_VARIANT_DB_AUTHENTICATION_DB,
-                dbParameters.getAuthenticationDatabase());
+                mongoConnection.getAuthenticationDatabase());
         variantOptions.put(MongoDBVariantStorageManager.OPENCGA_STORAGE_MONGODB_VARIANT_DB_USER,
-                dbParameters.getUser());
+                mongoConnection.getUser());
         variantOptions.put(MongoDBVariantStorageManager.OPENCGA_STORAGE_MONGODB_VARIANT_DB_PASS,
-                dbParameters.getPassword());
+                mongoConnection.getPassword());
 
         return variantOptions;
     }

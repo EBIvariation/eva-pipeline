@@ -27,8 +27,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import uk.ac.ebi.eva.utils.MongoConnection;
-
 import javax.annotation.PostConstruct;
 
 import java.io.File;
@@ -296,9 +294,5 @@ public class JobOptions {
 
     public String getOutputDir() {
         return getPipelineOptions().getString(JobParametersNames.OUTPUT_DIR);
-    }
-
-    public MongoConnection getMongoConnection() {
-        return new MongoConnection(dbHosts, dbAuthenticationDb, dbUser, dbPassword, readPreference);
     }
 }

@@ -44,6 +44,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import uk.ac.ebi.eva.pipeline.parameters.DatabaseParameters;
 import uk.ac.ebi.eva.pipeline.parameters.InputParameters;
+import uk.ac.ebi.eva.pipeline.parameters.MongoConnection;
 import uk.ac.ebi.eva.pipeline.parameters.OutputParameters;
 import uk.ac.ebi.eva.utils.URLHelper;
 
@@ -159,15 +160,16 @@ public class PopulationStatisticsLoaderStep implements Tasklet {
     }
 
     private MongoCredentials getMongoCredentials() throws IllegalOpenCGACredentialsException {
-        String hosts = dbParameters.getHosts();
+        MongoConnection mongoConnection = dbParameters.getMongoConnection();
+        String hosts = mongoConnection.getHosts();
         List<DataStoreServerAddress> dataStoreServerAddresses = MongoCredentials.parseDataStoreServerAddresses(hosts);
 
         String dbName = dbParameters.getDatabaseName();
-        String user = dbParameters.getUser();
-        String pass = dbParameters.getPassword();
+        String user = mongoConnection.getUser();
+        String pass = mongoConnection.getPassword();
 
         MongoCredentials mongoCredentials = new MongoCredentials(dataStoreServerAddresses, dbName, user, pass);
-        mongoCredentials.setAuthenticationDatabase(dbParameters.getAuthenticationDatabase());
+        mongoCredentials.setAuthenticationDatabase(mongoConnection.getAuthenticationDatabase());
         return mongoCredentials;
     }
 

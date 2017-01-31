@@ -34,7 +34,7 @@ import com.mongodb.MongoClient;
 import com.mongodb.MongoCredential;
 import com.mongodb.ReadPreference;
 
-import uk.ac.ebi.eva.utils.MongoConnection;
+import uk.ac.ebi.eva.pipeline.parameters.MongoConnection;
 import uk.ac.ebi.eva.utils.MongoDBHelper;
 
 /**
@@ -49,14 +49,6 @@ public class MongoConfiguration {
     @Bean
     public MongoMappingContext mongoMappingContext() {
         return new MongoMappingContext();
-    }
-
-    public MongoOperations getDefaultMongoOperations(String database) throws UnknownHostException {
-        MongoClient mongoClient = new MongoClient();
-        mongoClient.setReadPreference(ReadPreference.primary());
-        MongoDbFactory mongoFactory = getMongoDbFactory(mongoClient, database);
-        MongoTemplate mongoTemplate = new MongoTemplate(mongoFactory, getMappingMongoConverter(mongoFactory));
-        return mongoTemplate;
     }
 
     public MongoOperations getMongoOperations(String database, MongoConnection connection) 
