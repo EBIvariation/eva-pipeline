@@ -15,6 +15,7 @@
  */
 package uk.ac.ebi.eva.utils;
 
+import com.sun.mail.imap.protocol.ENVELOPE;
 import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParametersBuilder;
 
@@ -61,6 +62,11 @@ public class EvaJobParameterBuilder extends JobParametersBuilder {
     }
     public EvaJobParameterBuilder collectionFilesName(String collectionFilesName) {
         addParameter(JobParametersNames.DB_COLLECTIONS_FILES_NAME, new JobParameter(collectionFilesName));
+        return this;
+    }
+
+    public EvaJobParameterBuilder collectionFeaturesName(String collectionFeaturesName) {
+        addParameter(JobParametersNames.DB_COLLECTIONS_FEATURES_NAME, new JobParameter(collectionFeaturesName));
         return this;
     }
 
