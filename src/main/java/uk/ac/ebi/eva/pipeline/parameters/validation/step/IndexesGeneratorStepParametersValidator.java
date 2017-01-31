@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2017 EMBL - European Bioinformatics Institute
+ * Copyright 2017 EMBL - European Bioinformatics Institute
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,11 +22,9 @@ import org.springframework.batch.core.job.CompositeJobParametersValidator;
 import org.springframework.batch.core.job.DefaultJobParametersValidator;
 
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
-import uk.ac.ebi.eva.pipeline.parameters.validation.ConfigChunkSizeValidator;
 import uk.ac.ebi.eva.pipeline.parameters.validation.ConfigRestartabilityAllowValidator;
 import uk.ac.ebi.eva.pipeline.parameters.validation.DbCollectionsFeaturesNameValidator;
 import uk.ac.ebi.eva.pipeline.parameters.validation.DbNameValidator;
-import uk.ac.ebi.eva.pipeline.parameters.validation.InputGtfValidator;
 import uk.ac.ebi.eva.pipeline.parameters.validation.OptionalValidator;
 
 import java.util.Arrays;

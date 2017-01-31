@@ -15,7 +15,6 @@
  */
 package uk.ac.ebi.eva.utils;
 
-import com.sun.mail.imap.protocol.ENVELOPE;
 import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParametersBuilder;
 
