@@ -19,6 +19,7 @@ package uk.ac.ebi.eva.pipeline.jobs;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.opencb.opencga.lib.common.Config;
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
@@ -78,6 +79,9 @@ public class GenotypedVcfJobWorkflowTest {
 
     @Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
+
+    private static String opencgaHome = System.getenv("OPENCGA_HOME") != null ? System
+            .getenv("OPENCGA_HOME") : "/opt/opencga";
 
     @Autowired
     private JobOptions jobOptions;  // we need this for stats.skip and annot.skip
@@ -210,6 +214,7 @@ public class GenotypedVcfJobWorkflowTest {
     }
 
     private JobParameters initVariantConfigurationJob() throws IOException {
+        Config.setOpenCGAHome(opencgaHome);
         File inputFile = getResource(INPUT_FILE);
         String dbName = mongoRule.getRandomTemporaryDatabaseName();
         String outputDirStats = temporaryFolderRule.newFolder().getAbsolutePath();

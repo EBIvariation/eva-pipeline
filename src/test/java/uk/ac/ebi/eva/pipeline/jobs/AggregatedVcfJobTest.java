@@ -21,6 +21,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.opencb.biodata.models.variant.Variant;
 import org.opencb.datastore.core.QueryOptions;
+import org.opencb.opencga.lib.common.Config;
 import org.opencb.opencga.storage.core.StorageManagerFactory;
 import org.opencb.opencga.storage.core.variant.VariantStorageManager;
 import org.opencb.opencga.storage.core.variant.adaptors.VariantDBAdaptor;
@@ -74,11 +75,15 @@ public class AggregatedVcfJobTest {
     @Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
 
+    private static String opencgaHome = System.getenv("OPENCGA_HOME") != null ? System
+            .getenv("OPENCGA_HOME") : "/opt/opencga";
+
     public static final Set<String> EXPECTED_REQUIRED_STEP_NAMES = new TreeSet<>(
             Arrays.asList(BeanNames.LOAD_VARIANTS_STEP, BeanNames.LOAD_FILE_STEP));
 
     @Test
     public void aggregatedTransformAndLoadShouldBeExecuted() throws Exception {
+        Config.setOpenCGAHome(opencgaHome);
         String dbName = mongoRule.getRandomTemporaryDatabaseName();
 
         JobParameters jobParameters = new EvaJobParameterBuilder()
