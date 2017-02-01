@@ -16,7 +16,6 @@
 package uk.ac.ebi.eva.pipeline.jobs;
 
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -38,16 +37,14 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-
 import uk.ac.ebi.eva.pipeline.Application;
 import uk.ac.ebi.eva.pipeline.configuration.BeanNames;
-import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
-import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
 import uk.ac.ebi.eva.utils.EvaJobParameterBuilder;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -70,25 +67,13 @@ import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResource;
 @TestPropertySource({"classpath:variant-aggregated.properties", "classpath:test-mongo.properties"})
 @ContextConfiguration(classes = {AggregatedVcfJob.class, BatchTestConfiguration.class})
 public class AggregatedVcfJobTest {
-
-    // TODO this test can't be modified to use fully the temporary folder rule / mongo rule.
+    public static final String INPUT = "/aggregated.vcf.gz";
 
     @Rule
     public TemporaryMongoRule mongoRule = new TemporaryMongoRule();
 
     @Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
-
-    @Autowired
-    private JobOptions jobOptions;
-
-    private String input;
-
-    private String outputDir;
-
-    private String compressExtension;
-
-    private String dbName;
 
     private static String opencgaHome = System.getenv("OPENCGA_HOME") != null ? System
             .getenv("OPENCGA_HOME") : "/opt/opencga";
@@ -99,13 +84,13 @@ public class AggregatedVcfJobTest {
     @Test
     public void aggregatedTransformAndLoadShouldBeExecuted() throws Exception {
         Config.setOpenCGAHome(opencgaHome);
-        mongoRule.getTemporaryDatabase(dbName);
+        String dbName = mongoRule.getRandomTemporaryDatabaseName();
 
         JobParameters jobParameters = new EvaJobParameterBuilder()
                 .collectionVariantsName("variants")
                 .databaseName(dbName)
                 .inputStudyId("aggregated-job")
-                .inputVcf(getResource(input).getAbsolutePath())
+                .inputVcf(getResource(INPUT).getAbsolutePath())
                 .inputVcfAggregation("BASIC")
                 .inputVcfId("1")
                 .timestamp()
@@ -132,7 +117,7 @@ public class AggregatedVcfJobTest {
         VariantDBAdaptor variantDBAdaptor = variantStorageManager.getDBAdaptor(dbName, null);
         VariantDBIterator iterator = variantDBAdaptor.iterator(new QueryOptions());
 
-        String file = jobOptions.getPipelineOptions().getString(JobParametersNames.INPUT_VCF);
+        File file = getResource(INPUT);
         long lines = JobTestUtils.getLines(new GZIPInputStream(new FileInputStream(file)));
         Assert.assertEquals(lines, JobTestUtils.count(iterator));
 
@@ -173,18 +158,5 @@ public class AggregatedVcfJobTest {
 //        assertEquals(ExitStatus.FAILED, jobExecution.getExitStatus());
 //        assertEquals(BatchStatus.FAILED, jobExecution.getStatus());
 //    }
-
-    @Before
-    public void setUp() throws Exception {
-        jobOptions.loadArgs();
-
-        input = jobOptions.getPipelineOptions().getString(JobParametersNames.INPUT_VCF);
-        outputDir = jobOptions.getOutputDir();
-        compressExtension = jobOptions.getPipelineOptions().getString("compressExtension");
-        dbName = jobOptions.getPipelineOptions().getString(JobParametersNames.DB_NAME);
-
-        String inputFile = AggregatedVcfJobTest.class.getResource(input).getFile();
-        jobOptions.getPipelineOptions().put(JobParametersNames.INPUT_VCF, inputFile);
-    }
 
 }

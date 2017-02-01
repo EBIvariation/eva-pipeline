@@ -24,7 +24,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.opencb.biodata.models.variant.VariantSource;
 import org.opencb.biodata.models.variant.VariantStudy;
-import org.opencb.opencga.storage.core.variant.VariantStorageManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.test.context.ContextConfiguration;
@@ -35,8 +34,7 @@ import uk.ac.ebi.eva.commons.models.data.VariantSourceEntity;
 import uk.ac.ebi.eva.pipeline.configuration.MongoConfiguration;
 import uk.ac.ebi.eva.pipeline.io.readers.VcfHeaderReader;
 import uk.ac.ebi.eva.pipeline.jobs.steps.LoadFileStep;
-import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
-import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
+import uk.ac.ebi.eva.pipeline.parameters.MongoConnection;
 import uk.ac.ebi.eva.test.configuration.BaseTestConfiguration;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 
@@ -59,17 +57,29 @@ import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResource;
  * date, aggregation. Stats are not there because those are written by the statistics job.
  */
 @RunWith(SpringRunner.class)
-@TestPropertySource({"classpath:genotyped-vcf.properties"})
+@TestPropertySource({"classpath:genotyped-vcf.properties", "classpath:test-mongo.properties"})
 @ContextConfiguration(classes = {BaseTestConfiguration.class, LoadFileStep.class})
 public class VariantSourceEntityMongoWriterTest {
 
     private static final String SMALL_VCF_FILE = "/small20.vcf.gz";
 
+    private static final String COLLECTION_FILES_NAME = "files";
+
+    private static final String FILE_ID = "1";
+
+    private static final String STUDY_ID = "1";
+
+    private static final String STUDY_NAME = "small";
+
+    private static final VariantStudy.StudyType STUDY_TYPE = VariantStudy.StudyType.COLLECTION;
+
+    private static final VariantSource.Aggregation AGGREGATION = VariantSource.Aggregation.NONE;
+
     @Rule
     public TemporaryMongoRule mongoRule = new TemporaryMongoRule();
 
     @Autowired
-    private JobOptions jobOptions;
+    private MongoConnection mongoConnection;
 
     @Autowired
     private MongoConfiguration mongoConfiguration;
@@ -79,12 +89,11 @@ public class VariantSourceEntityMongoWriterTest {
     @Test
     public void shouldWriteAllFieldsIntoMongoDb() throws Exception {
         String databaseName = mongoRule.getRandomTemporaryDatabaseName();
-        MongoOperations mongoOperations = mongoConfiguration.getMongoOperations(
-                databaseName, jobOptions.getMongoConnection());
-        DBCollection fileCollection = mongoRule.getCollection(databaseName, jobOptions.getDbCollectionsFilesName());
+        MongoOperations mongoOperations = mongoConfiguration.getMongoOperations(databaseName, mongoConnection);
+        DBCollection fileCollection = mongoRule.getCollection(databaseName, COLLECTION_FILES_NAME);
 
         VariantSourceEntityMongoWriter filesWriter = new VariantSourceEntityMongoWriter(
-                mongoOperations, jobOptions.getDbCollectionsFilesName());
+                mongoOperations, COLLECTION_FILES_NAME);
 
         VariantSourceEntity variantSourceEntity = getVariantSourceEntity();
         filesWriter.write(Collections.singletonList(variantSourceEntity));
@@ -119,12 +128,11 @@ public class VariantSourceEntityMongoWriterTest {
     @Test
     public void shouldWriteSamplesWithDotsInName() throws Exception {
         String databaseName = mongoRule.getRandomTemporaryDatabaseName();
-        MongoOperations mongoOperations = mongoConfiguration.getMongoOperations(
-                databaseName, jobOptions.getMongoConnection());
-        DBCollection fileCollection = mongoRule.getCollection(databaseName, jobOptions.getDbCollectionsFilesName());
+        MongoOperations mongoOperations = mongoConfiguration.getMongoOperations(databaseName, mongoConnection);
+        DBCollection fileCollection = mongoRule.getCollection(databaseName, COLLECTION_FILES_NAME);
 
         VariantSourceEntityMongoWriter filesWriter = new VariantSourceEntityMongoWriter(
-                mongoOperations, jobOptions.getDbCollectionsFilesName());
+                mongoOperations, COLLECTION_FILES_NAME);
 
         VariantSourceEntity variantSourceEntity = getVariantSourceEntity();
         Map<String, Integer> samplesPosition = new HashMap<>();
@@ -148,16 +156,8 @@ public class VariantSourceEntityMongoWriterTest {
     }
 
     private VariantSourceEntity getVariantSourceEntity() throws Exception {
-        VariantSource source = (VariantSource) jobOptions.getVariantOptions().get(
-                VariantStorageManager.VARIANT_SOURCE);
-        String fileId = source.getFileId();
-        String studyId = source.getStudyId();
-        String studyName = source.getStudyName();
-        VariantStudy.StudyType studyType = source.getType();
-        VariantSource.Aggregation aggregation = source.getAggregation();
-
-        VcfHeaderReader headerReader = new VcfHeaderReader(new File(input), fileId, studyId, studyName,
-                                                           studyType, aggregation);
+        VcfHeaderReader headerReader = new VcfHeaderReader(new File(input), FILE_ID, STUDY_ID, STUDY_NAME,
+                                                           STUDY_TYPE, AGGREGATION);
 
         return headerReader.read();
     }
@@ -165,6 +165,5 @@ public class VariantSourceEntityMongoWriterTest {
     @Before
     public void setUp() throws Exception {
         input = getResource(SMALL_VCF_FILE).getAbsolutePath();
-        jobOptions.getPipelineOptions().put(JobParametersNames.INPUT_VCF, input);
     }
 }

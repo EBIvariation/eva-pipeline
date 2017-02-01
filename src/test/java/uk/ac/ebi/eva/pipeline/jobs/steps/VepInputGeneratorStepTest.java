@@ -39,7 +39,6 @@ import uk.ac.ebi.eva.utils.URLHelper;
 import java.io.File;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static uk.ac.ebi.eva.test.utils.JobTestUtils.readFirstLine;
 import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResourceUrl;
@@ -83,12 +82,6 @@ public class VepInputGeneratorStepTest {
                 .inputVcfId(FILE_ID)
                 .outputDirAnnotation(outputDirAnnot)
                 .toJobParameters();
-
-        if (vepInput.exists()) {
-            vepInput.delete();
-        }
-
-        assertFalse(vepInput.exists());
 
         JobExecution jobExecution = jobLauncherTestUtils.launchStep(BeanNames.GENERATE_VEP_INPUT_STEP, jobParameters);
 

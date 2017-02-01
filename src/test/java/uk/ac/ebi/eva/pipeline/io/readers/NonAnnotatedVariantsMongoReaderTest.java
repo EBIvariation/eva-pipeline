@@ -16,7 +16,6 @@
 package uk.ac.ebi.eva.pipeline.io.readers;
 
 import com.mongodb.DBObject;
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -31,7 +30,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import uk.ac.ebi.eva.pipeline.configuration.MongoConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.readers.NonAnnotatedVariantsMongoReaderConfiguration;
-import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
+import uk.ac.ebi.eva.pipeline.parameters.MongoConnection;
 import uk.ac.ebi.eva.test.configuration.BaseTestConfiguration;
 import uk.ac.ebi.eva.test.data.VariantData;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
@@ -49,7 +48,7 @@ import static org.junit.Assert.assertTrue;
  */
 @RunWith(SpringRunner.class)
 @ActiveProfiles("variant-annotation-mongo")
-@TestPropertySource("classpath:annotation.properties")
+@TestPropertySource({"classpath:annotation.properties", "classpath:test-mongo.properties"})
 @ContextConfiguration(classes = {NonAnnotatedVariantsMongoReaderConfiguration.class, BaseTestConfiguration.class})
 public class NonAnnotatedVariantsMongoReaderTest {
 
@@ -57,30 +56,26 @@ public class NonAnnotatedVariantsMongoReaderTest {
     private static final String DOC_START = "start";
     private static final String DOC_ANNOT = "annot";
 
+    private static final String COLLECTION_VARIANTS_NAME = "variants";
+
     @Rule
     public TemporaryMongoRule mongoRule = new TemporaryMongoRule();
 
     @Autowired
-    private JobOptions jobOptions;
-
-    @Autowired
     private MongoConfiguration mongoConfiguration;
 
-    @Before
-    public void setUp() throws Exception {
-        jobOptions.loadArgs();
-    }
+    @Autowired
+    private MongoConnection mongoConnection;
 
     @Test
     public void shouldReadVariantsWithoutAnnotationField() throws Exception {
         ExecutionContext executionContext = MetaDataInstanceFactory.createStepExecution().getExecutionContext();
-        String databaseName = insertDocuments(jobOptions.getDbCollectionsVariantsName());
+        String databaseName = insertDocuments(COLLECTION_VARIANTS_NAME);
 
-        MongoOperations mongoOperations = mongoConfiguration.getMongoOperations(databaseName,
-                jobOptions.getMongoConnection());
+        MongoOperations mongoOperations = mongoConfiguration.getMongoOperations(databaseName, mongoConnection);
 
         NonAnnotatedVariantsMongoReader mongoItemReader = new NonAnnotatedVariantsMongoReader(
-                mongoOperations, jobOptions.getDbCollectionsVariantsName());
+                mongoOperations, COLLECTION_VARIANTS_NAME);
         mongoItemReader.open(executionContext);
 
         int itemCount = 0;
