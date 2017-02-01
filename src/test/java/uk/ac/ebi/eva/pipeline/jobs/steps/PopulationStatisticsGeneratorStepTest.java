@@ -31,7 +31,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import uk.ac.ebi.eva.pipeline.configuration.BeanNames;
 import uk.ac.ebi.eva.pipeline.jobs.PopulationStatisticsJob;
 import uk.ac.ebi.eva.pipeline.jobs.steps.tasklets.PopulationStatisticsGeneratorStep;
-import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
@@ -70,7 +69,7 @@ public class PopulationStatisticsGeneratorStepTest {
     @Test
     public void statisticsGeneratorStepShouldCalculateStats() throws IOException, InterruptedException, URISyntaxException {
         //Given a valid VCF input file
-        String databaseName = mongoRule.getRandomTemporaryDatabaseName();
+        String databaseName = mongoRule.restoreDumpInTemporaryDatabase(getResourceUrl(MONGO_DUMP));
         String statsDir = temporaryFolderRule.getRoot().getAbsolutePath();
         String studyId = "1";
         String fileId = "1";
@@ -80,11 +79,8 @@ public class PopulationStatisticsGeneratorStepTest {
                 .inputVcf(SMALL_VCF_FILE)
                 .inputStudyId(studyId)
                 .inputVcfId(fileId)
-                .addString(JobParametersNames.OUTPUT_DIR_STATISTICS, statsDir)
+                .outputDirStats(statsDir)
                 .toJobParameters();
-
-        //and a valid variants load step already completed
-        mongoRule.restoreDump(getResourceUrl(MONGO_DUMP), databaseName);
 
         // and non-existent variants stats file and variantSource stats file
         File statsFile = new File(URLHelper.getVariantsStatsUri(statsDir, studyId, fileId));
@@ -113,24 +109,20 @@ public class PopulationStatisticsGeneratorStepTest {
         //Given a valid VCF input file
         String databaseName = mongoRule.getRandomTemporaryDatabaseName();
         String statsDir = temporaryFolderRule.getRoot().getAbsolutePath();
-        String sid = "sid";
-        String fid = "fid";
+        String wrongId = "non-existent-id";
 
         JobParameters jobParameters = new EvaJobParameterBuilder()
                 .databaseName(databaseName)
                 .inputVcf(SMALL_VCF_FILE)
-                .inputStudyId(sid)
-                .inputVcfId(fid)
+                .inputStudyId(wrongId)
+                .inputVcfId(wrongId)
                 .outputDirStats(statsDir)
                 .toJobParameters();
 
-        //and a valid variants load step already completed
-        mongoRule.restoreDump(getResourceUrl(MONGO_DUMP), databaseName);
-
         // and non-existent variants stats file and variantSource stats file
-        File statsFile = new File(URLHelper.getVariantsStatsUri(statsDir, sid, fid));
+        File statsFile = new File(URLHelper.getVariantsStatsUri(statsDir, wrongId, wrongId));
         assertFalse(statsFile.exists());
-        File sourceStatsFile = new File(URLHelper.getSourceStatsUri(statsDir, sid, fid));
+        File sourceStatsFile = new File(URLHelper.getSourceStatsUri(statsDir, wrongId, wrongId));
         assertFalse(sourceStatsFile.exists());
 
         // When the execute method in variantsStatsCreate is executed

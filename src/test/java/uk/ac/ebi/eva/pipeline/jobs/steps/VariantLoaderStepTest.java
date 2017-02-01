@@ -19,8 +19,6 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.opencb.biodata.models.variant.VariantSource;
-import org.opencb.biodata.models.variant.VariantStudy;
 import org.opencb.datastore.core.QueryOptions;
 import org.opencb.opencga.lib.common.Config;
 import org.opencb.opencga.storage.core.StorageManagerFactory;
@@ -37,18 +35,15 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
+
 import uk.ac.ebi.eva.pipeline.Application;
 import uk.ac.ebi.eva.pipeline.configuration.BeanNames;
 import uk.ac.ebi.eva.pipeline.jobs.GenotypedVcfJob;
-import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
-import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
-import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 import uk.ac.ebi.eva.utils.EvaJobParameterBuilder;
 
 import static org.junit.Assert.assertEquals;
-import static org.opencb.opencga.storage.core.variant.VariantStorageManager.VARIANT_SOURCE;
 import static uk.ac.ebi.eva.test.utils.JobTestUtils.count;
 import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResource;
 
@@ -66,16 +61,10 @@ public class VariantLoaderStepTest {
     private static final String SMALL_VCF_FILE = "/small20.vcf.gz";
 
     @Rule
-    public PipelineTemporaryFolderRule temporaryFolderRule = new PipelineTemporaryFolderRule();
-
-    @Rule
     public TemporaryMongoRule mongoRule = new TemporaryMongoRule();
 
     @Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
-
-    @Autowired
-    private JobOptions jobOptions;
 
     private String input;
 
@@ -84,20 +73,8 @@ public class VariantLoaderStepTest {
 
     @Test
     public void loaderStepShouldLoadAllVariants() throws Exception {
-        String outputDir = temporaryFolderRule.getRoot().getAbsolutePath();
-        jobOptions.getPipelineOptions().put(JobParametersNames.OUTPUT_DIR, outputDir);
-
         Config.setOpenCGAHome(opencgaHome);
-
         String databaseName = mongoRule.getRandomTemporaryDatabaseName();
-        jobOptions.setDbName(databaseName);
-        jobOptions.getVariantOptions().put(VARIANT_SOURCE, new VariantSource(
-                input,
-                "1",
-                "1",
-                "studyName",
-                VariantStudy.StudyType.COLLECTION,
-                VariantSource.Aggregation.NONE));
 
         // When the execute method in variantsLoad is executed
         JobParameters jobParameters = new EvaJobParameterBuilder()
@@ -126,7 +103,6 @@ public class VariantLoaderStepTest {
     @Before
     public void setUp() throws Exception {
         input = getResource(SMALL_VCF_FILE).getAbsolutePath();
-        jobOptions.getPipelineOptions().put(JobParametersNames.INPUT_VCF, input);
     }
 
 }

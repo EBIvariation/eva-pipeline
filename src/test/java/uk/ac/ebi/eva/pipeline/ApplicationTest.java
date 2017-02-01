@@ -32,11 +32,18 @@ import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 @TestPropertySource({"classpath:test-mongo.properties"})
 public class ApplicationTest {
 
-    @Autowired
-    JobExplorer jobExplorer;
+    /**
+     * Used for .getJobInstances(). It asks for a jobInstanceId and the count of job instances to return.
+     */
+    private static final int FIRST_JOB_INSTANCE = 0;
+
+    private static final int EXPECTED_JOB_COUNT = 1;
 
     @Autowired
-    JobOptions jobOptions;
+    private JobExplorer jobExplorer;
+
+    @Autowired
+    private JobOptions jobOptions;
 
     @Rule
     public TemporaryMongoRule mongoRule = new TemporaryMongoRule();
@@ -45,13 +52,14 @@ public class ApplicationTest {
     public void main() throws Exception {
         mongoRule.getTemporaryDatabase(jobOptions.getDbName());
 
-        Assert.assertEquals(1, jobExplorer.getJobNames().size());
+        Assert.assertEquals(EXPECTED_JOB_COUNT, jobExplorer.getJobNames().size());
         Assert.assertEquals(BeanNames.GENOTYPED_VCF_JOB, jobExplorer.getJobNames().get(0));
+        Assert.assertEquals(EXPECTED_JOB_COUNT, jobExplorer.getJobInstanceCount(BeanNames.GENOTYPED_VCF_JOB));
 
-        List<JobInstance> jobInstances = jobExplorer.getJobInstances(BeanNames.GENOTYPED_VCF_JOB, 0, 100);
-        Assert.assertEquals(1, jobInstances.size());
+        JobInstance jobInstance = jobExplorer.getJobInstances(
+                BeanNames.GENOTYPED_VCF_JOB, FIRST_JOB_INSTANCE, EXPECTED_JOB_COUNT).get(0);
 
-        JobExecution jobExecution = jobExplorer.getJobExecution(jobInstances.get(0).getInstanceId());
+        JobExecution jobExecution = jobExplorer.getJobExecution(jobInstance.getInstanceId());
         Assert.assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
     }
 }
