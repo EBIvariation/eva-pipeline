@@ -34,6 +34,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import uk.ac.ebi.eva.commons.models.converters.data.VariantToDBObjectConverter;
 import uk.ac.ebi.eva.pipeline.Application;
 import uk.ac.ebi.eva.pipeline.configuration.BeanNames;
 import uk.ac.ebi.eva.pipeline.jobs.AnnotationJob;
@@ -101,11 +102,11 @@ public class AnnotationLoaderStepTest {
 
         DBObjectToVariantAnnotationConverter converter = new DBObjectToVariantAnnotationConverter();
 
-        int cnt = 0;
+        int count = 0;
         int consequenceTypeCount = 0;
         while (cursor.hasNext()) {
-            cnt++;
-            DBObject dbObject = (DBObject) cursor.next().get("annot");
+            count++;
+            DBObject dbObject = (DBObject) cursor.next().get(VariantToDBObjectConverter.ANNOTATION_FIELD);
             if (dbObject != null) {
                 VariantAnnotation annot = converter.convertToDataModelType(dbObject);
                 Assert.assertNotNull(annot.getConsequenceTypes());
@@ -113,7 +114,7 @@ public class AnnotationLoaderStepTest {
             }
         }
 
-        assertEquals(300, cnt);
+        assertEquals(300, count);
         assertTrue("Annotations not found", consequenceTypeCount > 0);
     }
 

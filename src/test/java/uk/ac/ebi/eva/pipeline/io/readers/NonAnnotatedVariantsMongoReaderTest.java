@@ -28,6 +28,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import uk.ac.ebi.eva.commons.models.converters.data.VariantToDBObjectConverter;
 import uk.ac.ebi.eva.pipeline.configuration.MongoConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.readers.NonAnnotatedVariantsMongoReaderConfiguration;
 import uk.ac.ebi.eva.pipeline.parameters.MongoConnection;
@@ -52,11 +53,9 @@ import static org.junit.Assert.assertTrue;
 @ContextConfiguration(classes = {NonAnnotatedVariantsMongoReaderConfiguration.class, BaseTestConfiguration.class})
 public class NonAnnotatedVariantsMongoReaderTest {
 
-    private static final String DOC_CHR = "chr";
-    private static final String DOC_START = "start";
-    private static final String DOC_ANNOT = "annot";
-
     private static final String COLLECTION_VARIANTS_NAME = "variants";
+
+    private static final int EXPECTED_NON_ANNOTATED_VARIANTS = 1;
 
     @Rule
     public TemporaryMongoRule mongoRule = new TemporaryMongoRule();
@@ -82,11 +81,11 @@ public class NonAnnotatedVariantsMongoReaderTest {
         DBObject doc;
         while ((doc = mongoItemReader.read()) != null) {
             itemCount++;
-            assertTrue(doc.containsField(DOC_CHR));
-            assertTrue(doc.containsField(DOC_START));
-            assertFalse(doc.containsField(DOC_ANNOT));
+            assertTrue(doc.containsField(VariantToDBObjectConverter.CHROMOSOME_FIELD));
+            assertTrue(doc.containsField(VariantToDBObjectConverter.START_FIELD));
+            assertFalse(doc.containsField(VariantToDBObjectConverter.ANNOTATION_FIELD));
         }
-        assertEquals(itemCount, 1);
+        assertEquals(EXPECTED_NON_ANNOTATED_VARIANTS, itemCount);
         mongoItemReader.close();
     }
 

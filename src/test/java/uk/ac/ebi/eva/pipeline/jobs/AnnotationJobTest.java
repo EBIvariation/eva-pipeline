@@ -36,6 +36,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import uk.ac.ebi.eva.commons.models.converters.data.VariantToDBObjectConverter;
 import uk.ac.ebi.eva.pipeline.configuration.BeanNames;
 import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
@@ -137,7 +138,7 @@ public class AnnotationJobTest {
         int consequenceTypeCount = 0;
         while (cursor.hasNext()) {
             count++;
-            DBObject dbObject = (DBObject) cursor.next().get("annot");
+            DBObject dbObject = (DBObject) cursor.next().get(VariantToDBObjectConverter.ANNOTATION_FIELD);
             if (dbObject != null) {
                 VariantAnnotation annot = converter.convertToDataModelType(dbObject);
                 assertNotNull(annot.getConsequenceTypes());

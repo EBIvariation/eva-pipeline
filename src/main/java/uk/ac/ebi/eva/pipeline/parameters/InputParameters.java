@@ -43,6 +43,9 @@ public class InputParameters {
     @Value(PARAMETER + JobParametersNames.INPUT_GTF + END)
     private String gtf;
 
+    @Value(PARAMETER + JobParametersNames.INPUT_PEDIGREE + END)
+    private String pedigree;
+
     @Value(PARAMETER + JobParametersNames.INPUT_VCF_AGGREGATION + "']?:'NONE'}")
     private String vcfAggregation;
 
@@ -101,5 +104,9 @@ public class InputParameters {
 
     public String getGtf() {
         return gtf;
+    }
+
+    public String getPedigree() {
+        return pedigree;
     }
 }
