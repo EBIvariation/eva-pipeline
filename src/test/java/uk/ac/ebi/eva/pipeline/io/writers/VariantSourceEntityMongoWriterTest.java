@@ -77,6 +77,10 @@ public class VariantSourceEntityMongoWriterTest {
 
     private static final String STUDY_NAME = "small";
 
+    private static final VariantStudy.StudyType STUDY_TYPE = VariantStudy.StudyType.COLLECTION;
+
+    private static final VariantSource.Aggregation AGGREGATION = VariantSource.Aggregation.NONE;
+
     @Rule
     public TemporaryMongoRule mongoRule = new TemporaryMongoRule();
 
@@ -186,12 +190,8 @@ public class VariantSourceEntityMongoWriterTest {
     }
 
     private VariantSourceEntity getVariantSourceEntity() throws Exception {
-        VariantStudy.StudyType studyType = VariantStudy.StudyType.COLLECTION;
-        VariantSource.Aggregation aggregation = VariantSource.Aggregation.NONE;
-
-        VcfHeaderReader headerReader = new VcfHeaderReader(new File(input), FILE_ID, STUDY_ID, STUDY_NAME, studyType,
-                aggregation);
-
+        VcfHeaderReader headerReader = new VcfHeaderReader(new File(input), FILE_ID, STUDY_ID, STUDY_NAME,
+                                                           STUDY_TYPE, AGGREGATION);
         return headerReader.read();
     }
 

@@ -112,13 +112,9 @@ public class GenotypedVcfJobTest {
 
         File variantsStatsFile = new File(URLHelper.getVariantsStatsUri(outputDirStats, INPUT_STUDY_ID, INPUT_VCF_ID));
         File sourceStatsFile = new File(URLHelper.getSourceStatsUri(outputDirStats, INPUT_STUDY_ID, INPUT_VCF_ID));
-        assertFalse(variantsStatsFile.exists());
-        assertFalse(sourceStatsFile.exists());
 
         File vepInputFile = new File(URLHelper.resolveVepInput(outputDirAnnotation, INPUT_STUDY_ID, INPUT_VCF_ID));
         File vepOutputFile = new File(URLHelper.resolveVepOutput(outputDirAnnotation, INPUT_STUDY_ID, INPUT_VCF_ID));
-        assertFalse(vepInputFile.exists());
-        assertFalse(vepOutputFile.exists());
 
         VariantDBIterator iterator;
 
