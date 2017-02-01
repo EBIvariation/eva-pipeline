@@ -21,6 +21,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.opencb.biodata.models.variant.Variant;
 import org.opencb.datastore.core.QueryOptions;
+import org.opencb.opencga.lib.common.Config;
 import org.opencb.opencga.storage.core.StorageManagerException;
 import org.opencb.opencga.storage.core.StorageManagerFactory;
 import org.opencb.opencga.storage.core.variant.VariantStorageManager;
@@ -97,8 +98,12 @@ public class GenotypedVcfJobTest {
     @Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
 
+    private static String opencgaHome = System.getenv("OPENCGA_HOME") != null ? System
+            .getenv("OPENCGA_HOME") : "/opt/opencga";
+
     @Test
     public void fullGenotypedVcfJob() throws Exception {
+        Config.setOpenCGAHome(opencgaHome);
         File inputFile = getResource(INPUT_FILE);
         String dbName = mongoRule.getRandomTemporaryDatabaseName();
 
