@@ -33,22 +33,30 @@ public class PedReader implements ItemReader<Pedigree> {
 
     private String pedigreePath;
 
+    private boolean readAlreadyDone;
+
     public PedReader(String pedigreePath) {
         this.pedigreePath = pedigreePath;
+        this.readAlreadyDone = false;
     }
 
     /**
-     * Maybe we should return null after the first call? this reader is intended to read just one element.
+     * The ItemReader interface requires a null to be returned after all the elements are read.
      */
     @Override
     public Pedigree read() throws Exception {
-        PedigreeReader pedigreeReader = new PedigreePedReader(pedigreePath);
-        if (!pedigreeReader.open()) {
-            throw new Exception("Couldn't open file " + pedigreePath);
-        }
-        Pedigree pedigree = pedigreeReader.read().get(0);
-        pedigreeReader.close();
+        if (readAlreadyDone) {
+            return null;
+        } else {
+            PedigreeReader pedigreeReader = new PedigreePedReader(pedigreePath);
+            if (!pedigreeReader.open()) {
+                throw new Exception("Couldn't open file " + pedigreePath);
+            }
+            Pedigree pedigree = pedigreeReader.read().get(0);
+            pedigreeReader.close();
 
-        return pedigree;
+            readAlreadyDone = true;
+            return pedigree;
+        }
     }
 }
