@@ -35,19 +35,21 @@ public class VcfHeaderReader implements ItemReader<VariantSourceEntity> {
 
     private final VariantSource source;
 
+    private boolean readAlreadyDone;
+
     public VcfHeaderReader(File file,
                            String fileId,
                            String studyId,
                            String studyName,
                            VariantStudy.StudyType type,
                            VariantSource.Aggregation aggregation) {
-        this.file = file;
-        this.source = new VariantSource(file.getName(), fileId, studyId, studyName, type, aggregation);
+        this(file, new VariantSource(file.getName(), fileId, studyId, studyName, type, aggregation));
     }
 
     public VcfHeaderReader(File file, VariantSource source) {
         this.file = file;
         this.source = source;
+        this.readAlreadyDone = false;
     }
 
     /**
@@ -73,13 +75,19 @@ public class VcfHeaderReader implements ItemReader<VariantSourceEntity> {
      */
     @Override
     public VariantSourceEntity read() throws Exception {
-        VariantVcfReader reader = new VariantVcfReader(source, file.getPath());
-        reader.open();
-        reader.pre();
-        reader.post();
-        reader.close();
+        if (readAlreadyDone) {
+            return null;
+        } else {
+            VariantVcfReader reader = new VariantVcfReader(source, file.getPath());
+            reader.open();
+            reader.pre();
+            reader.post();
+            reader.close();
 
-        source.addMetadata(VARIANT_FILE_HEADER_KEY, reader.getHeader());
-        return new VariantSourceEntity(source);
+            source.addMetadata(VARIANT_FILE_HEADER_KEY, reader.getHeader());
+
+            readAlreadyDone = true;
+            return new VariantSourceEntity(source);
+        }
     }
 }
