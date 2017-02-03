@@ -51,6 +51,7 @@ public class VcfHeaderReaderTest {
 
         VcfHeaderReader headerReader = new VcfHeaderReader(input, FILE_ID, STUDY_ID, STUDY_NAME,
                                                            studyType, aggregation);
+        headerReader.open(null);
         VariantSourceEntity source = headerReader.read();
 
         assertEquals(FILE_ID, source.getFileId());
@@ -85,6 +86,7 @@ public class VcfHeaderReaderTest {
         VcfHeaderReader headerReader = new VcfHeaderReader(input, FILE_ID, STUDY_ID, STUDY_NAME,
                                                            VariantStudy.StudyType.COLLECTION,
                                                            VariantSource.Aggregation.NONE);
+        headerReader.open(null);
         VariantSourceEntity source = headerReader.read();
 
         char CHARACTER_TO_REPLACE_DOTS = (char) 163;
@@ -115,6 +117,7 @@ public class VcfHeaderReaderTest {
         VcfHeaderReader headerReader = new VcfHeaderReader(input, FILE_ID, STUDY_ID, STUDY_NAME,
                                                            VariantStudy.StudyType.COLLECTION,
                                                            VariantSource.Aggregation.NONE);
+        headerReader.open(null);
         VariantSourceEntity source = headerReader.read();
 
         char CHARACTER_TO_REPLACE_DOTS = (char) 163;

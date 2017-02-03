@@ -20,7 +20,13 @@ import org.opencb.biodata.formats.pedigree.io.PedigreeReader;
 import org.opencb.biodata.models.pedigree.Pedigree;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.batch.item.ItemReader;
+import org.springframework.batch.item.ExecutionContext;
+import org.springframework.batch.item.ItemStreamException;
+import org.springframework.batch.item.file.ResourceAwareItemReaderItemStream;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
+
+import java.io.IOException;
 
 /**
  * ItemReader that parses a PED file
@@ -28,35 +34,85 @@ import org.springframework.batch.item.ItemReader;
  * PED specs
  * http://pngu.mgh.harvard.edu/~purcell/plink/data.shtml#ped
  */
-public class PedReader implements ItemReader<Pedigree> {
+public class PedReader implements ResourceAwareItemReaderItemStream<Pedigree> {
     private static final Logger logger = LoggerFactory.getLogger(PedReader.class);
-
-    private String pedigreePath;
 
     private boolean readAlreadyDone;
 
-    public PedReader(String pedigreePath) {
-        this.pedigreePath = pedigreePath;
+    private PedigreeReader pedigreeReader;
+
+    private Resource resource;
+
+    public PedReader() {
         this.readAlreadyDone = false;
     }
 
+    public PedReader(String pedigreePath) {
+        this();
+        setResource(new FileSystemResource(pedigreePath));
+    }
+
+    @Override
+    public void setResource(Resource resource) {
+        this.resource = resource;
+    }
+
     /**
-     * The ItemReader interface requires a null to be returned after all the elements are read.
+     * The ItemReader interface requires a null to be returned after all the elements are read, and we will just
+     * read one Pedigree from a ped file.
      */
     @Override
     public Pedigree read() throws Exception {
         if (readAlreadyDone) {
             return null;
         } else {
-            PedigreeReader pedigreeReader = new PedigreePedReader(pedigreePath);
-            if (!pedigreeReader.open()) {
-                throw new Exception("Couldn't open file " + pedigreePath);
-            }
-            Pedigree pedigree = pedigreeReader.read().get(0);
-            pedigreeReader.close();
-
             readAlreadyDone = true;
-            return pedigree;
+            return doRead();
         }
+    }
+
+    private Pedigree doRead() {
+        if (pedigreeReader == null) {
+            throw new IllegalStateException("The method PedReader.open() should be called before reading");
+        }
+        return pedigreeReader.read().get(0);
+    }
+
+    @Override
+    public void open(ExecutionContext executionContext) throws ItemStreamException {
+        readAlreadyDone = false;
+        checkResourceIsProvided();
+        String resourcePath = getResourcePath();
+        pedigreeReader = new PedigreePedReader(resourcePath);
+        doOpen(resourcePath);
+    }
+
+    private void checkResourceIsProvided() {
+        if (resource == null) {
+            throw new ItemStreamException("Resource was not provided.");
+        }
+    }
+
+    private String getResourcePath() {
+        try {
+            return resource.getFile().getAbsolutePath();
+        } catch (IOException innerException) {
+            throw new ItemStreamException(innerException);
+        }
+    }
+
+    private void doOpen(String path) {
+        if (!pedigreeReader.open()) {
+            throw new ItemStreamException("Couldn't open file " + path);
+        }
+    }
+
+    @Override
+    public void update(ExecutionContext executionContext) throws ItemStreamException {
+    }
+
+    @Override
+    public void close() throws ItemStreamException {
+        pedigreeReader.close();
     }
 }

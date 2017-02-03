@@ -43,6 +43,7 @@ public class PedReaderTest {
     public void wholePedFileShouldBeParsedIntoPedigree() throws Exception {
         String pedigreePath = getResource(PEDIGREE_FILE).getAbsolutePath();
         PedReader pedReader = new PedReader(pedigreePath);
+        pedReader.open(null);
         Pedigree pedigree = pedReader.read();
 
         //check that Pedigree.Individuals is correctly populated
@@ -67,6 +68,7 @@ public class PedReaderTest {
     public void missingLastColumnInPedFileShouldThrowsException() throws Exception {
         String pedigreePath = getResource(MALFORMED_PEDIGREE).getAbsolutePath();
         PedReader pedReader = new PedReader(pedigreePath);
+        pedReader.open(null);
         pedReader.read();
     }
 

@@ -192,6 +192,7 @@ public class VariantSourceEntityMongoWriterTest {
     private VariantSourceEntity getVariantSourceEntity() throws Exception {
         VcfHeaderReader headerReader = new VcfHeaderReader(new File(input), FILE_ID, STUDY_ID, STUDY_NAME,
                                                            STUDY_TYPE, AGGREGATION);
+        headerReader.open(null);
         return headerReader.read();
     }
 

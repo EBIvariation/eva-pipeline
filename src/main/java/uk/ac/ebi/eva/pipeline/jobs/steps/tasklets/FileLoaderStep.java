@@ -61,7 +61,7 @@ public class FileLoaderStep implements Tasklet {
                 inputParameters.getStudyName(),
                 inputParameters.getStudyType(),
                 inputParameters.getVcfAggregation());
-
+        vcfHeaderReader.open(null);
         VariantSourceEntity variantSourceEntity = vcfHeaderReader.read();
 
         MongoOperations mongoOperations = mongoConfiguration.getMongoOperations(
