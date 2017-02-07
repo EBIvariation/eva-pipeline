@@ -63,15 +63,12 @@ public class NonAnnotatedVariantsMongoReaderTest {
     @Autowired
     private MongoConfiguration mongoConfiguration;
 
-    @Autowired
-    private MongoConnection mongoConnection;
-
     @Test
     public void shouldReadVariantsWithoutAnnotationField() throws Exception {
         ExecutionContext executionContext = MetaDataInstanceFactory.createStepExecution().getExecutionContext();
         String databaseName = insertDocuments(COLLECTION_VARIANTS_NAME);
 
-        MongoOperations mongoOperations = mongoConfiguration.getMongoOperations(databaseName, mongoConnection);
+        MongoOperations mongoOperations = mongoConfiguration.getMongoOperations(databaseName);
 
         NonAnnotatedVariantsMongoReader mongoItemReader = new NonAnnotatedVariantsMongoReader(
                 mongoOperations, COLLECTION_VARIANTS_NAME);

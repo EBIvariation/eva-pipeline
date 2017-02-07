@@ -47,8 +47,7 @@ public class VariantWriterConfiguration {
     @Profile(Application.VARIANT_WRITER_MONGO_PROFILE)
     public ItemWriter<Variant> variantMongoWriter(JobOptions jobOptions, DatabaseParameters databaseParameters) throws
             Exception {
-        MongoOperations mongoOperations = mongoConfiguration.getMongoOperations(
-                databaseParameters.getDatabaseName(), databaseParameters.getMongoConnection());
+        MongoOperations mongoOperations = mongoConfiguration.getMongoOperations(databaseParameters.getDatabaseName());
 
         return new VariantMongoWriter(databaseParameters.getCollectionVariantsName(),
                 mongoOperations,

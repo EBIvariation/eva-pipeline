@@ -59,16 +59,13 @@ public class GeneWriterTest {
     public TemporaryMongoRule mongoRule = new TemporaryMongoRule();
 
     @Autowired
-    private MongoConnection mongoConnection;
-
-    @Autowired
     private MongoConfiguration mongoConfiguration;
 
     @Test
     public void shouldWriteAllFieldsIntoMongoDb() throws Exception {
         String databaseName = mongoRule.getRandomTemporaryDatabaseName();
 
-        MongoOperations mongoOperations = mongoConfiguration.getMongoOperations(databaseName, mongoConnection);
+        MongoOperations mongoOperations = mongoConfiguration.getMongoOperations(databaseName);
 
         GeneWriter geneWriter = new GeneWriter(mongoOperations, COLLECTION_FEATURES_NAME);
 

@@ -64,9 +64,6 @@ public class VariantMongoWriterTest {
     @Autowired
     private MongoConfiguration mongoConfiguration;
 
-    @Autowired
-    private MongoConnection mongoConnection;
-
     private static final List<? extends Variant> EMPTY_LIST = new ArrayList<>();
 
     private VariantToMongoDbObjectConverter variantToMongoDbObjectConverter =
@@ -80,7 +77,7 @@ public class VariantMongoWriterTest {
     @Test
     public void noVariantsNothingShouldBeWritten() throws UnknownHostException {
         String dbName = mongoRule.getRandomTemporaryDatabaseName();
-        MongoOperations mongoOperations = mongoConfiguration.getMongoOperations(dbName, mongoConnection);
+        MongoOperations mongoOperations = mongoConfiguration.getMongoOperations(dbName);
         DBCollection dbCollection = mongoOperations.getCollection(collectionName);
 
         VariantMongoWriter variantMongoWriter = new VariantMongoWriter(collectionName, mongoOperations,
@@ -96,7 +93,7 @@ public class VariantMongoWriterTest {
         Variant variant2 = new Variant("2", 3, 4, "C", "G");
 
         String dbName = mongoRule.getRandomTemporaryDatabaseName();
-        MongoOperations mongoOperations = mongoConfiguration.getMongoOperations(dbName, mongoConnection);
+        MongoOperations mongoOperations = mongoConfiguration.getMongoOperations(dbName);
         DBCollection dbCollection = mongoOperations.getCollection(collectionName);
 
         BasicDBObject dbObject = new BasicDBObject();
@@ -114,7 +111,7 @@ public class VariantMongoWriterTest {
     @Test
     public void indexesShouldBeCreatedInBackground() throws UnknownHostException {
         String dbName = mongoRule.getRandomTemporaryDatabaseName();
-        MongoOperations mongoOperations = mongoConfiguration.getMongoOperations(dbName, mongoConnection);
+        MongoOperations mongoOperations = mongoConfiguration.getMongoOperations(dbName);
         DBCollection dbCollection = mongoOperations.getCollection(collectionName);
 
         VariantMongoWriter variantMongoWriter = new VariantMongoWriter(collectionName, mongoOperations,
@@ -139,7 +136,7 @@ public class VariantMongoWriterTest {
         Variant variant1 = new Variant("1", 1, 2, "A", "T");
 
         String dbName = mongoRule.getRandomTemporaryDatabaseName();
-        MongoOperations mongoOperations = mongoConfiguration.getMongoOperations(dbName, mongoConnection);
+        MongoOperations mongoOperations = mongoConfiguration.getMongoOperations(dbName);
 
         BasicDBObject dbObject = new BasicDBObject();
 

@@ -67,9 +67,6 @@ public class StatisticsMongoWriterTest {
     @Rule
     public TemporaryMongoRule mongoRule = new TemporaryMongoRule();
 
-    @Autowired
-    private MongoConnection mongoConnection;
-
     @Test
     public void shouldWriteAllFieldsIntoMongoDb() throws Exception {
         List<PopulationStatistics> populationStatisticsList = buildPopulationStatsList();
@@ -170,7 +167,7 @@ public class StatisticsMongoWriterTest {
     }
 
     public StatisticsMongoWriter getStatisticsMongoWriter(String databaseName) throws UnknownHostException {
-        MongoOperations operations = mongoConfiguration.getMongoOperations(databaseName, mongoConnection);
+        MongoOperations operations = mongoConfiguration.getMongoOperations(databaseName);
         StatisticsMongoWriter statisticsMongoWriter = new StatisticsMongoWriter(operations, COLLECTION_STATS_NAME);
         return statisticsMongoWriter;
     }

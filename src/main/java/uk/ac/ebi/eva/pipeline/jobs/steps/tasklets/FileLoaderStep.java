@@ -64,8 +64,7 @@ public class FileLoaderStep implements Tasklet {
         vcfHeaderReader.open(null);
         VariantSourceEntity variantSourceEntity = vcfHeaderReader.read();
 
-        MongoOperations mongoOperations = mongoConfiguration.getMongoOperations(
-                dbParameters.getDatabaseName(), dbParameters.getMongoConnection());
+        MongoOperations mongoOperations = mongoConfiguration.getMongoOperations(dbParameters.getDatabaseName());
 
         VariantSourceEntityMongoWriter variantSourceEntityMongoWriter = new VariantSourceEntityMongoWriter(
                 mongoOperations, dbParameters.getCollectionFilesName());

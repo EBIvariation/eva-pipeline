@@ -41,8 +41,7 @@ public class IndexesGeneratorStep implements Tasklet {
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
-        MongoOperations operations = mongoConfiguration.getMongoOperations(
-                databaseParameters.getDatabaseName(), databaseParameters.getMongoConnection());
+        MongoOperations operations = mongoConfiguration.getMongoOperations(databaseParameters.getDatabaseName());
         operations.getCollection(databaseParameters.getCollectionFeaturesName())
                 .createIndex(new BasicDBObject("name", 1), new BasicDBObject("sparse", true).append("background", true));
 

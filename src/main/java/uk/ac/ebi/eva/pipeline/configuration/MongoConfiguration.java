@@ -44,6 +44,9 @@ import uk.ac.ebi.eva.utils.MongoDBHelper;
 public class MongoConfiguration {
 
     @Autowired
+    private MongoConnection mongoConnection;
+
+    @Autowired
     private MongoMappingContext mongoMappingContext;
 
     @Bean
@@ -51,46 +54,47 @@ public class MongoConfiguration {
         return new MongoMappingContext();
     }
 
-    public MongoOperations getMongoOperations(String database, MongoConnection connection) 
+    public MongoOperations getMongoOperations(String database)
             throws UnknownHostException {
-        MongoClient mongoClient = getMongoClient(connection);
+        MongoClient mongoClient = getMongoClient();
         MongoDbFactory mongoFactory = getMongoDbFactory(mongoClient, database);
         MongoTemplate mongoTemplate = new MongoTemplate(mongoFactory, getMappingMongoConverter(mongoFactory));
         return mongoTemplate;
     }
-    
-    public MongoClient getMongoClient(MongoConnection connection) throws UnknownHostException {
+
+    private MongoDbFactory getMongoDbFactory(MongoClient client, String database) {
+        return new SimpleMongoDbFactory(client, database);
+    }
+
+    private MongoClient getMongoClient() throws UnknownHostException {
         String authenticationDatabase = null;
         String user = null;
         String password = null;
         MongoClient mongoClient;
         
         // The Mongo API is not happy to deal with empty strings for authentication DB, user and password
-        if (connection.getAuthenticationDatabase() != null && !connection.getAuthenticationDatabase().trim().isEmpty()) {
-            authenticationDatabase = connection.getAuthenticationDatabase();
+        if (mongoConnection.getAuthenticationDatabase() != null && !mongoConnection.getAuthenticationDatabase().trim()
+                .isEmpty()) {
+            authenticationDatabase = mongoConnection.getAuthenticationDatabase();
         }
-        if (connection.getUser() != null && !connection.getUser().trim().isEmpty()) {
-            user = connection.getUser();
+        if (mongoConnection.getUser() != null && !mongoConnection.getUser().trim().isEmpty()) {
+            user = mongoConnection.getUser();
         }
-        if (connection.getPassword() != null && !connection.getPassword().trim().isEmpty()) {
-            password = connection.getPassword();
+        if (mongoConnection.getPassword() != null && !mongoConnection.getPassword().trim().isEmpty()) {
+            password = mongoConnection.getPassword();
         }
         
         if (user == null || password == null) {
-            mongoClient = new MongoClient(MongoDBHelper.parseServerAddresses(connection.getHosts()));
+            mongoClient = new MongoClient(MongoDBHelper.parseServerAddresses(mongoConnection.getHosts()));
         } else {
             mongoClient = new MongoClient(
-                    MongoDBHelper.parseServerAddresses(connection.getHosts()),
-                    Collections.singletonList(MongoCredential.createCredential(connection.getUser(),
-                            authenticationDatabase, connection.getPassword().toCharArray())));
+                    MongoDBHelper.parseServerAddresses(mongoConnection.getHosts()),
+                    Collections.singletonList(MongoCredential.createCredential(mongoConnection.getUser(),
+                            authenticationDatabase, mongoConnection.getPassword().toCharArray())));
         }
-        mongoClient.setReadPreference(connection.getReadPreference());
+        mongoClient.setReadPreference(mongoConnection.getReadPreference());
 
         return mongoClient;
-    }
-
-    private MongoDbFactory getMongoDbFactory(MongoClient client, String database) {
-        return new SimpleMongoDbFactory(client, database);
     }
 
     private MappingMongoConverter getMappingMongoConverter(MongoDbFactory mongoFactory) {

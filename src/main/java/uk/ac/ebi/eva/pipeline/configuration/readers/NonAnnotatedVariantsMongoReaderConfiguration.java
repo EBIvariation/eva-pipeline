@@ -44,8 +44,7 @@ public class NonAnnotatedVariantsMongoReaderConfiguration {
     @StepScope
     public NonAnnotatedVariantsMongoReader nonAnnotatedVariantsMongoReader(DatabaseParameters databaseParameters)
             throws UnknownHostException {
-        MongoOperations mongoOperations = mongoConfiguration.getMongoOperations(
-                databaseParameters.getDatabaseName(), databaseParameters.getMongoConnection());
+        MongoOperations mongoOperations = mongoConfiguration.getMongoOperations(databaseParameters.getDatabaseName());
         return new NonAnnotatedVariantsMongoReader(mongoOperations, databaseParameters.getCollectionVariantsName());
     }
 

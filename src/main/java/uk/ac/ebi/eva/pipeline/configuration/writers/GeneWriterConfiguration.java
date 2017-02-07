@@ -42,8 +42,7 @@ public class GeneWriterConfiguration {
     @Bean(GENE_WRITER)
     @StepScope
     public ItemWriter<FeatureCoordinates> geneWriter(DatabaseParameters databaseParameters) throws UnknownHostException {
-        MongoOperations mongoOperations = mongoConfiguration.getMongoOperations(
-                databaseParameters.getDatabaseName(), databaseParameters.getMongoConnection());
+        MongoOperations mongoOperations = mongoConfiguration.getMongoOperations(databaseParameters.getDatabaseName());
         return new GeneWriter(mongoOperations, databaseParameters.getCollectionFeaturesName());
     }
 

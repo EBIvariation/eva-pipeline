@@ -72,10 +72,6 @@ public class VepAnnotationMongoWriterTest {
     @Rule
     public TemporaryMongoRule mongoRule = new TemporaryMongoRule();
 
-    @Autowired
-    private MongoConnection mongoConnection;
-
-
     private DBObjectToVariantAnnotationConverter converter;
     private VepAnnotationMongoWriter annotationWriter;
     private AnnotationLineMapper AnnotationLineMapper;
@@ -95,7 +91,7 @@ public class VepAnnotationMongoWriterTest {
         writeIdsIntoMongo(annotations, variants);
 
         // now, load the annotation
-        MongoOperations operations = mongoConfiguration.getMongoOperations(databaseName, mongoConnection);
+        MongoOperations operations = mongoConfiguration.getMongoOperations(databaseName);
         annotationWriter = new VepAnnotationMongoWriter(operations, COLLECTION_VARIANTS_NAME);
         annotationWriter.write(annotations);
 
@@ -154,7 +150,7 @@ public class VepAnnotationMongoWriterTest {
         }
 
         // now, load the annotation
-        MongoOperations operations = mongoConfiguration.getMongoOperations(databaseName, mongoConnection);
+        MongoOperations operations = mongoConfiguration.getMongoOperations(databaseName);
         annotationWriter = new VepAnnotationMongoWriter(operations, dbCollectionVariantsName);
 
         annotationWriter.write(annotationSet1);

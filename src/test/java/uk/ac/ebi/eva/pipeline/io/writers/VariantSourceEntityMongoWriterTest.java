@@ -85,9 +85,6 @@ public class VariantSourceEntityMongoWriterTest {
     public TemporaryMongoRule mongoRule = new TemporaryMongoRule();
 
     @Autowired
-    private MongoConnection mongoConnection;
-
-    @Autowired
     private MongoConfiguration mongoConfiguration;
 
     private String input;
@@ -95,7 +92,7 @@ public class VariantSourceEntityMongoWriterTest {
     @Test
     public void shouldWriteAllFieldsIntoMongoDb() throws Exception {
         String databaseName = mongoRule.getRandomTemporaryDatabaseName();
-        MongoOperations mongoOperations = mongoConfiguration.getMongoOperations(databaseName, mongoConnection);
+        MongoOperations mongoOperations = mongoConfiguration.getMongoOperations(databaseName);
         DBCollection fileCollection = mongoRule.getCollection(databaseName, COLLECTION_FILES_NAME);
 
         VariantSourceEntityMongoWriter filesWriter = new VariantSourceEntityMongoWriter(
@@ -134,7 +131,7 @@ public class VariantSourceEntityMongoWriterTest {
     @Test
     public void shouldWriteSamplesWithDotsInName() throws Exception {
         String databaseName = mongoRule.getRandomTemporaryDatabaseName();
-        MongoOperations mongoOperations = mongoConfiguration.getMongoOperations(databaseName, mongoConnection);
+        MongoOperations mongoOperations = mongoConfiguration.getMongoOperations(databaseName);
         DBCollection fileCollection = mongoRule.getCollection(databaseName, COLLECTION_FILES_NAME);
 
         VariantSourceEntityMongoWriter filesWriter = new VariantSourceEntityMongoWriter(
