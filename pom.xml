@@ -17,8 +17,8 @@
 
     <properties>
         <java.version>1.8</java.version>
-        <opencga.version>0.5.2</opencga.version>
-        <biodata.version>0.4.5</biodata.version>
+        <opencga.version>0.5.3</opencga.version>
+        <biodata.version>0.4.6</biodata.version>
         <cellbase.version>3.1.3</cellbase.version>
         <postgresql.version>9.1-901-1.jdbc4</postgresql.version>
         <mongo-java-driver.version>2.14.2</mongo-java-driver.version>
