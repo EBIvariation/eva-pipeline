@@ -23,14 +23,13 @@ import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.test.MetaDataInstanceFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoOperations;
+import org.springframework.data.mongodb.core.mapping.MongoMappingContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-
 import uk.ac.ebi.eva.commons.models.converters.data.VariantToDBObjectConverter;
 import uk.ac.ebi.eva.pipeline.configuration.MongoConfiguration;
-import uk.ac.ebi.eva.pipeline.configuration.readers.NonAnnotatedVariantsMongoReaderConfiguration;
 import uk.ac.ebi.eva.pipeline.parameters.MongoConnection;
 import uk.ac.ebi.eva.test.configuration.BaseTestConfiguration;
 import uk.ac.ebi.eva.test.data.VariantData;
@@ -50,25 +49,29 @@ import static org.junit.Assert.assertTrue;
 @RunWith(SpringRunner.class)
 @ActiveProfiles("variant-annotation-mongo")
 @TestPropertySource({"classpath:annotation.properties", "classpath:test-mongo.properties"})
-@ContextConfiguration(classes = {NonAnnotatedVariantsMongoReaderConfiguration.class, BaseTestConfiguration.class})
+@ContextConfiguration(classes = {BaseTestConfiguration.class})
 public class NonAnnotatedVariantsMongoReaderTest {
 
     private static final String COLLECTION_VARIANTS_NAME = "variants";
 
     private static final int EXPECTED_NON_ANNOTATED_VARIANTS = 1;
 
-    @Rule
-    public TemporaryMongoRule mongoRule = new TemporaryMongoRule();
+    @Autowired
+    private MongoConnection mongoConnection;
 
     @Autowired
-    private MongoConfiguration mongoConfiguration;
+    private MongoMappingContext mongoMappingContext;
+
+    @Rule
+    public TemporaryMongoRule mongoRule = new TemporaryMongoRule();
 
     @Test
     public void shouldReadVariantsWithoutAnnotationField() throws Exception {
         ExecutionContext executionContext = MetaDataInstanceFactory.createStepExecution().getExecutionContext();
         String databaseName = insertDocuments(COLLECTION_VARIANTS_NAME);
 
-        MongoOperations mongoOperations = mongoConfiguration.getMongoOperations(databaseName);
+        MongoOperations mongoOperations = MongoConfiguration.getMongoOperations(databaseName, mongoConnection,
+                mongoMappingContext);
 
         NonAnnotatedVariantsMongoReader mongoItemReader = new NonAnnotatedVariantsMongoReader(
                 mongoOperations, COLLECTION_VARIANTS_NAME);

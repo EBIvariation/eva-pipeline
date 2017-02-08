@@ -18,7 +18,9 @@ package uk.ac.ebi.eva.pipeline.configuration;
 import java.net.UnknownHostException;
 import java.util.Collections;
 
+import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mongodb.MongoDbFactory;
@@ -34,6 +36,8 @@ import com.mongodb.MongoClient;
 import com.mongodb.MongoCredential;
 import com.mongodb.ReadPreference;
 
+import uk.ac.ebi.eva.pipeline.parameters.DatabaseParameters;
+import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 import uk.ac.ebi.eva.pipeline.parameters.MongoConnection;
 import uk.ac.ebi.eva.utils.MongoDBHelper;
 
@@ -43,30 +47,33 @@ import uk.ac.ebi.eva.utils.MongoDBHelper;
 @Configuration
 public class MongoConfiguration {
 
-    @Autowired
-    private MongoConnection mongoConnection;
-
-    @Autowired
-    private MongoMappingContext mongoMappingContext;
-
     @Bean
     public MongoMappingContext mongoMappingContext() {
         return new MongoMappingContext();
     }
 
-    public MongoOperations getMongoOperations(String database)
+    @Bean
+    @StepScope
+    public MongoOperations mongoTemplate(DatabaseParameters databaseParameters, MongoMappingContext mongoMappingContext)
             throws UnknownHostException {
-        MongoClient mongoClient = getMongoClient();
-        MongoDbFactory mongoFactory = getMongoDbFactory(mongoClient, database);
-        MongoTemplate mongoTemplate = new MongoTemplate(mongoFactory, getMappingMongoConverter(mongoFactory));
-        return mongoTemplate;
+        return getMongoOperations(databaseParameters.getDatabaseName(),databaseParameters.getMongoConnection(),
+                mongoMappingContext);
     }
 
-    private MongoDbFactory getMongoDbFactory(MongoClient client, String database) {
+    public static MongoOperations getMongoOperations(String databaseName, MongoConnection mongoConnection,
+                                                     MongoMappingContext mongoMappingContext)
+            throws UnknownHostException {
+        MongoClient mongoClient = getMongoClient(mongoConnection);
+        MongoDbFactory mongoFactory = getMongoDbFactory(mongoClient, databaseName);
+        MappingMongoConverter mappingMongoConverter = getMappingMongoConverter(mongoFactory, mongoMappingContext);
+        return new MongoTemplate(mongoFactory, mappingMongoConverter);
+    }
+
+    private static MongoDbFactory getMongoDbFactory(MongoClient client, String database) {
         return new SimpleMongoDbFactory(client, database);
     }
 
-    private MongoClient getMongoClient() throws UnknownHostException {
+    private static MongoClient getMongoClient(MongoConnection mongoConnection) throws UnknownHostException {
         String authenticationDatabase = null;
         String user = null;
         String password = null;
@@ -97,7 +104,8 @@ public class MongoConfiguration {
         return mongoClient;
     }
 
-    private MappingMongoConverter getMappingMongoConverter(MongoDbFactory mongoFactory) {
+    private static MappingMongoConverter getMappingMongoConverter(MongoDbFactory mongoFactory,
+                                                                  MongoMappingContext mongoMappingContext) {
         DbRefResolver dbRefResolver = new DefaultDbRefResolver(mongoFactory);
         MappingMongoConverter mongoConverter = new MappingMongoConverter(dbRefResolver, mongoMappingContext);
 

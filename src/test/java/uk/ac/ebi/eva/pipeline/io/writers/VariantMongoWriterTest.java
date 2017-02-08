@@ -25,13 +25,12 @@ import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoOperations;
+import org.springframework.data.mongodb.core.mapping.MongoMappingContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-
 import uk.ac.ebi.eva.commons.models.data.Variant;
 import uk.ac.ebi.eva.pipeline.configuration.MongoConfiguration;
-import uk.ac.ebi.eva.pipeline.configuration.writers.VariantWriterConfiguration;
 import uk.ac.ebi.eva.pipeline.model.converters.data.VariantToMongoDbObjectConverter;
 import uk.ac.ebi.eva.pipeline.parameters.MongoConnection;
 import uk.ac.ebi.eva.test.configuration.BaseTestConfiguration;
@@ -58,11 +57,8 @@ import static org.mockito.Mockito.when;
  */
 @RunWith(SpringRunner.class)
 @TestPropertySource({"classpath:common-configuration.properties", "classpath:test-mongo.properties"})
-@ContextConfiguration(classes = {BaseTestConfiguration.class, VariantWriterConfiguration.class})
+@ContextConfiguration(classes = {BaseTestConfiguration.class})
 public class VariantMongoWriterTest {
-
-    @Autowired
-    private MongoConfiguration mongoConfiguration;
 
     private static final List<? extends Variant> EMPTY_LIST = new ArrayList<>();
 
@@ -71,13 +67,20 @@ public class VariantMongoWriterTest {
 
     private final String collectionName = "variants";
 
+    @Autowired
+    private MongoConnection mongoConnection;
+
+    @Autowired
+    private MongoMappingContext mongoMappingContext;
+
     @Rule
     public TemporaryMongoRule mongoRule = new TemporaryMongoRule();
 
     @Test
     public void noVariantsNothingShouldBeWritten() throws UnknownHostException {
         String dbName = mongoRule.getRandomTemporaryDatabaseName();
-        MongoOperations mongoOperations = mongoConfiguration.getMongoOperations(dbName);
+        MongoOperations mongoOperations = MongoConfiguration.getMongoOperations(dbName, mongoConnection,
+                mongoMappingContext);
         DBCollection dbCollection = mongoOperations.getCollection(collectionName);
 
         VariantMongoWriter variantMongoWriter = new VariantMongoWriter(collectionName, mongoOperations,
@@ -93,7 +96,8 @@ public class VariantMongoWriterTest {
         Variant variant2 = new Variant("2", 3, 4, "C", "G");
 
         String dbName = mongoRule.getRandomTemporaryDatabaseName();
-        MongoOperations mongoOperations = mongoConfiguration.getMongoOperations(dbName);
+        MongoOperations mongoOperations = MongoConfiguration.getMongoOperations(dbName, mongoConnection,
+                mongoMappingContext);
         DBCollection dbCollection = mongoOperations.getCollection(collectionName);
 
         BasicDBObject dbObject = new BasicDBObject();
@@ -111,7 +115,8 @@ public class VariantMongoWriterTest {
     @Test
     public void indexesShouldBeCreatedInBackground() throws UnknownHostException {
         String dbName = mongoRule.getRandomTemporaryDatabaseName();
-        MongoOperations mongoOperations = mongoConfiguration.getMongoOperations(dbName);
+        MongoOperations mongoOperations = MongoConfiguration.getMongoOperations(dbName, mongoConnection,
+                mongoMappingContext);
         DBCollection dbCollection = mongoOperations.getCollection(collectionName);
 
         VariantMongoWriter variantMongoWriter = new VariantMongoWriter(collectionName, mongoOperations,
@@ -136,7 +141,8 @@ public class VariantMongoWriterTest {
         Variant variant1 = new Variant("1", 1, 2, "A", "T");
 
         String dbName = mongoRule.getRandomTemporaryDatabaseName();
-        MongoOperations mongoOperations = mongoConfiguration.getMongoOperations(dbName);
+        MongoOperations mongoOperations = MongoConfiguration.getMongoOperations(dbName, mongoConnection,
+                mongoMappingContext);
 
         BasicDBObject dbObject = new BasicDBObject();
 

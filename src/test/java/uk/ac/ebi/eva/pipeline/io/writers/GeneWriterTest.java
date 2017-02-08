@@ -24,12 +24,11 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoOperations;
+import org.springframework.data.mongodb.core.mapping.MongoMappingContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-
 import uk.ac.ebi.eva.pipeline.configuration.MongoConfiguration;
-import uk.ac.ebi.eva.pipeline.configuration.writers.GeneWriterConfiguration;
 import uk.ac.ebi.eva.pipeline.io.mappers.GeneLineMapper;
 import uk.ac.ebi.eva.pipeline.model.FeatureCoordinates;
 import uk.ac.ebi.eva.pipeline.parameters.MongoConnection;
@@ -50,22 +49,25 @@ import static org.junit.Assert.assertTrue;
  */
 @RunWith(SpringRunner.class)
 @TestPropertySource({"classpath:initialize-database.properties", "classpath:test-mongo.properties"})
-@ContextConfiguration(classes = {BaseTestConfiguration.class, GeneWriterConfiguration.class})
+@ContextConfiguration(classes = {BaseTestConfiguration.class})
 public class GeneWriterTest {
 
     private static final String COLLECTION_FEATURES_NAME = "features";
 
-    @Rule
-    public TemporaryMongoRule mongoRule = new TemporaryMongoRule();
+    @Autowired
+    private MongoConnection mongoConnection;
 
     @Autowired
-    private MongoConfiguration mongoConfiguration;
+    private MongoMappingContext mongoMappingContext;
+
+    @Rule
+    public TemporaryMongoRule mongoRule = new TemporaryMongoRule();
 
     @Test
     public void shouldWriteAllFieldsIntoMongoDb() throws Exception {
         String databaseName = mongoRule.getRandomTemporaryDatabaseName();
 
-        MongoOperations mongoOperations = mongoConfiguration.getMongoOperations(databaseName);
+        MongoOperations mongoOperations = MongoConfiguration.getMongoOperations(databaseName, mongoConnection, mongoMappingContext);
 
         GeneWriter geneWriter = new GeneWriter(mongoOperations, COLLECTION_FEATURES_NAME);
 

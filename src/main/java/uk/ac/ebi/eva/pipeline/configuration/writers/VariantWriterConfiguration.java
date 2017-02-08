@@ -15,48 +15,37 @@
  */
 package uk.ac.ebi.eva.pipeline.configuration.writers;
 
-import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VARIANT_WRITER;
-
 import org.opencb.opencga.storage.core.variant.VariantStorageManager;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.item.ItemWriter;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.mongodb.core.MongoOperations;
-
 import uk.ac.ebi.eva.commons.models.data.Variant;
 import uk.ac.ebi.eva.pipeline.Application;
-import uk.ac.ebi.eva.pipeline.configuration.MongoConfiguration;
 import uk.ac.ebi.eva.pipeline.io.writers.VariantMongoWriter;
 import uk.ac.ebi.eva.pipeline.model.converters.data.VariantToMongoDbObjectConverter;
 import uk.ac.ebi.eva.pipeline.parameters.DatabaseParameters;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 
-@Configuration
-@Import({ MongoConfiguration.class })
-public class VariantWriterConfiguration {
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VARIANT_WRITER;
 
-    @Autowired
-    private MongoConfiguration mongoConfiguration;
+@Configuration
+public class VariantWriterConfiguration {
 
     @Bean(VARIANT_WRITER)
     @StepScope
     @Profile(Application.VARIANT_WRITER_MONGO_PROFILE)
-    public ItemWriter<Variant> variantMongoWriter(JobOptions jobOptions, DatabaseParameters databaseParameters) throws
-            Exception {
-        MongoOperations mongoOperations = mongoConfiguration.getMongoOperations(databaseParameters.getDatabaseName());
-
-        return new VariantMongoWriter(databaseParameters.getCollectionVariantsName(),
-                mongoOperations,
+    public ItemWriter<Variant> variantMongoWriter(JobOptions jobOptions, MongoOperations mongoOperations,
+                                                  DatabaseParameters databaseParameters) {
+        return new VariantMongoWriter(databaseParameters.getCollectionVariantsName(), mongoOperations,
                 variantToMongoDbObjectConverter(jobOptions));
     }
 
     @Bean
     @StepScope
-    public VariantToMongoDbObjectConverter variantToMongoDbObjectConverter(JobOptions jobOptions) throws Exception {
+    public VariantToMongoDbObjectConverter variantToMongoDbObjectConverter(JobOptions jobOptions) {
         return new VariantToMongoDbObjectConverter(
                 jobOptions.getVariantOptions().getBoolean(VariantStorageManager.INCLUDE_STATS),
                 jobOptions.getVariantOptions().getBoolean(VariantStorageManager.CALCULATE_STATS),
