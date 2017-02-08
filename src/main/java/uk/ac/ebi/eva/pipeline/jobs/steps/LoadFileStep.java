@@ -40,7 +40,7 @@ public class LoadFileStep {
 
     @Bean
     @StepScope
-    FileLoaderStep fileLoaderStep() {
+    public FileLoaderStep fileLoaderStep() {
         return new FileLoaderStep();
     }
 
