@@ -93,6 +93,7 @@ public class AggregatedVcfJobTest {
                 .inputVcf(getResource(INPUT).getAbsolutePath())
                 .inputVcfAggregation("BASIC")
                 .inputVcfId("1")
+                .collectionFilesName("files")
                 .timestamp()
                 .toJobParameters();
         JobExecution jobExecution = jobLauncherTestUtils.launchJob(jobParameters);
