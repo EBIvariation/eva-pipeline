@@ -21,9 +21,7 @@ import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoOperations;
-
 import uk.ac.ebi.eva.commons.models.data.VariantSourceEntity;
-import uk.ac.ebi.eva.pipeline.configuration.MongoConfiguration;
 import uk.ac.ebi.eva.pipeline.io.readers.VcfHeaderReader;
 import uk.ac.ebi.eva.pipeline.io.writers.VariantSourceEntityMongoWriter;
 import uk.ac.ebi.eva.pipeline.parameters.DatabaseParameters;
@@ -43,7 +41,7 @@ import java.util.Collections;
 public class FileLoaderStep implements Tasklet {
 
     @Autowired
-    private MongoConfiguration mongoConfiguration;
+    private MongoOperations mongoOperations;
 
     @Autowired
     private InputParameters inputParameters;
@@ -63,9 +61,6 @@ public class FileLoaderStep implements Tasklet {
                 inputParameters.getVcfAggregation());
         vcfHeaderReader.open(null);
         VariantSourceEntity variantSourceEntity = vcfHeaderReader.read();
-
-        MongoOperations mongoOperations = mongoConfiguration.getMongoOperations(
-                dbParameters.getDatabaseName(), dbParameters.getMongoConnection());
 
         VariantSourceEntityMongoWriter variantSourceEntityMongoWriter = new VariantSourceEntityMongoWriter(
                 mongoOperations, dbParameters.getCollectionFilesName());

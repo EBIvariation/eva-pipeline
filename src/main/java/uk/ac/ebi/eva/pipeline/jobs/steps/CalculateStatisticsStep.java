@@ -41,7 +41,7 @@ public class CalculateStatisticsStep {
 
     @Bean
     @StepScope
-    PopulationStatisticsGeneratorStep populationStatisticsGeneratorStep() {
+    public PopulationStatisticsGeneratorStep populationStatisticsGeneratorStep() {
         return new PopulationStatisticsGeneratorStep();
     }
 

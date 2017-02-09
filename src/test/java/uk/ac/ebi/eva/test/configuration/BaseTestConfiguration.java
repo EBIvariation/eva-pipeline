@@ -18,6 +18,7 @@ package uk.ac.ebi.eva.test.configuration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import org.springframework.data.mongodb.core.mapping.MongoMappingContext;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 import uk.ac.ebi.eva.pipeline.parameters.MongoConnection;
 
@@ -32,5 +33,10 @@ public class BaseTestConfiguration {
     @Bean
     public MongoConnection mongoConnection() {
         return new MongoConnection();
+    }
+
+    @Bean
+    public MongoMappingContext mongoMappingContext() {
+        return new MongoMappingContext();
     }
 }

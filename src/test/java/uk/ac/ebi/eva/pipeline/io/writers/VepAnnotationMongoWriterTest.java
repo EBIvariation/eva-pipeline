@@ -27,14 +27,13 @@ import org.opencb.biodata.models.variant.annotation.VariantAnnotation;
 import org.opencb.opencga.storage.mongodb.variant.DBObjectToVariantAnnotationConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoOperations;
+import org.springframework.data.mongodb.core.mapping.MongoMappingContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-
 import uk.ac.ebi.eva.commons.models.converters.data.VariantToDBObjectConverter;
 import uk.ac.ebi.eva.pipeline.configuration.MongoConfiguration;
-import uk.ac.ebi.eva.pipeline.configuration.writers.VariantAnnotationWriterConfiguration;
 import uk.ac.ebi.eva.pipeline.io.mappers.AnnotationLineMapper;
 import uk.ac.ebi.eva.pipeline.parameters.MongoConnection;
 import uk.ac.ebi.eva.test.configuration.BaseTestConfiguration;
@@ -61,20 +60,19 @@ import static uk.ac.ebi.eva.test.data.VepOutputContent.vepOutputContent;
 @RunWith(SpringRunner.class)
 @ActiveProfiles("variant-annotation-mongo")
 @TestPropertySource({"classpath:annotation.properties", "classpath:test-mongo.properties"})
-@ContextConfiguration(classes = {BaseTestConfiguration.class, VariantAnnotationWriterConfiguration.class})
+@ContextConfiguration(classes = {BaseTestConfiguration.class})
 public class VepAnnotationMongoWriterTest {
 
     private static final String COLLECTION_VARIANTS_NAME = "variants";
 
     @Autowired
-    private MongoConfiguration mongoConfiguration;
+    private MongoConnection mongoConnection;
+
+    @Autowired
+    private MongoMappingContext mongoMappingContext;
 
     @Rule
     public TemporaryMongoRule mongoRule = new TemporaryMongoRule();
-
-    @Autowired
-    private MongoConnection mongoConnection;
-
 
     private DBObjectToVariantAnnotationConverter converter;
     private VepAnnotationMongoWriter annotationWriter;
@@ -95,7 +93,8 @@ public class VepAnnotationMongoWriterTest {
         writeIdsIntoMongo(annotations, variants);
 
         // now, load the annotation
-        MongoOperations operations = mongoConfiguration.getMongoOperations(databaseName, mongoConnection);
+        MongoOperations operations = MongoConfiguration.getMongoOperations(databaseName, mongoConnection,
+                mongoMappingContext);
         annotationWriter = new VepAnnotationMongoWriter(operations, COLLECTION_VARIANTS_NAME);
         annotationWriter.write(annotations);
 
@@ -154,7 +153,8 @@ public class VepAnnotationMongoWriterTest {
         }
 
         // now, load the annotation
-        MongoOperations operations = mongoConfiguration.getMongoOperations(databaseName, mongoConnection);
+        MongoOperations operations = MongoConfiguration.getMongoOperations(databaseName, mongoConnection,
+                mongoMappingContext);
         annotationWriter = new VepAnnotationMongoWriter(operations, dbCollectionVariantsName);
 
         annotationWriter.write(annotationSet1);

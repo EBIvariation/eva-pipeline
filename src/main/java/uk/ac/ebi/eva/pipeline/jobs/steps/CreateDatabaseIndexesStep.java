@@ -40,7 +40,7 @@ public class CreateDatabaseIndexesStep {
 
     @Bean
     @StepScope
-    IndexesGeneratorStep indexesGeneratorStep() {
+    public IndexesGeneratorStep indexesGeneratorStep() {
         return new IndexesGeneratorStep();
     }
 

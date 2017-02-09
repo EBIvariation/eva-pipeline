@@ -26,10 +26,10 @@ import org.junit.runner.RunWith;
 import org.springframework.batch.item.file.mapping.JsonLineMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoOperations;
+import org.springframework.data.mongodb.core.mapping.MongoMappingContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-
 import uk.ac.ebi.eva.pipeline.configuration.MongoConfiguration;
 import uk.ac.ebi.eva.pipeline.model.PopulationStatistics;
 import uk.ac.ebi.eva.pipeline.parameters.MongoConnection;
@@ -51,24 +51,24 @@ import static org.junit.Assert.assertNotNull;
  * {@link StatisticsMongoWriter}
  * input: a List of {@link PopulationStatistics} to each call of `.write()`
  * output: the FeatureCoordinates get written in mongo, with at least: chromosome, start and end.
- *
+ * <p>
  * TODO Replace MongoDBHelper with StatisticsMongoWriterConfiguration in ContextConfiguration when the class exists
  */
 @RunWith(SpringRunner.class)
 @TestPropertySource({"classpath:common-configuration.properties"})
-@ContextConfiguration(classes = {BaseTestConfiguration.class, MongoConfiguration.class})
+@ContextConfiguration(classes = {BaseTestConfiguration.class})
 public class StatisticsMongoWriterTest {
 
     private static final String COLLECTION_STATS_NAME = "populationStatistics";
 
     @Autowired
-    private MongoConfiguration mongoConfiguration;
+    private MongoConnection mongoConnection;
+
+    @Autowired
+    private MongoMappingContext mongoMappingContext;
 
     @Rule
     public TemporaryMongoRule mongoRule = new TemporaryMongoRule();
-
-    @Autowired
-    private MongoConnection mongoConnection;
 
     @Test
     public void shouldWriteAllFieldsIntoMongoDb() throws Exception {
@@ -170,7 +170,8 @@ public class StatisticsMongoWriterTest {
     }
 
     public StatisticsMongoWriter getStatisticsMongoWriter(String databaseName) throws UnknownHostException {
-        MongoOperations operations = mongoConfiguration.getMongoOperations(databaseName, mongoConnection);
+        MongoOperations operations = MongoConfiguration.getMongoOperations(databaseName, mongoConnection,
+                mongoMappingContext);
         StatisticsMongoWriter statisticsMongoWriter = new StatisticsMongoWriter(operations, COLLECTION_STATS_NAME);
         return statisticsMongoWriter;
     }

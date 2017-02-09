@@ -23,6 +23,7 @@ import org.opencb.biodata.models.variant.VariantSource;
 import org.opencb.biodata.models.variant.VariantStudy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoOperations;
+import org.springframework.data.mongodb.core.mapping.MongoMappingContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -81,21 +82,22 @@ public class VariantSourceEntityMongoWriterTest {
 
     private static final VariantSource.Aggregation AGGREGATION = VariantSource.Aggregation.NONE;
 
-    @Rule
-    public TemporaryMongoRule mongoRule = new TemporaryMongoRule();
-
     @Autowired
     private MongoConnection mongoConnection;
 
     @Autowired
-    private MongoConfiguration mongoConfiguration;
+    private MongoMappingContext mongoMappingContext;
+
+    @Rule
+    public TemporaryMongoRule mongoRule = new TemporaryMongoRule();
 
     private String input;
 
     @Test
     public void shouldWriteAllFieldsIntoMongoDb() throws Exception {
         String databaseName = mongoRule.getRandomTemporaryDatabaseName();
-        MongoOperations mongoOperations = mongoConfiguration.getMongoOperations(databaseName, mongoConnection);
+        MongoOperations mongoOperations = MongoConfiguration.getMongoOperations(databaseName, mongoConnection,
+                mongoMappingContext);
         DBCollection fileCollection = mongoRule.getCollection(databaseName, COLLECTION_FILES_NAME);
 
         VariantSourceEntityMongoWriter filesWriter = new VariantSourceEntityMongoWriter(
@@ -134,7 +136,8 @@ public class VariantSourceEntityMongoWriterTest {
     @Test
     public void shouldWriteSamplesWithDotsInName() throws Exception {
         String databaseName = mongoRule.getRandomTemporaryDatabaseName();
-        MongoOperations mongoOperations = mongoConfiguration.getMongoOperations(databaseName, mongoConnection);
+        MongoOperations mongoOperations = MongoConfiguration.getMongoOperations(databaseName, mongoConnection,
+                mongoMappingContext);
         DBCollection fileCollection = mongoRule.getCollection(databaseName, COLLECTION_FILES_NAME);
 
         VariantSourceEntityMongoWriter filesWriter = new VariantSourceEntityMongoWriter(
@@ -164,7 +167,8 @@ public class VariantSourceEntityMongoWriterTest {
     @Test
     public void shouldCreateUniqueFileIndex() throws Exception {
         String databaseName = mongoRule.getRandomTemporaryDatabaseName();
-        MongoOperations mongoOperations = mongoConfiguration.getMongoOperations(databaseName, mongoConnection);
+        MongoOperations mongoOperations = MongoConfiguration.getMongoOperations(databaseName, mongoConnection,
+                mongoMappingContext);
         DBCollection fileCollection = mongoRule.getCollection(databaseName, COLLECTION_FILES_NAME);
 
         VariantSourceEntityMongoWriter filesWriter = new VariantSourceEntityMongoWriter( mongoOperations,

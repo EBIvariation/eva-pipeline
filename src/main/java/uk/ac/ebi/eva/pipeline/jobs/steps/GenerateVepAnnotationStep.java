@@ -40,7 +40,7 @@ public class GenerateVepAnnotationStep {
 
     @Bean
     @StepScope
-    VepAnnotationGeneratorStep vepAnnotationGeneratorStep() {
+    public VepAnnotationGeneratorStep vepAnnotationGeneratorStep() {
         return new VepAnnotationGeneratorStep();
     }
 

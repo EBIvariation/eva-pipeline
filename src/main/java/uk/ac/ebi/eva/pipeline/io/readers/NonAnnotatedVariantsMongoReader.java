@@ -33,8 +33,7 @@ import java.net.UnknownHostException;
  */
 public class NonAnnotatedVariantsMongoReader extends MongoDbCursorItemReader {
 
-    public NonAnnotatedVariantsMongoReader(MongoOperations template, String collectionsVariantsName)
-            throws UnknownHostException {
+    public NonAnnotatedVariantsMongoReader(MongoOperations template, String collectionsVariantsName) {
         super();
 
         setTemplate(template);
