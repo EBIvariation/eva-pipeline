@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 EMBL - European Bioinformatics Institute
+ * Copyright 2016-2017 EMBL - European Bioinformatics Institute
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,6 @@
  */
 package uk.ac.ebi.eva.pipeline.jobs.steps.processor;
 
-import org.beanio.InvalidRecordException;
 import org.junit.Before;
 import org.junit.Test;
 import org.opencb.biodata.models.variant.VariantSource;
@@ -33,6 +32,7 @@ import uk.ac.ebi.eva.test.data.VariantToVariantAnnotationProcessorTestData;
 import uk.ac.ebi.eva.test.utils.TestFileUtils;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -44,7 +44,6 @@ import java.util.stream.Collectors;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 
 /**
  * Test for {@link VariantToVariantAnnotationProcessor}
@@ -58,6 +57,8 @@ public class VariantToVariantAnnotationProcessorTest {
 
     private static final String STUDY_NAME = "study name";
 
+    private final List<String> csqFields = Arrays.asList("Allele|Consequence|IMPACT|SYMBOL|Gene|Feature_type|Feature|BIOTYPE|EXON|INTRON|HGVSc|HGVSp|cDNA_position|CDS_position|Protein_position|Amino_acids|Codons|Existing_variation|DISTANCE|STRAND|FLAGS|SYMBOL_SOURCE|HGNC_ID".split("\\|", -1));
+
     private VariantToVariantAnnotationProcessor processor;
 
     private Variant variant;
@@ -66,13 +67,14 @@ public class VariantToVariantAnnotationProcessorTest {
 
     @Before
     public void setUp() throws Exception {
-        processor = new VariantToVariantAnnotationProcessor();
         variant = new Variant("1", 1, 2, "A", "T");
         sourceEntry = new VariantSourceEntry(FILE_ID, STUDY_ID);
     }
 
     @Test
     public void variantWithoutSourceEntriesShouldReturnNull() {
+        processor = new VariantToVariantAnnotationProcessor(new ArrayList<>());
+
         assertNull(processor.process(variant));
     }
 
@@ -82,7 +84,8 @@ public class VariantToVariantAnnotationProcessorTest {
         sourceEntries.put(FILE_ID, sourceEntry);
         variant.setSourceEntries(sourceEntries);
 
-        processor = new VariantToVariantAnnotationProcessor();
+        processor = new VariantToVariantAnnotationProcessor(new ArrayList<>());
+
         assertNull(processor.process(variant));
     }
 
@@ -96,11 +99,13 @@ public class VariantToVariantAnnotationProcessorTest {
         sourceEntries.put(FILE_ID, sourceEntry);
         variant.setSourceEntries(sourceEntries);
 
+        processor = new VariantToVariantAnnotationProcessor(new ArrayList<>());
+
         assertNull(processor.process(variant));
     }
 
-    @Test(expected = InvalidRecordException.class)
-    public void sourceEntriesWithInvalidCsqValue() {
+    @Test(expected = RuntimeException.class)
+    public void csqInfoFieldsInHeaderMissing() {
         Map<String, String> attributes = new HashMap<>();
         attributes.put("CSQ", "anyValue");
         sourceEntry.setAttributes(attributes);
@@ -108,6 +113,8 @@ public class VariantToVariantAnnotationProcessorTest {
         Map<String, VariantSourceEntry> sourceEntries = new HashMap<>();
         sourceEntries.put(FILE_ID, sourceEntry);
         variant.setSourceEntries(sourceEntries);
+
+        processor = new VariantToVariantAnnotationProcessor(new ArrayList<>());
 
         processor.process(variant);
     }
@@ -122,10 +129,14 @@ public class VariantToVariantAnnotationProcessorTest {
         sourceEntries.put(FILE_ID, sourceEntry);
         variant.setSourceEntries(sourceEntries);
 
+        List<String> partialCsqFields = Arrays.asList("Allele|Consequence|IMPACT|SYMBOL|Gene|Feature_type|Feature|BIOTYPE|EXON|INTRON|HGVSc|HGVSp|cDNA_position|CDS_position|Protein_position|Amino_acids".split("\\|", -1));
+
+        processor = new VariantToVariantAnnotationProcessor(partialCsqFields);
+
         VariantAnnotation variantAnnotation = processor.process(variant);
         List<ConsequenceType> consequenceTypes = variantAnnotation.getConsequenceTypes();
 
-        assertTrue(variantAnnotation.getHgvs().isEmpty());
+        assertNull(variantAnnotation.getHgvs());
         assertEquals(VariantToVariantAnnotationProcessorTestData.SINGLE_PARTIAL_CSQ.split(",").length,
                      consequenceTypes.size());
 
@@ -133,17 +144,16 @@ public class VariantToVariantAnnotationProcessorTest {
 
         assertEquals("EPlOSAG00000001824", consequenceType.getEnsemblGeneId());
         assertEquals("EPlOSAT00000003212", consequenceType.getEnsemblTranscriptId());
-        assertEquals("-1", consequenceType.getStrand());
         assertEquals("ncRNA", consequenceType.getBiotype());
 
         ConsequenceType expectedConsequenceType = new ConsequenceType("upstream_gene_variant");
 
         assertEquals(expectedConsequenceType.getSoTerms().get(0).getSoAccession(),
                      consequenceType.getSoTerms().get(0).getSoAccession());
-
+        assertNull(consequenceType.getStrand());
         assertNull(consequenceType.getcDnaPosition());
         assertNull(consequenceType.getCdsPosition());
-        assertTrue(consequenceType.getCodon().isEmpty());
+        assertNull(consequenceType.getCodon());
     }
 
     @Test
@@ -155,6 +165,8 @@ public class VariantToVariantAnnotationProcessorTest {
         Map<String, VariantSourceEntry> sourceEntries = new HashMap<>();
         sourceEntries.put(FILE_ID, sourceEntry);
         variant.setSourceEntries(sourceEntries);
+
+        processor = new VariantToVariantAnnotationProcessor(csqFields);
 
         VariantAnnotation variantAnnotation = processor.process(variant);
         List<ConsequenceType> consequenceTypes = variantAnnotation.getConsequenceTypes();
@@ -182,11 +194,48 @@ public class VariantToVariantAnnotationProcessorTest {
         assertNull(consequenceType.getAaChange());
         assertNull(consequenceType.getProteinSubstitutionScores());
         assertNull(consequenceType.getRelativePosition());
+    }
 
-        Set<String> hgvs = new HashSet<>(variantAnnotation.getHgvs());
-        Set<String> expectedHgvs = new HashSet<>(Arrays.asList("hgvsC", "hgvsP"));
+    @Test
+    public void csqFieldsInDifferentOrder() {
+        Map<String, String> attributes = new HashMap<>();
+        attributes.put("CSQ", VariantToVariantAnnotationProcessorTestData.NON_DEFAULT_ORDER_CSQ);
+        sourceEntry.setAttributes(attributes);
 
-        assertEquals(expectedHgvs, hgvs);
+        Map<String, VariantSourceEntry> sourceEntries = new HashMap<>();
+        sourceEntries.put(FILE_ID, sourceEntry);
+        variant.setSourceEntries(sourceEntries);
+
+        List<String> csqFieldsWithDifferentOrder = Arrays.asList("STRAND|Allele|Consequence|IMPACT|SYMBOL|Gene|Feature_type|Feature|BIOTYPE|cDNA_position|CDS_position|Codons".split("\\|",-1));
+
+        processor = new VariantToVariantAnnotationProcessor(csqFieldsWithDifferentOrder);
+
+        VariantAnnotation variantAnnotation = processor.process(variant);
+        List<ConsequenceType> consequenceTypes = variantAnnotation.getConsequenceTypes();
+
+        assertEquals(VariantToVariantAnnotationProcessorTestData.NON_DEFAULT_ORDER_CSQ.split(",").length,
+                     consequenceTypes.size());
+
+        ConsequenceType consequenceType = consequenceTypes.get(0);
+
+        assertEquals("gene", consequenceType.getEnsemblGeneId());
+        assertEquals("feature", consequenceType.getEnsemblTranscriptId());
+        assertEquals("strand", consequenceType.getStrand());
+        assertEquals("biotype", consequenceType.getBiotype());
+        assertEquals(Integer.valueOf(0), consequenceType.getcDnaPosition());
+        assertEquals(Integer.valueOf(0), consequenceType.getCdsPosition());
+        assertEquals("codons", consequenceType.getCodon());
+
+        ConsequenceType expectedConsequenceType = new ConsequenceType("upstream_gene_variant");
+
+        assertEquals(expectedConsequenceType.getSoTerms().get(0).getSoAccession(),
+                     consequenceType.getSoTerms().get(0).getSoAccession());
+
+        assertNull(consequenceType.getGeneName());
+        assertNull(consequenceType.getAaPosition());
+        assertNull(consequenceType.getAaChange());
+        assertNull(consequenceType.getProteinSubstitutionScores());
+        assertNull(consequenceType.getRelativePosition());
     }
 
     @Test
@@ -198,6 +247,8 @@ public class VariantToVariantAnnotationProcessorTest {
         Map<String, VariantSourceEntry> sourceEntries = new HashMap<>();
         sourceEntries.put(FILE_ID, sourceEntry);
         variant.setSourceEntries(sourceEntries);
+
+        processor = new VariantToVariantAnnotationProcessor(csqFields);
 
         VariantAnnotation variantAnnotation = processor.process(variant);
         List<ConsequenceType> consequenceTypes = variantAnnotation.getConsequenceTypes();
@@ -215,6 +266,8 @@ public class VariantToVariantAnnotationProcessorTest {
         Map<String, VariantSourceEntry> sourceEntries = new HashMap<>();
         sourceEntries.put(FILE_ID, sourceEntry);
         variant.setSourceEntries(sourceEntries);
+
+        processor = new VariantToVariantAnnotationProcessor(csqFields);
 
         VariantAnnotation variantAnnotation = processor.process(variant);
         List<ConsequenceType> consequenceTypes = variantAnnotation.getConsequenceTypes();
@@ -254,6 +307,8 @@ public class VariantToVariantAnnotationProcessorTest {
         vcfReader.open(executionContext);
 
         List<Variant> variants = vcfReader.read();
+
+        processor = new VariantToVariantAnnotationProcessor(csqFields);
 
         for (Variant variant : variants) {
             VariantAnnotation annotation = processor.process(variant);

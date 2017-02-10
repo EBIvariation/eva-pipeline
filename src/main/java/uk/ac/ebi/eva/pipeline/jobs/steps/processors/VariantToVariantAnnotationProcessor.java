@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 EMBL - European Bioinformatics Institute
+ * Copyright 2016-2017 EMBL - European Bioinformatics Institute
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,6 @@
  */
 package uk.ac.ebi.eva.pipeline.jobs.steps.processors;
 
-import org.apache.commons.lang.StringUtils;
-import org.beanio.StreamFactory;
-import org.beanio.Unmarshaller;
-import org.beanio.builder.DelimitedParserBuilder;
-import org.beanio.builder.StreamBuilder;
 import org.opencb.biodata.models.variant.annotation.ConsequenceType;
 import org.opencb.biodata.models.variant.annotation.VariantAnnotation;
 import org.slf4j.Logger;
@@ -28,11 +23,9 @@ import org.springframework.batch.item.ItemProcessor;
 
 import uk.ac.ebi.eva.commons.models.data.Variant;
 import uk.ac.ebi.eva.commons.models.data.VariantSourceEntry;
-import uk.ac.ebi.eva.pipeline.model.Csq;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -54,26 +47,31 @@ import java.util.stream.Collectors;
 public class VariantToVariantAnnotationProcessor implements ItemProcessor<Variant, VariantAnnotation> {
     protected static Logger logger = LoggerFactory.getLogger(VariantToVariantAnnotationProcessor.class);
 
+    private final List<String> csqFields;
+
+    public VariantToVariantAnnotationProcessor(List<String> csqFields) {
+        this.csqFields = csqFields;
+    }
+
     @Override
     public VariantAnnotation process(Variant variant) {
         logger.trace("Converting variant {} into VariantAnnotation", variant);
 
         Map<String, VariantSourceEntry> sourceEntries = variant.getSourceEntries();
 
-        List<Csq> csqs = new ArrayList<>();
+        List<ConsequenceType> consequenceTypes = new ArrayList<>();
 
         for (VariantSourceEntry sourceEntry : sourceEntries.values()) {
             String csqValue = sourceEntry.getAttribute("CSQ");
-            csqs.addAll(parseCsqValue(csqValue));
+            consequenceTypes = extractConsequenceTypesFromCsqs(splitMultipleCsqValues(csqValue));
         }
 
-        if (!csqs.isEmpty()) {
+        if (!consequenceTypes.isEmpty()) {
             VariantAnnotation variantAnnotation = new VariantAnnotation(variant.getChromosome(), variant.getStart(),
                                                                         variant.getEnd(), variant.getReference(),
                                                                         variant.getAlternate());
 
-            variantAnnotation.setConsequenceTypes(extractConsequenceTypesFromCsq(csqs));
-            variantAnnotation.setHgvs(extractHgvsFromCsq(csqs));
+            variantAnnotation.setConsequenceTypes(consequenceTypes);
 
             return variantAnnotation;
         }
@@ -81,60 +79,93 @@ public class VariantToVariantAnnotationProcessor implements ItemProcessor<Varian
         return null;
     }
 
-    private List<ConsequenceType> extractConsequenceTypesFromCsq(List<Csq> csqs) {
-        return csqs.stream().map(this::csqToConsequenceTypeMapper).collect(Collectors.toList());
+    /**
+     * Commas in fields are replaced with ampersands (&) to preserve VCF format.
+     * See http://www.ensembl.org/info/docs/tools/vep/vep_formats.html
+     */
+    private List<ConsequenceType> extractConsequenceTypesFromCsqs(List<String> csqs) {
+        return csqs.stream()
+                .map(csq-> csq.replaceAll("&", ","))
+                .map(csq->Arrays.asList(csq.split("\\|", -1)))
+                .map(this::csqValuesToConsequenceTypeMapper)
+                .collect(Collectors.toList());
     }
 
-    private List<String> extractHgvsFromCsq(List<Csq> csqs) {
-        return csqs.stream().map(csq -> Arrays.asList(csq.getHgvsC(), csq.getHgvsP())).flatMap(Collection::stream)
-                .filter(StringUtils::isNotBlank).collect(Collectors.toList());
-    }
+    private ConsequenceType csqValuesToConsequenceTypeMapper(List<String> csqValues) {
 
-    private ConsequenceType csqToConsequenceTypeMapper(Csq csq) {
+        if(csqValues.size() != csqFields.size()){
+            throw new RuntimeException("CSQ fields in INFO header and CSQ values have different size!");
+        }
+
         ConsequenceType consequenceType = new ConsequenceType();
-        consequenceType.setcDnaPosition(csq.getcDNAposition());
-        consequenceType.setCdsPosition(csq.getCdsPosition());
-        consequenceType.setBiotype(csq.getBiotype());
-        consequenceType.setEnsemblGeneId(csq.getGene());
-        consequenceType.setEnsemblTranscriptId(csq.getFeature());
-        consequenceType.setStrand(csq.getStrand());
-        consequenceType.setCodon(csq.getCodons());
-        consequenceType.setSoTermsFromSoNames(Arrays.asList(csq.getConsequence().split(",")));
+
+        for(String csqField : csqFields){
+
+            String csqValue = csqValues.get(csqFields.indexOf(csqField));
+
+            if(!csqValue.isEmpty()){
+                populateConsequenceType(consequenceType, csqField, csqValue);
+            }
+        }
 
         return consequenceType;
     }
 
-    private List<Csq> parseCsqValue(String csqValue) {
-        List<Csq> csqs = new ArrayList<>();
+    private void populateConsequenceType(ConsequenceType consequenceType, String csqField, String csqValue){
+        switch (csqField){
+            case "cDNA_position":
+                consequenceType.setcDnaPosition(Integer.valueOf(csqValue));
+                break;
+            case "CDS_position":
+                consequenceType.setCdsPosition(Integer.valueOf(csqValue));
+                break;
+            case "BIOTYPE":
+                consequenceType.setBiotype(csqValue);
+                break;
+            case "Gene":
+                consequenceType.setEnsemblGeneId(csqValue);
+                break;
+            case "Feature":
+                consequenceType.setEnsemblTranscriptId(csqValue);
+                break;
+            case "STRAND":
+                consequenceType.setStrand(csqValue);
+                break;
+            case "Codons":
+                consequenceType.setCodon(csqValue);   //// TODO: 08/02/2017 can be multiple???
+                break;
+            case "Consequence":
+                consequenceType.setSoTermsFromSoNames(Arrays.asList(csqValue.split(",")));
+                break;
+            default:
+                logger.info("The CSQ field {} will not be stored.", csqField);
+        }
+    }
+
+    private List<String> splitMultipleCsqValues(String csqValue) {
+        List<String> csqs = new ArrayList<>();
 
         if (csqValue != null) {
-            csqs = Arrays.stream(csqValue.split(",")).map(this::stringToCsqMapper).collect(Collectors.toList());
+            csqs = Arrays.asList(csqValue.split(","));
         }
 
         return csqs;
     }
 
-    private Csq stringToCsqMapper(String csq) {
-        logger.trace("Mapping CSQ field {}", csq);
+    /*
+    //TODO move this into reader?
+    private List<String> extractCsqFieldsFromVcfInfoHeader(VariantSourceEntity variantSourceEntity){
+        Collection<VcfInfoHeader> vcfInfoHeaders = (Collection<VcfInfoHeader>) variantSourceEntity.getMetadata().get("INFO");
+        List<VcfInfoHeader> csqInfo = vcfInfoHeaders.stream().filter(i-> "CSQ".equals(i.getId())).collect(Collectors.toList());
 
-        StreamFactory factory = StreamFactory.newInstance();
-        StreamBuilder builder = new StreamBuilder("csqMapper").format("delimited")
-                .parser(new DelimitedParserBuilder('|')).addRecord(Csq.class);
-        factory.define(builder);
-        Unmarshaller unmarshaller = factory.createUnmarshaller("csqMapper");
+        if(csqInfo.size()==1){
+            String csqDescription = csqInfo.get(0).getDescription();
+            csqFields = Arrays.asList(csqDescription.replace("Consequence annotations from Ensembl VEP. Format: ","").split("\\|"));
+        }else{
+            //// TODO: 09/02/2017 complain!!
+        }
 
-        return (Csq) unmarshaller.unmarshal(replaceAmpersandsWithComma(csq));
-    }
-
-    /**
-     * Commas in fields are replaced with ampersands (&) to preserve VCF format.
-     * See http://www.ensembl.org/info/docs/tools/vep/vep_formats.html
-     *
-     * @param csq value
-     * @return csq value with '&' replaced by ','
-     */
-    private String replaceAmpersandsWithComma(String csq) {
-        return csq.replaceAll("&", ",");
-    }
+        return csqFields;
+    }*/
 
 }
