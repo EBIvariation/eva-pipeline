@@ -55,8 +55,8 @@ import static org.junit.Assert.assertNotNull;
  * TODO Replace MongoDBHelper with StatisticsMongoWriterConfiguration in ContextConfiguration when the class exists
  */
 @RunWith(SpringRunner.class)
-@TestPropertySource({"classpath:common-configuration.properties"})
-@ContextConfiguration(classes = {BaseTestConfiguration.class})
+@TestPropertySource({"classpath:test-mongo.properties"})
+@ContextConfiguration(classes = {MongoConnection.class, MongoMappingContext.class})
 public class StatisticsMongoWriterTest {
 
     private static final String COLLECTION_STATS_NAME = "populationStatistics";

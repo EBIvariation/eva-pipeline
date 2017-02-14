@@ -1,5 +1,6 @@
 package uk.ac.ebi.eva.pipeline.io.readers;
 
+import org.junit.Rule;
 import org.junit.Test;
 import org.opencb.biodata.models.variant.VariantSource;
 import org.opencb.biodata.models.variant.VariantStudy;
@@ -8,6 +9,7 @@ import org.springframework.batch.test.MetaDataInstanceFactory;
 
 import uk.ac.ebi.eva.commons.models.data.Variant;
 import uk.ac.ebi.eva.commons.models.data.VariantSourceEntry;
+import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
 import uk.ac.ebi.eva.test.utils.TestFileUtils;
 
@@ -36,6 +38,9 @@ public class AggregatedVcfReaderTest {
     private static final String INPUT_FILE_PATH_EXAC = "/aggregated.exac.vcf.gz";
 
     private static final String INPUT_FILE_PATH_EVS = "/aggregated.evs.vcf.gz";
+
+    @Rule
+    public PipelineTemporaryFolderRule temporaryFolderRule = new PipelineTemporaryFolderRule();
 
     @Test
     public void shouldReadAllLines() throws Exception {
@@ -73,7 +78,7 @@ public class AggregatedVcfReaderTest {
 
         // uncompress the input VCF into a temporal file
         File input = TestFileUtils.getResource(INPUT_FILE_PATH);
-        File tempFile = JobTestUtils.createTempFile();
+        File tempFile = temporaryFolderRule.newFile();
         JobTestUtils.uncompress(input.getAbsolutePath(), tempFile);
 
         AggregatedVcfReader vcfReader = new AggregatedVcfReader(FILE_ID, STUDY_ID, VariantSource.Aggregation.BASIC,

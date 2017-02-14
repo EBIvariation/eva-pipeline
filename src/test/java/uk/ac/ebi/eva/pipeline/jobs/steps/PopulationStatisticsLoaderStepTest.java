@@ -75,7 +75,7 @@ public class PopulationStatisticsLoaderStepTest {
         String fileId = "1";
         String studyId = "1";
         String dbName = mongoRule.restoreDumpInTemporaryDatabase(getResourceUrl(MONGO_DUMP));
-        String statsDir = temporaryFolderRule.getRoot().getAbsolutePath();
+        String statsDir = temporaryFolderRule.newFolder().getAbsolutePath();
 
         JobParameters jobParameters = new EvaJobParameterBuilder()
                 .collectionFilesName("files")
@@ -118,7 +118,7 @@ public class PopulationStatisticsLoaderStepTest {
         String fileId = "1";
         String studyId = "1";
         String dbName = mongoRule.restoreDumpInTemporaryDatabase(getResourceUrl(MONGO_DUMP));
-        String statsDir = temporaryFolderRule.getRoot().getAbsolutePath();
+        String statsDir = temporaryFolderRule.newFolder().getAbsolutePath();
 
         JobParameters jobParameters = new EvaJobParameterBuilder()
                 .collectionFilesName("files")

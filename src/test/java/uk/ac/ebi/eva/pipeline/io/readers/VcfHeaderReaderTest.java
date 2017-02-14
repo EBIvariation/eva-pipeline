@@ -1,14 +1,17 @@
 package uk.ac.ebi.eva.pipeline.io.readers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.mongodb.BasicDBObject;
 import com.mongodb.util.JSON;
+import org.junit.Rule;
 import org.junit.Test;
 import org.opencb.biodata.models.variant.VariantSource;
 import org.opencb.biodata.models.variant.VariantStudy;
 
 import uk.ac.ebi.eva.commons.models.data.VariantSourceEntity;
+import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
 import uk.ac.ebi.eva.test.utils.TestFileUtils;
 
@@ -41,6 +44,9 @@ public class VcfHeaderReaderTest {
     private static final String STUDY_NAME = "study name";
 
     private static final String INPUT_AGGREGATED_FILE_PATH = "/aggregated.vcf.gz";
+
+    @Rule
+    public PipelineTemporaryFolderRule temporaryFolderRule = new PipelineTemporaryFolderRule();
 
     @Test
     public void testRead() throws Exception {
@@ -89,17 +95,9 @@ public class VcfHeaderReaderTest {
         headerReader.open(null);
         VariantSourceEntity source = headerReader.read();
 
-        char CHARACTER_TO_REPLACE_DOTS = (char) 163;
         Map<String, Object> meta = source.getMetadata();
-        BasicDBObject metadataMongo = new BasicDBObject();
-        for (Map.Entry<String, Object> metaEntry : meta.entrySet()) {
-            ObjectMapper mapper = new ObjectMapper();
-            ObjectWriter writer = mapper.writer();
-            String key = metaEntry.getKey().replace('.', CHARACTER_TO_REPLACE_DOTS);
-            Object value = metaEntry.getValue();
-            String jsonString = writer.writeValueAsString(value);
-            metadataMongo.append(key, JSON.parse(jsonString));
-        }
+        BasicDBObject metadataMongo = mapMetadataToDBObject(meta);
+
         checkFieldsInsideList(metadataMongo, "INFO", Arrays.asList("id", "description", "number", "type"));
         checkFieldsInsideList(metadataMongo, "FORMAT", Arrays.asList("id", "description", "number", "type"));
         checkFieldsInsideList(metadataMongo, "ALT", Arrays.asList("id", "description"));
@@ -111,7 +109,7 @@ public class VcfHeaderReaderTest {
     public void testConversionAggregated() throws Exception {
         // uncompress the input VCF into a temporal file
         File input = TestFileUtils.getResource(INPUT_AGGREGATED_FILE_PATH);
-        File tempFile = JobTestUtils.createTempFile();  // TODO replace with temporary rules
+        File tempFile = temporaryFolderRule.newFile();
         JobTestUtils.uncompress(input.getAbsolutePath(), tempFile);
 
         VcfHeaderReader headerReader = new VcfHeaderReader(input, FILE_ID, STUDY_ID, STUDY_NAME,
@@ -120,8 +118,15 @@ public class VcfHeaderReaderTest {
         headerReader.open(null);
         VariantSourceEntity source = headerReader.read();
 
-        char CHARACTER_TO_REPLACE_DOTS = (char) 163;
         Map<String, Object> meta = source.getMetadata();
+        BasicDBObject metadataMongo = mapMetadataToDBObject(meta);
+
+        checkFieldsInsideList(metadataMongo, "INFO", Arrays.asList("id", "description", "number", "type"));
+        checkStringInsideList(metadataMongo, "contig");
+    }
+
+    private BasicDBObject mapMetadataToDBObject(Map<String, Object> meta) throws JsonProcessingException {
+        char CHARACTER_TO_REPLACE_DOTS = (char) 163;
         BasicDBObject metadataMongo = new BasicDBObject();
         for (Map.Entry<String, Object> metaEntry : meta.entrySet()) {
             ObjectMapper mapper = new ObjectMapper();
@@ -131,9 +136,7 @@ public class VcfHeaderReaderTest {
             String jsonString = writer.writeValueAsString(value);
             metadataMongo.append(key, JSON.parse(jsonString));
         }
-
-        checkFieldsInsideList(metadataMongo, "INFO", Arrays.asList("id", "description", "number", "type"));
-        checkStringInsideList(metadataMongo, "contig");
+        return metadataMongo;
     }
 
 }

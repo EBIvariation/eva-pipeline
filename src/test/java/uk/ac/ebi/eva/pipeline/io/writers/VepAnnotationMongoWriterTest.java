@@ -59,8 +59,8 @@ import static uk.ac.ebi.eva.test.data.VepOutputContent.vepOutputContent;
  */
 @RunWith(SpringRunner.class)
 @ActiveProfiles("variant-annotation-mongo")
-@TestPropertySource({"classpath:annotation.properties", "classpath:test-mongo.properties"})
-@ContextConfiguration(classes = {BaseTestConfiguration.class})
+@TestPropertySource({"classpath:test-mongo.properties"})
+@ContextConfiguration(classes = {MongoConnection.class, MongoMappingContext.class})
 public class VepAnnotationMongoWriterTest {
 
     private static final String COLLECTION_VARIANTS_NAME = "variants";

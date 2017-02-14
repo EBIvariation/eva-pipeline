@@ -56,8 +56,8 @@ import static org.mockito.Mockito.when;
  * Testing {@link VariantMongoWriter}
  */
 @RunWith(SpringRunner.class)
-@TestPropertySource({"classpath:common-configuration.properties", "classpath:test-mongo.properties"})
-@ContextConfiguration(classes = {BaseTestConfiguration.class})
+@TestPropertySource({"classpath:test-mongo.properties"})
+@ContextConfiguration(classes = {MongoConnection.class, MongoMappingContext.class})
 public class VariantMongoWriterTest {
 
     private static final List<? extends Variant> EMPTY_LIST = new ArrayList<>();

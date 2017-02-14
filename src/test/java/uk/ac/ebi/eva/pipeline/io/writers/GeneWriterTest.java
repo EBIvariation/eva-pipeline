@@ -48,8 +48,8 @@ import static org.junit.Assert.assertTrue;
  * output: the FeatureCoordinates get written in mongo, with at least: chromosome, start and end.
  */
 @RunWith(SpringRunner.class)
-@TestPropertySource({"classpath:initialize-database.properties", "classpath:test-mongo.properties"})
-@ContextConfiguration(classes = {BaseTestConfiguration.class})
+@TestPropertySource({"classpath:test-mongo.properties"})
+@ContextConfiguration(classes = {MongoConnection.class, MongoMappingContext.class})
 public class GeneWriterTest {
 
     private static final String COLLECTION_FEATURES_NAME = "features";

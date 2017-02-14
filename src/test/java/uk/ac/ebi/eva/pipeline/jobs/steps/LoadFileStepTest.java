@@ -35,7 +35,6 @@ import uk.ac.ebi.eva.pipeline.Application;
 import uk.ac.ebi.eva.pipeline.configuration.BeanNames;
 import uk.ac.ebi.eva.pipeline.jobs.GenotypedVcfJob;
 import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
-import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 import uk.ac.ebi.eva.utils.EvaJobParameterBuilder;
 
@@ -57,9 +56,6 @@ public class LoadFileStepTest {
     private static final String SMALL_VCF_FILE = "/small20.vcf.gz";
 
     private static final String COLLECTION_FILES_NAME = "files";
-
-    @Rule
-    public PipelineTemporaryFolderRule temporaryFolderRule = new PipelineTemporaryFolderRule();
 
     @Rule
     public TemporaryMongoRule mongoRule = new TemporaryMongoRule();

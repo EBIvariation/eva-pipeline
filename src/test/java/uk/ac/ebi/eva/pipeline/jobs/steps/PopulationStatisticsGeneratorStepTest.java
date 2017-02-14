@@ -70,7 +70,7 @@ public class PopulationStatisticsGeneratorStepTest {
     public void statisticsGeneratorStepShouldCalculateStats() throws IOException, InterruptedException, URISyntaxException {
         //Given a valid VCF input file
         String databaseName = mongoRule.restoreDumpInTemporaryDatabase(getResourceUrl(MONGO_DUMP));
-        String statsDir = temporaryFolderRule.getRoot().getAbsolutePath();
+        String statsDir = temporaryFolderRule.newFolder().getAbsolutePath();
         String studyId = "1";
         String fileId = "1";
 
@@ -108,7 +108,7 @@ public class PopulationStatisticsGeneratorStepTest {
     public void statisticsGeneratorStepShouldFailIfVariantLoadStepIsNotCompleted() throws Exception {
         //Given a valid VCF input file
         String databaseName = mongoRule.getRandomTemporaryDatabaseName();
-        String statsDir = temporaryFolderRule.getRoot().getAbsolutePath();
+        String statsDir = temporaryFolderRule.newFolder().getAbsolutePath();
         String wrongId = "non-existent-id";
 
         JobParameters jobParameters = new EvaJobParameterBuilder()
