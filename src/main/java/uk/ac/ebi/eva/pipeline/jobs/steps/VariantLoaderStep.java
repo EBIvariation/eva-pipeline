@@ -23,12 +23,14 @@ import org.springframework.batch.core.configuration.annotation.StepBuilderFactor
 import org.springframework.batch.item.ItemStreamReader;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.file.FlatFileParseException;
+import org.springframework.batch.repeat.policy.SimpleCompletionPolicy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import uk.ac.ebi.eva.commons.models.data.Variant;
+import uk.ac.ebi.eva.pipeline.configuration.ChunkSizeCompletionPolicyConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.readers.VcfReaderConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.writers.VariantWriterConfiguration;
 import uk.ac.ebi.eva.pipeline.listeners.SkippedItemListener;
@@ -46,7 +48,7 @@ import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VARIANT_WRITER;
  */
 @Configuration
 @EnableBatchProcessing
-@Import({VariantWriterConfiguration.class, VcfReaderConfiguration.class})
+@Import({VariantWriterConfiguration.class, VcfReaderConfiguration.class, ChunkSizeCompletionPolicyConfiguration.class})
 public class VariantLoaderStep {
 
     private static final Logger logger = LoggerFactory.getLogger(VariantLoaderStep.class);
@@ -60,11 +62,12 @@ public class VariantLoaderStep {
     private ItemWriter<Variant> variantWriter;
 
     @Bean(LOAD_VARIANTS_STEP)
-    public Step loadVariantsStep(StepBuilderFactory stepBuilderFactory, JobOptions jobOptions) {
+    public Step loadVariantsStep(StepBuilderFactory stepBuilderFactory, JobOptions jobOptions,
+                                 SimpleCompletionPolicy chunkSizeCompletitionPolicy) {
         logger.debug("Building '" + LOAD_VARIANTS_STEP + "'");
 
         return stepBuilderFactory.get(LOAD_VARIANTS_STEP)
-                .<Variant, Variant>chunk(jobOptions.getChunkSize())
+                .<Variant, Variant>chunk(chunkSizeCompletitionPolicy)
                 .reader(reader)
                 .writer(variantWriter)
                 .faultTolerant().skipLimit(50).skip(FlatFileParseException.class)

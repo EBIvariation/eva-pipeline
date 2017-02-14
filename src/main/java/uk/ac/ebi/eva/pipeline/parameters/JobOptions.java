@@ -41,7 +41,6 @@ public class JobOptions {
 
     // Pipeline application options.
     @Value("${" + JobParametersNames.CONFIG_RESTARTABILITY_ALLOW + ":false}") private boolean allowStartIfComplete;
-    @Value("${" + JobParametersNames.CONFIG_CHUNK_SIZE + ":1000}") private int chunkSize;
 
     @PostConstruct
     public void loadArgs() throws IOException {
@@ -55,10 +54,6 @@ public class JobOptions {
 
     public boolean isAllowStartIfComplete() {
         return allowStartIfComplete;
-    }
-
-    public int getChunkSize() {
-        return chunkSize;
     }
 
 }

@@ -22,11 +22,13 @@ import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.item.ItemStreamWriter;
+import org.springframework.batch.repeat.policy.SimpleCompletionPolicy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import uk.ac.ebi.eva.pipeline.configuration.ChunkSizeCompletionPolicyConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.readers.NonAnnotatedVariantsMongoReaderConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.writers.VepInputFlatFileWriterConfiguration;
 import uk.ac.ebi.eva.pipeline.io.readers.NonAnnotatedVariantsMongoReader;
@@ -56,7 +58,8 @@ import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VEP_INPUT_WRITER;
  */
 @Configuration
 @EnableBatchProcessing
-@Import({NonAnnotatedVariantsMongoReaderConfiguration.class, VepInputFlatFileWriterConfiguration.class})
+@Import({NonAnnotatedVariantsMongoReaderConfiguration.class, VepInputFlatFileWriterConfiguration.class,
+        ChunkSizeCompletionPolicyConfiguration.class})
 public class VepInputGeneratorStep {
 
     private static final Logger logger = LoggerFactory.getLogger(VepInputGeneratorStep.class);
@@ -70,11 +73,12 @@ public class VepInputGeneratorStep {
     private ItemStreamWriter<VariantWrapper> writer;
 
     @Bean(GENERATE_VEP_INPUT_STEP)
-    public Step generateVepInputStep(StepBuilderFactory stepBuilderFactory, JobOptions jobOptions) {
+    public Step generateVepInputStep(StepBuilderFactory stepBuilderFactory, JobOptions jobOptions,
+                                     SimpleCompletionPolicy chunkSizeCompletitionPolicy) {
         logger.debug("Building '" + GENERATE_VEP_INPUT_STEP + "'");
 
         return stepBuilderFactory.get(GENERATE_VEP_INPUT_STEP)
-                .<DBObject, VariantWrapper>chunk(jobOptions.getChunkSize())
+                .<DBObject, VariantWrapper>chunk(chunkSizeCompletitionPolicy)
                 .reader(reader)
                 .processor(new AnnotationProcessor())
                 .writer(writer)

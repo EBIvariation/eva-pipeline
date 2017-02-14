@@ -25,11 +25,13 @@ import org.springframework.batch.core.configuration.annotation.StepBuilderFactor
 import org.springframework.batch.item.ItemStreamReader;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.file.FlatFileParseException;
+import org.springframework.batch.repeat.policy.SimpleCompletionPolicy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import uk.ac.ebi.eva.pipeline.configuration.ChunkSizeCompletionPolicyConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.readers.VariantAnnotationReaderConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.writers.VariantAnnotationWriterConfiguration;
 import uk.ac.ebi.eva.pipeline.io.readers.AnnotationFlatFileReader;
@@ -58,7 +60,8 @@ import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VARIANT_ANNOTATION_
 
 @Configuration
 @EnableBatchProcessing
-@Import({VariantAnnotationReaderConfiguration.class, VariantAnnotationWriterConfiguration.class})
+@Import({VariantAnnotationReaderConfiguration.class, VariantAnnotationWriterConfiguration.class,
+        ChunkSizeCompletionPolicyConfiguration.class})
 public class AnnotationLoaderStep {
     private static final Logger logger = LoggerFactory.getLogger(AnnotationLoaderStep.class);
 
@@ -71,11 +74,12 @@ public class AnnotationLoaderStep {
     private ItemWriter<VariantAnnotation> variantAnnotationItemWriter;
 
     @Bean(LOAD_VEP_ANNOTATION_STEP)
-    public Step loadVepAnnotationStep(StepBuilderFactory stepBuilderFactory, JobOptions jobOptions) {
+    public Step loadVepAnnotationStep(StepBuilderFactory stepBuilderFactory, JobOptions jobOptions,
+                                      SimpleCompletionPolicy chunkSizeCompletitionPolicy) {
         logger.debug("Building '" + LOAD_VEP_ANNOTATION_STEP + "'");
 
         return stepBuilderFactory.get(LOAD_VEP_ANNOTATION_STEP)
-                .<VariantAnnotation, VariantAnnotation>chunk(jobOptions.getChunkSize())
+                .<VariantAnnotation, VariantAnnotation>chunk(chunkSizeCompletitionPolicy)
                 .reader(variantAnnotationReader)
                 .writer(variantAnnotationItemWriter)
                 .faultTolerant().skipLimit(50).skip(FlatFileParseException.class)

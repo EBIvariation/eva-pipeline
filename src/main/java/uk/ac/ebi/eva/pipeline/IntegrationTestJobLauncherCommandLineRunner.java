@@ -30,7 +30,7 @@ import uk.ac.ebi.eva.pipeline.parameters.ParametersFromProperties;
  * and injects them in the running instance of the job. Used for integration tests.
  */
 @Component
-@Profile("integrationTest")
+@Profile(Application.INTEGRATION_TEST_PROFILE)
 public class IntegrationTestJobLauncherCommandLineRunner extends JobLauncherCommandLineRunner {
 
     @Value("${spring.batch.job.names:#{null}}")
