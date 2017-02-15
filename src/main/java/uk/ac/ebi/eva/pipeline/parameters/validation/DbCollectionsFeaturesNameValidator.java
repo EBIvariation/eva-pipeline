@@ -31,7 +31,7 @@ public class DbCollectionsFeaturesNameValidator implements JobParametersValidato
     @Override
     public void validate(JobParameters parameters) throws JobParametersInvalidException {
         ParametersValidatorUtil
-                .checkIsNotNullOrEmptyString(parameters.getString(JobParametersNames.DB_COLLECTIONS_FEATURES_NAME),
-                                             JobParametersNames.DB_COLLECTIONS_FEATURES_NAME);
+                .checkIsValidString(parameters.getString(JobParametersNames.DB_COLLECTIONS_FEATURES_NAME),
+                                    JobParametersNames.DB_COLLECTIONS_FEATURES_NAME);
     }
 }

@@ -29,7 +29,7 @@ import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 public class InputStudyNameValidator implements JobParametersValidator {
     @Override
     public void validate(JobParameters parameters) throws JobParametersInvalidException {
-        ParametersValidatorUtil.checkIsNotNullOrEmptyString(parameters.getString(JobParametersNames.INPUT_STUDY_NAME),
-                                                            JobParametersNames.INPUT_STUDY_NAME);
+        ParametersValidatorUtil.checkIsValidString(parameters.getString(JobParametersNames.INPUT_STUDY_NAME),
+                                                   JobParametersNames.INPUT_STUDY_NAME);
     }
 }

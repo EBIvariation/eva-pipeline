@@ -30,7 +30,7 @@ public class InputStudyIdValidator implements JobParametersValidator {
 
     @Override
     public void validate(JobParameters parameters) throws JobParametersInvalidException {
-        ParametersValidatorUtil.checkIsNotNullOrEmptyString(parameters.getString(JobParametersNames.INPUT_STUDY_ID),
-                                                            JobParametersNames.INPUT_STUDY_ID);
+        ParametersValidatorUtil.checkIsValidString(parameters.getString(JobParametersNames.INPUT_STUDY_ID),
+                                                   JobParametersNames.INPUT_STUDY_ID);
     }
 }

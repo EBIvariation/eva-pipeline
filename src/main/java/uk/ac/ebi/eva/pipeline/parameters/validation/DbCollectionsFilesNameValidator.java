@@ -30,7 +30,7 @@ public class DbCollectionsFilesNameValidator implements JobParametersValidator {
 
     @Override
     public void validate(JobParameters parameters) throws JobParametersInvalidException {
-        ParametersValidatorUtil.checkIsNotNullOrEmptyString(
+        ParametersValidatorUtil.checkIsValidString(
                 parameters.getString(JobParametersNames.DB_COLLECTIONS_FILES_NAME),
                 JobParametersNames.DB_COLLECTIONS_FILES_NAME);
     }
