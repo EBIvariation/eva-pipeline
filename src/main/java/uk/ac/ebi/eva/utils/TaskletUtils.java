@@ -11,13 +11,11 @@ import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 public class TaskletUtils {
 
     public static TaskletStep generateStep(StepBuilderFactory stepBuilderFactory, String stepName, Tasklet tasklet,
-                                           JobOptions jobOptions) {
+                                           boolean allowStartIfComplete) {
         StepBuilder step1 = stepBuilderFactory.get(stepName);
         final TaskletStepBuilder taskletBuilder = step1.tasklet(tasklet);
         // true: every job execution will do this step, even if this step is already COMPLETED
         // false(default): if the job was aborted and is relaunched, this step will NOT be done again
-        boolean allowStartIfComplete = jobOptions.getPipelineOptions().getBoolean(JobParametersNames
-                .CONFIG_RESTARTABILITY_ALLOW);
         taskletBuilder.allowStartIfComplete(allowStartIfComplete);
         return taskletBuilder.build();
     }

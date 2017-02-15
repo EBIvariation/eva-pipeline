@@ -84,4 +84,7 @@ public class ParametersFromProperties {
         return properties;
     }
 
+    public String getDatabaseName() {
+        return databaseName;
+    }
 }

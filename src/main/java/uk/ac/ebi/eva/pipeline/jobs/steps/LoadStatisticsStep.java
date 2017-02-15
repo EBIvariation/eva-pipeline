@@ -48,7 +48,7 @@ public class LoadStatisticsStep {
     public TaskletStep loadStatisticsStep(StepBuilderFactory stepBuilderFactory, JobOptions jobOptions) {
         logger.debug("Building '" + LOAD_STATISTICS_STEP + "'");
         return TaskletUtils.generateStep(stepBuilderFactory, LOAD_STATISTICS_STEP,
-                populationStatisticsLoaderStep(), jobOptions);
+                populationStatisticsLoaderStep(), jobOptions.isAllowStartIfComplete());
     }
 
 }

@@ -15,7 +15,6 @@
  */
 package uk.ac.ebi.eva.pipeline.jobs.steps;
 
-import org.opencb.datastore.core.ObjectMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.Step;
@@ -34,7 +33,6 @@ import uk.ac.ebi.eva.pipeline.configuration.readers.VcfReaderConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.writers.VariantWriterConfiguration;
 import uk.ac.ebi.eva.pipeline.listeners.SkippedItemListener;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
-import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.LOAD_VARIANTS_STEP;
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VARIANT_READER;
@@ -65,15 +63,12 @@ public class VariantLoaderStep {
     public Step loadVariantsStep(StepBuilderFactory stepBuilderFactory, JobOptions jobOptions) {
         logger.debug("Building '" + LOAD_VARIANTS_STEP + "'");
 
-        ObjectMap pipelineOptions = jobOptions.getPipelineOptions();
-        boolean startIfcomplete = pipelineOptions.getBoolean(JobParametersNames.CONFIG_RESTARTABILITY_ALLOW);
-
         return stepBuilderFactory.get(LOAD_VARIANTS_STEP)
-                .<Variant, Variant>chunk(jobOptions.getPipelineOptions().getInt(JobParametersNames.CONFIG_CHUNK_SIZE))
+                .<Variant, Variant>chunk(jobOptions.getChunkSize())
                 .reader(reader)
                 .writer(variantWriter)
                 .faultTolerant().skipLimit(50).skip(FlatFileParseException.class)
-                .allowStartIfComplete(startIfcomplete)
+                .allowStartIfComplete(jobOptions.isAllowStartIfComplete())
                 .listener(new SkippedItemListener())
                 .build();
     }

@@ -33,7 +33,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
-
 import uk.ac.ebi.eva.pipeline.jobs.flows.ParallelStatisticsAndAnnotationFlow;
 import uk.ac.ebi.eva.pipeline.jobs.steps.LoadFileStep;
 import uk.ac.ebi.eva.pipeline.jobs.steps.VariantLoaderStep;
@@ -61,8 +60,6 @@ public class GenotypedVcfJob {
 
     //job default settings
     private static final boolean INCLUDE_SAMPLES = true;
-
-    private static final boolean COMPRESS_GENOTYPES = true;
 
     private static final boolean CALCULATE_STATS = false;
 
@@ -102,7 +99,6 @@ public class GenotypedVcfJob {
     @JobScope
     public JobExecutionListener genotypedJobListener() {
         return new VariantOptionsConfigurerListener(INCLUDE_SAMPLES,
-                COMPRESS_GENOTYPES,
                 CALCULATE_STATS,
                 INCLUDE_STATS);
     }
