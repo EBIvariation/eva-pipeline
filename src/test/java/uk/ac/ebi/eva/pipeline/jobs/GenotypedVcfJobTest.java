@@ -87,7 +87,7 @@ public class GenotypedVcfJobTest {
 
     private static final String INPUT_STUDY_ID = "genotyped-job";
 
-    private static final String INPUT_FILE = "/small20.vcf.gz";
+    private static final String INPUT_FILE = "/input-files/genotyped.vcf.gz";
 
     private static final String COLLECTION_FILES_NAME = "files";
 
@@ -191,7 +191,7 @@ public class GenotypedVcfJobTest {
 
     private void checkAnnotationInput(File vepInputFile) throws IOException {
         BufferedReader testReader = new BufferedReader(new InputStreamReader(new FileInputStream(
-                getResource("/preannot.sorted"))));
+                getResource("/expected-output/preannot.sorted"))));
         BufferedReader actualReader = new BufferedReader(new InputStreamReader(new FileInputStream(
                 vepInputFile.toString())));
 

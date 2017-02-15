@@ -40,7 +40,6 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.ac.ebi.eva.pipeline.Application;
 import uk.ac.ebi.eva.pipeline.configuration.BeanNames;
-import uk.ac.ebi.eva.pipeline.configuration.MongoConfiguration;
 import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
@@ -69,7 +68,7 @@ import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResource;
 @TestPropertySource({"classpath:variant-aggregated.properties", "classpath:test-mongo.properties"})
 @ContextConfiguration(classes = {AggregatedVcfJob.class, BatchTestConfiguration.class})
 public class AggregatedVcfJobTest {
-    public static final String INPUT = "/aggregated.vcf.gz";
+    public static final String INPUT = "/input-files/aggregated.vcf.gz";
 
     private static final String COLLECTION_VARIANTS_NAME = "variants";
 

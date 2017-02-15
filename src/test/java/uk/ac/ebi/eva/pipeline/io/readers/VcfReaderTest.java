@@ -3,8 +3,6 @@ package uk.ac.ebi.eva.pipeline.io.readers;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.opencb.biodata.models.variant.VariantSource;
-import org.opencb.biodata.models.variant.VariantStudy;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.item.file.FlatFileParseException;
 import org.springframework.batch.test.MetaDataInstanceFactory;
@@ -35,9 +33,9 @@ public class VcfReaderTest {
     @Rule
     public ExpectedException exception = ExpectedException.none();
 
-    private static final String INPUT_FILE_PATH = "/small20.vcf.gz";
+    private static final String INPUT_FILE_PATH = "/input-files/genotyped.vcf.gz";
 
-    private static final String INPUT_WRONG_FILE_PATH = "/wrong_no_alt.vcf.gz";
+    private static final String INPUT_WRONG_FILE_PATH = "/input-files/wrong_no_alt.vcf.gz";
 
     private static final String FILE_ID = "5";
 

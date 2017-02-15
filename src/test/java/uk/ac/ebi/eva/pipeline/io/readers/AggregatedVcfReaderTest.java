@@ -3,7 +3,6 @@ package uk.ac.ebi.eva.pipeline.io.readers;
 import org.junit.Rule;
 import org.junit.Test;
 import org.opencb.biodata.models.variant.VariantSource;
-import org.opencb.biodata.models.variant.VariantStudy;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.test.MetaDataInstanceFactory;
 
@@ -33,11 +32,11 @@ public class AggregatedVcfReaderTest {
 
     private static final String STUDY_ID = "7";
 
-    private static final String INPUT_FILE_PATH = "/aggregated.vcf.gz";
+    private static final String INPUT_FILE_PATH = "/input-files/aggregated.vcf.gz";
 
-    private static final String INPUT_FILE_PATH_EXAC = "/aggregated.exac.vcf.gz";
+    private static final String INPUT_FILE_PATH_EXAC = "/input-files/aggregated.exac.vcf.gz";
 
-    private static final String INPUT_FILE_PATH_EVS = "/aggregated.evs.vcf.gz";
+    private static final String INPUT_FILE_PATH_EVS = "/input-files/aggregated.evs.vcf.gz";
 
     @Rule
     public PipelineTemporaryFolderRule temporaryFolderRule = new PipelineTemporaryFolderRule();

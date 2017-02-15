@@ -45,9 +45,9 @@ public class UnwindingItemReaderTest {
     @Rule
     public PipelineTemporaryFolderRule temporaryFolderRule = new PipelineTemporaryFolderRule();
 
-    private static final String INPUT_FILE_PATH = "/small20.vcf.gz";
+    private static final String INPUT_FILE_PATH = "/input-files/genotyped.vcf.gz";
 
-    private static final String INPUT_WRONG_FILE_PATH = "/wrong_no_alt.vcf.gz";
+    private static final String INPUT_WRONG_FILE_PATH = "/input-files/wrong_no_alt.vcf.gz";
 
     private static final String FILE_ID = "5";
 
