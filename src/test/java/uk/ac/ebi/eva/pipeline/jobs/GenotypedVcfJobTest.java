@@ -127,24 +127,28 @@ public class GenotypedVcfJobTest {
         File vepInputFile = new File(URLHelper.resolveVepInput(outputDirAnnotation, INPUT_STUDY_ID, INPUT_VCF_ID));
         File vepOutputFile = new File(URLHelper.resolveVepOutput(outputDirAnnotation, INPUT_STUDY_ID, INPUT_VCF_ID));
 
-        Variant variant;
+        File fasta = temporaryFolderRule.newFile();
+
+        Variant variant
 
         // Run the Job
         JobParameters jobParameters = new EvaJobParameterBuilder()
                 .collectionFilesName(COLLECTION_FILES_NAME)
                 .collectionVariantsName(COLLECTION_VARIANTS_NAME)
                 .databaseName(dbName)
-                .inputFasta("")
+                .inputFasta(fasta.getAbsolutePath())
                 .inputStudyId(INPUT_STUDY_ID)
+                .inputStudyName("inputStudyName")
+                .inputStudyType("COLLECTION")
                 .inputVcf(inputFile.getAbsolutePath())
                 .inputVcfAggregation("NONE")
                 .inputVcfId(INPUT_VCF_ID)
                 .outputDirAnnotation(outputDirAnnotation)
                 .outputDirStats(outputDirStats)
                 .vepCachePath("")
-                .vepCacheSpecies("")
-                .vepCacheVersion("")
-                .vepNumForks("")
+                .vepCacheSpecies("human")
+                .vepCacheVersion("1")
+                .vepNumForks("1")
                 .vepPath(getResource(MOCK_VEP).getPath())
                 .toJobParameters();
 

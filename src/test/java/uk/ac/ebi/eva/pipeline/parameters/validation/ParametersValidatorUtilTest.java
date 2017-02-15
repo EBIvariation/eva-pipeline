@@ -54,6 +54,22 @@ public class ParametersValidatorUtilTest {
         ParametersValidatorUtil.checkIsNotNullOrEmptyString(null, JOB_PARAMETER_NAME);
     }
 
+    @Test(expected = JobParametersInvalidException.class)
+    public void stringWithAsciiCharacter() throws JobParametersInvalidException {
+        ParametersValidatorUtil.checkAsciiString("Réal", JOB_PARAMETER_NAME);
+    }
+
+    @Test
+    public void stringWithOutAsciiCharacter() throws JobParametersInvalidException {
+        ParametersValidatorUtil.checkAsciiString("Real", JOB_PARAMETER_NAME);
+    }
+
+    @Test(expected = JobParametersInvalidException.class)
+    public void stringWithLineSeparator() throws JobParametersInvalidException {
+        final String NEW_LINE = System.getProperty("line.separator");
+        ParametersValidatorUtil.checkSingleLineString("abc" + NEW_LINE + "def", JOB_PARAMETER_NAME);
+    }
+
 
     @Test
     public void validBooleanFalseString() throws JobParametersInvalidException {

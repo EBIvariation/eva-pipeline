@@ -30,6 +30,16 @@ public class EvaJobParameterBuilder extends JobParametersBuilder {
         return this;
     }
 
+    public EvaJobParameterBuilder inputStudyType(String inputStudyType) {
+        addParameter(JobParametersNames.INPUT_STUDY_TYPE, new JobParameter(inputStudyType));
+        return this;
+    }
+
+    public EvaJobParameterBuilder inputStudyName(String inputStudyName) {
+        addParameter(JobParametersNames.INPUT_STUDY_NAME, new JobParameter(inputStudyName));
+        return this;
+    }
+
     public EvaJobParameterBuilder inputVcfId(String inputVcfId) {
         addParameter(JobParametersNames.INPUT_VCF_ID, new JobParameter(inputVcfId));
         return this;

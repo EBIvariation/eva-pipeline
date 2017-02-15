@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2016 EMBL - European Bioinformatics Institute
+ * Copyright 2015-2017 EMBL - European Bioinformatics Institute
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,7 +75,8 @@ public class GenotypedVcfJob {
 
         JobBuilder jobBuilder = jobBuilderFactory
                 .get(GENOTYPED_VCF_JOB)
-                .incrementer(new RunIdIncrementer());
+                .incrementer(new RunIdIncrementer())
+                .validator(new GenotypedVcfJobParametersValidator());
         FlowJobBuilder builder = jobBuilder
                 .flow(variantLoaderStep)
                 .next(loadFileStep)

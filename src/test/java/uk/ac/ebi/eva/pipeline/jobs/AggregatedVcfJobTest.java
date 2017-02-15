@@ -41,6 +41,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import uk.ac.ebi.eva.pipeline.Application;
 import uk.ac.ebi.eva.pipeline.configuration.BeanNames;
 import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
+import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
 import uk.ac.ebi.eva.utils.EvaJobParameterBuilder;
@@ -77,6 +78,9 @@ public class AggregatedVcfJobTest {
     @Rule
     public TemporaryMongoRule mongoRule = new TemporaryMongoRule();
 
+    @Rule
+    public PipelineTemporaryFolderRule temporaryFolderRule = new PipelineTemporaryFolderRule();
+
     @Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
 
@@ -91,21 +95,27 @@ public class AggregatedVcfJobTest {
         Config.setOpenCGAHome(opencgaHome);
         String dbName = mongoRule.getRandomTemporaryDatabaseName();
 
+        String outputDirAnnotation = temporaryFolderRule.newFolder().getAbsolutePath();
+
+        File fasta = temporaryFolderRule.newFile();
+
         JobParameters jobParameters = new EvaJobParameterBuilder()
                 .collectionFilesName(COLLECTION_FILES_NAME)
                 .collectionVariantsName(COLLECTION_VARIANTS_NAME)
                 .databaseName(dbName)
-                .inputFasta("")
+                .inputFasta(fasta.getAbsolutePath())
                 .inputStudyId("aggregated-job")
+                .inputStudyName("inputStudyName")
+                .inputStudyType("COLLECTION")
                 .inputVcf(getResource(INPUT).getAbsolutePath())
                 .inputVcfAggregation("BASIC")
                 .inputVcfId("1")
+                .outputDirAnnotation(outputDirAnnotation)
                 .vepCachePath("")
-                .vepCacheSpecies("")
-                .vepCacheVersion("")
-                .vepNumForks("")
-                .vepPath("")
-                .outputDirAnnotation("")
+                .vepCacheSpecies("human")
+                .vepCacheVersion("1")
+                .vepNumForks("1")
+                .vepPath(getResource(MOCK_VEP).getPath())
                 .timestamp()
                 .annotationSkip(true)
                 .toJobParameters();
