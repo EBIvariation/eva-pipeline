@@ -96,6 +96,7 @@ public class AggregatedVcfJobTest {
                 .inputVcfId("1")
                 .collectionFilesName("files")
                 .timestamp()
+                .annotationSkip(true)
                 .toJobParameters();
         JobExecution jobExecution = jobLauncherTestUtils.launchJob(jobParameters);
 

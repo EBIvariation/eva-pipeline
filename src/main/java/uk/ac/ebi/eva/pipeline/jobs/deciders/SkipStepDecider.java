@@ -15,7 +15,6 @@
  */
 package uk.ac.ebi.eva.pipeline.jobs.deciders;
 
-import org.opencb.datastore.core.ObjectMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.JobExecution;
@@ -29,31 +28,21 @@ import org.springframework.batch.core.job.flow.JobExecutionDecider;
 public class SkipStepDecider implements JobExecutionDecider {
     private static final Logger logger = LoggerFactory.getLogger(SkipStepDecider.class);
 
-    private String skipStep;
-    private ObjectMap pipelineOptions;
-
     public static final String SKIP_STEP = "SKIP_STEP";
     public static final String DO_STEP = "DO_STEP";
 
-    /**
-     * @param pipelineOptions ObjectMap that will have a boolean for .get(skipStep), telling whether to skip or not
-     * @param skipStep        name of the key that the user sets to skip a step, e.g. "annotation.create.skip"
-     *                        It's recommended to use pre-defined constants, such as AnnotationJob.SKIP_ANNOT to avoid
-     *                        misspelling mistakes.
-     */
-    public SkipStepDecider(ObjectMap pipelineOptions, String skipStep) {
-        this.skipStep = skipStep;
-        this.pipelineOptions = pipelineOptions;
+    public final String jobParameterName;
+
+    public SkipStepDecider(String jobParameterName){
+        this.jobParameterName = jobParameterName;
     }
 
     @Override
     public FlowExecutionStatus decide(JobExecution jobExecution, StepExecution stepExecution) {
-        if (Boolean.parseBoolean(pipelineOptions.getString(skipStep))) {
-            logger.info("Skipping step because {} is enabled", skipStep);
+        if (Boolean.parseBoolean(jobExecution.getJobParameters().getString(jobParameterName))) {
+            logger.info("Step skipped due to setting {} enabled", jobParameterName);
             return new FlowExecutionStatus(SKIP_STEP);
         }
-
-        logger.info("Running step because {} is disabled", skipStep);
         return new FlowExecutionStatus(DO_STEP);
     }
 
