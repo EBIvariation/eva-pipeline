@@ -16,7 +16,6 @@
 package uk.ac.ebi.eva.pipeline.jobs.steps;
 
 import com.mongodb.DBObject;
-import org.opencb.datastore.core.ObjectMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.Step;
@@ -35,7 +34,6 @@ import uk.ac.ebi.eva.pipeline.io.writers.VepInputFlatFileWriter;
 import uk.ac.ebi.eva.pipeline.jobs.steps.processors.AnnotationProcessor;
 import uk.ac.ebi.eva.pipeline.model.VariantWrapper;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
-import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.GENERATE_VEP_INPUT_STEP;
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.NON_ANNOTATED_VARIANTS_READER;
@@ -75,16 +73,12 @@ public class VepInputGeneratorStep {
     public Step generateVepInputStep(StepBuilderFactory stepBuilderFactory, JobOptions jobOptions) {
         logger.debug("Building '" + GENERATE_VEP_INPUT_STEP + "'");
 
-        ObjectMap pipelineOptions = jobOptions.getPipelineOptions();
-        boolean startIfcomplete = pipelineOptions.getBoolean(JobParametersNames.CONFIG_RESTARTABILITY_ALLOW);
-        int chunkSize = pipelineOptions.getInt(JobParametersNames.CONFIG_CHUNK_SIZE);
-
         return stepBuilderFactory.get(GENERATE_VEP_INPUT_STEP)
-                .<DBObject, VariantWrapper>chunk(chunkSize)
+                .<DBObject, VariantWrapper>chunk(jobOptions.getChunkSize())
                 .reader(reader)
                 .processor(new AnnotationProcessor())
                 .writer(writer)
-                .allowStartIfComplete(startIfcomplete)
+                .allowStartIfComplete(jobOptions.isAllowStartIfComplete())
                 .build();
     }
 }

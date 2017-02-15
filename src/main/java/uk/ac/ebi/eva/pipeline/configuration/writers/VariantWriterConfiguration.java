@@ -15,7 +15,6 @@
  */
 package uk.ac.ebi.eva.pipeline.configuration.writers;
 
-import org.opencb.opencga.storage.core.variant.VariantStorageManager;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.context.annotation.Bean;
@@ -47,11 +46,10 @@ public class VariantWriterConfiguration {
     @StepScope
     public VariantToMongoDbObjectConverter variantToMongoDbObjectConverter(JobOptions jobOptions) {
         return new VariantToMongoDbObjectConverter(
-                jobOptions.getVariantOptions().getBoolean(VariantStorageManager.INCLUDE_STATS),
-                jobOptions.getVariantOptions().getBoolean(VariantStorageManager.CALCULATE_STATS),
-                jobOptions.getVariantOptions().getBoolean(VariantStorageManager.INCLUDE_SAMPLES),
-                (VariantStorageManager.IncludeSrc) jobOptions.getVariantOptions()
-                        .get(VariantStorageManager.INCLUDE_SRC));
+                jobOptions.isIncludeStats(),
+                jobOptions.isCalculateStats(),
+                jobOptions.isIncludeSamples(),
+                jobOptions.getIncludeSourceLine());
     }
 
 }

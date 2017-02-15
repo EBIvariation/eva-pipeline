@@ -48,7 +48,7 @@ public class CreateDatabaseIndexesStep {
     public TaskletStep createDatabaseIndexesStep(StepBuilderFactory stepBuilderFactory, JobOptions jobOptions) {
         logger.debug("Building '" + CREATE_DATABASE_INDEXES_STEP + "'");
         return TaskletUtils.generateStep(stepBuilderFactory, CREATE_DATABASE_INDEXES_STEP, indexesGeneratorStep(),
-                jobOptions);
+                jobOptions.isAllowStartIfComplete());
     }
 
 }

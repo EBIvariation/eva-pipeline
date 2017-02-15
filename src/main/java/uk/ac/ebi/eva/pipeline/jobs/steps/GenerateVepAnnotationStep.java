@@ -48,7 +48,7 @@ public class GenerateVepAnnotationStep {
     public TaskletStep generateVepAnnotationStep(StepBuilderFactory stepBuilderFactory, JobOptions jobOptions) {
         logger.debug("Building '" + GENERATE_VEP_ANNOTATION_STEP + "'");
         return TaskletUtils.generateStep(stepBuilderFactory, GENERATE_VEP_ANNOTATION_STEP,
-                vepAnnotationGeneratorStep(), jobOptions);
+                vepAnnotationGeneratorStep(), jobOptions.isAllowStartIfComplete());
     }
 
 }

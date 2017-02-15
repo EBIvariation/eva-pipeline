@@ -32,7 +32,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
-
 import uk.ac.ebi.eva.pipeline.jobs.flows.AnnotationFlowOptional;
 import uk.ac.ebi.eva.pipeline.jobs.steps.LoadFileStep;
 import uk.ac.ebi.eva.pipeline.jobs.steps.VariantLoaderStep;
@@ -60,8 +59,6 @@ public class AggregatedVcfJob {
 
     //job default settings
     private static final boolean INCLUDE_SAMPLES = false;
-
-    private static final boolean COMPRESS_GENOTYPES = false;
 
     private static final boolean CALCULATE_STATS = true;
 
@@ -102,7 +99,6 @@ public class AggregatedVcfJob {
     @Scope("prototype")
     JobExecutionListener aggregatedJobListener() {
         return new VariantOptionsConfigurerListener(INCLUDE_SAMPLES,
-                COMPRESS_GENOTYPES,
                 CALCULATE_STATS,
                 INCLUDE_STATS);
     }

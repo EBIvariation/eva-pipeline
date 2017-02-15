@@ -47,7 +47,8 @@ public class LoadFileStep {
     @Bean(LOAD_FILE_STEP)
     public TaskletStep loadFileStep(StepBuilderFactory stepBuilderFactory, JobOptions jobOptions) {
         logger.debug("Building '" + LOAD_FILE_STEP + "'");
-        return TaskletUtils.generateStep(stepBuilderFactory, LOAD_FILE_STEP, fileLoaderStep(), jobOptions);
+        return TaskletUtils.generateStep(stepBuilderFactory, LOAD_FILE_STEP, fileLoaderStep(),
+                jobOptions.isAllowStartIfComplete());
     }
 
 }

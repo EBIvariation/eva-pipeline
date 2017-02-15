@@ -1,7 +1,5 @@
 package uk.ac.ebi.eva.pipeline;
 
-import java.util.List;
-
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
@@ -15,9 +13,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-
 import uk.ac.ebi.eva.pipeline.configuration.BeanNames;
-import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
+import uk.ac.ebi.eva.pipeline.parameters.ParametersFromProperties;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 
 /**
@@ -43,14 +40,14 @@ public class ApplicationTest {
     private JobExplorer jobExplorer;
 
     @Autowired
-    private JobOptions jobOptions;
+    private ParametersFromProperties parametersFromProperties;
 
     @Rule
     public TemporaryMongoRule mongoRule = new TemporaryMongoRule();
 
     @Test
     public void main() throws Exception {
-        mongoRule.getTemporaryDatabase(jobOptions.getDbName());
+        mongoRule.getTemporaryDatabase(parametersFromProperties.getDatabaseName());
 
         Assert.assertEquals(EXPECTED_JOB_COUNT, jobExplorer.getJobNames().size());
         Assert.assertEquals(BeanNames.GENOTYPED_VCF_JOB, jobExplorer.getJobNames().get(0));

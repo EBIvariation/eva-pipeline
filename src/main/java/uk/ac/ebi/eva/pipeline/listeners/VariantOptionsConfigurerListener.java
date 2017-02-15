@@ -33,7 +33,6 @@ public class VariantOptionsConfigurerListener implements JobExecutionListener {
 
     private static final Logger logger = LoggerFactory.getLogger(VariantOptionsConfigurerListener.class);
     private final boolean includeSamples;
-    private final boolean compressGenotypes;
     private final boolean calculateStats;
     private final boolean includeStats;
 
@@ -41,11 +40,9 @@ public class VariantOptionsConfigurerListener implements JobExecutionListener {
     private JobOptions jobOptions;
 
     public VariantOptionsConfigurerListener(boolean includeSamples,
-                                            boolean compressGenotypes,
                                             boolean calculateStats,
                                             boolean includeStats) {
         this.includeSamples = includeSamples;
-        this.compressGenotypes = compressGenotypes;
         this.calculateStats = calculateStats;
         this.includeStats = includeStats;
     }
@@ -53,7 +50,7 @@ public class VariantOptionsConfigurerListener implements JobExecutionListener {
     @Override
     public void beforeJob(JobExecution jobExecution) {
         logger.debug("Setting up job " + jobExecution.getJobInstance().getJobName());
-        jobOptions.configureGenotypesStorage(includeSamples, compressGenotypes);
+        jobOptions.configureGenotypesStorage(includeSamples);
         jobOptions.configureStatisticsStorage(calculateStats, includeStats);
     }
 
