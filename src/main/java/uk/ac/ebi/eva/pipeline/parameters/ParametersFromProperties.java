@@ -62,6 +62,12 @@ public class ParametersFromProperties {
     @Value(PROPERTY + JobParametersNames.OUTPUT_DIR_STATISTICS + OR_NULL)
     private String outputDirStats;
 
+    @Value(PROPERTY + JobParametersNames.STATISTICS_SKIP + OR_NULL)
+    private String statisticsSkip;
+
+    @Value(PROPERTY + JobParametersNames.ANNOTATION_SKIP + OR_NULL)
+    private String annotationSkip;
+
     public Properties getProperties() {
         Properties properties = new Properties();
 

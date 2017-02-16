@@ -100,6 +100,7 @@ public class AggregatedVcfJobTest {
                 .inputVcfAggregation("BASIC")
                 .inputVcfId("1")
                 .timestamp()
+                .annotationSkip(true)
                 .toJobParameters();
         JobExecution jobExecution = jobLauncherTestUtils.launchJob(jobParameters);
 

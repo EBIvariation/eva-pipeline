@@ -42,15 +42,9 @@ public class JobOptions {
     //// OpenCGA options with default values (non-customizable)
     private VariantStorageManager.IncludeSrc includeSourceLine = VariantStorageManager.IncludeSrc.FIRST_8_COLUMNS;
 
-    // Skip steps
-    @Value("${" + JobParametersNames.ANNOTATION_SKIP + ":false}") private boolean skipAnnot;
-    @Value("${" + JobParametersNames.STATISTICS_SKIP + ":false}") private boolean skipStats;
-
     // Pipeline application options.
     @Value("${" + JobParametersNames.CONFIG_RESTARTABILITY_ALLOW + ":false}") private boolean allowStartIfComplete;
     @Value("${" + JobParametersNames.CONFIG_CHUNK_SIZE + ":1000}") private int chunkSize;
-
-    private ObjectMap pipelineOptions = new ObjectMap();
 
     //These values are setted through VariantOptionsConfigurerListener
     private boolean calculateStats;
@@ -65,13 +59,6 @@ public class JobOptions {
             opencgaAppHome = System.getenv("OPENCGA_HOME") != null ? System.getenv("OPENCGA_HOME") : "/opt/opencga";
         }
         Config.setOpenCGAHome(opencgaAppHome);
-        loadPipelineOptions();
-    }
-
-    private void loadPipelineOptions() {
-        pipelineOptions.put(JobParametersNames.ANNOTATION_SKIP, skipAnnot);
-        pipelineOptions.put(JobParametersNames.STATISTICS_SKIP, skipStats);
-        logger.debug("Using as pipelineOptions: {}", pipelineOptions.entrySet().toString());
     }
 
     public void configureGenotypesStorage(boolean includeSamples) {
@@ -81,10 +68,6 @@ public class JobOptions {
     public void configureStatisticsStorage(boolean calculateStats, boolean includeStats) {
         this.calculateStats = calculateStats;
         this.includeStats = includeStats;
-    }
-
-    public ObjectMap getPipelineOptions() {
-        return pipelineOptions;
     }
 
     public boolean isAllowStartIfComplete() {

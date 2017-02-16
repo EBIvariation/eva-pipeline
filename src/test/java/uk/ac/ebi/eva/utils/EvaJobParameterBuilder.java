@@ -108,4 +108,14 @@ public class EvaJobParameterBuilder extends JobParametersBuilder {
         addParameter(JobParametersNames.OUTPUT_DIR_STATISTICS, new JobParameter(outputDirStats));
         return this;
     }
+
+    public EvaJobParameterBuilder annotationSkip(boolean annotationSkip) {
+        addParameter(JobParametersNames.ANNOTATION_SKIP, new JobParameter(Boolean.toString(annotationSkip)));
+        return this;
+    }
+
+    public EvaJobParameterBuilder statisticsSkip(boolean statisticsSkip) {
+        addParameter(JobParametersNames.STATISTICS_SKIP, new JobParameter(Boolean.toString(statisticsSkip)));
+        return this;
+    }
 }

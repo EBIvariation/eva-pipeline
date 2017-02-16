@@ -19,15 +19,13 @@ import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.job.builder.FlowBuilder;
 import org.springframework.batch.core.job.flow.Flow;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.batch.core.job.flow.JobExecutionDecider;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.Scope;
+import uk.ac.ebi.eva.pipeline.configuration.JobExecutionDeciderConfiguration;
 import uk.ac.ebi.eva.pipeline.jobs.deciders.SkipStepDecider;
-import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
-import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.CALCULATE_STATISTICS_FLOW;
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.CALCULATE_STATISTICS_OPTIONAL_FLOW;
@@ -39,31 +37,18 @@ import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.STATISTICS_SKIP_STE
  */
 @Configuration
 @EnableBatchProcessing
-@Import({PopulationStatisticsFlow.class})
+@Import({PopulationStatisticsFlow.class, JobExecutionDeciderConfiguration.class})
 public class PopulationStatisticsOptionalFlow {
 
-    @Autowired
-    @Qualifier(CALCULATE_STATISTICS_FLOW)
-    private Flow calculateStatisticsflow;
-
-    @Autowired
-    @Qualifier(STATISTICS_SKIP_STEP_DECIDER)
-    private SkipStepDecider skipStepDecider;
-
     @Bean(CALCULATE_STATISTICS_OPTIONAL_FLOW)
-    public Flow calculateStatisticsOptionalFlow() {
+    public Flow calculateStatisticsOptionalFlow(@Qualifier(CALCULATE_STATISTICS_FLOW) Flow calculateStatisticsflow,
+                                                @Qualifier(STATISTICS_SKIP_STEP_DECIDER) JobExecutionDecider decider) {
         return new FlowBuilder<Flow>(CALCULATE_STATISTICS_OPTIONAL_FLOW)
-                .start(skipStepDecider).on(SkipStepDecider.DO_STEP)
+                .start(decider).on(SkipStepDecider.DO_STEP)
                 .to(calculateStatisticsflow)
-                .from(skipStepDecider).on(SkipStepDecider.SKIP_STEP)
+                .from(decider).on(SkipStepDecider.SKIP_STEP)
                 .end(BatchStatus.COMPLETED.toString())
                 .build();
-    }
-
-    @Bean(STATISTICS_SKIP_STEP_DECIDER)
-    @Scope("prototype")
-    SkipStepDecider skipStepDecider(JobOptions jobOptions) {
-        return new SkipStepDecider(jobOptions.getPipelineOptions(), JobParametersNames.STATISTICS_SKIP);
     }
 
 }

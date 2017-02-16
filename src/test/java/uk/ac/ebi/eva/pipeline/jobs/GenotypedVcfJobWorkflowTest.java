@@ -30,11 +30,9 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-
 import uk.ac.ebi.eva.pipeline.Application;
 import uk.ac.ebi.eva.pipeline.configuration.BeanNames;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
-import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
@@ -57,11 +55,11 @@ import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResource;
 
 /**
  * Workflow test for {@link GenotypedVcfJob}
- *
+ * <p>
  * TODO The test should fail when we will integrate the JobParameter validation since there are empty parameters for VEP
  */
 @RunWith(SpringRunner.class)
-@ActiveProfiles({Application.VARIANT_WRITER_MONGO_PROFILE,Application.VARIANT_ANNOTATION_MONGO_PROFILE})
+@ActiveProfiles({Application.VARIANT_WRITER_MONGO_PROFILE, Application.VARIANT_ANNOTATION_MONGO_PROFILE})
 @TestPropertySource({"classpath:genotyped-vcf-workflow.properties", "classpath:test-mongo.properties"})
 @ContextConfiguration(classes = {GenotypedVcfJob.class, BatchTestConfiguration.class})
 public class GenotypedVcfJobWorkflowTest {
@@ -93,11 +91,12 @@ public class GenotypedVcfJobWorkflowTest {
 
     public static final Set<String> EXPECTED_ANNOTATION_STEP_NAMES = new TreeSet<>(
             Arrays.asList(BeanNames.GENERATE_VEP_INPUT_STEP, BeanNames.GENERATE_VEP_ANNOTATION_STEP,
-                          BeanNames.LOAD_VEP_ANNOTATION_STEP));
+                    BeanNames.LOAD_VEP_ANNOTATION_STEP));
 
     @Test
     public void allStepsShouldBeExecuted() throws Exception {
-        JobParameters jobParameters = initVariantConfigurationJob();
+        EvaJobParameterBuilder builder = initVariantConfigurationJob();
+        JobParameters jobParameters = builder.toJobParameters();
 
         JobExecution execution = jobLauncherTestUtils.launchJob(jobParameters);
 
@@ -133,25 +132,23 @@ public class GenotypedVcfJobWorkflowTest {
 
     @Test
     public void optionalStepsShouldBeSkipped() throws Exception {
-        JobParameters jobParameters = initVariantConfigurationJob();
-
-        jobOptions.getPipelineOptions().put(JobParametersNames.ANNOTATION_SKIP, true);
-        jobOptions.getPipelineOptions().put(JobParametersNames.STATISTICS_SKIP, true);
+        EvaJobParameterBuilder builder = initVariantConfigurationJob();
+        JobParameters jobParameters = builder.annotationSkip(true).statisticsSkip(true).toJobParameters();
 
         JobExecution execution = jobLauncherTestUtils.launchJob(jobParameters);
 
         assertEquals(ExitStatus.COMPLETED, execution.getExitStatus());
 
         Set<String> names = execution.getStepExecutions().stream().map(StepExecution::getStepName)
-                                      .collect(Collectors.toSet());
+                .collect(Collectors.toSet());
 
         assertEquals(EXPECTED_REQUIRED_STEP_NAMES, names);
     }
 
     @Test
     public void statsStepsShouldBeSkipped() throws Exception {
-        JobParameters jobParameters = initVariantConfigurationJob();
-        jobOptions.getPipelineOptions().put(JobParametersNames.STATISTICS_SKIP, true);
+        EvaJobParameterBuilder builder = initVariantConfigurationJob();
+        JobParameters jobParameters = builder.statisticsSkip(true).toJobParameters();
 
         JobExecution execution = jobLauncherTestUtils.launchJob(jobParameters);
 
@@ -182,8 +179,8 @@ public class GenotypedVcfJobWorkflowTest {
 
     @Test
     public void annotationStepsShouldBeSkipped() throws Exception {
-        JobParameters jobParameters = initVariantConfigurationJob();
-        jobOptions.getPipelineOptions().put(JobParametersNames.ANNOTATION_SKIP, true);
+        EvaJobParameterBuilder builder = initVariantConfigurationJob();
+        JobParameters jobParameters = builder.annotationSkip(true).toJobParameters();
 
         JobExecution execution = jobLauncherTestUtils.launchJob(jobParameters);
 
@@ -212,7 +209,7 @@ public class GenotypedVcfJobWorkflowTest {
                 .before(nameToStepExecution.get(BeanNames.LOAD_STATISTICS_STEP).getStartTime()));
     }
 
-    private JobParameters initVariantConfigurationJob() throws IOException {
+    private EvaJobParameterBuilder initVariantConfigurationJob() throws IOException {
         Config.setOpenCGAHome(opencgaHome);
         File inputFile = getResource(INPUT_FILE);
         String dbName = mongoRule.getRandomTemporaryDatabaseName();
@@ -237,9 +234,7 @@ public class GenotypedVcfJobWorkflowTest {
                 .vepNumForks("")
                 .vepPath(getResource(MOCK_VEP).getPath());
 
-        jobOptions.getPipelineOptions().put(JobParametersNames.ANNOTATION_SKIP, false);
-        jobOptions.getPipelineOptions().put(JobParametersNames.STATISTICS_SKIP, false);
-        return evaJobParameterBuilder.toJobParameters();
+        return evaJobParameterBuilder;
     }
 
 }
