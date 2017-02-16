@@ -55,8 +55,8 @@ import static org.junit.Assert.assertNotNull;
  * TODO Replace MongoDBHelper with StatisticsMongoWriterConfiguration in ContextConfiguration when the class exists
  */
 @RunWith(SpringRunner.class)
-@TestPropertySource({"classpath:common-configuration.properties"})
-@ContextConfiguration(classes = {BaseTestConfiguration.class})
+@TestPropertySource({"classpath:test-mongo.properties"})
+@ContextConfiguration(classes = {MongoConnection.class, MongoMappingContext.class})
 public class StatisticsMongoWriterTest {
 
     private static final String COLLECTION_STATS_NAME = "populationStatistics";
@@ -77,8 +77,8 @@ public class StatisticsMongoWriterTest {
         String databaseName = mongoRule.getRandomTemporaryDatabaseName();
         StatisticsMongoWriter statisticsMongoWriter = getStatisticsMongoWriter(databaseName);
 
-        int n = 1;
-        for (int i = 0; i < n; i++) {
+        int expectedDocumentsCount = 1;
+        for (int i = 0; i < expectedDocumentsCount; i++) {
             statisticsMongoWriter.write(populationStatisticsList);
         }
 
@@ -101,7 +101,7 @@ public class StatisticsMongoWriterTest {
             assertNotNull(next.get("maf"));
             assertNotNull(next.get("numGt"));
         }
-        assertEquals(n, count);
+        assertEquals(expectedDocumentsCount, count);
     }
 
     @Test

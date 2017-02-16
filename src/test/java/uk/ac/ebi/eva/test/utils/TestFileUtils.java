@@ -22,7 +22,7 @@ public abstract class TestFileUtils {
 
     public static void copyResource(String resourcePath, String outputDir) throws IOException {
         File vcfFile = new File(TestFileUtils.class.getResource(resourcePath).getFile());
-        FileCopyUtils.copy(vcfFile, new File(outputDir, resourcePath));
+        FileCopyUtils.copy(vcfFile, new File(outputDir, vcfFile.getName()));
     }
 
     public static File getResource(String resourcePath) {

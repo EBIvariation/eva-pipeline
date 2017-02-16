@@ -48,8 +48,8 @@ import static org.junit.Assert.assertTrue;
  */
 @RunWith(SpringRunner.class)
 @ActiveProfiles("variant-annotation-mongo")
-@TestPropertySource({"classpath:annotation.properties", "classpath:test-mongo.properties"})
-@ContextConfiguration(classes = {BaseTestConfiguration.class})
+@TestPropertySource({"classpath:test-mongo.properties"})
+@ContextConfiguration(classes = {MongoConnection.class, MongoMappingContext.class})
 public class NonAnnotatedVariantsMongoReaderTest {
 
     private static final String COLLECTION_VARIANTS_NAME = "variants";
@@ -78,12 +78,12 @@ public class NonAnnotatedVariantsMongoReaderTest {
         mongoItemReader.open(executionContext);
 
         int itemCount = 0;
-        DBObject doc;
-        while ((doc = mongoItemReader.read()) != null) {
+        DBObject variantMongoDocument;
+        while ((variantMongoDocument = mongoItemReader.read()) != null) {
             itemCount++;
-            assertTrue(doc.containsField(VariantToDBObjectConverter.CHROMOSOME_FIELD));
-            assertTrue(doc.containsField(VariantToDBObjectConverter.START_FIELD));
-            assertFalse(doc.containsField(VariantToDBObjectConverter.ANNOTATION_FIELD));
+            assertTrue(variantMongoDocument.containsField(VariantToDBObjectConverter.CHROMOSOME_FIELD));
+            assertTrue(variantMongoDocument.containsField(VariantToDBObjectConverter.START_FIELD));
+            assertFalse(variantMongoDocument.containsField(VariantToDBObjectConverter.ANNOTATION_FIELD));
         }
         assertEquals(EXPECTED_NON_ANNOTATED_VARIANTS, itemCount);
         mongoItemReader.close();

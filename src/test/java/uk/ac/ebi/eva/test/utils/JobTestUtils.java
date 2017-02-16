@@ -32,8 +32,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -46,10 +44,6 @@ import static org.junit.Assert.assertTrue;
 
 public abstract class JobTestUtils {
     private static final Logger logger = LoggerFactory.getLogger(JobTestUtils.class);
-
-    private static final String EVA_PIPELINE_TEMP_PREFIX = "eva-pipeline-test";
-
-    private static final java.lang.String EVA_PIPELINE_TEMP_POSTFIX = ".tmp";
 
     /**
      * reads the file and sorts it in memory to return the first ordered line. Don't use for big files!
@@ -95,19 +89,9 @@ public abstract class JobTestUtils {
         return rows;
     }
 
-    public static String getTransformedOutputPath(Path input, String compressExtension, String outputDir) {
-        return Paths.get(outputDir).resolve(input) + ".variants.json" + compressExtension;
-    }
-
     public static JobParameters getJobParameters() {
         return new JobParametersBuilder()
                 .addLong("time", System.currentTimeMillis()).toJobParameters();
-    }
-
-    public static File createTempFile() throws IOException {
-        File tempFile = File.createTempFile(EVA_PIPELINE_TEMP_PREFIX, EVA_PIPELINE_TEMP_POSTFIX);
-        tempFile.deleteOnExit();
-        return tempFile;
     }
 
     /**
@@ -147,16 +131,17 @@ public abstract class JobTestUtils {
     }
 
     public static void uncompress(String inputCompressedFile, File outputFile) throws IOException {
-        GZIPInputStream gzis = new GZIPInputStream(new FileInputStream(inputCompressedFile));
-        FileOutputStream out = new FileOutputStream(outputFile);
+        GZIPInputStream gzipInputStream = new GZIPInputStream(new FileInputStream(inputCompressedFile));
+        FileOutputStream fileOutputStream = new FileOutputStream(outputFile);
 
         byte[] buffer = new byte[1024];
-        int len;
-        while ((len = gzis.read(buffer)) > 0) {
-            out.write(buffer, 0, len);
+        final int offset = 0;
+        int length;
+        while ((length = gzipInputStream.read(buffer)) > 0) {
+            fileOutputStream.write(buffer, offset, length);
         }
 
-        gzis.close();
-        out.close();
+        gzipInputStream.close();
+        fileOutputStream.close();
     }
 }

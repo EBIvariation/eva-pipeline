@@ -52,7 +52,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResource;
 
@@ -69,7 +68,7 @@ public class GenotypedVcfJobWorkflowTest {
 
     private static final String MOCK_VEP = "/mockvep.pl";
 
-    private static final String INPUT_FILE = "/small20.vcf.gz";
+    private static final String INPUT_FILE = "/input-files/vcf/genotyped.vcf.gz";
 
     @Rule
     public TemporaryMongoRule mongoRule = new TemporaryMongoRule();

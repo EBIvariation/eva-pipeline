@@ -49,7 +49,6 @@ import static org.junit.Assert.assertEquals;
 @ContextConfiguration(classes = {DatabaseInitializationJob.class, BatchTestConfiguration.class})
 public class IndexesGeneratorStepTest {
 
-
     private static final String COLLECTION_FEATURES_NAME = "features";
 
     @Rule

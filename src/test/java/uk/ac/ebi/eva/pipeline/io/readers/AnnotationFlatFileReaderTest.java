@@ -67,8 +67,8 @@ public class AnnotationFlatFileReaderTest {
         assertEquals(count, consequenceTypeCount);
 
         // annotationFlatFileReader should get all the lines from the file
-        long actualCount = JobTestUtils.getLines(new GZIPInputStream(new FileInputStream(file)));
-        assertEquals(actualCount, count);
+        long expectedCount = JobTestUtils.getLines(new GZIPInputStream(new FileInputStream(file)));
+        assertEquals(expectedCount, count);
     }
 
     // Missing ':' in 20_63351 (should be 20:63351)

@@ -3,14 +3,13 @@ package uk.ac.ebi.eva.pipeline.io.readers;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.opencb.biodata.models.variant.VariantSource;
-import org.opencb.biodata.models.variant.VariantStudy;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.item.file.FlatFileParseException;
 import org.springframework.batch.test.MetaDataInstanceFactory;
 
 import uk.ac.ebi.eva.commons.models.data.Variant;
 import uk.ac.ebi.eva.commons.models.data.VariantSourceEntry;
+import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
 import uk.ac.ebi.eva.test.utils.TestFileUtils;
 
@@ -34,15 +33,16 @@ public class VcfReaderTest {
     @Rule
     public ExpectedException exception = ExpectedException.none();
 
-    private static final String INPUT_FILE_PATH = "/small20.vcf.gz";
+    private static final String INPUT_FILE_PATH = "/input-files/vcf/genotyped.vcf.gz";
 
-    private static final String INPUT_WRONG_FILE_PATH = "/wrong_no_alt.vcf.gz";
+    private static final String INPUT_WRONG_FILE_PATH = "/input-files/vcf/wrong_no_alt.vcf.gz";
 
     private static final String FILE_ID = "5";
 
     private static final String STUDY_ID = "7";
 
-    private static final String STUDY_NAME = "study name";
+    @Rule
+    public PipelineTemporaryFolderRule temporaryFolderRule = new PipelineTemporaryFolderRule();
 
     @Test
     public void shouldReadAllLines() throws Exception {
@@ -81,7 +81,7 @@ public class VcfReaderTest {
 
         // uncompress the input VCF into a temporary file
         File input = TestFileUtils.getResource(INPUT_FILE_PATH);
-        File tempFile = JobTestUtils.createTempFile();  // TODO replace with temporary rules
+        File tempFile = temporaryFolderRule.newFile();
         JobTestUtils.uncompress(input.getAbsolutePath(), tempFile);
 
         VcfReader vcfReader = new VcfReader(FILE_ID, STUDY_ID, tempFile);

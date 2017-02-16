@@ -53,7 +53,7 @@ import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResourceUrl;
 @TestPropertySource({"classpath:common-configuration.properties", "classpath:test-mongo.properties"})
 @ContextConfiguration(classes = {PopulationStatisticsJob.class, BatchTestConfiguration.class})
 public class PopulationStatisticsGeneratorStepTest {
-    private static final String SMALL_VCF_FILE = "/small20.vcf.gz";
+    private static final String SMALL_VCF_FILE = "/input-files/vcf/genotyped.vcf.gz";
 
     private static final String MONGO_DUMP = "/dump/VariantStatsConfigurationTest_vl";
 
@@ -70,7 +70,7 @@ public class PopulationStatisticsGeneratorStepTest {
     public void statisticsGeneratorStepShouldCalculateStats() throws IOException, InterruptedException, URISyntaxException {
         //Given a valid VCF input file
         String databaseName = mongoRule.restoreDumpInTemporaryDatabase(getResourceUrl(MONGO_DUMP));
-        String statsDir = temporaryFolderRule.getRoot().getAbsolutePath();
+        String statsDir = temporaryFolderRule.newFolder().getAbsolutePath();
         String studyId = "1";
         String fileId = "1";
 
@@ -108,7 +108,7 @@ public class PopulationStatisticsGeneratorStepTest {
     public void statisticsGeneratorStepShouldFailIfVariantLoadStepIsNotCompleted() throws Exception {
         //Given a valid VCF input file
         String databaseName = mongoRule.getRandomTemporaryDatabaseName();
-        String statsDir = temporaryFolderRule.getRoot().getAbsolutePath();
+        String statsDir = temporaryFolderRule.newFolder().getAbsolutePath();
         String wrongId = "non-existent-id";
 
         JobParameters jobParameters = new EvaJobParameterBuilder()

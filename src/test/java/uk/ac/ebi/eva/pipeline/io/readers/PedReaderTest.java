@@ -35,9 +35,9 @@ import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResource;
  * output: a Pedigree when method `.read()` is called.
  */
 public class PedReaderTest {
-    private static final String PEDIGREE_FILE = "/ped/pedigree-test-file.ped";
+    private static final String PEDIGREE_FILE = "/input-files/ped/pedigree-test-file.ped";
 
-    private static final String MALFORMED_PEDIGREE = "/ped/malformed-pedigree-test-file.ped";
+    private static final String MALFORMED_PEDIGREE = "/input-files/ped/malformed-pedigree-test-file.ped";
 
     @Test
     public void wholePedFileShouldBeParsedIntoPedigree() throws Exception {

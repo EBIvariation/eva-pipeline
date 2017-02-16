@@ -87,7 +87,11 @@ public class GenotypedVcfJobTest {
 
     private static final String INPUT_STUDY_ID = "genotyped-job";
 
-    private static final String INPUT_FILE = "/small20.vcf.gz";
+    private static final String INPUT_FILE = "/input-files/vcf/genotyped.vcf.gz";
+
+    private static final String COLLECTION_FILES_NAME = "files";
+
+    private static final String COLLECTION_VARIANTS_NAME = "variants";
 
     @Rule
     public TemporaryMongoRule mongoRule = new TemporaryMongoRule();
@@ -120,8 +124,8 @@ public class GenotypedVcfJobTest {
 
         // Run the Job
         JobParameters jobParameters = new EvaJobParameterBuilder()
-                .collectionFilesName("files")
-                .collectionVariantsName("variants")
+                .collectionFilesName(COLLECTION_FILES_NAME)
+                .collectionVariantsName(COLLECTION_VARIANTS_NAME)
                 .databaseName(dbName)
                 .inputFasta("")
                 .inputStudyId(INPUT_STUDY_ID)
@@ -187,7 +191,7 @@ public class GenotypedVcfJobTest {
 
     private void checkAnnotationInput(File vepInputFile) throws IOException {
         BufferedReader testReader = new BufferedReader(new InputStreamReader(new FileInputStream(
-                getResource("/preannot.sorted"))));
+                getResource("/expected-output/preannot.sorted"))));
         BufferedReader actualReader = new BufferedReader(new InputStreamReader(new FileInputStream(
                 vepInputFile.toString())));
 
@@ -227,4 +231,25 @@ public class GenotypedVcfJobTest {
         assertEquals(EXPECTED_VALID_ANNOTATIONS, consequenceTypeCount);
     }
 
+    @Test
+    public void aggregationIsNotAllowed() throws Exception {
+        String dbName = mongoRule.getRandomTemporaryDatabaseName();
+        mongoRule.getTemporaryDatabase(dbName);
+        Config.setOpenCGAHome(opencgaHome);
+
+        JobParameters jobParameters = new EvaJobParameterBuilder()
+                .collectionFilesName(COLLECTION_FILES_NAME)
+                .collectionVariantsName(COLLECTION_VARIANTS_NAME)
+                .databaseName(dbName)
+                .inputVcf(getResource(INPUT_FILE).getAbsolutePath())
+                .inputVcfId(INPUT_VCF_ID)
+                .inputStudyId(INPUT_STUDY_ID)
+                .inputVcfAggregation("BASIC")
+                .timestamp()
+                .toJobParameters();
+        JobExecution jobExecution = jobLauncherTestUtils.launchJob(jobParameters);
+
+        assertEquals(ExitStatus.FAILED, jobExecution.getExitStatus());
+        assertEquals(BatchStatus.FAILED, jobExecution.getStatus());
+    }
 }

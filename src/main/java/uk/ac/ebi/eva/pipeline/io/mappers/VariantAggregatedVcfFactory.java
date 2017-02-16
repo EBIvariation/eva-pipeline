@@ -17,8 +17,8 @@
 package uk.ac.ebi.eva.pipeline.io.mappers;
 
 import org.opencb.biodata.models.feature.Genotype;
-import org.opencb.biodata.models.variant.VariantSource;
 import org.opencb.biodata.models.variant.exceptions.NonStandardCompliantSampleField;
+
 import uk.ac.ebi.eva.commons.models.data.Variant;
 import uk.ac.ebi.eva.commons.models.data.VariantSourceEntry;
 import uk.ac.ebi.eva.commons.models.data.VariantStats;
@@ -99,7 +99,10 @@ public class VariantAggregatedVcfFactory extends VariantVcfFactory {
     protected void parseSplitSampleData(Variant variant, String fileId, String studyId, String[] fields,
                                         String[] alternateAlleles, String[] secondaryAlternates, int alternateAlleleIdx)
             throws NonStandardCompliantSampleField {
-        // Nothing to do
+        if (fields.length > 8) {
+            throw new IllegalArgumentException("Aggregated VCFs should not have column FORMAT nor " +
+                    "further sample columns, i.e. there should be only 8 columns");
+        }
     }
 
     @Override

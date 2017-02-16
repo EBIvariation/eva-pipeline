@@ -24,7 +24,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import uk.ac.ebi.eva.pipeline.configuration.BeanNames;
 import uk.ac.ebi.eva.pipeline.jobs.PopulationStatisticsJob;
 import uk.ac.ebi.eva.pipeline.jobs.steps.tasklets.PopulationStatisticsLoaderStep;
-import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
@@ -47,11 +46,10 @@ import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResourceUrl;
 @ContextConfiguration(classes = {PopulationStatisticsJob.class, BatchTestConfiguration.class})
 public class PopulationStatisticsLoaderStepTest {
 
-    private static final String SMALL_VCF_FILE = "/small20.vcf.gz";
+    private static final String SMALL_VCF_FILE = "/input-files/vcf/genotyped.vcf.gz";
     private static final String MONGO_DUMP = "/dump/VariantStatsConfigurationTest_vl";
-    private static final String SOURCE_FILE_NAME = "/1_1.source.stats.json.gz";
-    private static final String VARIANTS_FILE_NAME = "/1_1.variants.stats.json.gz";
-    private static final String VCF_FILE_NAME = "/small20.vcf.gz.variants.json.gz";
+    private static final String SOURCE_FILE_NAME = "/input-files/statistics/1_1.source.stats.json.gz";
+    private static final String VARIANTS_FILE_NAME = "/input-files/statistics/1_1.variants.stats.json.gz";
     private static final String FILE_NOT_FOUND_EXCEPTION = "java.io.FileNotFoundException:";
 
     @Rule
@@ -75,7 +73,7 @@ public class PopulationStatisticsLoaderStepTest {
         String fileId = "1";
         String studyId = "1";
         String dbName = mongoRule.restoreDumpInTemporaryDatabase(getResourceUrl(MONGO_DUMP));
-        String statsDir = temporaryFolderRule.getRoot().getAbsolutePath();
+        String statsDir = temporaryFolderRule.newFolder().getAbsolutePath();
 
         JobParameters jobParameters = new EvaJobParameterBuilder()
                 .collectionFilesName("files")
@@ -118,7 +116,7 @@ public class PopulationStatisticsLoaderStepTest {
         String fileId = "1";
         String studyId = "1";
         String dbName = mongoRule.restoreDumpInTemporaryDatabase(getResourceUrl(MONGO_DUMP));
-        String statsDir = temporaryFolderRule.getRoot().getAbsolutePath();
+        String statsDir = temporaryFolderRule.newFolder().getAbsolutePath();
 
         JobParameters jobParameters = new EvaJobParameterBuilder()
                 .collectionFilesName("files")

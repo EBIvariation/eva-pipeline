@@ -16,6 +16,7 @@
 package uk.ac.ebi.eva.pipeline.jobs;
 
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -39,7 +40,6 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.ac.ebi.eva.pipeline.Application;
 import uk.ac.ebi.eva.pipeline.configuration.BeanNames;
-import uk.ac.ebi.eva.pipeline.configuration.MongoConfiguration;
 import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
@@ -68,7 +68,11 @@ import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResource;
 @TestPropertySource({"classpath:variant-aggregated.properties", "classpath:test-mongo.properties"})
 @ContextConfiguration(classes = {AggregatedVcfJob.class, BatchTestConfiguration.class})
 public class AggregatedVcfJobTest {
-    public static final String INPUT = "/aggregated.vcf.gz";
+    public static final String INPUT = "/input-files/vcf/aggregated.vcf.gz";
+
+    private static final String COLLECTION_VARIANTS_NAME = "variants";
+
+    private static final String COLLECTION_FILES_NAME = "files";
 
     @Rule
     public TemporaryMongoRule mongoRule = new TemporaryMongoRule();
@@ -88,13 +92,13 @@ public class AggregatedVcfJobTest {
         String dbName = mongoRule.getRandomTemporaryDatabaseName();
 
         JobParameters jobParameters = new EvaJobParameterBuilder()
-                .collectionVariantsName("variants")
+                .collectionFilesName(COLLECTION_FILES_NAME)
+                .collectionVariantsName(COLLECTION_VARIANTS_NAME)
                 .databaseName(dbName)
                 .inputStudyId("aggregated-job")
                 .inputVcf(getResource(INPUT).getAbsolutePath())
                 .inputVcfAggregation("BASIC")
                 .inputVcfId("1")
-                .collectionFilesName("files")
                 .timestamp()
                 .toJobParameters();
         JobExecution jobExecution = jobLauncherTestUtils.launchJob(jobParameters);
@@ -128,37 +132,28 @@ public class AggregatedVcfJobTest {
         assertFalse(variant.getSourceEntries().values().iterator().next().getCohortStats().isEmpty());
     }
 
-// TODO This test needs to be refactored, as right the pipeline will handle the injection of the appropriate variant
-// source even if the aggregated job has been selected.
-//    @Test
-//    public void aggregationNoneIsNotAllowed() throws Exception {
-//        mongoRule.getTemporaryDatabase(dbName);
-//        VariantSource source =
-//                (VariantSource) jobOptions.getVariantOptions().get(VariantStorageManager.VARIANT_SOURCE);
-//        jobOptions.getVariantOptions().put(
-//                VariantStorageManager.VARIANT_SOURCE, new VariantSource(
-//                        input,
-//                        source.getFileId(),
-//                        source.getStudyId(),
-//                        source.getStudyName(),
-//                        source.getType(),
-//                        VariantSource.Aggregation.NONE));
-//
-//        Config.setOpenCGAHome(opencgaHome);
-//
-//        JobParameters jobParameters = new EvaJobParameterBuilder().inputVcf(getResource(input).getAbsolutePath())
-//                .databaseName(dbName)
-//                .collectionVariantsName("variants")
-//                .inputVcfId("1")
-//                .inputStudyId("aggregated-job")
-//                .inputStudyName("studyName")
-//                .inputStudyType("COLLECTION")
-//                .inputVcfAggregation("NONE")
-//                .timestamp().build();
-//        JobExecution jobExecution = jobLauncherTestUtils.launchJob(jobParameters);
-//
-//        assertEquals(ExitStatus.FAILED, jobExecution.getExitStatus());
-//        assertEquals(BatchStatus.FAILED, jobExecution.getStatus());
-//    }
+// TODO This test needs to be refactored, as right the pipeline will handle the injection of the appropriate VcfReader
+// even if the aggregated job has been selected. Maybe we should check this with jobParametersValidator?
+    @Ignore
+    @Test
+    public void aggregationNoneIsNotAllowed() throws Exception {
+        String dbName = mongoRule.getRandomTemporaryDatabaseName();
+        mongoRule.getTemporaryDatabase(dbName);
+        Config.setOpenCGAHome(opencgaHome);
 
+        JobParameters jobParameters = new EvaJobParameterBuilder()
+                .collectionFilesName(COLLECTION_FILES_NAME)
+                .collectionVariantsName(COLLECTION_VARIANTS_NAME)
+                .databaseName(dbName)
+                .inputVcf(getResource(INPUT).getAbsolutePath())
+                .inputVcfId("1")
+                .inputStudyId("aggregated-job")
+                .inputVcfAggregation("NONE")
+                .timestamp()
+                .toJobParameters();
+        JobExecution jobExecution = jobLauncherTestUtils.launchJob(jobParameters);
+
+        assertEquals(ExitStatus.FAILED, jobExecution.getExitStatus());
+        assertEquals(BatchStatus.FAILED, jobExecution.getStatus());
+    }
 }
