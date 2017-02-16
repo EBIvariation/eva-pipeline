@@ -68,7 +68,7 @@ import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResource;
 @ContextConfiguration(classes = {BaseTestConfiguration.class, LoadFileStep.class})
 public class VariantSourceEntityMongoWriterTest {
 
-    private static final String SMALL_VCF_FILE = "/input-files/genotyped.vcf.gz";
+    private static final String SMALL_VCF_FILE = "/input-files/vcf/genotyped.vcf.gz";
 
     private static final String COLLECTION_FILES_NAME = "files";
 

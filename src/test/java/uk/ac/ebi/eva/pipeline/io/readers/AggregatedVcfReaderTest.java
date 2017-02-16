@@ -32,11 +32,11 @@ public class AggregatedVcfReaderTest {
 
     private static final String STUDY_ID = "7";
 
-    private static final String INPUT_FILE_PATH = "/input-files/aggregated.vcf.gz";
+    private static final String INPUT_FILE_PATH = "/input-files/vcf/aggregated.vcf.gz";
 
-    private static final String INPUT_FILE_PATH_EXAC = "/input-files/aggregated.exac.vcf.gz";
+    private static final String INPUT_FILE_PATH_EXAC = "/input-files/vcf/aggregated.exac.vcf.gz";
 
-    private static final String INPUT_FILE_PATH_EVS = "/input-files/aggregated.evs.vcf.gz";
+    private static final String INPUT_FILE_PATH_EVS = "/input-files/vcf/aggregated.evs.vcf.gz";
 
     @Rule
     public PipelineTemporaryFolderRule temporaryFolderRule = new PipelineTemporaryFolderRule();

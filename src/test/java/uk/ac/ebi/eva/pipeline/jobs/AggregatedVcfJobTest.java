@@ -68,7 +68,7 @@ import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResource;
 @TestPropertySource({"classpath:variant-aggregated.properties", "classpath:test-mongo.properties"})
 @ContextConfiguration(classes = {AggregatedVcfJob.class, BatchTestConfiguration.class})
 public class AggregatedVcfJobTest {
-    public static final String INPUT = "/input-files/aggregated.vcf.gz";
+    public static final String INPUT = "/input-files/vcf/aggregated.vcf.gz";
 
     private static final String COLLECTION_VARIANTS_NAME = "variants";
 

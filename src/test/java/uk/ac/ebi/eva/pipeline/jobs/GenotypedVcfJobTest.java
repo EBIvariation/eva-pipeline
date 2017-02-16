@@ -87,7 +87,7 @@ public class GenotypedVcfJobTest {
 
     private static final String INPUT_STUDY_ID = "genotyped-job";
 
-    private static final String INPUT_FILE = "/input-files/genotyped.vcf.gz";
+    private static final String INPUT_FILE = "/input-files/vcf/genotyped.vcf.gz";
 
     private static final String COLLECTION_FILES_NAME = "files";
 

@@ -46,7 +46,7 @@ import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResourceUrl;
 @ContextConfiguration(classes = {PopulationStatisticsJob.class, BatchTestConfiguration.class})
 public class PopulationStatisticsLoaderStepTest {
 
-    private static final String SMALL_VCF_FILE = "/input-files/genotyped.vcf.gz";
+    private static final String SMALL_VCF_FILE = "/input-files/vcf/genotyped.vcf.gz";
     private static final String MONGO_DUMP = "/dump/VariantStatsConfigurationTest_vl";
     private static final String SOURCE_FILE_NAME = "/input-files/statistics/1_1.source.stats.json.gz";
     private static final String VARIANTS_FILE_NAME = "/input-files/statistics/1_1.variants.stats.json.gz";

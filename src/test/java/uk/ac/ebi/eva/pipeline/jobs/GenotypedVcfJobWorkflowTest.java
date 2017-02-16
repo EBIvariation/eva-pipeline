@@ -68,7 +68,7 @@ public class GenotypedVcfJobWorkflowTest {
 
     private static final String MOCK_VEP = "/mockvep.pl";
 
-    private static final String INPUT_FILE = "/input-files/genotyped.vcf.gz";
+    private static final String INPUT_FILE = "/input-files/vcf/genotyped.vcf.gz";
 
     @Rule
     public TemporaryMongoRule mongoRule = new TemporaryMongoRule();

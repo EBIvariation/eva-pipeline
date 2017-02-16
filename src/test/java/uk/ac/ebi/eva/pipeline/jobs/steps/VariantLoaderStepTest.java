@@ -58,7 +58,7 @@ public class VariantLoaderStepTest {
 
     private static final int EXPECTED_VARIANTS = 300;
 
-    private static final String SMALL_VCF_FILE = "/input-files/genotyped.vcf.gz";
+    private static final String SMALL_VCF_FILE = "/input-files/vcf/genotyped.vcf.gz";
 
     @Rule
     public TemporaryMongoRule mongoRule = new TemporaryMongoRule();

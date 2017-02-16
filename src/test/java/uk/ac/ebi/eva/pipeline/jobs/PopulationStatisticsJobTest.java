@@ -53,7 +53,7 @@ import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResourceUrl;
 @TestPropertySource({"classpath:common-configuration.properties", "classpath:test-mongo.properties"})
 @ContextConfiguration(classes = {PopulationStatisticsJob.class, BatchTestConfiguration.class})
 public class PopulationStatisticsJobTest {
-    private static final String SMALL_VCF_FILE = "/input-files/genotyped.vcf.gz";
+    private static final String SMALL_VCF_FILE = "/input-files/vcf/genotyped.vcf.gz";
 
     private static final String MONGO_DUMP = "/dump/VariantStatsConfigurationTest_vl";
 

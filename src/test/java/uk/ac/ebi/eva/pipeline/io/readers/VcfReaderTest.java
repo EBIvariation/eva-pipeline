@@ -33,9 +33,9 @@ public class VcfReaderTest {
     @Rule
     public ExpectedException exception = ExpectedException.none();
 
-    private static final String INPUT_FILE_PATH = "/input-files/genotyped.vcf.gz";
+    private static final String INPUT_FILE_PATH = "/input-files/vcf/genotyped.vcf.gz";
 
-    private static final String INPUT_WRONG_FILE_PATH = "/input-files/wrong_no_alt.vcf.gz";
+    private static final String INPUT_WRONG_FILE_PATH = "/input-files/vcf/wrong_no_alt.vcf.gz";
 
     private static final String FILE_ID = "5";
 

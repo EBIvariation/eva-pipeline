@@ -35,7 +35,7 @@ import static uk.ac.ebi.eva.test.utils.JobTestUtils.checkStringInsideList;
  */
 public class VcfHeaderReaderTest {
 
-    private static final String INPUT_FILE_PATH = "/input-files/genotyped.vcf.gz";
+    private static final String INPUT_FILE_PATH = "/input-files/vcf/genotyped.vcf.gz";
 
     private static final String FILE_ID = "5";
 
@@ -43,7 +43,7 @@ public class VcfHeaderReaderTest {
 
     private static final String STUDY_NAME = "study name";
 
-    private static final String INPUT_AGGREGATED_FILE_PATH = "/input-files/aggregated.vcf.gz";
+    private static final String INPUT_AGGREGATED_FILE_PATH = "/input-files/vcf/aggregated.vcf.gz";
 
     @Rule
     public PipelineTemporaryFolderRule temporaryFolderRule = new PipelineTemporaryFolderRule();

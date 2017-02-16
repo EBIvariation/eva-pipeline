@@ -53,7 +53,7 @@ public class LoadFileStepTest {
 
     private static final int EXPECTED_FILES = 1;
 
-    private static final String SMALL_VCF_FILE = "/input-files/genotyped.vcf.gz";
+    private static final String SMALL_VCF_FILE = "/input-files/vcf/genotyped.vcf.gz";
 
     private static final String COLLECTION_FILES_NAME = "files";
 
