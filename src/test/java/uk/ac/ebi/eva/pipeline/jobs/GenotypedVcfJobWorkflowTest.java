@@ -232,9 +232,7 @@ public class GenotypedVcfJobWorkflowTest {
                 .vepCacheSpecies("")
                 .vepCacheVersion("")
                 .vepNumForks("")
-                .vepPath(getResource(MOCK_VEP).getPath())
-                .annotationSkip(false)
-                .statisticsSkip(false);
+                .vepPath(getResource(MOCK_VEP).getPath());
 
         return evaJobParameterBuilder;
     }

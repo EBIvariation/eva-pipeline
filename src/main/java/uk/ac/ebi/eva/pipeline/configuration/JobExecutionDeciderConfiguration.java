@@ -26,6 +26,9 @@ import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.ANNOTATION_SKIP_STEP_DECIDER;
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.STATISTICS_SKIP_STEP_DECIDER;
 
+/**
+ * This class defines the beans for the deciders to skip annotation and statistics step.
+ */
 @Configuration
 @EnableBatchProcessing
 public class JobExecutionDeciderConfiguration {

@@ -33,14 +33,14 @@ public class SkipStepDecider implements JobExecutionDecider {
 
     public final String jobParameterName;
 
-    public SkipStepDecider(String jobParameterName){
+    public SkipStepDecider(String jobParameterName) {
         this.jobParameterName = jobParameterName;
     }
 
     @Override
     public FlowExecutionStatus decide(JobExecution jobExecution, StepExecution stepExecution) {
         if (Boolean.parseBoolean(jobExecution.getJobParameters().getString(jobParameterName))) {
-            logger.info("Step skipped due to setting {} enabled", jobParameterName);
+            logger.info("Step skipped due to {} enabled", jobParameterName);
             return new FlowExecutionStatus(SKIP_STEP);
         }
         return new FlowExecutionStatus(DO_STEP);
