@@ -33,6 +33,7 @@ public class ParametersValidatorUtil {
                                    String jobParametersName) throws JobParametersInvalidException {
         checkIsNotNullOrEmptyString(stringToValidate, jobParametersName);
         checkNonPrintableCharacters(stringToValidate, jobParametersName);
+        checkLength(stringToValidate, jobParametersName);
     }
 
     static void checkNonPrintableCharacters(String stringToValidate,
@@ -50,6 +51,13 @@ public class ParametersValidatorUtil {
         if (Strings.isNullOrEmpty(stringToValidate) || stringToValidate.trim().length() == 0) {
             throw new JobParametersInvalidException(
                     String.format("%s in %s must be specified", stringToValidate, jobParametersName));
+        }
+    }
+
+    static void checkLength(String stringToValidate, String jobParametersName) throws JobParametersInvalidException {
+        if(stringToValidate.length()>=250){
+            throw new JobParametersInvalidException(
+                    String.format("%s in %s can't exceed 250 characters", stringToValidate, jobParametersName));
         }
     }
 

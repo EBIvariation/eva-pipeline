@@ -84,6 +84,15 @@ public class ParametersValidatorUtilTest {
         ParametersValidatorUtil.checkNonPrintableCharacters("1000 Genomes Phase 3 Version 5", JOB_PARAMETER_NAME);
     }
 
+    @Test
+    public void stringSmallerThan250Characters() throws JobParametersInvalidException {
+        ParametersValidatorUtil.checkLength("1000 Genomes Phase 3 Version 5", JOB_PARAMETER_NAME);
+    }
+
+    @Test(expected = JobParametersInvalidException.class)
+    public void stringBiggerThan250Characters() throws JobParametersInvalidException {
+        ParametersValidatorUtil.checkLength("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.", JOB_PARAMETER_NAME);
+    }
 
     @Test
     public void validBooleanFalseString() throws JobParametersInvalidException {
