@@ -15,6 +15,8 @@
  */
 package uk.ac.ebi.eva.pipeline.configuration.writers;
 
+import org.opencb.biodata.models.variant.VariantSource;
+import org.opencb.opencga.storage.core.variant.VariantStorageManager;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.context.annotation.Bean;
@@ -26,6 +28,7 @@ import uk.ac.ebi.eva.pipeline.Application;
 import uk.ac.ebi.eva.pipeline.io.writers.VariantMongoWriter;
 import uk.ac.ebi.eva.pipeline.model.converters.data.VariantToMongoDbObjectConverter;
 import uk.ac.ebi.eva.pipeline.parameters.DatabaseParameters;
+import uk.ac.ebi.eva.pipeline.parameters.InputParameters;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VARIANT_WRITER;
@@ -33,23 +36,26 @@ import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VARIANT_WRITER;
 @Configuration
 public class VariantWriterConfiguration {
 
+    //// OpenCGA options with default values (non-customizable)
+    private VariantStorageManager.IncludeSrc includeSourceLine = VariantStorageManager.IncludeSrc.FIRST_8_COLUMNS;
+
     @Bean(VARIANT_WRITER)
     @StepScope
     @Profile(Application.VARIANT_WRITER_MONGO_PROFILE)
-    public ItemWriter<Variant> variantMongoWriter(JobOptions jobOptions, MongoOperations mongoOperations,
+    public ItemWriter<Variant> variantMongoWriter(InputParameters inputParameters, MongoOperations mongoOperations,
                                                   DatabaseParameters databaseParameters) {
         return new VariantMongoWriter(databaseParameters.getCollectionVariantsName(), mongoOperations,
-                variantToMongoDbObjectConverter(jobOptions));
+                variantToMongoDbObjectConverter(inputParameters));
     }
 
     @Bean
     @StepScope
-    public VariantToMongoDbObjectConverter variantToMongoDbObjectConverter(JobOptions jobOptions) {
-        return new VariantToMongoDbObjectConverter(
-                jobOptions.isIncludeStats(),
-                jobOptions.isCalculateStats(),
-                jobOptions.isIncludeSamples(),
-                jobOptions.getIncludeSourceLine());
+    public VariantToMongoDbObjectConverter variantToMongoDbObjectConverter(InputParameters inputParameters) {
+        if (VariantSource.Aggregation.NONE.equals(inputParameters.getVcfAggregation())) {
+            return new VariantToMongoDbObjectConverter(false, false, true, includeSourceLine);
+        } else {
+            return new VariantToMongoDbObjectConverter(true, true, false, includeSourceLine);
+        }
     }
 
 }

@@ -54,12 +54,11 @@ public class VcfReaderConfiguration {
     public VcfReader vcfReader(InputParameters parameters) throws IOException {
         String fileId = parameters.getVcfId();
         String studyId = parameters.getStudyId();
-        VariantSource.Aggregation aggregation = parameters.getVcfAggregation();
 
         if (VariantSource.Aggregation.NONE.equals(parameters.getVcfAggregation())) {
             return new VcfReader(fileId, studyId, parameters.getVcf());
         } else {
-            return new AggregatedVcfReader(fileId, studyId, aggregation, parameters.getVcf());
+            return new AggregatedVcfReader(fileId, studyId, parameters.getVcfAggregation(), parameters.getVcf());
         }
     }
 

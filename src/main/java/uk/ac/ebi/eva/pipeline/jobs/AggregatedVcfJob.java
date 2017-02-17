@@ -18,7 +18,6 @@ package uk.ac.ebi.eva.pipeline.jobs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.Job;
-import org.springframework.batch.core.JobExecutionListener;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
@@ -35,7 +34,6 @@ import org.springframework.context.annotation.Scope;
 import uk.ac.ebi.eva.pipeline.jobs.flows.AnnotationFlowOptional;
 import uk.ac.ebi.eva.pipeline.jobs.steps.LoadFileStep;
 import uk.ac.ebi.eva.pipeline.jobs.steps.VariantLoaderStep;
-import uk.ac.ebi.eva.pipeline.listeners.VariantOptionsConfigurerListener;
 
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.AGGREGATED_VCF_JOB;
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.LOAD_FILE_STEP;
@@ -57,13 +55,6 @@ public class AggregatedVcfJob {
 
     private static final Logger logger = LoggerFactory.getLogger(AggregatedVcfJob.class);
 
-    //job default settings
-    private static final boolean INCLUDE_SAMPLES = false;
-
-    private static final boolean CALCULATE_STATS = true;
-
-    private static final boolean INCLUDE_STATS = true;
-
     @Autowired
     @Qualifier(VEP_ANNOTATION_OPTIONAL_FLOW)
     private Flow annotationFlowOptional;
@@ -83,9 +74,7 @@ public class AggregatedVcfJob {
 
         JobBuilder jobBuilder = jobBuilderFactory
                 .get(AGGREGATED_VCF_JOB)
-                .incrementer(new RunIdIncrementer())
-                .listener(aggregatedJobListener());
-
+                .incrementer(new RunIdIncrementer());
         FlowJobBuilder builder = jobBuilder
                 .flow(variantLoaderStep)
                 .next(loadFileStep)
@@ -93,13 +82,5 @@ public class AggregatedVcfJob {
                 .end();
 
         return builder.build();
-    }
-
-    @Bean
-    @Scope("prototype")
-    JobExecutionListener aggregatedJobListener() {
-        return new VariantOptionsConfigurerListener(INCLUDE_SAMPLES,
-                CALCULATE_STATS,
-                INCLUDE_STATS);
     }
 }
