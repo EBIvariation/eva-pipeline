@@ -95,27 +95,16 @@ public class AggregatedVcfJobTest {
         Config.setOpenCGAHome(opencgaHome);
         String dbName = mongoRule.getRandomTemporaryDatabaseName();
 
-        String outputDirAnnotation = temporaryFolderRule.newFolder().getAbsolutePath();
-
-        File fasta = temporaryFolderRule.newFile();
-
         JobParameters jobParameters = new EvaJobParameterBuilder()
                 .collectionFilesName(COLLECTION_FILES_NAME)
                 .collectionVariantsName(COLLECTION_VARIANTS_NAME)
                 .databaseName(dbName)
-                .inputFasta(fasta.getAbsolutePath())
                 .inputStudyId("aggregated-job")
                 .inputStudyName("inputStudyName")
                 .inputStudyType("COLLECTION")
                 .inputVcf(getResource(INPUT).getAbsolutePath())
                 .inputVcfAggregation("BASIC")
                 .inputVcfId("1")
-                .outputDirAnnotation(outputDirAnnotation)
-                .vepCachePath("")
-                .vepCacheSpecies("human")
-                .vepCacheVersion("1")
-                .vepNumForks("1")
-                .vepPath(getResource(MOCK_VEP).getPath())
                 .timestamp()
                 .annotationSkip(true)
                 .toJobParameters();
