@@ -129,7 +129,7 @@ public class GenotypedVcfJobTest {
 
         File fasta = temporaryFolderRule.newFile();
 
-        Variant variant
+        Variant variant;
 
         // Run the Job
         JobParameters jobParameters = new EvaJobParameterBuilder()
@@ -254,14 +254,29 @@ public class GenotypedVcfJobTest {
         mongoRule.getTemporaryDatabase(dbName);
         Config.setOpenCGAHome(opencgaHome);
 
+        String outputDirStats = temporaryFolderRule.newFolder().getAbsolutePath();
+        String outputDirAnnotation = temporaryFolderRule.newFolder().getAbsolutePath();
+
+        File fasta = temporaryFolderRule.newFile();
+
         JobParameters jobParameters = new EvaJobParameterBuilder()
                 .collectionFilesName(COLLECTION_FILES_NAME)
                 .collectionVariantsName(COLLECTION_VARIANTS_NAME)
                 .databaseName(dbName)
+                .inputFasta(fasta.getAbsolutePath())
                 .inputVcf(getResource(INPUT_FILE).getAbsolutePath())
                 .inputVcfId(INPUT_VCF_ID)
                 .inputStudyId(INPUT_STUDY_ID)
+                .inputStudyName("inputStudyName")
+                .inputStudyType("COLLECTION")
                 .inputVcfAggregation("BASIC")
+                .outputDirAnnotation(outputDirAnnotation)
+                .outputDirStats(outputDirStats)
+                .vepCachePath("")
+                .vepCacheSpecies("human")
+                .vepCacheVersion("1")
+                .vepNumForks("1")
+                .vepPath(getResource(MOCK_VEP).getPath())
                 .timestamp()
                 .toJobParameters();
         JobExecution jobExecution = jobLauncherTestUtils.launchJob(jobParameters);
