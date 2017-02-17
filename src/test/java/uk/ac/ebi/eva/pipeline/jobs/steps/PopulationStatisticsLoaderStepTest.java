@@ -1,14 +1,16 @@
 package uk.ac.ebi.eva.pipeline.jobs.steps;
 
+import com.mongodb.DBCursor;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.opencb.datastore.core.QueryOptions;
+import org.opencb.biodata.models.variant.Variant;
+import org.opencb.biodata.models.variant.stats.VariantStats;
 import org.opencb.opencga.storage.core.StorageManagerException;
-import org.opencb.opencga.storage.core.StorageManagerFactory;
 import org.opencb.opencga.storage.core.variant.VariantStorageManager;
-import org.opencb.opencga.storage.core.variant.adaptors.VariantDBAdaptor;
-import org.opencb.opencga.storage.core.variant.adaptors.VariantDBIterator;
+import org.opencb.opencga.storage.mongodb.variant.DBObjectToVariantConverter;
+import org.opencb.opencga.storage.mongodb.variant.DBObjectToVariantSourceEntryConverter;
+import org.opencb.opencga.storage.mongodb.variant.DBObjectToVariantStatsConverter;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.JobExecution;
@@ -30,6 +32,7 @@ import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 import uk.ac.ebi.eva.utils.EvaJobParameterBuilder;
 
 import java.io.IOException;
+import java.util.Map;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertEquals;
@@ -51,6 +54,9 @@ public class PopulationStatisticsLoaderStepTest {
     private static final String SOURCE_FILE_NAME = "/input-files/statistics/1_1.source.stats.json.gz";
     private static final String VARIANTS_FILE_NAME = "/input-files/statistics/1_1.variants.stats.json.gz";
     private static final String FILE_NOT_FOUND_EXCEPTION = "java.io.FileNotFoundException:";
+
+    private static final String COLLECTION_FILES_NAME = "files";
+    private static final String COLLECTION_VARIANTS_NAME = "variants";
 
     @Rule
     public PipelineTemporaryFolderRule temporaryFolderRule = new PipelineTemporaryFolderRule();
@@ -76,8 +82,8 @@ public class PopulationStatisticsLoaderStepTest {
         String statsDir = temporaryFolderRule.newFolder().getAbsolutePath();
 
         JobParameters jobParameters = new EvaJobParameterBuilder()
-                .collectionFilesName("files")
-                .collectionVariantsName("variants")
+                .collectionFilesName(COLLECTION_FILES_NAME)
+                .collectionVariantsName(COLLECTION_VARIANTS_NAME)
                 .databaseName(dbName)
                 .inputStudyId(studyId)
                 .inputVcf(input)
@@ -96,10 +102,20 @@ public class PopulationStatisticsLoaderStepTest {
         assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());
 
         // The DB docs should have the field "st"
-        VariantStorageManager variantStorageManager = StorageManagerFactory.getVariantStorageManager();
-        VariantDBAdaptor variantDBAdaptor = variantStorageManager.getDBAdaptor(dbName, null);
-        VariantDBIterator iterator = variantDBAdaptor.iterator(new QueryOptions());
-        assertEquals(1, iterator.next().getSourceEntries().values().iterator().next().getCohortStats().size());
+        DBCursor cursor = mongoRule.getCollection(dbName, COLLECTION_VARIANTS_NAME).find();
+        assertEquals(1, getCohortStatsFromFirstVariant(cursor).size());
+    }
+
+    private Map<String, VariantStats> getCohortStatsFromFirstVariant(DBCursor cursor) {
+        DBObjectToVariantConverter variantConverter = getVariantConverter();
+        Variant variant = variantConverter.convertToDataModelType(cursor.iterator().next());
+        return variant.getSourceEntries().values().iterator().next().getCohortStats();
+    }
+
+    private DBObjectToVariantConverter getVariantConverter() {
+        return new DBObjectToVariantConverter(
+                new DBObjectToVariantSourceEntryConverter(VariantStorageManager.IncludeSrc.FIRST_8_COLUMNS),
+                new DBObjectToVariantStatsConverter());
     }
 
     private void copyFilesToOutpurDir(String outputDir) throws IOException {

@@ -16,6 +16,8 @@
 
 package uk.ac.ebi.eva.pipeline.jobs;
 
+import com.mongodb.DBCursor;
+import com.mongodb.DBObject;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -27,6 +29,9 @@ import org.opencb.opencga.storage.core.StorageManagerFactory;
 import org.opencb.opencga.storage.core.variant.VariantStorageManager;
 import org.opencb.opencga.storage.core.variant.adaptors.VariantDBAdaptor;
 import org.opencb.opencga.storage.core.variant.adaptors.VariantDBIterator;
+import org.opencb.opencga.storage.mongodb.variant.DBObjectToVariantConverter;
+import org.opencb.opencga.storage.mongodb.variant.DBObjectToVariantSourceEntryConverter;
+import org.opencb.opencga.storage.mongodb.variant.DBObjectToVariantStatsConverter;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.JobExecution;
@@ -38,6 +43,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
+
 import uk.ac.ebi.eva.pipeline.Application;
 import uk.ac.ebi.eva.pipeline.configuration.BeanNames;
 import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
@@ -53,6 +59,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
@@ -72,7 +79,7 @@ import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResource;
  */
 @RunWith(SpringRunner.class)
 @ActiveProfiles({Application.VARIANT_WRITER_MONGO_PROFILE,Application.VARIANT_ANNOTATION_MONGO_PROFILE})
-@TestPropertySource({"classpath:genotyped-vcf.properties", "classpath:test-mongo.properties"})
+@TestPropertySource({"classpath:common-configuration.properties", "classpath:test-mongo.properties"})
 @ContextConfiguration(classes = {GenotypedVcfJob.class, BatchTestConfiguration.class})
 public class GenotypedVcfJobTest {
     private static final String MOCK_VEP = "/mockvep.pl";
@@ -120,7 +127,7 @@ public class GenotypedVcfJobTest {
         File vepInputFile = new File(URLHelper.resolveVepInput(outputDirAnnotation, INPUT_STUDY_ID, INPUT_VCF_ID));
         File vepOutputFile = new File(URLHelper.resolveVepOutput(outputDirAnnotation, INPUT_STUDY_ID, INPUT_VCF_ID));
 
-        VariantDBIterator iterator;
+        Variant variant;
 
         // Run the Job
         JobParameters jobParameters = new EvaJobParameterBuilder()
@@ -149,16 +156,16 @@ public class GenotypedVcfJobTest {
         // 1 load step: check ((documents in DB) == (lines in transformed file))
         //variantStorageManager = StorageManagerFactory.getVariantStorageManager();
         //variantDBAdaptor = variantStorageManager.getDBAdaptor(dbName, null);
-        iterator = getVariantDBIterator(dbName);
-        assertEquals(EXPECTED_VARIANTS, count(iterator));
+        DBCursor cursor = mongoRule.getCollection(dbName, COLLECTION_VARIANTS_NAME).find();
+        assertEquals(EXPECTED_VARIANTS, count(cursor));
 
         // 2 create stats step
         assertTrue(variantsStatsFile.exists());
         assertTrue(sourceStatsFile.exists());
 
         // 3 load stats step: check the DB docs have the field "st"
-        iterator = getVariantDBIterator(dbName);
-        assertEquals(1, iterator.next().getSourceEntries().values().iterator().next().getCohortStats().size());
+        variant = getFirstVariant(dbName);
+        assertEquals(1, variant.getSourceEntries().values().iterator().next().getCohortStats().size());
 
         // 4 annotation flow
         // annotation input vep generate step
@@ -182,11 +189,17 @@ public class GenotypedVcfJobTest {
 
     }
 
-    private VariantDBIterator getVariantDBIterator(String dbName) throws IllegalAccessException,
-            ClassNotFoundException, InstantiationException, StorageManagerException {
-        VariantStorageManager variantStorageManager = StorageManagerFactory.getVariantStorageManager();
-        VariantDBAdaptor variantDBAdaptor = variantStorageManager.getDBAdaptor(dbName, null);
-        return variantDBAdaptor.iterator(new QueryOptions());
+    private Variant getFirstVariant(String database) {
+        DBCursor cursor = mongoRule.getCollection(database, COLLECTION_VARIANTS_NAME).find();
+        DBObjectToVariantConverter variantConverter = getVariantConverter();
+        Variant variant = variantConverter.convertToDataModelType(cursor.iterator().next());
+        return variant;
+    }
+
+    private DBObjectToVariantConverter getVariantConverter() {
+        return new DBObjectToVariantConverter(
+                new DBObjectToVariantSourceEntryConverter(VariantStorageManager.IncludeSrc.FIRST_8_COLUMNS),
+                new DBObjectToVariantStatsConverter());
     }
 
     private void checkAnnotationInput(File vepInputFile) throws IOException {
@@ -214,14 +227,14 @@ public class GenotypedVcfJobTest {
 
     private void checkLoadedAnnotation(String dbName) throws IllegalAccessException, ClassNotFoundException,
             InstantiationException, StorageManagerException {
-        VariantDBIterator iterator;
-        iterator = getVariantDBIterator(dbName);
+        Iterator<DBObject> iterator = mongoRule.getCollection(dbName, COLLECTION_VARIANTS_NAME).find().iterator();
+        DBObjectToVariantConverter converter = getVariantConverter();
 
         int count = 0;
         int consequenceTypeCount = 0;
         while (iterator.hasNext()) {
             count++;
-            Variant next = iterator.next();
+            Variant next = converter.convertToDataModelType(iterator.next());
             if (next.getAnnotation().getConsequenceTypes() != null) {
                 consequenceTypeCount += next.getAnnotation().getConsequenceTypes().size();
             }

@@ -52,7 +52,7 @@ import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResource;
  */
 @RunWith(SpringRunner.class)
 @ActiveProfiles(Application.VARIANT_ANNOTATION_MONGO_PROFILE)
-@TestPropertySource("classpath:annotation.properties")
+@TestPropertySource("classpath:common-configuration.properties")
 @ContextConfiguration(classes = {AnnotationJob.class, BatchTestConfiguration.class})
 public class VepAnnotationGeneratorStepTest {
 

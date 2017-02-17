@@ -47,7 +47,7 @@ import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResource;
  */
 @RunWith(SpringRunner.class)
 @ActiveProfiles({Application.VARIANT_WRITER_MONGO_PROFILE, Application.VARIANT_ANNOTATION_MONGO_PROFILE})
-@TestPropertySource({"classpath:genotyped-vcf.properties", "classpath:test-mongo.properties"})
+@TestPropertySource({"classpath:common-configuration.properties", "classpath:test-mongo.properties"})
 @ContextConfiguration(classes = {GenotypedVcfJob.class, BatchTestConfiguration.class})
 public class LoadFileStepTest {
 

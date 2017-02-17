@@ -45,7 +45,7 @@ import static org.junit.Assert.assertEquals;
  * Test {@link IndexesGeneratorStep}
  */
 @RunWith(SpringRunner.class)
-@TestPropertySource({"classpath:initialize-database.properties", "classpath:test-mongo.properties"})
+@TestPropertySource({"classpath:common-configuration.properties", "classpath:test-mongo.properties"})
 @ContextConfiguration(classes = {DatabaseInitializationJob.class, BatchTestConfiguration.class})
 public class IndexesGeneratorStepTest {
 
