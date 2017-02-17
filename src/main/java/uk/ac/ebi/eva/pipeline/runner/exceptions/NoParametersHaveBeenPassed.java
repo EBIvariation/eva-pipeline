@@ -20,7 +20,7 @@ import static uk.ac.ebi.eva.pipeline.EvaPipelineJobLauncher.PROPERTY_FILE_PROPER
 public class NoParametersHaveBeenPassed extends Exception {
 
     public NoParametersHaveBeenPassed() {
-        super("No parameters have been provided, please use --" + PROPERTY_FILE_PROPERTY + " to define one" +
+        super("No job parameters have been provided, please use --" + PROPERTY_FILE_PROPERTY + " to define one" +
                 " or set parameters through command line runner.");
     }
 

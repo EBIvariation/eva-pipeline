@@ -26,7 +26,6 @@ import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.batch.JobLauncherCommandLineRunner;
-import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import uk.ac.ebi.eva.pipeline.runner.ManageJobsUtils;
@@ -35,6 +34,7 @@ import uk.ac.ebi.eva.pipeline.runner.exceptions.NoParametersHaveBeenPassed;
 import uk.ac.ebi.eva.pipeline.runner.exceptions.NoPreviousJobExecution;
 import uk.ac.ebi.eva.pipeline.runner.exceptions.UnexpectedErrorReadingFile;
 import uk.ac.ebi.eva.pipeline.runner.exceptions.UnexpectedFileCodification;
+import uk.ac.ebi.eva.pipeline.runner.exceptions.UnrecognizedElement;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -48,6 +48,7 @@ public class EvaPipelineJobLauncher extends JobLauncherCommandLineRunner {
 
     private static final Logger logger = LoggerFactory.getLogger(EvaPipelineJobLauncher.class);
 
+    public static final String SPRING_BATCH_JOB_NAME_PROPERTY = "spring.batch.job.names";
     public static final String PROPERTY_FILE_PROPERTY = "properties.file";
     private static final String PROPERTY_FORCE_NAME = "force.restart";
 
@@ -78,33 +79,56 @@ public class EvaPipelineJobLauncher extends JobLauncherCommandLineRunner {
 
     @Override
     public void run(String... args) throws JobExecutionException {
-        logger.error(String.valueOf(Arrays.asList(args)));
         try {
+            checkAllParametersStartByDoubleDash(args);
+
+            String[] processedArgs = removeStartingHypens(args);
+            String[] filteredArgs = filterLauncherOnlyParameters(processedArgs);
+
             checkIfJobNamesHasBeenDefined();
-            checkIfPropertiesHaveBeenProvided(args);
+            checkIfPropertiesHaveBeenProvided(filteredArgs);
 
             // Command line properties have precedence over file defined ones.
             Properties properties = new Properties();
             if (propertyFilePath != null) {
                 properties.putAll(getPropertiesFile());
             }
-            properties.putAll(StringUtils.splitArrayElementsIntoProperties(args, "="));
+            properties.putAll(StringUtils.splitArrayElementsIntoProperties(filteredArgs, "="));
 
             setJobNames(jobNames);
 
-            if(forceRestart){
+            if (forceRestart) {
+                logger.info("Force restart against job '" + jobNames + "' with parameters: " + properties);
                 ManageJobsUtils.markLastJobAsFailed(jobRepository, jobNames,
                         converter.getJobParameters(properties));
             }
-
-            properties = removeLauncherSpecificProperties(properties);
-            logger.info("Running job '" + jobNames + "' with properties: " + properties);
+            logger.info("Running job '" + jobNames + "' with parameters: " + properties);
             launchJobFromProperties(properties);
         } catch (NoJobToExecute | NoParametersHaveBeenPassed | UnexpectedFileCodification | FileNotFoundException |
-                UnexpectedErrorReadingFile | NoPreviousJobExecution e) {
+                UnexpectedErrorReadingFile | NoPreviousJobExecution | UnrecognizedElement e) {
             logger.error(e.getMessage());
         }
+    }
 
+    private void checkAllParametersStartByDoubleDash(String[] args) throws UnrecognizedElement {
+        for (String arg : args) {
+            if (!arg.startsWith("--")) {
+                throw new UnrecognizedElement(arg);
+            }
+        }
+    }
+
+    private String[] removeStartingHypens(String[] args) {
+        return Arrays.stream(args).map(arg -> arg.substring(2)).toArray(String[]::new);
+    }
+
+    private String[] filterLauncherOnlyParameters(String[] args) {
+        return Arrays.stream(args).filter(arg -> isLaunchParameter(arg)).toArray(String[]::new);
+    }
+
+    private boolean isLaunchParameter(String arg) {
+        return !(arg.startsWith(PROPERTY_FILE_PROPERTY + "=") || arg.startsWith(PROPERTY_FORCE_NAME + "=")
+                || arg.startsWith(SPRING_BATCH_JOB_NAME_PROPERTY + "="));
     }
 
     private Properties removeLauncherSpecificProperties(Properties unfilteredProperties) {

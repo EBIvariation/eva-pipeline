@@ -79,8 +79,8 @@ public class EvaPipelineJobLauncherTest {
     @Test
     public void jobProvidedButNoParameters() throws JobExecutionException {
         evaPipelineJobLauncher.setJobNames("genotyped-vcf-job");
-        evaPipelineJobLauncher.run();
-        assertThat(capture.toString(), containsString("No parameters have been provided"));
+        evaPipelineJobLauncher.run("--spring.batch.job.names=genotyped-vcf-job");
+        assertThat(capture.toString(), containsString("No job parameters have been provided"));
     }
 
     @Test
@@ -97,31 +97,33 @@ public class EvaPipelineJobLauncherTest {
         File vepInputFile = GenotypedVcfJobTestUtils.getVepInputFile(outputDirAnnotation);
         File vepOutputFile = GenotypedVcfJobTestUtils.getVepOutputFile(outputDirAnnotation);
 
+        int lastJobCount = jobExplorer.getJobInstanceCount(GENOTYPED_VCF_JOB);
+
         evaPipelineJobLauncher.setJobNames(GENOTYPED_VCF_JOB);
         evaPipelineJobLauncher.run(
-                "input.vcf=" + inputFile.getAbsolutePath(),
-                "input.vcf.id=" + GenotypedVcfJobTestUtils.INPUT_VCF_ID,
-                "input.vcf.aggregation=NONE",
-                "input.study.name=small vcf",
-                "input.study.id=" + GenotypedVcfJobTestUtils.INPUT_STUDY_ID,
-                "input.study.type=COLLECTION",
-                "output.dir.annotation=" + outputDirAnnotation,
-                "output.dir.statistics=" + outputDirStats,
-                "spring.data.mongodb.database=" + databaseName,
-                "app.vep.path=" + GenotypedVcfJobTestUtils.getMockVep().getPath(),
-                "app.vep.num-forks=",
-                "app.vep.cache.path=",
-                "app.vep.cache.version=",
-                "app.vep.cache.species=",
-                "input.fasta=",
-                "config.db.read-preference=secondary",
-                "db.collections.variants.name=variants",
-                "db.collections.files.name=files",
-                "db.collections.features.name=features",
-                "db.collections.stats.name=populationStatistics"
+                "--input.vcf=" + inputFile.getAbsolutePath(),
+                "--input.vcf.id=" + GenotypedVcfJobTestUtils.INPUT_VCF_ID,
+                "--input.vcf.aggregation=NONE",
+                "--input.study.name=small vcf",
+                "--input.study.id=" + GenotypedVcfJobTestUtils.INPUT_STUDY_ID,
+                "--input.study.type=COLLECTION",
+                "--output.dir.annotation=" + outputDirAnnotation,
+                "--output.dir.statistics=" + outputDirStats,
+                "--spring.data.mongodb.database=" + databaseName,
+                "--app.vep.path=" + GenotypedVcfJobTestUtils.getMockVep().getPath(),
+                "--app.vep.num-forks=",
+                "--app.vep.cache.path=",
+                "--app.vep.cache.version=",
+                "--app.vep.cache.species=",
+                "--input.fasta=",
+                "--config.db.read-preference=secondary",
+                "--db.collections.variants.name=variants",
+                "--db.collections.files.name=files",
+                "--db.collections.features.name=features",
+                "--db.collections.stats.name=populationStatistics"
         );
 
-        assertFalse(jobExplorer.getJobInstances(GENOTYPED_VCF_JOB, 0, 1).isEmpty());
+        assertFalse(jobExplorer.getJobInstances(GENOTYPED_VCF_JOB, lastJobCount, 1).isEmpty());
         JobExecution jobExecution = jobExplorer.getJobExecution(jobExplorer.getJobInstances(GENOTYPED_VCF_JOB, 0, 1)
                 .get(0).getInstanceId());
 
@@ -164,21 +166,23 @@ public class EvaPipelineJobLauncherTest {
         File vepInputFile = GenotypedVcfJobTestUtils.getVepInputFile(outputDirAnnotation);
         File vepOutputFile = GenotypedVcfJobTestUtils.getVepOutputFile(outputDirAnnotation);
 
+        int lastJobCount = jobExplorer.getJobInstanceCount(GENOTYPED_VCF_JOB);
+
         //Set properties file to read
         evaPipelineJobLauncher.setPropertyFilePath(getResource(GENOTYPED_PROPERTIES_FILE).getAbsolutePath());
 
         evaPipelineJobLauncher.setJobNames(GENOTYPED_VCF_JOB);
         evaPipelineJobLauncher.run(
-                "input.vcf=" + inputFile.getAbsolutePath(),
-                "input.vcf.id=" + GenotypedVcfJobTestUtils.INPUT_VCF_ID,
-                "input.study.id=" + GenotypedVcfJobTestUtils.INPUT_STUDY_ID,
-                "output.dir.annotation=" + outputDirAnnotation,
-                "output.dir.statistics=" + outputDirStats,
-                "spring.data.mongodb.database=" + databaseName,
-                "app.vep.path=" + GenotypedVcfJobTestUtils.getMockVep().getPath()
+                "--input.vcf=" + inputFile.getAbsolutePath(),
+                "--input.vcf.id=" + GenotypedVcfJobTestUtils.INPUT_VCF_ID,
+                "--input.study.id=" + GenotypedVcfJobTestUtils.INPUT_STUDY_ID,
+                "--output.dir.annotation=" + outputDirAnnotation,
+                "--output.dir.statistics=" + outputDirStats,
+                "--spring.data.mongodb.database=" + databaseName,
+                "--app.vep.path=" + GenotypedVcfJobTestUtils.getMockVep().getPath()
         );
 
-        assertFalse(jobExplorer.getJobInstances(GENOTYPED_VCF_JOB, 0, 1).isEmpty());
+        assertFalse(jobExplorer.getJobInstances(GENOTYPED_VCF_JOB, lastJobCount, 1).isEmpty());
         JobExecution jobExecution = jobExplorer.getJobExecution(jobExplorer.getJobInstances(GENOTYPED_VCF_JOB, 0, 1)
                 .get(0).getInstanceId());
 
