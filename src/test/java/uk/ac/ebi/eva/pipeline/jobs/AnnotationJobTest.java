@@ -65,7 +65,7 @@ import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResourceUrl;
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest
-@TestPropertySource({"classpath:annotation-job.properties", "classpath:test-mongo.properties"})
+@TestPropertySource({"classpath:common-configuration.properties", "classpath:test-mongo.properties"})
 @ContextConfiguration(classes = {AnnotationJob.class, BatchTestConfiguration.class})
 public class AnnotationJobTest {
     private static final String MOCK_VEP = "/mockvep.pl";

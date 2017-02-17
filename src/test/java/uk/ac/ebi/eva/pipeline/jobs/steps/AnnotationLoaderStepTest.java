@@ -59,7 +59,7 @@ import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResourceUrl;
  */
 @RunWith(SpringRunner.class)
 @ActiveProfiles(Application.VARIANT_ANNOTATION_MONGO_PROFILE)
-@TestPropertySource({"classpath:annotation-loader-step.properties", "classpath:test-mongo.properties"})
+@TestPropertySource({"classpath:common-configuration.properties", "classpath:test-mongo.properties"})
 @ContextConfiguration(classes = {AnnotationJob.class, BatchTestConfiguration.class})
 public class AnnotationLoaderStepTest {
     private static final String MONGO_DUMP = "/dump/VariantStatsConfigurationTest_vl";

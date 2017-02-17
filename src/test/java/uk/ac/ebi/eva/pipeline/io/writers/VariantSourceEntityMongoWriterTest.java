@@ -64,7 +64,7 @@ import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResource;
  * date, aggregation. Stats are not there because those are written by the statistics job.
  */
 @RunWith(SpringRunner.class)
-@TestPropertySource({"classpath:genotyped-vcf.properties", "classpath:test-mongo.properties"})
+@TestPropertySource({"classpath:common-configuration.properties", "classpath:test-mongo.properties"})
 @ContextConfiguration(classes = {BaseTestConfiguration.class, LoadFileStep.class})
 public class VariantSourceEntityMongoWriterTest {
 

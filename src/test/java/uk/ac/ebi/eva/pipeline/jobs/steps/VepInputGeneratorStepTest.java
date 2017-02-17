@@ -50,7 +50,7 @@ import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResourceUrl;
  * Test {@link VepInputGeneratorStep}
  */
 @RunWith(SpringRunner.class)
-@TestPropertySource({"classpath:vep-input-generator-step.properties", "classpath:test-mongo.properties"})
+@TestPropertySource({"classpath:common-configuration.properties", "classpath:test-mongo.properties"})
 @ActiveProfiles(Application.VARIANT_ANNOTATION_MONGO_PROFILE)
 @ContextConfiguration(classes = {AnnotationJob.class, BatchTestConfiguration.class})
 public class VepInputGeneratorStepTest {
