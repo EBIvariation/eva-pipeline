@@ -62,7 +62,7 @@ public class InputStudyNameValidatorTest {
         validator.validate(jobParametersBuilder.toJobParameters());
     }
 
-    @Test(expected = JobParametersInvalidException.class)
+    @Test
     public void inputStudyNameWithSymbolsIsNotValid() throws JobParametersInvalidException {
         jobParametersBuilder = new JobParametersBuilder();
         jobParametersBuilder.addString(JobParametersNames.INPUT_STUDY_NAME, "@£ %! ()");

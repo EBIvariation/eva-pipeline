@@ -55,19 +55,33 @@ public class ParametersValidatorUtilTest {
     }
 
     @Test(expected = JobParametersInvalidException.class)
-    public void stringWithAsciiCharacter() throws JobParametersInvalidException {
-        ParametersValidatorUtil.checkAsciiString("Réal", JOB_PARAMETER_NAME);
+    public void stringWithNonPrintableCharacter() throws JobParametersInvalidException {
+        ParametersValidatorUtil.checkNonPrintableCharacters("R\0al", JOB_PARAMETER_NAME);
     }
 
     @Test
-    public void stringWithOutAsciiCharacter() throws JobParametersInvalidException {
-        ParametersValidatorUtil.checkAsciiString("Real", JOB_PARAMETER_NAME);
+    public void stringWithAccentCharacter() throws JobParametersInvalidException {
+        ParametersValidatorUtil.checkNonPrintableCharacters("Réal", JOB_PARAMETER_NAME);
     }
 
-    @Test(expected = JobParametersInvalidException.class)
-    public void stringWithLineSeparator() throws JobParametersInvalidException {
-        final String NEW_LINE = System.getProperty("line.separator");
-        ParametersValidatorUtil.checkSingleLineString("abc" + NEW_LINE + "def", JOB_PARAMETER_NAME);
+    @Test
+    public void stringWithDieresisCharacter() throws JobParametersInvalidException {
+        ParametersValidatorUtil.checkNonPrintableCharacters("RÜal", JOB_PARAMETER_NAME);
+    }
+
+    @Test
+    public void stringWithTildeCharacter() throws JobParametersInvalidException {
+        ParametersValidatorUtil.checkNonPrintableCharacters("R Ã al", JOB_PARAMETER_NAME);
+    }
+
+    @Test
+    public void stringWithLineSeparato() throws JobParametersInvalidException {
+        ParametersValidatorUtil.checkNonPrintableCharacters("1000 Genomes Phase 3 \n Version 5", JOB_PARAMETER_NAME);
+    }
+
+    @Test
+    public void stringWithAllPrintableCharacters() throws JobParametersInvalidException {
+        ParametersValidatorUtil.checkNonPrintableCharacters("1000 Genomes Phase 3 Version 5", JOB_PARAMETER_NAME);
     }
 
 

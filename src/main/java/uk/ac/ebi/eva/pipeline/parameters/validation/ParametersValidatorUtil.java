@@ -22,6 +22,7 @@ import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.regex.Pattern;
 
 /**
  * Utility class to hold the low level checks on strings, dirs, files... parameters
@@ -31,24 +32,16 @@ public class ParametersValidatorUtil {
     static void checkIsValidString(String stringToValidate,
                                    String jobParametersName) throws JobParametersInvalidException {
         checkIsNotNullOrEmptyString(stringToValidate, jobParametersName);
-        checkAsciiString(stringToValidate, jobParametersName);
-        checkSingleLineString(stringToValidate, jobParametersName);
+        checkNonPrintableCharacters(stringToValidate, jobParametersName);
     }
 
-    static void checkAsciiString(String stringToValidate,
-                                 String jobParametersName) throws JobParametersInvalidException {
-        if (!stringToValidate.matches("\\A\\p{ASCII}*\\z")) {
-            throw new JobParametersInvalidException(
-                    String.format("%s in %s contains non ascii characters", stringToValidate, jobParametersName));
-        }
-    }
+    static void checkNonPrintableCharacters(String stringToValidate,
+                                            String jobParametersName) throws JobParametersInvalidException {
+        Pattern regex = Pattern.compile("[\\p{C}&&[^\n]]");
 
-    static void checkSingleLineString(String stringToValidate,
-                                      String jobParametersName) throws JobParametersInvalidException {
-        final String NEW_LINE = System.getProperty("line.separator");
-        if (stringToValidate.contains(NEW_LINE)) {
+        if (regex.matcher(stringToValidate).find()) {
             throw new JobParametersInvalidException(
-                    String.format("%s in %s should be on a single line", stringToValidate, jobParametersName));
+                    String.format("%s in %s contains non printable characters", stringToValidate, jobParametersName));
         }
     }
 
