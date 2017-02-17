@@ -44,7 +44,6 @@ import java.util.Arrays;
 import java.util.Properties;
 
 @Component
-@Profile(Application.EXCLUDE_INTEGRATION_TEST_PROFILE)
 public class EvaPipelineJobLauncher extends JobLauncherCommandLineRunner {
 
     private static final Logger logger = LoggerFactory.getLogger(EvaPipelineJobLauncher.class);

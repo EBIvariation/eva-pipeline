@@ -45,17 +45,6 @@ public class Application {
      */
     public static final String MONGO_EXPERIMENTAL_PROFILE = "experimental";
 
-    /**
-     * Profile for integration testing
-     */
-    public static final String INTEGRATION_TEST_PROFILE = "integrationTest";
-
-    /**
-     * Any @Profile with this annotation will work always that integrationTest is not used.
-     */
-    public static final String EXCLUDE_INTEGRATION_TEST_PROFILE = "!" + INTEGRATION_TEST_PROFILE;
-
-
     public static void main(String[] args) throws Exception {
         SpringApplication.run(Application.class, args);
     }
