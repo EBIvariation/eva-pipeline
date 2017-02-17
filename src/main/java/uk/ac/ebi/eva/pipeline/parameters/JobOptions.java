@@ -37,7 +37,7 @@ import java.io.IOException;
 public class JobOptions {
     private static final Logger logger = LoggerFactory.getLogger(JobOptions.class);
 
-    @Value("${" + JobParametersNames.APP_OPENCGA_PATH + "}") private String opencgaAppHome;
+    @Value("${" + JobParametersNames.APP_OPENCGA_PATH + ":#{null}}") private String opencgaAppHome;
 
     // Pipeline application options.
     @Value("${" + JobParametersNames.CONFIG_RESTARTABILITY_ALLOW + ":false}") private boolean allowStartIfComplete;

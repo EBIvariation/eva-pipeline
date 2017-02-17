@@ -17,16 +17,10 @@ package uk.ac.ebi.eva.pipeline;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.batch.core.BatchStatus;
-import org.springframework.batch.core.ExitStatus;
-import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobExecutionException;
-import org.springframework.batch.core.JobParameters;
-import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.converter.DefaultJobParametersConverter;
 import org.springframework.batch.core.converter.JobParametersConverter;
 import org.springframework.batch.core.explore.JobExplorer;
-import org.springframework.batch.core.job.SimpleJob;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,7 +41,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.Properties;
 
 @Component
@@ -60,7 +53,7 @@ public class EvaPipelineJobLauncher extends JobLauncherCommandLineRunner {
     private static final String PROPERTY_FORCE_NAME = "force.restart";
 
     @Value("${spring.batch.job.names:#{null}}")
-    private String springBatchJob;
+    private String jobNames;
 
     @Value("${" + PROPERTY_FILE_PROPERTY + ":#{null}}")
     private String propertyFilePath;
@@ -86,8 +79,9 @@ public class EvaPipelineJobLauncher extends JobLauncherCommandLineRunner {
 
     @Override
     public void run(String... args) throws JobExecutionException {
+        logger.error(String.valueOf(Arrays.asList(args)));
         try {
-            checkIfJobHasBeenDefined();
+            checkIfJobNamesHasBeenDefined();
             checkIfPropertiesHaveBeenProvided(args);
 
             // Command line properties have precedence over file defined ones.
@@ -97,15 +91,15 @@ public class EvaPipelineJobLauncher extends JobLauncherCommandLineRunner {
             }
             properties.putAll(StringUtils.splitArrayElementsIntoProperties(args, "="));
 
-            setJobNames(springBatchJob);
+            setJobNames(jobNames);
 
             if(forceRestart){
-                ManageJobsUtils.markLastJobAsFailed(jobRepository, springBatchJob,
+                ManageJobsUtils.markLastJobAsFailed(jobRepository, jobNames,
                         converter.getJobParameters(properties));
             }
 
             properties = removeLauncherSpecificProperties(properties);
-            logger.info("Running job '" + springBatchJob + "' with properties: " + properties);
+            logger.info("Running job '" + jobNames + "' with properties: " + properties);
             launchJobFromProperties(properties);
         } catch (NoJobToExecute | NoParametersHaveBeenPassed | UnexpectedFileCodification | FileNotFoundException |
                 UnexpectedErrorReadingFile | NoPreviousJobExecution e) {
@@ -138,13 +132,13 @@ public class EvaPipelineJobLauncher extends JobLauncherCommandLineRunner {
     }
 
     private void checkIfPropertiesHaveBeenProvided(String[] args) throws NoParametersHaveBeenPassed {
-        if (args == null) {
+        if (args == null || args.length == 0) {
             throw new NoParametersHaveBeenPassed();
         }
     }
 
-    private void checkIfJobHasBeenDefined() throws NoJobToExecute {
-        if (springBatchJob == null) {
+    private void checkIfJobNamesHasBeenDefined() throws NoJobToExecute {
+        if (jobNames == null) {
             throw new NoJobToExecute();
         }
     }
@@ -156,4 +150,13 @@ public class EvaPipelineJobLauncher extends JobLauncherCommandLineRunner {
         return properties;
     }
 
+    @Override
+    public void setJobNames(String jobNames) {
+        this.jobNames = jobNames;
+        super.setJobNames(jobNames);
+    }
+
+    public void setPropertyFilePath(String propertyFilePath) {
+        this.propertyFilePath = propertyFilePath;
+    }
 }
