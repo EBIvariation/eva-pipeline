@@ -46,6 +46,10 @@ import static org.junit.Assert.assertThat;
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.GENOTYPED_VCF_JOB;
 import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResource;
 
+/**
+ * This suit of tests checks the behaviour of the EvaPipelineJobLauncher and launches a full execution of the
+ * genotype vcf test.
+ */
 @RunWith(SpringRunner.class)
 @SpringBootTest()
 @ActiveProfiles({"test,mongo"})

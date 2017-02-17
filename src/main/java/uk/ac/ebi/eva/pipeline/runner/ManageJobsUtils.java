@@ -25,6 +25,9 @@ import uk.ac.ebi.eva.pipeline.runner.exceptions.NoPreviousJobExecution;
 
 import java.util.Date;
 
+/**
+ * Utility class to change job / step status
+ */
 public class ManageJobsUtils {
 
     public static void markLastJobAsFailed(JobRepository jobRepository, String jobName, JobParameters

@@ -15,6 +15,9 @@
  */
 package uk.ac.ebi.eva.pipeline.runner.exceptions;
 
+/**
+ * Runner throws this exception when no job argument has been provided.
+ */
 public class NoJobToExecute extends Exception {
 
     public NoJobToExecute() {

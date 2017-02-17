@@ -17,6 +17,9 @@ package uk.ac.ebi.eva.pipeline.runner.exceptions;
 
 import org.springframework.batch.core.JobParameters;
 
+/**
+ * Exception thrown by the runner when trying to restart a job and no previous run is found.
+ */
 public class NoPreviousJobExecution extends Exception {
 
     public NoPreviousJobExecution(String jobName, JobParameters jobParameters) {

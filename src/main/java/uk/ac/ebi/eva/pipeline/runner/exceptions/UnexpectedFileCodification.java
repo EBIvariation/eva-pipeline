@@ -15,6 +15,9 @@
  */
 package uk.ac.ebi.eva.pipeline.runner.exceptions;
 
+/**
+ * Exception used to express a codification problem while interpreting a file
+ */
 public class UnexpectedFileCodification extends Exception {
 
     public UnexpectedFileCodification(String filePath) {

@@ -15,6 +15,9 @@
  */
 package uk.ac.ebi.eva.pipeline.runner.exceptions;
 
+/**
+ * Unexpected error while reading or processing a file
+ */
 public class UnexpectedErrorReadingFile extends Exception {
 
     public UnexpectedErrorReadingFile(String filePath) {

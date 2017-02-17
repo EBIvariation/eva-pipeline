@@ -17,6 +17,9 @@ package uk.ac.ebi.eva.pipeline.runner.exceptions;
 
 import static uk.ac.ebi.eva.pipeline.EvaPipelineJobLauncher.PROPERTY_FILE_PROPERTY;
 
+/**
+ * Exception thrown by the runner when no parameters have been passed to a job.
+ */
 public class NoParametersHaveBeenPassed extends Exception {
 
     public NoParametersHaveBeenPassed() {
