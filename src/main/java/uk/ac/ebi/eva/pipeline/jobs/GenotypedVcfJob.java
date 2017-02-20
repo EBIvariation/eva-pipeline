@@ -34,6 +34,7 @@ import org.springframework.context.annotation.Scope;
 import uk.ac.ebi.eva.pipeline.jobs.flows.ParallelStatisticsAndAnnotationFlow;
 import uk.ac.ebi.eva.pipeline.jobs.steps.LoadFileStep;
 import uk.ac.ebi.eva.pipeline.jobs.steps.VariantLoaderStep;
+import uk.ac.ebi.eva.pipeline.parameters.validation.job.GenotypedVcfJobParametersValidator;
 
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.GENOTYPED_VCF_JOB;
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.LOAD_FILE_STEP;
