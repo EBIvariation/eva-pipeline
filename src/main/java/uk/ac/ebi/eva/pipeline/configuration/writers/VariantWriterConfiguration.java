@@ -16,7 +16,6 @@
 package uk.ac.ebi.eva.pipeline.configuration.writers;
 
 import org.opencb.biodata.models.variant.VariantSource;
-import org.opencb.opencga.storage.core.variant.VariantStorageManager;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.context.annotation.Bean;
@@ -29,15 +28,11 @@ import uk.ac.ebi.eva.pipeline.io.writers.VariantMongoWriter;
 import uk.ac.ebi.eva.pipeline.model.converters.data.VariantToMongoDbObjectConverter;
 import uk.ac.ebi.eva.pipeline.parameters.DatabaseParameters;
 import uk.ac.ebi.eva.pipeline.parameters.InputParameters;
-import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VARIANT_WRITER;
 
 @Configuration
 public class VariantWriterConfiguration {
-
-    //// OpenCGA options with default values (non-customizable)
-    private VariantStorageManager.IncludeSrc includeSourceLine = VariantStorageManager.IncludeSrc.FIRST_8_COLUMNS;
 
     @Bean(VARIANT_WRITER)
     @StepScope
@@ -51,11 +46,15 @@ public class VariantWriterConfiguration {
     @Bean
     @StepScope
     public VariantToMongoDbObjectConverter variantToMongoDbObjectConverter(InputParameters inputParameters) {
+        boolean includeSamples, includeStats;
         if (VariantSource.Aggregation.NONE.equals(inputParameters.getVcfAggregation())) {
-            return new VariantToMongoDbObjectConverter(false, false, true, includeSourceLine);
+            includeSamples = true;
+            includeStats = false;
         } else {
-            return new VariantToMongoDbObjectConverter(true, true, false, includeSourceLine);
+            includeSamples = false;
+            includeStats = true;
         }
+        return new VariantToMongoDbObjectConverter(includeStats, includeSamples);
     }
 
 }

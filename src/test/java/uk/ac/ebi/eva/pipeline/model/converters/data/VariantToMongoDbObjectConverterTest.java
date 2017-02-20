@@ -51,7 +51,7 @@ public class VariantToMongoDbObjectConverterTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void convertNullVariantShouldThrowAnException() {
-        variantToMongoDbObjectConverter = new VariantToMongoDbObjectConverter(false, false, true, includeSrc);
+        variantToMongoDbObjectConverter = new VariantToMongoDbObjectConverter(false, true);
         variantToMongoDbObjectConverter.convert(null);
     }
 
@@ -65,7 +65,7 @@ public class VariantToMongoDbObjectConverterTest {
 
         Variant variant = buildVariant(chromosome, start, end, reference, alternate, fileId, studyId);
 
-        variantToMongoDbObjectConverter = new VariantToMongoDbObjectConverter(false, false, true, includeSrc);
+        variantToMongoDbObjectConverter = new VariantToMongoDbObjectConverter(false, true);
         conversionService.addConverter(variantToMongoDbObjectConverter);
 
         DBObject dbObject = conversionService.convert(variant, DBObject.class);
@@ -89,7 +89,7 @@ public class VariantToMongoDbObjectConverterTest {
     public void includeStatsTrueShouldIncludeStatistics() {
         Variant variant = buildVariant("12", 3, 4, "A", "T", fileId, studyId);
 
-        variantToMongoDbObjectConverter = new VariantToMongoDbObjectConverter(true, true, false, includeSrc);
+        variantToMongoDbObjectConverter = new VariantToMongoDbObjectConverter(true, false);
         conversionService.addConverter(variantToMongoDbObjectConverter);
 
         DBObject dbObject = conversionService.convert(variant, DBObject.class);
@@ -104,7 +104,7 @@ public class VariantToMongoDbObjectConverterTest {
     public void includeStatsFalseShouldNotIncludeStatistics() {
         Variant variant = buildVariant("12", 3, 4, "A", "T", fileId, studyId);
 
-        variantToMongoDbObjectConverter = new VariantToMongoDbObjectConverter(false, false, true, includeSrc);
+        variantToMongoDbObjectConverter = new VariantToMongoDbObjectConverter(false, true);
         conversionService.addConverter(variantToMongoDbObjectConverter);
 
         DBObject dbObject = conversionService.convert(variant, DBObject.class);
@@ -120,7 +120,7 @@ public class VariantToMongoDbObjectConverterTest {
         Variant variant = buildVariant("12", 3, 4, "A", "T", fileId, studyId);
         variant.setIds(Sets.newHashSet("a", "b", "c"));
 
-        variantToMongoDbObjectConverter = new VariantToMongoDbObjectConverter(false, false, true, includeSrc);
+        variantToMongoDbObjectConverter = new VariantToMongoDbObjectConverter(false, true);
         conversionService.addConverter(variantToMongoDbObjectConverter);
 
         DBObject dbObject = conversionService.convert(variant, DBObject.class);
@@ -135,7 +135,7 @@ public class VariantToMongoDbObjectConverterTest {
     public void idsIfNotPresentShouldNotBeWrittenIntoTheVariant() {
         Variant variant = buildVariant("12", 3, 4, "A", "T", fileId, studyId);
 
-        variantToMongoDbObjectConverter = new VariantToMongoDbObjectConverter(false, false, true, includeSrc);
+        variantToMongoDbObjectConverter = new VariantToMongoDbObjectConverter(false, true);
         conversionService.addConverter(variantToMongoDbObjectConverter);
 
         DBObject dbObject = conversionService.convert(variant, DBObject.class);
