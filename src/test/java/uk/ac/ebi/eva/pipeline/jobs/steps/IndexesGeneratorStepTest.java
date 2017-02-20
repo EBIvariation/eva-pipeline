@@ -25,17 +25,15 @@ import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
-import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-
 import uk.ac.ebi.eva.pipeline.configuration.BeanNames;
-import uk.ac.ebi.eva.pipeline.jobs.DatabaseInitializationJob;
 import uk.ac.ebi.eva.pipeline.jobs.steps.tasklets.IndexesGeneratorStep;
 import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
+import uk.ac.ebi.eva.test.utils.StepLauncherTestUtils;
 import uk.ac.ebi.eva.utils.EvaJobParameterBuilder;
 
 import static org.junit.Assert.assertEquals;
@@ -46,7 +44,7 @@ import static org.junit.Assert.assertEquals;
  */
 @RunWith(SpringRunner.class)
 @TestPropertySource({"classpath:common-configuration.properties", "classpath:test-mongo.properties"})
-@ContextConfiguration(classes = {DatabaseInitializationJob.class, BatchTestConfiguration.class})
+@ContextConfiguration(classes = {CreateDatabaseIndexesStep.class, BatchTestConfiguration.class})
 public class IndexesGeneratorStepTest {
 
     private static final String COLLECTION_FEATURES_NAME = "features";
@@ -55,7 +53,7 @@ public class IndexesGeneratorStepTest {
     public TemporaryMongoRule mongoRule = new TemporaryMongoRule();
 
     @Autowired
-    private JobLauncherTestUtils jobLauncherTestUtils;
+    private StepLauncherTestUtils stepLauncherTestUtils;
 
     @Test
     public void testIndexesAreCreated() throws Exception {
@@ -65,7 +63,7 @@ public class IndexesGeneratorStepTest {
                 .collectionFeaturesName(COLLECTION_FEATURES_NAME)
                 .toJobParameters();
 
-        JobExecution jobExecution = jobLauncherTestUtils.launchStep(BeanNames.CREATE_DATABASE_INDEXES_STEP,
+        JobExecution jobExecution = stepLauncherTestUtils.launchStep(BeanNames.CREATE_DATABASE_INDEXES_STEP,
                 jobParameters);
 
         assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
@@ -87,7 +85,7 @@ public class IndexesGeneratorStepTest {
                 .collectionFeaturesName(COLLECTION_FEATURES_NAME)
                 .toJobParameters();
 
-        JobExecution jobExecution = jobLauncherTestUtils.launchStep(BeanNames.CREATE_DATABASE_INDEXES_STEP,
+        JobExecution jobExecution = stepLauncherTestUtils.launchStep(BeanNames.CREATE_DATABASE_INDEXES_STEP,
                 jobParameters);
 
         assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());

@@ -22,20 +22,18 @@ import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
-import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-
 import uk.ac.ebi.eva.pipeline.Application;
 import uk.ac.ebi.eva.pipeline.configuration.BeanNames;
-import uk.ac.ebi.eva.pipeline.jobs.AnnotationJob;
 import uk.ac.ebi.eva.pipeline.jobs.steps.tasklets.VepAnnotationGeneratorStep;
 import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
+import uk.ac.ebi.eva.test.utils.StepLauncherTestUtils;
 import uk.ac.ebi.eva.utils.EvaJobParameterBuilder;
 import uk.ac.ebi.eva.utils.URLHelper;
 
@@ -53,7 +51,7 @@ import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResource;
 @RunWith(SpringRunner.class)
 @ActiveProfiles(Application.VARIANT_ANNOTATION_MONGO_PROFILE)
 @TestPropertySource("classpath:common-configuration.properties")
-@ContextConfiguration(classes = {AnnotationJob.class, BatchTestConfiguration.class})
+@ContextConfiguration(classes = {GenerateVepAnnotationStep.class, BatchTestConfiguration.class})
 public class VepAnnotationGeneratorStepTest {
 
     private static final String MOCKVEP = "/mockvep.pl";
@@ -66,7 +64,7 @@ public class VepAnnotationGeneratorStepTest {
     public PipelineTemporaryFolderRule temporaryFolderRule = new PipelineTemporaryFolderRule();
 
     @Autowired
-    private JobLauncherTestUtils jobLauncherTestUtils;
+    private StepLauncherTestUtils stepLauncherTestUtils;
 
     @Test
     public void shouldGenerateVepAnnotations() throws Exception {
@@ -85,7 +83,7 @@ public class VepAnnotationGeneratorStepTest {
                 .toJobParameters();
 
         // When the execute method in variantsAnnotCreate is executed
-        JobExecution jobExecution = jobLauncherTestUtils
+        JobExecution jobExecution = stepLauncherTestUtils
                 .launchStep(BeanNames.GENERATE_VEP_ANNOTATION_STEP, jobParameters);
 
         //Then variantsAnnotCreate step should complete correctly

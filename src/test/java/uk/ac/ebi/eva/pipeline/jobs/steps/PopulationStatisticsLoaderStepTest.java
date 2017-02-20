@@ -16,19 +16,17 @@ import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobExecutionException;
 import org.springframework.batch.core.JobParameters;
-import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.rule.OutputCapture;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-
 import uk.ac.ebi.eva.pipeline.configuration.BeanNames;
-import uk.ac.ebi.eva.pipeline.jobs.PopulationStatisticsJob;
 import uk.ac.ebi.eva.pipeline.jobs.steps.tasklets.PopulationStatisticsLoaderStep;
 import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
+import uk.ac.ebi.eva.test.utils.StepLauncherTestUtils;
 import uk.ac.ebi.eva.utils.EvaJobParameterBuilder;
 
 import java.io.IOException;
@@ -46,7 +44,7 @@ import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResourceUrl;
  */
 @RunWith(SpringRunner.class)
 @TestPropertySource({"classpath:common-configuration.properties", "classpath:test-mongo.properties"})
-@ContextConfiguration(classes = {PopulationStatisticsJob.class, BatchTestConfiguration.class})
+@ContextConfiguration(classes = {LoadStatisticsStep.class, BatchTestConfiguration.class})
 public class PopulationStatisticsLoaderStepTest {
 
     private static final String SMALL_VCF_FILE = "/input-files/vcf/genotyped.vcf.gz";
@@ -65,7 +63,7 @@ public class PopulationStatisticsLoaderStepTest {
     public TemporaryMongoRule mongoRule = new TemporaryMongoRule();
 
     @Autowired
-    private JobLauncherTestUtils jobLauncherTestUtils;
+    private StepLauncherTestUtils stepLauncherTestUtils;
 
     //Capture error output
     @Rule
@@ -95,7 +93,7 @@ public class PopulationStatisticsLoaderStepTest {
         copyFilesToOutpurDir(statsDir);
 
         // When the execute method in variantsStatsLoad is executed
-        JobExecution jobExecution = jobLauncherTestUtils.launchStep(BeanNames.LOAD_STATISTICS_STEP, jobParameters);
+        JobExecution jobExecution = stepLauncherTestUtils.launchStep(BeanNames.LOAD_STATISTICS_STEP, jobParameters);
 
         // Then variantsStatsLoad step should complete correctly
         assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
@@ -144,7 +142,7 @@ public class PopulationStatisticsLoaderStepTest {
                 .outputDirStats(statsDir)
                 .toJobParameters();
 
-        JobExecution jobExecution = jobLauncherTestUtils.launchStep(BeanNames.LOAD_STATISTICS_STEP, jobParameters);
+        JobExecution jobExecution = stepLauncherTestUtils.launchStep(BeanNames.LOAD_STATISTICS_STEP, jobParameters);
         assertThat(capture.toString(), containsString(FILE_NOT_FOUND_EXCEPTION));
 
         assertEquals(ExitStatus.FAILED.getExitCode(), jobExecution.getExitStatus().getExitCode());

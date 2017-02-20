@@ -29,18 +29,16 @@ import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
-import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-
 import uk.ac.ebi.eva.pipeline.Application;
 import uk.ac.ebi.eva.pipeline.configuration.BeanNames;
-import uk.ac.ebi.eva.pipeline.jobs.GenotypedVcfJob;
 import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
+import uk.ac.ebi.eva.test.utils.StepLauncherTestUtils;
 import uk.ac.ebi.eva.utils.EvaJobParameterBuilder;
 
 import static org.junit.Assert.assertEquals;
@@ -53,7 +51,7 @@ import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResource;
 @RunWith(SpringRunner.class)
 @ActiveProfiles({Application.VARIANT_WRITER_MONGO_PROFILE, Application.VARIANT_ANNOTATION_MONGO_PROFILE})
 @TestPropertySource({"classpath:common-configuration.properties", "classpath:test-mongo.properties"})
-@ContextConfiguration(classes = {GenotypedVcfJob.class, BatchTestConfiguration.class})
+@ContextConfiguration(classes = {VariantLoaderStep.class, BatchTestConfiguration.class})
 public class VariantLoaderStepTest {
 
     private static final int EXPECTED_VARIANTS = 300;
@@ -64,7 +62,7 @@ public class VariantLoaderStepTest {
     public TemporaryMongoRule mongoRule = new TemporaryMongoRule();
 
     @Autowired
-    private JobLauncherTestUtils jobLauncherTestUtils;
+    private StepLauncherTestUtils stepLauncherTestUtils;
 
     private String input;
 
@@ -86,7 +84,7 @@ public class VariantLoaderStepTest {
                 .inputVcfId("1")
                 .toJobParameters();
 
-        JobExecution jobExecution = jobLauncherTestUtils.launchStep(BeanNames.LOAD_VARIANTS_STEP, jobParameters);
+        JobExecution jobExecution = stepLauncherTestUtils.launchStep(BeanNames.LOAD_VARIANTS_STEP, jobParameters);
 
         //Then variantsLoad step should complete correctly
         assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());

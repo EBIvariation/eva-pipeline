@@ -22,18 +22,16 @@ import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
-import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-
 import uk.ac.ebi.eva.pipeline.configuration.BeanNames;
-import uk.ac.ebi.eva.pipeline.jobs.PopulationStatisticsJob;
 import uk.ac.ebi.eva.pipeline.jobs.steps.tasklets.PopulationStatisticsGeneratorStep;
 import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
+import uk.ac.ebi.eva.test.utils.StepLauncherTestUtils;
 import uk.ac.ebi.eva.utils.EvaJobParameterBuilder;
 import uk.ac.ebi.eva.utils.URLHelper;
 
@@ -51,7 +49,7 @@ import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResourceUrl;
  */
 @RunWith(SpringRunner.class)
 @TestPropertySource({"classpath:common-configuration.properties", "classpath:test-mongo.properties"})
-@ContextConfiguration(classes = {PopulationStatisticsJob.class, BatchTestConfiguration.class})
+@ContextConfiguration(classes = {CalculateStatisticsStep.class, BatchTestConfiguration.class})
 public class PopulationStatisticsGeneratorStepTest {
     private static final String SMALL_VCF_FILE = "/input-files/vcf/genotyped.vcf.gz";
 
@@ -64,7 +62,7 @@ public class PopulationStatisticsGeneratorStepTest {
     public PipelineTemporaryFolderRule temporaryFolderRule = new PipelineTemporaryFolderRule();
 
     @Autowired
-    private JobLauncherTestUtils jobLauncherTestUtils;
+    private StepLauncherTestUtils stepLauncherTestUtils;
 
     @Test
     public void statisticsGeneratorStepShouldCalculateStats() throws IOException, InterruptedException, URISyntaxException {
@@ -89,7 +87,7 @@ public class PopulationStatisticsGeneratorStepTest {
         assertFalse(sourceStatsFile.exists());
 
         // When the execute method in variantsStatsCreate is executed
-        JobExecution jobExecution = jobLauncherTestUtils.launchStep(BeanNames.CALCULATE_STATISTICS_STEP, jobParameters);
+        JobExecution jobExecution = stepLauncherTestUtils.launchStep(BeanNames.CALCULATE_STATISTICS_STEP, jobParameters);
 
         //Then variantsStatsCreate step should complete correctly
         assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
@@ -126,7 +124,7 @@ public class PopulationStatisticsGeneratorStepTest {
         assertFalse(sourceStatsFile.exists());
 
         // When the execute method in variantsStatsCreate is executed
-        JobExecution jobExecution = jobLauncherTestUtils.launchStep(BeanNames.CALCULATE_STATISTICS_STEP, jobParameters);
+        JobExecution jobExecution = stepLauncherTestUtils.launchStep(BeanNames.CALCULATE_STATISTICS_STEP, jobParameters);
         assertEquals(ExitStatus.FAILED.getExitCode(), jobExecution.getExitStatus().getExitCode());
     }
 
