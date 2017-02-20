@@ -39,17 +39,9 @@ public class JobOptions {
 
     @Value("${" + JobParametersNames.APP_OPENCGA_PATH + "}") private String opencgaAppHome;
 
-    //// OpenCGA options with default values (non-customizable)
-    private VariantStorageManager.IncludeSrc includeSourceLine = VariantStorageManager.IncludeSrc.FIRST_8_COLUMNS;
-
     // Pipeline application options.
     @Value("${" + JobParametersNames.CONFIG_RESTARTABILITY_ALLOW + ":false}") private boolean allowStartIfComplete;
     @Value("${" + JobParametersNames.CONFIG_CHUNK_SIZE + ":1000}") private int chunkSize;
-
-    //These values are setted through VariantOptionsConfigurerListener
-    private boolean calculateStats;
-    private boolean includeStats;
-    private boolean includeSamples;
 
     @PostConstruct
     public void loadArgs() throws IOException {
@@ -61,15 +53,6 @@ public class JobOptions {
         Config.setOpenCGAHome(opencgaAppHome);
     }
 
-    public void configureGenotypesStorage(boolean includeSamples) {
-        this.includeSamples = includeSamples;
-    }
-
-    public void configureStatisticsStorage(boolean calculateStats, boolean includeStats) {
-        this.calculateStats = calculateStats;
-        this.includeStats = includeStats;
-    }
-
     public boolean isAllowStartIfComplete() {
         return allowStartIfComplete;
     }
@@ -78,19 +61,4 @@ public class JobOptions {
         return chunkSize;
     }
 
-    public boolean isCalculateStats() {
-        return calculateStats;
-    }
-
-    public boolean isIncludeStats() {
-        return includeStats;
-    }
-
-    public boolean isIncludeSamples() {
-        return includeSamples;
-    }
-
-    public VariantStorageManager.IncludeSrc getIncludeSourceLine() {
-        return includeSourceLine;
-    }
 }
