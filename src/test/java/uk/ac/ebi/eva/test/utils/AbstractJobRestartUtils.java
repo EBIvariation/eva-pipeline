@@ -36,7 +36,7 @@ import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import uk.ac.ebi.eva.runner.JobRestartAsynchronous;
+import uk.ac.ebi.eva.runner.JobRestartAsynchronousTest;
 
 import java.util.Arrays;
 import java.util.UUID;
@@ -75,7 +75,7 @@ public abstract class AbstractJobRestartUtils {
     protected JobExecution launchJob(JobLauncherTestUtils jobLauncherTestUtils) throws Exception {
         JobExecution jobExecution;
         jobExecution = jobLauncherTestUtils.launchJob(new JobParameters());
-        Thread.sleep(JobRestartAsynchronous.INITIALIZE_JOB_SLEEP);
+        Thread.sleep(JobRestartAsynchronousTest.INITIALIZE_JOB_SLEEP);
         return jobExecution;
     }
 

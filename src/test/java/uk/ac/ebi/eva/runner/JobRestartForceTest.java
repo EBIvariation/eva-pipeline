@@ -37,7 +37,7 @@ import uk.ac.ebi.eva.test.utils.AbstractJobRestartUtils;
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = {AsynchronousBatchTestConfiguration.class})
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
-public class JobRestartForce extends AbstractJobRestartUtils {
+public class JobRestartForceTest extends AbstractJobRestartUtils {
 
     // Wait until the job has been launched properly. The launch operation is not transactional, and other
     // instanciations of the same job with the same parameter can throw exceptions in this interval.

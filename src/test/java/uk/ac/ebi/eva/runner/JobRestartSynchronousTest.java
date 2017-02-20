@@ -37,7 +37,7 @@ import java.util.UUID;
  */
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = {SynchronousBatchTestConfiguration.class})
-public class JobRestartSynchronous extends AbstractJobRestartUtils {
+public class JobRestartSynchronousTest extends AbstractJobRestartUtils {
 
     @Test
     public void runCompleteJobTwiceWithSameParameters() throws Exception {
