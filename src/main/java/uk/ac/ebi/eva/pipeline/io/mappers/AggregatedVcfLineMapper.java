@@ -17,9 +17,14 @@ package uk.ac.ebi.eva.pipeline.io.mappers;
 
 import org.opencb.biodata.models.variant.VariantSource;
 import org.springframework.batch.item.file.LineMapper;
+import org.springframework.util.Assert;
 import uk.ac.ebi.eva.commons.models.data.Variant;
+import uk.ac.ebi.eva.utils.FileUtils;
 
+import java.io.File;
 import java.util.List;
+import java.util.Optional;
+import java.util.Properties;
 
 import static org.junit.Assert.assertNotNull;
 
@@ -34,18 +39,26 @@ public class AggregatedVcfLineMapper implements LineMapper<List<Variant>> {
     private final String studyId;
     private VariantVcfFactory factory;
 
-    public AggregatedVcfLineMapper(String fileId, String studyId, VariantSource.Aggregation aggregation) {
+    public AggregatedVcfLineMapper(String fileId, String studyId, VariantSource.Aggregation aggregation,
+                                   Optional<String> mappingFilePath) {
+        Assert.notNull(fileId);
+        Assert.notNull(studyId);
+        Assert.notNull(aggregation);
+
         this.fileId = fileId;
         this.studyId = studyId;
+
+        Properties mappings = mappingFilePath.map(path -> FileUtils.getPropertiesFile(path).orElseThrow
+                (RuntimeException::new)).orElse(null);
         switch (aggregation) {
             case EVS:
-                factory = new VariantVcfEVSFactory();
+                factory = new VariantVcfEVSFactory(mappings);
                 break;
             case EXAC:
-                factory = new VariantVcfExacFactory();
+                factory = new VariantVcfExacFactory(mappings);
                 break;
             case BASIC:
-                factory = new VariantAggregatedVcfFactory();
+                factory = new VariantAggregatedVcfFactory(mappings);
                 break;
             case NONE:
                 throw new IllegalArgumentException(

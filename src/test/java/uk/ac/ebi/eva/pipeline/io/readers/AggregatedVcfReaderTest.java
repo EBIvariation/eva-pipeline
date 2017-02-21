@@ -15,6 +15,7 @@ import uk.ac.ebi.eva.test.utils.TestFileUtils;
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.List;
+import java.util.Optional;
 import java.util.zip.GZIPInputStream;
 
 import static org.junit.Assert.assertEquals;
@@ -64,7 +65,8 @@ public class AggregatedVcfReaderTest {
         // input vcf
         File input = TestFileUtils.getResource(inputFilePath);
 
-        AggregatedVcfReader vcfReader = new AggregatedVcfReader(FILE_ID, STUDY_ID, aggregationType, input);
+        AggregatedVcfReader vcfReader = new AggregatedVcfReader(FILE_ID, STUDY_ID, aggregationType, Optional.empty(),
+                input);
         vcfReader.setSaveState(false);
         vcfReader.open(executionContext);
 
@@ -81,7 +83,7 @@ public class AggregatedVcfReaderTest {
         JobTestUtils.uncompress(input.getAbsolutePath(), tempFile);
 
         AggregatedVcfReader vcfReader = new AggregatedVcfReader(FILE_ID, STUDY_ID, VariantSource.Aggregation.BASIC,
-                tempFile);
+                Optional.empty(), tempFile);
         vcfReader.setSaveState(false);
         vcfReader.open(executionContext);
 

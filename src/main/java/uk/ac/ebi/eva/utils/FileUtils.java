@@ -1,5 +1,7 @@
 package uk.ac.ebi.eva.utils;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 
@@ -10,9 +12,13 @@ import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.Optional;
+import java.util.Properties;
 import java.util.zip.GZIPOutputStream;
 
 public abstract class FileUtils {
+
+    private static final Logger logger = LoggerFactory.getLogger(FileUtils.class);
 
     public static void validateDirectoryPath(String path, boolean emptyIsValid) throws FileNotFoundException {
         if (emptyIsValid && (path == null || path.isEmpty())) {
@@ -40,5 +46,17 @@ public abstract class FileUtils {
             resource = new FileSystemResource(file);
         }
         return resource;
+    }
+
+    public static Optional<Properties> getPropertiesFile(String propertiesFilePath){
+        try {
+            InputStream input = new FileInputStream(propertiesFilePath);
+            Properties properties = new Properties();
+            properties.load(input);
+            return Optional.ofNullable(properties);
+        }catch(Exception e){
+            logger.error("Error while reading property file '"+propertiesFilePath+"'",e);
+            return Optional.ofNullable(null);
+        }
     }
 }
