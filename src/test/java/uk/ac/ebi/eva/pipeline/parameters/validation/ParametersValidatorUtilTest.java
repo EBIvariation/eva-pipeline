@@ -75,9 +75,21 @@ public class ParametersValidatorUtilTest {
     }
 
     @Test
-    public void stringWithLineSeparato() throws JobParametersInvalidException {
+    public void stringWithStandardLineSeparator() throws JobParametersInvalidException {
         ParametersValidatorUtil
                 .checkDoesNotContainPrintableCharacters("1000 Genomes Phase 3 \n Version 5", JOB_PARAMETER_NAME);
+    }
+
+    @Test
+    public void stringWithOsXLineSeparator() throws JobParametersInvalidException {
+        ParametersValidatorUtil
+                .checkDoesNotContainPrintableCharacters("1000 Genomes Phase 3 \r Version 5", JOB_PARAMETER_NAME);
+    }
+
+    @Test
+    public void stringWithWindowsLineSeparator() throws JobParametersInvalidException {
+        ParametersValidatorUtil
+                .checkDoesNotContainPrintableCharacters("1000 Genomes Phase 3 \r\n Version 5", JOB_PARAMETER_NAME);
     }
 
     @Test

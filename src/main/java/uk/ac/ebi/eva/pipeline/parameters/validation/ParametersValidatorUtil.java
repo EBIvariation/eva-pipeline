@@ -38,7 +38,7 @@ public class ParametersValidatorUtil {
 
     static void checkDoesNotContainPrintableCharacters(String stringToValidate,
                                                        String jobParametersName) throws JobParametersInvalidException {
-        Pattern regex = Pattern.compile("[\\p{C}&&[^\n]]");
+        Pattern regex = Pattern.compile("[\\p{C}&&[^\n]&&[^\r]]");
 
         if (regex.matcher(stringToValidate).find()) {
             throw new JobParametersInvalidException(
