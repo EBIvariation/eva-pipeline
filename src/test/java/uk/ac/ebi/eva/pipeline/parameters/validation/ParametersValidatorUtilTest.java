@@ -36,22 +36,12 @@ public class ParametersValidatorUtilTest {
 
     @Test
     public void validString() throws JobParametersInvalidException {
-        ParametersValidatorUtil.checkIsNotNullOrEmptyString("any string", JOB_PARAMETER_NAME);
-    }
-
-    @Test(expected = JobParametersInvalidException.class)
-    public void stringIsEmpty() throws JobParametersInvalidException {
-        ParametersValidatorUtil.checkIsNotNullOrEmptyString("", JOB_PARAMETER_NAME);
-    }
-
-    @Test(expected = JobParametersInvalidException.class)
-    public void stringIsAWhitespace() throws JobParametersInvalidException {
-        ParametersValidatorUtil.checkIsNotNullOrEmptyString(" ", JOB_PARAMETER_NAME);
+        ParametersValidatorUtil.checkIsValidString("any string", JOB_PARAMETER_NAME);
     }
 
     @Test(expected = JobParametersInvalidException.class)
     public void stringIsNull() throws JobParametersInvalidException {
-        ParametersValidatorUtil.checkIsNotNullOrEmptyString(null, JOB_PARAMETER_NAME);
+        ParametersValidatorUtil.checkIsNotNullString(null, JOB_PARAMETER_NAME);
     }
 
     @Test(expected = JobParametersInvalidException.class)
@@ -109,6 +99,17 @@ public class ParametersValidatorUtilTest {
                 "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.",
                 JOB_PARAMETER_NAME);
     }
+
+    @Test(expected = JobParametersInvalidException.class)
+    public void stringIsEmpty() throws JobParametersInvalidException {
+        ParametersValidatorUtil.checkLength("", JOB_PARAMETER_NAME);
+    }
+
+    @Test(expected = JobParametersInvalidException.class)
+    public void stringIsAWhitespace() throws JobParametersInvalidException {
+        ParametersValidatorUtil.checkLength(" ", JOB_PARAMETER_NAME);
+    }
+
 
     @Test
     public void validBooleanFalseString() throws JobParametersInvalidException {
