@@ -56,32 +56,34 @@ public class ParametersValidatorUtilTest {
 
     @Test(expected = JobParametersInvalidException.class)
     public void stringWithNonPrintableCharacter() throws JobParametersInvalidException {
-        ParametersValidatorUtil.checkNonPrintableCharacters("R\0al", JOB_PARAMETER_NAME);
+        ParametersValidatorUtil.checkDoesNotContainPrintableCharacters("R\0al", JOB_PARAMETER_NAME);
     }
 
     @Test
     public void stringWithAccentCharacter() throws JobParametersInvalidException {
-        ParametersValidatorUtil.checkNonPrintableCharacters("Réal", JOB_PARAMETER_NAME);
+        ParametersValidatorUtil.checkDoesNotContainPrintableCharacters("Réal", JOB_PARAMETER_NAME);
     }
 
     @Test
     public void stringWithDieresisCharacter() throws JobParametersInvalidException {
-        ParametersValidatorUtil.checkNonPrintableCharacters("RÜal", JOB_PARAMETER_NAME);
+        ParametersValidatorUtil.checkDoesNotContainPrintableCharacters("RÜal", JOB_PARAMETER_NAME);
     }
 
     @Test
     public void stringWithTildeCharacter() throws JobParametersInvalidException {
-        ParametersValidatorUtil.checkNonPrintableCharacters("R Ã al", JOB_PARAMETER_NAME);
+        ParametersValidatorUtil.checkDoesNotContainPrintableCharacters("R Ã al", JOB_PARAMETER_NAME);
     }
 
     @Test
     public void stringWithLineSeparato() throws JobParametersInvalidException {
-        ParametersValidatorUtil.checkNonPrintableCharacters("1000 Genomes Phase 3 \n Version 5", JOB_PARAMETER_NAME);
+        ParametersValidatorUtil
+                .checkDoesNotContainPrintableCharacters("1000 Genomes Phase 3 \n Version 5", JOB_PARAMETER_NAME);
     }
 
     @Test
     public void stringWithAllPrintableCharacters() throws JobParametersInvalidException {
-        ParametersValidatorUtil.checkNonPrintableCharacters("1000 Genomes Phase 3 Version 5", JOB_PARAMETER_NAME);
+        ParametersValidatorUtil
+                .checkDoesNotContainPrintableCharacters("1000 Genomes Phase 3 Version 5", JOB_PARAMETER_NAME);
     }
 
     @Test
@@ -91,7 +93,9 @@ public class ParametersValidatorUtilTest {
 
     @Test(expected = JobParametersInvalidException.class)
     public void stringBiggerThan250Characters() throws JobParametersInvalidException {
-        ParametersValidatorUtil.checkLength("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.", JOB_PARAMETER_NAME);
+        ParametersValidatorUtil.checkLength(
+                "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.",
+                JOB_PARAMETER_NAME);
     }
 
     @Test

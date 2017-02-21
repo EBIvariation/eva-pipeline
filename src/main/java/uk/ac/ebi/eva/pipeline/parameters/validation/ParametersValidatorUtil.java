@@ -32,12 +32,12 @@ public class ParametersValidatorUtil {
     static void checkIsValidString(String stringToValidate,
                                    String jobParametersName) throws JobParametersInvalidException {
         checkIsNotNullOrEmptyString(stringToValidate, jobParametersName);
-        checkNonPrintableCharacters(stringToValidate, jobParametersName);
+        checkDoesNotContainPrintableCharacters(stringToValidate, jobParametersName);
         checkLength(stringToValidate, jobParametersName);
     }
 
-    static void checkNonPrintableCharacters(String stringToValidate,
-                                            String jobParametersName) throws JobParametersInvalidException {
+    static void checkDoesNotContainPrintableCharacters(String stringToValidate,
+                                                       String jobParametersName) throws JobParametersInvalidException {
         Pattern regex = Pattern.compile("[\\p{C}&&[^\n]]");
 
         if (regex.matcher(stringToValidate).find()) {
