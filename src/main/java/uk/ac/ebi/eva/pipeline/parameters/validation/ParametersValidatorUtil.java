@@ -55,7 +55,7 @@ public class ParametersValidatorUtil {
     }
 
     static void checkLength(String stringToValidate, String jobParametersName) throws JobParametersInvalidException {
-        if(stringToValidate.length()>=250){
+        if (stringToValidate.length() >= 250) {
             throw new JobParametersInvalidException(
                     String.format("%s in %s can't exceed 250 characters", stringToValidate, jobParametersName));
         }
