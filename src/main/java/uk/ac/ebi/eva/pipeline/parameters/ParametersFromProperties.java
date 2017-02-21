@@ -90,10 +90,10 @@ public class ParametersFromProperties {
     private String vepPath;
 
     @Value(PROPERTY + JobParametersNames.STATISTICS_SKIP + OR_NULL)
-    private String skipStats;
+    private String statisticsSkip;
 
     @Value(PROPERTY + JobParametersNames.ANNOTATION_SKIP + OR_NULL)
-    private String skipAnnot;
+    private String annotationSkip;
 
     public Properties getProperties() {
         Properties properties = new Properties();
