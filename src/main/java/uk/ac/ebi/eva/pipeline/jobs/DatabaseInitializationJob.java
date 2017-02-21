@@ -41,6 +41,8 @@ import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.INIT_DATABASE_JOB;
  * <p>
  * 1. create the needed indexes in the DBs
  * 2. load genomic features for the species
+ *
+ * TODO add a new DatabaseInitializationJobParametersValidator
  */
 @Configuration
 @EnableBatchProcessing

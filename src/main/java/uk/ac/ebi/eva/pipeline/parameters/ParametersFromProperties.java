@@ -62,6 +62,33 @@ public class ParametersFromProperties {
     @Value(PROPERTY + JobParametersNames.OUTPUT_DIR_STATISTICS + OR_NULL)
     private String outputDirStats;
 
+    @Value(PROPERTY + JobParametersNames.INPUT_STUDY_NAME + OR_NULL)
+    private String studyName;
+
+    @Value(PROPERTY + JobParametersNames.INPUT_STUDY_TYPE + OR_NULL)
+    private String studyType;
+
+    @Value(PROPERTY + JobParametersNames.OUTPUT_DIR_ANNOTATION + OR_NULL)
+    private String outputDirAnnotation;
+
+    @Value(PROPERTY + JobParametersNames.APP_VEP_CACHE_PATH + OR_NULL)
+    private String vepCachePath;
+
+    @Value(PROPERTY + JobParametersNames.APP_VEP_CACHE_SPECIES + OR_NULL)
+    private String vepCacheSpecies;
+
+    @Value(PROPERTY + JobParametersNames.APP_VEP_CACHE_VERSION + OR_NULL)
+    private String vepCacheVersion;
+
+    @Value(PROPERTY + JobParametersNames.INPUT_FASTA + OR_NULL)
+    private String inputFasta;
+
+    @Value(PROPERTY + JobParametersNames.APP_VEP_NUMFORKS + OR_NULL)
+    private String vepNumForks;
+
+    @Value(PROPERTY + JobParametersNames.APP_VEP_PATH + OR_NULL)
+    private String vepPath;
+
     @Value(PROPERTY + JobParametersNames.STATISTICS_SKIP + OR_NULL)
     private String statisticsSkip;
 

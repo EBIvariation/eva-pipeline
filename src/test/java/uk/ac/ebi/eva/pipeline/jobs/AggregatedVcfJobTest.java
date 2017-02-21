@@ -41,6 +41,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import uk.ac.ebi.eva.pipeline.Application;
 import uk.ac.ebi.eva.pipeline.configuration.BeanNames;
 import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
+import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
 import uk.ac.ebi.eva.utils.EvaJobParameterBuilder;
@@ -77,6 +78,9 @@ public class AggregatedVcfJobTest {
     @Rule
     public TemporaryMongoRule mongoRule = new TemporaryMongoRule();
 
+    @Rule
+    public PipelineTemporaryFolderRule temporaryFolderRule = new PipelineTemporaryFolderRule();
+
     @Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
 
@@ -95,17 +99,12 @@ public class AggregatedVcfJobTest {
                 .collectionFilesName(COLLECTION_FILES_NAME)
                 .collectionVariantsName(COLLECTION_VARIANTS_NAME)
                 .databaseName(dbName)
-                .inputFasta("")
                 .inputStudyId("aggregated-job")
+                .inputStudyName("inputStudyName")
+                .inputStudyType("COLLECTION")
                 .inputVcf(getResource(INPUT).getAbsolutePath())
                 .inputVcfAggregation("BASIC")
                 .inputVcfId("1")
-                .vepCachePath("")
-                .vepCacheSpecies("")
-                .vepCacheVersion("")
-                .vepNumForks("")
-                .vepPath("")
-                .outputDirAnnotation("")
                 .timestamp()
                 .annotationSkip(true)
                 .toJobParameters();

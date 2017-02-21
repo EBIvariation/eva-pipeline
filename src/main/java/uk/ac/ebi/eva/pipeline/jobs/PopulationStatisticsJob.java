@@ -37,6 +37,8 @@ import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.CALCULATE_STATISTIC
 
 /**
  * Configuration to run a full Statistics job: variantStatsFlow: statsCreate --> statsLoad
+ *
+ * TODO add a new PopulationStatisticsJobParametersValidator
  */
 @Configuration
 @EnableBatchProcessing

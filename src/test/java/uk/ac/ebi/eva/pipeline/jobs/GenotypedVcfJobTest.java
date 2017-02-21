@@ -127,6 +127,8 @@ public class GenotypedVcfJobTest {
         File vepInputFile = new File(URLHelper.resolveVepInput(outputDirAnnotation, INPUT_STUDY_ID, INPUT_VCF_ID));
         File vepOutputFile = new File(URLHelper.resolveVepOutput(outputDirAnnotation, INPUT_STUDY_ID, INPUT_VCF_ID));
 
+        File fasta = temporaryFolderRule.newFile();
+
         Variant variant;
 
         // Run the Job
@@ -134,17 +136,19 @@ public class GenotypedVcfJobTest {
                 .collectionFilesName(COLLECTION_FILES_NAME)
                 .collectionVariantsName(COLLECTION_VARIANTS_NAME)
                 .databaseName(dbName)
-                .inputFasta("")
+                .inputFasta(fasta.getAbsolutePath())
                 .inputStudyId(INPUT_STUDY_ID)
+                .inputStudyName("inputStudyName")
+                .inputStudyType("COLLECTION")
                 .inputVcf(inputFile.getAbsolutePath())
                 .inputVcfAggregation("NONE")
                 .inputVcfId(INPUT_VCF_ID)
                 .outputDirAnnotation(outputDirAnnotation)
                 .outputDirStats(outputDirStats)
                 .vepCachePath("")
-                .vepCacheSpecies("")
-                .vepCacheVersion("")
-                .vepNumForks("")
+                .vepCacheSpecies("human")
+                .vepCacheVersion("1")
+                .vepNumForks("1")
                 .vepPath(getResource(MOCK_VEP).getPath())
                 .toJobParameters();
 
@@ -250,14 +254,29 @@ public class GenotypedVcfJobTest {
         mongoRule.getTemporaryDatabase(dbName);
         Config.setOpenCGAHome(opencgaHome);
 
+        String outputDirStats = temporaryFolderRule.newFolder().getAbsolutePath();
+        String outputDirAnnotation = temporaryFolderRule.newFolder().getAbsolutePath();
+
+        File fasta = temporaryFolderRule.newFile();
+
         JobParameters jobParameters = new EvaJobParameterBuilder()
                 .collectionFilesName(COLLECTION_FILES_NAME)
                 .collectionVariantsName(COLLECTION_VARIANTS_NAME)
                 .databaseName(dbName)
+                .inputFasta(fasta.getAbsolutePath())
                 .inputVcf(getResource(INPUT_FILE).getAbsolutePath())
                 .inputVcfId(INPUT_VCF_ID)
                 .inputStudyId(INPUT_STUDY_ID)
+                .inputStudyName("inputStudyName")
+                .inputStudyType("COLLECTION")
                 .inputVcfAggregation("BASIC")
+                .outputDirAnnotation(outputDirAnnotation)
+                .outputDirStats(outputDirStats)
+                .vepCachePath("")
+                .vepCacheSpecies("human")
+                .vepCacheVersion("1")
+                .vepNumForks("1")
+                .vepPath(getResource(MOCK_VEP).getPath())
                 .timestamp()
                 .toJobParameters();
         JobExecution jobExecution = jobLauncherTestUtils.launchJob(jobParameters);

@@ -215,13 +215,16 @@ public class GenotypedVcfJobWorkflowTest {
         String dbName = mongoRule.getRandomTemporaryDatabaseName();
         String outputDirStats = temporaryFolderRule.newFolder().getAbsolutePath();
         String outputDirAnnotation = temporaryFolderRule.newFolder().getAbsolutePath();
+        File fasta = temporaryFolderRule.newFile();
 
         EvaJobParameterBuilder evaJobParameterBuilder = new EvaJobParameterBuilder()
                 .collectionFilesName("files")
                 .collectionVariantsName("variants")
                 .databaseName(dbName)
-                .inputFasta("")
+                .inputFasta(fasta.getAbsolutePath())
                 .inputStudyId("genotyped-job-workflow")
+                .inputStudyName("inputStudyName")
+                .inputStudyType("COLLECTION")
                 .inputVcf(inputFile.getAbsolutePath())
                 .inputVcfAggregation("NONE")
                 .inputVcfId("1")
@@ -229,9 +232,9 @@ public class GenotypedVcfJobWorkflowTest {
                 .outputDirStats(outputDirStats)
                 .timestamp()
                 .vepCachePath("")
-                .vepCacheSpecies("")
-                .vepCacheVersion("")
-                .vepNumForks("")
+                .vepCacheSpecies("human")
+                .vepCacheVersion("1")
+                .vepNumForks("1")
                 .vepPath(getResource(MOCK_VEP).getPath());
 
         return evaJobParameterBuilder;

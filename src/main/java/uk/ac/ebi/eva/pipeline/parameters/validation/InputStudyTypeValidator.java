@@ -30,8 +30,8 @@ import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 public class InputStudyTypeValidator implements JobParametersValidator {
     @Override
     public void validate(JobParameters parameters) throws JobParametersInvalidException {
-        ParametersValidatorUtil.checkIsNotNullOrEmptyString(parameters.getString(JobParametersNames.INPUT_STUDY_TYPE),
-                                                            JobParametersNames.INPUT_STUDY_TYPE);
+        ParametersValidatorUtil.checkIsValidString(parameters.getString(JobParametersNames.INPUT_STUDY_TYPE),
+                                                   JobParametersNames.INPUT_STUDY_TYPE);
 
         try {
             VariantStudy.StudyType.valueOf(parameters.getString(JobParametersNames.INPUT_STUDY_TYPE));

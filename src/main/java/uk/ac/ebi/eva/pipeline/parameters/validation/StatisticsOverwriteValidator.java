@@ -33,7 +33,7 @@ public class StatisticsOverwriteValidator implements JobParametersValidator {
     public void validate(JobParameters parameters) throws JobParametersInvalidException {
         String statisticsOverwriteValue = parameters.getString(JobParametersNames.STATISTICS_OVERWRITE);
 
-        ParametersValidatorUtil.checkIsNotNullOrEmptyString(
+        ParametersValidatorUtil.checkIsValidString(
                 statisticsOverwriteValue, JobParametersNames.STATISTICS_OVERWRITE);
         ParametersValidatorUtil.checkIsBoolean(
                 statisticsOverwriteValue,JobParametersNames.STATISTICS_OVERWRITE);

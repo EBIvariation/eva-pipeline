@@ -29,7 +29,7 @@ import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 public class InputVcfIdValidator implements JobParametersValidator {
     @Override
     public void validate(JobParameters parameters) throws JobParametersInvalidException {
-        ParametersValidatorUtil.checkIsNotNullOrEmptyString(parameters.getString(JobParametersNames.INPUT_VCF_ID),
-                                                            JobParametersNames.INPUT_VCF_ID);
+        ParametersValidatorUtil.checkIsValidString(parameters.getString(JobParametersNames.INPUT_VCF_ID),
+                                                   JobParametersNames.INPUT_VCF_ID);
     }
 }
