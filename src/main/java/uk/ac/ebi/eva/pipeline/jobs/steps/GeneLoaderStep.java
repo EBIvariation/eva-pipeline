@@ -76,11 +76,11 @@ public class GeneLoaderStep {
 
     @Bean(GENES_LOAD_STEP)
     public Step genesLoadStep(StepBuilderFactory stepBuilderFactory, JobOptions jobOptions,
-                              SimpleCompletionPolicy chunkSizeCompletitionPolicy) {
+                              SimpleCompletionPolicy chunkSizeCompletionPolicy) {
         logger.debug("Building '" + GENES_LOAD_STEP + "'");
 
         return stepBuilderFactory.get(GENES_LOAD_STEP)
-                .<FeatureCoordinates, FeatureCoordinates>chunk(chunkSizeCompletitionPolicy)
+                .<FeatureCoordinates, FeatureCoordinates>chunk(chunkSizeCompletionPolicy)
                 .reader(reader)
                 .processor(new GeneFilterProcessor())
                 .writer(writer)

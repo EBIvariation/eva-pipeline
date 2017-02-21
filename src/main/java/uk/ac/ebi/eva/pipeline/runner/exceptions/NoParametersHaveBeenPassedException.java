@@ -15,15 +15,16 @@
  */
 package uk.ac.ebi.eva.pipeline.runner.exceptions;
 
-import org.springframework.batch.core.JobParameters;
+import static uk.ac.ebi.eva.pipeline.EvaPipelineJobLauncher.PROPERTY_FILE_PROPERTY;
 
 /**
- * Exception thrown by the runner when trying to restart a job and no previous run is found.
+ * Exception thrown by the runner when no parameters have been passed to a job.
  */
-public class NoPreviousJobExecution extends Exception {
+public class NoParametersHaveBeenPassedException extends Exception {
 
-    public NoPreviousJobExecution(String jobName, JobParameters jobParameters) {
-        super("No previous execution from job '" + jobName + "' with parameters '" + jobParameters + "'");
+    public NoParametersHaveBeenPassedException() {
+        super("No job parameters have been provided. Please list them as command line arguments, or in a file using "
+                + "the argument --" + PROPERTY_FILE_PROPERTY);
     }
 
 }

@@ -23,6 +23,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
+/**
+ * Configuration for simple spring batch tests without any database that also require a step registry to inject steps
+ * manually.
+ */
 @Configuration
 @EnableBatchProcessing
 @Import({SimpleBatchConfiguration.class})

@@ -42,7 +42,8 @@ import java.util.Arrays;
 import java.util.UUID;
 
 /**
- * Base class with utility methods to create test jobs and steps.
+ * Base class for the jobs to check the behaviour of spring boot. This class has all the utility methods to create
+ * jobs and steps on demand in the tests without any need to generate or inject them from specific configuration classes
  */
 public abstract class AbstractJobRestartUtils {
 

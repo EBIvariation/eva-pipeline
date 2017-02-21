@@ -15,16 +15,12 @@
  */
 package uk.ac.ebi.eva.pipeline.runner.exceptions;
 
-import static uk.ac.ebi.eva.pipeline.EvaPipelineJobLauncher.PROPERTY_FILE_PROPERTY;
-
 /**
- * Exception thrown by the runner when no parameters have been passed to a job.
+ * Exception thrown where a string value argument is not recognized or valid in a function.
  */
-public class NoParametersHaveBeenPassed extends Exception {
+public class NotValidParameterFormatException extends Exception {
 
-    public NoParametersHaveBeenPassed() {
-        super("No job parameters have been provided, please use --" + PROPERTY_FILE_PROPERTY + " to define one" +
-                " or set parameters through command line runner.");
+    public NotValidParameterFormatException(String arg) {
+        super("Parameters '"+arg+"' not valid");
     }
-
 }

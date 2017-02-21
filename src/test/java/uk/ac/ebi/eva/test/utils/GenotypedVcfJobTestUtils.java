@@ -32,7 +32,7 @@ import static uk.ac.ebi.eva.test.utils.JobTestUtils.getLines;
 import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResource;
 
 /**
- * Utility functions to test
+ * GenotypedVcfJob test assertion functions and constants for testing.
  */
 public class GenotypedVcfJobTestUtils {
 

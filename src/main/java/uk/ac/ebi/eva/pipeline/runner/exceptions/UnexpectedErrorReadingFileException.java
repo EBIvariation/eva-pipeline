@@ -16,11 +16,12 @@
 package uk.ac.ebi.eva.pipeline.runner.exceptions;
 
 /**
- * Runner throws this exception when no job argument has been provided.
+ * Unexpected error while reading or processing a file
  */
-public class NoJobToExecute extends Exception {
+public class UnexpectedErrorReadingFileException extends Exception {
 
-    public NoJobToExecute() {
-        super("No job name has been provided.");
+    public UnexpectedErrorReadingFileException(String filePath) {
+        super("Unexpected error reading file '" + filePath + "'");
     }
+
 }

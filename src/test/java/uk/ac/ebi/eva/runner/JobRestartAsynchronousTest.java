@@ -40,7 +40,7 @@ import uk.ac.ebi.eva.test.utils.AbstractJobRestartUtils;
 public class JobRestartAsynchronousTest extends AbstractJobRestartUtils {
 
     // Wait until the job has been launched properly. The launch operation is not transactional, and other
-    // instanciations of the same job with the same parameter can throw exceptions in this interval.
+    // instances of the same job with the same parameter can throw exceptions in this interval.
     public static final int INITIALIZE_JOB_SLEEP = 100;
     public static final int STEP_TIME_DURATION = 1000;
     public static final int WAIT_FOR_JOB_TO_END = 2000;
@@ -69,7 +69,7 @@ public class JobRestartAsynchronousTest extends AbstractJobRestartUtils {
     }
 
     @Test
-    public void jobStopedAndAbandonedCanBeStarted() throws Exception {
+    public void jobStoppedAndAbandonedCanBeStarted() throws Exception {
         JobLauncherTestUtils jobLauncherTestUtils = getJobLauncherTestUtils(getTestJob(
                 getWaitingStep(false, STEP_TIME_DURATION)));
         JobExecution jobExecution = launchJob(jobLauncherTestUtils);
@@ -80,7 +80,7 @@ public class JobRestartAsynchronousTest extends AbstractJobRestartUtils {
     }
 
     @Test
-    public void abandonJobsRequireStepsMarkedAsRestartable() throws Exception {
+    public void abandonedJobsRequireStepsMarkedAsRestartable() throws Exception {
         Job job = getTestJob(getQuickStep(false), getWaitingStep(false, STEP_TIME_DURATION));
         JobLauncherTestUtils jobLauncherTestUtils = getJobLauncherTestUtils(job);
         JobExecution jobExecution = launchJob(jobLauncherTestUtils);

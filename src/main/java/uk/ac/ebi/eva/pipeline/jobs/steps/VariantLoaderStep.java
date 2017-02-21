@@ -63,11 +63,11 @@ public class VariantLoaderStep {
 
     @Bean(LOAD_VARIANTS_STEP)
     public Step loadVariantsStep(StepBuilderFactory stepBuilderFactory, JobOptions jobOptions,
-                                 SimpleCompletionPolicy chunkSizeCompletitionPolicy) {
+                                 SimpleCompletionPolicy chunkSizeCompletionPolicy) {
         logger.debug("Building '" + LOAD_VARIANTS_STEP + "'");
 
         return stepBuilderFactory.get(LOAD_VARIANTS_STEP)
-                .<Variant, Variant>chunk(chunkSizeCompletitionPolicy)
+                .<Variant, Variant>chunk(chunkSizeCompletionPolicy)
                 .reader(reader)
                 .writer(variantWriter)
                 .faultTolerant().skipLimit(50).skip(FlatFileParseException.class)

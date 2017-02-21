@@ -16,12 +16,11 @@
 package uk.ac.ebi.eva.pipeline.runner;
 
 import org.springframework.batch.core.BatchStatus;
-import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.repository.JobRepository;
-import uk.ac.ebi.eva.pipeline.runner.exceptions.NoPreviousJobExecution;
+import uk.ac.ebi.eva.pipeline.runner.exceptions.NoPreviousJobExecutionException;
 
 import java.util.Date;
 
@@ -31,10 +30,10 @@ import java.util.Date;
 public class ManageJobsUtils {
 
     public static void markLastJobAsFailed(JobRepository jobRepository, String jobName, JobParameters
-            jobParameters) throws NoPreviousJobExecution {
+            jobParameters) throws NoPreviousJobExecutionException {
         JobExecution lastJobExecution = jobRepository.getLastJobExecution(jobName, jobParameters);
         if (lastJobExecution == null) {
-            throw new NoPreviousJobExecution(jobName, jobParameters);
+            throw new NoPreviousJobExecutionException(jobName, jobParameters);
         }
 
         Date currentTime = new Date();

@@ -75,11 +75,11 @@ public class AnnotationLoaderStep {
 
     @Bean(LOAD_VEP_ANNOTATION_STEP)
     public Step loadVepAnnotationStep(StepBuilderFactory stepBuilderFactory, JobOptions jobOptions,
-                                      SimpleCompletionPolicy chunkSizeCompletitionPolicy) {
+                                      SimpleCompletionPolicy chunkSizeCompletionPolicy) {
         logger.debug("Building '" + LOAD_VEP_ANNOTATION_STEP + "'");
 
         return stepBuilderFactory.get(LOAD_VEP_ANNOTATION_STEP)
-                .<VariantAnnotation, VariantAnnotation>chunk(chunkSizeCompletitionPolicy)
+                .<VariantAnnotation, VariantAnnotation>chunk(chunkSizeCompletionPolicy)
                 .reader(variantAnnotationReader)
                 .writer(variantAnnotationItemWriter)
                 .faultTolerant().skipLimit(50).skip(FlatFileParseException.class)

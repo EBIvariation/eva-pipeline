@@ -74,11 +74,11 @@ public class VepInputGeneratorStep {
 
     @Bean(GENERATE_VEP_INPUT_STEP)
     public Step generateVepInputStep(StepBuilderFactory stepBuilderFactory, JobOptions jobOptions,
-                                     SimpleCompletionPolicy chunkSizeCompletitionPolicy) {
+                                     SimpleCompletionPolicy chunkSizeCompletionPolicy) {
         logger.debug("Building '" + GENERATE_VEP_INPUT_STEP + "'");
 
         return stepBuilderFactory.get(GENERATE_VEP_INPUT_STEP)
-                .<DBObject, VariantWrapper>chunk(chunkSizeCompletitionPolicy)
+                .<DBObject, VariantWrapper>chunk(chunkSizeCompletionPolicy)
                 .reader(reader)
                 .processor(new AnnotationProcessor())
                 .writer(writer)

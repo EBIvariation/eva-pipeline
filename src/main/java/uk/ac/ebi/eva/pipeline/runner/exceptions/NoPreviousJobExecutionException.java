@@ -15,12 +15,15 @@
  */
 package uk.ac.ebi.eva.pipeline.runner.exceptions;
 
-/**
- * Exception used to express a codification problem while interpreting a file
- */
-public class UnexpectedFileCodification extends Exception {
+import org.springframework.batch.core.JobParameters;
 
-    public UnexpectedFileCodification(String filePath) {
-        super("Unexpected codification in file '" + filePath + "'");
+/**
+ * Exception thrown by the runner when trying to restart a job and no previous run is found.
+ */
+public class NoPreviousJobExecutionException extends Exception {
+
+    public NoPreviousJobExecutionException(String jobName, JobParameters jobParameters) {
+        super("No previous execution from job '" + jobName + "' with parameters '" + jobParameters + "'");
     }
+
 }

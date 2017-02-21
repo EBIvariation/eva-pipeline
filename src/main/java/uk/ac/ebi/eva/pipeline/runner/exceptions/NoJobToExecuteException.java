@@ -16,11 +16,11 @@
 package uk.ac.ebi.eva.pipeline.runner.exceptions;
 
 /**
- * Exception thrown where a string value argument is not recognized or valid in a function.
+ * Runner throws this exception when no job argument has been provided.
  */
-public class UnrecognizedElement extends Exception {
+public class NoJobToExecuteException extends Exception {
 
-    public UnrecognizedElement(String arg) {
-        super("Element '"+arg+"' not recognized");
+    public NoJobToExecuteException() {
+        super("No job name has been provided.");
     }
 }

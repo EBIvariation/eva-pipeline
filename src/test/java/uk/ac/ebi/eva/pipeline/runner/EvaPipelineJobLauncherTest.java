@@ -34,6 +34,7 @@ import uk.ac.ebi.eva.pipeline.EvaPipelineJobLauncher;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 import uk.ac.ebi.eva.test.utils.GenotypedVcfJobTestUtils;
+import uk.ac.ebi.eva.utils.EvaCommandLineBuilder;
 
 import java.io.File;
 import java.io.IOException;
@@ -43,6 +44,7 @@ import static org.hamcrest.core.StringContains.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
+import static uk.ac.ebi.eva.pipeline.EvaPipelineJobLauncher.SPRING_BATCH_JOB_NAME_PROPERTY;
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.GENOTYPED_VCF_JOB;
 import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResource;
 
@@ -57,6 +59,8 @@ import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResource;
 public class EvaPipelineJobLauncherTest {
 
     private static final String GENOTYPED_PROPERTIES_FILE = "/genotype-test.properties";
+    private static final String NO_JOB_NAME_HAS_BEEN_PROVIDED = "No job name has been provided";
+    private static final String NO_JOB_PARAMETERS_HAVE_BEEN_PROVIDED = "No job parameters have been provided";
 
     @Autowired
     private JobExplorer jobExplorer;
@@ -77,14 +81,14 @@ public class EvaPipelineJobLauncherTest {
     public void noJobNameHasBeenProvidedStopsExecution() throws JobExecutionException {
         evaPipelineJobLauncher.setJobNames(null);
         evaPipelineJobLauncher.run();
-        assertThat(capture.toString(), containsString("No job name has been provided"));
+        assertThat(capture.toString(), containsString(NO_JOB_NAME_HAS_BEEN_PROVIDED));
     }
 
     @Test
     public void jobProvidedButNoParameters() throws JobExecutionException {
-        evaPipelineJobLauncher.setJobNames("genotyped-vcf-job");
-        evaPipelineJobLauncher.run("--spring.batch.job.names=genotyped-vcf-job");
-        assertThat(capture.toString(), containsString("No job parameters have been provided"));
+        evaPipelineJobLauncher.setJobNames(GENOTYPED_VCF_JOB);
+        evaPipelineJobLauncher.run("--" + SPRING_BATCH_JOB_NAME_PROPERTY + "=" + GENOTYPED_VCF_JOB);
+        assertThat(capture.toString(), containsString(NO_JOB_PARAMETERS_HAVE_BEEN_PROVIDED));
     }
 
     @Test
@@ -104,27 +108,27 @@ public class EvaPipelineJobLauncherTest {
         int lastJobCount = jobExplorer.getJobInstanceCount(GENOTYPED_VCF_JOB);
 
         evaPipelineJobLauncher.setJobNames(GENOTYPED_VCF_JOB);
-        evaPipelineJobLauncher.run(
-                "--input.vcf=" + inputFile.getAbsolutePath(),
-                "--input.vcf.id=" + GenotypedVcfJobTestUtils.INPUT_VCF_ID,
-                "--input.vcf.aggregation=NONE",
-                "--input.study.name=small vcf",
-                "--input.study.id=" + GenotypedVcfJobTestUtils.INPUT_STUDY_ID,
-                "--input.study.type=COLLECTION",
-                "--output.dir.annotation=" + outputDirAnnotation,
-                "--output.dir.statistics=" + outputDirStats,
-                "--spring.data.mongodb.database=" + databaseName,
-                "--app.vep.path=" + GenotypedVcfJobTestUtils.getMockVep().getPath(),
-                "--app.vep.num-forks=",
-                "--app.vep.cache.path=",
-                "--app.vep.cache.version=",
-                "--app.vep.cache.species=",
-                "--input.fasta=",
-                "--config.db.read-preference=secondary",
-                "--db.collections.variants.name=variants",
-                "--db.collections.files.name=files",
-                "--db.collections.features.name=features",
-                "--db.collections.stats.name=populationStatistics"
+        evaPipelineJobLauncher.run(new EvaCommandLineBuilder()
+                .inputVcf(inputFile.getAbsolutePath())
+                .inputVcfId(GenotypedVcfJobTestUtils.INPUT_VCF_ID)
+                .inputVcfAggregation("NONE")
+                .inputStudyName("small vcf")
+                .inputStudyId(GenotypedVcfJobTestUtils.INPUT_STUDY_ID)
+                .inputStudyType("COLLECTION")
+                .outputDirAnnotation(outputDirAnnotation)
+                .outputDirStatistics(outputDirStats)
+                .databaseName(databaseName)
+                .appVepPath(GenotypedVcfJobTestUtils.getMockVep().getPath())
+                .appVepNumForks("")
+                .appVepCachePath("")
+                .appVepCacheVersion("")
+                .appVepCacheSpecies("")
+                .inputFasta("")
+                .configDbReadPreference("secondary")
+                .dbCollectionsVariantsName("variants")
+                .dbCollectionsFilesName("files")
+                .dbCollectionsFeaturesName("features")
+                .dbCollectionsStatisticsName("populationStatistics").build()
         );
 
         assertFalse(jobExplorer.getJobInstances(GENOTYPED_VCF_JOB, lastJobCount, 1).isEmpty());
@@ -176,14 +180,15 @@ public class EvaPipelineJobLauncherTest {
         evaPipelineJobLauncher.setPropertyFilePath(getResource(GENOTYPED_PROPERTIES_FILE).getAbsolutePath());
 
         evaPipelineJobLauncher.setJobNames(GENOTYPED_VCF_JOB);
-        evaPipelineJobLauncher.run(
-                "--input.vcf=" + inputFile.getAbsolutePath(),
-                "--input.vcf.id=" + GenotypedVcfJobTestUtils.INPUT_VCF_ID,
-                "--input.study.id=" + GenotypedVcfJobTestUtils.INPUT_STUDY_ID,
-                "--output.dir.annotation=" + outputDirAnnotation,
-                "--output.dir.statistics=" + outputDirStats,
-                "--spring.data.mongodb.database=" + databaseName,
-                "--app.vep.path=" + GenotypedVcfJobTestUtils.getMockVep().getPath()
+        evaPipelineJobLauncher.run(new EvaCommandLineBuilder()
+                .inputVcf(inputFile.getAbsolutePath())
+                .inputVcfId(GenotypedVcfJobTestUtils.INPUT_VCF_ID)
+                .inputStudyId(GenotypedVcfJobTestUtils.INPUT_STUDY_ID)
+                .outputDirAnnotation(outputDirAnnotation)
+                .outputDirStatistics(outputDirStats)
+                .databaseName(databaseName)
+                .appVepPath(GenotypedVcfJobTestUtils.getMockVep().getPath())
+                .build()
         );
 
         assertFalse(jobExplorer.getJobInstances(GENOTYPED_VCF_JOB, lastJobCount, 1).isEmpty());

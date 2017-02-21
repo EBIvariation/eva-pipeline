@@ -31,6 +31,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
+/**
+ * Specific configuration to use a spring batch context with an asynchronous thread pool executor. The standard base
+ * batch configuration injects a synchronous task executor.
+ */
 @Configuration
 @EnableBatchProcessing
 public class AsynchronousBatchTestConfiguration {
@@ -55,12 +59,12 @@ public class AsynchronousBatchTestConfiguration {
     }
 
     @Bean
-    public StepRegistry stepRegistry(){
+    public StepRegistry stepRegistry() {
         return new MapStepRegistry();
     }
 
     @Bean
-    public JobLauncher jobLauncher(){
+    public JobLauncher jobLauncher() {
         SimpleJobLauncher jobLauncher = new SimpleJobLauncher();
         jobLauncher.setTaskExecutor(threadPoolTaskExecutor());
         jobLauncher.setJobRepository(jobRepository);
@@ -68,7 +72,7 @@ public class AsynchronousBatchTestConfiguration {
     }
 
     @Bean
-    public ThreadPoolTaskExecutor threadPoolTaskExecutor(){
+    public ThreadPoolTaskExecutor threadPoolTaskExecutor() {
         return new ThreadPoolTaskExecutor();
     }
 

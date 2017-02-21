@@ -16,12 +16,11 @@
 package uk.ac.ebi.eva.pipeline.runner.exceptions;
 
 /**
- * Unexpected error while reading or processing a file
+ * Exception used to express a codification problem while interpreting a file
  */
-public class UnexpectedErrorReadingFile extends Exception {
+public class UnexpectedFileEncodingException extends Exception {
 
-    public UnexpectedErrorReadingFile(String filePath) {
-        super("Unexpected error reading file '" + filePath + "'");
+    public UnexpectedFileEncodingException(String filePath) {
+        super("Unexpected encoding in file '" + filePath + "'");
     }
-
 }

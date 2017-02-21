@@ -32,7 +32,7 @@ import uk.ac.ebi.eva.test.configuration.AsynchronousBatchTestConfiguration;
 import uk.ac.ebi.eva.test.utils.AbstractJobRestartUtils;
 
 /**
- * Test to check launcher behaviour in Asynchronous cases.
+ * Test to check if the ManageJobUtils.markLastJobAsFailed let us restart a job redoing all the steps.
  */
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = {AsynchronousBatchTestConfiguration.class})
@@ -40,7 +40,7 @@ import uk.ac.ebi.eva.test.utils.AbstractJobRestartUtils;
 public class JobRestartForceTest extends AbstractJobRestartUtils {
 
     // Wait until the job has been launched properly. The launch operation is not transactional, and other
-    // instanciations of the same job with the same parameter can throw exceptions in this interval.
+    // instances of the same job with the same parameter can throw exceptions in this interval.
     public static final int INITIALIZE_JOB_SLEEP = 100;
     public static final int STEP_TIME_DURATION = 1000;
     public static final int WAIT_FOR_JOB_TO_END = 2000;
