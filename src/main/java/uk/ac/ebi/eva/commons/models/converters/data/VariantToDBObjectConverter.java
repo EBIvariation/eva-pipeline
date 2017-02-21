@@ -19,12 +19,12 @@ package uk.ac.ebi.eva.commons.models.converters.data;
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
-import org.opencb.opencga.storage.mongodb.variant.DBObjectToVariantAnnotationConverter;
 import org.opencb.opencga.storage.mongodb.variant.VariantMongoDBWriter;
 import org.springframework.core.convert.converter.Converter;
 
 import uk.ac.ebi.eva.commons.models.data.Variant;
 import uk.ac.ebi.eva.commons.models.data.VariantSourceEntry;
+import uk.ac.ebi.eva.pipeline.model.converters.data.DBObjectToVariantAnnotationConverter;
 import uk.ac.ebi.eva.utils.MongoDBHelper;
 
 import java.util.ArrayList;

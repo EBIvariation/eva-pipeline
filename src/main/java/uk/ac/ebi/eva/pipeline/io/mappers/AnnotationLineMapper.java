@@ -19,11 +19,12 @@ package uk.ac.ebi.eva.pipeline.io.mappers;
 import org.apache.commons.lang.ArrayUtils;
 import org.opencb.biodata.models.variant.annotation.ConsequenceType;
 import org.opencb.biodata.models.variant.annotation.Score;
-import org.opencb.biodata.models.variant.annotation.VariantAnnotation;
 import org.opencb.biodata.models.variation.PopulationFrequency;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.item.file.LineMapper;
+
+import uk.ac.ebi.eva.commons.models.data.VariantAnnotation;
 
 import java.util.ArrayList;
 import java.util.Arrays;

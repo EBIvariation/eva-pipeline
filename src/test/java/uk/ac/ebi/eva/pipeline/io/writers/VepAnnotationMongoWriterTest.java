@@ -23,8 +23,6 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.opencb.biodata.models.variant.annotation.VariantAnnotation;
-import org.opencb.opencga.storage.mongodb.variant.DBObjectToVariantAnnotationConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.data.mongodb.core.mapping.MongoMappingContext;
@@ -32,6 +30,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
+
+import uk.ac.ebi.eva.commons.models.data.VariantAnnotation;
 import uk.ac.ebi.eva.commons.models.converters.data.VariantToDBObjectConverter;
 import uk.ac.ebi.eva.pipeline.Application;
 import uk.ac.ebi.eva.pipeline.configuration.MongoConfiguration;

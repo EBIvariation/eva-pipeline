@@ -16,7 +16,8 @@
 package uk.ac.ebi.eva.pipeline.io.mappers;
 
 import org.junit.Test;
-import org.opencb.biodata.models.variant.annotation.VariantAnnotation;
+
+import uk.ac.ebi.eva.commons.models.data.VariantAnnotation;
 import uk.ac.ebi.eva.test.data.VepOutputContent;
 
 import static org.junit.Assert.assertNotNull;
