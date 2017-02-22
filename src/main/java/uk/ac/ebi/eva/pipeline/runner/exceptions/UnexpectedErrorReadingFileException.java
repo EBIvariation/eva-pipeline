@@ -15,13 +15,15 @@
  */
 package uk.ac.ebi.eva.pipeline.runner.exceptions;
 
+import java.io.IOException;
+
 /**
  * Unexpected error while reading or processing a file
  */
 public class UnexpectedErrorReadingFileException extends Exception {
 
-    public UnexpectedErrorReadingFileException(String filePath) {
-        super("Unexpected error reading file '" + filePath + "'");
+    public UnexpectedErrorReadingFileException(String filePath, IOException e) {
+        super("Unexpected error reading file '" + filePath + "'", e);
     }
 
 }

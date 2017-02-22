@@ -15,16 +15,13 @@
  */
 package uk.ac.ebi.eva.pipeline.runner.exceptions;
 
-import static uk.ac.ebi.eva.pipeline.parameters.JobParametersNames.PROPERTY_FILE_PROPERTY;
-
 /**
- * Exception thrown by the runner when no parameters have been passed to a job.
+ * Exception thrown when a job cannot be found to run it.
  */
-public class NoParametersHaveBeenPassedException extends Exception {
+public class UnknownJobException extends Exception {
 
-    public NoParametersHaveBeenPassedException() {
-        super("No job parameters have been provided. Please list them as command line arguments, or in a file using "
-                + "the argument --" + PROPERTY_FILE_PROPERTY);
+    public UnknownJobException(String jobName) {
+        super("Unknown job name '" + jobName + "'");
     }
 
 }

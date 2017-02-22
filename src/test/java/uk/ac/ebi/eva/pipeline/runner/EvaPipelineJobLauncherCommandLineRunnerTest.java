@@ -30,7 +30,7 @@ import org.springframework.boot.test.rule.OutputCapture;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-import uk.ac.ebi.eva.pipeline.EvaPipelineJobLauncher;
+import uk.ac.ebi.eva.pipeline.EvaPipelineJobLauncherCommandLineRunner;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 import uk.ac.ebi.eva.test.utils.GenotypedVcfJobTestUtils;
@@ -44,19 +44,19 @@ import static org.hamcrest.core.StringContains.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
-import static uk.ac.ebi.eva.pipeline.EvaPipelineJobLauncher.SPRING_BATCH_JOB_NAME_PROPERTY;
+import static uk.ac.ebi.eva.pipeline.EvaPipelineJobLauncherCommandLineRunner.SPRING_BATCH_JOB_NAME_PROPERTY;
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.GENOTYPED_VCF_JOB;
 import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResource;
 
 /**
- * This suit of tests checks the behaviour of the EvaPipelineJobLauncher and launches a full execution of the
+ * This suit of tests checks the behaviour of the EvaPipelineJobLauncherCommandLineRunner and launches a full execution of the
  * genotype vcf test.
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest()
 @ActiveProfiles({"test,mongo"})
 @TestPropertySource(value = {"classpath:test-mongo.properties"}, properties = "debug=true")
-public class EvaPipelineJobLauncherTest {
+public class EvaPipelineJobLauncherCommandLineRunnerTest {
 
     private static final String GENOTYPED_PROPERTIES_FILE = "/genotype-test.properties";
     private static final String NO_JOB_NAME_HAS_BEEN_PROVIDED = "No job name has been provided";
@@ -66,7 +66,7 @@ public class EvaPipelineJobLauncherTest {
     private JobExplorer jobExplorer;
 
     @Autowired
-    private EvaPipelineJobLauncher evaPipelineJobLauncher;
+    private EvaPipelineJobLauncherCommandLineRunner evaPipelineJobLauncherCommandLineRunner;
 
     @Rule
     public OutputCapture capture = new OutputCapture();
@@ -79,15 +79,15 @@ public class EvaPipelineJobLauncherTest {
 
     @Test
     public void noJobNameHasBeenProvidedStopsExecution() throws JobExecutionException {
-        evaPipelineJobLauncher.setJobNames(null);
-        evaPipelineJobLauncher.run();
+        evaPipelineJobLauncherCommandLineRunner.setJobName(null);
+        evaPipelineJobLauncherCommandLineRunner.run();
         assertThat(capture.toString(), containsString(NO_JOB_NAME_HAS_BEEN_PROVIDED));
     }
 
     @Test
     public void jobProvidedButNoParameters() throws JobExecutionException {
-        evaPipelineJobLauncher.setJobNames(GENOTYPED_VCF_JOB);
-        evaPipelineJobLauncher.run("--" + SPRING_BATCH_JOB_NAME_PROPERTY + "=" + GENOTYPED_VCF_JOB);
+        evaPipelineJobLauncherCommandLineRunner.setJobName(GENOTYPED_VCF_JOB);
+        evaPipelineJobLauncherCommandLineRunner.run("--" + SPRING_BATCH_JOB_NAME_PROPERTY + "=" + GENOTYPED_VCF_JOB);
         assertThat(capture.toString(), containsString(NO_JOB_PARAMETERS_HAVE_BEEN_PROVIDED));
     }
 
@@ -107,8 +107,8 @@ public class EvaPipelineJobLauncherTest {
 
         int lastJobCount = jobExplorer.getJobInstanceCount(GENOTYPED_VCF_JOB);
 
-        evaPipelineJobLauncher.setJobNames(GENOTYPED_VCF_JOB);
-        evaPipelineJobLauncher.run(new EvaCommandLineBuilder()
+        evaPipelineJobLauncherCommandLineRunner.setJobName(GENOTYPED_VCF_JOB);
+        evaPipelineJobLauncherCommandLineRunner.run(new EvaCommandLineBuilder()
                 .inputVcf(inputFile.getAbsolutePath())
                 .inputVcfId(GenotypedVcfJobTestUtils.INPUT_VCF_ID)
                 .inputVcfAggregation("NONE")
@@ -130,6 +130,8 @@ public class EvaPipelineJobLauncherTest {
                 .dbCollectionsFeaturesName("features")
                 .dbCollectionsStatisticsName("populationStatistics").build()
         );
+
+        assertEquals(EvaPipelineJobLauncherCommandLineRunner.EXIT_WITHOUT_ERRORS, evaPipelineJobLauncherCommandLineRunner.getExitCode());
 
         assertFalse(jobExplorer.getJobInstances(GENOTYPED_VCF_JOB, lastJobCount, 1).isEmpty());
         JobExecution jobExecution = jobExplorer.getJobExecution(jobExplorer.getJobInstances(GENOTYPED_VCF_JOB, 0, 1)
@@ -177,10 +179,10 @@ public class EvaPipelineJobLauncherTest {
         int lastJobCount = jobExplorer.getJobInstanceCount(GENOTYPED_VCF_JOB);
 
         //Set properties file to read
-        evaPipelineJobLauncher.setPropertyFilePath(getResource(GENOTYPED_PROPERTIES_FILE).getAbsolutePath());
+        evaPipelineJobLauncherCommandLineRunner.setPropertyFilePath(getResource(GENOTYPED_PROPERTIES_FILE).getAbsolutePath());
 
-        evaPipelineJobLauncher.setJobNames(GENOTYPED_VCF_JOB);
-        evaPipelineJobLauncher.run(new EvaCommandLineBuilder()
+        evaPipelineJobLauncherCommandLineRunner.setJobName(GENOTYPED_VCF_JOB);
+        evaPipelineJobLauncherCommandLineRunner.run(new EvaCommandLineBuilder()
                 .inputVcf(inputFile.getAbsolutePath())
                 .inputVcfId(GenotypedVcfJobTestUtils.INPUT_VCF_ID)
                 .inputStudyId(GenotypedVcfJobTestUtils.INPUT_STUDY_ID)
@@ -190,6 +192,8 @@ public class EvaPipelineJobLauncherTest {
                 .appVepPath(GenotypedVcfJobTestUtils.getMockVep().getPath())
                 .build()
         );
+
+        assertEquals(EvaPipelineJobLauncherCommandLineRunner.EXIT_WITHOUT_ERRORS, evaPipelineJobLauncherCommandLineRunner.getExitCode());
 
         assertFalse(jobExplorer.getJobInstances(GENOTYPED_VCF_JOB, lastJobCount, 1).isEmpty());
         JobExecution jobExecution = jobExplorer.getJobExecution(jobExplorer.getJobInstances(GENOTYPED_VCF_JOB, 0, 1)

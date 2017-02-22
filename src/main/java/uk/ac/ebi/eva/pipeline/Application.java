@@ -15,9 +15,12 @@
  */
 package uk.ac.ebi.eva.pipeline;
 
+import org.springframework.batch.core.launch.support.SimpleJobLauncher;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.batch.JobLauncherCommandLineRunner;
 import org.springframework.boot.autoconfigure.data.mongo.MongoDataAutoConfiguration;
+import org.springframework.context.ConfigurableApplicationContext;
 
 
 /**
@@ -29,7 +32,7 @@ import org.springframework.boot.autoconfigure.data.mongo.MongoDataAutoConfigurat
  * Append any parameter as needed.
  * TODO document all parameters
  */
-@SpringBootApplication(exclude = {MongoDataAutoConfiguration.class})
+@SpringBootApplication(exclude = {MongoDataAutoConfiguration.class, JobLauncherCommandLineRunner.class})
 public class Application {
 
     public static final String VARIANT_WRITER_MONGO_PROFILE = "variant-writer-mongo";
@@ -46,6 +49,7 @@ public class Application {
     public static final String MONGO_EXPERIMENTAL_PROFILE = "experimental";
 
     public static void main(String[] args) throws Exception {
-        SpringApplication.run(Application.class, args);
+        ConfigurableApplicationContext context = SpringApplication.run(Application.class, args);
+        System.exit(SpringApplication.exit(context));
     }
 }
