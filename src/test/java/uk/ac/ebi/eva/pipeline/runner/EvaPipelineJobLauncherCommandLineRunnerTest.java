@@ -105,6 +105,8 @@ public class EvaPipelineJobLauncherCommandLineRunnerTest {
         File vepInputFile = GenotypedVcfJobTestUtils.getVepInputFile(outputDirAnnotation);
         File vepOutputFile = GenotypedVcfJobTestUtils.getVepOutputFile(outputDirAnnotation);
 
+        File fasta = temporaryFolderRule.newFile();
+
         int lastJobCount = jobExplorer.getJobInstanceCount(GENOTYPED_VCF_JOB);
 
         evaPipelineJobLauncherCommandLineRunner.setJobName(GENOTYPED_VCF_JOB);
@@ -119,11 +121,11 @@ public class EvaPipelineJobLauncherCommandLineRunnerTest {
                 .outputDirStatistics(outputDirStats)
                 .databaseName(databaseName)
                 .appVepPath(GenotypedVcfJobTestUtils.getMockVep().getPath())
-                .appVepNumForks("")
-                .appVepCachePath("")
-                .appVepCacheVersion("")
-                .appVepCacheSpecies("")
-                .inputFasta("")
+                .vepCachePath("")
+                .vepCacheSpecies("human")
+                .vepCacheVersion("1")
+                .vepNumForks("1")
+                .inputFasta(fasta.getAbsolutePath())
                 .configDbReadPreference("secondary")
                 .dbCollectionsVariantsName("variants")
                 .dbCollectionsFilesName("files")
@@ -178,6 +180,8 @@ public class EvaPipelineJobLauncherCommandLineRunnerTest {
 
         int lastJobCount = jobExplorer.getJobInstanceCount(GENOTYPED_VCF_JOB);
 
+        File fasta = temporaryFolderRule.newFile();
+
         //Set properties file to read
         evaPipelineJobLauncherCommandLineRunner.setPropertyFilePath(getResource(GENOTYPED_PROPERTIES_FILE).getAbsolutePath());
 
@@ -190,6 +194,7 @@ public class EvaPipelineJobLauncherCommandLineRunnerTest {
                 .outputDirStatistics(outputDirStats)
                 .databaseName(databaseName)
                 .appVepPath(GenotypedVcfJobTestUtils.getMockVep().getPath())
+                .inputFasta(fasta.getAbsolutePath())
                 .build()
         );
 
