@@ -20,10 +20,9 @@ import org.springframework.batch.item.file.LineMapper;
 import org.springframework.util.Assert;
 import uk.ac.ebi.eva.commons.models.data.Variant;
 import uk.ac.ebi.eva.utils.FileUtils;
-import uk.ac.ebi.eva.utils.ThrowingFunction;
 
+import java.io.IOException;
 import java.util.List;
-import java.util.Optional;
 import java.util.Properties;
 
 import static org.junit.Assert.assertNotNull;
@@ -40,7 +39,7 @@ public class AggregatedVcfLineMapper implements LineMapper<List<Variant>> {
     private VariantVcfFactory factory;
 
     public AggregatedVcfLineMapper(String fileId, String studyId, VariantSource.Aggregation aggregation,
-                                   Optional<String> mappingFilePath) {
+                                   String mappingFilePath) throws IOException {
         Assert.notNull(fileId);
         Assert.notNull(studyId);
         Assert.notNull(aggregation);
@@ -48,8 +47,11 @@ public class AggregatedVcfLineMapper implements LineMapper<List<Variant>> {
         this.fileId = fileId;
         this.studyId = studyId;
 
-        ThrowingFunction<String, Properties> getPropertiesFile = FileUtils::getPropertiesFile;
-        Properties mappings = mappingFilePath.map(getPropertiesFile).orElse(null);
+        Properties mappings = null;
+        if(mappingFilePath!=null){
+            mappings = FileUtils.getPropertiesFile(mappingFilePath);
+        }
+
         switch (aggregation) {
             case EVS:
                 factory = new VariantVcfEVSFactory(mappings);

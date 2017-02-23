@@ -25,10 +25,6 @@ public abstract class TestFileUtils {
         FileCopyUtils.copy(vcfFile, new File(outputDir, vcfFile.getName()));
     }
 
-    public static File getResource(String resourcePath) {
-        return new File(TestFileUtils.class.getResource(resourcePath).getFile());
-    }
-
     public static URL getResourceUrl(String resourcePath) {
         return TestFileUtils.class.getResource(resourcePath);
     }

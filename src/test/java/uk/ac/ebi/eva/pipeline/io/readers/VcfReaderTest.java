@@ -6,7 +6,6 @@ import org.junit.rules.ExpectedException;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.item.file.FlatFileParseException;
 import org.springframework.batch.test.MetaDataInstanceFactory;
-
 import uk.ac.ebi.eva.commons.models.data.Variant;
 import uk.ac.ebi.eva.commons.models.data.VariantSourceEntry;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
@@ -20,6 +19,7 @@ import java.util.zip.GZIPInputStream;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static uk.ac.ebi.eva.utils.FileUtils.getResource;
 
 /**
  * {@link VcfReader}
@@ -49,7 +49,7 @@ public class VcfReaderTest {
         ExecutionContext executionContext = MetaDataInstanceFactory.createStepExecution().getExecutionContext();
 
         // input vcf
-        File input = TestFileUtils.getResource(INPUT_FILE_PATH);
+        File input = getResource(INPUT_FILE_PATH);
 
         VcfReader vcfReader = new VcfReader(FILE_ID, STUDY_ID, input);
         vcfReader.setSaveState(false);
@@ -63,7 +63,7 @@ public class VcfReaderTest {
         ExecutionContext executionContext = MetaDataInstanceFactory.createStepExecution().getExecutionContext();
 
         // input vcf
-        File input = TestFileUtils.getResource(INPUT_WRONG_FILE_PATH);
+        File input = getResource(INPUT_WRONG_FILE_PATH);
 
         VcfReader vcfReader = new VcfReader(FILE_ID, STUDY_ID, input);
         vcfReader.setSaveState(false);
@@ -80,7 +80,7 @@ public class VcfReaderTest {
         ExecutionContext executionContext = MetaDataInstanceFactory.createStepExecution().getExecutionContext();
 
         // uncompress the input VCF into a temporary file
-        File input = TestFileUtils.getResource(INPUT_FILE_PATH);
+        File input = getResource(INPUT_FILE_PATH);
         File tempFile = temporaryFolderRule.newFile();
         JobTestUtils.uncompress(input.getAbsolutePath(), tempFile);
 

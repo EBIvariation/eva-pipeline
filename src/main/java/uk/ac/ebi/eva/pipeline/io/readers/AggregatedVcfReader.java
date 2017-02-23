@@ -33,7 +33,7 @@ import java.util.Optional;
 public class AggregatedVcfReader extends VcfReader {
 
     public AggregatedVcfReader(String fileId, String studyId, VariantSource.Aggregation aggregation,
-                               Optional<String> mappingFilePath, File file) throws IOException {
+                               String mappingFilePath, File file) throws IOException {
         super(new AggregatedVcfLineMapper(fileId, studyId, aggregation, mappingFilePath), file);
     }
 }

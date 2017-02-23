@@ -116,7 +116,7 @@ public class InputParameters {
         return pedigree;
     }
 
-    public Optional<String> getAggregatedMappingFile() {
-        return Optional.ofNullable(aggregatedMappingFile);
+    public String getAggregatedMappingFile() {
+        return aggregatedMappingFile;
     }
 }

@@ -58,7 +58,7 @@ import java.util.zip.GZIPInputStream;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResource;
+import static uk.ac.ebi.eva.utils.FileUtils.getResource;
 
 /**
  * Test for {@link AggregatedVcfJob}

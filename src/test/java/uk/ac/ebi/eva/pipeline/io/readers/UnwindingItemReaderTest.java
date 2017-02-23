@@ -36,6 +36,7 @@ import java.util.zip.GZIPInputStream;
 import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static uk.ac.ebi.eva.utils.FileUtils.getResource;
 
 public class UnwindingItemReaderTest {
 
@@ -58,7 +59,7 @@ public class UnwindingItemReaderTest {
         ExecutionContext executionContext = MetaDataInstanceFactory.createStepExecution().getExecutionContext();
 
         // input vcf
-        File input = TestFileUtils.getResource(INPUT_FILE_PATH);
+        File input = getResource(INPUT_FILE_PATH);
 
         VcfReader vcfReader = new VcfReader(FILE_ID, STUDY_ID, input);
         vcfReader.setSaveState(false);
@@ -72,7 +73,7 @@ public class UnwindingItemReaderTest {
         ExecutionContext executionContext = MetaDataInstanceFactory.createStepExecution().getExecutionContext();
 
         // input vcf
-        File input = TestFileUtils.getResource(INPUT_WRONG_FILE_PATH);
+        File input = getResource(INPUT_WRONG_FILE_PATH);
 
         VcfReader vcfReader = new VcfReader(FILE_ID, STUDY_ID, input);
         vcfReader.setSaveState(false);
@@ -91,7 +92,7 @@ public class UnwindingItemReaderTest {
         ExecutionContext executionContext = MetaDataInstanceFactory.createStepExecution().getExecutionContext();
 
         // uncompress the input VCF into a temporary file
-        File input = TestFileUtils.getResource(INPUT_FILE_PATH);
+        File input = getResource(INPUT_FILE_PATH);
         File tempFile = temporaryFolderRule.newFile();
         JobTestUtils.uncompress(input.getAbsolutePath(), tempFile);
 

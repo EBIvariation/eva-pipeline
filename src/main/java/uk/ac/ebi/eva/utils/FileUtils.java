@@ -62,10 +62,14 @@ public abstract class FileUtils {
         return resource;
     }
 
+    public static File getResource(String resourcePath) {
+        return new File(FileUtils.class.getResource(resourcePath).getFile());
+    }
+
     public static Properties getPropertiesFile(String propertiesFilePath) throws IOException {
-            InputStream input = new FileInputStream(propertiesFilePath);
-            Properties properties = new Properties();
-            properties.load(input);
-            return properties;
+        InputStream input = new FileInputStream(propertiesFilePath);
+        Properties properties = new Properties();
+        properties.load(input);
+        return properties;
     }
 }

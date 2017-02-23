@@ -41,6 +41,8 @@ public class JobParametersNames {
 
     public static final String INPUT_FASTA = "input.fasta";
 
+    public static final String AGGREGATED_MAPPING_FILE = "input.vcf.aggregation.mapping-path";
+
     /*
      * Output
      */
@@ -137,8 +139,7 @@ public class JobParametersNames {
 
     public static final String CONFIG_CHUNK_SIZE = "config.chunk.size";
 
-    public static final String AGGREGATED_MAPPING_FILE = "aggregated.mapping.file";
-
+    
     public static final String PROPERTY_FILE_PROPERTY = "parameters.path";
 
     public static final String RESTART_PROPERTY = "force.restart";

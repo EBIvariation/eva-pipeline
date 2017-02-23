@@ -62,7 +62,7 @@ public class VariantAggregatedVcfFactory extends VariantVcfFactory {
     }
 
     /**
-     * @param tagMap Properties that contains case-sensitive tag mapping for aggregation data. A valid example structure
+     * @param mappings Properties that contains case-sensitive tag mapping for aggregation data. A valid example structure
      *               of this file is:
      *               <pre>
      *               {@code
@@ -83,8 +83,20 @@ public class VariantAggregatedVcfFactory extends VariantVcfFactory {
      *               be a bijection, i.e. there must not be repeated entries in any side. The part before the '.' can be any string
      *               naming the group. The part after the '.' must be one of AF, AC, AN or GTC.
      */
-    public VariantAggregatedVcfFactory(Properties tagMap) {
-        this.tagMap = tagMap;
+    public VariantAggregatedVcfFactory(Properties mappings) {
+        if(mappings == null){
+            loadDefaultMappings();
+        }else{
+            loadMappings(mappings);
+        }
+    }
+
+    protected void loadDefaultMappings() {
+        // No default mapping.
+    }
+
+    protected void loadMappings(Properties mappings) {
+        this.tagMap = mappings;
         if (tagMap != null) {
             this.reverseTagMap = new LinkedHashMap<>(tagMap.size());
             for (String tag : tagMap.stringPropertyNames()) {

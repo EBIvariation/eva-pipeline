@@ -56,12 +56,13 @@ public class VcfReaderConfiguration {
         String fileId = parameters.getVcfId();
         String studyId = parameters.getStudyId();
         File vcfFile = new File(parameters.getVcf());
+        VariantSource.Aggregation vcfAggregation = parameters.getVcfAggregation();
 
-        if (VariantSource.Aggregation.NONE.equals(parameters.getVcfAggregation())) {
+        if (VariantSource.Aggregation.NONE.equals(vcfAggregation)) {
             return new VcfReader(fileId, studyId, vcfFile);
         } else {
-            return new AggregatedVcfReader(fileId, studyId, parameters.getVcfAggregation(),
-                    parameters.getAggregatedMappingFile(), vcfFile);
+            return new AggregatedVcfReader(fileId, studyId, vcfAggregation, parameters.getAggregatedMappingFile(),
+                    vcfFile);
         }
     }
 

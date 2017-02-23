@@ -21,6 +21,7 @@ import java.util.zip.GZIPInputStream;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static uk.ac.ebi.eva.utils.FileUtils.getResource;
 
 /**
  * {@link AggregatedVcfReader}
@@ -63,9 +64,9 @@ public class AggregatedVcfReaderTest {
         ExecutionContext executionContext = MetaDataInstanceFactory.createStepExecution().getExecutionContext();
 
         // input vcf
-        File input = TestFileUtils.getResource(inputFilePath);
+        File input = getResource(inputFilePath);
 
-        AggregatedVcfReader vcfReader = new AggregatedVcfReader(FILE_ID, STUDY_ID, aggregationType, Optional.empty(),
+        AggregatedVcfReader vcfReader = new AggregatedVcfReader(FILE_ID, STUDY_ID, aggregationType, null,
                 input);
         vcfReader.setSaveState(false);
         vcfReader.open(executionContext);
@@ -78,12 +79,12 @@ public class AggregatedVcfReaderTest {
         ExecutionContext executionContext = MetaDataInstanceFactory.createStepExecution().getExecutionContext();
 
         // uncompress the input VCF into a temporal file
-        File input = TestFileUtils.getResource(INPUT_FILE_PATH);
+        File input = getResource(INPUT_FILE_PATH);
         File tempFile = temporaryFolderRule.newFile();
         JobTestUtils.uncompress(input.getAbsolutePath(), tempFile);
 
         AggregatedVcfReader vcfReader = new AggregatedVcfReader(FILE_ID, STUDY_ID, VariantSource.Aggregation.BASIC,
-                Optional.empty(), tempFile);
+                null, tempFile);
         vcfReader.setSaveState(false);
         vcfReader.open(executionContext);
 
