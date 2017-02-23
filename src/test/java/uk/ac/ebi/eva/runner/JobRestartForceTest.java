@@ -49,7 +49,7 @@ public class JobRestartForceTest extends AbstractJobRestartUtils {
     private JobOperator jobOperator;
 
     @Test
-    public void forceFailureCompliesBatchToDoACleanRunEvenIfNotMarkedAsRestartable() throws Exception {
+    public void forceJobFailureEnsuresCleanRunEvenIfStepsNotRestartables() throws Exception {
         Job job = getTestJob(getQuickStep(false), getWaitingStep(false, STEP_TIME_DURATION));
         JobLauncherTestUtils jobLauncherTestUtils = getJobLauncherTestUtils(job);
         JobExecution jobExecution = launchJob(jobLauncherTestUtils);

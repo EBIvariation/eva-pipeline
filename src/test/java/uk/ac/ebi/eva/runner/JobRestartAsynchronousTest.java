@@ -94,7 +94,7 @@ public class JobRestartAsynchronousTest extends AbstractJobRestartUtils {
     }
 
     @Test
-    public void abandonJobsWithMarkedAsRestartableRestartAllSteps() throws Exception {
+    public void abandonJobsMarkedAsRestartableRestartAllSteps() throws Exception {
         Job job = getTestJob(getQuickStep(true), getWaitingStep(true, STEP_TIME_DURATION));
         JobLauncherTestUtils jobLauncherTestUtils = getJobLauncherTestUtils(job);
         JobExecution jobExecution = launchJob(jobLauncherTestUtils);

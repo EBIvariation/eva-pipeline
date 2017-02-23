@@ -15,7 +15,6 @@
  */
 package uk.ac.ebi.eva.pipeline;
 
-import org.springframework.batch.core.launch.support.SimpleJobLauncher;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.batch.JobLauncherCommandLineRunner;

@@ -35,7 +35,7 @@ public class JobExecutionApplicationListener implements ApplicationListener<JobE
 
     public boolean isJobExecutionComplete() {
         return execution != null
-                && execution.getStatus().compareTo(BatchStatus.COMPLETED) == 0
+                && execution.getStatus().equals(BatchStatus.COMPLETED)
                 && execution.getExitStatus().compareTo(ExitStatus.COMPLETED) == 0;
     }
 }

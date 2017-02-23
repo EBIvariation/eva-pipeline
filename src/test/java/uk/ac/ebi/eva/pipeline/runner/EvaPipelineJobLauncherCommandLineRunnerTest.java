@@ -31,7 +31,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import uk.ac.ebi.eva.pipeline.EvaPipelineJobLauncherCommandLineRunner;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 import uk.ac.ebi.eva.test.utils.GenotypedVcfJobTestUtils;
@@ -45,7 +44,7 @@ import static org.hamcrest.core.StringContains.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
-import static uk.ac.ebi.eva.pipeline.EvaPipelineJobLauncherCommandLineRunner.SPRING_BATCH_JOB_NAME_PROPERTY;
+import static uk.ac.ebi.eva.pipeline.runner.EvaPipelineJobLauncherCommandLineRunner.SPRING_BATCH_JOB_NAME_PROPERTY;
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.GENOTYPED_VCF_JOB;
 import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResource;
 
@@ -225,5 +224,35 @@ public class EvaPipelineJobLauncherCommandLineRunnerTest {
         GenotypedVcfJobTestUtils.checkLoadedAnnotation(databaseName);
 
         GenotypedVcfJobTestUtils.checkSkippedOneMalformedLine(jobExecution);
+    }
+
+    @Test
+    public void onlyFileWithoutParametersFailsValidation() throws JobExecutionException, IOException,
+            URISyntaxException,
+            ClassNotFoundException, StorageManagerException, InstantiationException, IllegalAccessException {
+        String databaseName = mongoRule.getRandomTemporaryDatabaseName();
+        File inputFile = GenotypedVcfJobTestUtils.getInputFile();
+        String outputDirStats = temporaryFolderRule.newFolder().getAbsolutePath();
+        String outputDirAnnotation = temporaryFolderRule.newFolder().getAbsolutePath();
+
+        File variantsStatsFile = GenotypedVcfJobTestUtils.getVariantsStatsFile(outputDirStats);
+        File sourceStatsFile = GenotypedVcfJobTestUtils.getSourceStatsFile(outputDirStats);
+
+        File vepInputFile = GenotypedVcfJobTestUtils.getVepInputFile(outputDirAnnotation);
+        File vepOutputFile = GenotypedVcfJobTestUtils.getVepOutputFile(outputDirAnnotation);
+
+        File fasta = temporaryFolderRule.newFile();
+
+        //Set properties file to read
+        evaPipelineJobLauncherCommandLineRunner.setPropertyFilePath(
+                getResource(GENOTYPED_PROPERTIES_FILE).getAbsolutePath());
+
+        evaPipelineJobLauncherCommandLineRunner.setJobNames(GENOTYPED_VCF_JOB);
+        evaPipelineJobLauncherCommandLineRunner.run(new EvaCommandLineBuilder()
+                  .build()
+        );
+
+        assertEquals(EvaPipelineJobLauncherCommandLineRunner.EXIT_WITH_ERRORS,
+                evaPipelineJobLauncherCommandLineRunner.getExitCode());
     }
 }

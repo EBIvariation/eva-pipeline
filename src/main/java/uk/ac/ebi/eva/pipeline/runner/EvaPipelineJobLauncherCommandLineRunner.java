@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.ac.ebi.eva.pipeline;
+package uk.ac.ebi.eva.pipeline.runner;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,7 +34,6 @@ import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.ExitCodeGenerator;
 import org.springframework.boot.autoconfigure.batch.JobLauncherCommandLineRunner;
 import org.springframework.context.ApplicationEventPublisherAware;
@@ -42,8 +41,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.PatternMatchUtils;
 import org.springframework.util.StringUtils;
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
-import uk.ac.ebi.eva.pipeline.runner.JobExecutionApplicationListener;
-import uk.ac.ebi.eva.pipeline.runner.ManageJobsUtils;
 import uk.ac.ebi.eva.pipeline.runner.exceptions.NoJobToExecuteException;
 import uk.ac.ebi.eva.pipeline.runner.exceptions.NoParametersHaveBeenPassedException;
 import uk.ac.ebi.eva.pipeline.runner.exceptions.NoPreviousJobExecutionException;
@@ -79,7 +76,7 @@ public class EvaPipelineJobLauncherCommandLineRunner extends JobLauncherCommandL
 
     public static final int EXIT_WITHOUT_ERRORS = 0;
 
-    private static final int EXIT_WITH_ERRORS = 1;
+    public static final int EXIT_WITH_ERRORS = 1;
 
     @Value("${" + SPRING_BATCH_JOB_NAME_PROPERTY + ":#{null}}")
     private String jobName;
@@ -101,12 +98,16 @@ public class EvaPipelineJobLauncherCommandLineRunner extends JobLauncherCommandL
     @Autowired
     private JobExecutionApplicationListener jobExecutionApplicationListener;
 
+    private boolean abnormalExit;
+
     public EvaPipelineJobLauncherCommandLineRunner(JobLauncher jobLauncher, JobExplorer jobExplorer,
                                                    JobRepository jobRepository) {
         super(jobLauncher, jobExplorer);
         jobs = Collections.emptySet();
         this.jobRepository = jobRepository;
+        abnormalExit = false;
         converter = new DefaultJobParametersConverter();
+
     }
 
     @Autowired(required = false)
@@ -136,7 +137,7 @@ public class EvaPipelineJobLauncherCommandLineRunner extends JobLauncherCommandL
 
     @Override
     public int getExitCode() {
-        if (jobExecutionApplicationListener.isJobExecutionComplete()) {
+        if (!abnormalExit && jobExecutionApplicationListener.isJobExecutionComplete()) {
             return EXIT_WITHOUT_ERRORS;
         } else {
             return EXIT_WITH_ERRORS;
@@ -146,6 +147,7 @@ public class EvaPipelineJobLauncherCommandLineRunner extends JobLauncherCommandL
     @Override
     public void run(String... args) throws JobExecutionException {
         try {
+            abnormalExit = false;
             JobParameters jobParameters = getJobParameters(args);
             if (restartPreviousExecution) {
                 restartPreviousJobExecution(jobParameters);
@@ -153,9 +155,10 @@ public class EvaPipelineJobLauncherCommandLineRunner extends JobLauncherCommandL
             launchJob(jobParameters);
         } catch (NoJobToExecuteException | NoParametersHaveBeenPassedException | UnexpectedFileEncodingException
                 | FileNotFoundException | UnexpectedErrorReadingFileException | NoPreviousJobExecutionException
-                | NotValidParameterFormatException | UnknownJobException e) {
+                | NotValidParameterFormatException | UnknownJobException | JobParametersInvalidException e) {
             logger.error(e.getMessage());
-            logger.trace("Error trace", e);
+            logger.debug("Error trace", e);
+            abnormalExit = true;
         }
     }
 
@@ -200,17 +203,22 @@ public class EvaPipelineJobLauncherCommandLineRunner extends JobLauncherCommandL
         checkAllParametersStartByDoubleDash(args);
 
         String[] processedArgs = removeStartingHypens(args);
-        String[] filteredArgs = filterLauncherOnlyParameters(processedArgs);
+        String[] filteredArgs = filterJobParameters(processedArgs);
 
-        checkIfJobNamesHasBeenDefined();
-        checkIfPropertiesHaveBeenProvided(filteredArgs);
+        checkIfJobNameHasBeenDefined();
 
         // Command line properties have precedence over file defined ones.
         Properties properties = new Properties();
         if (propertyFilePath != null) {
             properties.putAll(getPropertiesFile());
+        } else {
+            checkIfPropertiesHaveBeenProvided(filteredArgs);
         }
-        properties.putAll(StringUtils.splitArrayElementsIntoProperties(filteredArgs, "="));
+
+        if (filteredArgs.length > 0) {
+            properties.putAll(StringUtils.splitArrayElementsIntoProperties(filteredArgs, "="));
+        }
+
         return converter.getJobParameters(properties);
     }
 
@@ -232,11 +240,11 @@ public class EvaPipelineJobLauncherCommandLineRunner extends JobLauncherCommandL
         return Arrays.stream(args).map(arg -> arg.substring(2)).toArray(String[]::new);
     }
 
-    private String[] filterLauncherOnlyParameters(String[] args) {
-        return Arrays.stream(args).filter(arg -> isLauncherParameter(arg)).toArray(String[]::new);
+    private String[] filterJobParameters(String[] args) {
+        return Arrays.stream(args).filter(arg -> isNotLauncherParameter(arg)).toArray(String[]::new);
     }
 
-    private static boolean isLauncherParameter(String arg) {
+    private static boolean isNotLauncherParameter(String arg) {
         return !(arg.startsWith(JobParametersNames.PROPERTY_FILE_PROPERTY + "=")
                 || arg.startsWith(JobParametersNames.RESTART_PROPERTY + "=")
                 || arg.startsWith(SPRING_BATCH_JOB_NAME_PROPERTY + "="));
@@ -263,7 +271,7 @@ public class EvaPipelineJobLauncherCommandLineRunner extends JobLauncherCommandL
         }
     }
 
-    private void checkIfJobNamesHasBeenDefined() throws NoJobToExecuteException {
+    private void checkIfJobNameHasBeenDefined() throws NoJobToExecuteException {
         if (!StringUtils.hasText(jobName)) {
             throw new NoJobToExecuteException();
         }
