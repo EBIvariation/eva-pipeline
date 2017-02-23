@@ -22,7 +22,7 @@ import org.springframework.context.annotation.Configuration;
 import uk.ac.ebi.eva.pipeline.parameters.ChunkSizeParameters;
 
 /**
- * Spring configuration to inject a SimplecompletitionPolicy that modifies the chunk size with the configured
+ * Spring configuration to inject a SimplecompletionPolicy that modifies the chunk size with the configured
  * JobParameters chunk size.
  */
 @Configuration

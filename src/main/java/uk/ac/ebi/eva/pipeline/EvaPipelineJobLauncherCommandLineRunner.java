@@ -63,14 +63,14 @@ import java.util.Properties;
 
 /**
  * This class is a modified version of the default JobLauncherCommandLineRunner.
- * It's main differences are:
+ * Its main differences are:
  * -If no job is specified then the execution stops.
  * -Job parameters can be passed from command line as normal parameters.
  * -Job parameters can be passed from a properties file by the user.
  * -The user can restart a job that has been run previously marking the previous execution as failed.
  */
 @Component
-public class EvaPipelineJobLauncherCommandLineRunner extends JobLauncherCommandLineRunner implements CommandLineRunner,
+public class EvaPipelineJobLauncherCommandLineRunner extends JobLauncherCommandLineRunner implements
         ApplicationEventPublisherAware, ExitCodeGenerator {
 
     private static final Logger logger = LoggerFactory.getLogger(EvaPipelineJobLauncherCommandLineRunner.class);
@@ -124,8 +124,10 @@ public class EvaPipelineJobLauncherCommandLineRunner extends JobLauncherCommandL
         this.jobs = jobs;
     }
 
-    public void setJobName(String jobName) {
+    @Override
+    public void setJobNames(String jobName) {
         this.jobName = jobName;
+        super.setJobNames(jobName);
     }
 
     public void setPropertyFilePath(String propertyFilePath) {
@@ -251,7 +253,7 @@ public class EvaPipelineJobLauncherCommandLineRunner extends JobLauncherCommandL
         } catch (IOException e) {
             throw new UnexpectedErrorReadingFileException(propertyFilePath, e);
         } catch (IllegalArgumentException e) {
-            throw new UnexpectedFileEncodingException(propertyFilePath);
+            throw new UnexpectedFileEncodingException(propertyFilePath, e);
         }
     }
 

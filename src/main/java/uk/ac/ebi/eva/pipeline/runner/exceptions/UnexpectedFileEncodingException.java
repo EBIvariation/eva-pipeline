@@ -15,12 +15,14 @@
  */
 package uk.ac.ebi.eva.pipeline.runner.exceptions;
 
+import java.io.IOException;
+
 /**
  * Exception used to express a codification problem while interpreting a file
  */
 public class UnexpectedFileEncodingException extends Exception {
 
-    public UnexpectedFileEncodingException(String filePath) {
-        super("Unexpected encoding in file '" + filePath + "'");
+    public UnexpectedFileEncodingException(String filePath, IllegalArgumentException e) {
+        super("Unexpected encoding in file '" + filePath + "'", e);
     }
 }

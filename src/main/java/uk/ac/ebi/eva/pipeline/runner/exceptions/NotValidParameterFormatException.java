@@ -21,6 +21,6 @@ package uk.ac.ebi.eva.pipeline.runner.exceptions;
 public class NotValidParameterFormatException extends Exception {
 
     public NotValidParameterFormatException(String arg) {
-        super("Parameters '"+arg+"' not valid");
+        super("Parameters '" + arg + "' not valid");
     }
 }
