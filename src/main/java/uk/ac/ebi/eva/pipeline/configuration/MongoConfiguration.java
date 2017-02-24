@@ -15,12 +15,9 @@
  */
 package uk.ac.ebi.eva.pipeline.configuration;
 
-import java.net.UnknownHostException;
-import java.util.Collections;
-
+import com.mongodb.MongoClient;
+import com.mongodb.MongoCredential;
 import org.springframework.batch.core.configuration.annotation.StepScope;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mongodb.MongoDbFactory;
@@ -31,15 +28,12 @@ import org.springframework.data.mongodb.core.convert.DbRefResolver;
 import org.springframework.data.mongodb.core.convert.DefaultDbRefResolver;
 import org.springframework.data.mongodb.core.convert.MappingMongoConverter;
 import org.springframework.data.mongodb.core.mapping.MongoMappingContext;
-
-import com.mongodb.MongoClient;
-import com.mongodb.MongoCredential;
-import com.mongodb.ReadPreference;
-
 import uk.ac.ebi.eva.pipeline.parameters.DatabaseParameters;
-import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 import uk.ac.ebi.eva.pipeline.parameters.MongoConnection;
 import uk.ac.ebi.eva.utils.MongoDBHelper;
+
+import java.net.UnknownHostException;
+import java.util.Collections;
 
 /**
  * Utility class dealing with MongoDB connections using pipeline options

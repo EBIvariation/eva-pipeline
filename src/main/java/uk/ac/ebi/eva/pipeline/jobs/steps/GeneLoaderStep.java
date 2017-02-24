@@ -24,11 +24,14 @@ import org.springframework.batch.core.configuration.annotation.StepBuilderFactor
 import org.springframework.batch.item.ItemStreamReader;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.file.FlatFileParseException;
+import org.springframework.batch.repeat.policy.SimpleCompletionPolicy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+
+import uk.ac.ebi.eva.pipeline.configuration.ChunkSizeCompletionPolicyConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.readers.GeneReaderConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.writers.GeneWriterConfiguration;
 import uk.ac.ebi.eva.pipeline.io.mappers.GeneLineMapper;
@@ -58,7 +61,7 @@ import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.GENE_WRITER;
 
 @Configuration
 @EnableBatchProcessing
-@Import({GeneReaderConfiguration.class, GeneWriterConfiguration.class})
+@Import({GeneReaderConfiguration.class, GeneWriterConfiguration.class, ChunkSizeCompletionPolicyConfiguration.class})
 public class GeneLoaderStep {
 
     private static final Logger logger = LoggerFactory.getLogger(GeneLoaderStep.class);
@@ -72,11 +75,12 @@ public class GeneLoaderStep {
     private ItemWriter<FeatureCoordinates> writer;
 
     @Bean(GENES_LOAD_STEP)
-    public Step genesLoadStep(StepBuilderFactory stepBuilderFactory, JobOptions jobOptions) {
+    public Step genesLoadStep(StepBuilderFactory stepBuilderFactory, JobOptions jobOptions,
+                              SimpleCompletionPolicy chunkSizeCompletionPolicy) {
         logger.debug("Building '" + GENES_LOAD_STEP + "'");
 
         return stepBuilderFactory.get(GENES_LOAD_STEP)
-                .<FeatureCoordinates, FeatureCoordinates>chunk(jobOptions.getChunkSize())
+                .<FeatureCoordinates, FeatureCoordinates>chunk(chunkSizeCompletionPolicy)
                 .reader(reader)
                 .processor(new GeneFilterProcessor())
                 .writer(writer)

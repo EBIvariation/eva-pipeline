@@ -16,27 +16,14 @@
 
 package uk.ac.ebi.eva.pipeline.jobs;
 
-import com.mongodb.DBCursor;
-import com.mongodb.DBObject;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.opencb.biodata.models.variant.Variant;
-import org.opencb.datastore.core.QueryOptions;
 import org.opencb.opencga.lib.common.Config;
-import org.opencb.opencga.storage.core.StorageManagerException;
-import org.opencb.opencga.storage.core.StorageManagerFactory;
-import org.opencb.opencga.storage.core.variant.VariantStorageManager;
-import org.opencb.opencga.storage.core.variant.adaptors.VariantDBAdaptor;
-import org.opencb.opencga.storage.core.variant.adaptors.VariantDBIterator;
-import org.opencb.opencga.storage.mongodb.variant.DBObjectToVariantConverter;
-import org.opencb.opencga.storage.mongodb.variant.DBObjectToVariantSourceEntryConverter;
-import org.opencb.opencga.storage.mongodb.variant.DBObjectToVariantStatsConverter;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
-import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ActiveProfiles;
@@ -45,32 +32,15 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import uk.ac.ebi.eva.pipeline.Application;
-import uk.ac.ebi.eva.pipeline.configuration.BeanNames;
 import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
+import uk.ac.ebi.eva.test.utils.GenotypedVcfJobTestUtils;
 import uk.ac.ebi.eva.utils.EvaJobParameterBuilder;
-import uk.ac.ebi.eva.utils.URLHelper;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.zip.GZIPInputStream;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static uk.ac.ebi.eva.test.utils.JobTestUtils.count;
-import static uk.ac.ebi.eva.test.utils.JobTestUtils.getLines;
-import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResource;
 
 /**
  * Test for {@link GenotypedVcfJob}
@@ -82,23 +52,6 @@ import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResource;
 @TestPropertySource({"classpath:common-configuration.properties", "classpath:test-mongo.properties"})
 @ContextConfiguration(classes = {GenotypedVcfJob.class, BatchTestConfiguration.class})
 public class GenotypedVcfJobTest {
-    private static final String MOCK_VEP = "/mockvep.pl";
-
-    private static final int EXPECTED_VALID_ANNOTATIONS = 536;
-
-    private static final int EXPECTED_ANNOTATIONS = 537;
-
-    private static final int EXPECTED_VARIANTS = 300;
-
-    private static final String INPUT_VCF_ID = "1";
-
-    private static final String INPUT_STUDY_ID = "genotyped-job";
-
-    private static final String INPUT_FILE = "/input-files/vcf/genotyped.vcf.gz";
-
-    private static final String COLLECTION_FILES_NAME = "files";
-
-    private static final String COLLECTION_VARIANTS_NAME = "variants";
 
     @Rule
     public TemporaryMongoRule mongoRule = new TemporaryMongoRule();
@@ -115,41 +68,40 @@ public class GenotypedVcfJobTest {
     @Test
     public void fullGenotypedVcfJob() throws Exception {
         Config.setOpenCGAHome(opencgaHome);
-        File inputFile = getResource(INPUT_FILE);
-        String dbName = mongoRule.getRandomTemporaryDatabaseName();
+        File inputFile = GenotypedVcfJobTestUtils.getInputFile();
+        File mockVep = GenotypedVcfJobTestUtils.getMockVep();
+        String databaseName = mongoRule.getRandomTemporaryDatabaseName();
 
         String outputDirStats = temporaryFolderRule.newFolder().getAbsolutePath();
         String outputDirAnnotation = temporaryFolderRule.newFolder().getAbsolutePath();
 
-        File variantsStatsFile = new File(URLHelper.getVariantsStatsUri(outputDirStats, INPUT_STUDY_ID, INPUT_VCF_ID));
-        File sourceStatsFile = new File(URLHelper.getSourceStatsUri(outputDirStats, INPUT_STUDY_ID, INPUT_VCF_ID));
+        File variantsStatsFile = GenotypedVcfJobTestUtils.getVariantsStatsFile(outputDirStats);
+        File sourceStatsFile = GenotypedVcfJobTestUtils.getSourceStatsFile(outputDirStats);
 
-        File vepInputFile = new File(URLHelper.resolveVepInput(outputDirAnnotation, INPUT_STUDY_ID, INPUT_VCF_ID));
-        File vepOutputFile = new File(URLHelper.resolveVepOutput(outputDirAnnotation, INPUT_STUDY_ID, INPUT_VCF_ID));
+        File vepInputFile = GenotypedVcfJobTestUtils.getVepInputFile(outputDirAnnotation);
+        File vepOutputFile = GenotypedVcfJobTestUtils.getVepOutputFile(outputDirAnnotation);
 
         File fasta = temporaryFolderRule.newFile();
 
-        Variant variant;
-
         // Run the Job
         JobParameters jobParameters = new EvaJobParameterBuilder()
-                .collectionFilesName(COLLECTION_FILES_NAME)
-                .collectionVariantsName(COLLECTION_VARIANTS_NAME)
-                .databaseName(dbName)
+                .collectionFilesName(GenotypedVcfJobTestUtils.COLLECTION_FILES_NAME)
+                .collectionVariantsName(GenotypedVcfJobTestUtils.COLLECTION_VARIANTS_NAME)
+                .databaseName(databaseName)
                 .inputFasta(fasta.getAbsolutePath())
-                .inputStudyId(INPUT_STUDY_ID)
+                .inputStudyId(GenotypedVcfJobTestUtils.INPUT_STUDY_ID)
                 .inputStudyName("inputStudyName")
                 .inputStudyType("COLLECTION")
                 .inputVcf(inputFile.getAbsolutePath())
                 .inputVcfAggregation("NONE")
-                .inputVcfId(INPUT_VCF_ID)
+                .inputVcfId(GenotypedVcfJobTestUtils.INPUT_VCF_ID)
                 .outputDirAnnotation(outputDirAnnotation)
                 .outputDirStats(outputDirStats)
                 .vepCachePath("")
                 .vepCacheSpecies("human")
                 .vepCacheVersion("1")
                 .vepNumForks("1")
-                .vepPath(getResource(MOCK_VEP).getPath())
+                .vepPath(mockVep.getPath())
                 .toJobParameters();
 
         JobExecution jobExecution = jobLauncherTestUtils.launchJob(jobParameters);
@@ -157,116 +109,43 @@ public class GenotypedVcfJobTest {
         assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
         assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());
 
-        // 1 load step: check ((documents in DB) == (lines in transformed file))
-        //variantStorageManager = StorageManagerFactory.getVariantStorageManager();
-        //variantDBAdaptor = variantStorageManager.getDBAdaptor(dbName, null);
-        DBCursor cursor = mongoRule.getCollection(dbName, COLLECTION_VARIANTS_NAME).find();
-        assertEquals(EXPECTED_VARIANTS, count(cursor));
+        GenotypedVcfJobTestUtils.checkLoadStep(databaseName);
 
-        // 2 create stats step
-        assertTrue(variantsStatsFile.exists());
-        assertTrue(sourceStatsFile.exists());
+        GenotypedVcfJobTestUtils.checkCreateStatsStep(variantsStatsFile, sourceStatsFile);
 
-        // 3 load stats step: check the DB docs have the field "st"
-        variant = getFirstVariant(dbName);
-        assertEquals(1, variant.getSourceEntries().values().iterator().next().getCohortStats().size());
+        GenotypedVcfJobTestUtils.checkLoadStatsStep(databaseName);
 
-        // 4 annotation flow
-        // annotation input vep generate step
-        checkAnnotationInput(vepInputFile);
+        GenotypedVcfJobTestUtils.checkAnnotationInput(vepInputFile);
 
-        // 5 annotation create step
-        assertTrue(vepInputFile.exists());
-        assertTrue(vepOutputFile.exists());
+        GenotypedVcfJobTestUtils.checkAnnotationCreateStep(vepInputFile,vepOutputFile);
 
-        // Check output file length
-        assertEquals(EXPECTED_ANNOTATIONS, getLines(new GZIPInputStream(new FileInputStream(vepOutputFile))));
+        GenotypedVcfJobTestUtils.checkOutputFileLength(vepOutputFile);
 
-        // 6 Annotation load step: check documents in DB have annotation (only consequence type)
-        checkLoadedAnnotation(dbName);
+        GenotypedVcfJobTestUtils.checkLoadedAnnotation(databaseName);
 
-        //check that one line is skipped because malformed
-        List<StepExecution> variantAnnotationLoadStepExecution = jobExecution.getStepExecutions().stream()
-                .filter(stepExecution -> stepExecution.getStepName().equals(BeanNames.LOAD_VEP_ANNOTATION_STEP))
-                .collect(Collectors.toList());
-        assertEquals(1, variantAnnotationLoadStepExecution.get(0).getReadSkipCount());
+        GenotypedVcfJobTestUtils.checkSkippedOneMalformedLine(jobExecution);
 
-    }
-
-    private Variant getFirstVariant(String database) {
-        DBCursor cursor = mongoRule.getCollection(database, COLLECTION_VARIANTS_NAME).find();
-        DBObjectToVariantConverter variantConverter = getVariantConverter();
-        Variant variant = variantConverter.convertToDataModelType(cursor.iterator().next());
-        return variant;
-    }
-
-    private DBObjectToVariantConverter getVariantConverter() {
-        return new DBObjectToVariantConverter(
-                new DBObjectToVariantSourceEntryConverter(VariantStorageManager.IncludeSrc.FIRST_8_COLUMNS),
-                new DBObjectToVariantStatsConverter());
-    }
-
-    private void checkAnnotationInput(File vepInputFile) throws IOException {
-        BufferedReader testReader = new BufferedReader(new InputStreamReader(new FileInputStream(
-                getResource("/expected-output/preannot.sorted"))));
-        BufferedReader actualReader = new BufferedReader(new InputStreamReader(new FileInputStream(
-                vepInputFile.toString())));
-
-        ArrayList<String> rows = new ArrayList<>();
-
-        String s;
-        while ((s = actualReader.readLine()) != null) {
-            rows.add(s);
-        }
-        Collections.sort(rows);
-
-        String testLine = testReader.readLine();
-        for (String row : rows) {
-            assertEquals(testLine, row);
-            testLine = testReader.readLine();
-        }
-        assertNull(testLine); // if both files have the same length testReader should be after the last line
-    }
-
-
-    private void checkLoadedAnnotation(String dbName) throws IllegalAccessException, ClassNotFoundException,
-            InstantiationException, StorageManagerException {
-        Iterator<DBObject> iterator = mongoRule.getCollection(dbName, COLLECTION_VARIANTS_NAME).find().iterator();
-        DBObjectToVariantConverter converter = getVariantConverter();
-
-        int count = 0;
-        int consequenceTypeCount = 0;
-        while (iterator.hasNext()) {
-            count++;
-            Variant next = converter.convertToDataModelType(iterator.next());
-            if (next.getAnnotation().getConsequenceTypes() != null) {
-                consequenceTypeCount += next.getAnnotation().getConsequenceTypes().size();
-            }
-        }
-
-        assertEquals(EXPECTED_VARIANTS, count);
-        assertEquals(EXPECTED_VALID_ANNOTATIONS, consequenceTypeCount);
     }
 
     @Test
     public void aggregationIsNotAllowed() throws Exception {
-        String dbName = mongoRule.getRandomTemporaryDatabaseName();
-        mongoRule.getTemporaryDatabase(dbName);
+        String databaseName = mongoRule.getRandomTemporaryDatabaseName();
+        mongoRule.getTemporaryDatabase(databaseName);
         Config.setOpenCGAHome(opencgaHome);
-
+        File mockVep = GenotypedVcfJobTestUtils.getMockVep();
         String outputDirStats = temporaryFolderRule.newFolder().getAbsolutePath();
         String outputDirAnnotation = temporaryFolderRule.newFolder().getAbsolutePath();
 
         File fasta = temporaryFolderRule.newFile();
 
         JobParameters jobParameters = new EvaJobParameterBuilder()
-                .collectionFilesName(COLLECTION_FILES_NAME)
-                .collectionVariantsName(COLLECTION_VARIANTS_NAME)
-                .databaseName(dbName)
-                .inputFasta(fasta.getAbsolutePath())
-                .inputVcf(getResource(INPUT_FILE).getAbsolutePath())
-                .inputVcfId(INPUT_VCF_ID)
-                .inputStudyId(INPUT_STUDY_ID)
+                .collectionFilesName(GenotypedVcfJobTestUtils.COLLECTION_FILES_NAME)
+                .collectionVariantsName(GenotypedVcfJobTestUtils.COLLECTION_VARIANTS_NAME)
+                .databaseName(databaseName)
+		        .inputFasta(fasta.getAbsolutePath())
+                .inputVcf(GenotypedVcfJobTestUtils.getInputFile().getAbsolutePath())
+                .inputVcfId(GenotypedVcfJobTestUtils.INPUT_VCF_ID)
+                .inputStudyId(GenotypedVcfJobTestUtils.INPUT_STUDY_ID)
                 .inputStudyName("inputStudyName")
                 .inputStudyType("COLLECTION")
                 .inputVcfAggregation("BASIC")
@@ -276,7 +155,7 @@ public class GenotypedVcfJobTest {
                 .vepCacheSpecies("human")
                 .vepCacheVersion("1")
                 .vepNumForks("1")
-                .vepPath(getResource(MOCK_VEP).getPath())
+                .vepPath(mockVep.getPath())
                 .timestamp()
                 .toJobParameters();
         JobExecution jobExecution = jobLauncherTestUtils.launchJob(jobParameters);

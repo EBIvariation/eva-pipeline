@@ -37,11 +37,10 @@ import java.io.IOException;
 public class JobOptions {
     private static final Logger logger = LoggerFactory.getLogger(JobOptions.class);
 
-    @Value("${" + JobParametersNames.APP_OPENCGA_PATH + "}") private String opencgaAppHome;
+    @Value("${" + JobParametersNames.APP_OPENCGA_PATH + ":#{null}}") private String opencgaAppHome;
 
     // Pipeline application options.
     @Value("${" + JobParametersNames.CONFIG_RESTARTABILITY_ALLOW + ":false}") private boolean allowStartIfComplete;
-    @Value("${" + JobParametersNames.CONFIG_CHUNK_SIZE + ":1000}") private int chunkSize;
 
     @PostConstruct
     public void loadArgs() throws IOException {
@@ -55,10 +54,6 @@ public class JobOptions {
 
     public boolean isAllowStartIfComplete() {
         return allowStartIfComplete;
-    }
-
-    public int getChunkSize() {
-        return chunkSize;
     }
 
 }
