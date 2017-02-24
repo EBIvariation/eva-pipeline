@@ -26,9 +26,9 @@ import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 import java.io.File;
 import java.io.IOException;
 
-public class InputVcfAggregationMappingPathTest {
+public class InputVcfAggregationMappingPathValidatorTest {
 
-    private InputVcfAggregationMappingPath validator;
+    private InputVcfAggregationMappingPathValidator validator;
 
     private JobParametersBuilder jobParametersBuilder;
 
@@ -37,7 +37,7 @@ public class InputVcfAggregationMappingPathTest {
 
     @Before
     public void setUp() throws Exception {
-        validator = new InputVcfAggregationMappingPath();
+        validator = new InputVcfAggregationMappingPathValidator();
     }
 
     @Test

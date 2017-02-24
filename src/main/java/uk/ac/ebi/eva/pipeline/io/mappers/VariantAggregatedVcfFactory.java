@@ -62,31 +62,32 @@ public class VariantAggregatedVcfFactory extends VariantVcfFactory {
     }
 
     /**
-     * @param mappings Properties that contains case-sensitive tag mapping for aggregation data. A valid example structure
-     *               of this file is:
-     *               <pre>
-     *               {@code
+     * @param mappings Properties that contains case-sensitive tag mapping for aggregation data. A valid example
+     *                 structure of this file is:
+     *                 <pre>
+     *                               {@code
      *
-     *               EUR.AF=EUR_AF
-     *               EUR.AC=AC_EUR
-     *               EUR.AN=EUR_AN
-     *               EUR.GTC=EUR_GTC
-     *               ALL.AF=AF
-     *               ALL.AC=TAC
-     *               ALL.AN=AN
-     *               ALL.GTC=GTC
-     *               }
-     *               </pre>
-     *               <p>
-     *               <p>
-     *               where the right side of the '=' is how the values appear in the vcf, and left side is how it will loaded. It must
-     *               be a bijection, i.e. there must not be repeated entries in any side. The part before the '.' can be any string
-     *               naming the group. The part after the '.' must be one of AF, AC, AN or GTC.
+     *                               EUR.AF=EUR_AF
+     *                               EUR.AC=AC_EUR
+     *                               EUR.AN=EUR_AN
+     *                               EUR.GTC=EUR_GTC
+     *                               ALL.AF=AF
+     *                               ALL.AC=TAC
+     *                               ALL.AN=AN
+     *                               ALL.GTC=GTC
+     *                               }
+     *                               </pre>
+     *                 <p>
+     *                 <p>
+     *                 where the right side of the '=' is how the values appear in the vcf, and left side is how it will
+     *                 loaded. It must be a bijection, i.e. there must not be repeated entries in any side. The part
+     *                 before the '.' can be any string naming the group. The part after the '.' must be one of AF,
+     *                 AC, AN or GTC.
      */
     public VariantAggregatedVcfFactory(Properties mappings) {
-        if(mappings == null){
+        if (mappings == null) {
             loadDefaultMappings();
-        }else{
+        } else {
             loadMappings(mappings);
         }
     }
@@ -164,10 +165,11 @@ public class VariantAggregatedVcfFactory extends VariantVcfFactory {
         file.setStats(vs);
     }
 
-    protected void parseCohortStats(Variant variant, String fileId, String studyId, int numAllele, String[] alternateAlleles,
-                                    String info) {
+    protected void parseCohortStats(Variant variant, String fileId, String studyId, int numAllele,
+                                    String[] alternateAlleles, String info) {
         VariantSourceEntry file = variant.getSourceEntry(fileId, studyId);
-        Map<String, Map<String, String>> cohortStats = new LinkedHashMap<>();   // cohortName -> (statsName -> statsValue): EUR->(AC->3,2)
+        Map<String, Map<String, String>> cohortStats = new LinkedHashMap<>();
+        // cohortName -> (statsName -> statsValue): EUR->(AC->3,2)
         String[] splittedInfo = info.split(";");
         for (String attribute : splittedInfo) {
             String[] assignment = attribute.split("=");

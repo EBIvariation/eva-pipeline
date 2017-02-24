@@ -27,7 +27,7 @@ import uk.ac.ebi.eva.pipeline.parameters.validation.ConfigRestartabilityAllowVal
 import uk.ac.ebi.eva.pipeline.parameters.validation.DbCollectionsVariantsNameValidator;
 import uk.ac.ebi.eva.pipeline.parameters.validation.DbNameValidator;
 import uk.ac.ebi.eva.pipeline.parameters.validation.InputStudyIdValidator;
-import uk.ac.ebi.eva.pipeline.parameters.validation.InputVcfAggregationMappingPath;
+import uk.ac.ebi.eva.pipeline.parameters.validation.InputVcfAggregationMappingPathValidator;
 import uk.ac.ebi.eva.pipeline.parameters.validation.InputVcfAggregationValidator;
 import uk.ac.ebi.eva.pipeline.parameters.validation.InputVcfIdValidator;
 import uk.ac.ebi.eva.pipeline.parameters.validation.InputVcfValidator;
@@ -67,7 +67,7 @@ public class VariantLoaderStepParametersValidator extends DefaultJobParametersVa
                 new InputVcfIdValidator(),
                 new InputVcfValidator(),
                 new InputVcfAggregationValidator(),
-                new OptionalValidator(new InputVcfAggregationMappingPath(),
+                new OptionalValidator(new InputVcfAggregationMappingPathValidator(),
                         JobParametersNames.INPUT_VCF_AGGREGATION_MAPPING_PATH),
                 new OptionalValidator(new ConfigChunkSizeValidator(), JobParametersNames.CONFIG_CHUNK_SIZE),
                 new OptionalValidator(new ConfigRestartabilityAllowValidator(),

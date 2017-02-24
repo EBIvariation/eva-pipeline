@@ -25,7 +25,7 @@ import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
  *
  * @throws JobParametersInvalidException If the file is not a valid path, does not exist or is not readable
  */
-public class InputVcfAggregationMappingPath implements JobParametersValidator {
+public class InputVcfAggregationMappingPathValidator implements JobParametersValidator {
     @Override
     public void validate(JobParameters parameters) throws JobParametersInvalidException {
         ParametersValidatorUtil.checkFileExists(parameters.getString(
