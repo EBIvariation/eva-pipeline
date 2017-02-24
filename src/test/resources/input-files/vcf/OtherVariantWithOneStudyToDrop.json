@@ -1,11 +1,11 @@
 {
-  "_id" : "20_60345_G_A",
+  "_id" : "20_60346_G_A",
   "chr" : "20",
-  "start" : 60345,
+  "start" : 60346,
   "files" : [
     {
       "fid" : "5",
-      "sid" : "1",
+      "sid" : "studyIdToDrop",
       "attrs" : {
         "QUAL" : "100.0",
         "FILTER" : "PASS",

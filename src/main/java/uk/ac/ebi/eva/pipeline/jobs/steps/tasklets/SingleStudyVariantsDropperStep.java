@@ -34,7 +34,10 @@ import static uk.ac.ebi.eva.commons.models.converters.data.VariantToDBObjectConv
 import static uk.ac.ebi.eva.commons.models.data.VariantSourceEntity.STUDYID_FIELD;
 
 /**
- * Tasklet that removes from mongo all the variants that have only an entry from a given study to delete.
+ * Tasklet that removes from mongo all the variants that have only one entry from a given study to delete.
+ * If we removed the entry instead of the whole variant, we could end up keeping variants that don't appear in any
+ * study (i.e. an empty "files" array in the variant mongo document), which doesn't make sense, so we remove the
+ * complete document for those cases first.
  * <p>
  * Input: a studyId
  * <p>

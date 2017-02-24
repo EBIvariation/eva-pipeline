@@ -41,6 +41,8 @@ import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 import uk.ac.ebi.eva.utils.EvaJobParameterBuilder;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collection;
 
 import static org.junit.Assert.assertEquals;
 import static uk.ac.ebi.eva.commons.models.converters.data.VariantSourceEntryToDBObjectConverter.STUDYID_FIELD;
@@ -57,7 +59,9 @@ public class DropSingleStudyVariantsStepTest {
 
     private static final String COLLECTION_VARIANTS_NAME = "variants";
 
-    private static final long EXPECTED_VARIANTS_AFTER_DROP_STUDY = 1;
+    private static final long EXPECTED_VARIANTS_AFTER_DROP_STUDY = 2;
+
+    private static final String STUDY_ID_TO_DROP = "studyIdToDrop";
 
     @Rule
     public TemporaryMongoRule mongoRule = new TemporaryMongoRule();
@@ -66,14 +70,40 @@ public class DropSingleStudyVariantsStepTest {
     private JobLauncherTestUtils jobLauncherTestUtils;
 
     @Test
-    public void dropperStepShouldDropAllVariants() throws Exception {
-        String databaseName = insertDocuments(COLLECTION_VARIANTS_NAME);
-        String studyToDrop = "studyIdToDrop";
+    public void testNoVariantsToDrop() throws Exception {
+        String databaseName = insertDocuments(COLLECTION_VARIANTS_NAME, Arrays.asList(
+                VariantData.getVariantWithOneStudy(),
+                VariantData.getVariantWithTwoStudies()));
 
+        checkDrop(databaseName, EXPECTED_VARIANTS_AFTER_DROP_STUDY);
+    }
+
+    @Test
+    public void testDropMatchingSingleStudyVariant() throws Exception {
+        String databaseName = insertDocuments(COLLECTION_VARIANTS_NAME, Arrays.asList(
+                VariantData.getVariantWithOneStudyToDrop(),
+                VariantData.getVariantWithOneStudy(),
+                VariantData.getVariantWithTwoStudies()));
+
+        checkDrop(databaseName, EXPECTED_VARIANTS_AFTER_DROP_STUDY);
+    }
+
+    @Test
+    public void testSeveralVariantsToDrop() throws Exception {
+        String databaseName = insertDocuments(COLLECTION_VARIANTS_NAME, Arrays.asList(
+                VariantData.getVariantWithOneStudyToDrop(),
+                VariantData.getOtherVariantWithOneStudyToDrop(),
+                VariantData.getVariantWithOneStudy(),
+                VariantData.getVariantWithTwoStudies()));
+
+        checkDrop(databaseName, EXPECTED_VARIANTS_AFTER_DROP_STUDY);
+    }
+
+    private void checkDrop(String databaseName, long expectedVariantsAfterDropStudy) {
         JobParameters jobParameters = new EvaJobParameterBuilder()
                 .collectionVariantsName(COLLECTION_VARIANTS_NAME)
                 .databaseName(databaseName)
-                .inputStudyId(studyToDrop)
+                .inputStudyId(STUDY_ID_TO_DROP)
                 .toJobParameters();
 
         // When the execute method in variantsLoad is executed
@@ -86,18 +116,19 @@ public class DropSingleStudyVariantsStepTest {
 
         // And the documents in the DB should not contain the study removed
         DBCollection variantsCollection = mongoRule.getCollection(databaseName, COLLECTION_VARIANTS_NAME);
-        assertEquals(EXPECTED_VARIANTS_AFTER_DROP_STUDY, variantsCollection.count());
+        assertEquals(expectedVariantsAfterDropStudy, variantsCollection.count());
 
         String filesStudyIdField = String.format("%s.%s", FILES_FIELD, STUDYID_FIELD);
-        BasicDBObject singleStudyVariants = new BasicDBObject(filesStudyIdField, studyToDrop)
+        BasicDBObject singleStudyVariants = new BasicDBObject(filesStudyIdField, STUDY_ID_TO_DROP)
                 .append(FILES_FIELD, new BasicDBObject("$size", 1));
         assertEquals(0, variantsCollection.count(singleStudyVariants));
     }
 
-    private String insertDocuments(String collectionName) throws IOException {
+    private String insertDocuments(String collectionName, Collection<String> documents) throws IOException {
         String databaseName = mongoRule.getRandomTemporaryDatabaseName();
-        mongoRule.insert(databaseName, collectionName, VariantData.getVariantsWithOneStudyToDrop());
-        mongoRule.insert(databaseName, collectionName, VariantData.getVariantsWithTwoStudiesToDrop());
+        for (String document : documents) {
+            mongoRule.insert(databaseName, collectionName, document);
+        }
         return databaseName;
     }
 }

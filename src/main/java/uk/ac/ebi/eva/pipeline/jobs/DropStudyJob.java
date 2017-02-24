@@ -32,13 +32,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
 
-import uk.ac.ebi.eva.pipeline.jobs.flows.AnnotationFlowOptional;
 import uk.ac.ebi.eva.pipeline.jobs.steps.DropSingleStudyVariantsStep;
-import uk.ac.ebi.eva.pipeline.jobs.steps.LoadFileStep;
-import uk.ac.ebi.eva.pipeline.jobs.steps.VariantLoaderStep;
 import uk.ac.ebi.eva.pipeline.parameters.validation.job.AggregatedVcfJobParametersValidator;
 
-import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.AGGREGATED_VCF_JOB;
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.DROP_SINGLE_STUDY_VARIANTS_STEP;
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.DROP_STUDY_JOB;
 
@@ -58,13 +54,13 @@ public class DropStudyJob {
     @Qualifier(DROP_SINGLE_STUDY_VARIANTS_STEP)
     private Step dropSingleStudyVariantsStep;
 
-    @Bean(AGGREGATED_VCF_JOB)
+    @Bean(DROP_STUDY_JOB)
     @Scope("prototype")
     public Job dropStudyJob(JobBuilderFactory jobBuilderFactory) {
         logger.debug("Building '" + DROP_STUDY_JOB + "'");
 
         JobBuilder jobBuilder = jobBuilderFactory
-                .get(AGGREGATED_VCF_JOB)
+                .get(DROP_STUDY_JOB)
                 .incrementer(new RunIdIncrementer())
                 .validator(new AggregatedVcfJobParametersValidator());
         SimpleJobBuilder builder = jobBuilder
