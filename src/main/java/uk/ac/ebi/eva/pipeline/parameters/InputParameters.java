@@ -59,14 +59,6 @@ public class InputParameters {
     @Value(PARAMETER + JobParametersNames.INPUT_VCF_AGGREGATION_MAPPING_PATH + OR_NULL)
     private String aggregatedMappingFile;
 
-    // maybe the next three could go into a ConfigurationParameters?
-
-    @Value(PARAMETER + JobParametersNames.APP_OPENCGA_PATH  + END)
-    private String opencgaAppHome;
-
-    @Value(PARAMETER + JobParametersNames.CONFIG_RESTARTABILITY_ALLOW + "']?:false}")
-    private boolean allowStartIfComplete;
-
     @Value(PARAMETER + JobParametersNames.CONFIG_CHUNK_SIZE + "']?:1000}")
     private int chunkSize;
 
@@ -92,14 +84,6 @@ public class InputParameters {
 
     public VariantStudy.StudyType getStudyType() {
         return studyType;
-    }
-
-    public String getOpencgaAppHome() {
-        return opencgaAppHome;
-    }
-
-    public boolean isAllowStartIfComplete() {
-        return allowStartIfComplete;
     }
 
     public int getChunkSize() {
