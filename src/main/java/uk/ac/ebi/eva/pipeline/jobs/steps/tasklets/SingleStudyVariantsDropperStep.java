@@ -15,18 +15,34 @@
  */
 package uk.ac.ebi.eva.pipeline.jobs.steps.tasklets;
 
+import com.mongodb.WriteResult;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoOperations;
+import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 
 import uk.ac.ebi.eva.pipeline.parameters.DatabaseParameters;
 import uk.ac.ebi.eva.pipeline.parameters.InputParameters;
 
+import static uk.ac.ebi.eva.commons.models.converters.data.VariantToDBObjectConverter.FILES_FIELD;
+import static uk.ac.ebi.eva.commons.models.data.VariantSourceEntity.STUDYID_FIELD;
+
+/**
+ * Tasklet that removes from mongo all the variants that have only an entry from a given study to delete.
+ * <p>
+ * Input: a studyId
+ * <p>
+ * Output: those variants are removed
+ */
 public class SingleStudyVariantsDropperStep implements Tasklet {
+
+    private static final Logger logger = LoggerFactory.getLogger(SingleStudyVariantsDropperStep.class);
 
     @Autowired
     private MongoOperations mongoOperations;
@@ -39,8 +55,15 @@ public class SingleStudyVariantsDropperStep implements Tasklet {
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
-        Query query = new Query();
-        mongoOperations.remove(query, dbParameters.getCollectionVariantsName());
+
+        String filesStudyIdField = String.format("%s.%s", FILES_FIELD, STUDYID_FIELD);
+        Query query = new Query(
+                new Criteria(filesStudyIdField).is(inputParameters.getStudyId())
+                        .and(FILES_FIELD).size(1));
+
+        logger.info("removing single study variants. used query: {}", query);
+        WriteResult writeResult = mongoOperations.remove(query, dbParameters.getCollectionVariantsName());
+        logger.info("result: {}", writeResult.toString());
 
         return RepeatStatus.FINISHED;
     }

@@ -18,7 +18,6 @@ package uk.ac.ebi.eva.pipeline.jobs.steps;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
-import com.mongodb.DBCursor;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -46,7 +45,6 @@ import java.io.IOException;
 import static org.junit.Assert.assertEquals;
 import static uk.ac.ebi.eva.commons.models.converters.data.VariantSourceEntryToDBObjectConverter.STUDYID_FIELD;
 import static uk.ac.ebi.eva.commons.models.converters.data.VariantToDBObjectConverter.FILES_FIELD;
-import static uk.ac.ebi.eva.test.utils.JobTestUtils.count;
 
 /**
  * Test for {@link DropSingleStudyVariantsStep}
@@ -70,10 +68,9 @@ public class DropSingleStudyVariantsStepTest {
     @Test
     public void dropperStepShouldDropAllVariants() throws Exception {
         String databaseName = insertDocuments(COLLECTION_VARIANTS_NAME);
-        String studyToDrop = "1";
+        String studyToDrop = "studyIdToDrop";
 
         JobParameters jobParameters = new EvaJobParameterBuilder()
-//                .collectionFilesName(COLLECTION_FILES_NAME)
                 .collectionVariantsName(COLLECTION_VARIANTS_NAME)
                 .databaseName(databaseName)
                 .inputStudyId(studyToDrop)
@@ -92,8 +89,9 @@ public class DropSingleStudyVariantsStepTest {
         assertEquals(EXPECTED_VARIANTS_AFTER_DROP_STUDY, variantsCollection.count());
 
         String filesStudyIdField = String.format("%s.%s", FILES_FIELD, STUDYID_FIELD);
-        DBCursor droppedVariantsCursor = variantsCollection.find(new BasicDBObject(filesStudyIdField, studyToDrop));
-        assertEquals(0, count(droppedVariantsCursor));
+        BasicDBObject singleStudyVariants = new BasicDBObject(filesStudyIdField, studyToDrop)
+                .append(FILES_FIELD, new BasicDBObject("$size", 1));
+        assertEquals(0, variantsCollection.count(singleStudyVariants));
     }
 
     private String insertDocuments(String collectionName) throws IOException {
