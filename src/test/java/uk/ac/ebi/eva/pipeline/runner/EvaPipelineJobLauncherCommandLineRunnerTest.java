@@ -78,10 +78,9 @@ public class EvaPipelineJobLauncherCommandLineRunnerTest {
     public PipelineTemporaryFolderRule temporaryFolderRule = new PipelineTemporaryFolderRule();
 
     @Test
-    public void noJobNameHasBeenProvidedStopsExecution() throws JobExecutionException {
-        evaPipelineJobLauncherCommandLineRunner.setJobNames(null);
+    public void noJobParametersHaveBeenProvided() throws JobExecutionException {
         evaPipelineJobLauncherCommandLineRunner.run();
-        assertThat(capture.toString(), containsString(NO_JOB_NAME_HAS_BEEN_PROVIDED));
+        assertThat(capture.toString(), containsString(NO_JOB_PARAMETERS_HAVE_BEEN_PROVIDED));
     }
 
     @Test
@@ -89,6 +88,12 @@ public class EvaPipelineJobLauncherCommandLineRunnerTest {
         evaPipelineJobLauncherCommandLineRunner.setJobNames(GENOTYPED_VCF_JOB);
         evaPipelineJobLauncherCommandLineRunner.run("--" + SPRING_BATCH_JOB_NAME_PROPERTY + "=" + GENOTYPED_VCF_JOB);
         assertThat(capture.toString(), containsString(NO_JOB_PARAMETERS_HAVE_BEEN_PROVIDED));
+    }
+
+    @Test
+    public void noJobNameProvidedAndAParameter() throws JobExecutionException {
+        evaPipelineJobLauncherCommandLineRunner.run("--dummy=true");
+        assertThat(capture.toString(), containsString(NO_JOB_NAME_HAS_BEEN_PROVIDED));
     }
 
     @Test
@@ -183,7 +188,6 @@ public class EvaPipelineJobLauncherCommandLineRunnerTest {
         evaPipelineJobLauncherCommandLineRunner.setPropertyFilePath(
                 getResource(GENOTYPED_PROPERTIES_FILE).getAbsolutePath());
 
-        evaPipelineJobLauncherCommandLineRunner.setJobNames(GENOTYPED_VCF_JOB);
         evaPipelineJobLauncherCommandLineRunner.run(new EvaCommandLineBuilder()
                 .inputVcf(inputFile.getAbsolutePath())
                 .inputVcfId(GenotypedVcfJobTestUtils.INPUT_VCF_ID)
