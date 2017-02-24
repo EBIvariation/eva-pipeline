@@ -15,9 +15,7 @@
  */
 package uk.ac.ebi.eva.pipeline.parameters;
 
-import org.opencb.datastore.core.ObjectMap;
 import org.opencb.opencga.lib.common.Config;
-import org.opencb.opencga.storage.core.variant.VariantStorageManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;

@@ -20,6 +20,7 @@ import uk.ac.ebi.eva.pipeline.io.mappers.AggregatedVcfLineMapper;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Optional;
 
 /**
  * VCF file reader for VCFs without genotypes (aggregated VCFs).
@@ -31,13 +32,8 @@ import java.io.IOException;
  */
 public class AggregatedVcfReader extends VcfReader {
 
-    public AggregatedVcfReader(String fileId, String studyId, VariantSource.Aggregation aggregation, String file)
-            throws IOException {
-        this(fileId, studyId, aggregation, new File(file));
-    }
-
-    public AggregatedVcfReader(String fileId, String studyId, VariantSource.Aggregation aggregation, File file)
-            throws IOException {
-        super(new AggregatedVcfLineMapper(fileId, studyId, aggregation), file);
+    public AggregatedVcfReader(String fileId, String studyId, VariantSource.Aggregation aggregation,
+                               String mappingFilePath, File file) throws IOException {
+        super(new AggregatedVcfLineMapper(fileId, studyId, aggregation, mappingFilePath), file);
     }
 }

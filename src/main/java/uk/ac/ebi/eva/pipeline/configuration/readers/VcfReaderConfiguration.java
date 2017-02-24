@@ -26,6 +26,7 @@ import uk.ac.ebi.eva.pipeline.io.readers.UnwindingItemStreamReader;
 import uk.ac.ebi.eva.pipeline.io.readers.VcfReader;
 import uk.ac.ebi.eva.pipeline.parameters.InputParameters;
 
+import java.io.File;
 import java.io.IOException;
 
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VARIANT_READER;
@@ -54,11 +55,14 @@ public class VcfReaderConfiguration {
     public VcfReader vcfReader(InputParameters parameters) throws IOException {
         String fileId = parameters.getVcfId();
         String studyId = parameters.getStudyId();
+        File vcfFile = new File(parameters.getVcf());
+        VariantSource.Aggregation vcfAggregation = parameters.getVcfAggregation();
 
-        if (VariantSource.Aggregation.NONE.equals(parameters.getVcfAggregation())) {
-            return new VcfReader(fileId, studyId, parameters.getVcf());
+        if (VariantSource.Aggregation.NONE.equals(vcfAggregation)) {
+            return new VcfReader(fileId, studyId, vcfFile);
         } else {
-            return new AggregatedVcfReader(fileId, studyId, parameters.getVcfAggregation(), parameters.getVcf());
+            return new AggregatedVcfReader(fileId, studyId, vcfAggregation, parameters.getAggregatedMappingFile(),
+                    vcfFile);
         }
     }
 

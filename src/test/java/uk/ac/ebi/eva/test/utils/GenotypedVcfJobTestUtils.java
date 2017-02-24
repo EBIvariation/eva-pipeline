@@ -29,7 +29,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static uk.ac.ebi.eva.test.utils.JobTestUtils.count;
 import static uk.ac.ebi.eva.test.utils.JobTestUtils.getLines;
-import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResource;
+import static uk.ac.ebi.eva.utils.FileUtils.getResource;
 
 /**
  * GenotypedVcfJob test assertion functions and constants for testing.

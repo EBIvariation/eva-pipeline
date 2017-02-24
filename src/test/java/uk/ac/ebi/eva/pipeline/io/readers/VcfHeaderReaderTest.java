@@ -9,7 +9,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.opencb.biodata.models.variant.VariantSource;
 import org.opencb.biodata.models.variant.VariantStudy;
-
 import uk.ac.ebi.eva.commons.models.data.VariantSourceEntity;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
@@ -25,6 +24,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static uk.ac.ebi.eva.test.utils.JobTestUtils.checkFieldsInsideList;
 import static uk.ac.ebi.eva.test.utils.JobTestUtils.checkStringInsideList;
+import static uk.ac.ebi.eva.utils.FileUtils.getResource;
 
 /**
  * {@link VcfHeaderReader}
@@ -50,13 +50,13 @@ public class VcfHeaderReaderTest {
 
     @Test
     public void testRead() throws Exception {
-        File input = TestFileUtils.getResource(INPUT_FILE_PATH);
+        File input = getResource(INPUT_FILE_PATH);
 
         VariantStudy.StudyType studyType = VariantStudy.StudyType.COLLECTION;
         VariantSource.Aggregation aggregation = VariantSource.Aggregation.NONE;
 
         VcfHeaderReader headerReader = new VcfHeaderReader(input, FILE_ID, STUDY_ID, STUDY_NAME,
-                                                           studyType, aggregation);
+                studyType, aggregation);
         headerReader.open(null);
         VariantSourceEntity source = headerReader.read();
 
@@ -87,11 +87,11 @@ public class VcfHeaderReaderTest {
      */
     @Test
     public void testConversion() throws Exception {
-        File input = TestFileUtils.getResource(INPUT_FILE_PATH);
+        File input = getResource(INPUT_FILE_PATH);
 
         VcfHeaderReader headerReader = new VcfHeaderReader(input, FILE_ID, STUDY_ID, STUDY_NAME,
-                                                           VariantStudy.StudyType.COLLECTION,
-                                                           VariantSource.Aggregation.NONE);
+                VariantStudy.StudyType.COLLECTION,
+                VariantSource.Aggregation.NONE);
         headerReader.open(null);
         VariantSourceEntity source = headerReader.read();
 
@@ -108,13 +108,13 @@ public class VcfHeaderReaderTest {
     @Test
     public void testConversionAggregated() throws Exception {
         // uncompress the input VCF into a temporal file
-        File input = TestFileUtils.getResource(INPUT_AGGREGATED_FILE_PATH);
+        File input = getResource(INPUT_AGGREGATED_FILE_PATH);
         File tempFile = temporaryFolderRule.newFile();
         JobTestUtils.uncompress(input.getAbsolutePath(), tempFile);
 
         VcfHeaderReader headerReader = new VcfHeaderReader(input, FILE_ID, STUDY_ID, STUDY_NAME,
-                                                           VariantStudy.StudyType.COLLECTION,
-                                                           VariantSource.Aggregation.NONE);
+                VariantStudy.StudyType.COLLECTION,
+                VariantSource.Aggregation.NONE);
         headerReader.open(null);
         VariantSourceEntity source = headerReader.read();
 

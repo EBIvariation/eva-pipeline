@@ -22,7 +22,10 @@ import org.opencb.biodata.models.variant.VariantSource;
 import uk.ac.ebi.eva.commons.models.data.Variant;
 import uk.ac.ebi.eva.commons.models.data.VariantSourceEntry;
 import uk.ac.ebi.eva.commons.models.data.VariantStats;
+import uk.ac.ebi.eva.utils.FileUtils;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -42,6 +45,8 @@ public class VariantVcfExacFactory extends VariantAggregatedVcfFactory {
     private static final String AC_ADJ = "AC_Adj";
 
     private static final String COMMA = ",";
+
+    private static final String EXAC_MAPPING_FILE = "/mappings/exac-mapping.properties";
 
     public VariantVcfExacFactory() {
         this(null);
@@ -72,6 +77,14 @@ public class VariantVcfExacFactory extends VariantAggregatedVcfFactory {
         super(tagMap);
     }
 
+    @Override
+    protected void loadDefaultMappings() {
+        try {
+            loadMappings(FileUtils.getPropertiesFile(FileUtils.getResource(EXAC_MAPPING_FILE).getAbsolutePath()));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     @Override
     protected void parseStats(Variant variant, String fileId, String studyId, int numAllele, String[] alternateAlleles,

@@ -51,7 +51,7 @@ import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResource;
+import static uk.ac.ebi.eva.utils.FileUtils.getResource;
 
 /**
  * Workflow test for {@link GenotypedVcfJob}

@@ -30,6 +30,7 @@ public class InputParameters {
 
     private static final String PARAMETER = "#{jobParameters['";
     private static final String END = "']}";
+    private static final String OR_NULL = "']?:null}";
 
     @Value(PARAMETER + JobParametersNames.INPUT_STUDY_ID + END)
     private String studyId;
@@ -55,13 +56,8 @@ public class InputParameters {
     @Value(PARAMETER + JobParametersNames.INPUT_STUDY_TYPE + END)
     private VariantStudy.StudyType studyType;
 
-    // maybe the next three could go into a ConfigurationParameters?
-
-    @Value(PARAMETER + JobParametersNames.APP_OPENCGA_PATH  + END)
-    private String opencgaAppHome;
-
-    @Value(PARAMETER + JobParametersNames.CONFIG_RESTARTABILITY_ALLOW + "']?:false}")
-    private boolean allowStartIfComplete;
+    @Value(PARAMETER + JobParametersNames.INPUT_VCF_AGGREGATION_MAPPING_PATH + OR_NULL)
+    private String aggregatedMappingFile;
 
     @Value(PARAMETER + JobParametersNames.CONFIG_CHUNK_SIZE + "']?:1000}")
     private int chunkSize;
@@ -90,14 +86,6 @@ public class InputParameters {
         return studyType;
     }
 
-    public String getOpencgaAppHome() {
-        return opencgaAppHome;
-    }
-
-    public boolean isAllowStartIfComplete() {
-        return allowStartIfComplete;
-    }
-
     public int getChunkSize() {
         return chunkSize;
     }
@@ -108,5 +96,9 @@ public class InputParameters {
 
     public String getPedigree() {
         return pedigree;
+    }
+
+    public String getAggregatedMappingFile() {
+        return aggregatedMappingFile;
     }
 }

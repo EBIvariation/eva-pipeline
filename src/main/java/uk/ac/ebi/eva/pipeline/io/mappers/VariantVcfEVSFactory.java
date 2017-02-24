@@ -21,16 +21,20 @@ import org.opencb.biodata.models.variant.VariantSource;
 import uk.ac.ebi.eva.commons.models.data.Variant;
 import uk.ac.ebi.eva.commons.models.data.VariantSourceEntry;
 import uk.ac.ebi.eva.commons.models.data.VariantStats;
+import uk.ac.ebi.eva.utils.FileUtils;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Properties;
 import java.util.Set;
 
 /**
- * Overrides the methods in VariantAggregatedVcfFactory that take care of the fields QUAL, FILTER and INFO, to support 
+ * Overrides the methods in VariantAggregatedVcfFactory that take care of the fields QUAL, FILTER and INFO, to support
  * the specific format of Exome Variant Server VCFs.
  */
 public class VariantVcfEVSFactory extends VariantAggregatedVcfFactory {
 
+    private static final String EVS_MAPPING_FILE = "/mappings/evs-mapping.properties";
 
     public VariantVcfEVSFactory() {
         this(null);
@@ -61,10 +65,19 @@ public class VariantVcfEVSFactory extends VariantAggregatedVcfFactory {
         super(tagMap);
     }
 
+    @Override
+    protected void loadDefaultMappings() {
+        try {
+            loadMappings(FileUtils.getPropertiesFile(FileUtils.getResource(EVS_MAPPING_FILE).getAbsolutePath()));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     @Override
-    protected void setOtherFields(Variant variant, String fileId, String studyId, Set<String> ids, float quality, String filter,
-                                  String info, String format, int numAllele, String[] alternateAlleles, String line) {
+    protected void setOtherFields(Variant variant, String fileId, String studyId, Set<String> ids, float quality,
+                                  String filter, String info, String format, int numAllele, String[] alternateAlleles,
+                                  String line) {
         // Fields not affected by the structure of REF and ALT fields
         variant.setIds(ids);
         VariantSourceEntry sourceEntry = variant.getSourceEntry(fileId, studyId);

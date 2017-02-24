@@ -17,9 +17,13 @@ package uk.ac.ebi.eva.pipeline.io.mappers;
 
 import org.opencb.biodata.models.variant.VariantSource;
 import org.springframework.batch.item.file.LineMapper;
+import org.springframework.util.Assert;
 import uk.ac.ebi.eva.commons.models.data.Variant;
+import uk.ac.ebi.eva.utils.FileUtils;
 
+import java.io.IOException;
 import java.util.List;
+import java.util.Properties;
 
 import static org.junit.Assert.assertNotNull;
 
@@ -34,18 +38,29 @@ public class AggregatedVcfLineMapper implements LineMapper<List<Variant>> {
     private final String studyId;
     private VariantVcfFactory factory;
 
-    public AggregatedVcfLineMapper(String fileId, String studyId, VariantSource.Aggregation aggregation) {
+    public AggregatedVcfLineMapper(String fileId, String studyId, VariantSource.Aggregation aggregation,
+                                   String mappingFilePath) throws IOException {
+        Assert.notNull(fileId);
+        Assert.notNull(studyId);
+        Assert.notNull(aggregation);
+
         this.fileId = fileId;
         this.studyId = studyId;
+
+        Properties mappings = null;
+        if(mappingFilePath!=null){
+            mappings = FileUtils.getPropertiesFile(mappingFilePath);
+        }
+
         switch (aggregation) {
             case EVS:
-                factory = new VariantVcfEVSFactory();
+                factory = new VariantVcfEVSFactory(mappings);
                 break;
             case EXAC:
-                factory = new VariantVcfExacFactory();
+                factory = new VariantVcfExacFactory(mappings);
                 break;
             case BASIC:
-                factory = new VariantAggregatedVcfFactory();
+                factory = new VariantAggregatedVcfFactory(mappings);
                 break;
             case NONE:
                 throw new IllegalArgumentException(
@@ -57,7 +72,7 @@ public class AggregatedVcfLineMapper implements LineMapper<List<Variant>> {
     @Override
     public List<Variant> mapLine(String line, int lineNumber) throws Exception {
         assertNotNull(this.getClass().getSimpleName() + " should be used to read aggregated VCFs only " +
-                        "(hint: do not set VariantSource.Aggregation to NONE)", factory);
+                "(hint: do not set VariantSource.Aggregation to NONE)", factory);
         return factory.create(fileId, studyId, line);
     }
 }
