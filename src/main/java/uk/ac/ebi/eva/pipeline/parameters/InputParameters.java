@@ -21,8 +21,6 @@ import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
-
 /**
  * Service that holds access to Job input parameters.
  */
@@ -58,7 +56,7 @@ public class InputParameters {
     @Value(PARAMETER + JobParametersNames.INPUT_STUDY_TYPE + END)
     private VariantStudy.StudyType studyType;
 
-    @Value(PARAMETER + JobParametersNames.AGGREGATED_MAPPING_FILE + OR_NULL)
+    @Value(PARAMETER + JobParametersNames.INPUT_VCF_AGGREGATION_MAPPING_PATH + OR_NULL)
     private String aggregatedMappingFile;
 
     // maybe the next three could go into a ConfigurationParameters?

@@ -57,6 +57,8 @@ public class VariantLoaderStepParametersValidatorTest {
         requiredParameters.put(JobParametersNames.INPUT_VCF_AGGREGATION, new JobParameter("NONE"));
         requiredParameters.put(JobParametersNames.INPUT_VCF,
                                new JobParameter(temporaryFolderRule.newFile().getCanonicalPath()));
+        requiredParameters.put(JobParametersNames.INPUT_VCF_AGGREGATION_MAPPING_PATH,
+                               new JobParameter(temporaryFolderRule.newFile().getCanonicalPath()));
 
         optionalParameters = new TreeMap<>();
         optionalParameters.put(JobParametersNames.CONFIG_CHUNK_SIZE, new JobParameter("100"));

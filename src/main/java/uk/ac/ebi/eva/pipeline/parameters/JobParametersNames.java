@@ -41,7 +41,7 @@ public class JobParametersNames {
 
     public static final String INPUT_FASTA = "input.fasta";
 
-    public static final String AGGREGATED_MAPPING_FILE = "input.vcf.aggregation.mapping-path";
+    public static final String INPUT_VCF_AGGREGATION_MAPPING_PATH = "input.vcf.aggregation.mapping-path";
 
     /*
      * Output
