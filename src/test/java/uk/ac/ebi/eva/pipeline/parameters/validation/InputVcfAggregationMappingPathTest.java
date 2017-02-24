@@ -41,7 +41,7 @@ public class InputVcfAggregationMappingPathTest {
     }
 
     @Test
-    public void inputFastaIsValid() throws JobParametersInvalidException, IOException {
+    public void inputVcfAggregationMappingPathIsValid() throws JobParametersInvalidException, IOException {
         jobParametersBuilder = new JobParametersBuilder();
         jobParametersBuilder.addString(JobParametersNames.INPUT_VCF_AGGREGATION_MAPPING_PATH,
                 temporaryFolder.newFile().getCanonicalPath());
@@ -49,14 +49,14 @@ public class InputVcfAggregationMappingPathTest {
     }
 
     @Test(expected = JobParametersInvalidException.class)
-    public void inputFastaNotExist() throws JobParametersInvalidException {
+    public void inputVcfAggregationMappingPathNotExist() throws JobParametersInvalidException {
         jobParametersBuilder = new JobParametersBuilder();
         jobParametersBuilder.addString(JobParametersNames.INPUT_VCF_AGGREGATION_MAPPING_PATH, "file://path/to/file");
         validator.validate(jobParametersBuilder.toJobParameters());
     }
 
     @Test(expected = JobParametersInvalidException.class)
-    public void inputFastaNotReadable() throws JobParametersInvalidException, IOException {
+    public void inputVcfAggregationMappingPathNotReadable() throws JobParametersInvalidException, IOException {
         File file = temporaryFolder.newFile("not_readable");
         file.setReadable(false);
 
@@ -66,7 +66,7 @@ public class InputVcfAggregationMappingPathTest {
     }
 
     @Test(expected = JobParametersInvalidException.class)
-    public void inputFastaIsADirectory() throws JobParametersInvalidException, IOException {
+    public void inputVcfAggregationMappingPathIsADirectory() throws JobParametersInvalidException, IOException {
         jobParametersBuilder = new JobParametersBuilder();
         jobParametersBuilder.addString(JobParametersNames.INPUT_VCF_AGGREGATION_MAPPING_PATH,
                 temporaryFolder.getRoot().getCanonicalPath());
