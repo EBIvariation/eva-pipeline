@@ -25,7 +25,7 @@ import org.springframework.batch.item.data.MongoItemWriter;
 import org.springframework.data.mongodb.core.MongoOperations;
 
 import uk.ac.ebi.eva.commons.models.data.VariantAnnotation;
-import uk.ac.ebi.eva.pipeline.model.converters.data.DBObjectToVariantAnnotationConverter;
+import uk.ac.ebi.eva.commons.models.converters.data.VariantAnnotationToDBObjectConverter;
 import uk.ac.ebi.eva.utils.MongoDBHelper;
 
 import java.util.ArrayList;
@@ -60,11 +60,11 @@ public class VepAnnotationMongoWriter extends MongoItemWriter<VariantAnnotation>
 
     private MongoOperations mongoOperations;
     private String collection;
-    private DBObjectToVariantAnnotationConverter converter;
+    private VariantAnnotationToDBObjectConverter converter;
 
     public VepAnnotationMongoWriter(MongoOperations mongoOperations) {
         this.mongoOperations = mongoOperations;
-        this.converter = new DBObjectToVariantAnnotationConverter();
+        this.converter = new VariantAnnotationToDBObjectConverter();
     }
 
     public VepAnnotationMongoWriter(MongoOperations mongoOperations, String collection){
@@ -151,7 +151,7 @@ public class VepAnnotationMongoWriter extends MongoItemWriter<VariantAnnotation>
     private void writeVariantAnnotationInMongoDb(String storageId, VariantAnnotation variantAnnotation){
         logger.trace("Writing annotations into mongo id: {}", storageId);
 
-        DBObject storageVariantAnnotation = converter.convertToStorageType(variantAnnotation);
+        DBObject storageVariantAnnotation = converter.convert(variantAnnotation);
 
         BasicDBObject find = new BasicDBObject("_id", storageId);
 

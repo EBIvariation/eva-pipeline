@@ -105,7 +105,7 @@ public class VepAnnotationMongoWriterTest {
         int consequenceTypeCount = 0;
         while (cursor.hasNext()) {
             count++;
-            VariantAnnotation annot = converter.convertToDataModelType(
+            VariantAnnotation annot = converter.convert(
                     (DBObject) cursor.next().get(VariantToDBObjectConverter.ANNOTATION_FIELD));
             assertNotNull(annot.getConsequenceTypes());
             consequenceTypeCount += annot.getConsequenceTypes().size();
@@ -168,7 +168,7 @@ public class VepAnnotationMongoWriterTest {
             DBObject dbObject = cursor.next();
             String id = dbObject.get("_id").toString();
 
-            VariantAnnotation annot = converter.convertToDataModelType(
+            VariantAnnotation annot = converter.convert(
                     (DBObject) dbObject.get(VariantToDBObjectConverter.ANNOTATION_FIELD));
 
             if (id.equals("20_63360_C_T") || id.equals("20_63399_G_A") || id.equals("20_63426_G_T")) {
