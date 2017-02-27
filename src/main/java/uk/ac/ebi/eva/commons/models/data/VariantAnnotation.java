@@ -48,8 +48,6 @@ public class VariantAnnotation {
 
     private List<ConsequenceType> consequenceTypes;
 
-    private List<PopulationFrequency> populationFrequencies = null;
-
     private Map<String, Object> additionalAttributes;
 
     public VariantAnnotation() {
@@ -134,13 +132,4 @@ public class VariantAnnotation {
     public void setConsequenceTypes(List<ConsequenceType> consequenceTypes) {
         this.consequenceTypes = consequenceTypes;
     }
-
-    public List<PopulationFrequency> getPopulationFrequencies() {
-        return populationFrequencies;
-    }
-
-    public void setPopulationFrequencies(List<PopulationFrequency> populationFrequencies) {
-        this.populationFrequencies = populationFrequencies;
-    }
-
 }
