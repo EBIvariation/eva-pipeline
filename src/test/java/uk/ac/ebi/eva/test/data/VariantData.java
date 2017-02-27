@@ -26,10 +26,10 @@ public class VariantData {
     private static final String VARIANT_WITHOUT_ANNOTATION_PATH = "/input-files/annotation/VariantWithOutAnnotation";
     private static final String VARIANT_WITH_ANNOTATION_PATH = "/input-files/annotation/VariantWithAnnotation";
     private static final String POPULATION_STATS_PATH = "/input-files/statistics/PopulationStatistics.json";
-    private static final String VARIANT_WITH_ONE_STUDY_TO_DROP_PATH = "/input-files/vcf/VariantWithOneStudyToDrop.json";
-    private static final String OTHER_VARIANT_WITH_ONE_STUDY_TO_DROP_PATH = "/input-files/vcf/OtherVariantWithOneStudyToDrop.json";
-    private static final String VARIANT_WITH_ONE_STUDY_PATH = "/input-files/vcf/VariantWithOneStudy.json";
-    private static final String VARIANT_WITH_TWO_STUDIES_PATH = "/input-files/vcf/VariantWithTwoStudies.json";
+    private static final String VARIANT_WITH_ONE_STUDY_TO_DROP_PATH = "/input-files/variant/VariantWithOneStudyToDrop.json";
+    private static final String OTHER_VARIANT_WITH_ONE_STUDY_TO_DROP_PATH = "/input-files/variant/OtherVariantWithOneStudyToDrop.json";
+    private static final String VARIANT_WITH_ONE_STUDY_PATH = "/input-files/variant/VariantWithOneStudy.json";
+    private static final String VARIANT_WITH_TWO_STUDIES_PATH = "/input-files/variant/VariantWithTwoStudies.json";
 
     public static String getVariantWithoutAnnotation() throws IOException {
         return FileUtils.readFileToString(getResource(VARIANT_WITHOUT_ANNOTATION_PATH));

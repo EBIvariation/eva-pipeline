@@ -58,15 +58,14 @@ public class SingleStudyVariantsDropperStep implements Tasklet {
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
-
         String filesStudyIdField = String.format("%s.%s", FILES_FIELD, STUDYID_FIELD);
         Query query = new Query(
                 new Criteria(filesStudyIdField).is(inputParameters.getStudyId())
                         .and(FILES_FIELD).size(1));
-
-        logger.info("removing single study variants. used query: {}", query);
+        logger.info("Deleting variants reported only in study {}", inputParameters.getStudyId());
+        logger.trace("Query used: {}", query);
         WriteResult writeResult = mongoOperations.remove(query, dbParameters.getCollectionVariantsName());
-        logger.info("result: {}", writeResult.toString());
+        logger.info("Result: {}", writeResult.toString());
 
         return RepeatStatus.FINISHED;
     }
