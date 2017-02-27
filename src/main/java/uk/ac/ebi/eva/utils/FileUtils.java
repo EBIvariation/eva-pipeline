@@ -22,7 +22,6 @@ import org.springframework.core.io.Resource;
 import uk.ac.ebi.eva.pipeline.io.GzipLazyResource;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -66,10 +65,13 @@ public abstract class FileUtils {
         return new File(FileUtils.class.getResource(resourcePath).getFile());
     }
 
-    public static Properties getPropertiesFile(String propertiesFilePath) throws IOException {
-        InputStream input = new FileInputStream(propertiesFilePath);
+    public static InputStream getResourceAsStream(String resourcePath) {
+        return FileUtils.class.getResourceAsStream(resourcePath);
+    }
+
+    public static Properties getPropertiesFile(InputStream propertiesInputStream) throws IOException {
         Properties properties = new Properties();
-        properties.load(input);
+        properties.load(propertiesInputStream);
         return properties;
     }
 }
