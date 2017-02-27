@@ -24,6 +24,7 @@ import org.opencb.biodata.models.variant.annotation.Xref;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.convert.converter.Converter;
+import org.springframework.util.Assert;
 
 import uk.ac.ebi.eva.commons.models.data.VariantAnnotation;
 
@@ -43,6 +44,7 @@ public class DBObjectToVariantAnnotationConverter implements Converter<DBObject,
 
     @Override
     public VariantAnnotation convert(DBObject object) {
+        Assert.notNull(object, "Variant annotation DBObject should not be null");
         logger.trace("Convert mongo object into variant annotation {} ", object);
 
         VariantAnnotation variantAnnotation = new VariantAnnotation();
