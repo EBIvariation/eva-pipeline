@@ -60,7 +60,6 @@ public class VariantAnnotationToDBObjectConverterTest {
 
     @Test
     public void allFieldsOfVariantAnnotationShouldBeConverted() {
-
         List<String> soAccessionsValues = Arrays.asList("transcript_ablation", "splice_donor_variant");
 
         Score polyphenScore = new Score(1.0, "Polyphen", "Polyphen description");
@@ -106,12 +105,12 @@ public class VariantAnnotationToDBObjectConverterTest {
 
         assertEquals(expectedSoAccessionsNumbers, sos);
 
-        BasicDBObject polyfhenField = (BasicDBObject) ct.get(AnnotationFieldNames.POLYPHEN_FIELD);
+        BasicDBObject polyphenField = (BasicDBObject) ct.get(AnnotationFieldNames.POLYPHEN_FIELD);
         BasicDBObject siftField = (BasicDBObject) ct.get(AnnotationFieldNames.SIFT_FIELD);
 
-        assertTrue(polyphenScore.getScore().equals(polyfhenField.getDouble("sc")));
-        assertEquals(polyphenScore.getDescription(), polyfhenField.getString("desc"));
-        assertTrue(siftScore.getScore().equals(siftField.getDouble("sc")));
+        assertEquals(polyphenScore.getScore(), polyphenField.getDouble("sc"), 0.001);
+        assertEquals(polyphenScore.getDescription(), polyphenField.getString("desc"));
+        assertEquals(siftScore.getScore(), siftField.getDouble("sc"), 0.001);
         assertEquals(siftScore.getDescription(), siftField.getString("desc"));
 
         //Xrefs
