@@ -208,33 +208,21 @@ public class EvaPipelineJobLauncherCommandLineRunner extends JobLauncherCommandL
     }
 
     private void launchJob(JobParameters jobParameters) throws JobExecutionException, UnknownJobException {
-        executeLocalJobs(jobParameters);
-        executeRegisteredJobs(jobParameters);
-    }
-
-    private void executeLocalJobs(JobParameters jobParameters) throws JobExecutionException {
         for (Job job : this.jobs) {
-            if (!PatternMatchUtils.simpleMatch(jobName, job.getName())) {
-                logger.debug("Skipped job: " + job.getName());
-                continue;
-            }
-            execute(job, jobParameters);
-            return;
-        }
-    }
-
-    private void executeRegisteredJobs(JobParameters jobParameters) throws JobExecutionException {
-        if (this.jobRegistry != null) {
-            try {
-                Job job = jobRegistry.getJob(jobName);
-                if (this.jobs.contains(job)) {
-                    return;
-                }
+            if (PatternMatchUtils.simpleMatch(jobName, job.getName())) {
                 execute(job, jobParameters);
                 return;
-            } catch (NoSuchJobException ex) {
-                logger.debug("No job found in registry for job name: " + jobName);
             }
+        }
+
+        if (this.jobRegistry != null) {
+            try {
+                execute(jobRegistry.getJob(jobName), jobParameters);
+            } catch (NoSuchJobException ex) {
+                logger.error("No job found in registry for job name: " + jobName);
+            }
+        } else {
+            logger.error("Job not found and no JobRegistry initializated.");
         }
     }
 
