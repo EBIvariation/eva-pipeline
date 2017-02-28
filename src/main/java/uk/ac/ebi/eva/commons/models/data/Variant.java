@@ -16,8 +16,6 @@
  */
 package uk.ac.ebi.eva.commons.models.data;
 
-import org.opencb.biodata.models.variant.annotation.VariantEffect;
-
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
