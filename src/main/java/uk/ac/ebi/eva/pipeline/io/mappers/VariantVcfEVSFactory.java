@@ -16,14 +16,11 @@
  */
 package uk.ac.ebi.eva.pipeline.io.mappers;
 
-import org.opencb.biodata.models.variant.VariantSource;
-
 import uk.ac.ebi.eva.commons.models.data.Variant;
 import uk.ac.ebi.eva.commons.models.data.VariantSourceEntry;
 import uk.ac.ebi.eva.commons.models.data.VariantStats;
 import uk.ac.ebi.eva.utils.FileUtils;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.Properties;
 import java.util.Set;
@@ -68,7 +65,7 @@ public class VariantVcfEVSFactory extends VariantAggregatedVcfFactory {
     @Override
     protected void loadDefaultMappings() {
         try {
-            loadMappings(FileUtils.getPropertiesFile(FileUtils.getResource(EVS_MAPPING_FILE).getAbsolutePath()));
+            loadMappings(FileUtils.getPropertiesFile(FileUtils.getResourceAsStream(EVS_MAPPING_FILE)));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

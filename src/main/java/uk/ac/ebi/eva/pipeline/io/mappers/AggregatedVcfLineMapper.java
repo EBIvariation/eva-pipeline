@@ -21,6 +21,7 @@ import org.springframework.util.Assert;
 import uk.ac.ebi.eva.commons.models.data.Variant;
 import uk.ac.ebi.eva.utils.FileUtils;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.List;
 import java.util.Properties;
@@ -49,7 +50,7 @@ public class AggregatedVcfLineMapper implements LineMapper<List<Variant>> {
 
         Properties mappings = null;
         if(mappingFilePath!=null){
-            mappings = FileUtils.getPropertiesFile(mappingFilePath);
+            mappings = FileUtils.getPropertiesFile(new FileInputStream(mappingFilePath));
         }
 
         switch (aggregation) {
