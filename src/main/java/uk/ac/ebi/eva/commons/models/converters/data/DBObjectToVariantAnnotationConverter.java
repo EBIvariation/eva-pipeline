@@ -52,90 +52,110 @@ public class DBObjectToVariantAnnotationConverter implements Converter<DBObject,
         //ConsequenceType
         List<ConsequenceType> consequenceTypes = new LinkedList<>();
         Object cts = object.get(AnnotationFieldNames.CONSEQUENCE_TYPE_FIELD);
-        if (cts != null && cts instanceof BasicDBList) {
-            for (Object o : ((BasicDBList) cts)) {
-                if (o instanceof DBObject) {
-                    DBObject ct = (DBObject) o;
+        if (cts != null)
+            if (cts instanceof BasicDBList) {
+                for (Object o : ((BasicDBList) cts)) {
+                    if (o instanceof DBObject) {
+                        DBObject ct = (DBObject) o;
 
-                    //SO accession name
-                    List<String> soAccessionNames = new LinkedList<>();
-                    if (ct.containsField(AnnotationFieldNames.SO_ACCESSION_FIELD)) {
-                        if (ct.get(AnnotationFieldNames.SO_ACCESSION_FIELD) instanceof List) {
-                            List<Integer> list = (List) ct.get(AnnotationFieldNames.SO_ACCESSION_FIELD);
-                            for (Integer so : list) {
-                                soAccessionNames.add(ConsequenceTypeMappings.accessionToTerm.get(so));
-                            }
-                        } else {
-                            soAccessionNames
-                                    .add(ConsequenceTypeMappings.accessionToTerm.get(ct.get(
-                                            AnnotationFieldNames.SO_ACCESSION_FIELD)));
-                        }
+                        List<String> soAccessionNames = convertSoField(ct);
+                        List<Score> proteinSubstitutionScores = convertProteinSubstitutionScoresField(ct);
+
+                        consequenceTypes.add(new ConsequenceType(
+                                getDefault(ct, AnnotationFieldNames.GENE_NAME_FIELD, ""),
+                                getDefault(ct, AnnotationFieldNames.ENSEMBL_GENE_ID_FIELD, ""),
+                                getDefault(ct, AnnotationFieldNames.ENSEMBL_TRANSCRIPT_ID_FIELD, ""),
+                                getDefault(ct, AnnotationFieldNames.STRAND_FIELD, ""),
+                                getDefault(ct, AnnotationFieldNames.BIOTYPE_FIELD, ""),
+                                getDefault(ct, AnnotationFieldNames.C_DNA_POSITION_FIELD, 0),
+                                getDefault(ct, AnnotationFieldNames.CDS_POSITION_FIELD, 0),
+                                getDefault(ct, AnnotationFieldNames.AA_POSITION_FIELD, 0),
+                                getDefault(ct, AnnotationFieldNames.AA_CHANGE_FIELD, ""),
+                                getDefault(ct, AnnotationFieldNames.CODON_FIELD, ""),
+                                proteinSubstitutionScores,
+                                soAccessionNames));
+                    } else {
+                        throw new ClassCastException("Object was not of type DBObject");
                     }
-
-                    //ProteinSubstitutionScores
-                    List<Score> proteinSubstitutionScores = new LinkedList<>();
-                    if (ct.containsField(AnnotationFieldNames.PROTEIN_SUBSTITUTION_SCORE_FIELD)) {
-                        List<DBObject> list = (List) ct.get(AnnotationFieldNames.PROTEIN_SUBSTITUTION_SCORE_FIELD);
-                        for (DBObject dbObject : list) {
-                            proteinSubstitutionScores.add(new Score(
-                                    getDefault(dbObject, AnnotationFieldNames.SCORE_SCORE_FIELD, 0.0),
-                                    getDefault(dbObject, AnnotationFieldNames.SCORE_SOURCE_FIELD, ""),
-                                    getDefault(dbObject, AnnotationFieldNames.SCORE_DESCRIPTION_FIELD, "")
-                            ));
-                        }
-                    }
-
-                    if (ct.containsField(AnnotationFieldNames.POLYPHEN_FIELD)) {
-                        DBObject dbObject = (DBObject) ct.get(AnnotationFieldNames.POLYPHEN_FIELD);
-                        proteinSubstitutionScores.add(new Score(getDefault(dbObject, AnnotationFieldNames.SCORE_SCORE_FIELD, 0.0),
-                                                                "Polyphen",
-                                                                getDefault(dbObject, AnnotationFieldNames.SCORE_DESCRIPTION_FIELD, "")));
-                    }
-
-                    if (ct.containsField(AnnotationFieldNames.SIFT_FIELD)) {
-                        DBObject dbObject = (DBObject) ct.get(AnnotationFieldNames.SIFT_FIELD);
-                        proteinSubstitutionScores.add(new Score(getDefault(dbObject, AnnotationFieldNames.SCORE_SCORE_FIELD, 0.0),
-                                                                "Sift",
-                                                                getDefault(dbObject, AnnotationFieldNames.SCORE_DESCRIPTION_FIELD, "")));
-                    }
-
-                    consequenceTypes.add(new ConsequenceType(
-                            getDefault(ct, AnnotationFieldNames.GENE_NAME_FIELD, "") /*.toString()*/,
-                            getDefault(ct, AnnotationFieldNames.ENSEMBL_GENE_ID_FIELD, "") /*.toString()*/,
-                            getDefault(ct, AnnotationFieldNames.ENSEMBL_TRANSCRIPT_ID_FIELD, "") /*.toString()*/,
-                            getDefault(ct, AnnotationFieldNames.STRAND_FIELD, "") /*.toString()*/,
-                            getDefault(ct, AnnotationFieldNames.BIOTYPE_FIELD, "") /*.toString()*/,
-                            getDefault(ct, AnnotationFieldNames.C_DNA_POSITION_FIELD, 0),
-                            getDefault(ct, AnnotationFieldNames.CDS_POSITION_FIELD, 0),
-                            getDefault(ct, AnnotationFieldNames.AA_POSITION_FIELD, 0),
-                            getDefault(ct, AnnotationFieldNames.AA_CHANGE_FIELD, "") /*.toString() */,
-                            getDefault(ct, AnnotationFieldNames.CODON_FIELD, "") /*.toString() */,
-                            proteinSubstitutionScores,
-                            soAccessionNames));
                 }
+            } else {
+                throw new ClassCastException("Object was not of type BasicDBList");
             }
-
-        }
         variantAnnotation.setConsequenceTypes(consequenceTypes);
 
         //XREfs
         List<Xref> xrefs = new LinkedList<>();
         Object xrs = object.get(AnnotationFieldNames.XREFS_FIELD);
-        if (xrs != null && xrs instanceof BasicDBList) {
-            for (Object o : (BasicDBList) xrs) {
-                if (o instanceof DBObject) {
-                    DBObject xref = (DBObject) o;
+        if (xrs != null)
+            if (xrs instanceof BasicDBList) {
+                for (Object o : (BasicDBList) xrs) {
+                    if (o instanceof DBObject) {
+                        DBObject xref = (DBObject) o;
 
-                    xrefs.add(new Xref(
-                            (String) xref.get(AnnotationFieldNames.XREF_ID_FIELD),
-                            (String) xref.get(AnnotationFieldNames.XREF_SOURCE_FIELD))
-                    );
+                        xrefs.add(new Xref(
+                                (String) xref.get(AnnotationFieldNames.XREF_ID_FIELD),
+                                (String) xref.get(AnnotationFieldNames.XREF_SOURCE_FIELD))
+                        );
+                    } else {
+                        throw new ClassCastException("Object was not of type DBObject");
+                    }
                 }
+            } else {
+                throw new ClassCastException("Object was not of type BasicDBList");
             }
-        }
         variantAnnotation.setXrefs(xrefs);
 
         return variantAnnotation;
+    }
+
+    private List<String> convertSoField(DBObject ct) {
+        List<String> soAccessionNames = new LinkedList<>();
+        if (ct.containsField(AnnotationFieldNames.SO_ACCESSION_FIELD)) {
+            if (ct.get(AnnotationFieldNames.SO_ACCESSION_FIELD) instanceof List) {
+                List<Integer> list = (List) ct.get(AnnotationFieldNames.SO_ACCESSION_FIELD);
+                for (Integer so : list) {
+                    soAccessionNames.add(ConsequenceTypeMappings.accessionToTerm.get(so));
+                }
+            } else {
+                soAccessionNames
+                        .add(ConsequenceTypeMappings.accessionToTerm.get(ct.get(
+                                AnnotationFieldNames.SO_ACCESSION_FIELD)));
+            }
+        }
+        return soAccessionNames;
+    }
+
+    private List<Score> convertProteinSubstitutionScoresField(DBObject ct) {
+        List<Score> proteinSubstitutionScores = new LinkedList<>();
+        if (ct.containsField(AnnotationFieldNames.PROTEIN_SUBSTITUTION_SCORE_FIELD)) {
+            List<DBObject> list = (List) ct.get(AnnotationFieldNames.PROTEIN_SUBSTITUTION_SCORE_FIELD);
+            for (DBObject dbObject : list) {
+                proteinSubstitutionScores.add(new Score(
+                        getDefault(dbObject, AnnotationFieldNames.SCORE_SCORE_FIELD, 0.0),
+                        getDefault(dbObject, AnnotationFieldNames.SCORE_SOURCE_FIELD, ""),
+                        getDefault(dbObject, AnnotationFieldNames.SCORE_DESCRIPTION_FIELD, "")
+                ));
+            }
+        }
+
+        if (ct.containsField(AnnotationFieldNames.POLYPHEN_FIELD)) {
+            DBObject dbObject = (DBObject) ct.get(AnnotationFieldNames.POLYPHEN_FIELD);
+            proteinSubstitutionScores
+                    .add(new Score(getDefault(dbObject, AnnotationFieldNames.SCORE_SCORE_FIELD, 0.0),
+                                   "Polyphen",
+                                   getDefault(dbObject, AnnotationFieldNames.SCORE_DESCRIPTION_FIELD,
+                                              "")));
+        }
+
+        if (ct.containsField(AnnotationFieldNames.SIFT_FIELD)) {
+            DBObject dbObject = (DBObject) ct.get(AnnotationFieldNames.SIFT_FIELD);
+            proteinSubstitutionScores
+                    .add(new Score(getDefault(dbObject, AnnotationFieldNames.SCORE_SCORE_FIELD, 0.0),
+                                   "Sift",
+                                   getDefault(dbObject, AnnotationFieldNames.SCORE_DESCRIPTION_FIELD,
+                                              "")));
+        }
+        return proteinSubstitutionScores;
     }
 
     private String getDefault(DBObject object, String key, String defaultValue) {
