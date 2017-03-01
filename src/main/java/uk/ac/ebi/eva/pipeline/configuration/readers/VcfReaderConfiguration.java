@@ -39,7 +39,7 @@ public class VcfReaderConfiguration {
 
     @Bean(VARIANT_READER)
     @StepScope
-    public ItemStreamReader<Variant> unwindingReader(VcfReader vcfReader) throws Exception {
+    public ItemStreamReader<Variant> unwindingReader(VcfReader vcfReader) {
         return new UnwindingItemStreamReader<>(vcfReader);
     }
 

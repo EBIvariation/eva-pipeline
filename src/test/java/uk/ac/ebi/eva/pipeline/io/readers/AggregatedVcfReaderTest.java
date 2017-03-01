@@ -10,12 +10,10 @@ import uk.ac.ebi.eva.commons.models.data.Variant;
 import uk.ac.ebi.eva.commons.models.data.VariantSourceEntry;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
-import uk.ac.ebi.eva.test.utils.TestFileUtils;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.List;
-import java.util.Optional;
 import java.util.zip.GZIPInputStream;
 
 import static org.junit.Assert.assertEquals;

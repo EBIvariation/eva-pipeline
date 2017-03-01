@@ -17,7 +17,6 @@ package uk.ac.ebi.eva.pipeline.configuration;
 
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.job.flow.JobExecutionDecider;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import uk.ac.ebi.eva.pipeline.jobs.deciders.SkipStepDecider;

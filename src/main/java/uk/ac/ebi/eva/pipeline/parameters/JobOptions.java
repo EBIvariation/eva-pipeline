@@ -41,7 +41,7 @@ public class JobOptions {
     @Value("${" + JobParametersNames.CONFIG_RESTARTABILITY_ALLOW + ":false}") private boolean allowStartIfComplete;
 
     @PostConstruct
-    public void loadArgs() throws IOException {
+    public void loadArgs() {
         logger.info("Loading job arguments");
 
         if (opencgaAppHome == null || opencgaAppHome.isEmpty()) {

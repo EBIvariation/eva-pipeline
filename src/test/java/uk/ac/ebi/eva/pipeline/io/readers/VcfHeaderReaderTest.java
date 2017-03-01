@@ -12,7 +12,6 @@ import org.opencb.biodata.models.variant.VariantStudy;
 import uk.ac.ebi.eva.commons.models.data.VariantSourceEntity;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
-import uk.ac.ebi.eva.test.utils.TestFileUtils;
 
 import java.io.File;
 import java.util.Arrays;

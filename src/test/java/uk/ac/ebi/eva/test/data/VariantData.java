@@ -17,8 +17,6 @@ package uk.ac.ebi.eva.test.data;
 
 import org.apache.commons.io.FileUtils;
 
-import uk.ac.ebi.eva.test.utils.TestFileUtils;
-
 import java.io.IOException;
 
 import static uk.ac.ebi.eva.utils.FileUtils.getResource;
