@@ -16,7 +16,6 @@
 package uk.ac.ebi.eva.pipeline.io.readers;
 
 import org.opencb.biodata.models.variant.VariantSource;
-
 import uk.ac.ebi.eva.pipeline.io.mappers.AggregatedVcfLineMapper;
 
 import java.io.File;
@@ -32,11 +31,8 @@ import java.io.IOException;
  */
 public class AggregatedVcfReader extends VcfReader {
 
-    public AggregatedVcfReader(VariantSource source, String file) throws IOException {
-        this(source, new File(file));
-    }
-
-    public AggregatedVcfReader(VariantSource source, File file) throws IOException {
-        super(new AggregatedVcfLineMapper(source), file);
+    public AggregatedVcfReader(String fileId, String studyId, VariantSource.Aggregation aggregation,
+                               String mappingFilePath, File file) throws IOException {
+        super(new AggregatedVcfLineMapper(fileId, studyId, aggregation, mappingFilePath), file);
     }
 }

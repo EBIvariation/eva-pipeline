@@ -29,7 +29,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 /**
- * Tests that the arguments necessary to run a {@link uk.ac.ebi.eva.pipeline.jobs.AggregatedVcfJob} are
+ * Tests that the arguments necessary to run a {@link uk.ac.ebi.eva.pipeline.jobs.GenotypedVcfJob} are
  * correctly validated
  */
 public class GenotypedVcfJobParametersValidatorTest {

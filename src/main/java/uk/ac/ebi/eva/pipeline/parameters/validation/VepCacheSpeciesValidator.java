@@ -31,7 +31,7 @@ public class VepCacheSpeciesValidator implements JobParametersValidator {
     @Override
     public void validate(JobParameters parameters) throws JobParametersInvalidException {
         ParametersValidatorUtil
-                .checkIsNotNullOrEmptyString(parameters.getString(JobParametersNames.APP_VEP_CACHE_SPECIES),
-                                             JobParametersNames.APP_VEP_CACHE_SPECIES);
+                .checkIsValidString(parameters.getString(JobParametersNames.APP_VEP_CACHE_SPECIES),
+                                    JobParametersNames.APP_VEP_CACHE_SPECIES);
     }
 }

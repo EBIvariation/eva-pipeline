@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 EMBL - European Bioinformatics Institute
+ * Copyright 2016-2017 EMBL - European Bioinformatics Institute
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package uk.ac.ebi.eva.pipeline.jobs;
 
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -28,6 +27,7 @@ import org.opencb.opencga.storage.mongodb.variant.DBObjectToVariantAnnotationCon
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.JobExecution;
+import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,12 +35,15 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
+
+import uk.ac.ebi.eva.commons.models.converters.data.VariantToDBObjectConverter;
 import uk.ac.ebi.eva.pipeline.configuration.BeanNames;
-import uk.ac.ebi.eva.pipeline.jobs.steps.GenerateVepAnnotationStep;
-import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
+import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
+import uk.ac.ebi.eva.utils.EvaJobParameterBuilder;
+import uk.ac.ebi.eva.utils.URLHelper;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -52,38 +55,64 @@ import java.util.stream.Collectors;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResource;
 import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResourceUrl;
+import static uk.ac.ebi.eva.utils.FileUtils.getResource;
 
 /**
  * Test for {@link AnnotationJob}
+ *
+ * TODO The test should fail when we will integrate the JobParameter validation since there are empty parameters for VEP
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest
-@TestPropertySource({"classpath:annotation-job.properties"})
+@TestPropertySource({"classpath:common-configuration.properties", "classpath:test-mongo.properties"})
 @ContextConfiguration(classes = {AnnotationJob.class, BatchTestConfiguration.class})
 public class AnnotationJobTest {
     private static final String MOCK_VEP = "/mockvep.pl";
     private static final String MONGO_DUMP = "/dump/VariantStatsConfigurationTest_vl";
-    //TODO check later to substitute files for temporary ones / pay attention to vep Input file
+    private static final String INPUT_STUDY_ID = "annotation-job";
+    private static final String INPUT_VCF_ID = "1";
+    private static final String COLLECTION_VARIANTS_NAME = "variants";
 
     @Rule
     public TemporaryMongoRule mongoRule = new TemporaryMongoRule();
 
+    @Rule
+    public PipelineTemporaryFolderRule temporaryFolderRule = new PipelineTemporaryFolderRule();
+
     @Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
 
-    @Autowired
-    private JobOptions jobOptions;
-
-    private File vepInputFile;
     private DBObjectToVariantAnnotationConverter converter;
 
     @Test
     public void allAnnotationStepsShouldBeExecuted() throws Exception {
-        mongoRule.restoreDump(getResourceUrl(MONGO_DUMP), jobOptions.getDbName());
+        String dbName = mongoRule.restoreDumpInTemporaryDatabase(getResourceUrl(MONGO_DUMP));
+        String outputDirAnnot = temporaryFolderRule.getRoot().getAbsolutePath();
 
-        JobExecution jobExecution = jobLauncherTestUtils.launchJob();
+        File vepInput = new File(URLHelper.resolveVepInput(outputDirAnnot, INPUT_STUDY_ID, INPUT_VCF_ID));
+        String vepInputName = vepInput.getName();
+        temporaryFolderRule.newFile(vepInputName);
+
+        File vepOutput = new File(URLHelper.resolveVepOutput(outputDirAnnot, INPUT_STUDY_ID, INPUT_VCF_ID));
+        String vepOutputName = vepOutput.getName();
+        temporaryFolderRule.newFile(vepOutputName);
+
+        JobParameters jobParameters = new EvaJobParameterBuilder()
+                .collectionVariantsName(COLLECTION_VARIANTS_NAME)
+                .databaseName(dbName)
+                .inputFasta("")
+                .inputStudyId(INPUT_STUDY_ID)
+                .inputVcfId(INPUT_VCF_ID)
+                .outputDirAnnotation(outputDirAnnot)
+                .vepCachePath("")
+                .vepCacheSpecies("")
+                .vepCacheVersion("")
+                .vepNumForks("")
+                .vepPath(getResource(MOCK_VEP).getPath())
+                .toJobParameters();
+
+        JobExecution jobExecution = jobLauncherTestUtils.launchJob(jobParameters);
 
         assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
         assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());
@@ -99,18 +128,17 @@ public class AnnotationJobTest {
         assertEquals(BeanNames.LOAD_VEP_ANNOTATION_STEP, loadVepAnnotationsStep.getStepName());
 
         //check list of variants without annotation output file
-        assertTrue(vepInputFile.exists());
-        assertEquals("20\t60343\t60343\tG/A\t+", JobTestUtils.readFirstLine(vepInputFile));
+        assertTrue(vepInput.exists());
+        assertEquals("20\t60343\t60343\tG/A\t+", JobTestUtils.readFirstLine(vepInput));
 
         //check that documents have the annotation
-        DBCursor cursor = mongoRule.getCollection(jobOptions.getDbName(), jobOptions.getDbCollectionsVariantsName())
-                .find();
+        DBCursor cursor = mongoRule.getCollection(dbName, COLLECTION_VARIANTS_NAME).find();
 
-        int cnt = 0;
+        int count = 0;
         int consequenceTypeCount = 0;
         while (cursor.hasNext()) {
-            cnt++;
-            DBObject dbObject = (DBObject) cursor.next().get("annot");
+            count++;
+            DBObject dbObject = (DBObject) cursor.next().get(VariantToDBObjectConverter.ANNOTATION_FIELD);
             if (dbObject != null) {
                 VariantAnnotation annot = converter.convertToDataModelType(dbObject);
                 assertNotNull(annot.getConsequenceTypes());
@@ -118,7 +146,7 @@ public class AnnotationJobTest {
             }
         }
 
-        assertEquals(300, cnt);
+        assertEquals(300, count);
         assertEquals(536, consequenceTypeCount);
 
         //check that one line is skipped because malformed
@@ -130,7 +158,28 @@ public class AnnotationJobTest {
 
     @Test
     public void noVariantsToAnnotateOnlyFindVariantsToAnnotateStepShouldRun() throws Exception {
-        JobExecution jobExecution = jobLauncherTestUtils.launchJob();
+        String dbName = mongoRule.getRandomTemporaryDatabaseName();
+        String outputDirAnnot = temporaryFolderRule.getRoot().getAbsolutePath();
+
+        File vepInput = new File(URLHelper.resolveVepInput(outputDirAnnot, INPUT_STUDY_ID, INPUT_VCF_ID));
+        String vepInputName = vepInput.getName();
+        temporaryFolderRule.newFile(vepInputName);
+
+        JobParameters jobParameters = new EvaJobParameterBuilder()
+                .collectionVariantsName(COLLECTION_VARIANTS_NAME)
+                .databaseName(dbName)
+                .inputFasta("")
+                .inputStudyId(INPUT_STUDY_ID)
+                .inputVcfId(INPUT_VCF_ID)
+                .outputDirAnnotation(outputDirAnnot)
+                .vepCachePath("")
+                .vepCacheSpecies("")
+                .vepCacheVersion("")
+                .vepNumForks("")
+                .vepPath(getResource(MOCK_VEP).getPath())
+                .toJobParameters();
+
+        JobExecution jobExecution = jobLauncherTestUtils.launchJob(jobParameters);
 
         assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
         assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());
@@ -140,27 +189,13 @@ public class AnnotationJobTest {
 
         assertEquals(BeanNames.GENERATE_VEP_INPUT_STEP, findVariantsToAnnotateStep.getStepName());
 
-        assertTrue(vepInputFile.exists());
-        assertTrue(Files.size(Paths.get(vepInputFile.toPath().toUri())) == 0);
+        assertTrue(vepInput.exists());
+        assertTrue(Files.size(Paths.get(vepInput.toPath().toUri())) == 0);
     }
 
     @Before
     public void setUp() throws Exception {
-        jobOptions.loadArgs();
-
-        vepInputFile = new File(jobOptions.getVepInput());
-        jobOptions.setAppVepPath(getResource(MOCK_VEP));
-
         converter = new DBObjectToVariantAnnotationConverter();
-    }
-
-    /**
-     * Release resources and delete the temporary output file
-     */
-    @After
-    public void tearDown() throws Exception {
-        vepInputFile.delete();
-        new File(jobOptions.getVepOutput()).delete();
     }
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 EMBL - European Bioinformatics Institute
+ * Copyright 2016-2017 EMBL - European Bioinformatics Institute
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,37 +16,33 @@
 
 package uk.ac.ebi.eva.pipeline.jobs;
 
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.opencb.biodata.models.variant.VariantSource;
 import org.opencb.opencga.lib.common.Config;
-import org.opencb.opencga.storage.core.variant.VariantStorageManager;
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.JobExecution;
+import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-
+import uk.ac.ebi.eva.pipeline.Application;
 import uk.ac.ebi.eva.pipeline.configuration.BeanNames;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
-import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
+import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
+import uk.ac.ebi.eva.utils.EvaJobParameterBuilder;
 
 import java.io.File;
-import java.nio.file.Paths;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
@@ -54,44 +50,38 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResource;
+import static uk.ac.ebi.eva.utils.FileUtils.getResource;
 
 /**
  * Workflow test for {@link GenotypedVcfJob}
+ * <p>
+ * TODO The test should fail when we will integrate the JobParameter validation since there are empty parameters for VEP
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest
-@TestPropertySource({"classpath:genotyped-vcf-workflow.properties"})
+@ActiveProfiles({Application.VARIANT_WRITER_MONGO_PROFILE, Application.VARIANT_ANNOTATION_MONGO_PROFILE})
+@TestPropertySource({"classpath:common-configuration.properties", "classpath:test-mongo.properties"})
 @ContextConfiguration(classes = {GenotypedVcfJob.class, BatchTestConfiguration.class})
 public class GenotypedVcfJobWorkflowTest {
 
     private static final String MOCK_VEP = "/mockvep.pl";
 
-    //TODO check later to substitute files for temporary ones / pay attention to vep Input file
+    private static final String INPUT_FILE = "/input-files/vcf/genotyped.vcf.gz";
 
     @Rule
     public TemporaryMongoRule mongoRule = new TemporaryMongoRule();
 
+    @Rule
+    public PipelineTemporaryFolderRule temporaryFolderRule = new PipelineTemporaryFolderRule();
+
     @Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
 
+    private static String opencgaHome = System.getenv("OPENCGA_HOME") != null ? System
+            .getenv("OPENCGA_HOME") : "/opt/opencga";
+
     @Autowired
-    private JobOptions jobOptions;
-
-    private String inputFileResouce;
-
-    private String outputDir;
-
-    private String compressExtension;
-
-    private String vepInput;
-
-    private String vepOutput;
-
-    private static String opencgaHome = System.getenv("OPENCGA_HOME") != null ? System.getenv("OPENCGA_HOME") :
-            "/opt/opencga";
+    private JobOptions jobOptions;  // we need this for stats.skip and annot.skip
 
     public static final Set<String> EXPECTED_REQUIRED_STEP_NAMES = new TreeSet<>(
             Arrays.asList(BeanNames.LOAD_VARIANTS_STEP, BeanNames.LOAD_FILE_STEP));
@@ -101,13 +91,14 @@ public class GenotypedVcfJobWorkflowTest {
 
     public static final Set<String> EXPECTED_ANNOTATION_STEP_NAMES = new TreeSet<>(
             Arrays.asList(BeanNames.GENERATE_VEP_INPUT_STEP, BeanNames.GENERATE_VEP_ANNOTATION_STEP,
-                          BeanNames.LOAD_VEP_ANNOTATION_STEP));
+                    BeanNames.LOAD_VEP_ANNOTATION_STEP));
 
     @Test
     public void allStepsShouldBeExecuted() throws Exception {
-        initVariantConfigurationJob();
+        EvaJobParameterBuilder builder = initVariantConfigurationJob();
+        JobParameters jobParameters = builder.toJobParameters();
 
-        JobExecution execution = jobLauncherTestUtils.launchJob();
+        JobExecution execution = jobLauncherTestUtils.launchJob(jobParameters);
 
         assertEquals(ExitStatus.COMPLETED, execution.getExitStatus());
 
@@ -141,27 +132,25 @@ public class GenotypedVcfJobWorkflowTest {
 
     @Test
     public void optionalStepsShouldBeSkipped() throws Exception {
-        initVariantConfigurationJob();
+        EvaJobParameterBuilder builder = initVariantConfigurationJob();
+        JobParameters jobParameters = builder.annotationSkip(true).statisticsSkip(true).toJobParameters();
 
-        jobOptions.getPipelineOptions().put(JobParametersNames.ANNOTATION_SKIP, true);
-        jobOptions.getPipelineOptions().put(JobParametersNames.STATISTICS_SKIP, true);
-
-        JobExecution execution = jobLauncherTestUtils.launchJob();
+        JobExecution execution = jobLauncherTestUtils.launchJob(jobParameters);
 
         assertEquals(ExitStatus.COMPLETED, execution.getExitStatus());
 
         Set<String> names = execution.getStepExecutions().stream().map(StepExecution::getStepName)
-                                      .collect(Collectors.toSet());
+                .collect(Collectors.toSet());
 
         assertEquals(EXPECTED_REQUIRED_STEP_NAMES, names);
     }
 
     @Test
     public void statsStepsShouldBeSkipped() throws Exception {
-        initVariantConfigurationJob();
-        jobOptions.getPipelineOptions().put(JobParametersNames.STATISTICS_SKIP, true);
+        EvaJobParameterBuilder builder = initVariantConfigurationJob();
+        JobParameters jobParameters = builder.statisticsSkip(true).toJobParameters();
 
-        JobExecution execution = jobLauncherTestUtils.launchJob();
+        JobExecution execution = jobLauncherTestUtils.launchJob(jobParameters);
 
         assertEquals(ExitStatus.COMPLETED, execution.getExitStatus());
 
@@ -190,10 +179,10 @@ public class GenotypedVcfJobWorkflowTest {
 
     @Test
     public void annotationStepsShouldBeSkipped() throws Exception {
-        initVariantConfigurationJob();
-        jobOptions.getPipelineOptions().put(JobParametersNames.ANNOTATION_SKIP, true);
+        EvaJobParameterBuilder builder = initVariantConfigurationJob();
+        JobParameters jobParameters = builder.annotationSkip(true).toJobParameters();
 
-        JobExecution execution = jobLauncherTestUtils.launchJob();
+        JobExecution execution = jobLauncherTestUtils.launchJob(jobParameters);
 
         assertEquals(ExitStatus.COMPLETED, execution.getExitStatus());
 
@@ -220,52 +209,35 @@ public class GenotypedVcfJobWorkflowTest {
                 .before(nameToStepExecution.get(BeanNames.LOAD_STATISTICS_STEP).getStartTime()));
     }
 
-    /**
-     * JobLauncherTestUtils is initialized here because in GenotypedVcfJob there are two Job beans
-     * in this way it is possible to specify the Job to run (and avoid NoUniqueBeanDefinitionException)
-     *
-     * @throws Exception
-     */
-    @Before
-    public void setUp() throws Exception {
-        jobOptions.loadArgs();
-
-        inputFileResouce = jobOptions.getPipelineOptions().getString(JobParametersNames.INPUT_VCF);
-        outputDir = jobOptions.getOutputDir();
-        compressExtension = jobOptions.getPipelineOptions().getString("compressExtension");
-        vepInput = jobOptions.getPipelineOptions().getString(JobOptions.VEP_INPUT);
-        vepOutput = jobOptions.getPipelineOptions().getString(JobOptions.VEP_OUTPUT);
-    }
-
-    private void initVariantConfigurationJob() {
-        mongoRule.getTemporaryDatabase(jobOptions.getDbName());
-        jobOptions.getPipelineOptions().put(JobParametersNames.INPUT_VCF,
-                                            getResource(inputFileResouce).getAbsolutePath());
-        jobOptions.getPipelineOptions().put(JobParametersNames.APP_VEP_PATH, getResource(MOCK_VEP).getAbsolutePath());
-
+    private EvaJobParameterBuilder initVariantConfigurationJob() throws IOException {
         Config.setOpenCGAHome(opencgaHome);
+        File inputFile = getResource(INPUT_FILE);
+        String dbName = mongoRule.getRandomTemporaryDatabaseName();
+        String outputDirStats = temporaryFolderRule.newFolder().getAbsolutePath();
+        String outputDirAnnotation = temporaryFolderRule.newFolder().getAbsolutePath();
+        File fasta = temporaryFolderRule.newFile();
 
-        // transformedVcf file init
-        String transformedVcf = outputDir + inputFileResouce + ".variants.json" + compressExtension;
-        File transformedVcfFile = new File(transformedVcf);
-        transformedVcfFile.delete();
-        assertFalse(transformedVcfFile.exists());
+        EvaJobParameterBuilder evaJobParameterBuilder = new EvaJobParameterBuilder()
+                .collectionFilesName("files")
+                .collectionVariantsName("variants")
+                .databaseName(dbName)
+                .inputFasta(fasta.getAbsolutePath())
+                .inputStudyId("genotyped-job-workflow")
+                .inputStudyName("inputStudyName")
+                .inputStudyType("COLLECTION")
+                .inputVcf(inputFile.getAbsolutePath())
+                .inputVcfAggregation("NONE")
+                .inputVcfId("1")
+                .outputDirAnnotation(outputDirAnnotation)
+                .outputDirStats(outputDirStats)
+                .timestamp()
+                .vepCachePath("")
+                .vepCacheSpecies("human")
+                .vepCacheVersion("1")
+                .vepNumForks("1")
+                .vepPath(getResource(MOCK_VEP).getPath());
 
-        //stats file init
-        VariantSource source = (VariantSource) jobOptions.getVariantOptions().get(VariantStorageManager.VARIANT_SOURCE);
-        File statsFile = new File(Paths.get(outputDir).resolve(VariantStorageManager.buildFilename(source))
-                                          + ".variants.stats.json.gz");
-        statsFile.delete();
-        assertFalse(statsFile.exists());  // ensure the stats file doesn't exist from previous executions
-
-        // annotation files init
-        File vepInputFile = new File(vepInput);
-        vepInputFile.delete();
-        assertFalse(vepInputFile.exists());
-
-        File vepOutputFile = new File(vepOutput);
-        vepOutputFile.delete();
-        assertFalse(vepOutputFile.exists());
+        return evaJobParameterBuilder;
     }
 
 }

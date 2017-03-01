@@ -17,25 +17,25 @@ package uk.ac.ebi.eva.test.data;
 
 import org.apache.commons.io.FileUtils;
 
-import uk.ac.ebi.eva.test.utils.TestFileUtils;
-
 import java.io.IOException;
+
+import static uk.ac.ebi.eva.utils.FileUtils.getResource;
 
 public class VariantData {
 
-    private static final String VARIANT_WITHOUT_ANNOTATION_PATH = "/annotation/VariantWithOutAnnotation";
-    private static final String VARIANT_WITH_ANNOTATION_PATH = "/annotation/VariantWithAnnotation";
-    private static final String POPULATION_STATS_PATH = "/statistics/PopulationStatistics.json";
+    private static final String VARIANT_WITHOUT_ANNOTATION_PATH = "/input-files/annotation/VariantWithOutAnnotation";
+    private static final String VARIANT_WITH_ANNOTATION_PATH = "/input-files/annotation/VariantWithAnnotation";
+    private static final String POPULATION_STATS_PATH = "/input-files/statistics/PopulationStatistics.json";
 
     public static String getVariantWithoutAnnotation() throws IOException {
-        return FileUtils.readFileToString(TestFileUtils.getResource(VARIANT_WITHOUT_ANNOTATION_PATH));
+        return FileUtils.readFileToString(getResource(VARIANT_WITHOUT_ANNOTATION_PATH));
     }
 
     public static String getVariantWithAnnotation() throws IOException {
-        return FileUtils.readFileToString(TestFileUtils.getResource(VARIANT_WITH_ANNOTATION_PATH));
+        return FileUtils.readFileToString(getResource(VARIANT_WITH_ANNOTATION_PATH));
     }
 
     public static String getPopulationStatistics() throws IOException {
-        return FileUtils.readFileToString(TestFileUtils.getResource(POPULATION_STATS_PATH));
+        return FileUtils.readFileToString(getResource(POPULATION_STATS_PATH));
     }
 }

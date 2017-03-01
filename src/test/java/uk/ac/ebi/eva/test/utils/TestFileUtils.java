@@ -8,6 +8,7 @@ import java.util.zip.GZIPOutputStream;
 
 public abstract class TestFileUtils {
 
+    /** use {@link uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule#newGzipFile(java.lang.String)} instead */
     @Deprecated
     public static File makeGzipFile(String content, String vepOutput) throws IOException {
         File tempFile = new File(vepOutput);
@@ -21,11 +22,7 @@ public abstract class TestFileUtils {
 
     public static void copyResource(String resourcePath, String outputDir) throws IOException {
         File vcfFile = new File(TestFileUtils.class.getResource(resourcePath).getFile());
-        FileCopyUtils.copy(vcfFile, new File(outputDir, resourcePath));
-    }
-
-    public static File getResource(String resourcePath) {
-        return new File(TestFileUtils.class.getResource(resourcePath).getFile());
+        FileCopyUtils.copy(vcfFile, new File(outputDir, vcfFile.getName()));
     }
 
     public static URL getResourceUrl(String resourcePath) {

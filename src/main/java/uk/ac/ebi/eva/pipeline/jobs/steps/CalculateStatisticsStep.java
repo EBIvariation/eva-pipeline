@@ -40,7 +40,7 @@ public class CalculateStatisticsStep {
 
     @Bean
     @StepScope
-    PopulationStatisticsGeneratorStep populationStatisticsGeneratorStep() {
+    public PopulationStatisticsGeneratorStep populationStatisticsGeneratorStep() {
         return new PopulationStatisticsGeneratorStep();
     }
 
@@ -48,7 +48,7 @@ public class CalculateStatisticsStep {
     public TaskletStep calculateStatisticsStep(StepBuilderFactory stepBuilderFactory, JobOptions jobOptions) {
         logger.debug("Building '" + CALCULATE_STATISTICS_STEP + "'");
         return TaskletUtils.generateStep(stepBuilderFactory, CALCULATE_STATISTICS_STEP,
-                populationStatisticsGeneratorStep(), jobOptions);
+                populationStatisticsGeneratorStep(), jobOptions.isAllowStartIfComplete());
     }
 
 }

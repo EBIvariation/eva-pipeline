@@ -36,22 +36,78 @@ public class ParametersValidatorUtilTest {
 
     @Test
     public void validString() throws JobParametersInvalidException {
-        ParametersValidatorUtil.checkIsNotNullOrEmptyString("any string", JOB_PARAMETER_NAME);
-    }
-
-    @Test(expected = JobParametersInvalidException.class)
-    public void stringIsEmpty() throws JobParametersInvalidException {
-        ParametersValidatorUtil.checkIsNotNullOrEmptyString("", JOB_PARAMETER_NAME);
-    }
-
-    @Test(expected = JobParametersInvalidException.class)
-    public void stringIsAWhitespace() throws JobParametersInvalidException {
-        ParametersValidatorUtil.checkIsNotNullOrEmptyString(" ", JOB_PARAMETER_NAME);
+        ParametersValidatorUtil.checkIsValidString("any string", JOB_PARAMETER_NAME);
     }
 
     @Test(expected = JobParametersInvalidException.class)
     public void stringIsNull() throws JobParametersInvalidException {
-        ParametersValidatorUtil.checkIsNotNullOrEmptyString(null, JOB_PARAMETER_NAME);
+        ParametersValidatorUtil.checkIsNotNullString(null, JOB_PARAMETER_NAME);
+    }
+
+    @Test(expected = JobParametersInvalidException.class)
+    public void stringWithNonPrintableCharacter() throws JobParametersInvalidException {
+        ParametersValidatorUtil.checkDoesNotContainPrintableCharacters("R\0al", JOB_PARAMETER_NAME);
+    }
+
+    @Test
+    public void stringWithAccentCharacter() throws JobParametersInvalidException {
+        ParametersValidatorUtil.checkDoesNotContainPrintableCharacters("Réal", JOB_PARAMETER_NAME);
+    }
+
+    @Test
+    public void stringWithDieresisCharacter() throws JobParametersInvalidException {
+        ParametersValidatorUtil.checkDoesNotContainPrintableCharacters("RÜal", JOB_PARAMETER_NAME);
+    }
+
+    @Test
+    public void stringWithTildeCharacter() throws JobParametersInvalidException {
+        ParametersValidatorUtil.checkDoesNotContainPrintableCharacters("R Ã al", JOB_PARAMETER_NAME);
+    }
+
+    @Test
+    public void stringWithStandardLineSeparator() throws JobParametersInvalidException {
+        ParametersValidatorUtil
+                .checkDoesNotContainPrintableCharacters("1000 Genomes Phase 3 \n Version 5", JOB_PARAMETER_NAME);
+    }
+
+    @Test
+    public void stringWithOsXLineSeparator() throws JobParametersInvalidException {
+        ParametersValidatorUtil
+                .checkDoesNotContainPrintableCharacters("1000 Genomes Phase 3 \r Version 5", JOB_PARAMETER_NAME);
+    }
+
+    @Test
+    public void stringWithWindowsLineSeparator() throws JobParametersInvalidException {
+        ParametersValidatorUtil
+                .checkDoesNotContainPrintableCharacters("1000 Genomes Phase 3 \r\n Version 5", JOB_PARAMETER_NAME);
+    }
+
+    @Test
+    public void stringWithAllPrintableCharacters() throws JobParametersInvalidException {
+        ParametersValidatorUtil
+                .checkDoesNotContainPrintableCharacters("1000 Genomes Phase 3 Version 5", JOB_PARAMETER_NAME);
+    }
+
+    @Test
+    public void stringSmallerThan250Characters() throws JobParametersInvalidException {
+        ParametersValidatorUtil.checkLength("1000 Genomes Phase 3 Version 5", JOB_PARAMETER_NAME);
+    }
+
+    @Test(expected = JobParametersInvalidException.class)
+    public void stringBiggerThan250Characters() throws JobParametersInvalidException {
+        ParametersValidatorUtil.checkLength(
+                "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.",
+                JOB_PARAMETER_NAME);
+    }
+
+    @Test(expected = JobParametersInvalidException.class)
+    public void stringIsEmpty() throws JobParametersInvalidException {
+        ParametersValidatorUtil.checkLength("", JOB_PARAMETER_NAME);
+    }
+
+    @Test(expected = JobParametersInvalidException.class)
+    public void stringIsAWhitespace() throws JobParametersInvalidException {
+        ParametersValidatorUtil.checkLength(" ", JOB_PARAMETER_NAME);
     }
 
 

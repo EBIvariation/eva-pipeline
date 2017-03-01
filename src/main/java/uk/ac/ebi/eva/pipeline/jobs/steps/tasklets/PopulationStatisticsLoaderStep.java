@@ -40,9 +40,10 @@ import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
-import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
-import uk.ac.ebi.eva.utils.MongoDBHelper;
+import uk.ac.ebi.eva.pipeline.parameters.DatabaseParameters;
+import uk.ac.ebi.eva.pipeline.parameters.InputParameters;
+import uk.ac.ebi.eva.pipeline.parameters.MongoConnection;
+import uk.ac.ebi.eva.pipeline.parameters.OutputParameters;
 import uk.ac.ebi.eva.utils.URLHelper;
 
 import java.io.FileInputStream;
@@ -50,7 +51,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.UnknownHostException;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
@@ -97,12 +97,14 @@ import java.util.zip.GZIPInputStream;
 public class PopulationStatisticsLoaderStep implements Tasklet {
     private static final Logger logger = LoggerFactory.getLogger(PopulationStatisticsLoaderStep.class);
 
-    private static final String VARIANT_STATS_SUFFIX = ".variants.stats.json.gz";
-
-    private static final String SOURCE_STATS_SUFFIX = ".source.stats.json.gz";
+    @Autowired
+    private InputParameters inputParameters;
 
     @Autowired
-    private JobOptions jobOptions;
+    private OutputParameters outputParameters;
+
+    @Autowired
+    private DatabaseParameters dbParameters;
 
     private JsonFactory jsonFactory;
 
@@ -116,51 +118,64 @@ public class PopulationStatisticsLoaderStep implements Tasklet {
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
-        ObjectMap variantOptions = jobOptions.getVariantOptions();
-        ObjectMap pipelineOptions = jobOptions.getPipelineOptions();
-
-        VariantSource variantSource = variantOptions.get(VariantStorageManager.VARIANT_SOURCE, VariantSource.class);
-        URI outdirUri = URLHelper.createUri(pipelineOptions.getString(JobParametersNames.OUTPUT_DIR_STATISTICS));
-        URI statsOutputUri = outdirUri.resolve(MongoDBHelper.buildStorageFileId(
-                variantSource.getStudyId(), variantSource.getFileId()));
-
-        VariantDBAdaptor dbAdaptor = getDbAdaptor(pipelineOptions);
-        QueryOptions statsOptions = new QueryOptions(variantOptions);
+        VariantDBAdaptor dbAdaptor = getDbAdaptor();
+        URI variantStatsOutputUri = URLHelper.getVariantsStatsUri(
+                outputParameters.getOutputDirStatistics(), inputParameters.getStudyId(), inputParameters.getVcfId());
+        URI sourceStatsOutputUri = URLHelper.getSourceStatsUri(
+                outputParameters.getOutputDirStatistics(), inputParameters.getStudyId(), inputParameters.getVcfId());
+        QueryOptions statsOptions = new QueryOptions(getVariantOptions());
 
         // Load statistics for variants and the file
-        loadVariantStats(dbAdaptor, statsOutputUri, statsOptions);
-        loadSourceStats(dbAdaptor, statsOutputUri);
+        loadVariantStats(dbAdaptor, variantStatsOutputUri, statsOptions);
+        loadSourceStats(dbAdaptor, sourceStatsOutputUri);
 
         return RepeatStatus.FINISHED;
     }
 
-    private VariantDBAdaptor getDbAdaptor(ObjectMap properties) throws UnknownHostException, IllegalOpenCGACredentialsException {
-        MongoCredentials credentials = getMongoCredentials(properties);
-        String variantsCollectionName = properties.getString(JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME);
-        String filesCollectionName = properties.getString(JobParametersNames.DB_COLLECTIONS_FILES_NAME);
+    private ObjectMap getVariantOptions() {
+        ObjectMap variantOptions = new ObjectMap();
+        variantOptions.put(VariantStorageManager.VARIANT_SOURCE, getVariantSource());
+        variantOptions.put(VariantStorageManager.OVERWRITE_STATS, outputParameters.getStatisticsOverwrite());
+        return variantOptions;
+    }
+
+    private VariantSource getVariantSource() {
+        return new VariantSource(
+                    Paths.get(inputParameters.getVcf()).getFileName().toString(),
+                    inputParameters.getVcfId(),
+                    inputParameters.getStudyId(),
+                    inputParameters.getStudyName(),
+                    inputParameters.getStudyType(),
+                    inputParameters.getVcfAggregation());
+    }
+    private VariantDBAdaptor getDbAdaptor() throws UnknownHostException, IllegalOpenCGACredentialsException {
+        MongoCredentials credentials = getMongoCredentials();
+        String variantsCollectionName = dbParameters.getCollectionVariantsName();
+        String filesCollectionName = dbParameters.getCollectionFilesName();
 
         logger.debug("Getting DBAdaptor to database '{}'", credentials.getMongoDbName());
         return new VariantMongoDBAdaptor(credentials, variantsCollectionName, filesCollectionName);
     }
 
-    private MongoCredentials getMongoCredentials(ObjectMap properties) throws IllegalOpenCGACredentialsException {
-        String hosts = properties.getString(JobParametersNames.CONFIG_DB_HOSTS);
+    private MongoCredentials getMongoCredentials() throws IllegalOpenCGACredentialsException {
+        MongoConnection mongoConnection = dbParameters.getMongoConnection();
+        String hosts = mongoConnection.getHosts();
         List<DataStoreServerAddress> dataStoreServerAddresses = MongoCredentials.parseDataStoreServerAddresses(hosts);
 
-        String dbName = properties.getString(JobParametersNames.DB_NAME);
-        String authenticationDatabase = properties.getString(JobParametersNames.CONFIG_DB_AUTHENTICATIONDB, null);
-        String user = properties.getString(JobParametersNames.CONFIG_DB_USER, null);
-        String pass = properties.getString(JobParametersNames.CONFIG_DB_PASSWORD, null);
+        String dbName = dbParameters.getDatabaseName();
+        String user = mongoConnection.getUser();
+        String pass = mongoConnection.getPassword();
 
         MongoCredentials mongoCredentials = new MongoCredentials(dataStoreServerAddresses, dbName, user, pass);
-        mongoCredentials.setAuthenticationDatabase(authenticationDatabase);
+        mongoCredentials.setAuthenticationDatabase(mongoConnection.getAuthenticationDatabase());
         return mongoCredentials;
     }
 
-    private void loadVariantStats(VariantDBAdaptor variantDBAdaptor, URI uri, QueryOptions options) throws IOException {
+    private void loadVariantStats(VariantDBAdaptor variantDBAdaptor, URI variantsStatsUri, QueryOptions options)
+            throws IOException {
+
         // Open input stream
-        Path variantInput = Paths.get(uri.getPath() + VARIANT_STATS_SUFFIX);
-        InputStream variantInputStream = new GZIPInputStream(new FileInputStream(variantInput.toFile()));
+        InputStream variantInputStream = new GZIPInputStream(new FileInputStream(variantsStatsUri.getPath()));
 
         // Initialize JSON parser
         JsonParser parser = jsonFactory.createParser(variantInputStream);
@@ -196,14 +211,14 @@ public class PopulationStatisticsLoaderStep implements Tasklet {
 
         if (writes < variantsNumber) {
             logger.warn("provided statistics of {} variants, but only {} were updated", variantsNumber, writes);
-            logger.info("note: maybe those variants didn't had the proper study? maybe the new and the old stats were the same?");
+            logger.info(
+                    "note: maybe those variants didn't had the proper study? maybe the new and the old stats were the same?");
         }
     }
 
-    private void loadSourceStats(VariantDBAdaptor variantDBAdaptor, URI uri) throws IOException {
+    private void loadSourceStats(VariantDBAdaptor variantDBAdaptor, URI sourceStatsUri) throws IOException {
         // Open input stream
-        Path sourceInput = Paths.get(uri.getPath() + SOURCE_STATS_SUFFIX);
-        InputStream sourceInputStream = new GZIPInputStream(new FileInputStream(sourceInput.toFile()));
+        InputStream sourceInputStream = new GZIPInputStream(new FileInputStream(sourceStatsUri.getPath()));
 
         // Read from JSON file
         JsonParser sourceParser = jsonFactory.createParser(sourceInputStream);

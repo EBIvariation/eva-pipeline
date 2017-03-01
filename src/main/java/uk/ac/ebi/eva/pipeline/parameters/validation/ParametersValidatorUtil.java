@@ -15,22 +15,54 @@
  */
 package uk.ac.ebi.eva.pipeline.parameters.validation;
 
-import com.google.common.base.Strings;
 import org.springframework.batch.core.JobParametersInvalidException;
 
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.regex.Pattern;
 
 /**
  * Utility class to hold the low level checks on strings, dirs, files... parameters
  */
 public class ParametersValidatorUtil {
 
-    static void checkIsNotNullOrEmptyString(String stringToValidate,
-                                            String jobParametersName) throws JobParametersInvalidException {
-        if (Strings.isNullOrEmpty(stringToValidate) || stringToValidate.trim().length() == 0) {
+    static void checkIsValidString(String stringToValidate,
+                                   String jobParametersName) throws JobParametersInvalidException {
+        checkIsNotNullString(stringToValidate, jobParametersName);
+        checkDoesNotContainPrintableCharacters(stringToValidate, jobParametersName);
+        checkLength(stringToValidate, jobParametersName);
+    }
+
+    /**
+     * \n or \r are valid non-printable characters
+     */
+    static void checkDoesNotContainPrintableCharacters(String stringToValidate,
+                                                       String jobParametersName) throws JobParametersInvalidException {
+        Pattern regex = Pattern.compile("[\\p{C}&&[^\n]&&[^\r]]");
+
+        if (regex.matcher(stringToValidate).find()) {
+            throw new JobParametersInvalidException(
+                    String.format("%s in %s contains non printable characters", stringToValidate, jobParametersName));
+        }
+    }
+
+    static void checkIsNotNullString(String stringToValidate,
+                                     String jobParametersName) throws JobParametersInvalidException {
+        if (stringToValidate == null) {
+            throw new JobParametersInvalidException(
+                    String.format("%s value is null", jobParametersName));
+        }
+    }
+
+    static void checkLength(String stringToValidate, String jobParametersName) throws JobParametersInvalidException {
+        if (stringToValidate.length() >= 250) {
+            throw new JobParametersInvalidException(
+                    String.format("%s in %s can't exceed 250 characters", stringToValidate, jobParametersName));
+        }
+
+        if (stringToValidate.trim().length() == 0) {
             throw new JobParametersInvalidException(
                     String.format("%s in %s must be specified", stringToValidate, jobParametersName));
         }

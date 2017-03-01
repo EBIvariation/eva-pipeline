@@ -27,16 +27,16 @@ import org.opencb.biodata.models.variant.annotation.VariantAnnotation;
 import org.opencb.opencga.storage.mongodb.variant.DBObjectToVariantAnnotationConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoOperations;
+import org.springframework.data.mongodb.core.mapping.MongoMappingContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-
+import uk.ac.ebi.eva.commons.models.converters.data.VariantToDBObjectConverter;
+import uk.ac.ebi.eva.pipeline.Application;
 import uk.ac.ebi.eva.pipeline.configuration.MongoConfiguration;
-import uk.ac.ebi.eva.pipeline.configuration.writers.VariantAnnotationWriterConfiguration;
 import uk.ac.ebi.eva.pipeline.io.mappers.AnnotationLineMapper;
-import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
-import uk.ac.ebi.eva.test.configuration.BaseTestConfiguration;
+import uk.ac.ebi.eva.pipeline.parameters.MongoConnection;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 import uk.ac.ebi.eva.utils.MongoDBHelper;
 
@@ -58,19 +58,21 @@ import static uk.ac.ebi.eva.test.data.VepOutputContent.vepOutputContent;
  * "consequence types" annotations set
  */
 @RunWith(SpringRunner.class)
-@ActiveProfiles("variant-annotation-mongo")
-@TestPropertySource("classpath:annotation.properties")
-@ContextConfiguration(classes = {BaseTestConfiguration.class, VariantAnnotationWriterConfiguration.class})
+@ActiveProfiles(Application.VARIANT_ANNOTATION_MONGO_PROFILE)
+@TestPropertySource({"classpath:test-mongo.properties"})
+@ContextConfiguration(classes = {MongoConnection.class, MongoMappingContext.class})
 public class VepAnnotationMongoWriterTest {
 
+    private static final String COLLECTION_VARIANTS_NAME = "variants";
+
     @Autowired
-    private MongoConfiguration mongoConfiguration;
+    private MongoConnection mongoConnection;
+
+    @Autowired
+    private MongoMappingContext mongoMappingContext;
 
     @Rule
     public TemporaryMongoRule mongoRule = new TemporaryMongoRule();
-
-    @Autowired
-    private JobOptions jobOptions;
 
     private DBObjectToVariantAnnotationConverter converter;
     private VepAnnotationMongoWriter annotationWriter;
@@ -85,30 +87,30 @@ public class VepAnnotationMongoWriterTest {
             annotations.add(AnnotationLineMapper.mapLine(annotLine, 0));
         }
 
-        String dbCollectionVariantsName = jobOptions.getDbCollectionsVariantsName();
-        DBCollection variants = mongoRule.getCollection(databaseName, dbCollectionVariantsName);
+        DBCollection variants = mongoRule.getCollection(databaseName, COLLECTION_VARIANTS_NAME);
 
         // first do a mock of a "variants" collection, with just the _id
         writeIdsIntoMongo(annotations, variants);
 
         // now, load the annotation
-        MongoOperations operations = mongoConfiguration.getMongoOperations(
-                databaseName, jobOptions.getMongoConnection());
-        annotationWriter = new VepAnnotationMongoWriter(operations, dbCollectionVariantsName);
+        MongoOperations operations = MongoConfiguration.getMongoOperations(databaseName, mongoConnection,
+                mongoMappingContext);
+        annotationWriter = new VepAnnotationMongoWriter(operations, COLLECTION_VARIANTS_NAME);
         annotationWriter.write(annotations);
 
         // and finally check that documents in DB have annotation (only consequence type)
         DBCursor cursor = variants.find();
 
-        int cnt = 0;
+        int count = 0;
         int consequenceTypeCount = 0;
         while (cursor.hasNext()) {
-            cnt++;
-            VariantAnnotation annot = converter.convertToDataModelType((DBObject) cursor.next().get("annot"));
+            count++;
+            VariantAnnotation annot = converter.convertToDataModelType(
+                    (DBObject) cursor.next().get(VariantToDBObjectConverter.ANNOTATION_FIELD));
             assertNotNull(annot.getConsequenceTypes());
             consequenceTypeCount += annot.getConsequenceTypes().size();
         }
-        assertTrue(cnt > 0);
+        assertTrue(count > 0);
         assertEquals(annotations.size(), consequenceTypeCount);
     }
 
@@ -125,7 +127,7 @@ public class VepAnnotationMongoWriterTest {
         for (String annotLine : vepOutputContent.split("\n")) {
             annotations.add(AnnotationLineMapper.mapLine(annotLine, 0));
         }
-        String dbCollectionVariantsName = jobOptions.getDbCollectionsVariantsName();
+        String dbCollectionVariantsName = COLLECTION_VARIANTS_NAME;
         DBCollection variants = mongoRule.getCollection(databaseName, dbCollectionVariantsName);
 
         // first do a mock of a "variants" collection, with just the _id
@@ -151,8 +153,8 @@ public class VepAnnotationMongoWriterTest {
         }
 
         // now, load the annotation
-        MongoOperations operations = mongoConfiguration.getMongoOperations(
-                databaseName, jobOptions.getMongoConnection());
+        MongoOperations operations = MongoConfiguration.getMongoOperations(databaseName, mongoConnection,
+                mongoMappingContext);
         annotationWriter = new VepAnnotationMongoWriter(operations, dbCollectionVariantsName);
 
         annotationWriter.write(annotationSet1);
@@ -166,7 +168,8 @@ public class VepAnnotationMongoWriterTest {
             DBObject dbObject = cursor.next();
             String id = dbObject.get("_id").toString();
 
-            VariantAnnotation annot = converter.convertToDataModelType((DBObject) dbObject.get("annot"));
+            VariantAnnotation annot = converter.convertToDataModelType(
+                    (DBObject) dbObject.get(VariantToDBObjectConverter.ANNOTATION_FIELD));
 
             if (id.equals("20_63360_C_T") || id.equals("20_63399_G_A") || id.equals("20_63426_G_T")) {
                 assertEquals(2, annot.getConsequenceTypes().size());

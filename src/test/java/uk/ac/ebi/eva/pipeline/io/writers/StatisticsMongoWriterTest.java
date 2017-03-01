@@ -26,14 +26,13 @@ import org.junit.runner.RunWith;
 import org.springframework.batch.item.file.mapping.JsonLineMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoOperations;
+import org.springframework.data.mongodb.core.mapping.MongoMappingContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-
 import uk.ac.ebi.eva.pipeline.configuration.MongoConfiguration;
 import uk.ac.ebi.eva.pipeline.model.PopulationStatistics;
-import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
-import uk.ac.ebi.eva.test.configuration.BaseTestConfiguration;
+import uk.ac.ebi.eva.pipeline.parameters.MongoConnection;
 import uk.ac.ebi.eva.test.data.VariantData;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 
@@ -51,22 +50,24 @@ import static org.junit.Assert.assertNotNull;
  * {@link StatisticsMongoWriter}
  * input: a List of {@link PopulationStatistics} to each call of `.write()`
  * output: the FeatureCoordinates get written in mongo, with at least: chromosome, start and end.
- *
+ * <p>
  * TODO Replace MongoDBHelper with StatisticsMongoWriterConfiguration in ContextConfiguration when the class exists
  */
 @RunWith(SpringRunner.class)
-@TestPropertySource({"classpath:common-configuration.properties"})
-@ContextConfiguration(classes = {BaseTestConfiguration.class, MongoConfiguration.class})
+@TestPropertySource({"classpath:test-mongo.properties"})
+@ContextConfiguration(classes = {MongoConnection.class, MongoMappingContext.class})
 public class StatisticsMongoWriterTest {
 
+    private static final String COLLECTION_STATS_NAME = "populationStatistics";
+
     @Autowired
-    private MongoConfiguration mongoConfiguration;
+    private MongoConnection mongoConnection;
+
+    @Autowired
+    private MongoMappingContext mongoMappingContext;
 
     @Rule
     public TemporaryMongoRule mongoRule = new TemporaryMongoRule();
-
-    @Autowired
-    private JobOptions jobOptions;
 
     @Test
     public void shouldWriteAllFieldsIntoMongoDb() throws Exception {
@@ -75,13 +76,13 @@ public class StatisticsMongoWriterTest {
         String databaseName = mongoRule.getRandomTemporaryDatabaseName();
         StatisticsMongoWriter statisticsMongoWriter = getStatisticsMongoWriter(databaseName);
 
-        int n = 1;
-        for (int i = 0; i < n; i++) {
+        int expectedDocumentsCount = 1;
+        for (int i = 0; i < expectedDocumentsCount; i++) {
             statisticsMongoWriter.write(populationStatisticsList);
         }
 
         // do the checks
-        DBCollection statsCollection = mongoRule.getCollection(databaseName, jobOptions.getDbCollectionsStatsName());
+        DBCollection statsCollection = mongoRule.getCollection(databaseName, COLLECTION_STATS_NAME);
         // count documents in DB and check they have at least the index fields (vid, sid, cid) and maf and genotypeCount
         DBCursor cursor = statsCollection.find();
 
@@ -99,7 +100,7 @@ public class StatisticsMongoWriterTest {
             assertNotNull(next.get("maf"));
             assertNotNull(next.get("numGt"));
         }
-        assertEquals(n, count);
+        assertEquals(expectedDocumentsCount, count);
     }
 
     @Test
@@ -111,7 +112,7 @@ public class StatisticsMongoWriterTest {
         statisticsMongoWriter.write(populationStatisticsList);
 
         // do the checks
-        DBCollection statsCollection = mongoRule.getCollection(databaseName, jobOptions.getDbCollectionsStatsName());
+        DBCollection statsCollection = mongoRule.getCollection(databaseName, COLLECTION_STATS_NAME);
 
         // check there is an index in chr + start + ref + alt + sid + cid
         List<DBObject> indexes = new ArrayList<>();
@@ -168,10 +169,9 @@ public class StatisticsMongoWriterTest {
     }
 
     public StatisticsMongoWriter getStatisticsMongoWriter(String databaseName) throws UnknownHostException {
-        MongoOperations operations = mongoConfiguration.getMongoOperations(
-                databaseName, jobOptions.getMongoConnection());
-        StatisticsMongoWriter statisticsMongoWriter = new StatisticsMongoWriter(
-                operations, jobOptions.getDbCollectionsStatsName());
+        MongoOperations operations = MongoConfiguration.getMongoOperations(databaseName, mongoConnection,
+                mongoMappingContext);
+        StatisticsMongoWriter statisticsMongoWriter = new StatisticsMongoWriter(operations, COLLECTION_STATS_NAME);
         return statisticsMongoWriter;
     }
 }

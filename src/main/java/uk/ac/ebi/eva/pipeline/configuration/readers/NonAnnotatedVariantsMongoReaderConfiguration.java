@@ -16,37 +16,25 @@
 package uk.ac.ebi.eva.pipeline.configuration.readers;
 
 import org.springframework.batch.core.configuration.annotation.StepScope;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 import org.springframework.data.mongodb.core.MongoOperations;
-
-import uk.ac.ebi.eva.pipeline.configuration.MongoConfiguration;
 import uk.ac.ebi.eva.pipeline.io.readers.NonAnnotatedVariantsMongoReader;
-import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
-
-import java.net.UnknownHostException;
+import uk.ac.ebi.eva.pipeline.parameters.DatabaseParameters;
 
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.NON_ANNOTATED_VARIANTS_READER;
 
 /**
- * Configuration to inject a NonannotatedVariants bean that reads from a mongo database in the pipeline
+ * Configuration to inject a NonAnnotatedVariantsMongoReader bean that reads from a mongo database in the pipeline
  */
 @Configuration
-@Import({ MongoConfiguration.class })
 public class NonAnnotatedVariantsMongoReaderConfiguration {
-
-    @Autowired
-    private MongoConfiguration mongoConfiguration;
 
     @Bean(NON_ANNOTATED_VARIANTS_READER)
     @StepScope
-    public NonAnnotatedVariantsMongoReader nonAnnotatedVariantsMongoReader(JobOptions jobOptions)
-            throws UnknownHostException {
-        MongoOperations mongoOperations = mongoConfiguration.getMongoOperations(
-                jobOptions.getDbName(), jobOptions.getMongoConnection());
-        return new NonAnnotatedVariantsMongoReader(mongoOperations, jobOptions.getDbCollectionsVariantsName());
+    public NonAnnotatedVariantsMongoReader nonAnnotatedVariantsMongoReader(MongoOperations mongoOperations,
+                                                                           DatabaseParameters databaseParameters) {
+        return new NonAnnotatedVariantsMongoReader(mongoOperations, databaseParameters.getCollectionVariantsName());
     }
 
 }

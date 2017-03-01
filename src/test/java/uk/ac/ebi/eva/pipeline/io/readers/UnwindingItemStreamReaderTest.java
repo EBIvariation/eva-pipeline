@@ -18,8 +18,6 @@ package uk.ac.ebi.eva.pipeline.io.readers;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.opencb.biodata.models.variant.VariantSource;
-import org.opencb.biodata.models.variant.VariantStudy;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.file.FlatFileParseException;
@@ -27,8 +25,8 @@ import org.springframework.batch.test.MetaDataInstanceFactory;
 
 import uk.ac.ebi.eva.commons.models.data.Variant;
 import uk.ac.ebi.eva.commons.models.data.VariantSourceEntry;
+import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
-import uk.ac.ebi.eva.test.utils.TestFileUtils;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -37,35 +35,32 @@ import java.util.zip.GZIPInputStream;
 import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static uk.ac.ebi.eva.utils.FileUtils.getResource;
 
 public class UnwindingItemStreamReaderTest {
     
     @Rule
     public ExpectedException exception = ExpectedException.none();
 
-    private static final String INPUT_FILE_PATH = "/small20.vcf.gz";
+    @Rule
+    public PipelineTemporaryFolderRule temporaryFolderRule = new PipelineTemporaryFolderRule();
 
-    private static final String INPUT_WRONG_FILE_PATH = "/wrong_no_alt.vcf.gz";
+    private static final String INPUT_FILE_PATH = "/input-files/vcf/genotyped.vcf.gz";
+
+    private static final String INPUT_WRONG_FILE_PATH = "/input-files/vcf/wrong_no_alt.vcf.gz";
 
     private static final String FILE_ID = "5";
 
     private static final String STUDY_ID = "7";
-
-    private static final String STUDY_NAME = "study name";
 
     @Test
     public void shouldReadAllLines() throws Exception {
         ExecutionContext executionContext = MetaDataInstanceFactory.createStepExecution().getExecutionContext();
 
         // input vcf
-        File input = TestFileUtils.getResource(INPUT_FILE_PATH);
+        File input = getResource(INPUT_FILE_PATH);
 
-        VariantSource source = new VariantSource(input.getAbsolutePath(), FILE_ID, STUDY_ID, STUDY_NAME,
-                                                 VariantStudy.StudyType.COLLECTION,
-                                                 VariantSource.Aggregation.NONE);
-
-
-        VcfReader vcfReader = new VcfReader(source, input);
+        VcfReader vcfReader = new VcfReader(FILE_ID, STUDY_ID, input);
         vcfReader.setSaveState(false);
 
         UnwindingItemStreamReader<Variant> unwindingItemStreamReader = new UnwindingItemStreamReader<>(vcfReader);
@@ -79,13 +74,9 @@ public class UnwindingItemStreamReaderTest {
         ExecutionContext executionContext = MetaDataInstanceFactory.createStepExecution().getExecutionContext();
 
         // input vcf
-        File input = TestFileUtils.getResource(INPUT_WRONG_FILE_PATH);
+        File input = getResource(INPUT_WRONG_FILE_PATH);
 
-        VariantSource source = new VariantSource(input.getAbsolutePath(), FILE_ID, STUDY_ID, STUDY_NAME,
-                                                 VariantStudy.StudyType.COLLECTION,
-                                                 VariantSource.Aggregation.NONE);
-
-        VcfReader vcfReader = new VcfReader(source, input);
+        VcfReader vcfReader = new VcfReader(FILE_ID, STUDY_ID, input);
         vcfReader.setSaveState(false);
 
         UnwindingItemStreamReader<Variant> unwindingItemStreamReader = new UnwindingItemStreamReader<>(vcfReader);
@@ -102,15 +93,11 @@ public class UnwindingItemStreamReaderTest {
         ExecutionContext executionContext = MetaDataInstanceFactory.createStepExecution().getExecutionContext();
 
         // uncompress the input VCF into a temporary file
-        File input = TestFileUtils.getResource(INPUT_FILE_PATH);
-        File tempFile = JobTestUtils.createTempFile();  // TODO replace with temporary rules
+        File input = getResource(INPUT_FILE_PATH);
+        File tempFile = temporaryFolderRule.newFile();
         JobTestUtils.uncompress(input.getAbsolutePath(), tempFile);
 
-        VariantSource source = new VariantSource(input.getAbsolutePath(), FILE_ID, STUDY_ID, STUDY_NAME,
-                                                 VariantStudy.StudyType.COLLECTION,
-                                                 VariantSource.Aggregation.NONE);
-
-        VcfReader vcfReader = new VcfReader(source, tempFile);
+        VcfReader vcfReader = new VcfReader(FILE_ID, STUDY_ID, tempFile);
         vcfReader.setSaveState(false);
 
         UnwindingItemStreamReader<Variant> unwindingItemStreamReader = new UnwindingItemStreamReader<>(vcfReader);

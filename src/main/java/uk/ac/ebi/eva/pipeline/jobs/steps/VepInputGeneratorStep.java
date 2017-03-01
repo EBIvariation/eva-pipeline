@@ -16,18 +16,19 @@
 package uk.ac.ebi.eva.pipeline.jobs.steps;
 
 import com.mongodb.DBObject;
-import org.opencb.datastore.core.ObjectMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.item.ItemStreamWriter;
+import org.springframework.batch.repeat.policy.SimpleCompletionPolicy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import uk.ac.ebi.eva.pipeline.configuration.ChunkSizeCompletionPolicyConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.readers.NonAnnotatedVariantsMongoReaderConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.writers.VepInputFlatFileWriterConfiguration;
 import uk.ac.ebi.eva.pipeline.io.readers.NonAnnotatedVariantsMongoReader;
@@ -35,7 +36,6 @@ import uk.ac.ebi.eva.pipeline.io.writers.VepInputFlatFileWriter;
 import uk.ac.ebi.eva.pipeline.jobs.steps.processors.AnnotationProcessor;
 import uk.ac.ebi.eva.pipeline.model.VariantWrapper;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
-import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.GENERATE_VEP_INPUT_STEP;
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.NON_ANNOTATED_VARIANTS_READER;
@@ -58,7 +58,8 @@ import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VEP_INPUT_WRITER;
  */
 @Configuration
 @EnableBatchProcessing
-@Import({NonAnnotatedVariantsMongoReaderConfiguration.class, VepInputFlatFileWriterConfiguration.class})
+@Import({NonAnnotatedVariantsMongoReaderConfiguration.class, VepInputFlatFileWriterConfiguration.class,
+        ChunkSizeCompletionPolicyConfiguration.class})
 public class VepInputGeneratorStep {
 
     private static final Logger logger = LoggerFactory.getLogger(VepInputGeneratorStep.class);
@@ -72,19 +73,16 @@ public class VepInputGeneratorStep {
     private ItemStreamWriter<VariantWrapper> writer;
 
     @Bean(GENERATE_VEP_INPUT_STEP)
-    public Step generateVepInputStep(StepBuilderFactory stepBuilderFactory, JobOptions jobOptions) {
+    public Step generateVepInputStep(StepBuilderFactory stepBuilderFactory, JobOptions jobOptions,
+                                     SimpleCompletionPolicy chunkSizeCompletionPolicy) {
         logger.debug("Building '" + GENERATE_VEP_INPUT_STEP + "'");
 
-        ObjectMap pipelineOptions = jobOptions.getPipelineOptions();
-        boolean startIfcomplete = pipelineOptions.getBoolean(JobParametersNames.CONFIG_RESTARTABILITY_ALLOW);
-        int chunkSize = pipelineOptions.getInt(JobParametersNames.CONFIG_CHUNK_SIZE);
-
         return stepBuilderFactory.get(GENERATE_VEP_INPUT_STEP)
-                .<DBObject, VariantWrapper>chunk(chunkSize)
+                .<DBObject, VariantWrapper>chunk(chunkSizeCompletionPolicy)
                 .reader(reader)
                 .processor(new AnnotationProcessor())
                 .writer(writer)
-                .allowStartIfComplete(startIfcomplete)
+                .allowStartIfComplete(jobOptions.isAllowStartIfComplete())
                 .build();
     }
 }

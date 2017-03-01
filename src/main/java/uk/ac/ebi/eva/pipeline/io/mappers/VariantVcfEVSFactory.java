@@ -16,21 +16,22 @@
  */
 package uk.ac.ebi.eva.pipeline.io.mappers;
 
-import org.opencb.biodata.models.variant.VariantSource;
-
 import uk.ac.ebi.eva.commons.models.data.Variant;
 import uk.ac.ebi.eva.commons.models.data.VariantSourceEntry;
 import uk.ac.ebi.eva.commons.models.data.VariantStats;
+import uk.ac.ebi.eva.utils.FileUtils;
 
+import java.io.IOException;
 import java.util.Properties;
 import java.util.Set;
 
 /**
- * Overrides the methods in VariantAggregatedVcfFactory that take care of the fields QUAL, FILTER and INFO, to support 
+ * Overrides the methods in VariantAggregatedVcfFactory that take care of the fields QUAL, FILTER and INFO, to support
  * the specific format of Exome Variant Server VCFs.
  */
 public class VariantVcfEVSFactory extends VariantAggregatedVcfFactory {
 
+    private static final String EVS_MAPPING_FILE = "/mappings/evs-mapping.properties";
 
     public VariantVcfEVSFactory() {
         this(null);
@@ -61,13 +62,22 @@ public class VariantVcfEVSFactory extends VariantAggregatedVcfFactory {
         super(tagMap);
     }
 
+    @Override
+    protected void loadDefaultMappings() {
+        try {
+            loadMappings(FileUtils.getPropertiesFile(FileUtils.getResourceAsStream(EVS_MAPPING_FILE)));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     @Override
-    protected void setOtherFields(Variant variant, VariantSource source, Set<String> ids, float quality, String filter,
-                                  String info, String format, int numAllele, String[] alternateAlleles, String line) {
+    protected void setOtherFields(Variant variant, String fileId, String studyId, Set<String> ids, float quality,
+                                  String filter, String info, String format, int numAllele, String[] alternateAlleles,
+                                  String line) {
         // Fields not affected by the structure of REF and ALT fields
         variant.setIds(ids);
-        VariantSourceEntry sourceEntry = variant.getSourceEntry(source.getFileId(), source.getStudyId());
+        VariantSourceEntry sourceEntry = variant.getSourceEntry(fileId, studyId);
         if (quality > -1) {
             sourceEntry.addAttribute("QUAL", String.valueOf(quality));
         }
@@ -75,21 +85,21 @@ public class VariantVcfEVSFactory extends VariantAggregatedVcfFactory {
             sourceEntry.addAttribute("FILTER", filter);
         }
         if (!info.isEmpty()) {
-            parseInfo(variant, source.getFileId(), source.getStudyId(), info, numAllele);
+            parseInfo(variant, fileId, studyId, info, numAllele);
         }
         sourceEntry.setFormat(format);
         sourceEntry.addAttribute("src", line);
 
 
         if (tagMap == null) {   // whether we can parse population stats or not
-            parseEVSAttributes(variant, source, numAllele, alternateAlleles);
+            parseEVSAttributes(variant, fileId, studyId, numAllele, alternateAlleles);
         } else {
             parseCohortEVSInfo(variant, sourceEntry, numAllele, alternateAlleles);
         }
     }
 
-    private void parseEVSAttributes(Variant variant, VariantSource source, int numAllele, String[] alternateAlleles) {
-        VariantSourceEntry file = variant.getSourceEntry(source.getFileId(), source.getStudyId());
+    private void parseEVSAttributes(Variant variant, String fileId, String studyId, int numAllele, String[] alternateAlleles) {
+        VariantSourceEntry file = variant.getSourceEntry(fileId, studyId);
         VariantStats stats = new VariantStats(variant);
         if (file.hasAttribute("MAF")) {
             String splitsMAF[] = file.getAttribute("MAF").split(",");

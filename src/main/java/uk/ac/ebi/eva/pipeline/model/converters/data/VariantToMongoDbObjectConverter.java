@@ -17,7 +17,6 @@ package uk.ac.ebi.eva.pipeline.model.converters.data;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
-import org.opencb.opencga.storage.core.variant.VariantStorageManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.convert.converter.Converter;
@@ -44,11 +43,16 @@ public class VariantToMongoDbObjectConverter implements Converter<Variant, DBObj
 
     private boolean includeStats;
 
-    public VariantToMongoDbObjectConverter(boolean includeStats, boolean calculateStats, boolean includeSample,
-                                           VariantStorageManager.IncludeSrc includeSrc) {
-        
+    public VariantToMongoDbObjectConverter(boolean includeStats, boolean includeSample) {
+        this(includeStats, includeStats, includeSample);
+    }
+
+    public VariantToMongoDbObjectConverter(boolean includeStats, boolean calculateStats, boolean includeSample) {
+
         this.includeStats = includeStats;
         this.statsConverter = calculateStats ? new VariantStatsToDBObjectConverter() : null;
+
+
         SamplesToDBObjectConverter sampleConverter = includeSample ? new SamplesToDBObjectConverter() : null;
         this.sourceEntryConverter = new VariantSourceEntryToDBObjectConverter(sampleConverter);
         this.variantConverter = new VariantToDBObjectConverter(null, null, null);
@@ -64,7 +68,7 @@ public class VariantToMongoDbObjectConverter implements Converter<Variant, DBObj
         VariantSourceEntry variantSourceEntry = variant.getSourceEntries().values().iterator().next();
 
         BasicDBObject addToSet = new BasicDBObject().append(VariantToDBObjectConverter.FILES_FIELD,
-                                                            sourceEntryConverter.convert(variantSourceEntry));
+                sourceEntryConverter.convert(variantSourceEntry));
 
         if (includeStats) {
             List<DBObject> sourceEntryStats = statsConverter.convert(variantSourceEntry);

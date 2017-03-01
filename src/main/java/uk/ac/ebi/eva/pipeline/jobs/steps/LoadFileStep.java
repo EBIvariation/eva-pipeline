@@ -23,9 +23,6 @@ import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.step.tasklet.TaskletStep;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
-
-import uk.ac.ebi.eva.pipeline.configuration.MongoConfiguration;
 import uk.ac.ebi.eva.pipeline.jobs.steps.tasklets.FileLoaderStep;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 import uk.ac.ebi.eva.utils.TaskletUtils;
@@ -37,21 +34,21 @@ import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.LOAD_FILE_STEP;
  */
 @Configuration
 @EnableBatchProcessing
-@Import({ MongoConfiguration.class })
 public class LoadFileStep {
 
     private static final Logger logger = LoggerFactory.getLogger(LoadFileStep.class);
 
     @Bean
     @StepScope
-    FileLoaderStep fileLoaderStep() {
+    public FileLoaderStep fileLoaderStep() {
         return new FileLoaderStep();
     }
 
     @Bean(LOAD_FILE_STEP)
     public TaskletStep loadFileStep(StepBuilderFactory stepBuilderFactory, JobOptions jobOptions) {
         logger.debug("Building '" + LOAD_FILE_STEP + "'");
-        return TaskletUtils.generateStep(stepBuilderFactory, LOAD_FILE_STEP, fileLoaderStep(), jobOptions);
+        return TaskletUtils.generateStep(stepBuilderFactory, LOAD_FILE_STEP, fileLoaderStep(),
+                jobOptions.isAllowStartIfComplete());
     }
 
 }

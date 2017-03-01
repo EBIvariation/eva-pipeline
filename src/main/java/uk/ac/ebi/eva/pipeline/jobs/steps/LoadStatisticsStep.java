@@ -24,7 +24,6 @@ import org.springframework.batch.core.step.tasklet.TaskletStep;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import uk.ac.ebi.eva.pipeline.jobs.steps.tasklets.PopulationStatisticsLoaderStep;
-import uk.ac.ebi.eva.pipeline.jobs.steps.tasklets.VepAnnotationGeneratorStep;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 import uk.ac.ebi.eva.utils.TaskletUtils;
 
@@ -41,7 +40,7 @@ public class LoadStatisticsStep {
 
     @Bean
     @StepScope
-    PopulationStatisticsLoaderStep populationStatisticsLoaderStep() {
+    public PopulationStatisticsLoaderStep populationStatisticsLoaderStep() {
         return new PopulationStatisticsLoaderStep();
     }
 
@@ -49,7 +48,7 @@ public class LoadStatisticsStep {
     public TaskletStep loadStatisticsStep(StepBuilderFactory stepBuilderFactory, JobOptions jobOptions) {
         logger.debug("Building '" + LOAD_STATISTICS_STEP + "'");
         return TaskletUtils.generateStep(stepBuilderFactory, LOAD_STATISTICS_STEP,
-                populationStatisticsLoaderStep(), jobOptions);
+                populationStatisticsLoaderStep(), jobOptions.isAllowStartIfComplete());
     }
 
 }

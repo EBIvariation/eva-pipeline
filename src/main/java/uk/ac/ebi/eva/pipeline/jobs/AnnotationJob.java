@@ -44,6 +44,8 @@ import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VEP_ANNOTATION_FLOW
  * Optional flow: variantsAnnotGenerateInput --> (annotationCreate --> annotationLoad)
  * annotationCreate and annotationLoad steps are only executed if variantsAnnotGenerateInput is generating a
  * non-empty VEP input file
+ *
+ * TODO add a new AnnotationJobParametersValidator
  */
 
 @Configuration

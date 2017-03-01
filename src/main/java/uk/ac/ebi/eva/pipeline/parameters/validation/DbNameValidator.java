@@ -30,7 +30,7 @@ public class DbNameValidator implements JobParametersValidator {
 
     @Override
     public void validate(JobParameters parameters) throws JobParametersInvalidException {
-        ParametersValidatorUtil.checkIsNotNullOrEmptyString(
+        ParametersValidatorUtil.checkIsValidString(
                 parameters.getString(JobParametersNames.DB_NAME), JobParametersNames.DB_NAME);
     }
 }

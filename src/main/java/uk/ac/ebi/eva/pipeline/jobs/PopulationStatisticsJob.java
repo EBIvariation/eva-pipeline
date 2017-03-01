@@ -33,10 +33,11 @@ import uk.ac.ebi.eva.pipeline.jobs.flows.PopulationStatisticsFlow;
 
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.CALCULATE_STATISTICS_FLOW;
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.CALCULATE_STATISTICS_JOB;
-import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.CALCULATE_STATISTICS_OPTIONAL_FLOW;
 
 /**
  * Configuration to run a full Statistics job: variantStatsFlow: statsCreate --> statsLoad
+ *
+ * TODO add a new PopulationStatisticsJobParametersValidator
  */
 @Configuration
 @EnableBatchProcessing

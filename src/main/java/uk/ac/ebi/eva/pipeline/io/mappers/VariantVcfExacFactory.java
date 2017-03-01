@@ -17,12 +17,13 @@
 package uk.ac.ebi.eva.pipeline.io.mappers;
 
 import org.opencb.biodata.models.feature.Genotype;
-import org.opencb.biodata.models.variant.VariantSource;
 
 import uk.ac.ebi.eva.commons.models.data.Variant;
 import uk.ac.ebi.eva.commons.models.data.VariantSourceEntry;
 import uk.ac.ebi.eva.commons.models.data.VariantStats;
+import uk.ac.ebi.eva.utils.FileUtils;
 
+import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -42,6 +43,8 @@ public class VariantVcfExacFactory extends VariantAggregatedVcfFactory {
     private static final String AC_ADJ = "AC_Adj";
 
     private static final String COMMA = ",";
+
+    private static final String EXAC_MAPPING_FILE = "/mappings/exac-mapping.properties";
 
     public VariantVcfExacFactory() {
         this(null);
@@ -72,11 +75,19 @@ public class VariantVcfExacFactory extends VariantAggregatedVcfFactory {
         super(tagMap);
     }
 
+    @Override
+    protected void loadDefaultMappings() {
+        try {
+            loadMappings(FileUtils.getPropertiesFile(FileUtils.getResourceAsStream(EXAC_MAPPING_FILE)));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     @Override
-    protected void parseStats(Variant variant, VariantSource source, int numAllele, String[] alternateAlleles,
+    protected void parseStats(Variant variant, String fileId, String studyId, int numAllele, String[] alternateAlleles,
                               String info) {
-        VariantSourceEntry sourceEntry = variant.getSourceEntry(source.getFileId(), source.getStudyId());
+        VariantSourceEntry sourceEntry = variant.getSourceEntry(fileId, studyId);
         VariantStats stats = new VariantStats(variant);
 
         if (sourceEntry.hasAttribute(AC_HET)) {   // heterozygous genotype count
@@ -119,9 +130,9 @@ public class VariantVcfExacFactory extends VariantAggregatedVcfFactory {
 
 
     @Override
-    protected void parseCohortStats(Variant variant, VariantSource source, int numAllele, String[] alternateAlleles,
+    protected void parseCohortStats(Variant variant, String fileId, String studyId, int numAllele, String[] alternateAlleles,
                                     String info) {
-        VariantSourceEntry sourceEntry = variant.getSourceEntry(source.getFileId(), source.getStudyId());
+        VariantSourceEntry sourceEntry = variant.getSourceEntry(fileId, studyId);
         String[] attributes = info.split(";");
         Map<String, Integer> ans = new LinkedHashMap<>();
         Map<String, String[]> acs = new LinkedHashMap<>();

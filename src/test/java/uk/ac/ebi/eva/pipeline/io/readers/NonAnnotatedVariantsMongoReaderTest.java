@@ -16,7 +16,6 @@
 package uk.ac.ebi.eva.pipeline.io.readers;
 
 import com.mongodb.DBObject;
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -24,15 +23,15 @@ import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.test.MetaDataInstanceFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoOperations;
+import org.springframework.data.mongodb.core.mapping.MongoMappingContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-
+import uk.ac.ebi.eva.commons.models.converters.data.VariantToDBObjectConverter;
+import uk.ac.ebi.eva.pipeline.Application;
 import uk.ac.ebi.eva.pipeline.configuration.MongoConfiguration;
-import uk.ac.ebi.eva.pipeline.configuration.readers.NonAnnotatedVariantsMongoReaderConfiguration;
-import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
-import uk.ac.ebi.eva.test.configuration.BaseTestConfiguration;
+import uk.ac.ebi.eva.pipeline.parameters.MongoConnection;
 import uk.ac.ebi.eva.test.data.VariantData;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 
@@ -48,50 +47,45 @@ import static org.junit.Assert.assertTrue;
  * output: a DBObject each time `.read()` is called, with at least: chr, start, annot
  */
 @RunWith(SpringRunner.class)
-@ActiveProfiles("variant-annotation-mongo")
-@TestPropertySource("classpath:annotation.properties")
-@ContextConfiguration(classes = {NonAnnotatedVariantsMongoReaderConfiguration.class, BaseTestConfiguration.class})
+@ActiveProfiles(Application.VARIANT_ANNOTATION_MONGO_PROFILE)
+@TestPropertySource({"classpath:test-mongo.properties"})
+@ContextConfiguration(classes = {MongoConnection.class, MongoMappingContext.class})
 public class NonAnnotatedVariantsMongoReaderTest {
 
-    private static final String DOC_CHR = "chr";
-    private static final String DOC_START = "start";
-    private static final String DOC_ANNOT = "annot";
+    private static final String COLLECTION_VARIANTS_NAME = "variants";
+
+    private static final int EXPECTED_NON_ANNOTATED_VARIANTS = 1;
+
+    @Autowired
+    private MongoConnection mongoConnection;
+
+    @Autowired
+    private MongoMappingContext mongoMappingContext;
 
     @Rule
     public TemporaryMongoRule mongoRule = new TemporaryMongoRule();
 
-    @Autowired
-    private JobOptions jobOptions;
-
-    @Autowired
-    private MongoConfiguration mongoConfiguration;
-
-    @Before
-    public void setUp() throws Exception {
-        jobOptions.loadArgs();
-    }
-
     @Test
     public void shouldReadVariantsWithoutAnnotationField() throws Exception {
         ExecutionContext executionContext = MetaDataInstanceFactory.createStepExecution().getExecutionContext();
-        String databaseName = insertDocuments(jobOptions.getDbCollectionsVariantsName());
+        String databaseName = insertDocuments(COLLECTION_VARIANTS_NAME);
 
-        MongoOperations mongoOperations = mongoConfiguration.getMongoOperations(databaseName,
-                jobOptions.getMongoConnection());
+        MongoOperations mongoOperations = MongoConfiguration.getMongoOperations(databaseName, mongoConnection,
+                mongoMappingContext);
 
         NonAnnotatedVariantsMongoReader mongoItemReader = new NonAnnotatedVariantsMongoReader(
-                mongoOperations, jobOptions.getDbCollectionsVariantsName());
+                mongoOperations, COLLECTION_VARIANTS_NAME);
         mongoItemReader.open(executionContext);
 
         int itemCount = 0;
-        DBObject doc;
-        while ((doc = mongoItemReader.read()) != null) {
+        DBObject variantMongoDocument;
+        while ((variantMongoDocument = mongoItemReader.read()) != null) {
             itemCount++;
-            assertTrue(doc.containsField(DOC_CHR));
-            assertTrue(doc.containsField(DOC_START));
-            assertFalse(doc.containsField(DOC_ANNOT));
+            assertTrue(variantMongoDocument.containsField(VariantToDBObjectConverter.CHROMOSOME_FIELD));
+            assertTrue(variantMongoDocument.containsField(VariantToDBObjectConverter.START_FIELD));
+            assertFalse(variantMongoDocument.containsField(VariantToDBObjectConverter.ANNOTATION_FIELD));
         }
-        assertEquals(itemCount, 1);
+        assertEquals(EXPECTED_NON_ANNOTATED_VARIANTS, itemCount);
         mongoItemReader.close();
     }
 

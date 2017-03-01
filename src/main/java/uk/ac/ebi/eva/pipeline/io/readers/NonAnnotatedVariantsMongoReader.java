@@ -23,8 +23,6 @@ import javax.annotation.PostConstruct;
 
 import org.springframework.data.mongodb.core.MongoOperations;
 
-import java.net.UnknownHostException;
-
 /**
  * Mongo variant reader using an ItemReader cursor based. This is speeding up
  * the reading of the variant in big collections. The
@@ -33,8 +31,7 @@ import java.net.UnknownHostException;
  */
 public class NonAnnotatedVariantsMongoReader extends MongoDbCursorItemReader {
 
-    public NonAnnotatedVariantsMongoReader(MongoOperations template, String collectionsVariantsName)
-            throws UnknownHostException {
+    public NonAnnotatedVariantsMongoReader(MongoOperations template, String collectionsVariantsName) {
         super();
 
         setTemplate(template);

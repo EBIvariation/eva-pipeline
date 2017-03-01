@@ -18,36 +18,24 @@ package uk.ac.ebi.eva.pipeline.configuration.writers;
 import org.opencb.biodata.models.variant.annotation.VariantAnnotation;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.item.ItemWriter;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.mongodb.core.MongoOperations;
 import uk.ac.ebi.eva.pipeline.Application;
-import uk.ac.ebi.eva.pipeline.configuration.MongoConfiguration;
 import uk.ac.ebi.eva.pipeline.io.writers.VepAnnotationMongoWriter;
-import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
-import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
-
-import java.net.UnknownHostException;
+import uk.ac.ebi.eva.pipeline.parameters.DatabaseParameters;
 
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VARIANT_ANNOTATION_WRITER;
 
 @Configuration
-@Import({ MongoConfiguration.class })
 public class VariantAnnotationWriterConfiguration {
-
-    @Autowired
-    private MongoConfiguration mongoConfiguration;
 
     @Bean(VARIANT_ANNOTATION_WRITER)
     @StepScope
     @Profile(Application.VARIANT_ANNOTATION_MONGO_PROFILE)
-    public ItemWriter<VariantAnnotation> variantAnnotationItemWriter(JobOptions jobOptions) throws UnknownHostException {
-        MongoOperations mongoOperations = mongoConfiguration.getMongoOperations(
-                jobOptions.getDbName(), jobOptions.getMongoConnection());
-        String collections = jobOptions.getPipelineOptions().getString(JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME);
-        return new VepAnnotationMongoWriter(mongoOperations, collections);
+    public ItemWriter<VariantAnnotation> variantAnnotationItemWriter(MongoOperations mongoOperations,
+                                                                     DatabaseParameters databaseParameters) {
+        return new VepAnnotationMongoWriter(mongoOperations, databaseParameters.getCollectionVariantsName());
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 EMBL - European Bioinformatics Institute
+ * Copyright 2016-2017 EMBL - European Bioinformatics Institute
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,14 +15,13 @@
  */
 package uk.ac.ebi.eva.pipeline.jobs.steps;
 
-import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.JobExecution;
+import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ActiveProfiles;
@@ -33,10 +32,11 @@ import uk.ac.ebi.eva.pipeline.Application;
 import uk.ac.ebi.eva.pipeline.configuration.BeanNames;
 import uk.ac.ebi.eva.pipeline.jobs.AnnotationJob;
 import uk.ac.ebi.eva.pipeline.jobs.steps.tasklets.VepAnnotationGeneratorStep;
-import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
+import uk.ac.ebi.eva.utils.EvaJobParameterBuilder;
+import uk.ac.ebi.eva.utils.URLHelper;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -44,49 +44,58 @@ import java.util.zip.GZIPInputStream;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResource;
+import static uk.ac.ebi.eva.utils.FileUtils.getResource;
 
 /**
  * Test for {@link VepAnnotationGeneratorStep}
  */
 @RunWith(SpringRunner.class)
 @ActiveProfiles(Application.VARIANT_ANNOTATION_MONGO_PROFILE)
-@TestPropertySource("classpath:annotation.properties")
+@TestPropertySource("classpath:common-configuration.properties")
 @ContextConfiguration(classes = {AnnotationJob.class, BatchTestConfiguration.class})
 public class VepAnnotationGeneratorStepTest {
 
-    private static final String VEP_INPUT_CONTENT = "20\t60343\t60343\tG/A\t+";
     private static final String MOCKVEP = "/mockvep.pl";
+
+    private static final String STUDY_ID = "7";
+
+    private static final String FILE_ID = "5";
+
     @Rule
     public PipelineTemporaryFolderRule temporaryFolderRule = new PipelineTemporaryFolderRule();
 
     @Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
-    @Autowired
-    private JobOptions jobOptions;
-
-    @Before
-    public void setUp() throws Exception {
-        jobOptions.loadArgs();
-        jobOptions.setAppVepPath(getResource(MOCKVEP));
-    }
 
     @Test
     public void shouldGenerateVepAnnotations() throws Exception {
-        jobOptions.setVepInputFile(temporaryFolderRule.newGzipFile(VEP_INPUT_CONTENT).getAbsolutePath());
-        File vepOutputFile = temporaryFolderRule.newFile();
-        jobOptions.setVepOutput(vepOutputFile.getAbsolutePath());
+        File vepOutputFolder = temporaryFolderRule.newFolder();
+
+        JobParameters jobParameters = new EvaJobParameterBuilder()
+                .inputFasta("")
+                .inputStudyId(STUDY_ID)
+                .inputVcfId(FILE_ID)
+                .outputDirAnnotation(vepOutputFolder.getAbsolutePath())
+                .vepCachePath("")
+                .vepCacheSpecies("")
+                .vepCacheVersion("")
+                .vepNumForks("")
+                .vepPath(getResource(MOCKVEP).getPath())
+                .toJobParameters();
 
         // When the execute method in variantsAnnotCreate is executed
-        JobExecution jobExecution = jobLauncherTestUtils.launchStep(BeanNames.GENERATE_VEP_ANNOTATION_STEP);
+        JobExecution jobExecution = jobLauncherTestUtils
+                .launchStep(BeanNames.GENERATE_VEP_ANNOTATION_STEP, jobParameters);
 
         //Then variantsAnnotCreate step should complete correctly
         assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
         assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());
 
         // And VEP output should exist and annotations should be in the file
+        File vepOutputFile = new File(URLHelper.resolveVepOutput(vepOutputFolder.getAbsolutePath(), STUDY_ID, FILE_ID));
+
         assertTrue(vepOutputFile.exists());
-        Assert.assertEquals(537, JobTestUtils.getLines(new GZIPInputStream(new FileInputStream(vepOutputFile))));
+        assertEquals(537, JobTestUtils.getLines(new GZIPInputStream(new FileInputStream(vepOutputFile))));
     }
 
 }

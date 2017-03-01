@@ -24,16 +24,14 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoOperations;
+import org.springframework.data.mongodb.core.mapping.MongoMappingContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-
 import uk.ac.ebi.eva.pipeline.configuration.MongoConfiguration;
-import uk.ac.ebi.eva.pipeline.configuration.writers.GeneWriterConfiguration;
 import uk.ac.ebi.eva.pipeline.io.mappers.GeneLineMapper;
 import uk.ac.ebi.eva.pipeline.model.FeatureCoordinates;
-import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
-import uk.ac.ebi.eva.test.configuration.BaseTestConfiguration;
+import uk.ac.ebi.eva.pipeline.parameters.MongoConnection;
 import uk.ac.ebi.eva.test.data.GtfStaticTestData;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 
@@ -49,27 +47,28 @@ import static org.junit.Assert.assertTrue;
  * output: the FeatureCoordinates get written in mongo, with at least: chromosome, start and end.
  */
 @RunWith(SpringRunner.class)
-@TestPropertySource({"classpath:initialize-database.properties"})
-@ContextConfiguration(classes = {BaseTestConfiguration.class, GeneWriterConfiguration.class})
+@TestPropertySource({"classpath:test-mongo.properties"})
+@ContextConfiguration(classes = {MongoConnection.class, MongoMappingContext.class})
 public class GeneWriterTest {
+
+    private static final String COLLECTION_FEATURES_NAME = "features";
+
+    @Autowired
+    private MongoConnection mongoConnection;
+
+    @Autowired
+    private MongoMappingContext mongoMappingContext;
 
     @Rule
     public TemporaryMongoRule mongoRule = new TemporaryMongoRule();
-
-    @Autowired
-    private JobOptions jobOptions;
-
-    @Autowired
-    private MongoConfiguration mongoConfiguration;
 
     @Test
     public void shouldWriteAllFieldsIntoMongoDb() throws Exception {
         String databaseName = mongoRule.getRandomTemporaryDatabaseName();
 
-        MongoOperations mongoOperations = mongoConfiguration.getMongoOperations(databaseName,
-                jobOptions.getMongoConnection());
+        MongoOperations mongoOperations = MongoConfiguration.getMongoOperations(databaseName, mongoConnection, mongoMappingContext);
 
-        GeneWriter geneWriter = new GeneWriter(mongoOperations, jobOptions.getDbCollectionsFeaturesName());
+        GeneWriter geneWriter = new GeneWriter(mongoOperations, COLLECTION_FEATURES_NAME);
 
         GeneLineMapper lineMapper = new GeneLineMapper();
         List<FeatureCoordinates> genes = new ArrayList<>();
@@ -80,7 +79,7 @@ public class GeneWriterTest {
         }
         geneWriter.write(genes);
 
-        DBCollection genesCollection = mongoRule.getCollection(databaseName, jobOptions.getDbCollectionsFeaturesName());
+        DBCollection genesCollection = mongoRule.getCollection(databaseName, COLLECTION_FEATURES_NAME);
 
         // count documents in DB and check they have region (chr + start + end)
         DBCursor cursor = genesCollection.find();

@@ -44,7 +44,7 @@ public class VariantToDBObjectConverterTest {
 
     private Variant variant;
 
-    protected VariantSourceEntry variantSourceEntry;
+    private VariantSourceEntry variantSourceEntry;
 
     @Before
     public void setUp() {

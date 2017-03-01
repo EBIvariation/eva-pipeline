@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2016 EMBL - European Bioinformatics Institute
+ * Copyright 2015-2017 EMBL - European Bioinformatics Institute
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,11 +18,9 @@ package uk.ac.ebi.eva.pipeline.jobs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.Job;
-import org.springframework.batch.core.JobExecutionListener;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
-import org.springframework.batch.core.configuration.annotation.JobScope;
 import org.springframework.batch.core.job.builder.FlowJobBuilder;
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.job.flow.Flow;
@@ -33,11 +31,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
-
 import uk.ac.ebi.eva.pipeline.jobs.flows.ParallelStatisticsAndAnnotationFlow;
 import uk.ac.ebi.eva.pipeline.jobs.steps.LoadFileStep;
 import uk.ac.ebi.eva.pipeline.jobs.steps.VariantLoaderStep;
-import uk.ac.ebi.eva.pipeline.listeners.VariantOptionsConfigurerListener;
+import uk.ac.ebi.eva.pipeline.parameters.validation.job.GenotypedVcfJobParametersValidator;
 
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.GENOTYPED_VCF_JOB;
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.LOAD_FILE_STEP;
@@ -57,16 +54,8 @@ import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.PARALLEL_STATISTICS
 @EnableBatchProcessing
 @Import({VariantLoaderStep.class, LoadFileStep.class, ParallelStatisticsAndAnnotationFlow.class})
 public class GenotypedVcfJob {
+
     private static final Logger logger = LoggerFactory.getLogger(GenotypedVcfJob.class);
-
-    //job default settings
-    private static final boolean INCLUDE_SAMPLES = true;
-
-    private static final boolean COMPRESS_GENOTYPES = true;
-
-    private static final boolean CALCULATE_STATS = false;
-
-    private static final boolean INCLUDE_STATS = false;
 
     @Autowired
     @Qualifier(PARALLEL_STATISTICS_AND_ANNOTATION)
@@ -88,7 +77,7 @@ public class GenotypedVcfJob {
         JobBuilder jobBuilder = jobBuilderFactory
                 .get(GENOTYPED_VCF_JOB)
                 .incrementer(new RunIdIncrementer())
-                .listener(genotypedJobListener());
+                .validator(new GenotypedVcfJobParametersValidator());
         FlowJobBuilder builder = jobBuilder
                 .flow(variantLoaderStep)
                 .next(loadFileStep)
@@ -98,12 +87,4 @@ public class GenotypedVcfJob {
         return builder.build();
     }
 
-    @Bean
-    @JobScope
-    public JobExecutionListener genotypedJobListener() {
-        return new VariantOptionsConfigurerListener(INCLUDE_SAMPLES,
-                COMPRESS_GENOTYPES,
-                CALCULATE_STATS,
-                INCLUDE_STATS);
-    }
 }

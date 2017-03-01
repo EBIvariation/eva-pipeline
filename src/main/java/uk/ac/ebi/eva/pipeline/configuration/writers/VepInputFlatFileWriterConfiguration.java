@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 EMBL - European Bioinformatics Institute
+ * Copyright 2016-2017 EMBL - European Bioinformatics Institute
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import uk.ac.ebi.eva.pipeline.io.writers.VepInputFlatFileWriter;
 import uk.ac.ebi.eva.pipeline.model.VariantWrapper;
-import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
+import uk.ac.ebi.eva.pipeline.parameters.AnnotationParameters;
 
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VEP_INPUT_WRITER;
 
@@ -30,8 +30,8 @@ public class VepInputFlatFileWriterConfiguration {
 
     @Bean(VEP_INPUT_WRITER)
     @StepScope
-    public ItemStreamWriter<VariantWrapper> vepInputFlatFileWriter(JobOptions jobOptions) {
-        return new VepInputFlatFileWriter(jobOptions.getVepInput());
+    public ItemStreamWriter<VariantWrapper> vepInputFlatFileWriter(AnnotationParameters annotationParameters) {
+        return new VepInputFlatFileWriter(annotationParameters.getVepInput());
     }
 
 }
