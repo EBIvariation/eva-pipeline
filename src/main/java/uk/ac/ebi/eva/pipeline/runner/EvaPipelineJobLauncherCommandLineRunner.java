@@ -221,9 +221,9 @@ public class EvaPipelineJobLauncherCommandLineRunner extends JobLauncherCommandL
             } catch (NoSuchJobException ex) {
                 logger.error("No job found in registry for job name: " + jobName);
             }
-        } else {
-            logger.error("Job not found and no JobRegistry initializated.");
         }
+
+        throw new UnknownJobException(jobName);
     }
 
     @Override
