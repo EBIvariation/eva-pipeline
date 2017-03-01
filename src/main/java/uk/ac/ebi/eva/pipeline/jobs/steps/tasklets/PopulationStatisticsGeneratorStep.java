@@ -35,7 +35,6 @@ import uk.ac.ebi.eva.pipeline.parameters.DatabaseParameters;
 import uk.ac.ebi.eva.pipeline.parameters.InputParameters;
 import uk.ac.ebi.eva.pipeline.parameters.MongoConnection;
 import uk.ac.ebi.eva.pipeline.parameters.OutputParameters;
-import uk.ac.ebi.eva.utils.MongoDBHelper;
 import uk.ac.ebi.eva.utils.URLHelper;
 
 import java.net.URI;

@@ -15,13 +15,10 @@
  */
 package uk.ac.ebi.eva.pipeline.io.mappers;
 
-import org.opencb.biodata.models.variant.VariantSource;
 import org.springframework.batch.item.file.LineMapper;
 import uk.ac.ebi.eva.commons.models.data.Variant;
 
 import java.util.List;
-
-import static org.junit.Assert.assertNotNull;
 
 /**
  * Maps a String (in VCF format) to a list of variants.

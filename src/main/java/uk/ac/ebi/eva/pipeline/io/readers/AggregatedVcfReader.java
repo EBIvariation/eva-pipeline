@@ -20,7 +20,6 @@ import uk.ac.ebi.eva.pipeline.io.mappers.AggregatedVcfLineMapper;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Optional;
 
 /**
  * VCF file reader for VCFs without genotypes (aggregated VCFs).

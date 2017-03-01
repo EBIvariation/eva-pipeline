@@ -15,8 +15,6 @@
  */
 package uk.ac.ebi.eva.pipeline.runner.exceptions;
 
-import java.io.IOException;
-
 /**
  * Exception used to express a codification problem while interpreting a file
  */

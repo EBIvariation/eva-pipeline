@@ -23,8 +23,6 @@ import javax.annotation.PostConstruct;
 
 import org.springframework.data.mongodb.core.MongoOperations;
 
-import java.net.UnknownHostException;
-
 /**
  * Mongo variant reader using an ItemReader cursor based. This is speeding up
  * the reading of the variant in big collections. The
