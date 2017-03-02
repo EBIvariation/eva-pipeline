@@ -33,7 +33,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
 
 import uk.ac.ebi.eva.pipeline.jobs.steps.DropSingleStudyVariantsStep;
-import uk.ac.ebi.eva.pipeline.parameters.validation.job.AggregatedVcfJobParametersValidator;
 
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.DROP_SINGLE_STUDY_VARIANTS_STEP;
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.DROP_STUDY_JOB;
@@ -61,8 +60,8 @@ public class DropStudyJob {
 
         JobBuilder jobBuilder = jobBuilderFactory
                 .get(DROP_STUDY_JOB)
-                .incrementer(new RunIdIncrementer())
-                .validator(new AggregatedVcfJobParametersValidator());
+                .incrementer(new RunIdIncrementer());
+
         SimpleJobBuilder builder = jobBuilder
                 .start(dropSingleStudyVariantsStep);
 
