@@ -45,7 +45,7 @@ public class NonAnnotatedVariantsMongoReader extends MongoDbCursorItemReader {
         setCollection(collectionsVariantsName);
 
         BasicDBObjectBuilder queryBuilder = BasicDBObjectBuilder.start();
-        if (studyId != null) {
+        if (!studyId.isEmpty()) {
             queryBuilder.add(STUDY_KEY, studyId);
         }
         DBObject query = queryBuilder.add("annot.ct.so", new BasicDBObject("$exists", false)).get();

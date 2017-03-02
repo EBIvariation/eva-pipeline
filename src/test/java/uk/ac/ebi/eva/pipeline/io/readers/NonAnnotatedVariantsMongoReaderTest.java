@@ -28,6 +28,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
+
 import uk.ac.ebi.eva.commons.models.converters.data.VariantToDBObjectConverter;
 import uk.ac.ebi.eva.pipeline.Application;
 import uk.ac.ebi.eva.pipeline.configuration.MongoConfiguration;
@@ -54,9 +55,13 @@ public class NonAnnotatedVariantsMongoReaderTest {
 
     private static final String COLLECTION_VARIANTS_NAME = "variants";
 
-    private static final int EXPECTED_NON_ANNOTATED_VARIANTS = 1;
+    private static final int EXPECTED_NON_ANNOTATED_VARIANTS_IN_STUDY = 1;
+
+    private static final int EXPECTED_NON_ANNOTATED_VARIANTS_IN_DB = 2;
 
     private static final String STUDY_ID = "7";
+
+    private static final String ALL_STUDIES = "";
 
     @Autowired
     private MongoConnection mongoConnection;
@@ -68,7 +73,16 @@ public class NonAnnotatedVariantsMongoReaderTest {
     public TemporaryMongoRule mongoRule = new TemporaryMongoRule();
 
     @Test
+    public void shouldReadVariantsWithoutAnnotationFieldInStudy() throws Exception {
+        checkNonAnnotatedVariantsRead(EXPECTED_NON_ANNOTATED_VARIANTS_IN_STUDY, STUDY_ID);
+    }
+
+    @Test
     public void shouldReadVariantsWithoutAnnotationField() throws Exception {
+        checkNonAnnotatedVariantsRead(EXPECTED_NON_ANNOTATED_VARIANTS_IN_DB, ALL_STUDIES);
+    }
+
+    private void checkNonAnnotatedVariantsRead(int expectedNonAnnotatedVariants, String study) throws Exception {
         ExecutionContext executionContext = MetaDataInstanceFactory.createStepExecution().getExecutionContext();
         String databaseName = mongoRule.createDBAndInsertDocuments(COLLECTION_VARIANTS_NAME, Arrays.asList(
                 VariantData.getVariantWithAnnotation(),
@@ -79,7 +93,7 @@ public class NonAnnotatedVariantsMongoReaderTest {
                 mongoMappingContext);
 
         NonAnnotatedVariantsMongoReader mongoItemReader = new NonAnnotatedVariantsMongoReader(
-                mongoOperations, COLLECTION_VARIANTS_NAME, STUDY_ID);
+                mongoOperations, COLLECTION_VARIANTS_NAME, study);
         mongoItemReader.open(executionContext);
 
         int itemCount = 0;
@@ -90,7 +104,7 @@ public class NonAnnotatedVariantsMongoReaderTest {
             assertTrue(variantMongoDocument.containsField(VariantToDBObjectConverter.START_FIELD));
             assertFalse(variantMongoDocument.containsField(VariantToDBObjectConverter.ANNOTATION_FIELD));
         }
-        assertEquals(EXPECTED_NON_ANNOTATED_VARIANTS, itemCount);
+        assertEquals(expectedNonAnnotatedVariants, itemCount);
         mongoItemReader.close();
     }
 }
