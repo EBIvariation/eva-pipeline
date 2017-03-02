@@ -19,8 +19,10 @@ import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mongodb.core.MongoOperations;
+
 import uk.ac.ebi.eva.pipeline.io.readers.NonAnnotatedVariantsMongoReader;
 import uk.ac.ebi.eva.pipeline.parameters.DatabaseParameters;
+import uk.ac.ebi.eva.pipeline.parameters.InputParameters;
 
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.NON_ANNOTATED_VARIANTS_READER;
 
@@ -33,8 +35,12 @@ public class NonAnnotatedVariantsMongoReaderConfiguration {
     @Bean(NON_ANNOTATED_VARIANTS_READER)
     @StepScope
     public NonAnnotatedVariantsMongoReader nonAnnotatedVariantsMongoReader(MongoOperations mongoOperations,
-                                                                           DatabaseParameters databaseParameters) {
-        return new NonAnnotatedVariantsMongoReader(mongoOperations, databaseParameters.getCollectionVariantsName());
+                                                                           DatabaseParameters databaseParameters,
+                                                                           InputParameters inputParameters) {
+        return new NonAnnotatedVariantsMongoReader(
+                mongoOperations,
+                databaseParameters.getCollectionVariantsName(),
+                inputParameters.getStudyId());
     }
 
 }
