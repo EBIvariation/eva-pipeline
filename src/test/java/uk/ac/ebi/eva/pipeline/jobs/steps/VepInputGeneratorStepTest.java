@@ -56,9 +56,9 @@ public class VepInputGeneratorStepTest {
 
     private static final String MONGO_DUMP = "/dump/VariantStatsConfigurationTest_vl";
 
-    private static final String STUDY_ID = "7";
+    private static final String STUDY_ID = "1";
 
-    private static final String FILE_ID = "5";
+    private static final String FILE_ID = "1";
 
     private static final String COLLECTION_VARIANTS_NAME = "variants";
 

@@ -56,6 +56,8 @@ public class NonAnnotatedVariantsMongoReaderTest {
 
     private static final int EXPECTED_NON_ANNOTATED_VARIANTS = 1;
 
+    private static final String STUDY_ID = "7";
+
     @Autowired
     private MongoConnection mongoConnection;
 
@@ -70,13 +72,14 @@ public class NonAnnotatedVariantsMongoReaderTest {
         ExecutionContext executionContext = MetaDataInstanceFactory.createStepExecution().getExecutionContext();
         String databaseName = mongoRule.createDBAndInsertDocuments(COLLECTION_VARIANTS_NAME, Arrays.asList(
                 VariantData.getVariantWithAnnotation(),
-                VariantData.getVariantWithoutAnnotation()));
+                VariantData.getVariantWithoutAnnotation(),
+                VariantData.getVariantWithoutAnnotationOtherStudy()));
 
         MongoOperations mongoOperations = MongoConfiguration.getMongoOperations(databaseName, mongoConnection,
                 mongoMappingContext);
 
         NonAnnotatedVariantsMongoReader mongoItemReader = new NonAnnotatedVariantsMongoReader(
-                mongoOperations, COLLECTION_VARIANTS_NAME);
+                mongoOperations, COLLECTION_VARIANTS_NAME, STUDY_ID);
         mongoItemReader.open(executionContext);
 
         int itemCount = 0;
@@ -90,5 +93,4 @@ public class NonAnnotatedVariantsMongoReaderTest {
         assertEquals(EXPECTED_NON_ANNOTATED_VARIANTS, itemCount);
         mongoItemReader.close();
     }
-
 }

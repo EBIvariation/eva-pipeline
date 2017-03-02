@@ -23,13 +23,18 @@ import static uk.ac.ebi.eva.utils.FileUtils.getResource;
 
 public class VariantData {
 
-    private static final String VARIANT_WITHOUT_ANNOTATION_PATH = "/input-files/annotation/VariantWithOutAnnotation";
-    private static final String VARIANT_WITH_ANNOTATION_PATH = "/input-files/annotation/VariantWithAnnotation";
+    private static final String VARIANT_WITHOUT_ANNOTATION_PATH = "/input-files/annotation/VariantWithOutAnnotation.json";
+    private static final String VARIANT_WITHOUT_ANNOTATION_OTHER_STUDY_PATH = "/input-files/annotation/VariantWithOutAnnotationOtherStudy.json";
+    private static final String VARIANT_WITH_ANNOTATION_PATH = "/input-files/annotation/VariantWithAnnotation.json";
     private static final String POPULATION_STATS_PATH = "/input-files/statistics/PopulationStatistics.json";
     private static final String VARIANT_WITH_ONE_STUDY_TO_DROP_PATH = "/input-files/variant/VariantWithOneStudyToDrop.json";
     private static final String OTHER_VARIANT_WITH_ONE_STUDY_TO_DROP_PATH = "/input-files/variant/OtherVariantWithOneStudyToDrop.json";
     private static final String VARIANT_WITH_ONE_STUDY_PATH = "/input-files/variant/VariantWithOneStudy.json";
     private static final String VARIANT_WITH_TWO_STUDIES_PATH = "/input-files/variant/VariantWithTwoStudies.json";
+
+    public static String getVariantWithoutAnnotationOtherStudy() throws IOException {
+        return FileUtils.readFileToString(getResource(VARIANT_WITHOUT_ANNOTATION_OTHER_STUDY_PATH));
+    }
 
     public static String getVariantWithoutAnnotation() throws IOException {
         return FileUtils.readFileToString(getResource(VARIANT_WITHOUT_ANNOTATION_PATH));
