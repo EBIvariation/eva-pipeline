@@ -79,7 +79,7 @@ public class DropSingleStudyVariantsStepTest {
     }
 
     @Test
-    public void testDropMatchingSingleStudyVariant() throws Exception {
+    public void testOneVariantToDrop() throws Exception {
         String databaseName = insertDocuments(COLLECTION_VARIANTS_NAME, Arrays.asList(
                 VariantData.getVariantWithOneStudyToDrop(),
                 VariantData.getVariantWithOneStudy(),

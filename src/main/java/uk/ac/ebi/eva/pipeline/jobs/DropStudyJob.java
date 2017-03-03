@@ -40,7 +40,7 @@ import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.DROP_STUDY_JOB;
 /**
  * Job that removes a study from the database. Given a study to remove:
  * <p>
- * remove single study variants --> pull study entries in the rest of variants --> remove file entry in files collection
+ * remove variants in single study --> pull study entries from the rest of variants --> remove file entry in files collection
  */
 @Configuration
 @EnableBatchProcessing
