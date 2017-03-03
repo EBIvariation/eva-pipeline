@@ -13,6 +13,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -120,5 +121,13 @@ public class TemporaryMongoRule extends ExternalResource {
         bufferedReader.close();
 
         logger.info("mongorestore exit value: " + exec.exitValue());
+    }
+
+    public String insertDocuments(String collectionName, Collection<String> documents) throws IOException {
+        String databaseName = getRandomTemporaryDatabaseName();
+        for (String document : documents) {
+            insert(databaseName, collectionName, document);
+        }
+        return databaseName;
     }
 }
