@@ -36,32 +36,38 @@ import uk.ac.ebi.eva.pipeline.Application;
 import uk.ac.ebi.eva.pipeline.configuration.BeanNames;
 import uk.ac.ebi.eva.pipeline.jobs.DropStudyJob;
 import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
-import uk.ac.ebi.eva.test.data.VariantData;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 import uk.ac.ebi.eva.utils.EvaJobParameterBuilder;
 
-import java.io.IOException;
 import java.util.Arrays;
-import java.util.Collection;
+import java.util.Collections;
 
 import static org.junit.Assert.assertEquals;
+import static uk.ac.ebi.eva.commons.models.converters.data.VariantSourceEntryToDBObjectConverter.FILEID_FIELD;
 import static uk.ac.ebi.eva.commons.models.converters.data.VariantSourceEntryToDBObjectConverter.STUDYID_FIELD;
-import static uk.ac.ebi.eva.commons.models.converters.data.VariantToDBObjectConverter.FILES_FIELD;
 
 /**
- * Test for {@link DropSingleStudyVariantsStep}
+ * Test for {@link DropFilesByStudyStep}
  */
 @RunWith(SpringRunner.class)
 @ActiveProfiles({Application.VARIANT_WRITER_MONGO_PROFILE, Application.VARIANT_ANNOTATION_MONGO_PROFILE})
 @TestPropertySource({"classpath:common-configuration.properties", "classpath:test-mongo.properties"})
 @ContextConfiguration(classes = {DropStudyJob.class, BatchTestConfiguration.class})
-public class DropSingleStudyVariantsStepTest {
+public class DropFilesByStudyStepTest {
 
-    private static final String COLLECTION_VARIANTS_NAME = "variants";
+    private static final String COLLECTION_FILES_NAME = "files";
 
-    private static final long EXPECTED_VARIANTS_AFTER_DROP_STUDY = 2;
+    private static final long EXPECTED_FILES_AFTER_DROP_STUDY = 1;
 
-    private static final String STUDY_ID_TO_DROP = "studyIdToDrop";
+    private static final String STUDY_ID_TO_DROP = "studyToDrop";
+
+    private static final String OTHER_STUDY_ID = "otherStudy";
+
+    private static final String FILES_DOCUMENT = buildFilesDocumentString(STUDY_ID_TO_DROP, "fileOne");
+
+    private static final String OTHER_FILES_DOCUMENT = buildFilesDocumentString(STUDY_ID_TO_DROP, "fileTwo");
+
+    private static final String OTHER_STUDY_FILES_DOCUMENT = buildFilesDocumentString(OTHER_STUDY_ID, "fileThree");
 
     @Rule
     public TemporaryMongoRule mongoRule = new TemporaryMongoRule();
@@ -69,56 +75,53 @@ public class DropSingleStudyVariantsStepTest {
     @Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
 
-    @Test
-    public void testNoVariantsToDrop() throws Exception {
-        String databaseName = mongoRule.insertDocuments(COLLECTION_VARIANTS_NAME, Arrays.asList(
-                VariantData.getVariantWithOneStudy(),
-                VariantData.getVariantWithTwoStudies()));
-
-        checkDrop(databaseName, EXPECTED_VARIANTS_AFTER_DROP_STUDY);
+    private static String buildFilesDocumentString(String studyId, String fileId) {
+        return "{\"" + STUDYID_FIELD + "\":\"" + studyId
+                + "\", \"" + FILEID_FIELD + "\":\"" + fileId + "\"}";
     }
 
     @Test
-    public void testOneVariantToDrop() throws Exception {
-        String databaseName = mongoRule.insertDocuments(COLLECTION_VARIANTS_NAME, Arrays.asList(
-                VariantData.getVariantWithOneStudyToDrop(),
-                VariantData.getVariantWithOneStudy(),
-                VariantData.getVariantWithTwoStudies()));
+    public void testNoFilesToDrop() throws Exception {
+        String databaseName = mongoRule.insertDocuments(COLLECTION_FILES_NAME,
+                Collections.singletonList(OTHER_STUDY_FILES_DOCUMENT));
 
-        checkDrop(databaseName, EXPECTED_VARIANTS_AFTER_DROP_STUDY);
+        checkDrop(databaseName, EXPECTED_FILES_AFTER_DROP_STUDY);
     }
 
     @Test
-    public void testSeveralVariantsToDrop() throws Exception {
-        String databaseName = mongoRule.insertDocuments(COLLECTION_VARIANTS_NAME, Arrays.asList(
-                VariantData.getVariantWithOneStudyToDrop(),
-                VariantData.getOtherVariantWithOneStudyToDrop(),
-                VariantData.getVariantWithOneStudy(),
-                VariantData.getVariantWithTwoStudies()));
+    public void testOneFileToDrop() throws Exception {
+        String databaseName = mongoRule.insertDocuments(COLLECTION_FILES_NAME,
+                Arrays.asList(FILES_DOCUMENT, OTHER_STUDY_FILES_DOCUMENT));
 
-        checkDrop(databaseName, EXPECTED_VARIANTS_AFTER_DROP_STUDY);
+        checkDrop(databaseName, EXPECTED_FILES_AFTER_DROP_STUDY);
     }
 
-    private void checkDrop(String databaseName, long expectedVariantsAfterDropStudy) {
+    @Test
+    public void testSeveralFilesToDrop() throws Exception {
+        String databaseName = mongoRule.insertDocuments(COLLECTION_FILES_NAME,
+                Arrays.asList(FILES_DOCUMENT, OTHER_FILES_DOCUMENT, OTHER_STUDY_FILES_DOCUMENT));
+
+        checkDrop(databaseName, EXPECTED_FILES_AFTER_DROP_STUDY);
+    }
+
+    private void checkDrop(String databaseName, long expectedFilesAfterDropStudy) {
         JobParameters jobParameters = new EvaJobParameterBuilder()
-                .collectionVariantsName(COLLECTION_VARIANTS_NAME)
+                .collectionFilesName(COLLECTION_FILES_NAME)
                 .databaseName(databaseName)
                 .inputStudyId(STUDY_ID_TO_DROP)
                 .toJobParameters();
 
-        JobExecution jobExecution = jobLauncherTestUtils.launchStep(BeanNames.DROP_SINGLE_STUDY_VARIANTS_STEP,
+        JobExecution jobExecution = jobLauncherTestUtils.launchStep(BeanNames.DROP_FILES_BY_STUDY_STEP,
                 jobParameters);
 
         assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
         assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());
 
-        DBCollection variantsCollection = mongoRule.getCollection(databaseName, COLLECTION_VARIANTS_NAME);
-        assertEquals(expectedVariantsAfterDropStudy, variantsCollection.count());
+        DBCollection variantsCollection = mongoRule.getCollection(databaseName, COLLECTION_FILES_NAME);
+        assertEquals(expectedFilesAfterDropStudy, variantsCollection.count());
 
-        String filesStudyIdField = String.format("%s.%s", FILES_FIELD, STUDYID_FIELD);
-        BasicDBObject singleStudyVariants = new BasicDBObject(filesStudyIdField, STUDY_ID_TO_DROP)
-                .append(FILES_FIELD, new BasicDBObject("$size", 1));
-        assertEquals(0, variantsCollection.count(singleStudyVariants));
+        BasicDBObject remainingFilesThatShouldHaveBeenDropped = new BasicDBObject(STUDYID_FIELD, STUDY_ID_TO_DROP);
+        assertEquals(0, variantsCollection.count(remainingFilesThatShouldHaveBeenDropped));
     }
 
 }
