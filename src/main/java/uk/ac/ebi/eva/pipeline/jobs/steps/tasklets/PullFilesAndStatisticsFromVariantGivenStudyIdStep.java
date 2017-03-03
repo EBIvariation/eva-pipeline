@@ -35,9 +35,10 @@ import static uk.ac.ebi.eva.commons.models.converters.data.VariantToDBObjectConv
 import static uk.ac.ebi.eva.commons.models.data.VariantSourceEntity.STUDYID_FIELD;
 
 /**
- * Tasklet that removes the variant information in files and statistics given a studyId.
+ * Tasklet that removes the files and statistics in a variant given a studyId. The id is readed from the jobParameter
+ * studyId.
  */
-public class VariantsAndStatisticsDropperTasklet implements Tasklet {
+public class PullFilesAndStatisticsFromVariantGivenStudyIdStep implements Tasklet {
 
     private static final Logger logger = LoggerFactory.getLogger(SingleStudyVariantsDropperStep.class);
 
@@ -52,9 +53,8 @@ public class VariantsAndStatisticsDropperTasklet implements Tasklet {
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
-        logger.info("Deleting variants reported only in study {}", inputParameters.getStudyId());
+        logger.info("Pulling files and statistics reported only in study {}", inputParameters.getStudyId());
         dropVariantsAndStatisticsByStudy(inputParameters.getStudyId());
-
         return RepeatStatus.FINISHED;
     }
 

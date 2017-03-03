@@ -47,13 +47,13 @@ import static uk.ac.ebi.eva.commons.models.converters.data.VariantToDBObjectConv
 import static uk.ac.ebi.eva.commons.models.converters.data.VariantToDBObjectConverter.STATS_FIELD;
 
 /**
- * Test for {@link DropVariantsAndStatisticsByStudyStep}
+ * Test for {@link PullFilesAndStatisticsByStudyStep}
  */
 @RunWith(SpringRunner.class)
 @ActiveProfiles({Application.VARIANT_WRITER_MONGO_PROFILE, Application.VARIANT_ANNOTATION_MONGO_PROFILE})
 @TestPropertySource({"classpath:common-configuration.properties", "classpath:test-mongo.properties"})
 @ContextConfiguration(classes = {DropStudyJob.class, BatchTestConfiguration.class})
-public class DropVariantsAndStatisticsByStudyStepTest {
+public class PullFilesAndStatisticsByStudyStepTest {
 
     private static final String COLLECTION_VARIANTS_NAME = "variants";
 
@@ -139,7 +139,7 @@ public class DropVariantsAndStatisticsByStudyStepTest {
                 .toJobParameters();
 
         // When the execute method in variantsLoad is executed
-        JobExecution jobExecution = jobLauncherTestUtils.launchStep(BeanNames.DROP_VARIANTS_AND_STATISTICS_BY_STUDY_STEP,
+        JobExecution jobExecution = jobLauncherTestUtils.launchStep(BeanNames.PULL_FILES_AND_STATISTICS_BY_STUDY_STEP,
                 jobParameters);
 
         //Then variantsLoad step should complete correctly

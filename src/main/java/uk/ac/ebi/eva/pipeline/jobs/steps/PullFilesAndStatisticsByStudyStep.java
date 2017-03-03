@@ -23,28 +23,31 @@ import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.step.tasklet.TaskletStep;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import uk.ac.ebi.eva.pipeline.jobs.steps.tasklets.VariantsAndStatisticsDropperTasklet;
+import uk.ac.ebi.eva.pipeline.jobs.steps.tasklets.PullFilesAndStatisticsFromVariantGivenStudyIdStep;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 import uk.ac.ebi.eva.utils.TaskletUtils;
 
-import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.DROP_VARIANTS_AND_STATISTICS_BY_STUDY_STEP;
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.PULL_FILES_AND_STATISTICS_BY_STUDY_STEP;
 
+/**
+ * Step that pulls the file and statistics in a variant based on their study id.
+ */
 @Configuration
 @EnableBatchProcessing
-public class DropVariantsAndStatisticsByStudyStep {
+public class PullFilesAndStatisticsByStudyStep {
 
-    private static final Logger logger = LoggerFactory.getLogger(DropVariantsAndStatisticsByStudyStep.class);
+    private static final Logger logger = LoggerFactory.getLogger(PullFilesAndStatisticsByStudyStep.class);
 
     @Bean
     @StepScope
-    public VariantsAndStatisticsDropperTasklet variantsAndStatisticsDropperTasklet() {
-        return new VariantsAndStatisticsDropperTasklet();
+    public PullFilesAndStatisticsFromVariantGivenStudyIdStep variantsAndStatisticsDropperTasklet() {
+        return new PullFilesAndStatisticsFromVariantGivenStudyIdStep();
     }
 
-    @Bean(DROP_VARIANTS_AND_STATISTICS_BY_STUDY_STEP)
+    @Bean(PULL_FILES_AND_STATISTICS_BY_STUDY_STEP)
     public TaskletStep dropVariantsAndStatisticsByStudioStep(StepBuilderFactory stepBuilderFactory,
                                                              JobOptions jobOptions) {
-        return TaskletUtils.generateStep(stepBuilderFactory, DROP_VARIANTS_AND_STATISTICS_BY_STUDY_STEP,
+        return TaskletUtils.generateStep(stepBuilderFactory, PULL_FILES_AND_STATISTICS_BY_STUDY_STEP,
                 variantsAndStatisticsDropperTasklet(), jobOptions.isAllowStartIfComplete());
     }
 
