@@ -155,9 +155,6 @@ public class PullFilesAndStatisticsByStudyStepTest {
         BasicDBObject variantFiles = new BasicDBObject(filesStudyIdField, STUDY_ID_TO_DROP);
         BasicDBObject variantStats = new BasicDBObject(statsStudyIdField, STUDY_ID_TO_DROP);
 
-        System.out.println(variantsCollection.count(variantFiles));
-        System.out.println(variantsCollection.count(variantStats));
-
         assertEquals(expectedFileCount, variantsCollection.count(variantFiles));
         assertEquals(expectedStatsCount, variantsCollection.count(variantStats));
     }
