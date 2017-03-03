@@ -26,6 +26,10 @@ public class VariantData {
     private static final String VARIANT_WITHOUT_ANNOTATION_PATH = "/input-files/annotation/VariantWithOutAnnotation";
     private static final String VARIANT_WITH_ANNOTATION_PATH = "/input-files/annotation/VariantWithAnnotation";
     private static final String POPULATION_STATS_PATH = "/input-files/statistics/PopulationStatistics.json";
+    private static final String VARIANT_WITH_ONE_STUDY_TO_DROP_PATH = "/input-files/variant/VariantWithOneStudyToDrop.json";
+    private static final String OTHER_VARIANT_WITH_ONE_STUDY_TO_DROP_PATH = "/input-files/variant/OtherVariantWithOneStudyToDrop.json";
+    private static final String VARIANT_WITH_ONE_STUDY_PATH = "/input-files/variant/VariantWithOneStudy.json";
+    private static final String VARIANT_WITH_TWO_STUDIES_PATH = "/input-files/variant/VariantWithTwoStudies.json";
 
     public static String getVariantWithoutAnnotation() throws IOException {
         return FileUtils.readFileToString(getResource(VARIANT_WITHOUT_ANNOTATION_PATH));
@@ -37,5 +41,21 @@ public class VariantData {
 
     public static String getPopulationStatistics() throws IOException {
         return FileUtils.readFileToString(getResource(POPULATION_STATS_PATH));
+    }
+
+    public static String getVariantWithOneStudyToDrop() throws IOException {
+        return FileUtils.readFileToString(getResource(VARIANT_WITH_ONE_STUDY_TO_DROP_PATH));
+    }
+
+    public static String getOtherVariantWithOneStudyToDrop() throws IOException {
+        return FileUtils.readFileToString(getResource(OTHER_VARIANT_WITH_ONE_STUDY_TO_DROP_PATH));
+    }
+
+    public static String getVariantWithOneStudy() throws IOException {
+        return FileUtils.readFileToString(getResource(VARIANT_WITH_ONE_STUDY_PATH));
+    }
+
+    public static String getVariantWithTwoStudies() throws IOException {
+        return FileUtils.readFileToString(getResource(VARIANT_WITH_TWO_STUDIES_PATH));
     }
 }
