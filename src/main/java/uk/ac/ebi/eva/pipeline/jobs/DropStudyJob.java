@@ -31,11 +31,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
-
 import uk.ac.ebi.eva.pipeline.jobs.steps.DropSingleStudyVariantsStep;
+import uk.ac.ebi.eva.pipeline.jobs.steps.DropVariantsAndStatisticsByStudyStep;
 
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.DROP_SINGLE_STUDY_VARIANTS_STEP;
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.DROP_STUDY_JOB;
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.DROP_VARIANTS_AND_STATISTICS_BY_STUDY_STEP;
 
 /**
  * Job that removes a study from the database. Given a study to remove:
@@ -44,7 +45,7 @@ import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.DROP_STUDY_JOB;
  */
 @Configuration
 @EnableBatchProcessing
-@Import({DropSingleStudyVariantsStep.class})
+@Import({DropSingleStudyVariantsStep.class, DropVariantsAndStatisticsByStudyStep.class})
 public class DropStudyJob {
 
     private static final Logger logger = LoggerFactory.getLogger(DropStudyJob.class);
@@ -52,6 +53,10 @@ public class DropStudyJob {
     @Autowired
     @Qualifier(DROP_SINGLE_STUDY_VARIANTS_STEP)
     private Step dropSingleStudyVariantsStep;
+
+    @Autowired
+    @Qualifier(DROP_VARIANTS_AND_STATISTICS_BY_STUDY_STEP)
+    private Step dropVariantsAndStatisticsByStudyStep;
 
     @Bean(DROP_STUDY_JOB)
     @Scope("prototype")
@@ -63,7 +68,7 @@ public class DropStudyJob {
                 .incrementer(new RunIdIncrementer());
 
         SimpleJobBuilder builder = jobBuilder
-                .start(dropSingleStudyVariantsStep);
+                .start(dropSingleStudyVariantsStep).next(dropVariantsAndStatisticsByStudyStep);
 
         return builder.build();
     }

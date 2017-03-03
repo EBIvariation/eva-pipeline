@@ -49,6 +49,8 @@ public class BeanNames {
     public static final String LOAD_FILE_STEP = "load-file-step";
     public static final String GENERATE_VEP_INPUT_STEP = "generate-vep-input-step";
     public static final String DROP_SINGLE_STUDY_VARIANTS_STEP = "drop-single-study-variants-step";
+    public static final String DROP_VARIANTS_AND_STATISTICS_BY_STUDY_STEP =
+            "drop-variants-and-statistics-by-study-step";
 
     public static final String AGGREGATED_VCF_JOB = "aggregated-vcf-job";
     public static final String ANNOTATE_VARIANTS_JOB = "annotate-variants-job";
@@ -56,5 +58,4 @@ public class BeanNames {
     public static final String GENOTYPED_VCF_JOB = "genotyped-vcf-job";
     public static final String CALCULATE_STATISTICS_JOB = "calculate-statistics-job";
     public static final String DROP_STUDY_JOB = "drop-study-job";
-
 }

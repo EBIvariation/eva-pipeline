@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package uk.ac.ebi.eva.pipeline.jobs.steps;
 
 import com.mongodb.BasicDBObject;
@@ -31,7 +30,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-
 import uk.ac.ebi.eva.pipeline.Application;
 import uk.ac.ebi.eva.pipeline.configuration.BeanNames;
 import uk.ac.ebi.eva.pipeline.jobs.DropStudyJob;
@@ -42,24 +40,22 @@ import uk.ac.ebi.eva.utils.EvaJobParameterBuilder;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Collection;
 
 import static org.junit.Assert.assertEquals;
 import static uk.ac.ebi.eva.commons.models.converters.data.VariantSourceEntryToDBObjectConverter.STUDYID_FIELD;
 import static uk.ac.ebi.eva.commons.models.converters.data.VariantToDBObjectConverter.FILES_FIELD;
+import static uk.ac.ebi.eva.commons.models.converters.data.VariantToDBObjectConverter.STATS_FIELD;
 
 /**
- * Test for {@link DropSingleStudyVariantsStep}
+ * Test for {@link DropVariantsAndStatisticsByStudyStep}
  */
 @RunWith(SpringRunner.class)
 @ActiveProfiles({Application.VARIANT_WRITER_MONGO_PROFILE, Application.VARIANT_ANNOTATION_MONGO_PROFILE})
 @TestPropertySource({"classpath:common-configuration.properties", "classpath:test-mongo.properties"})
 @ContextConfiguration(classes = {DropStudyJob.class, BatchTestConfiguration.class})
-public class DropSingleStudyVariantsStepTest {
+public class DropVariantsAndStatisticsByStudyStepTest {
 
     private static final String COLLECTION_VARIANTS_NAME = "variants";
-
-    private static final long EXPECTED_VARIANTS_AFTER_DROP_STUDY = 2;
 
     private static final String STUDY_ID_TO_DROP = "studyIdToDrop";
 
@@ -70,36 +66,72 @@ public class DropSingleStudyVariantsStepTest {
     private JobLauncherTestUtils jobLauncherTestUtils;
 
     @Test
-    public void testNoVariantsToDrop() throws Exception {
-        String databaseName = mongoRule.insertDocuments(COLLECTION_VARIANTS_NAME, Arrays.asList(
-                VariantData.getVariantWithOneStudy(),
-                VariantData.getVariantWithTwoStudies()));
+    public void testNothingToPull() throws IOException {
+        final int expectedFilesBefore = 0;
+        final int expectedFilesAfter = 0;
+        final int expectedStatsBefore = 0;
+        final int expectedStatsAfter = 0;
 
-        checkDrop(databaseName, EXPECTED_VARIANTS_AFTER_DROP_STUDY);
+        String databaseName = mongoRule.insertDocuments(COLLECTION_VARIANTS_NAME, Arrays.asList(
+                VariantData.getVariantWithOneStudy()));
+
+        check(databaseName, expectedFilesBefore, expectedStatsBefore);
+        executeStep(databaseName);
+        check(databaseName, expectedFilesAfter, expectedStatsAfter);
     }
 
     @Test
-    public void testOneVariantToDrop() throws Exception {
+    public void testFileToPull() throws IOException {
+        final int expectedFilesBefore = 1;
+        final int expectedFilesAfter = 0;
+        final int expectedStatsBefore = 0;
+        final int expectedStatsAfter = 0;
+
         String databaseName = mongoRule.insertDocuments(COLLECTION_VARIANTS_NAME, Arrays.asList(
-                VariantData.getVariantWithOneStudyToDrop(),
                 VariantData.getVariantWithOneStudy(),
                 VariantData.getVariantWithTwoStudies()));
 
-        checkDrop(databaseName, EXPECTED_VARIANTS_AFTER_DROP_STUDY);
+        check(databaseName, expectedFilesBefore, expectedStatsBefore);
+        executeStep(databaseName);
+        check(databaseName, expectedFilesAfter, expectedStatsAfter);
     }
 
     @Test
-    public void testSeveralVariantsToDrop() throws Exception {
-        String databaseName = mongoRule.insertDocuments(COLLECTION_VARIANTS_NAME, Arrays.asList(
-                VariantData.getVariantWithOneStudyToDrop(),
-                VariantData.getOtherVariantWithOneStudyToDrop(),
-                VariantData.getVariantWithOneStudy(),
-                VariantData.getVariantWithTwoStudies()));
+    public void testFileAndStatsToPull() throws IOException {
+        final int expectedFilesBefore = 2;
+        final int expectedFilesAfter = 0;
+        final int expectedStatsBefore = 1;
+        final int expectedStatsAfter = 0;
 
-        checkDrop(databaseName, EXPECTED_VARIANTS_AFTER_DROP_STUDY);
+        String databaseName = mongoRule.insertDocuments(COLLECTION_VARIANTS_NAME, Arrays.asList(
+                VariantData.getVariantWithOneStudy(),
+                VariantData.getVariantWithTwoStudies(),
+                VariantData.getVariantWithOneStudyToDrop()));
+
+        check(databaseName, expectedFilesBefore, expectedStatsBefore);
+        executeStep(databaseName);
+        check(databaseName, expectedFilesAfter, expectedStatsAfter);
     }
 
-    private void checkDrop(String databaseName, long expectedVariantsAfterDropStudy) {
+    @Test
+    public void testFileAndStatsToPullWithAllTestFiles() throws IOException {
+        final int expectedFilesBefore = 3;
+        final int expectedFilesAfter = 0;
+        final int expectedStatsBefore = 2;
+        final int expectedStatsAfter = 0;
+
+        String databaseName = mongoRule.insertDocuments(COLLECTION_VARIANTS_NAME, Arrays.asList(
+                VariantData.getVariantWithOneStudy(),
+                VariantData.getVariantWithTwoStudies(),
+                VariantData.getVariantWithOneStudyToDrop(),
+                VariantData.getOtherVariantWithOneStudyToDrop()));
+
+        check(databaseName, expectedFilesBefore, expectedStatsBefore);
+        executeStep(databaseName);
+        check(databaseName, expectedFilesAfter, expectedStatsAfter);
+    }
+
+    private void executeStep(String databaseName) {
         JobParameters jobParameters = new EvaJobParameterBuilder()
                 .collectionVariantsName(COLLECTION_VARIANTS_NAME)
                 .databaseName(databaseName)
@@ -107,21 +139,27 @@ public class DropSingleStudyVariantsStepTest {
                 .toJobParameters();
 
         // When the execute method in variantsLoad is executed
-        JobExecution jobExecution = jobLauncherTestUtils.launchStep(BeanNames.DROP_SINGLE_STUDY_VARIANTS_STEP,
+        JobExecution jobExecution = jobLauncherTestUtils.launchStep(BeanNames.DROP_VARIANTS_AND_STATISTICS_BY_STUDY_STEP,
                 jobParameters);
 
         //Then variantsLoad step should complete correctly
         assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
         assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());
+    }
 
+    private void check(String databaseName, int expectedFileCount, int expectedStatsCount) {
+        String filesStudyIdField = String.format("%s.%s", FILES_FIELD, STUDYID_FIELD);
+        String statsStudyIdField = String.format("%s.%s", STATS_FIELD, STUDYID_FIELD);
         // And the documents in the DB should not contain the study removed
         DBCollection variantsCollection = mongoRule.getCollection(databaseName, COLLECTION_VARIANTS_NAME);
-        assertEquals(expectedVariantsAfterDropStudy, variantsCollection.count());
+        BasicDBObject variantFiles = new BasicDBObject(filesStudyIdField, STUDY_ID_TO_DROP);
+        BasicDBObject variantStats = new BasicDBObject(statsStudyIdField, STUDY_ID_TO_DROP);
 
-        String filesStudyIdField = String.format("%s.%s", FILES_FIELD, STUDYID_FIELD);
-        BasicDBObject singleStudyVariants = new BasicDBObject(filesStudyIdField, STUDY_ID_TO_DROP)
-                .append(FILES_FIELD, new BasicDBObject("$size", 1));
-        assertEquals(0, variantsCollection.count(singleStudyVariants));
+        System.out.println(variantsCollection.count(variantFiles));
+        System.out.println(variantsCollection.count(variantStats));
+
+        assertEquals(expectedFileCount, variantsCollection.count(variantFiles));
+        assertEquals(expectedStatsCount, variantsCollection.count(variantStats));
     }
 
 }
