@@ -41,6 +41,8 @@ import java.util.zip.GZIPInputStream;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static uk.ac.ebi.eva.commons.models.converters.data.VariantSourceEntryToDBObjectConverter.FILEID_FIELD;
+import static uk.ac.ebi.eva.commons.models.converters.data.VariantSourceEntryToDBObjectConverter.STUDYID_FIELD;
 
 public abstract class JobTestUtils {
     private static final Logger logger = LoggerFactory.getLogger(JobTestUtils.class);
@@ -143,5 +145,10 @@ public abstract class JobTestUtils {
 
         gzipInputStream.close();
         fileOutputStream.close();
+    }
+
+    public static String buildFilesDocumentString(String studyId, String fileId) {
+        return "{\"" + STUDYID_FIELD + "\":\"" + studyId
+                + "\", \"" + FILEID_FIELD + "\":\"" + fileId + "\"}";
     }
 }
