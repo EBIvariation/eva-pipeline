@@ -40,9 +40,9 @@ import static uk.ac.ebi.eva.commons.models.data.VariantSourceEntity.STUDYID_FIEL
  * <p>
  * Output: all files that are in that study are removed
  */
-public class FileDropperStep implements Tasklet {
+public class FilesByStudyDropperStep implements Tasklet {
 
-    private static final Logger logger = LoggerFactory.getLogger(FileDropperStep.class);
+    private static final Logger logger = LoggerFactory.getLogger(FilesByStudyDropperStep.class);
 
     @Autowired
     private MongoOperations mongoOperations;
@@ -57,7 +57,7 @@ public class FileDropperStep implements Tasklet {
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
         Query query = new Query(new Criteria(STUDYID_FIELD).is(inputParameters.getStudyId()));
 
-        logger.info("Deleting study {} from {} collection", inputParameters.getStudyId(),
+        logger.info("Deleting study \"{}\" from \"{}\" collection", inputParameters.getStudyId(),
                 dbParameters.getCollectionFilesName());
         logger.trace("Query used: {}", query);
         WriteResult writeResult = mongoOperations.remove(query, dbParameters.getCollectionFilesName());

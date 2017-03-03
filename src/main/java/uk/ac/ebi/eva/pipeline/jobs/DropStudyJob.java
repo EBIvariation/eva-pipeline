@@ -32,11 +32,11 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
 
-import uk.ac.ebi.eva.pipeline.jobs.steps.DropFileStep;
+import uk.ac.ebi.eva.pipeline.jobs.steps.DropFilesByStudyStep;
 import uk.ac.ebi.eva.pipeline.jobs.steps.DropSingleStudyVariantsStep;
 import uk.ac.ebi.eva.pipeline.jobs.steps.PullFilesAndStatisticsByStudyStep;
 
-import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.DROP_FILE_STEP;
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.DROP_FILES_BY_STUDY_STEP;
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.DROP_SINGLE_STUDY_VARIANTS_STEP;
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.DROP_STUDY_JOB;
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.PULL_FILES_AND_STATISTICS_BY_STUDY_STEP;
@@ -48,7 +48,7 @@ import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.PULL_FILES_AND_STAT
  */
 @Configuration
 @EnableBatchProcessing
-@Import({DropSingleStudyVariantsStep.class, PullFilesAndStatisticsByStudyStep.class, DropFileStep.class})
+@Import({DropSingleStudyVariantsStep.class, PullFilesAndStatisticsByStudyStep.class, DropFilesByStudyStep.class})
 public class DropStudyJob {
 
     private static final Logger logger = LoggerFactory.getLogger(DropStudyJob.class);
@@ -62,7 +62,7 @@ public class DropStudyJob {
     private Step dropVariantsAndStatisticsByStudyStep;
 
     @Autowired
-    @Qualifier(DROP_FILE_STEP)
+    @Qualifier(DROP_FILES_BY_STUDY_STEP)
     private Step dropFileStep;
 
     @Bean(DROP_STUDY_JOB)

@@ -25,32 +25,31 @@ import org.springframework.batch.core.step.tasklet.TaskletStep;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import uk.ac.ebi.eva.pipeline.jobs.steps.tasklets.FileDropperStep;
-import uk.ac.ebi.eva.pipeline.jobs.steps.tasklets.SingleStudyVariantsDropperStep;
+import uk.ac.ebi.eva.pipeline.jobs.steps.tasklets.FilesByStudyDropperStep;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 import uk.ac.ebi.eva.utils.TaskletUtils;
 
-import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.DROP_FILE_STEP;
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.DROP_FILES_BY_STUDY_STEP;
 
 /**
- * Configuration class that inject a step created with the tasklet {@link SingleStudyVariantsDropperStep}
+ * Configuration class that inject a step created with the tasklet {@link FilesByStudyDropperStep}
  */
 @Configuration
 @EnableBatchProcessing
-public class DropFileStep {
+public class DropFilesByStudyStep {
 
-    private static final Logger logger = LoggerFactory.getLogger(DropFileStep.class);
+    private static final Logger logger = LoggerFactory.getLogger(DropFilesByStudyStep.class);
 
     @Bean
     @StepScope
-    public FileDropperStep fileDropperStep() {
-        return new FileDropperStep();
+    public FilesByStudyDropperStep fileDropperStep() {
+        return new FilesByStudyDropperStep();
     }
 
-    @Bean(DROP_FILE_STEP)
+    @Bean(DROP_FILES_BY_STUDY_STEP)
     public TaskletStep dropSingleStudyVariantsStep(StepBuilderFactory stepBuilderFactory, JobOptions jobOptions) {
-        logger.debug("Building '" + DROP_FILE_STEP + "'");
-        return TaskletUtils.generateStep(stepBuilderFactory, DROP_FILE_STEP,
+        logger.debug("Building '" + DROP_FILES_BY_STUDY_STEP + "'");
+        return TaskletUtils.generateStep(stepBuilderFactory, DROP_FILES_BY_STUDY_STEP,
                 fileDropperStep(), jobOptions.isAllowStartIfComplete());
     }
 

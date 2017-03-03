@@ -106,15 +106,12 @@ public class DropSingleStudyVariantsStepTest {
                 .inputStudyId(STUDY_ID_TO_DROP)
                 .toJobParameters();
 
-        // When the execute method in variantsLoad is executed
         JobExecution jobExecution = jobLauncherTestUtils.launchStep(BeanNames.DROP_SINGLE_STUDY_VARIANTS_STEP,
                 jobParameters);
 
-        //Then variantsLoad step should complete correctly
         assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
         assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());
 
-        // And the documents in the DB should not contain the study removed
         DBCollection variantsCollection = mongoRule.getCollection(databaseName, COLLECTION_VARIANTS_NAME);
         assertEquals(expectedVariantsAfterDropStudy, variantsCollection.count());
 

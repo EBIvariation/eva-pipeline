@@ -75,9 +75,9 @@ public class PullFilesAndStatisticsByStudyStepTest {
         String databaseName = mongoRule.insertDocuments(COLLECTION_VARIANTS_NAME, Arrays.asList(
                 VariantData.getVariantWithOneStudy()));
 
-        check(databaseName, expectedFilesBefore, expectedStatsBefore);
+        checkPull(databaseName, expectedFilesBefore, expectedStatsBefore);
         executeStep(databaseName);
-        check(databaseName, expectedFilesAfter, expectedStatsAfter);
+        checkPull(databaseName, expectedFilesAfter, expectedStatsAfter);
     }
 
     @Test
@@ -91,9 +91,9 @@ public class PullFilesAndStatisticsByStudyStepTest {
                 VariantData.getVariantWithOneStudy(),
                 VariantData.getVariantWithTwoStudies()));
 
-        check(databaseName, expectedFilesBefore, expectedStatsBefore);
+        checkPull(databaseName, expectedFilesBefore, expectedStatsBefore);
         executeStep(databaseName);
-        check(databaseName, expectedFilesAfter, expectedStatsAfter);
+        checkPull(databaseName, expectedFilesAfter, expectedStatsAfter);
     }
 
     @Test
@@ -108,9 +108,9 @@ public class PullFilesAndStatisticsByStudyStepTest {
                 VariantData.getVariantWithTwoStudies(),
                 VariantData.getVariantWithOneStudyToDrop()));
 
-        check(databaseName, expectedFilesBefore, expectedStatsBefore);
+        checkPull(databaseName, expectedFilesBefore, expectedStatsBefore);
         executeStep(databaseName);
-        check(databaseName, expectedFilesAfter, expectedStatsAfter);
+        checkPull(databaseName, expectedFilesAfter, expectedStatsAfter);
     }
 
     @Test
@@ -126,9 +126,9 @@ public class PullFilesAndStatisticsByStudyStepTest {
                 VariantData.getVariantWithOneStudyToDrop(),
                 VariantData.getOtherVariantWithOneStudyToDrop()));
 
-        check(databaseName, expectedFilesBefore, expectedStatsBefore);
+        checkPull(databaseName, expectedFilesBefore, expectedStatsBefore);
         executeStep(databaseName);
-        check(databaseName, expectedFilesAfter, expectedStatsAfter);
+        checkPull(databaseName, expectedFilesAfter, expectedStatsAfter);
     }
 
     private void executeStep(String databaseName) {
@@ -138,19 +138,17 @@ public class PullFilesAndStatisticsByStudyStepTest {
                 .inputStudyId(STUDY_ID_TO_DROP)
                 .toJobParameters();
 
-        // When the execute method in variantsLoad is executed
         JobExecution jobExecution = jobLauncherTestUtils.launchStep(BeanNames.PULL_FILES_AND_STATISTICS_BY_STUDY_STEP,
                 jobParameters);
 
-        //Then variantsLoad step should complete correctly
         assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
         assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());
     }
 
-    private void check(String databaseName, int expectedFileCount, int expectedStatsCount) {
+    private void checkPull(String databaseName, int expectedFileCount, int expectedStatsCount) {
         String filesStudyIdField = String.format("%s.%s", FILES_FIELD, STUDYID_FIELD);
         String statsStudyIdField = String.format("%s.%s", STATS_FIELD, STUDYID_FIELD);
-        // And the documents in the DB should not contain the study removed
+
         DBCollection variantsCollection = mongoRule.getCollection(databaseName, COLLECTION_VARIANTS_NAME);
         BasicDBObject variantFiles = new BasicDBObject(filesStudyIdField, STUDY_ID_TO_DROP);
         BasicDBObject variantStats = new BasicDBObject(statsStudyIdField, STUDY_ID_TO_DROP);

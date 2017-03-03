@@ -43,16 +43,17 @@ import java.util.Arrays;
 import java.util.Collections;
 
 import static org.junit.Assert.assertEquals;
+import static uk.ac.ebi.eva.commons.models.converters.data.VariantSourceEntryToDBObjectConverter.FILEID_FIELD;
 import static uk.ac.ebi.eva.commons.models.converters.data.VariantSourceEntryToDBObjectConverter.STUDYID_FIELD;
 
 /**
- * Test for {@link DropSingleStudyVariantsStep}
+ * Test for {@link DropFilesByStudyStep}
  */
 @RunWith(SpringRunner.class)
 @ActiveProfiles({Application.VARIANT_WRITER_MONGO_PROFILE, Application.VARIANT_ANNOTATION_MONGO_PROFILE})
 @TestPropertySource({"classpath:common-configuration.properties", "classpath:test-mongo.properties"})
 @ContextConfiguration(classes = {DropStudyJob.class, BatchTestConfiguration.class})
-public class DropFileStepTest {
+public class DropFilesByStudyStepTest {
 
     private static final String COLLECTION_FILES_NAME = "files";
 
@@ -62,9 +63,11 @@ public class DropFileStepTest {
 
     private static final String OTHER_STUDY_ID = "otherStudy";
 
-    private static final String FILES_DOCUMENT = buildFilesDocumentString(STUDY_ID_TO_DROP);
+    private static final String FILES_DOCUMENT = buildFilesDocumentString(STUDY_ID_TO_DROP, "fileOne");
 
-    private static final String OTHER_FILES_DOCUMENT = buildFilesDocumentString(OTHER_STUDY_ID);
+    private static final String OTHER_FILES_DOCUMENT = buildFilesDocumentString(STUDY_ID_TO_DROP, "fileTwo");
+
+    private static final String OTHER_STUDY_FILES_DOCUMENT = buildFilesDocumentString(OTHER_STUDY_ID, "fileThree");
 
     @Rule
     public TemporaryMongoRule mongoRule = new TemporaryMongoRule();
@@ -72,14 +75,15 @@ public class DropFileStepTest {
     @Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
 
-    private static String buildFilesDocumentString(String studyId) {
-        return "{\"" + STUDYID_FIELD + "\":\"" + studyId + "\"}";
+    private static String buildFilesDocumentString(String studyId, String fileId) {
+        return "{\"" + STUDYID_FIELD + "\":\"" + studyId
+                + "\", \"" + FILEID_FIELD + "\":\"" + fileId + "\"}";
     }
 
     @Test
     public void testNoFilesToDrop() throws Exception {
         String databaseName = mongoRule.insertDocuments(COLLECTION_FILES_NAME,
-                Collections.singletonList(OTHER_FILES_DOCUMENT));
+                Collections.singletonList(OTHER_STUDY_FILES_DOCUMENT));
 
         checkDrop(databaseName, EXPECTED_FILES_AFTER_DROP_STUDY);
     }
@@ -87,29 +91,34 @@ public class DropFileStepTest {
     @Test
     public void testOneFileToDrop() throws Exception {
         String databaseName = mongoRule.insertDocuments(COLLECTION_FILES_NAME,
-                Arrays.asList(FILES_DOCUMENT, OTHER_FILES_DOCUMENT));
+                Arrays.asList(FILES_DOCUMENT, OTHER_STUDY_FILES_DOCUMENT));
 
         checkDrop(databaseName, EXPECTED_FILES_AFTER_DROP_STUDY);
     }
 
-    private void checkDrop(String databaseName, long expectedVariantsAfterDropStudy) {
+    @Test
+    public void testSeveralFilesToDrop() throws Exception {
+        String databaseName = mongoRule.insertDocuments(COLLECTION_FILES_NAME,
+                Arrays.asList(FILES_DOCUMENT, OTHER_FILES_DOCUMENT, OTHER_STUDY_FILES_DOCUMENT));
+
+        checkDrop(databaseName, EXPECTED_FILES_AFTER_DROP_STUDY);
+    }
+
+    private void checkDrop(String databaseName, long expectedFilesAfterDropStudy) {
         JobParameters jobParameters = new EvaJobParameterBuilder()
                 .collectionFilesName(COLLECTION_FILES_NAME)
                 .databaseName(databaseName)
                 .inputStudyId(STUDY_ID_TO_DROP)
                 .toJobParameters();
 
-        // When the execute method in variantsLoad is executed
-        JobExecution jobExecution = jobLauncherTestUtils.launchStep(BeanNames.DROP_FILE_STEP,
+        JobExecution jobExecution = jobLauncherTestUtils.launchStep(BeanNames.DROP_FILES_BY_STUDY_STEP,
                 jobParameters);
 
-        //Then variantsLoad step should complete correctly
         assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
         assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());
 
-        // And the documents in the DB should not contain the study removed
         DBCollection variantsCollection = mongoRule.getCollection(databaseName, COLLECTION_FILES_NAME);
-        assertEquals(expectedVariantsAfterDropStudy, variantsCollection.count());
+        assertEquals(expectedFilesAfterDropStudy, variantsCollection.count());
 
         BasicDBObject remainingFilesThatShouldHaveBeenDropped = new BasicDBObject(STUDYID_FIELD, STUDY_ID_TO_DROP);
         assertEquals(0, variantsCollection.count(remainingFilesThatShouldHaveBeenDropped));
