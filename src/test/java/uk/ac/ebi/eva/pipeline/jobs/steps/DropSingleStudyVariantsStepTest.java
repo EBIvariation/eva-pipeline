@@ -16,7 +16,6 @@
 
 package uk.ac.ebi.eva.pipeline.jobs.steps;
 
-import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
 import org.junit.Rule;
 import org.junit.Test;
@@ -38,13 +37,12 @@ import uk.ac.ebi.eva.pipeline.jobs.DropStudyJob;
 import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
 import uk.ac.ebi.eva.test.data.VariantData;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
+import uk.ac.ebi.eva.test.utils.DropStudyJobTestUtils;
 import uk.ac.ebi.eva.utils.EvaJobParameterBuilder;
 
 import java.util.Arrays;
 
 import static org.junit.Assert.assertEquals;
-import static uk.ac.ebi.eva.commons.models.converters.data.VariantSourceEntryToDBObjectConverter.STUDYID_FIELD;
-import static uk.ac.ebi.eva.commons.models.converters.data.VariantToDBObjectConverter.FILES_FIELD;
 
 /**
  * Test for {@link DropSingleStudyVariantsStep}
@@ -69,7 +67,7 @@ public class DropSingleStudyVariantsStepTest {
 
     @Test
     public void testNoVariantsToDrop() throws Exception {
-        String databaseName = mongoRule.insertDocuments(COLLECTION_VARIANTS_NAME, Arrays.asList(
+        String databaseName = mongoRule.createDBAndInsertDocuments(COLLECTION_VARIANTS_NAME, Arrays.asList(
                 VariantData.getVariantWithOneStudy(),
                 VariantData.getVariantWithTwoStudies()));
 
@@ -78,7 +76,7 @@ public class DropSingleStudyVariantsStepTest {
 
     @Test
     public void testOneVariantToDrop() throws Exception {
-        String databaseName = mongoRule.insertDocuments(COLLECTION_VARIANTS_NAME, Arrays.asList(
+        String databaseName = mongoRule.createDBAndInsertDocuments(COLLECTION_VARIANTS_NAME, Arrays.asList(
                 VariantData.getVariantWithOneStudyToDrop(),
                 VariantData.getVariantWithOneStudy(),
                 VariantData.getVariantWithTwoStudies()));
@@ -88,7 +86,7 @@ public class DropSingleStudyVariantsStepTest {
 
     @Test
     public void testSeveralVariantsToDrop() throws Exception {
-        String databaseName = mongoRule.insertDocuments(COLLECTION_VARIANTS_NAME, Arrays.asList(
+        String databaseName = mongoRule.createDBAndInsertDocuments(COLLECTION_VARIANTS_NAME, Arrays.asList(
                 VariantData.getVariantWithOneStudyToDrop(),
                 VariantData.getOtherVariantWithOneStudyToDrop(),
                 VariantData.getVariantWithOneStudy(),
@@ -111,12 +109,8 @@ public class DropSingleStudyVariantsStepTest {
         assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());
 
         DBCollection variantsCollection = mongoRule.getCollection(databaseName, COLLECTION_VARIANTS_NAME);
-        assertEquals(expectedVariantsAfterDropStudy, variantsCollection.count());
-
-        String filesStudyIdField = String.format("%s.%s", FILES_FIELD, STUDYID_FIELD);
-        BasicDBObject singleStudyVariants = new BasicDBObject(filesStudyIdField, STUDY_ID_TO_DROP)
-                .append(FILES_FIELD, new BasicDBObject("$size", 1));
-        assertEquals(0, variantsCollection.count(singleStudyVariants));
+        DropStudyJobTestUtils.checkDropSingleStudy(variantsCollection, STUDY_ID_TO_DROP,
+                expectedVariantsAfterDropStudy);
     }
 
 }

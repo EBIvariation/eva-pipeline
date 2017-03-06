@@ -15,7 +15,6 @@
  */
 package uk.ac.ebi.eva.pipeline.jobs;
 
-import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
 import org.junit.Rule;
 import org.junit.Test;
@@ -40,13 +39,9 @@ import uk.ac.ebi.eva.utils.EvaJobParameterBuilder;
 import java.util.Arrays;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static uk.ac.ebi.eva.commons.models.converters.data.VariantToDBObjectConverter.FILES_FIELD;
-import static uk.ac.ebi.eva.commons.models.converters.data.VariantToDBObjectConverter.STATS_FIELD;
-import static uk.ac.ebi.eva.commons.models.data.VariantSourceEntity.STUDYID_FIELD;
-import static uk.ac.ebi.eva.test.utils.GenotypedVcfJobTestUtils.COLLECTION_FILES_NAME;
-import static uk.ac.ebi.eva.test.utils.GenotypedVcfJobTestUtils.COLLECTION_VARIANTS_NAME;
-import static uk.ac.ebi.eva.utils.FileUtils.getResource;
+import static uk.ac.ebi.eva.test.utils.DropStudyJobTestUtils.checkDropFiles;
+import static uk.ac.ebi.eva.test.utils.DropStudyJobTestUtils.checkDropSingleStudy;
+import static uk.ac.ebi.eva.test.utils.DropStudyJobTestUtils.checkPullStudy;
 
 /**
  * Test for {@link PopulationStatisticsJob}
@@ -55,6 +50,18 @@ import static uk.ac.ebi.eva.utils.FileUtils.getResource;
 @TestPropertySource({"classpath:common-configuration.properties", "classpath:test-mongo.properties"})
 @ContextConfiguration(classes = {DropStudyJob.class, BatchTestConfiguration.class})
 public class DropStudyJobTest {
+
+    private static final String COLLECTION_VARIANTS_NAME = "variants";
+
+    private static final String COLLECTION_FILES_NAME = "files";
+
+    private static final long EXPECTED_FILES_AFTER_DROP_STUDY = 1;
+
+    private static final long EXPECTED_VARIANTS_AFTER_DROP_STUDY = 2;
+
+    private static final long EXPECTED_FILE_COUNT = 0;
+
+    private static final long EXPECTED_STATS_COUNT = 0;
 
     @Rule
     public PipelineTemporaryFolderRule temporaryFolderRule = new PipelineTemporaryFolderRule();
@@ -65,38 +72,29 @@ public class DropStudyJobTest {
     @Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
 
-    private static final long EXPECTED_FILES_AFTER_DROP_STUDY = 1;
-
-    private static final long EXPECTED_VARIANTS_AFTER_DROP_STUDY = 2;
-
-    private static final long EXPECTED_FILE_COUNT = 0;
-
-    private static final long EXPECTED_STATS_COUNT = 0;
-
-    private static final String FILES_STUDY_ID_FIELD = String.format("%s.%s", FILES_FIELD, STUDYID_FIELD);
-
-    private static final String STATS_STUDY_ID_FIELD = String.format("%s.%s", STATS_FIELD, STUDYID_FIELD);
+    private static final String STUDY_ID_TO_DROP = "studyIdToDrop";
 
     @Test
     public void fullDropStudyJob() throws Exception {
-        //Given a valid VCF input file
-        String dbName = mongoRule.insertDocuments(COLLECTION_VARIANTS_NAME, Arrays.asList(
+        String dbName = mongoRule.createDBAndInsertDocuments(COLLECTION_VARIANTS_NAME, Arrays.asList(
                 VariantData.getVariantWithOneStudyToDrop(),
                 VariantData.getOtherVariantWithOneStudyToDrop(),
                 VariantData.getVariantWithOneStudy(),
                 VariantData.getVariantWithTwoStudies()));
 
-        String studyId = "studyIdToDrop";
-        mongoRule.insert(dbName, COLLECTION_FILES_NAME, JobTestUtils.buildFilesDocumentString(studyId, "fileIdOne"));
-        mongoRule.insert(dbName, COLLECTION_FILES_NAME, JobTestUtils.buildFilesDocumentString(studyId, "fileIdTwo"));
-        mongoRule.insert(dbName, COLLECTION_FILES_NAME,
-                JobTestUtils.buildFilesDocumentString("otherStudyId", "fileIdThree"));
+        mongoRule.insertDocuments(dbName, COLLECTION_FILES_NAME, Arrays.asList(
+                JobTestUtils.buildFilesDocumentString(STUDY_ID_TO_DROP, "fileIdOne"),
+                JobTestUtils.buildFilesDocumentString(STUDY_ID_TO_DROP, "fileIdTwo"),
+                JobTestUtils.buildFilesDocumentString("otherStudyId", "fileIdThree")));
+
+        DBCollection variantsCollection = mongoRule.getCollection(dbName, COLLECTION_VARIANTS_NAME);
+        DBCollection filesCollection = mongoRule.getCollection(dbName, COLLECTION_FILES_NAME);
 
         JobParameters jobParameters = new EvaJobParameterBuilder()
-                .collectionFilesName("files")
-                .collectionVariantsName("variants")
+                .collectionFilesName(COLLECTION_FILES_NAME)
+                .collectionVariantsName(COLLECTION_VARIANTS_NAME)
                 .databaseName(dbName)
-                .inputStudyId(studyId)
+                .inputStudyId(STUDY_ID_TO_DROP)
                 .timestamp()
                 .toJobParameters();
 
@@ -104,37 +102,9 @@ public class DropStudyJobTest {
         assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
         assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());
 
-
-        checkDropSingleStudy(dbName, studyId, EXPECTED_VARIANTS_AFTER_DROP_STUDY);
-        checkPullStudy(dbName, studyId, EXPECTED_FILE_COUNT, EXPECTED_STATS_COUNT);
-        checkDropFiles(dbName, studyId, EXPECTED_FILES_AFTER_DROP_STUDY);
-    }
-
-    private void checkDropSingleStudy(String dbName, String studyId, long expectedVariantsAfterDropStudy) {
-        DBCollection variantsCollection = mongoRule.getCollection(dbName, COLLECTION_VARIANTS_NAME);
-        assertEquals(expectedVariantsAfterDropStudy, variantsCollection.count());
-
-        BasicDBObject singleStudyVariants = new BasicDBObject(FILES_STUDY_ID_FIELD, studyId)
-                .append(FILES_FIELD, new BasicDBObject("$size", 1));
-        assertEquals(0, variantsCollection.count(singleStudyVariants));
-    }
-
-    private void checkPullStudy(String dbName, String studyId, long expectedFileCount, long expectedStatsCount) {
-        DBCollection variantsCollection = mongoRule.getCollection(dbName, COLLECTION_VARIANTS_NAME);
-
-        BasicDBObject variantFiles = new BasicDBObject(FILES_STUDY_ID_FIELD, studyId);
-        BasicDBObject variantStats = new BasicDBObject(STATS_STUDY_ID_FIELD, studyId);
-
-        assertEquals(expectedFileCount, variantsCollection.count(variantFiles));
-        assertEquals(expectedStatsCount, variantsCollection.count(variantStats));
-    }
-
-    private void checkDropFiles(String dbName, String studyId, long expectedFilesAfterDropStudy) {
-        DBCollection filesCollection = mongoRule.getCollection(dbName, COLLECTION_FILES_NAME);
-        assertEquals(expectedFilesAfterDropStudy, filesCollection.count());
-
-        BasicDBObject remainingFilesThatShouldHaveBeenDropped = new BasicDBObject(STUDYID_FIELD, studyId);
-        assertEquals(0, filesCollection.count(remainingFilesThatShouldHaveBeenDropped));
+        checkDropSingleStudy(variantsCollection, STUDY_ID_TO_DROP, EXPECTED_VARIANTS_AFTER_DROP_STUDY);
+        checkPullStudy(variantsCollection, STUDY_ID_TO_DROP, EXPECTED_FILE_COUNT, EXPECTED_STATS_COUNT);
+        checkDropFiles(filesCollection, STUDY_ID_TO_DROP, EXPECTED_FILES_AFTER_DROP_STUDY);
     }
 
 }

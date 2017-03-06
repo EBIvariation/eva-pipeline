@@ -35,7 +35,6 @@ import uk.ac.ebi.eva.pipeline.parameters.MongoConnection;
 import uk.ac.ebi.eva.test.data.VariantData;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 
-import java.io.IOException;
 import java.util.Arrays;
 
 import static org.junit.Assert.assertEquals;
@@ -69,7 +68,7 @@ public class NonAnnotatedVariantsMongoReaderTest {
     @Test
     public void shouldReadVariantsWithoutAnnotationField() throws Exception {
         ExecutionContext executionContext = MetaDataInstanceFactory.createStepExecution().getExecutionContext();
-        String databaseName = mongoRule.insertDocuments(COLLECTION_VARIANTS_NAME, Arrays.asList(
+        String databaseName = mongoRule.createDBAndInsertDocuments(COLLECTION_VARIANTS_NAME, Arrays.asList(
                 VariantData.getVariantWithAnnotation(),
                 VariantData.getVariantWithoutAnnotation()));
 

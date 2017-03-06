@@ -123,11 +123,15 @@ public class TemporaryMongoRule extends ExternalResource {
         logger.info("mongorestore exit value: " + exec.exitValue());
     }
 
-    public String insertDocuments(String collectionName, Collection<String> documents) throws IOException {
+    public String createDBAndInsertDocuments(String collectionName, Collection<String> documents) {
         String databaseName = getRandomTemporaryDatabaseName();
+        insertDocuments(databaseName, collectionName, documents);
+        return databaseName;
+    }
+
+    public void insertDocuments(String databaseName, String collectionName, Collection<String> documents) {
         for (String document : documents) {
             insert(databaseName, collectionName, document);
         }
-        return databaseName;
     }
 }

@@ -16,7 +16,6 @@
 
 package uk.ac.ebi.eva.pipeline.jobs.steps;
 
-import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
 import org.junit.Rule;
 import org.junit.Test;
@@ -37,6 +36,7 @@ import uk.ac.ebi.eva.pipeline.configuration.BeanNames;
 import uk.ac.ebi.eva.pipeline.jobs.DropStudyJob;
 import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
+import uk.ac.ebi.eva.test.utils.DropStudyJobTestUtils;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
 import uk.ac.ebi.eva.utils.EvaJobParameterBuilder;
 
@@ -44,7 +44,6 @@ import java.util.Arrays;
 import java.util.Collections;
 
 import static org.junit.Assert.assertEquals;
-import static uk.ac.ebi.eva.commons.models.converters.data.VariantSourceEntryToDBObjectConverter.STUDYID_FIELD;
 
 /**
  * Test for {@link DropFilesByStudyStep}
@@ -79,7 +78,7 @@ public class DropFilesByStudyStepTest {
 
     @Test
     public void testNoFilesToDrop() throws Exception {
-        String databaseName = mongoRule.insertDocuments(COLLECTION_FILES_NAME,
+        String databaseName = mongoRule.createDBAndInsertDocuments(COLLECTION_FILES_NAME,
                 Collections.singletonList(OTHER_STUDY_FILES_DOCUMENT));
 
         checkDrop(databaseName, EXPECTED_FILES_AFTER_DROP_STUDY);
@@ -87,7 +86,7 @@ public class DropFilesByStudyStepTest {
 
     @Test
     public void testOneFileToDrop() throws Exception {
-        String databaseName = mongoRule.insertDocuments(COLLECTION_FILES_NAME,
+        String databaseName = mongoRule.createDBAndInsertDocuments(COLLECTION_FILES_NAME,
                 Arrays.asList(FILES_DOCUMENT, OTHER_STUDY_FILES_DOCUMENT));
 
         checkDrop(databaseName, EXPECTED_FILES_AFTER_DROP_STUDY);
@@ -95,7 +94,7 @@ public class DropFilesByStudyStepTest {
 
     @Test
     public void testSeveralFilesToDrop() throws Exception {
-        String databaseName = mongoRule.insertDocuments(COLLECTION_FILES_NAME,
+        String databaseName = mongoRule.createDBAndInsertDocuments(COLLECTION_FILES_NAME,
                 Arrays.asList(FILES_DOCUMENT, OTHER_FILES_DOCUMENT, OTHER_STUDY_FILES_DOCUMENT));
 
         checkDrop(databaseName, EXPECTED_FILES_AFTER_DROP_STUDY);
@@ -115,10 +114,7 @@ public class DropFilesByStudyStepTest {
         assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());
 
         DBCollection filesCollection = mongoRule.getCollection(databaseName, COLLECTION_FILES_NAME);
-        assertEquals(expectedFilesAfterDropStudy, filesCollection.count());
-
-        BasicDBObject remainingFilesThatShouldHaveBeenDropped = new BasicDBObject(STUDYID_FIELD, STUDY_ID_TO_DROP);
-        assertEquals(0, filesCollection.count(remainingFilesThatShouldHaveBeenDropped));
+        DropStudyJobTestUtils.checkDropFiles(filesCollection, STUDY_ID_TO_DROP, EXPECTED_FILES_AFTER_DROP_STUDY);
     }
 
 }
