@@ -13,16 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.ac.ebi.eva.pipeline.listeners;
+package uk.ac.ebi.eva.utils;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.batch.core.ExitStatus;
-import org.springframework.batch.core.StepExecution;
-import org.springframework.batch.core.StepExecutionListener;
 
-import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
-import uk.ac.ebi.eva.utils.FileUtils;
+import uk.ac.ebi.eva.pipeline.listeners.StepProgressListener;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -46,17 +42,14 @@ import java.util.zip.GZIPInputStream;
  * <p>
  * In case of small VCF the NUMBER_OF_LINES will be 0 and no % will be printed in {@link StepProgressListener#afterChunk}
  */
-public class VcfNumberOfLinesEstimatorListener implements StepExecutionListener {
-    private static final Logger logger = LoggerFactory.getLogger(VcfNumberOfLinesEstimatorListener.class);
+public class VcfNumberOfLinesEstimator {
+    private static final Logger logger = LoggerFactory.getLogger(VcfNumberOfLinesEstimator.class);
 
     private static final int NUMBER_OF_LINES = 100;
 
-    @Override
-    public void beforeStep(StepExecution stepExecution) {
-        logger.debug("Estimating the number of lines in the VCF file");
+    public int estimateVcfNumberOfLines(String vcfFilePath) {
+        logger.debug("Estimating the number of lines in the VCF file {}", vcfFilePath);
         int estimatedTotalNumberOfLines = 0;
-
-        String vcfFilePath = stepExecution.getJobExecution().getJobParameters().getString(JobParametersNames.INPUT_VCF);
 
         String vcfHead;
         String vcfSection;
@@ -86,13 +79,8 @@ public class VcfNumberOfLinesEstimatorListener implements StepExecutionListener 
             estimatedTotalNumberOfLines = (int) ((vcfFileSize - vcfHeadFileSize) / singleVcfLineSize);
         }
 
-        logger.debug("Estimated number of lines in VCF file: {}", estimatedTotalNumberOfLines);
-        stepExecution.getExecutionContext().put(JobParametersNames.NUMBER_OF_LINES, estimatedTotalNumberOfLines);
-    }
-
-    @Override
-    public ExitStatus afterStep(StepExecution stepExecution) {
-        return null;
+        logger.info("Estimated number of lines in VCF file: {}", estimatedTotalNumberOfLines);
+        return estimatedTotalNumberOfLines;
     }
 
     /**
@@ -123,14 +111,14 @@ public class VcfNumberOfLinesEstimatorListener implements StepExecutionListener 
     private String retrieveVcfSection(String vcfFilePath) throws IOException {
         String vcfSection = "";
 
-        int lineCnt = NUMBER_OF_LINES;
+        int lineCount = NUMBER_OF_LINES;
         Scanner scanner = new Scanner(new GZIPInputStream(new FileInputStream(vcfFilePath)));
         while (scanner.hasNextLine()) {
             String line = scanner.nextLine();
             if (!line.startsWith("#")) {
-                lineCnt--;
+                lineCount--;
                 vcfSection += line + "\n";
-                if (lineCnt == 0) {
+                if (lineCount == 0) {
                     break;
                 }
             }
@@ -138,11 +126,10 @@ public class VcfNumberOfLinesEstimatorListener implements StepExecutionListener 
         scanner.close();
 
         //in case of small VCF
-        if (lineCnt > 0) {
+        if (lineCount > 0) {
             return "";
         }
 
         return vcfSection;
     }
-
 }
