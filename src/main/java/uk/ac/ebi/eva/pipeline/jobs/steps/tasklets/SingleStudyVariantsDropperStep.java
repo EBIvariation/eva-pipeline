@@ -62,7 +62,7 @@ public class SingleStudyVariantsDropperStep implements Tasklet {
         Query query = new Query(
                 new Criteria(filesStudyIdField).is(inputParameters.getStudyId())
                         .and(FILES_FIELD).size(1));
-        logger.info("Deleting variants reported only in study {}", inputParameters.getStudyId());
+        logger.info("Deleting variants reported only in study \"{}\"", inputParameters.getStudyId());
         logger.trace("Query used: {}", query);
         WriteResult writeResult = mongoOperations.remove(query, dbParameters.getCollectionVariantsName());
         logger.info("Result: {}", writeResult.toString());

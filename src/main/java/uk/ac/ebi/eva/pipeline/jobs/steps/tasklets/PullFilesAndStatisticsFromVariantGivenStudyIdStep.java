@@ -15,7 +15,8 @@
  */
 package uk.ac.ebi.eva.pipeline.jobs.steps.tasklets;
 
-import com.mongodb.BasicDBObjectBuilder;
+import com.mongodb.BasicDBObject;
+import com.mongodb.DBObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.StepContribution;
@@ -27,6 +28,7 @@ import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
+
 import uk.ac.ebi.eva.pipeline.parameters.DatabaseParameters;
 import uk.ac.ebi.eva.pipeline.parameters.InputParameters;
 
@@ -53,7 +55,8 @@ public class PullFilesAndStatisticsFromVariantGivenStudyIdStep implements Taskle
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
-        logger.info("Pulling files and statistics reported only in study {}", inputParameters.getStudyId());
+        logger.info("Pulling files and statistics from variants in study \"{}\"",
+                inputParameters.getStudyId());
         dropVariantsAndStatisticsByStudy(inputParameters.getStudyId());
         return RepeatStatus.FINISHED;
     }
@@ -62,8 +65,8 @@ public class PullFilesAndStatisticsFromVariantGivenStudyIdStep implements Taskle
         String filesStudyIdField = String.format("%s.%s", FILES_FIELD, STUDYID_FIELD);
         Query query = Query.query(Criteria.where(filesStudyIdField).is(studyId));
 
-        Update update = new Update().pull(FILES_FIELD, BasicDBObjectBuilder.start(STUDYID_FIELD, studyId).get())
-                .pull(STATS_FIELD, BasicDBObjectBuilder.start(STUDYID_FIELD, studyId).get());
+        DBObject containsStudyId = new BasicDBObject(STUDYID_FIELD, studyId);
+        Update update = new Update().pull(FILES_FIELD, containsStudyId).pull(STATS_FIELD, containsStudyId);
 
         logger.trace("Update operation with Query : {} and Update: {}", query, update);
         mongoOperations.updateMulti(query, update, dbParameters.getCollectionVariantsName());

@@ -57,7 +57,7 @@ public class FilesByStudyDropperStep implements Tasklet {
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
         Query query = new Query(new Criteria(STUDYID_FIELD).is(inputParameters.getStudyId()));
 
-        logger.info("Deleting study \"{}\" from \"{}\" collection", inputParameters.getStudyId(),
+        logger.info("Deleting files from study \"{}\"", inputParameters.getStudyId(),
                 dbParameters.getCollectionFilesName());
         logger.trace("Query used: {}", query);
         WriteResult writeResult = mongoOperations.remove(query, dbParameters.getCollectionFilesName());
