@@ -18,6 +18,7 @@ package uk.ac.ebi.eva.pipeline.io.readers;
 import com.mongodb.BasicDBObject;
 import com.mongodb.BasicDBObjectBuilder;
 import com.mongodb.DBObject;
+import org.springframework.batch.core.JobParametersInvalidException;
 import org.springframework.data.mongodb.core.MongoOperations;
 
 import uk.ac.ebi.eva.commons.models.converters.data.VariantSourceEntryToDBObjectConverter;
@@ -37,10 +38,17 @@ public class NonAnnotatedVariantsMongoReader extends MongoDbCursorItemReader {
             + VariantSourceEntryToDBObjectConverter.STUDYID_FIELD;
 
     /**
-     * @param studyId nullable. If null, the query brings all non-annotated variants in the collection.
-     *  If not null, bring only non-annotated variants from that study.
+     * @param studyId Can be the empty string, meaning to bring all non-annotated variants in the collection.
+     *  If the studyId string is not empty, bring only non-annotated variants from that study. This parameter should
+     *  not be null in any case.
      */
-    public NonAnnotatedVariantsMongoReader(MongoOperations template, String collectionsVariantsName, String studyId) {
+    public NonAnnotatedVariantsMongoReader(MongoOperations template, String collectionsVariantsName, String studyId)
+            throws JobParametersInvalidException {
+        if (studyId == null) {
+            throw new IllegalArgumentException("NonAnnotatedVariantsMongoReader needs a non-null studyId " +
+                    "(it can take a studyId or an empty string for reading every study)");
+        }
+
         setTemplate(template);
         setCollection(collectionsVariantsName);
 

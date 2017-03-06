@@ -19,6 +19,7 @@ import com.mongodb.DBObject;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.batch.core.JobParametersInvalidException;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.test.MetaDataInstanceFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -80,6 +81,11 @@ public class NonAnnotatedVariantsMongoReaderTest {
     @Test
     public void shouldReadVariantsWithoutAnnotationField() throws Exception {
         checkNonAnnotatedVariantsRead(EXPECTED_NON_ANNOTATED_VARIANTS_IN_DB, ALL_STUDIES);
+    }
+
+    @Test(expected = JobParametersInvalidException.class)
+    public void testStudyIdIsRequired() throws Exception {
+        checkNonAnnotatedVariantsRead(EXPECTED_NON_ANNOTATED_VARIANTS_IN_DB, null);
     }
 
     private void checkNonAnnotatedVariantsRead(int expectedNonAnnotatedVariants, String study) throws Exception {
