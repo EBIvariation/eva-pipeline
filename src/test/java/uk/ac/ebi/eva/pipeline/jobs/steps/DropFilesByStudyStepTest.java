@@ -36,7 +36,6 @@ import uk.ac.ebi.eva.pipeline.configuration.BeanNames;
 import uk.ac.ebi.eva.pipeline.jobs.DropStudyJob;
 import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
-import uk.ac.ebi.eva.test.utils.DropStudyJobTestUtils;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
 import uk.ac.ebi.eva.utils.EvaJobParameterBuilder;
 
@@ -44,6 +43,7 @@ import java.util.Arrays;
 import java.util.Collections;
 
 import static org.junit.Assert.assertEquals;
+import static uk.ac.ebi.eva.test.utils.DropStudyJobTestUtils.assertDropFiles;
 
 /**
  * Test for {@link DropFilesByStudyStep}
@@ -114,7 +114,7 @@ public class DropFilesByStudyStepTest {
         assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());
 
         DBCollection filesCollection = mongoRule.getCollection(databaseName, COLLECTION_FILES_NAME);
-        DropStudyJobTestUtils.checkDropFiles(filesCollection, STUDY_ID_TO_DROP, EXPECTED_FILES_AFTER_DROP_STUDY);
+        assertDropFiles(filesCollection, STUDY_ID_TO_DROP, expectedFilesAfterDropStudy);
     }
 
 }

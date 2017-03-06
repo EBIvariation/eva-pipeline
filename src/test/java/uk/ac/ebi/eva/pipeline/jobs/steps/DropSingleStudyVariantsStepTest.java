@@ -37,12 +37,12 @@ import uk.ac.ebi.eva.pipeline.jobs.DropStudyJob;
 import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
 import uk.ac.ebi.eva.test.data.VariantData;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
-import uk.ac.ebi.eva.test.utils.DropStudyJobTestUtils;
 import uk.ac.ebi.eva.utils.EvaJobParameterBuilder;
 
 import java.util.Arrays;
 
 import static org.junit.Assert.assertEquals;
+import static uk.ac.ebi.eva.test.utils.DropStudyJobTestUtils.assertDropSingleStudy;
 
 /**
  * Test for {@link DropSingleStudyVariantsStep}
@@ -109,8 +109,7 @@ public class DropSingleStudyVariantsStepTest {
         assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());
 
         DBCollection variantsCollection = mongoRule.getCollection(databaseName, COLLECTION_VARIANTS_NAME);
-        DropStudyJobTestUtils.checkDropSingleStudy(variantsCollection, STUDY_ID_TO_DROP,
-                expectedVariantsAfterDropStudy);
+        assertDropSingleStudy(variantsCollection, STUDY_ID_TO_DROP, expectedVariantsAfterDropStudy);
     }
 
 }

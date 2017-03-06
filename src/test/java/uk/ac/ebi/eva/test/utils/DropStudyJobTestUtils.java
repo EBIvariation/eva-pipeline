@@ -30,8 +30,9 @@ public class DropStudyJobTestUtils {
 
     private static final String STATS_STUDY_ID_FIELD = String.format("%s.%s", STATS_FIELD, STUDYID_FIELD);
 
-    public static void checkDropSingleStudy(DBCollection variantsCollection, String studyId,
+    public static void assertDropSingleStudy(DBCollection variantsCollection, String studyId,
             long expectedVariantsAfterDropStudy) {
+
         assertEquals(expectedVariantsAfterDropStudy, variantsCollection.count());
 
         BasicDBObject singleStudyVariants = new BasicDBObject(FILES_STUDY_ID_FIELD, studyId)
@@ -39,7 +40,7 @@ public class DropStudyJobTestUtils {
         assertEquals(0, variantsCollection.count(singleStudyVariants));
     }
 
-    public static void checkPullStudy(DBCollection variantsCollection, String studyId, long expectedFileCount,
+    public static void assertPullStudy(DBCollection variantsCollection, String studyId, long expectedFileCount,
             long expectedStatsCount) {
         BasicDBObject variantFiles = new BasicDBObject(FILES_STUDY_ID_FIELD, studyId);
         BasicDBObject variantStats = new BasicDBObject(STATS_STUDY_ID_FIELD, studyId);
@@ -48,7 +49,7 @@ public class DropStudyJobTestUtils {
         assertEquals(expectedStatsCount, variantsCollection.count(variantStats));
     }
 
-    public static void checkDropFiles(DBCollection filesCollection, String studyId, long expectedFilesAfterDropStudy) {
+    public static void assertDropFiles(DBCollection filesCollection, String studyId, long expectedFilesAfterDropStudy) {
         assertEquals(expectedFilesAfterDropStudy, filesCollection.count());
 
         BasicDBObject remainingFilesThatShouldHaveBeenDropped = new BasicDBObject(STUDYID_FIELD, studyId);

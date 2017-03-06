@@ -36,13 +36,13 @@ import uk.ac.ebi.eva.pipeline.jobs.DropStudyJob;
 import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
 import uk.ac.ebi.eva.test.data.VariantData;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
-import uk.ac.ebi.eva.test.utils.DropStudyJobTestUtils;
 import uk.ac.ebi.eva.utils.EvaJobParameterBuilder;
 
 import java.io.IOException;
 import java.util.Arrays;
 
 import static org.junit.Assert.assertEquals;
+import static uk.ac.ebi.eva.test.utils.DropStudyJobTestUtils.assertPullStudy;
 
 /**
  * Test for {@link PullFilesAndStatisticsByStudyStep}
@@ -145,8 +145,7 @@ public class PullFilesAndStatisticsByStudyStepTest {
 
     private void checkPull(String databaseName, int expectedFileCount, int expectedStatsCount) {
         DBCollection variantsCollection = mongoRule.getCollection(databaseName, COLLECTION_VARIANTS_NAME);
-        DropStudyJobTestUtils.checkPullStudy(variantsCollection, STUDY_ID_TO_DROP, expectedFileCount,
-                expectedStatsCount);
+        assertPullStudy(variantsCollection, STUDY_ID_TO_DROP, expectedFileCount, expectedStatsCount);
     }
 
 }
