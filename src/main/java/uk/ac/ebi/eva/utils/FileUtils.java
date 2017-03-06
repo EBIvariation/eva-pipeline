@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 EMBL - European Bioinformatics Institute
+ * Copyright 2016-2017 EMBL - European Bioinformatics Institute
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,11 +23,15 @@ import uk.ac.ebi.eva.pipeline.io.GzipLazyResource;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Properties;
+import java.util.zip.GZIPOutputStream;
 
 public abstract class FileUtils {
 
@@ -73,5 +77,22 @@ public abstract class FileUtils {
         Properties properties = new Properties();
         properties.load(propertiesInputStream);
         return properties;
+    }
+
+    /**
+     * Creates a temporary GzipFile withe the content at {@param content}.
+     * @param content
+     * @param name how the temporal file will be called
+     * @return
+     * @throws IOException
+     */
+    public static File newGzipFile(String content, String name) throws IOException {
+        File tempFile = File.createTempFile(name, ".gz");
+        try (FileOutputStream output = new FileOutputStream(tempFile)) {
+            try (Writer writer = new OutputStreamWriter(new GZIPOutputStream(output), "UTF-8")) {
+                writer.write(content);
+            }
+        }
+        return tempFile;
     }
 }

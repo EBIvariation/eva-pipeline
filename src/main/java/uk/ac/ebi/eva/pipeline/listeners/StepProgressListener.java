@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 EMBL - European Bioinformatics Institute
+ * Copyright 2016-2017 EMBL - European Bioinformatics Institute
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,10 +20,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.ChunkListener;
 import org.springframework.batch.core.scope.context.ChunkContext;
 
+import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
+
 /**
  * Log the number of read, write and skip items for each chunk.
  * Should be wired into a {@link org.springframework.batch.core.Step}
- *
  */
 public class StepProgressListener implements ChunkListener {
     private static final Logger logger = LoggerFactory.getLogger(StepProgressListener.class);
@@ -34,13 +35,26 @@ public class StepProgressListener implements ChunkListener {
 
     @Override
     public void afterChunk(ChunkContext context) {
-        logger.info("Chunk stats: Items read count {}, items write count {}, items skip count{}",
-                context.getStepContext().getStepExecution().getReadCount(),
-                context.getStepContext().getStepExecution().getWriteCount(),
-                context.getStepContext().getStepExecution().getReadSkipCount()
-                        + context.getStepContext().getStepExecution().getProcessSkipCount()
-                        + context.getStepContext().getStepExecution().getWriteSkipCount()
-        );
+
+        int estimatedTotalNumberOfLines = (int)context.getStepContext().getStepExecutionContext()
+                .get(JobParametersNames.NUMBER_OF_LINES);
+
+        int read = context.getStepContext().getStepExecution().getReadCount();
+        int write = context.getStepContext().getStepExecution().getWriteCount();
+        int skip = context.getStepContext().getStepExecution().getReadSkipCount()
+                + context.getStepContext().getStepExecution().getProcessSkipCount()
+                + context.getStepContext().getStepExecution().getWriteSkipCount();
+
+        String chunkStatisticsMessage = "Chunk stats: Items read count " + read + ", items write count " + write + " items skip count " + skip;
+
+        if (estimatedTotalNumberOfLines != 0) {
+            int percent = (int) (read * 100 / estimatedTotalNumberOfLines);
+            logger.info(
+                    percent + "% " + chunkStatisticsMessage);
+        } else {
+            logger.info(chunkStatisticsMessage);
+        }
+
     }
 
     @Override

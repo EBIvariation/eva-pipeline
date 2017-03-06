@@ -33,8 +33,11 @@ import uk.ac.ebi.eva.commons.models.data.Variant;
 import uk.ac.ebi.eva.pipeline.configuration.ChunkSizeCompletionPolicyConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.readers.VcfReaderConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.writers.VariantWriterConfiguration;
+import uk.ac.ebi.eva.pipeline.listeners.VcfNumberOfLinesEstimatorListener;
 import uk.ac.ebi.eva.pipeline.listeners.SkippedItemListener;
+import uk.ac.ebi.eva.pipeline.listeners.StepProgressListener;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
+import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.LOAD_VARIANTS_STEP;
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VARIANT_READER;
@@ -73,6 +76,8 @@ public class VariantLoaderStep {
                 .faultTolerant().skipLimit(50).skip(FlatFileParseException.class)
                 .allowStartIfComplete(jobOptions.isAllowStartIfComplete())
                 .listener(new SkippedItemListener())
+                .listener(new StepProgressListener())
+                .listener(new VcfNumberOfLinesEstimatorListener())
                 .build();
     }
 
