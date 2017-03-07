@@ -17,6 +17,7 @@ package uk.ac.ebi.eva.pipeline.jobs.steps.tasklets;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
+import com.mongodb.WriteResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.StepContribution;
@@ -42,7 +43,8 @@ import static uk.ac.ebi.eva.commons.models.data.VariantSourceEntity.STUDYID_FIEL
  */
 public class PullFilesAndStatisticsFromVariantGivenStudyIdStep implements Tasklet {
 
-    private static final Logger logger = LoggerFactory.getLogger(SingleStudyVariantsDropperStep.class);
+    private static final Logger logger = LoggerFactory.getLogger(
+            PullFilesAndStatisticsFromVariantGivenStudyIdStep.class);
 
     @Autowired
     private MongoOperations mongoOperations;
@@ -69,6 +71,8 @@ public class PullFilesAndStatisticsFromVariantGivenStudyIdStep implements Taskle
         Update update = new Update().pull(FILES_FIELD, containsStudyId).pull(STATS_FIELD, containsStudyId);
 
         logger.trace("Update operation with Query : {} and Update: {}", query, update);
-        mongoOperations.updateMulti(query, update, dbParameters.getCollectionVariantsName());
+        WriteResult writeResult = mongoOperations.updateMulti(query, update, dbParameters.getCollectionVariantsName());
+        logger.info("Result: {}", writeResult.toString());
+
     }
 }
