@@ -72,11 +72,11 @@ public class VcfNumberOfLinesEstimator {
                 throw new RuntimeException("Error while creating zip file", e);
             }
 
-            double vcfFileSize = new File(vcfFilePath).length();
-            double singleVcfLineSize = (vcfSectionFile != null ? vcfSectionFile.length() : 0) / NUMBER_OF_LINES;
-            double vcfHeadFileSize = vcfHeadFile != null ? vcfHeadFile.length() : 0;
+            int vcfFileSize = (int) new File(vcfFilePath).length();
+            int singleVcfLineSize = (int) (vcfSectionFile.length() / NUMBER_OF_LINES);
+            int vcfHeadFileSize = (int) vcfHeadFile.length();
 
-            estimatedTotalNumberOfLines = (int) ((vcfFileSize - vcfHeadFileSize) / singleVcfLineSize);
+            estimatedTotalNumberOfLines = ((vcfFileSize - vcfHeadFileSize) / singleVcfLineSize);
         }
 
         logger.info("Estimated number of lines in VCF file: {}", estimatedTotalNumberOfLines);
@@ -96,6 +96,8 @@ public class VcfNumberOfLinesEstimator {
             String line = scanner.nextLine();
             if (line.startsWith("#")) {
                 vcfHead += line + "\n";
+            }else {
+                break;
             }
         }
         scanner.close();
