@@ -65,18 +65,6 @@ public class EvaCommandLineBuilder {
         return addString(JobParametersNames.DB_NAME, databaseName);
     }
 
-    public EvaCommandLineBuilder collectionVariantsName(String collectionVariantsName) {
-        return addString(JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME, collectionVariantsName);
-    }
-
-    public EvaCommandLineBuilder collectionFilesName(String collectionFilesName) {
-        return addString(JobParametersNames.DB_COLLECTIONS_FILES_NAME, collectionFilesName);
-    }
-
-    public EvaCommandLineBuilder collectionFeaturesName(String collectionFeaturesName) {
-        return addString(JobParametersNames.DB_COLLECTIONS_FEATURES_NAME, collectionFeaturesName);
-    }
-
     public EvaCommandLineBuilder vepPath(String vepPath) {
         return addString(JobParametersNames.APP_VEP_PATH, vepPath);
     }

@@ -13,8 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-package uk.ac.ebi.eva.pipeline.jobs.steps;
+package uk.ac.ebi.eva.pipeline.jobs;
 
 import com.mongodb.DBCollection;
 import org.junit.Rule;
@@ -26,38 +25,46 @@ import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import uk.ac.ebi.eva.pipeline.Application;
-import uk.ac.ebi.eva.pipeline.configuration.BeanNames;
-import uk.ac.ebi.eva.pipeline.jobs.DropStudyJob;
 import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
 import uk.ac.ebi.eva.test.data.VariantData;
+import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
+import uk.ac.ebi.eva.test.utils.JobTestUtils;
 import uk.ac.ebi.eva.utils.EvaJobParameterBuilder;
 
 import java.util.Arrays;
 
 import static org.junit.Assert.assertEquals;
+import static uk.ac.ebi.eva.test.utils.DropStudyJobTestUtils.assertDropFiles;
 import static uk.ac.ebi.eva.test.utils.DropStudyJobTestUtils.assertDropSingleStudy;
+import static uk.ac.ebi.eva.test.utils.DropStudyJobTestUtils.assertPullStudy;
 
 /**
- * Test for {@link DropSingleStudyVariantsStep}
+ * Test for {@link PopulationStatisticsJob}
  */
 @RunWith(SpringRunner.class)
-@ActiveProfiles({Application.VARIANT_WRITER_MONGO_PROFILE, Application.VARIANT_ANNOTATION_MONGO_PROFILE})
 @TestPropertySource({"classpath:common-configuration.properties", "classpath:test-mongo.properties"})
 @ContextConfiguration(classes = {DropStudyJob.class, BatchTestConfiguration.class})
-public class DropSingleStudyVariantsStepTest {
+public class DropStudyJobTest {
 
     private static final String COLLECTION_VARIANTS_NAME = "variants";
 
+    private static final String COLLECTION_FILES_NAME = "files";
+
+    private static final long EXPECTED_FILES_AFTER_DROP_STUDY = 1;
+
     private static final long EXPECTED_VARIANTS_AFTER_DROP_STUDY = 2;
 
-    private static final String STUDY_ID_TO_DROP = "studyIdToDrop";
+    private static final long EXPECTED_FILE_COUNT = 0;
+
+    private static final long EXPECTED_STATS_COUNT = 0;
+
+    @Rule
+    public PipelineTemporaryFolderRule temporaryFolderRule = new PipelineTemporaryFolderRule();
 
     @Rule
     public TemporaryMongoRule mongoRule = new TemporaryMongoRule();
@@ -65,51 +72,39 @@ public class DropSingleStudyVariantsStepTest {
     @Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
 
-    @Test
-    public void testNoVariantsToDrop() throws Exception {
-        String databaseName = mongoRule.createDBAndInsertDocuments(COLLECTION_VARIANTS_NAME, Arrays.asList(
-                VariantData.getVariantWithOneStudy(),
-                VariantData.getVariantWithTwoStudies()));
-
-        checkDrop(databaseName, EXPECTED_VARIANTS_AFTER_DROP_STUDY);
-    }
+    private static final String STUDY_ID_TO_DROP = "studyIdToDrop";
 
     @Test
-    public void testOneVariantToDrop() throws Exception {
-        String databaseName = mongoRule.createDBAndInsertDocuments(COLLECTION_VARIANTS_NAME, Arrays.asList(
-                VariantData.getVariantWithOneStudyToDrop(),
-                VariantData.getVariantWithOneStudy(),
-                VariantData.getVariantWithTwoStudies()));
-
-        checkDrop(databaseName, EXPECTED_VARIANTS_AFTER_DROP_STUDY);
-    }
-
-    @Test
-    public void testSeveralVariantsToDrop() throws Exception {
-        String databaseName = mongoRule.createDBAndInsertDocuments(COLLECTION_VARIANTS_NAME, Arrays.asList(
+    public void fullDropStudyJob() throws Exception {
+        String dbName = mongoRule.createDBAndInsertDocuments(COLLECTION_VARIANTS_NAME, Arrays.asList(
                 VariantData.getVariantWithOneStudyToDrop(),
                 VariantData.getOtherVariantWithOneStudyToDrop(),
                 VariantData.getVariantWithOneStudy(),
                 VariantData.getVariantWithTwoStudies()));
 
-        checkDrop(databaseName, EXPECTED_VARIANTS_AFTER_DROP_STUDY);
-    }
+        mongoRule.insertDocuments(dbName, COLLECTION_FILES_NAME, Arrays.asList(
+                JobTestUtils.buildFilesDocumentString(STUDY_ID_TO_DROP, "fileIdOne"),
+                JobTestUtils.buildFilesDocumentString(STUDY_ID_TO_DROP, "fileIdTwo"),
+                JobTestUtils.buildFilesDocumentString("otherStudyId", "fileIdThree")));
 
-    private void checkDrop(String databaseName, long expectedVariantsAfterDropStudy) {
+        DBCollection variantsCollection = mongoRule.getCollection(dbName, COLLECTION_VARIANTS_NAME);
+        DBCollection filesCollection = mongoRule.getCollection(dbName, COLLECTION_FILES_NAME);
+
         JobParameters jobParameters = new EvaJobParameterBuilder()
+                .collectionFilesName(COLLECTION_FILES_NAME)
                 .collectionVariantsName(COLLECTION_VARIANTS_NAME)
-                .databaseName(databaseName)
+                .databaseName(dbName)
                 .inputStudyId(STUDY_ID_TO_DROP)
+                .timestamp()
                 .toJobParameters();
 
-        JobExecution jobExecution = jobLauncherTestUtils.launchStep(BeanNames.DROP_SINGLE_STUDY_VARIANTS_STEP,
-                jobParameters);
-
+        JobExecution jobExecution = jobLauncherTestUtils.launchJob(jobParameters);
         assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
         assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());
 
-        DBCollection variantsCollection = mongoRule.getCollection(databaseName, COLLECTION_VARIANTS_NAME);
-        assertDropSingleStudy(variantsCollection, STUDY_ID_TO_DROP, expectedVariantsAfterDropStudy);
+        assertDropSingleStudy(variantsCollection, STUDY_ID_TO_DROP, EXPECTED_VARIANTS_AFTER_DROP_STUDY);
+        assertPullStudy(variantsCollection, STUDY_ID_TO_DROP, EXPECTED_FILE_COUNT, EXPECTED_STATS_COUNT);
+        assertDropFiles(filesCollection, STUDY_ID_TO_DROP, EXPECTED_FILES_AFTER_DROP_STUDY);
     }
 
 }

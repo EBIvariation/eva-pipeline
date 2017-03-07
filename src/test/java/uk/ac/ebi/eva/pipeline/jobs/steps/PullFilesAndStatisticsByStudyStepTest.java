@@ -15,7 +15,6 @@
  */
 package uk.ac.ebi.eva.pipeline.jobs.steps;
 
-import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
 import org.junit.Rule;
 import org.junit.Test;
@@ -30,6 +29,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
+
 import uk.ac.ebi.eva.pipeline.Application;
 import uk.ac.ebi.eva.pipeline.configuration.BeanNames;
 import uk.ac.ebi.eva.pipeline.jobs.DropStudyJob;
@@ -42,9 +42,7 @@ import java.io.IOException;
 import java.util.Arrays;
 
 import static org.junit.Assert.assertEquals;
-import static uk.ac.ebi.eva.commons.models.converters.data.VariantSourceEntryToDBObjectConverter.STUDYID_FIELD;
-import static uk.ac.ebi.eva.commons.models.converters.data.VariantToDBObjectConverter.FILES_FIELD;
-import static uk.ac.ebi.eva.commons.models.converters.data.VariantToDBObjectConverter.STATS_FIELD;
+import static uk.ac.ebi.eva.test.utils.DropStudyJobTestUtils.assertPullStudy;
 
 /**
  * Test for {@link PullFilesAndStatisticsByStudyStep}
@@ -72,7 +70,7 @@ public class PullFilesAndStatisticsByStudyStepTest {
         final int expectedStatsBefore = 0;
         final int expectedStatsAfter = 0;
 
-        String databaseName = mongoRule.insertDocuments(COLLECTION_VARIANTS_NAME, Arrays.asList(
+        String databaseName = mongoRule.createDBAndInsertDocuments(COLLECTION_VARIANTS_NAME, Arrays.asList(
                 VariantData.getVariantWithOneStudy()));
 
         checkPull(databaseName, expectedFilesBefore, expectedStatsBefore);
@@ -87,7 +85,7 @@ public class PullFilesAndStatisticsByStudyStepTest {
         final int expectedStatsBefore = 0;
         final int expectedStatsAfter = 0;
 
-        String databaseName = mongoRule.insertDocuments(COLLECTION_VARIANTS_NAME, Arrays.asList(
+        String databaseName = mongoRule.createDBAndInsertDocuments(COLLECTION_VARIANTS_NAME, Arrays.asList(
                 VariantData.getVariantWithOneStudy(),
                 VariantData.getVariantWithTwoStudies()));
 
@@ -103,7 +101,7 @@ public class PullFilesAndStatisticsByStudyStepTest {
         final int expectedStatsBefore = 1;
         final int expectedStatsAfter = 0;
 
-        String databaseName = mongoRule.insertDocuments(COLLECTION_VARIANTS_NAME, Arrays.asList(
+        String databaseName = mongoRule.createDBAndInsertDocuments(COLLECTION_VARIANTS_NAME, Arrays.asList(
                 VariantData.getVariantWithOneStudy(),
                 VariantData.getVariantWithTwoStudies(),
                 VariantData.getVariantWithOneStudyToDrop()));
@@ -120,7 +118,7 @@ public class PullFilesAndStatisticsByStudyStepTest {
         final int expectedStatsBefore = 2;
         final int expectedStatsAfter = 0;
 
-        String databaseName = mongoRule.insertDocuments(COLLECTION_VARIANTS_NAME, Arrays.asList(
+        String databaseName = mongoRule.createDBAndInsertDocuments(COLLECTION_VARIANTS_NAME, Arrays.asList(
                 VariantData.getVariantWithOneStudy(),
                 VariantData.getVariantWithTwoStudies(),
                 VariantData.getVariantWithOneStudyToDrop(),
@@ -146,15 +144,8 @@ public class PullFilesAndStatisticsByStudyStepTest {
     }
 
     private void checkPull(String databaseName, int expectedFileCount, int expectedStatsCount) {
-        String filesStudyIdField = String.format("%s.%s", FILES_FIELD, STUDYID_FIELD);
-        String statsStudyIdField = String.format("%s.%s", STATS_FIELD, STUDYID_FIELD);
-
         DBCollection variantsCollection = mongoRule.getCollection(databaseName, COLLECTION_VARIANTS_NAME);
-        BasicDBObject variantFiles = new BasicDBObject(filesStudyIdField, STUDY_ID_TO_DROP);
-        BasicDBObject variantStats = new BasicDBObject(statsStudyIdField, STUDY_ID_TO_DROP);
-
-        assertEquals(expectedFileCount, variantsCollection.count(variantFiles));
-        assertEquals(expectedStatsCount, variantsCollection.count(variantStats));
+        assertPullStudy(variantsCollection, STUDY_ID_TO_DROP, expectedFileCount, expectedStatsCount);
     }
 
 }
