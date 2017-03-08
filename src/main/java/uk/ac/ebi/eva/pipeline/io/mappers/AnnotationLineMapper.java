@@ -109,7 +109,7 @@ public class AnnotationLineMapper implements LineMapper<VariantAnnotation> {
     private void parseTranscriptFields(ConsequenceType consequenceType, String[] lineFields) {
         consequenceType.setEnsemblGeneId(lineFields[3]);    // fill Ensembl gene id
         consequenceType.setEnsemblTranscriptId(lineFields[4]);  // fill Ensembl transcript id
-        if(!lineFields[6].equals("") && !lineFields.equals("-")) {  // VEP may leave this field empty
+        if(!lineFields[6].equals("") && !lineFields[6].equals("-")) {  // VEP may leave this field empty
             consequenceType.setSoTermsFromSoNames(Arrays.asList(lineFields[6].split(",")));    // fill so terms
         }
         if(!lineFields[7].equals("-")) {
@@ -200,15 +200,9 @@ public class AnnotationLineMapper implements LineMapper<VariantAnnotation> {
                     consequenceType.setBiotype(keyValue[1]);
                     break;
                 case "hgvsc":
-                    if(currentAnnotation.getHgvs()==null) {
-                        currentAnnotation.setHgvs(new ArrayList<String>());
-                    }
                     currentAnnotation.getHgvs().add(keyValue[1]);
                     break;
                 case "hgvsp":
-                    if(currentAnnotation.getHgvs()==null) {
-                        currentAnnotation.setHgvs(new ArrayList<String>());
-                    }
                     currentAnnotation.getHgvs().add(keyValue[1]);
                     break;
                 case "polyphen": // Format is PolyPhen=possibly_damaging(0.859)
