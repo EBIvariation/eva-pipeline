@@ -15,7 +15,6 @@
  */
 package uk.ac.ebi.eva.pipeline.configuration.readers;
 
-import org.springframework.batch.core.JobParametersInvalidException;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -37,8 +36,7 @@ public class NonAnnotatedVariantsMongoReaderConfiguration {
     @StepScope
     public NonAnnotatedVariantsMongoReader nonAnnotatedVariantsMongoReader(MongoOperations mongoOperations,
                                                                            DatabaseParameters databaseParameters,
-                                                                           InputParameters inputParameters)
-            throws JobParametersInvalidException {
+                                                                           InputParameters inputParameters) {
         return new NonAnnotatedVariantsMongoReader(
                 mongoOperations,
                 databaseParameters.getCollectionVariantsName(),

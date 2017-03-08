@@ -79,16 +79,16 @@ public class VepInputGeneratorStepTest {
     private JobLauncherTestUtils jobLauncherTestUtils;
 
     @Test
-    public void shouldGenerateVepInput() throws Exception {
-        checkVepInputWasGenerated(STUDY_ID);
+    public void shouldGenerateVepInputForStudyId() throws Exception {
+        assertVepInputWasGenerated(STUDY_ID);
     }
 
     @Test
-    public void shouldGenerateVepInputForAllStudies() throws Exception {
-        checkVepInputWasGenerated(ALL_STUDIES);
+    public void shouldAllowEmptyStringAsStudyIdJobParameter() throws Exception {
+        assertVepInputWasGenerated(ALL_STUDIES);
     }
 
-    private void checkVepInputWasGenerated(String inputStudyId) throws IOException, InterruptedException {
+    private void assertVepInputWasGenerated(String inputStudyId) throws IOException, InterruptedException {
         String randomTemporaryDatabaseName = mongoRule.restoreDumpInTemporaryDatabase(getResourceUrl(MONGO_DUMP));
         String outputDirAnnot = temporaryFolderRule.getRoot().getAbsolutePath();
         File vepInput = new File(URLHelper.resolveVepInput(outputDirAnnot, inputStudyId, FILE_ID));
