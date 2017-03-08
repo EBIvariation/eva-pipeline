@@ -52,7 +52,7 @@ public class DBObjectToVariantAnnotationConverter implements Converter<DBObject,
         //ConsequenceType
         List<ConsequenceType> consequenceTypes = new LinkedList<>();
         Object cts = object.get(AnnotationFieldNames.CONSEQUENCE_TYPE_FIELD);
-        if (cts != null)
+        if (cts != null) {
             if (cts instanceof BasicDBList) {
                 for (Object o : ((BasicDBList) cts)) {
                     if (o instanceof DBObject) {
@@ -81,12 +81,14 @@ public class DBObjectToVariantAnnotationConverter implements Converter<DBObject,
             } else {
                 throw new ClassCastException("Object was not of type BasicDBList");
             }
+        }
+
         variantAnnotation.setConsequenceTypes(consequenceTypes);
 
         //XREfs
         List<Xref> xrefs = new LinkedList<>();
         Object xrs = object.get(AnnotationFieldNames.XREFS_FIELD);
-        if (xrs != null)
+        if (xrs != null) {
             if (xrs instanceof BasicDBList) {
                 for (Object o : (BasicDBList) xrs) {
                     if (o instanceof DBObject) {
@@ -103,6 +105,8 @@ public class DBObjectToVariantAnnotationConverter implements Converter<DBObject,
             } else {
                 throw new ClassCastException("Object was not of type BasicDBList");
             }
+        }
+
         variantAnnotation.setXrefs(xrefs);
 
         return variantAnnotation;
