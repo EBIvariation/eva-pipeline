@@ -64,7 +64,7 @@ public class VariantVcfFactory {
             throw new IllegalArgumentException("Not enough fields provided (min 8)");
         }
 
-        String chromosome = fields[0];
+        String chromosome = removeChrPrefix(fields[0]);
         int position = Integer.parseInt(fields[1]);
 
         Set<String> ids = new HashSet<>();
@@ -113,6 +113,16 @@ public class VariantVcfFactory {
         }
 
         return variants;
+    }
+
+    private String removeChrPrefix(String chromosome) {
+        boolean ignoreCase = true;
+        int startOffset = 0;
+        String prefixToRemove = "chr";
+        if (chromosome.regionMatches(ignoreCase, startOffset, prefixToRemove, startOffset, prefixToRemove.length())) {
+            return chromosome.substring(prefixToRemove.length());
+        }
+        return chromosome;
     }
 
     private List<VariantKeyFields> buildVariantKeyFields(int position, String reference, String[] alternateAlleles) {
