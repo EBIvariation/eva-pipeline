@@ -136,6 +136,7 @@ public class Variant {
         this.length = Math.max(this.reference.length(), this.alternate.length());
         this.resetType();
 
+        this.ids = new HashSet<>();
         this.hgvs = new HashMap<>();
         if (this.type == VariantType.SNV) { // Generate HGVS code only for SNVs
             Set<String> hgvsCodes = new HashSet<>();

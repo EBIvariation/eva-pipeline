@@ -48,7 +48,7 @@ import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VARIANT_WRITER;
  */
 @Configuration
 @EnableBatchProcessing
-@Import({VariantWriterConfiguration.class, VcfReaderConfiguration.class, ChunkSizeCompletionPolicyConfiguration.class})
+@Import({VcfReaderConfiguration.class, VariantWriterConfiguration.class, ChunkSizeCompletionPolicyConfiguration.class})
 public class VariantLoaderStep {
 
     private static final Logger logger = LoggerFactory.getLogger(VariantLoaderStep.class);
