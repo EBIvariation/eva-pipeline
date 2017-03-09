@@ -49,7 +49,11 @@ public class URLHelper {
 
     public static URI getStatsBaseUri(String outputDirStatistics, String studyId, String fileId) throws URISyntaxException {
         URI outdirUri = URLHelper.createUri(outputDirStatistics);
-        return outdirUri.resolve(MongoDBHelper.buildStorageFileId(studyId, fileId));
+        return outdirUri.resolve(buildSourceEntryId(studyId, fileId));
+    }
+
+    public static String buildSourceEntryId(String studyId, String fileId) {
+        return studyId + "_" + fileId;
     }
 
     public static String resolveVepInput(String outputDirAnnotation, String studyId, String vcfId){

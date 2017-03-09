@@ -18,10 +18,12 @@ package uk.ac.ebi.eva.pipeline.io.readers;
 import com.mongodb.BasicDBObject;
 import com.mongodb.BasicDBObjectBuilder;
 import com.mongodb.DBObject;
+import org.springframework.data.mongodb.core.MongoOperations;
+
+import uk.ac.ebi.eva.commons.models.converters.data.VariantSourceEntryToDBObjectConverter;
+import uk.ac.ebi.eva.commons.models.converters.data.VariantToDBObjectConverter;
 
 import javax.annotation.PostConstruct;
-
-import org.springframework.data.mongodb.core.MongoOperations;
 
 /**
  * Mongo variant reader using an ItemReader cursor based. This is speeding up
@@ -31,13 +33,28 @@ import org.springframework.data.mongodb.core.MongoOperations;
  */
 public class NonAnnotatedVariantsMongoReader extends MongoDbCursorItemReader {
 
-    public NonAnnotatedVariantsMongoReader(MongoOperations template, String collectionsVariantsName) {
-        super();
+    private static final String STUDY_KEY = VariantToDBObjectConverter.FILES_FIELD + "."
+            + VariantSourceEntryToDBObjectConverter.STUDYID_FIELD;
+
+    /**
+     * @param studyId Can be the empty string, meaning to bring all non-annotated variants in the collection.
+     *  If the studyId string is not empty, bring only non-annotated variants from that study. This parameter should
+     *  not be null in any case.
+     */
+    public NonAnnotatedVariantsMongoReader(MongoOperations template, String collectionsVariantsName, String studyId) {
+        if (studyId == null) {
+            throw new IllegalArgumentException("NonAnnotatedVariantsMongoReader needs a non-null studyId " +
+                    "(it can take a studyId or an empty string for reading every study)");
+        }
 
         setTemplate(template);
         setCollection(collectionsVariantsName);
 
-        DBObject query = BasicDBObjectBuilder.start().add("annot.ct.so", new BasicDBObject("$exists", false)).get();
+        BasicDBObjectBuilder queryBuilder = BasicDBObjectBuilder.start();
+        if (!studyId.isEmpty()) {
+            queryBuilder.add(STUDY_KEY, studyId);
+        }
+        DBObject query = queryBuilder.add("annot.ct.so", new BasicDBObject("$exists", false)).get();
         setQuery(query);
 
         String[] fields = { "chr", "start", "end", "ref", "alt" };

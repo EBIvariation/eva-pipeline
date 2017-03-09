@@ -39,9 +39,12 @@ import uk.ac.ebi.eva.utils.EvaJobParameterBuilder;
 import uk.ac.ebi.eva.utils.URLHelper;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static uk.ac.ebi.eva.test.utils.JobTestUtils.getLines;
 import static uk.ac.ebi.eva.test.utils.JobTestUtils.readFirstLine;
 import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResourceUrl;
 
@@ -56,11 +59,15 @@ public class VepInputGeneratorStepTest {
 
     private static final String MONGO_DUMP = "/dump/VariantStatsConfigurationTest_vl";
 
-    private static final String STUDY_ID = "7";
+    private static final String STUDY_ID = "1";
 
-    private static final String FILE_ID = "5";
+    private static final String FILE_ID = "1";
 
     private static final String COLLECTION_VARIANTS_NAME = "variants";
+
+    private static final int EXPECTED_NON_ANNOTATED_VARIANTS = 300;
+
+    private static final String ALL_STUDIES = "";
 
     @Rule
     public TemporaryMongoRule mongoRule = new TemporaryMongoRule();
@@ -72,16 +79,25 @@ public class VepInputGeneratorStepTest {
     private JobLauncherTestUtils jobLauncherTestUtils;
 
     @Test
-    public void shouldGenerateVepInput() throws Exception {
+    public void shouldGenerateVepInputForStudyId() throws Exception {
+        assertVepInputWasGenerated(STUDY_ID);
+    }
+
+    @Test
+    public void shouldAllowEmptyStringAsStudyIdJobParameter() throws Exception {
+        assertVepInputWasGenerated(ALL_STUDIES);
+    }
+
+    private void assertVepInputWasGenerated(String inputStudyId) throws IOException, InterruptedException {
         String randomTemporaryDatabaseName = mongoRule.restoreDumpInTemporaryDatabase(getResourceUrl(MONGO_DUMP));
         String outputDirAnnot = temporaryFolderRule.getRoot().getAbsolutePath();
-        File vepInput = new File(URLHelper.resolveVepInput(outputDirAnnot, STUDY_ID, FILE_ID));
+        File vepInput = new File(URLHelper.resolveVepInput(outputDirAnnot, inputStudyId, FILE_ID));
         temporaryFolderRule.newFile(vepInput.getName());
 
         JobParameters jobParameters = new EvaJobParameterBuilder()
                 .collectionVariantsName(COLLECTION_VARIANTS_NAME)
                 .databaseName(randomTemporaryDatabaseName)
-                .inputStudyId(STUDY_ID)
+                .inputStudyId(inputStudyId)
                 .inputVcfId(FILE_ID)
                 .outputDirAnnotation(outputDirAnnot)
                 .toJobParameters();
@@ -93,5 +109,6 @@ public class VepInputGeneratorStepTest {
 
         assertTrue(vepInput.exists());
         assertEquals("20\t60343\t60343\tG/A\t+", readFirstLine(vepInput));
+        assertEquals(EXPECTED_NON_ANNOTATED_VARIANTS, getLines(new FileInputStream(vepInput)));
     }
 }

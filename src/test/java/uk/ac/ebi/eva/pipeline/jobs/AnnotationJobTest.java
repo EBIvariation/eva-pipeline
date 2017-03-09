@@ -70,7 +70,7 @@ import static uk.ac.ebi.eva.utils.FileUtils.getResource;
 public class AnnotationJobTest {
     private static final String MOCK_VEP = "/mockvep.pl";
     private static final String MONGO_DUMP = "/dump/VariantStatsConfigurationTest_vl";
-    private static final String INPUT_STUDY_ID = "annotation-job";
+    private static final String INPUT_STUDY_ID = "1";
     private static final String INPUT_VCF_ID = "1";
     private static final String COLLECTION_VARIANTS_NAME = "variants";
 
