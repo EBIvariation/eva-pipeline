@@ -76,12 +76,6 @@ public class AnnotationLineMapper implements LineMapper<VariantAnnotation> {
                 Integer.valueOf(variantMap.get("end")), variantMap.get("reference"),
                 variantMap.get("alternative"));
 
-        // Initialize list of consequence types
-        currentAnnotation.setConsequenceTypes(new ArrayList<>());
-
-        // Initialize Hgvs
-        currentAnnotation.setHgvs(new ArrayList<>());
-
         /**
          * parses extra column and populates fields as required.
          * Some lines do not have extra field and end with a \t: the split function above does not return that field

@@ -17,11 +17,11 @@ package uk.ac.ebi.eva.commons.models.data;
 
 import org.opencb.biodata.models.variant.annotation.ConsequenceType;
 import org.opencb.biodata.models.variant.annotation.Xref;
-import org.opencb.biodata.models.variation.PopulationFrequency;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 
 /**
  * Slim version of {@link org.opencb.biodata.models.variant.annotation.VariantAnnotation}
@@ -51,14 +51,11 @@ public class VariantAnnotation {
     private Map<String, Object> additionalAttributes;
 
     public VariantAnnotation() {
-        this(null, 0, 0, null);
+        this("", -1, -1, "");
     }
 
     public VariantAnnotation(String chromosome, int start, int end, String referenceAllele) {
-        this.chromosome = chromosome;
-        this.start = start;
-        this.end = end;
-        this.referenceAllele = referenceAllele;
+        this(chromosome, start, end, referenceAllele, "");
     }
 
     public VariantAnnotation(String chromosome, int start, int end, String referenceAllele, String alternativeAllele) {
@@ -67,6 +64,12 @@ public class VariantAnnotation {
         this.end = end;
         this.referenceAllele = referenceAllele;
         this.alternativeAllele = alternativeAllele;
+
+        this.id = "";
+        this.xrefs = new ArrayList<>();
+        this.hgvs = new ArrayList<>();
+        this.consequenceTypes = new ArrayList<>();
+        this.additionalAttributes = new HashMap<>();
     }
 
     public String getChromosome() {
