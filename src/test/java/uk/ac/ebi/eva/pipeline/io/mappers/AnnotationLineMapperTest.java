@@ -54,7 +54,7 @@ public class AnnotationLineMapperTest {
         List<ConsequenceType> consequenceTypes = variantAnnotation.getConsequenceTypes();
 
         assertNotNull(consequenceTypes);
-        assertTrue(consequenceTypes.size() == 1);
+        assertEquals(1, consequenceTypes.size());
 
         ConsequenceType consequenceType = consequenceTypes.get(0);
 
@@ -72,7 +72,7 @@ public class AnnotationLineMapperTest {
         List<ConsequenceType> consequenceTypes = variantAnnotation.getConsequenceTypes();
 
         assertNotNull(consequenceTypes);
-        assertTrue(consequenceTypes.size() == 1);
+        assertEquals(1, consequenceTypes.size());
 
         ConsequenceType consequenceType = consequenceTypes.get(0);
 
@@ -113,13 +113,13 @@ public class AnnotationLineMapperTest {
         List<ConsequenceType> consequenceTypes = variantAnnotation.getConsequenceTypes();
 
         assertNotNull(consequenceTypes);
-        assertTrue(consequenceTypes.size() == 1);
+        assertEquals(1, consequenceTypes.size());
 
         ConsequenceType consequenceType = consequenceTypes.get(0);
 
         List<Score> actualScores = consequenceType.getProteinSubstitutionScores();
         assertNotNull(actualScores);
-        assertTrue(actualScores.size() == 2);
+        assertEquals(2, actualScores.size());
 
         Score expectedSift = new Score(0.07, "Sift", "tolerated");
         Score expectedPolyphen = new Score(0.859, "Polyphen", "possibly_damaging");

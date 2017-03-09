@@ -84,7 +84,7 @@ public class VariantAnnotationToDBObjectConverterTest {
 
         //Consequence types
         LinkedList cts = (LinkedList) dbObject.get(AnnotationFieldNames.CONSEQUENCE_TYPE_FIELD);
-        assertTrue(cts.size() == 1);
+        assertEquals(1, cts.size());
 
         BasicDBObject ct = (BasicDBObject) cts.get(0);
         assertEquals(consequenceType.getGeneName(), ct.getString(AnnotationFieldNames.GENE_NAME_FIELD));
@@ -138,7 +138,7 @@ public class VariantAnnotationToDBObjectConverterTest {
 
         //Consequence types
         LinkedList cts = (LinkedList) dbObject.get(AnnotationFieldNames.CONSEQUENCE_TYPE_FIELD);
-        assertTrue(cts.size() == 1);
+        assertEquals(1, cts.size());
 
         //Xrefs
         HashSet<BasicDBObject> xrefs = (HashSet) dbObject.get(AnnotationFieldNames.XREFS_FIELD);
@@ -162,7 +162,7 @@ public class VariantAnnotationToDBObjectConverterTest {
         //Xrefs
         HashSet<BasicDBObject> xrefs = (HashSet) dbObject.get(AnnotationFieldNames.XREFS_FIELD);
 
-        assertTrue(xrefs.size() == 1);
+        assertEquals(1, xrefs.size());
         assertTrue(isXrefPresent(xrefs, "OS01G0112100", "ensemblGene"));    //from xrefs in VariantAnnotation obj
     }
 

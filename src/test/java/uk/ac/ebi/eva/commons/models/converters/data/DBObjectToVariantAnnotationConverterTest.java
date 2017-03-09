@@ -59,7 +59,7 @@ public class DBObjectToVariantAnnotationConverterTest {
         //Consequence types
         List<ConsequenceType> consequenceTypeList = annotation.getConsequenceTypes();
 
-        assertTrue(consequenceTypeList.size() == 1);
+        assertEquals(1, consequenceTypeList.size());
         ConsequenceType consequenceType = consequenceTypeList.get(0);
 
         assertEquals("geneName", consequenceType.getGeneName());
@@ -101,7 +101,7 @@ public class DBObjectToVariantAnnotationConverterTest {
 
         //Xrefs
         List<Xref> xrefList = annotation.getXrefs();
-        assertTrue(xrefList.size() == 4);
+        assertEquals(4, xrefList.size());
 
         Xref xref1 = new Xref("OS01G0112100", "ensemblGene");
         Xref xref2 = new Xref("ensemblGeneId", "ensemblGene");
