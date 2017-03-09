@@ -79,14 +79,19 @@ public class VariantVcfFactory {
                     "Alternative allele is a '.'. This is not an actual variant but a reference position. Variant found as: "
                             + chromosome + ":" + position + ":" + reference + ">" + alternate);
         }
-//        String alternate = fields[4].equals(".") ? "" : fields[4];
         String[] alternateAlleles = alternate.split(",");
         float quality = fields[5].equals(".") ? -1 : Float.parseFloat(fields[5]);
         String filter = fields[6].equals(".") ? "" : fields[6];
         String info = fields[7].equals(".") ? "" : fields[7];
         String format = (fields.length <= 8 || fields[8].equals(".")) ? "" : fields[8];
 
-        List<VariantKeyFields> generatedKeyFields = buildVariantKeyFields(position, reference, alternateAlleles);
+        List<VariantKeyFields> generatedKeyFields;
+        try {
+            generatedKeyFields = buildVariantKeyFields(position, reference, alternateAlleles);
+        } catch (NotAVariantException unused) {
+            throw new NotAVariantException("One alternate allele is identical to the reference. Variant found as: "
+                    + chromosome + ":" + position + ":" + reference + ">" + alternate);
+        }
 
         List<Variant> variants = new LinkedList<>();
         // Now create all the Variant objects read from the VCF record
@@ -153,9 +158,10 @@ public class VariantVcfFactory {
      * @param alternate Input alternate allele
      * @return The new start, end, reference and alternate alleles
      */
-    protected VariantKeyFields normalizeSuffixFirst(int position, String reference, String alternate) {
+    protected VariantKeyFields normalizeSuffixFirst(int position, String reference, String alternate)
+            throws NotAVariantException {
         if (reference.equals(alternate)) {
-            throw new NotAVariantException("reference and alternate at " + position + " are identical: " + alternate);
+            throw new NotAVariantException();
         }
 
         // Remove the trailing bases
