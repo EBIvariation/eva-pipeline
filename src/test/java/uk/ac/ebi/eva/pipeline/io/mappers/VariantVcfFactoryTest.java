@@ -44,6 +44,25 @@ public class VariantVcfFactoryTest {
     private VariantVcfFactory factory = new VariantVcfFactory();
 
     @Test
+    public void testRemoveChrPrefixInAnyCase() {
+        List<Variant> expResult = new LinkedList<>();
+        expResult.add(new Variant("1", 1000, 1000, "T", "G"));
+        String line;
+
+        line = "chr1\t1000\t.\tT\tG\t.\t.\t.";
+        List<Variant> result = factory.create(FILE_ID, STUDY_ID, line);
+        assertEquals(expResult, result);
+
+        line = "Chr1\t1000\t.\tT\tG\t.\t.\t.";
+        result = factory.create(FILE_ID, STUDY_ID, line);
+        assertEquals(expResult, result);
+
+        line = "CHR1\t1000\t.\tT\tG\t.\t.\t.";
+        result = factory.create(FILE_ID, STUDY_ID, line);
+        assertEquals(expResult, result);
+    }
+
+    @Test
     public void testCreateVariantFromVcfSameLengthRefAlt() {
         // Test when there are differences at the end of the sequence
         String line = "1\t1000\trs123\tTCACCC\tTGACGG\t.\t.\t.";
