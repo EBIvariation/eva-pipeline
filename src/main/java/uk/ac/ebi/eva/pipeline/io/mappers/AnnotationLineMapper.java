@@ -19,11 +19,11 @@ package uk.ac.ebi.eva.pipeline.io.mappers;
 import org.apache.commons.lang.ArrayUtils;
 import org.opencb.biodata.models.variant.annotation.ConsequenceType;
 import org.opencb.biodata.models.variant.annotation.Score;
-import org.opencb.biodata.models.variant.annotation.VariantAnnotation;
-import org.opencb.biodata.models.variation.PopulationFrequency;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.item.file.LineMapper;
+
+import uk.ac.ebi.eva.commons.models.data.VariantAnnotation;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -76,12 +76,6 @@ public class AnnotationLineMapper implements LineMapper<VariantAnnotation> {
                 Integer.valueOf(variantMap.get("end")), variantMap.get("reference"),
                 variantMap.get("alternative"));
 
-        // Initialize list of consequence types
-        currentAnnotation.setConsequenceTypes(new ArrayList<>());
-
-        // Initialize Hgvs
-        currentAnnotation.setHgvs(new ArrayList<>());
-
         /**
          * parses extra column and populates fields as required.
          * Some lines do not have extra field and end with a \t: the split function above does not return that field
@@ -109,7 +103,7 @@ public class AnnotationLineMapper implements LineMapper<VariantAnnotation> {
     private void parseTranscriptFields(ConsequenceType consequenceType, String[] lineFields) {
         consequenceType.setEnsemblGeneId(lineFields[3]);    // fill Ensembl gene id
         consequenceType.setEnsemblTranscriptId(lineFields[4]);  // fill Ensembl transcript id
-        if(!lineFields[6].equals("") && !lineFields.equals("-")) {  // VEP may leave this field empty
+        if(!lineFields[6].equals("") && !lineFields[6].equals("-")) {  // VEP may leave this field empty
             consequenceType.setSoTermsFromSoNames(Arrays.asList(lineFields[6].split(",")));    // fill so terms
         }
         if(!lineFields[7].equals("-")) {
@@ -196,166 +190,32 @@ public class AnnotationLineMapper implements LineMapper<VariantAnnotation> {
             String[] keyValue = field.split("=");
 
             switch (keyValue[0].toLowerCase()) {
-                case "aa_maf":
-                        if(currentAnnotation.getPopulationFrequencies()==null) {
-                            currentAnnotation.setPopulationFrequencies(new ArrayList<>());
-                        }
-                        currentAnnotation.getPopulationFrequencies().add(parsePopulationFrequency(keyValue[1], "ESP_6500",
-                                "African_American", currentAnnotation));
-
-                    break;
-                case "afr_maf":
-                        if(currentAnnotation.getPopulationFrequencies()==null) {
-                            currentAnnotation.setPopulationFrequencies(new ArrayList<>());
-                        }
-                        currentAnnotation.getPopulationFrequencies().add(parsePopulationFrequency(keyValue[1], "1000GENOMES",
-                                "phase_1_AFR", currentAnnotation));
-
-                    break;
-                case "amr_maf":
-                        if(currentAnnotation.getPopulationFrequencies()==null) {
-                            currentAnnotation.setPopulationFrequencies(new ArrayList<>());
-                        }
-                        currentAnnotation.getPopulationFrequencies().add(parsePopulationFrequency(keyValue[1], "1000GENOMES",
-                                "phase_1_AMR", currentAnnotation));
-
-                    break;
-                case "asn_maf":
-                        if(currentAnnotation.getPopulationFrequencies()==null) {
-                            currentAnnotation.setPopulationFrequencies(new ArrayList<>());
-                        }
-                        currentAnnotation.getPopulationFrequencies().add(parsePopulationFrequency(keyValue[1], "1000GENOMES",
-                                "phase_1_ASN", currentAnnotation));
-
-                    break;
                 case "biotype":
                     consequenceType.setBiotype(keyValue[1]);
                     break;
-//                case "canonical":
-//                    variantEffect.setCanonical(keyValue[1].equalsIgnoreCase("YES") || keyValue[1].equalsIgnoreCase("Y"));
-//                    break;
-//                case "ccds":
-//                    variantEffect.setCcdsId(keyValue[1]);
-//                    break;
-//                case "cell_type":
-//                    variantAnnotation.getRegulatoryEffect().setCellType(keyValue[1]);
-//                    break;
-//                case "clin_sig":
-//                    variantEffect.setClinicalSignificance(keyValue[1]);
-//                    break;
-//                case "distance":
-//                    variantEffect.setVariantToTranscriptDistance(Integer.parseInt(keyValue[1]));
-//                    break;
-//                case "domains":
-//                    variantEffect.setProteinDomains(keyValue[1].split(","));
-//                    break;
-                case "ea_maf":
-                        if(currentAnnotation.getPopulationFrequencies()==null) {
-                            currentAnnotation.setPopulationFrequencies(new ArrayList<>());
-                        }
-                        currentAnnotation.getPopulationFrequencies().add(parsePopulationFrequency(keyValue[1], "ESP_6500",
-                                "European_American", currentAnnotation));
-
-                    break;
-//                case "ensp":
-//                    variantEffect.setProteinId(keyValue[1]);
-//                    break;
-                case "eur_maf":
-                        if(currentAnnotation.getPopulationFrequencies()==null) {
-                            currentAnnotation.setPopulationFrequencies(new ArrayList<>());
-                        }
-                        currentAnnotation.getPopulationFrequencies().add(parsePopulationFrequency(keyValue[1], "1000GENOMES",
-                                "phase_1_EUR", currentAnnotation));
-
-                    break;
-//                case "exon":
-//                    variantEffect.setExonNumber(keyValue[1]);
-//                    break;
-                case "gmaf": // Format is GMAF=G:0.2640  or  GMAF=T:0.1221,-:0.0905
-                        if(currentAnnotation.getPopulationFrequencies()==null) {
-                            currentAnnotation.setPopulationFrequencies(new ArrayList<>());
-                        }
-                        currentAnnotation.getPopulationFrequencies().add(parsePopulationFrequency(keyValue[1], "1000GENOMES",
-                                "phase_1_ALL", currentAnnotation));
-
-                    break;
                 case "hgvsc":
-                    if(currentAnnotation.getHgvs()==null) {
-                        currentAnnotation.setHgvs(new ArrayList<String>());
-                    }
                     currentAnnotation.getHgvs().add(keyValue[1]);
                     break;
                 case "hgvsp":
-                    if(currentAnnotation.getHgvs()==null) {
-                        currentAnnotation.setHgvs(new ArrayList<String>());
-                    }
                     currentAnnotation.getHgvs().add(keyValue[1]);
                     break;
-//                case "high_inf_pos":
-//                    variantAnnotation.getRegulatoryEffect().setHighInformationPosition(keyValue[1].equalsIgnoreCase("YES") || keyValue[1].equalsIgnoreCase("Y"));
-//                    break;
-//                case "intron":
-//                    variantEffect.setIntronNumber(keyValue[1]);
-//                    break;
-//                case "motif_name":
-//                    variantAnnotation.getRegulatoryEffect().setMotifName(keyValue[1]);
-//                    break;
-//                case "motif_pos":
-//                    variantAnnotation.getRegulatoryEffect().setMotifPosition(Integer.parseInt(keyValue[1]));
-//                    break;
-//                case "motif_score_change":
-//                    variantAnnotation.getRegulatoryEffect().setMotifScoreChange(Float.parseFloat(keyValue[1]));
-//                    break;
                 case "polyphen": // Format is PolyPhen=possibly_damaging(0.859)
                     consequenceType.addProteinSubstitutionScore(parseProteinSubstitutionScore("Polyphen", keyValue[1]));
                     break;
-//                case "pubmed":
-//                    variantEffect.setPubmed(keyValue[1].split(","));
-//                    break;
                 case "sift": // Format is SIFT=tolerated(0.07)
                     consequenceType.addProteinSubstitutionScore(parseProteinSubstitutionScore("Sift", keyValue[1]));
                     break;
                 case "strand":
                     consequenceType.setStrand(keyValue[1].equals("1")?"+":"-");
                     break;
-//                case "sv":
-//                    variantEffect.setStructuralVariantsId(keyValue[1].split(","));
-//                    break;
                 case "symbol":
                     consequenceType.setGeneName(keyValue[1]);
                     break;
-//                case "symbol_source":
-//                    variantEffect.setGeneNameSource(keyValue[1]);
-//                    break;
                 default:
                     // ALLELE_NUM, FREQS, IND, ZYG
                     break;
             }
         }
-    }
-
-    /**
-     * From org.opencb.biodata.formats.annotation.io.VepFormatReader
-     * #parsePopulationFrequency(java.lang.String, java.lang.String, java.lang.String)
-     */
-    private PopulationFrequency parsePopulationFrequency(
-            String frequencyStrings, String study, String population, VariantAnnotation currentAnnotation) {
-        PopulationFrequency populationFrequency = new PopulationFrequency();
-        populationFrequency.setStudy(study);
-        populationFrequency.setPop(population);
-        populationFrequency.setSuperPop(population);
-        populationFrequency.setRefAllele(currentAnnotation.getReferenceAllele());
-        populationFrequency.setAltAllele(currentAnnotation.getAlternativeAllele());
-        for(String frequencyString : frequencyStrings.split(",")) {
-            String[] parts = frequencyString.split(":");
-            if (parts[0].equals(currentAnnotation.getAlternativeAllele())) {
-                populationFrequency.setAltAlleleFreq(Float.valueOf(parts[1]));
-            } else {
-                populationFrequency.setRefAlleleFreq(Float.valueOf(parts[1]));
-            }
-        }
-
-        return populationFrequency;
     }
 
     /**

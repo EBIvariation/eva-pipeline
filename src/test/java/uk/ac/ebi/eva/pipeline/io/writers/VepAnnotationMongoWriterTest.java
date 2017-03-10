@@ -23,8 +23,6 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.opencb.biodata.models.variant.annotation.VariantAnnotation;
-import org.opencb.opencga.storage.mongodb.variant.DBObjectToVariantAnnotationConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.data.mongodb.core.mapping.MongoMappingContext;
@@ -32,6 +30,9 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
+
+import uk.ac.ebi.eva.commons.models.converters.data.DBObjectToVariantAnnotationConverter;
+import uk.ac.ebi.eva.commons.models.data.VariantAnnotation;
 import uk.ac.ebi.eva.commons.models.converters.data.VariantToDBObjectConverter;
 import uk.ac.ebi.eva.pipeline.Application;
 import uk.ac.ebi.eva.pipeline.configuration.MongoConfiguration;
@@ -105,7 +106,7 @@ public class VepAnnotationMongoWriterTest {
         int consequenceTypeCount = 0;
         while (cursor.hasNext()) {
             count++;
-            VariantAnnotation annot = converter.convertToDataModelType(
+            VariantAnnotation annot = converter.convert(
                     (DBObject) cursor.next().get(VariantToDBObjectConverter.ANNOTATION_FIELD));
             assertNotNull(annot.getConsequenceTypes());
             consequenceTypeCount += annot.getConsequenceTypes().size();
@@ -168,7 +169,7 @@ public class VepAnnotationMongoWriterTest {
             DBObject dbObject = cursor.next();
             String id = dbObject.get("_id").toString();
 
-            VariantAnnotation annot = converter.convertToDataModelType(
+            VariantAnnotation annot = converter.convert(
                     (DBObject) dbObject.get(VariantToDBObjectConverter.ANNOTATION_FIELD));
 
             if (id.equals("20_63360_C_T") || id.equals("20_63399_G_A") || id.equals("20_63426_G_T")) {

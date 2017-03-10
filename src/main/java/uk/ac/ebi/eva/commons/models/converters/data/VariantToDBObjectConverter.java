@@ -19,7 +19,6 @@ package uk.ac.ebi.eva.commons.models.converters.data;
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
-import org.opencb.opencga.storage.mongodb.variant.DBObjectToVariantAnnotationConverter;
 import org.opencb.opencga.storage.mongodb.variant.VariantMongoDBWriter;
 import org.springframework.core.convert.converter.Converter;
 
@@ -84,7 +83,7 @@ public class VariantToDBObjectConverter implements Converter<Variant, DBObject> 
 
     private VariantSourceEntryToDBObjectConverter variantSourceEntryConverter;
 
-    private DBObjectToVariantAnnotationConverter variantAnnotationConverter;
+    private VariantAnnotationToDBObjectConverter variantAnnotationConverter;
 
     private VariantStatsToDBObjectConverter statsConverter;
 
@@ -107,7 +106,7 @@ public class VariantToDBObjectConverter implements Converter<Variant, DBObject> 
      */
     public VariantToDBObjectConverter(
             VariantSourceEntryToDBObjectConverter variantSourceEntryConverter,
-            DBObjectToVariantAnnotationConverter variantAnnotationConverter,
+            VariantAnnotationToDBObjectConverter variantAnnotationConverter,
             VariantStatsToDBObjectConverter VariantStatsConverter) {
         this.variantSourceEntryConverter = variantSourceEntryConverter;
         this.variantAnnotationConverter = variantAnnotationConverter;
@@ -192,7 +191,7 @@ public class VariantToDBObjectConverter implements Converter<Variant, DBObject> 
     private void appendAnnotations(Variant object, BasicDBObject mongoVariant) {
         if (variantAnnotationConverter != null) {
             if (object.getAnnotation() != null) {
-                DBObject annotation = variantAnnotationConverter.convertToStorageType(object.getAnnotation());
+                DBObject annotation = variantAnnotationConverter.convert(object.getAnnotation());
                 mongoVariant.append(ANNOTATION_FIELD, annotation);
             }
         }

@@ -16,9 +16,6 @@
  */
 package uk.ac.ebi.eva.commons.models.data;
 
-import org.opencb.biodata.models.variant.annotation.VariantAnnotation;
-import org.opencb.biodata.models.variant.annotation.VariantEffect;
-
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -299,10 +296,6 @@ public class Variant {
 
     public void setAnnotation(VariantAnnotation annotation) {
         this.annotation = annotation;
-    }
-
-    public void addEffect(String allele, VariantEffect ct) {
-        annotation.addEffect(allele, ct);
     }
 
     /**

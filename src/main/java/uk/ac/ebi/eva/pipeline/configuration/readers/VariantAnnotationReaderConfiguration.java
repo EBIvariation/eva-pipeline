@@ -15,11 +15,12 @@
  */
 package uk.ac.ebi.eva.pipeline.configuration.readers;
 
-import org.opencb.biodata.models.variant.annotation.VariantAnnotation;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.item.ItemStreamReader;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import uk.ac.ebi.eva.commons.models.data.VariantAnnotation;
 import uk.ac.ebi.eva.pipeline.io.readers.AnnotationFlatFileReader;
 import uk.ac.ebi.eva.pipeline.parameters.AnnotationParameters;
 
