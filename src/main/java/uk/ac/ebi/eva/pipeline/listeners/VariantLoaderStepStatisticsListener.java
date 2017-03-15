@@ -21,6 +21,7 @@ import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.StepExecutionListener;
 
+import uk.ac.ebi.eva.pipeline.parameters.InternalParametersNames;
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 import uk.ac.ebi.eva.utils.VcfNumberOfLinesEstimator;
 
@@ -37,7 +38,7 @@ public class VariantLoaderStepStatisticsListener implements StepExecutionListene
     public void beforeStep(StepExecution stepExecution) {
         String vcfFilePath = stepExecution.getJobExecution().getJobParameters().getString(JobParametersNames.INPUT_VCF);
         long estimatedTotalNumberOfLines = vcfNumberOfLinesEstimator.estimateVcfNumberOfLines(vcfFilePath);
-        stepExecution.getExecutionContext().put(JobParametersNames.NUMBER_OF_LINES, estimatedTotalNumberOfLines);
+        stepExecution.getExecutionContext().put(InternalParametersNames.NUMBER_OF_LINES, estimatedTotalNumberOfLines);
     }
 
     @Override

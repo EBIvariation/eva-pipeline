@@ -144,11 +144,4 @@ public class JobParametersNames {
 
     public static final String RESTART_PROPERTY = "force.restart";
 
-
-    /*
-     * Internal parameters
-     */
-
-    public static final String NUMBER_OF_LINES = "line";
-
 }
