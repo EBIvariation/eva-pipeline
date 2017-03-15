@@ -32,12 +32,10 @@ import uk.ac.ebi.eva.utils.VcfNumberOfLinesEstimator;
 public class VariantLoaderStepStatisticsListener implements StepExecutionListener {
     private static final Logger logger = LoggerFactory.getLogger(VariantLoaderStepStatisticsListener.class);
 
-    private VcfNumberOfLinesEstimator vcfNumberOfLinesEstimator = new VcfNumberOfLinesEstimator();
-
     @Override
     public void beforeStep(StepExecution stepExecution) {
         String vcfFilePath = stepExecution.getJobExecution().getJobParameters().getString(JobParametersNames.INPUT_VCF);
-        long estimatedTotalNumberOfLines = vcfNumberOfLinesEstimator.estimateVcfNumberOfLines(vcfFilePath);
+        long estimatedTotalNumberOfLines = new VcfNumberOfLinesEstimator().estimateVcfNumberOfLines(vcfFilePath);
         stepExecution.getExecutionContext().put(InternalParametersNames.NUMBER_OF_LINES, estimatedTotalNumberOfLines);
     }
 
