@@ -36,19 +36,19 @@ public class StepProgressListener implements ChunkListener {
     @Override
     public void afterChunk(ChunkContext context) {
 
-        int estimatedTotalNumberOfLines = (int)context.getStepContext().getStepExecutionContext()
+        long estimatedTotalNumberOfLines = (long)context.getStepContext().getStepExecutionContext()
                 .get(JobParametersNames.NUMBER_OF_LINES);
 
-        int read = context.getStepContext().getStepExecution().getReadCount();
-        int write = context.getStepContext().getStepExecution().getWriteCount();
-        int skip = context.getStepContext().getStepExecution().getReadSkipCount()
+        long read = context.getStepContext().getStepExecution().getReadCount();
+        long write = context.getStepContext().getStepExecution().getWriteCount();
+        long skip = context.getStepContext().getStepExecution().getReadSkipCount()
                 + context.getStepContext().getStepExecution().getProcessSkipCount()
                 + context.getStepContext().getStepExecution().getWriteSkipCount();
 
         String chunkStatisticsMessage = "Chunk stats: Items read count " + read + ", items write count " + write + " items skip count " + skip;
 
         if (estimatedTotalNumberOfLines != 0) {
-            int percent = (read * 100) / estimatedTotalNumberOfLines;
+            long percent = (read * 100) / estimatedTotalNumberOfLines;
             logger.info(percent + "% " + chunkStatisticsMessage);
         } else {
             logger.info(chunkStatisticsMessage);

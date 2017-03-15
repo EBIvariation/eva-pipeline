@@ -36,7 +36,7 @@ public class VariantLoaderStepStatisticsListener implements StepExecutionListene
     @Override
     public void beforeStep(StepExecution stepExecution) {
         String vcfFilePath = stepExecution.getJobExecution().getJobParameters().getString(JobParametersNames.INPUT_VCF);
-        int estimatedTotalNumberOfLines = vcfNumberOfLinesEstimator.estimateVcfNumberOfLines(vcfFilePath);
+        long estimatedTotalNumberOfLines = vcfNumberOfLinesEstimator.estimateVcfNumberOfLines(vcfFilePath);
         stepExecution.getExecutionContext().put(JobParametersNames.NUMBER_OF_LINES, estimatedTotalNumberOfLines);
     }
 

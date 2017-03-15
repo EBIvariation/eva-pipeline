@@ -43,7 +43,7 @@ public class VcfNumberOfLinesEstimatorTest {
     @Test
     public void predictedGenotypedVcfNumberOfLines() {
         String genotypedVcfPath = getResource(GENOTYPED_VCF).getAbsolutePath();
-        int estimatedNumberOfLines = numberOfLinesEstimator.estimateVcfNumberOfLines(genotypedVcfPath);
+        long estimatedNumberOfLines = numberOfLinesEstimator.estimateVcfNumberOfLines(genotypedVcfPath);
         int expectedNumberOfLines = 298;
 
         assertEquals(expectedNumberOfLines, estimatedNumberOfLines,
@@ -53,7 +53,7 @@ public class VcfNumberOfLinesEstimatorTest {
     @Test
     public void predictedAggregatedVcfNumberOfLines() {
         String aggregatedVcfPath = getResource(AGGREGATED_VCF).getAbsolutePath();
-        int estimatedNumberOfLines = numberOfLinesEstimator.estimateVcfNumberOfLines(aggregatedVcfPath);
+        long estimatedNumberOfLines = numberOfLinesEstimator.estimateVcfNumberOfLines(aggregatedVcfPath);
         int expectedNumberOfLines = 156;
 
         assertEquals(expectedNumberOfLines, estimatedNumberOfLines,
@@ -63,7 +63,7 @@ public class VcfNumberOfLinesEstimatorTest {
     @Test
     public void smallVcfNumberOfLines() {
         String smallGenotypedVcfPath = getResource(SMALL_VCF).getAbsolutePath();
-        int estimatedNumberOfLines = numberOfLinesEstimator.estimateVcfNumberOfLines(smallGenotypedVcfPath);
+        long estimatedNumberOfLines = numberOfLinesEstimator.estimateVcfNumberOfLines(smallGenotypedVcfPath);
 
         assertEquals(0, estimatedNumberOfLines);
     }

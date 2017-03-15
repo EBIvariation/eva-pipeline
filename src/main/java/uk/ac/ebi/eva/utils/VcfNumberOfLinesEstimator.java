@@ -47,9 +47,9 @@ public class VcfNumberOfLinesEstimator {
 
     private static final int NUMBER_OF_LINES = 100;
 
-    public int estimateVcfNumberOfLines(String vcfFilePath) {
+    public long estimateVcfNumberOfLines(String vcfFilePath) {
         logger.debug("Estimating the number of lines in the VCF file {}", vcfFilePath);
-        int estimatedTotalNumberOfLines = 0;
+        long estimatedTotalNumberOfLines = 0;
 
         String vcfHead;
         String vcfSection;
@@ -72,9 +72,9 @@ public class VcfNumberOfLinesEstimator {
                 throw new RuntimeException("Error while creating zip file", e);
             }
 
-            int vcfFileSize = (int) new File(vcfFilePath).length();
-            int singleVcfLineSize = (int) (vcfSectionFile.length() / NUMBER_OF_LINES);
-            int vcfHeadFileSize = (int) vcfHeadFile.length();
+            long vcfFileSize = new File(vcfFilePath).length();
+            long singleVcfLineSize = (vcfSectionFile.length() / NUMBER_OF_LINES);
+            long vcfHeadFileSize = vcfHeadFile.length();
 
             estimatedTotalNumberOfLines = ((vcfFileSize - vcfHeadFileSize) / singleVcfLineSize);
         }
