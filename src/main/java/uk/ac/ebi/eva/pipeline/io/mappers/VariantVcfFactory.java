@@ -104,6 +104,10 @@ public class VariantVcfFactory {
         return variants;
     }
 
+    /**
+     * Replace "chr" references only at the beginning of the chromosome name.
+     * For instance, tomato has SL2.40ch00 and that should be kept that way
+     */
     private String removeChrPrefix(String chromosome) {
         boolean ignoreCase = true;
         int startOffset = 0;
