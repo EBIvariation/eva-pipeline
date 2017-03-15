@@ -45,11 +45,11 @@ public class StepProgressListener implements ChunkListener {
                 + context.getStepContext().getStepExecution().getProcessSkipCount()
                 + context.getStepContext().getStepExecution().getWriteSkipCount();
 
-        String chunkStatisticsMessage = "Chunk stats: Items read count " + read + ", items write count " + write + " items skip count " + skip;
+        String chunkStatisticsMessage = "Items read =" + read + ", items written = " + write + ", items skipped = " + skip;
 
         if (estimatedTotalNumberOfLines != 0) {
             long percent = (read * 100) / estimatedTotalNumberOfLines;
-            logger.info(percent + "% " + chunkStatisticsMessage);
+            logger.info(percent + "% complete" + chunkStatisticsMessage);
         } else {
             logger.info(chunkStatisticsMessage);
         }

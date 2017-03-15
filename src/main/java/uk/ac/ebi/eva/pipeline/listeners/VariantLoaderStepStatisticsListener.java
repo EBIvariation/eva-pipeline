@@ -41,9 +41,9 @@ public class VariantLoaderStepStatisticsListener implements StepExecutionListene
 
     @Override
     public ExitStatus afterStep(StepExecution stepExecution) {
-        logger.info("Variant loader step stats: Items read count " + stepExecution
-                .getReadCount() + ", items write count " + stepExecution
-                .getWriteCount() + " items skip count " + stepExecution.getSkipCount());
+        logger.info("Items read = " + stepExecution
+                .getReadCount() + ", items written = " + stepExecution
+                .getWriteCount() + " items skipped = " + stepExecution.getSkipCount());
 
         return null;
     }
