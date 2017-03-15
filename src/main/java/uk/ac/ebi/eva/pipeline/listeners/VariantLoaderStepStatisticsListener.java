@@ -28,8 +28,8 @@ import uk.ac.ebi.eva.utils.VcfNumberOfLinesEstimator;
  * - Estimate the number of lines in the VCF file before the step. This will be used in {@link StepProgressListener}
  * - Log a statistics summary after the step
  */
-public class VariantLoaderStatisticsListener implements StepExecutionListener {
-    private static final Logger logger = LoggerFactory.getLogger(VariantLoaderStatisticsListener.class);
+public class VariantLoaderStepStatisticsListener implements StepExecutionListener {
+    private static final Logger logger = LoggerFactory.getLogger(VariantLoaderStepStatisticsListener.class);
 
     private VcfNumberOfLinesEstimator vcfNumberOfLinesEstimator = new VcfNumberOfLinesEstimator();
 
