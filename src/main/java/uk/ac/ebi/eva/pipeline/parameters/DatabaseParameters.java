@@ -43,6 +43,9 @@ public class DatabaseParameters {
     @Value(PARAMETER + JobParametersNames.DB_COLLECTIONS_FEATURES_NAME + END)
     private String collectionFeaturesName;
 
+    @Value(PARAMETER + JobParametersNames.DB_COLLECTIONS_ANNOTATION_METADATA_NAME + END)
+    private String collectionAnnotationMetadataName;
+
     @Autowired
     private MongoConnection mongoConnection;
 
@@ -64,5 +67,9 @@ public class DatabaseParameters {
 
     public String getCollectionFeaturesName() {
         return collectionFeaturesName;
+    }
+
+    public String getCollectionAnnotationMetadataName() {
+        return collectionAnnotationMetadataName;
     }
 }
