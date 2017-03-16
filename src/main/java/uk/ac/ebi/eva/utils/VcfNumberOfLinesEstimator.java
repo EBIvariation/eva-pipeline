@@ -129,14 +129,11 @@ public class VcfNumberOfLinesEstimator {
 
         int lineCount = NUMBER_OF_LINES;
         Scanner scanner = new Scanner(new GZIPInputStream(new FileInputStream(vcfFilePath)));
-        while (scanner.hasNextLine()) {
+        while (scanner.hasNextLine() && lineCount > 0) {
             String line = scanner.nextLine();
             if (!line.startsWith("#")) {
                 lineCount--;
                 vcfSection += line + "\n";
-                if (lineCount == 0) {
-                    break;
-                }
             }
         }
         scanner.close();
