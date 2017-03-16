@@ -25,7 +25,6 @@ public class BeanNames {
     public static final String VARIANT_ANNOTATION_READER = "variant-annotation-reader";
     public static final String VARIANT_READER = "variant-reader";
 
-    public static final String ANNOTATION_METADATA_WRITER = "annotation-metadata-writer";
     public static final String GENE_WRITER = "gene-writer";
     public static final String VEP_INPUT_WRITER = "vep-input-writer";
     public static final String VARIANT_ANNOTATION_WRITER = "variant-annotation-writer";
@@ -52,6 +51,7 @@ public class BeanNames {
     public static final String DROP_SINGLE_STUDY_VARIANTS_STEP = "drop-single-study-variants-step";
     public static final String PULL_FILES_AND_STATISTICS_BY_STUDY_STEP = "pull-files-and-statistics-by-study-step";
     public static final String DROP_FILES_BY_STUDY_STEP = "drop-files-by-study-step";
+    public static final String ANNOTATION_METADATA_STEP = "annotation-metadata-step";
 
     public static final String AGGREGATED_VCF_JOB = "aggregated-vcf-job";
     public static final String ANNOTATE_VARIANTS_JOB = "annotate-variants-job";

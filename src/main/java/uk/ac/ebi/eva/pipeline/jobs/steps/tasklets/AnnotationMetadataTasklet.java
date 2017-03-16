@@ -20,40 +20,41 @@ import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.MongoOperations;
 
-import uk.ac.ebi.eva.commons.models.data.VariantSourceEntity;
 import uk.ac.ebi.eva.commons.models.metadata.AnnotationMetadata;
-import uk.ac.ebi.eva.pipeline.io.writers.AnnotationMetadataMongoWriter;
 import uk.ac.ebi.eva.pipeline.parameters.AnnotationParameters;
-
-import java.util.Collections;
+import uk.ac.ebi.eva.pipeline.parameters.DatabaseParameters;
 
 /**
- * Tasklet that writes the metadata of a file into mongo. Uses
- * {@link VariantSourceEntity} as the collection schema.
+ * Tasklet that writes the annotation metadata into mongo. Uses
+ * {@link AnnotationMetadata} as the collection schema.
  * <p>
- * Input: VCF file
+ * Input: VEP version and VEP cache version
  * <p>
- * Output: the collection "files" contains the metadata of the VCF.
+ * Output: the collection "annotationMetadata" contains the above parameters.
  */
 public class AnnotationMetadataTasklet implements Tasklet {
 
     @Autowired
-    private AnnotationMetadataMongoWriter annotationMetadataMongoWriter;
+    private MongoOperations mongoOperations;
 
     @Autowired
     private AnnotationParameters annotationParameters;
-    
+
+    @Autowired
+    private DatabaseParameters databaseParameters;
+
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
         String vepCacheVersion = annotationParameters.getVepCacheVersion();
         String vepVersion = extractVersion(annotationParameters.getVepPath());
         AnnotationMetadata annotationMetadata = new AnnotationMetadata(vepVersion, vepCacheVersion);
-        annotationMetadataMongoWriter.write(Collections.singletonList(annotationMetadata));
+        mongoOperations.save(annotationMetadata, databaseParameters.getCollectionAnnotationMetadataName());
         return RepeatStatus.FINISHED;
     }
 
     private String extractVersion(String vepPath) {
-        return null;
+        throw new UnsupportedOperationException("unimplemented");
     }
 }
