@@ -72,7 +72,9 @@ public class AnnotationJobTest {
     private static final String MONGO_DUMP = "/dump/VariantStatsConfigurationTest_vl";
     private static final String INPUT_STUDY_ID = "1";
     private static final String INPUT_VCF_ID = "1";
+    private static final String COLLECTION_ANNOTATION_METADATA_NAME = "annotationMetadata";
     private static final String COLLECTION_VARIANTS_NAME = "variants";
+
 
     @Rule
     public TemporaryMongoRule mongoRule = new TemporaryMongoRule();
@@ -99,6 +101,7 @@ public class AnnotationJobTest {
         temporaryFolderRule.newFile(vepOutputName);
 
         JobParameters jobParameters = new EvaJobParameterBuilder()
+                .collectionAnnotationMetadataName(COLLECTION_ANNOTATION_METADATA_NAME)
                 .collectionVariantsName(COLLECTION_VARIANTS_NAME)
                 .databaseName(dbName)
                 .inputFasta("")
@@ -107,9 +110,10 @@ public class AnnotationJobTest {
                 .outputDirAnnotation(outputDirAnnot)
                 .vepCachePath("")
                 .vepCacheSpecies("")
-                .vepCacheVersion("")
+                .vepCacheVersion("80")
                 .vepNumForks("")
                 .vepPath(getResource(MOCK_VEP).getPath())
+                .vepVersion("80")
                 .toJobParameters();
 
         JobExecution jobExecution = jobLauncherTestUtils.launchJob(jobParameters);
@@ -117,15 +121,17 @@ public class AnnotationJobTest {
         assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
         assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());
 
-        assertEquals(3, jobExecution.getStepExecutions().size());
+        assertEquals(4, jobExecution.getStepExecutions().size());
         List<StepExecution> steps = new ArrayList<>(jobExecution.getStepExecutions());
         StepExecution findVariantsToAnnotateStep = steps.get(0);
         StepExecution generateVepAnnotationsStep = steps.get(1);
         StepExecution loadVepAnnotationsStep = steps.get(2);
+        StepExecution loadAnnotationMetadataStep = steps.get(3);
 
         assertEquals(BeanNames.GENERATE_VEP_INPUT_STEP, findVariantsToAnnotateStep.getStepName());
         assertEquals(BeanNames.GENERATE_VEP_ANNOTATION_STEP, generateVepAnnotationsStep.getStepName());
         assertEquals(BeanNames.LOAD_VEP_ANNOTATION_STEP, loadVepAnnotationsStep.getStepName());
+        assertEquals(BeanNames.ANNOTATION_METADATA_STEP, loadAnnotationMetadataStep.getStepName());
 
         //check list of variants without annotation output file
         assertTrue(vepInput.exists());
@@ -166,6 +172,7 @@ public class AnnotationJobTest {
         temporaryFolderRule.newFile(vepInputName);
 
         JobParameters jobParameters = new EvaJobParameterBuilder()
+                .collectionAnnotationMetadataName(COLLECTION_ANNOTATION_METADATA_NAME)
                 .collectionVariantsName(COLLECTION_VARIANTS_NAME)
                 .databaseName(dbName)
                 .inputFasta("")
@@ -174,9 +181,10 @@ public class AnnotationJobTest {
                 .outputDirAnnotation(outputDirAnnot)
                 .vepCachePath("")
                 .vepCacheSpecies("")
-                .vepCacheVersion("")
+                .vepCacheVersion("80")
                 .vepNumForks("")
                 .vepPath(getResource(MOCK_VEP).getPath())
+                .vepVersion("80")
                 .toJobParameters();
 
         JobExecution jobExecution = jobLauncherTestUtils.launchJob(jobParameters);

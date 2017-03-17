@@ -90,6 +90,11 @@ public class EvaJobParameterBuilder extends JobParametersBuilder {
         return this;
     }
 
+    public EvaJobParameterBuilder vepVersion(String vepVersion) {
+        addParameter(JobParametersNames.APP_VEP_VERSION, new JobParameter(vepVersion));
+        return this;
+    }
+
     public EvaJobParameterBuilder vepCacheVersion(String vepCacheVersion) {
         addParameter(JobParametersNames.APP_VEP_CACHE_VERSION, new JobParameter(vepCacheVersion));
         return this;

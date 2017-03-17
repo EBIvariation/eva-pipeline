@@ -89,9 +89,11 @@ public class GenotypedVcfJobWorkflowTest {
     public static final Set<String> EXPECTED_STATS_STEP_NAMES = new TreeSet<>(
             Arrays.asList(BeanNames.CALCULATE_STATISTICS_STEP, BeanNames.LOAD_STATISTICS_STEP));
 
-    public static final Set<String> EXPECTED_ANNOTATION_STEP_NAMES = new TreeSet<>(
-            Arrays.asList(BeanNames.GENERATE_VEP_INPUT_STEP, BeanNames.GENERATE_VEP_ANNOTATION_STEP,
-                    BeanNames.LOAD_VEP_ANNOTATION_STEP));
+    public static final Set<String> EXPECTED_ANNOTATION_STEP_NAMES = new TreeSet<>(Arrays.asList(
+                    BeanNames.GENERATE_VEP_INPUT_STEP,
+                    BeanNames.GENERATE_VEP_ANNOTATION_STEP,
+                    BeanNames.LOAD_VEP_ANNOTATION_STEP,
+                    BeanNames.ANNOTATION_METADATA_STEP));
 
     @Test
     public void allStepsShouldBeExecuted() throws Exception {
@@ -128,6 +130,8 @@ public class GenotypedVcfJobWorkflowTest {
                 .before(nameToStepExecution.get(BeanNames.GENERATE_VEP_ANNOTATION_STEP).getStartTime()));
         assertTrue(nameToStepExecution.get(BeanNames.GENERATE_VEP_ANNOTATION_STEP).getEndTime()
                 .before(nameToStepExecution.get(BeanNames.LOAD_VEP_ANNOTATION_STEP).getStartTime()));
+        assertTrue(nameToStepExecution.get(BeanNames.LOAD_VEP_ANNOTATION_STEP).getEndTime()
+                .before(nameToStepExecution.get(BeanNames.ANNOTATION_METADATA_STEP).getStartTime()));
     }
 
     @Test
@@ -175,6 +179,8 @@ public class GenotypedVcfJobWorkflowTest {
                 .before(nameToStepExecution.get(BeanNames.GENERATE_VEP_ANNOTATION_STEP).getStartTime()));
         assertTrue(nameToStepExecution.get(BeanNames.GENERATE_VEP_ANNOTATION_STEP).getEndTime()
                 .before(nameToStepExecution.get(BeanNames.LOAD_VEP_ANNOTATION_STEP).getStartTime()));
+        assertTrue(nameToStepExecution.get(BeanNames.LOAD_VEP_ANNOTATION_STEP).getEndTime()
+                .before(nameToStepExecution.get(BeanNames.ANNOTATION_METADATA_STEP).getStartTime()));
     }
 
     @Test
@@ -220,6 +226,7 @@ public class GenotypedVcfJobWorkflowTest {
         EvaJobParameterBuilder evaJobParameterBuilder = new EvaJobParameterBuilder()
                 .collectionFilesName("files")
                 .collectionVariantsName("variants")
+                .collectionAnnotationMetadataName("annotationMetadata")
                 .databaseName(dbName)
                 .inputFasta(fasta.getAbsolutePath())
                 .inputStudyId("genotyped-job-workflow")
@@ -235,7 +242,8 @@ public class GenotypedVcfJobWorkflowTest {
                 .vepCacheSpecies("human")
                 .vepCacheVersion("1")
                 .vepNumForks("1")
-                .vepPath(getResource(MOCK_VEP).getPath());
+                .vepPath(getResource(MOCK_VEP).getPath())
+                .vepVersion("1");
 
         return evaJobParameterBuilder;
     }

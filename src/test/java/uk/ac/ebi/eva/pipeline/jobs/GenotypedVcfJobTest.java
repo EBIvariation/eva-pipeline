@@ -86,6 +86,7 @@ public class GenotypedVcfJobTest {
         JobParameters jobParameters = new EvaJobParameterBuilder()
                 .collectionFilesName(GenotypedVcfJobTestUtils.COLLECTION_FILES_NAME)
                 .collectionVariantsName(GenotypedVcfJobTestUtils.COLLECTION_VARIANTS_NAME)
+                .collectionAnnotationMetadataName(GenotypedVcfJobTestUtils.COLLECTION_ANNOTATION_METADATA_NAME)
                 .databaseName(databaseName)
                 .inputFasta(fasta.getAbsolutePath())
                 .inputStudyId(GenotypedVcfJobTestUtils.INPUT_STUDY_ID)
@@ -101,6 +102,7 @@ public class GenotypedVcfJobTest {
                 .vepCacheVersion("1")
                 .vepNumForks("1")
                 .vepPath(mockVep.getPath())
+                .vepVersion("1")
                 .toJobParameters();
 
         JobExecution jobExecution = jobLauncherTestUtils.launchJob(jobParameters);

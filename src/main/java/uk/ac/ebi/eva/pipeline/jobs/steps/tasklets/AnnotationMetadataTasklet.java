@@ -22,6 +22,8 @@ import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoOperations;
 
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import uk.ac.ebi.eva.commons.models.metadata.AnnotationMetadata;
 import uk.ac.ebi.eva.pipeline.parameters.AnnotationParameters;
 import uk.ac.ebi.eva.pipeline.parameters.DatabaseParameters;
@@ -48,13 +50,16 @@ public class AnnotationMetadataTasklet implements Tasklet {
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
         String vepCacheVersion = annotationParameters.getVepCacheVersion();
-        String vepVersion = extractVersion(annotationParameters.getVepPath());
+        String vepVersion = annotationParameters.getVepVersion();
         AnnotationMetadata annotationMetadata = new AnnotationMetadata(vepVersion, vepCacheVersion);
-        mongoOperations.save(annotationMetadata, databaseParameters.getCollectionAnnotationMetadataName());
+        writeUnlessAlreadyPresent(annotationMetadata);
         return RepeatStatus.FINISHED;
     }
 
-    private String extractVersion(String vepPath) {
-        throw new UnsupportedOperationException("unimplemented");
+    private void writeUnlessAlreadyPresent(AnnotationMetadata annotationMetadata) {
+        long count = mongoOperations.count(new Query(Criteria.byExample(annotationMetadata)), AnnotationMetadata.class);
+        if (count == 0) {
+            mongoOperations.save(annotationMetadata, databaseParameters.getCollectionAnnotationMetadataName());
+        }
     }
 }

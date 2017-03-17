@@ -128,12 +128,15 @@ public class EvaPipelineJobLauncherCommandLineRunnerTest {
                 .vepCacheSpecies("human")
                 .vepCacheVersion("1")
                 .vepNumForks("1")
+                .vepVersion("1")
                 .inputFasta(fasta.getAbsolutePath())
                 .configDbReadPreference("secondary")
                 .dbCollectionsVariantsName("variants")
                 .dbCollectionsFilesName("files")
                 .dbCollectionsFeaturesName("features")
-                .dbCollectionsStatisticsName("populationStatistics").build()
+                .dbCollectionsStatisticsName("populationStatistics")
+                .dbCollectionsAnnotationMetadataName("annotationMetadata")
+                .build()
         );
 
         assertEquals(EvaPipelineJobLauncherCommandLineRunner.EXIT_WITHOUT_ERRORS,
@@ -234,18 +237,6 @@ public class EvaPipelineJobLauncherCommandLineRunnerTest {
     public void onlyFileWithoutParametersFailsValidation() throws JobExecutionException, IOException,
             URISyntaxException,
             ClassNotFoundException, StorageManagerException, InstantiationException, IllegalAccessException {
-        String databaseName = mongoRule.getRandomTemporaryDatabaseName();
-        File inputFile = GenotypedVcfJobTestUtils.getInputFile();
-        String outputDirStats = temporaryFolderRule.newFolder().getAbsolutePath();
-        String outputDirAnnotation = temporaryFolderRule.newFolder().getAbsolutePath();
-
-        File variantsStatsFile = GenotypedVcfJobTestUtils.getVariantsStatsFile(outputDirStats);
-        File sourceStatsFile = GenotypedVcfJobTestUtils.getSourceStatsFile(outputDirStats);
-
-        File vepInputFile = GenotypedVcfJobTestUtils.getVepInputFile(outputDirAnnotation);
-        File vepOutputFile = GenotypedVcfJobTestUtils.getVepOutputFile(outputDirAnnotation);
-
-        File fasta = temporaryFolderRule.newFile();
 
         //Set properties file to read
         evaPipelineJobLauncherCommandLineRunner.setPropertyFilePath(

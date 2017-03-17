@@ -48,6 +48,8 @@ public class GenotypedVcfJobTestUtils {
 
     public static final String COLLECTION_VARIANTS_NAME = "variants";
 
+    public static final String COLLECTION_ANNOTATION_METADATA_NAME = "annotationMetadata";
+
     private static final int EXPECTED_ANNOTATIONS = 537;
 
     private static final int EXPECTED_VARIANTS = 300;

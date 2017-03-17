@@ -15,7 +15,9 @@
  */
 package uk.ac.ebi.eva.pipeline.jobs.steps;
 
+import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
+import com.mongodb.DBObject;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -26,14 +28,17 @@ import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoOperations;
+import org.springframework.data.mongodb.core.mapping.MongoMappingContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-
 import uk.ac.ebi.eva.commons.models.metadata.AnnotationMetadata;
 import uk.ac.ebi.eva.pipeline.Application;
 import uk.ac.ebi.eva.pipeline.configuration.BeanNames;
+import uk.ac.ebi.eva.pipeline.configuration.MongoConfiguration;
+import uk.ac.ebi.eva.pipeline.jobs.AnnotationJob;
+import uk.ac.ebi.eva.pipeline.parameters.MongoConnection;
 import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
@@ -43,11 +48,13 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
-
+/**
+ * TODO jmmut remove import AnnotationJob when we add the stepLauncherTestUtils
+ */
 @RunWith(SpringRunner.class)
 @ActiveProfiles(Application.VARIANT_ANNOTATION_MONGO_PROFILE)
 @TestPropertySource({"classpath:common-configuration.properties", "classpath:test-mongo.properties"})
-@ContextConfiguration(classes = {AnnotationMetadataStep.class, BatchTestConfiguration.class})
+@ContextConfiguration(classes = {AnnotationJob.class, BatchTestConfiguration.class})
 public class AnnotationMetadataStepTest {
     @Rule
     public TemporaryMongoRule mongoRule = new TemporaryMongoRule();
@@ -59,20 +66,23 @@ public class AnnotationMetadataStepTest {
     private JobLauncherTestUtils jobLauncherTestUtils;
 
     @Autowired
-    private MongoOperations mongoOperations;
+    private MongoConnection mongoConnection;
+
+    @Autowired
+    private MongoMappingContext mongoMappingContext;
 
     @Test
-    public void shouldLoadAllAnnotations() throws Exception {
+    public void shouldWriteVersions() throws Exception {
         String databaseName = mongoRule.getRandomTemporaryDatabaseName();
         String collectionAnnotationMetadataName = "annotationMetadata";
         String vepCacheVersion = "87";
-        String vepPath = "path/to/87/vep.pl";
+        String vepVersion = "88";
 
         JobParameters jobParameters = new EvaJobParameterBuilder()
                 .collectionAnnotationMetadataName(collectionAnnotationMetadataName)
                 .databaseName(databaseName)
                 .vepCacheVersion(vepCacheVersion)
-                .vepPath(vepPath)
+                .vepVersion(vepVersion)
                 .toJobParameters();
 
         JobExecution jobExecution = jobLauncherTestUtils.launchStep(BeanNames.ANNOTATION_METADATA_STEP, jobParameters);
@@ -80,13 +90,24 @@ public class AnnotationMetadataStepTest {
         assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
         assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());
 
-        //check that documents have the annotation
+        //check that the document was written in mongo
+        MongoOperations mongoOperations = MongoConfiguration.getMongoOperations(databaseName, mongoConnection,
+                mongoMappingContext);
         List<AnnotationMetadata> annotationMetadatas = mongoOperations.findAll(AnnotationMetadata.class);
 
         assertEquals(1, annotationMetadatas.size());
         assertEquals(vepCacheVersion, annotationMetadatas.get(0).getCacheVersion());
-        assertEquals(vepPath, annotationMetadatas.get(0).getVepVersion());
+        assertEquals(vepVersion, annotationMetadatas.get(0).getVepVersion());
+    }
+
+    @Test
+    public void shouldNotAddRedundantVersions() throws Exception {
 
     }
 
+    @Test
+    public void shouldKeepOtherVersions() throws Exception {
+        
+
+    }
 }
