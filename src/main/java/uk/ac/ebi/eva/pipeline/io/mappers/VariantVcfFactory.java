@@ -64,8 +64,8 @@ public class VariantVcfFactory {
             throw new IllegalArgumentException("Not enough fields provided (min 8)");
         }
 
-        String chromosome = removeChrPrefix(fields[0]);
-        int position = Integer.parseInt(fields[1]);
+        String chromosome = getChromosomeWithoutPrefix(fields);
+        int position = getPosition(fields);
         Set<String> ids = getIds(fields);
         String reference = getReference(fields);
         String[] alternateAlleles = getAlternateAlleles(fields, chromosome, position, reference);
@@ -108,7 +108,8 @@ public class VariantVcfFactory {
      * Replace "chr" references only at the beginning of the chromosome name.
      * For instance, tomato has SL2.40ch00 and that should be kept that way
      */
-    private String removeChrPrefix(String chromosome) {
+    private String getChromosomeWithoutPrefix(String[] fields) {
+        String chromosome = fields[0];
         boolean ignoreCase = true;
         int startOffset = 0;
         String prefixToRemove = "chr";
@@ -116,6 +117,18 @@ public class VariantVcfFactory {
             return chromosome.substring(prefixToRemove.length());
         }
         return chromosome;
+    }
+
+    private int getPosition(String[] fields) {
+        return Integer.parseInt(fields[1]);
+    }
+
+    private Set<String> getIds(String[] fields) {
+        Set<String> ids = new HashSet<>();
+        if (!fields[2].equals(".")) {    // note!: we store a "." as an empty set, not a set with an empty string
+            ids.addAll(Arrays.asList(fields[2].split(";")));
+        }
+        return ids;
     }
 
     private String getReference(String[] fields) {
@@ -131,28 +144,20 @@ public class VariantVcfFactory {
         return fields[4].split(",");
     }
 
-    private String getFormat(String[] fields) {
-        return (fields.length <= 8 || fields[8].equals(".")) ? "" : fields[8];
-    }
-
-    private String getInfo(String[] fields) {
-        return fields[7].equals(".") ? "" : fields[7];
+    private float getQuality(String[] fields) {
+        return fields[5].equals(".") ? -1 : Float.parseFloat(fields[5]);
     }
 
     private String getFilter(String[] fields) {
         return fields[6].equals(".") ? "" : fields[6];
     }
 
-    private float getQuality(String[] fields) {
-        return fields[5].equals(".") ? -1 : Float.parseFloat(fields[5]);
+    private String getInfo(String[] fields) {
+        return fields[7].equals(".") ? "" : fields[7];
     }
 
-    private Set<String> getIds(String[] fields) {
-        Set<String> ids = new HashSet<>();
-        if (!fields[2].equals(".")) {    // note!: we store a "." as an empty set, not a set with an empty string
-            ids.addAll(Arrays.asList(fields[2].split(";")));
-        }
-        return ids;
+    private String getFormat(String[] fields) {
+        return (fields.length <= 8 || fields[8].equals(".")) ? "" : fields[8];
     }
 
     private List<VariantKeyFields> buildVariantKeyFields(String chromosome, int position, String reference,
