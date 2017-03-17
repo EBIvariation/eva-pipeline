@@ -36,6 +36,8 @@ import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import static java.lang.Math.max;
+
 /**
  * Class that parses VCF lines to create Variants.
  */
@@ -62,65 +64,27 @@ public class VariantVcfFactory {
             throw new IllegalArgumentException("Not enough fields provided (min 8)");
         }
 
+        String chromosome = getChromosomeWithoutPrefix(fields);
+        int position = getPosition(fields);
+        Set<String> ids = getIds(fields);
+        String reference = getReference(fields);
+        String[] alternateAlleles = getAlternateAlleles(fields, chromosome, position, reference);
+        float quality = getQuality(fields);
+        String filter = getFilter(fields);
+        String info = getInfo(fields);
+        String format = getFormat(fields);
+
+        List<VariantKeyFields> generatedKeyFields = buildVariantKeyFields(chromosome, position, reference,
+                alternateAlleles);
+
         List<Variant> variants = new LinkedList<>();
-
-        String chromosome = fields[0];
-        int position = Integer.parseInt(fields[1]);
-
-        Set<String> ids = new HashSet<>();
-        if (!fields[2].equals(".")) {    // note!: we store a "." as an empty set, not a set with an empty string
-            ids.addAll(Arrays.asList(fields[2].split(";")));
-        }
-
-        String reference = fields[3].equals(".") ? "" : fields[3];
-        String alternate = fields[4];
-        if (fields[4].equals(".")) {
-            throw new NotAVariantException(
-                    "Alternative allele is a '.'. This is not an actual variant but a reference position. Variant found as: "
-                            + chromosome + ":" + position + ":" + reference + ">" + alternate);
-        }
-//        String alternate = fields[4].equals(".") ? "" : fields[4];
-        String[] alternateAlleles = alternate.split(",");
-        float quality = fields[5].equals(".") ? -1 : Float.parseFloat(fields[5]);
-        String filter = fields[6].equals(".") ? "" : fields[6];
-        String info = fields[7].equals(".") ? "" : fields[7];
-        String format = (fields.length <= 8 || fields[8].equals(".")) ? "" : fields[8];
-
-        List<VariantKeyFields> generatedKeyFields = new ArrayList<>();
-
-        for (int i = 0; i < alternateAlleles.length; i++) { // This index is necessary for getting the samples where the mutated allele is present
-            String alt = alternateAlleles[i];
-            VariantKeyFields keyFields;
-            int referenceLen = reference.length();
-            int alternateLen = alt.length();
-
-            if (referenceLen == alternateLen) {
-                keyFields = createVariantsFromSameLengthRefAlt(position, reference, alt);
-            } else if (referenceLen == 0) {
-                keyFields = createVariantsFromInsertionEmptyRef(position, alt);
-            } else if (alternateLen == 0) {
-                keyFields = createVariantsFromDeletionEmptyAlt(position, reference);
-            } else {
-                keyFields = createVariantsFromIndelNoEmptyRefAlt(position, reference, alt);
-            }
-
-            keyFields.setNumAllele(i);
-
-            // Since the reference and alternate alleles won't necessarily match
-            // the ones read from the VCF file but they are still needed for
-            // instantiating the variants, they must be updated
-            alternateAlleles[i] = keyFields.alternate;
-            generatedKeyFields.add(keyFields);
-        }
-
         // Now create all the Variant objects read from the VCF record
         for (int altAlleleIdx = 0; altAlleleIdx < alternateAlleles.length; altAlleleIdx++) {
             VariantKeyFields keyFields = generatedKeyFields.get(altAlleleIdx);
             Variant variant = new Variant(chromosome, keyFields.start, keyFields.end, keyFields.reference,
                                           keyFields.alternate);
-            String[] secondaryAlternates = getSecondaryAlternates(variant, keyFields.getNumAllele(), alternateAlleles);
-            VariantSourceEntry file = new VariantSourceEntry(fileId, studyId,
-                                                             secondaryAlternates, format);
+            String[] secondaryAlternates = getSecondaryAlternates(keyFields.getNumAllele(), alternateAlleles);
+            VariantSourceEntry file = new VariantSourceEntry(fileId, studyId, secondaryAlternates, format);
             variant.addSourceEntry(file);
 
             try {
@@ -141,98 +105,120 @@ public class VariantVcfFactory {
     }
 
     /**
-     * Calculates the start, end, reference and alternate of a SNV/MNV where the
-     * reference and the alternate are not empty.
-     * <p>
-     * This task comprises 2 steps: removing the trailing bases that are
-     * identical in both alleles, then the leading identical bases.
-     *
-     * @param position Input starting position
-     * @param reference Input reference allele
-     * @param alt Input alternate allele
-     * @return The new start, end, reference and alternate alleles
+     * Replace "chr" references only at the beginning of the chromosome name.
+     * For instance, tomato has SL2.40ch00 and that should be kept that way
      */
-    protected VariantKeyFields createVariantsFromSameLengthRefAlt(int position, String reference, String alt) {
-        int indexOfDifference;
-        // Remove the trailing bases
-        String refReversed = StringUtils.reverse(reference);
-        String altReversed = StringUtils.reverse(alt);
-        indexOfDifference = StringUtils.indexOfDifference(refReversed, altReversed);
-
-        reference = StringUtils.reverse(refReversed.substring(indexOfDifference));
-        alt = StringUtils.reverse(altReversed.substring(indexOfDifference));
-
-        // Remove the leading bases
-        indexOfDifference = StringUtils.indexOfDifference(reference, alt);
-        if (indexOfDifference < 0) {
-            return null;
-        } else {
-            int start = position + indexOfDifference;
-            int end = position + reference.length() - 1;
-            String ref = reference.substring(indexOfDifference);
-            String inAlt = alt.substring(indexOfDifference);
-            return new VariantKeyFields(start, end, ref, inAlt);
+    private String getChromosomeWithoutPrefix(String[] fields) {
+        String chromosome = fields[0];
+        boolean ignoreCase = true;
+        int startOffset = 0;
+        String prefixToRemove = "chr";
+        if (chromosome.regionMatches(ignoreCase, startOffset, prefixToRemove, startOffset, prefixToRemove.length())) {
+            return chromosome.substring(prefixToRemove.length());
         }
+        return chromosome;
     }
 
-    protected VariantKeyFields createVariantsFromInsertionEmptyRef(int position, String alt) {
-        return new VariantKeyFields(position, position + alt.length() - 1, "", alt);
+    private int getPosition(String[] fields) {
+        return Integer.parseInt(fields[1]);
     }
 
-    protected VariantKeyFields createVariantsFromDeletionEmptyAlt(int position, String reference) {
-        return new VariantKeyFields(position, position + reference.length() - 1, reference, "");
+    private Set<String> getIds(String[] fields) {
+        Set<String> ids = new HashSet<>();
+        if (!fields[2].equals(".")) {    // note!: we store a "." as an empty set, not a set with an empty string
+            ids.addAll(Arrays.asList(fields[2].split(";")));
+        }
+        return ids;
+    }
+
+    private String getReference(String[] fields) {
+        return fields[3].equals(".") ? "" : fields[3];
+    }
+
+    private String[] getAlternateAlleles(String[] fields, String chromosome, int position, String reference) {
+        if (fields[4].equals(".")) {
+            throw new NotAVariantException(
+                    "Alternative allele is a '.'. This is not an actual variant but a reference position. " +
+                            "Variant found as: " + chromosome + ":" + position + ":" + reference + ">" + fields[4]);
+        }
+        return fields[4].split(",");
+    }
+
+    private float getQuality(String[] fields) {
+        return fields[5].equals(".") ? -1 : Float.parseFloat(fields[5]);
+    }
+
+    private String getFilter(String[] fields) {
+        return fields[6].equals(".") ? "" : fields[6];
+    }
+
+    private String getInfo(String[] fields) {
+        return fields[7].equals(".") ? "" : fields[7];
+    }
+
+    private String getFormat(String[] fields) {
+        return (fields.length <= 8 || fields[8].equals(".")) ? "" : fields[8];
+    }
+
+    private List<VariantKeyFields> buildVariantKeyFields(String chromosome, int position, String reference,
+            String[] alternateAlleles) {
+        List<VariantKeyFields> generatedKeyFields = new ArrayList<>();
+
+        for (int i = 0; i < alternateAlleles.length; i++) { // This index is necessary for getting the samples where the mutated allele is present
+            VariantKeyFields keyFields = normalizeLeftAlign(chromosome, position, reference, alternateAlleles[i]);
+            keyFields.setNumAllele(i);
+
+            // Since the reference and alternate alleles won't necessarily match
+            // the ones read from the VCF file but they are still needed for
+            // instantiating the variants, they must be updated
+            alternateAlleles[i] = keyFields.alternate;
+            generatedKeyFields.add(keyFields);
+        }
+        return generatedKeyFields;
     }
 
     /**
-     * Calculates the start, end, reference and alternate of an indel where the
-     * reference and the alternate are not empty.
+     * Calculates the normalized start, end, reference and alternate of a variant where the
+     * reference and the alternate are not identical.
      * <p>
      * This task comprises 2 steps: removing the trailing bases that are
      * identical in both alleles, then the leading identical bases.
-     *
+     * <p>
+     * It is left aligned because the traling bases are removed before the leading ones, implying a normalization where
+     * the position is moved the least possible from its original location.
+     * @param chromosome needed for error reporting and logging
      * @param position Input starting position
      * @param reference Input reference allele
-     * @param alt Input alternate allele
-     * @return The new start, end, reference and alternate alleles
+     * @param alternate Input alternate allele
+     * @return The new start, end, reference and alternate alleles wrapped in a VariantKeyFields
      */
-    protected VariantKeyFields createVariantsFromIndelNoEmptyRefAlt(int position, String reference, String alt) {
-        int indexOfDifference;
+    protected VariantKeyFields normalizeLeftAlign(String chromosome, int position, String reference, String alternate)
+            throws NotAVariantException {
+        if (reference.equals(alternate)) {
+            throw new NotAVariantException("One alternate allele is identical to the reference. Variant found as: "
+                        + chromosome + ":" + position + ":" + reference + ">" + alternate);
+        }
+
         // Remove the trailing bases
         String refReversed = StringUtils.reverse(reference);
-        String altReversed = StringUtils.reverse(alt);
-        indexOfDifference = StringUtils.indexOfDifference(refReversed, altReversed);
-
+        String altReversed = StringUtils.reverse(alternate);
+        int indexOfDifference = StringUtils.indexOfDifference(refReversed, altReversed);
         reference = StringUtils.reverse(refReversed.substring(indexOfDifference));
-        alt = StringUtils.reverse(altReversed.substring(indexOfDifference));
+        alternate = StringUtils.reverse(altReversed.substring(indexOfDifference));
 
         // Remove the leading bases
-        indexOfDifference = StringUtils.indexOfDifference(reference, alt);
-        if (indexOfDifference < 0) {
-            return null;
-        } else if (indexOfDifference == 0) {
-            if (reference.length() > alt.length()) { // Deletion
-                return new VariantKeyFields(position, position + reference.length() - 1, reference, alt);
-            } else { // Insertion
-                return new VariantKeyFields(position, position + alt.length() - 1, reference, alt);
-            }
-        } else {
-            if (reference.length() > alt.length()) { // Deletion
-                int start = position + indexOfDifference;
-                int end = position + reference.length() - 1;
-                String ref = reference.substring(indexOfDifference);
-                String inAlt = alt.substring(indexOfDifference);
-                return new VariantKeyFields(start, end, ref, inAlt);
-            } else { // Insertion
-                int start = position + indexOfDifference;
-                int end = position + alt.length() - 1;
-                String ref = reference.substring(indexOfDifference);
-                String inAlt = alt.substring(indexOfDifference);
-                return new VariantKeyFields(start, end, ref, inAlt);
-            }
+        indexOfDifference = StringUtils.indexOfDifference(reference, alternate);
+        int start = position + indexOfDifference;
+        int length = max(reference.length(), alternate.length());
+        int end = position + length - 1;    // -1 because end is inclusive
+        if (indexOfDifference > 0) {
+            reference = reference.substring(indexOfDifference);
+            alternate = alternate.substring(indexOfDifference);
         }
+        return new VariantKeyFields(start, end, reference, alternate);
     }
 
-    protected String[] getSecondaryAlternates(Variant variant, int numAllele, String[] alternateAlleles) {
+    protected String[] getSecondaryAlternates(int numAllele, String[] alternateAlleles) {
         String[] secondaryAlternates = new String[alternateAlleles.length - 1];
         for (int i = 0, j = 0; i < alternateAlleles.length; i++) {
             if (i != numAllele) {

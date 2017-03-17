@@ -136,6 +136,7 @@ public class Variant {
         this.length = Math.max(this.reference.length(), this.alternate.length());
         this.resetType();
 
+        this.ids = new HashSet<>();
         this.hgvs = new HashMap<>();
         if (this.type == VariantType.SNV) { // Generate HGVS code only for SNVs
             Set<String> hgvsCodes = new HashSet<>();
@@ -183,14 +184,6 @@ public class Variant {
     public final void setChromosome(String chromosome) {
         if (chromosome == null || chromosome.length() == 0) {
             throw new IllegalArgumentException("Chromosome must not be empty");
-        }
-        // Replace "chr" references only at the beginning of the chromosome name
-        // For instance, tomato has SL2.40ch00 and that should be kept that way
-        if (chromosome.startsWith("chrom") || chromosome.startsWith("chrm")
-                || chromosome.startsWith("chr") || chromosome.startsWith("ch")) {
-            this.chromosome = chromosome.replaceFirst("chrom|chrm|chr|ch", "");
-        } else {
-            this.chromosome = chromosome;
         }
     }
 
