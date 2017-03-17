@@ -15,9 +15,6 @@
  */
 package uk.ac.ebi.eva.pipeline.jobs.steps;
 
-import com.mongodb.DBCollection;
-import com.mongodb.DBCursor;
-import com.mongodb.DBObject;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -74,10 +71,23 @@ public class AnnotationMetadataStepTest {
     @Test
     public void shouldWriteVersions() throws Exception {
         String databaseName = mongoRule.getRandomTemporaryDatabaseName();
-        String collectionAnnotationMetadataName = "annotationMetadata";
+        MongoOperations mongoOperations = MongoConfiguration.getMongoOperations(databaseName, mongoConnection,
+                mongoMappingContext);
         String vepCacheVersion = "87";
         String vepVersion = "88";
 
+        assertStepCompletes(databaseName, vepCacheVersion, vepVersion);
+
+        //check that the document was written in mongo
+        List<AnnotationMetadata> annotationMetadatas = mongoOperations.findAll(AnnotationMetadata.class);
+
+        assertEquals(1, annotationMetadatas.size());
+        assertEquals(vepCacheVersion, annotationMetadatas.get(0).getCacheVersion());
+        assertEquals(vepVersion, annotationMetadatas.get(0).getVepVersion());
+    }
+
+    private void assertStepCompletes(String databaseName, String vepCacheVersion, String vepVersion) {
+        String collectionAnnotationMetadataName = "annotationMetadata";
         JobParameters jobParameters = new EvaJobParameterBuilder()
                 .collectionAnnotationMetadataName(collectionAnnotationMetadataName)
                 .databaseName(databaseName)
@@ -89,25 +99,40 @@ public class AnnotationMetadataStepTest {
 
         assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
         assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());
-
-        //check that the document was written in mongo
-        MongoOperations mongoOperations = MongoConfiguration.getMongoOperations(databaseName, mongoConnection,
-                mongoMappingContext);
-        List<AnnotationMetadata> annotationMetadatas = mongoOperations.findAll(AnnotationMetadata.class);
-
-        assertEquals(1, annotationMetadatas.size());
-        assertEquals(vepCacheVersion, annotationMetadatas.get(0).getCacheVersion());
-        assertEquals(vepVersion, annotationMetadatas.get(0).getVepVersion());
     }
 
     @Test
     public void shouldNotAddRedundantVersions() throws Exception {
+        String databaseName = mongoRule.getRandomTemporaryDatabaseName();
+        MongoOperations mongoOperations = MongoConfiguration.getMongoOperations(databaseName, mongoConnection,
+                mongoMappingContext);
+        mongoOperations.save(new AnnotationMetadata("70", "72"));
 
+        String vepCacheVersion = "87";
+        String vepVersion = "88";
+
+        assertStepCompletes(databaseName, vepCacheVersion, vepVersion);
+
+        //check that the document was written in mongo
+        List<AnnotationMetadata> annotationMetadatas = mongoOperations.findAll(AnnotationMetadata.class);
+
+        assertEquals(2, annotationMetadatas.size());
     }
 
     @Test
     public void shouldKeepOtherVersions() throws Exception {
-        
+        String databaseName = mongoRule.getRandomTemporaryDatabaseName();
+        MongoOperations mongoOperations = MongoConfiguration.getMongoOperations(databaseName, mongoConnection,
+                mongoMappingContext);
+        String vepCacheVersion = "87";
+        String vepVersion = "88";
+        mongoOperations.save(new AnnotationMetadata(vepVersion, vepCacheVersion));
 
+        assertStepCompletes(databaseName, vepCacheVersion, vepVersion);
+
+        //check that the document was written in mongo
+        List<AnnotationMetadata> annotationMetadatas = mongoOperations.findAll(AnnotationMetadata.class);
+
+        assertEquals(1, annotationMetadatas.size());
     }
 }

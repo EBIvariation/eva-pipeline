@@ -124,7 +124,7 @@ public class JobParametersNames {
 
     public static final String APP_VEP_PATH = "app.vep.path";
 
-    public static final String APP_VEP_VERSION = "APP_VEP_VERSION";
+    public static final String APP_VEP_VERSION = "app.vep.version";
 
     public static final String APP_VEP_CACHE_PATH = "app.vep.cache.path";
 
