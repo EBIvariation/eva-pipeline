@@ -15,15 +15,16 @@
  */
 package uk.ac.ebi.eva.pipeline.jobs.steps.processor;
 
-import com.mongodb.DBObject;
 import org.junit.Test;
-import org.springframework.batch.item.ItemProcessor;
+
+import uk.ac.ebi.eva.commons.models.data.Variant;
+import uk.ac.ebi.eva.commons.models.data.VariantAnnotation;
 import uk.ac.ebi.eva.pipeline.jobs.steps.processors.AnnotationProcessor;
 import uk.ac.ebi.eva.pipeline.model.VariantWrapper;
-import uk.ac.ebi.eva.test.data.VariantData;
+
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
-import static uk.ac.ebi.eva.test.rules.TemporaryMongoRule.constructDbObject;
 
 /**
  * {@link AnnotationProcessor}
@@ -34,15 +35,18 @@ public class AnnotationProcessorTest {
 
     @Test
     public void shouldConvertAllFieldsInVariant() throws Exception {
-        DBObject dbo = constructDbObject(VariantData.getVariantWithoutAnnotation());
+        Variant variant = new Variant("1", 100, 100, "A", "T");
+        VariantWrapper variantWrapper = new VariantWrapper(variant);
+        AnnotationProcessor processor = new AnnotationProcessor(600);
+        List<VariantAnnotation> variantAnnotations = processor.process(variantWrapper);
 
-        ItemProcessor<DBObject, VariantWrapper> processor = new AnnotationProcessor();
-        VariantWrapper variant = processor.process(dbo);
-        assertEquals("+", variant.getStrand());
-        assertEquals("20", variant.getChr());
-        assertEquals("G/A", variant.getRefAlt());
-        assertEquals(60343, variant.getEnd());
-        assertEquals(60343, variant.getStart());
+        assertEquals(1, variantAnnotations.size());
+        VariantAnnotation variantAnnotation = variantAnnotations.get(0);
+        assertEquals(variantAnnotation.getChromosome(), variant.getChromosome());
+        assertEquals(variantAnnotation.getStart(), variant.getStart());
+        assertEquals(variantAnnotation.getEnd(), variant.getEnd());
+        assertEquals(variantAnnotation.getReferenceAllele(), variant.getReference());
+        assertEquals(variantAnnotation.getAlternativeAllele(), variant.getAlternate());
     }
 
 }
