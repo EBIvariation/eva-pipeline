@@ -15,6 +15,9 @@
  */
 package uk.ac.ebi.eva.pipeline.parameters;
 
-public class InternalParametersNames {
+/**
+ * Class that holds the names (keys) of the parameters used into {@link org.springframework.batch.item.ExecutionContext}
+ */
+public class ExecutionContextParametersNames {
     public static final String NUMBER_OF_LINES = "line";
 }

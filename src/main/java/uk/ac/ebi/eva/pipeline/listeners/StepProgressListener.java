@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.ChunkListener;
 import org.springframework.batch.core.scope.context.ChunkContext;
 
-import uk.ac.ebi.eva.pipeline.parameters.InternalParametersNames;
+import uk.ac.ebi.eva.pipeline.parameters.ExecutionContextParametersNames;
 
 /**
  * Log the number of read, write and skip items for each chunk.
@@ -37,7 +37,7 @@ public class StepProgressListener implements ChunkListener {
     public void afterChunk(ChunkContext context) {
 
         long estimatedTotalNumberOfLines = (long)context.getStepContext().getStepExecutionContext()
-                .get(InternalParametersNames.NUMBER_OF_LINES);
+                .get(ExecutionContextParametersNames.NUMBER_OF_LINES);
 
         long read = context.getStepContext().getStepExecution().getReadCount();
         long write = context.getStepContext().getStepExecution().getWriteCount();
