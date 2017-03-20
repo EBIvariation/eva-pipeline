@@ -28,19 +28,6 @@ import java.util.zip.GZIPInputStream;
 
 /**
  * Estimate the number of lines in a VCF file.
- * <p>
- * Given that the VCF file could be VERY big then we estimate the number of lines using the following steps:
- * 1) retrieve the size in bytes of the whole zipped VCF (vcfFileSize)
- * 2) retrieve the size in bytes of the head of the VCF in a zipped file (vcfHeadFileSize)
- * 3) retrieve the size in bytes of the first 100 lines of the VCF in a zipped file and divide the value by 100 to
- * obtain the size of a single line (singleVcfLineSize)
- * 4) calculate the (vcfFileSize - vcfHeadFileSize) / singleVcfLineSize to estimate the total number of line in the VCF.
- * <p>
- * Why 100 in point 3?
- * Tested on a VCF with 157049 lines, 100 is the best and minimum number of lines to compress. This should generate an
- * estimated total number of lines similar to the real one.
- * <p>
- * In case of small VCF the NUMBER_OF_LINES will be 0 and no % will be printed in {@link StepProgressListener#afterChunk}
  */
 public class VcfNumberOfLinesEstimator {
     private static final Logger logger = LoggerFactory.getLogger(VcfNumberOfLinesEstimator.class);
@@ -51,15 +38,18 @@ public class VcfNumberOfLinesEstimator {
      * Given that the VCF file could be VERY big then we estimate the number of lines using the following steps:
      * 1) retrieve the size in bytes of the whole zipped VCF (vcfFileSize)
      * 2) retrieve the size in bytes of the head of the VCF in a zipped file (vcfHeadFileSize)
-     * 3) retrieve the size in bytes of the first 100 lines in the body of the VCF in a zipped file and divide the
-     * value by 100 to obtain the size of a single line (singleVcfLineSize)
+     * 3) retrieve the size in bytes of the first 100 lines of the VCF in a zipped file and divide the value by 100 to
+     * obtain the size of a single line (singleVcfLineSize)
      * 4) calculate the (vcfFileSize - vcfHeadFileSize) / singleVcfLineSize to estimate the total number of line in the VCF.
-     *
+     * <p>
      * Why 100 in point 3?
      * Tested on a VCF with 157049 lines, 100 is the best and minimum number of lines to compress. This should generate an
      * estimated total number of lines similar to the real one.
      * <p>
      * In case of small VCF the NUMBER_OF_LINES will be 0 and no % will be printed in {@link StepProgressListener#afterChunk}
+     *
+     * @param vcfFilePath location of the VCF file
+     * @return the approximated number of lines in the VCF file
      */
     public long estimateVcfNumberOfLines(String vcfFilePath) {
         logger.debug("Estimating the number of lines in the VCF file {}", vcfFilePath);
