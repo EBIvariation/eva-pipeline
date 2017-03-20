@@ -15,7 +15,8 @@
  */
 package uk.ac.ebi.eva.pipeline.model;
 
-import org.opencb.biodata.models.variant.Variant;
+
+import uk.ac.ebi.eva.commons.models.data.Variant;
 
 /**
  * Container for {@link Variant} including strand. By default strand in VCF is always '+'

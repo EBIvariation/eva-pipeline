@@ -56,7 +56,6 @@ public class AnnotationLineMapper implements LineMapper<VariantAnnotation> {
      * @param line in VEP output
      * @param lineNumber
      * @return a {@link VariantAnnotation}
-     * @throws Exception
      *
      * Most of the code is from org.opencb.biodata.formats.annotation.io.VepFormatReader#read() with few differences:
      *  - An empty array is initialized for Hgvs (like ConsequenceTypes);
