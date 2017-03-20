@@ -86,7 +86,7 @@ public class VariantMongoWriter extends MongoItemWriter<Variant> {
 
     private void executeBulk(BulkWriteOperation bulk, int currentBulkSize) {
         if (currentBulkSize != 0) {
-            logger.debug("Execute bulk. BulkSize : " + currentBulkSize);
+            logger.trace("Execute bulk. BulkSize : " + currentBulkSize);
             bulk.execute();
         }
     }
