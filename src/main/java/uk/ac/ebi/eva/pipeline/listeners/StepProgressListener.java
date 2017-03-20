@@ -49,7 +49,7 @@ public class StepProgressListener implements ChunkListener {
 
         if (estimatedTotalNumberOfLines != 0) {
             int percent = (int) ((read * 100) / estimatedTotalNumberOfLines);
-            logger.info(percent + "% complete" + chunkStatisticsMessage);
+            logger.info(percent + "% complete: " + chunkStatisticsMessage);
         } else {
             logger.info(chunkStatisticsMessage);
         }
