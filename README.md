@@ -36,11 +36,11 @@ If a MongoDB instance is available in the machine where you are running the buil
 
 ## Run
 
-Arguments to run the pipeline can be provided either using the command line or a properties file. Skeletons to load genotyped and aggregated VCF files are provided in the `examples` folder.
+Arguments to run the pipeline can be provided either using the command line or property files. The `examples` folder contains skeletons for configuring the environment and executing jobs to load genotyped and aggregated VCF files and to drop studies from the database.
 
 `application.properties` is used to configure database connections and applications the pipeline depends on (OpenCGA and Ensembl VEP, see _Dependencies_ section).
 
-`load-genotyped-vcf.properties`, `load-aggregated-vcf.properties` and `initialize-database.properties` are job-specific configurations.
+`load-genotyped-vcf.properties`, `load-aggregated-vcf.properties` , `drop-study-job.properties` and `initialize-database.properties` are job-specific configurations.
 
 If more convenient for your use case, the global configuration and job parameters files can be merged into one.
 
@@ -51,16 +51,16 @@ It is likely that you will need to edit some parameters to match your environmen
 By using these properties files, a job can be launched with a single command like:
 
     java -jar target/eva-pipeline-2.0-beta2-SNAPSHOT.jar \
-        --spring.config.location=file:examples/application.properties,file:examples/load-genotyped-vcf.properties
+        --spring.config.location=file:examples/application.properties --parameters.path=file:examples/load-genotyped-vcf.properties
 
 The contents from the configuration files can be also provided directly as command-line arguments, like the following:
 
     java -jar target/eva-pipeline-2.0-beta2-SNAPSHOT.jar \
         --spring.batch.job.names=load-genotyped-vcf \
-        input.vcf=/path/to/file.vcf \
-        input.study.name=My sample study \
+        --input.vcf=/path/to/file.vcf \
+        --input.study.name=My sample study \
         ...
-        app.vep.path=/path/to/variant-effect-predictor.pl
+        --app.vep.path=/path/to/variant-effect-predictor.pl
 
 ## Parameter reference
 
@@ -68,8 +68,6 @@ The contents from the configuration files can be also provided directly as comma
 
 * `spring.profiles.active`: "production" to keep track of half-executed jobs using a job repository database, "test" to use an in-memory database that will record a single run
 * `app.opencga.path`: Path to the OpenCGA installation folder. An `ls` in that path should show the conf, analysis, bin and libs folders.
-* `app.vep.path`: Path to the VEP installation folder.
-* `app.vep.num-forks`: Number of processes to run VEP in parallel (recommended 4).
 
 If using a persistent (not in-memory database), the following information needs to be filled in:
 
@@ -88,7 +86,7 @@ Other parameters are:
 
 ### General job tuning
 
-* `--spring.batch.job.names`: The name of the job to run. At the moment it can be `load-genotyped-vcf`, `load-aggregated-vcf`, `annotate-variants` or `calculate-statistics`
+* `--spring.batch.job.names`: The name of the job to run. At the moment it can be `genotyped-vcf-job`, `aggregated-vcf-job`, `annotate-variants-job`, `calculate-statistics-job` or `drop-study-job`
 
 Individual steps can be skipped using one of the following. This is not necessary unless they are irrelevant for the data to be processed, or some input data was generated in previous runs of the same job.
 
@@ -97,8 +95,7 @@ Individual steps can be skipped using one of the following. This is not necessar
 
 Other parameters are:
 
-* `config.restartability.allow`: When set to `true`, it allows to restart a a job, even if partially run previously.
-
+* `force.restart`: When included as command line parameter allows to restart a a job. This will also mark the last execution not finished of the same job / parameters as cancelled in the job database.
 
 ### Job run tuning
 
@@ -120,3 +117,5 @@ Other parameters are:
 * `app.vep.cache.path`: Path to the VEP cache root folder.
 * `app.vep.version`: Version of the VEP cache.
 * `app.vep.species`: Name of the species as stored in the cache folder.
+* `app.vep.path`: Path to the VEP installation folder.
+* `app.vep.num-forks`: Number of processes to run VEP in parallel (recommended 4).
