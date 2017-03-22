@@ -69,13 +69,34 @@ public class VepAnnotationFileWriterTest {
 
     @Test
     public void testMockVep() throws Exception {
-        int chunkSize = 10;
-        VepAnnotationFileWriter vepAnnotationFileWriter = new VepAnnotationFileWriter(TIMEOUT_IN_SECONDS, chunkSize,
-                annotationParameters);
         DBObjectToVariantConverter converter = new DBObjectToVariantConverter();
         VariantWrapper variantWrapper = new VariantWrapper(
                 converter.convertToDataModelType(constructDbObject(VariantData.getVariantWithAnnotation())));
         List<VariantWrapper> variantWrappers = Collections.singletonList(variantWrapper);
+        int chunkSize = variantWrappers.size();
+
+        VepAnnotationFileWriter vepAnnotationFileWriter = new VepAnnotationFileWriter(TIMEOUT_IN_SECONDS, chunkSize,
+                annotationParameters);
+
+        vepAnnotationFileWriter.open(null);
+        vepAnnotationFileWriter.write(variantWrappers);
+        vepAnnotationFileWriter.close();
+
+        File vepOutputFile = new File(annotationParameters.getVepOutput());
+        assertTrue(vepOutputFile.exists());
+        assertEquals(variantWrappers.size() + EXTRA_ANNOTATIONS, getLines(new FileInputStream(vepOutputFile)));
+    }
+
+    @Test
+    public void testVepWriterWritesLastSmallerChunk() throws Exception {
+        DBObjectToVariantConverter converter = new DBObjectToVariantConverter();
+        VariantWrapper variantWrapper = new VariantWrapper(
+                converter.convertToDataModelType(constructDbObject(VariantData.getVariantWithAnnotation())));
+        List<VariantWrapper> variantWrappers = Collections.singletonList(variantWrapper);
+        int chunkSizeGreaterThanActualVariants = variantWrappers.size() * 10;
+
+        VepAnnotationFileWriter vepAnnotationFileWriter = new VepAnnotationFileWriter(TIMEOUT_IN_SECONDS,
+                chunkSizeGreaterThanActualVariants, annotationParameters);
 
         vepAnnotationFileWriter.open(null);
         vepAnnotationFileWriter.write(variantWrappers);

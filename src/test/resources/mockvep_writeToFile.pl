@@ -1,14 +1,36 @@
 use warnings;
 use strict;
+use IO::File;
 
 use Getopt::Long;
 my $file = "/tmp/default_mockvep_writeTofile.txt";
-my $result = GetOptions ("o=s" => \$file); # -o string
+my $batchSize = 2;
+my $result = GetOptions (
+        "o=s" => \$file, # -o string
+        "b=i" => \$batchSize # -b integer
+        );
 
-open (MYFILE, ">> $file");
-foreach my $line ( <STDIN> ) {
+my @buffer = ();
+my $fileHandle = new IO::File;
+$fileHandle->open(">> $file");
+
+my $line;
+while ($line = <STDIN>) {
     chomp ($line);
-    print MYFILE "$line annotated\n";
+    push (@buffer, "$line annotated\n");
+    my $bufferSize = scalar (@buffer);
+    if ($bufferSize == $batchSize) {
+        foreach my $bufferLine (@buffer) {
+            print $fileHandle $bufferLine;
+        }
+        @buffer = ();
+        $fileHandle->flush();
+    }
 }
-print MYFILE "extra line as if some variant had two annotations\n";
-close (MYFILE);
+
+foreach my $bufferLine (@buffer) {
+    print $fileHandle $bufferLine;
+}
+
+print $fileHandle "extra line as if some variant had two annotations\n";
+$fileHandle->close();
