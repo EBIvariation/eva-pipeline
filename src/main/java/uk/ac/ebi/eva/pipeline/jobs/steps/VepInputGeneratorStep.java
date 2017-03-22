@@ -80,8 +80,7 @@ public class VepInputGeneratorStep {
         return stepBuilderFactory.get(GENERATE_VEP_INPUT_STEP)
                 .<DBObject, VariantWrapper>chunk(chunkSizeCompletionPolicy)
                 .reader(reader)
-//                .processor(new AnnotationProcessor(600))
-//                .processor()
+                .processor(new AnnotationProcessor())
                 .writer(writer)
                 .allowStartIfComplete(jobOptions.isAllowStartIfComplete())
                 .build();
