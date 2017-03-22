@@ -19,10 +19,12 @@ package uk.ac.ebi.eva.pipeline.io.writers;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.opencb.biodata.models.variant.Variant;
+import org.opencb.opencga.storage.mongodb.variant.DBObjectToVariantConverter;
 
-import uk.ac.ebi.eva.commons.models.data.Variant;
 import uk.ac.ebi.eva.pipeline.model.VariantWrapper;
 import uk.ac.ebi.eva.pipeline.parameters.AnnotationParameters;
+import uk.ac.ebi.eva.test.data.VariantData;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 
 import java.io.File;
@@ -32,6 +34,7 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static uk.ac.ebi.eva.test.rules.TemporaryMongoRule.constructDbObject;
 import static uk.ac.ebi.eva.test.utils.JobTestUtils.getLines;
 import static uk.ac.ebi.eva.utils.FileUtils.getResource;
 
@@ -69,8 +72,10 @@ public class VepAnnotationFileWriterTest {
         int chunkSize = 10;
         VepAnnotationFileWriter vepAnnotationFileWriter = new VepAnnotationFileWriter(TIMEOUT_IN_SECONDS, chunkSize,
                 annotationParameters);
-        Variant variant = new Variant("20", 100, 105, "A", "T");
-        List<VariantWrapper> variantWrappers = Collections.singletonList(new VariantWrapper(variant));
+        DBObjectToVariantConverter converter = new DBObjectToVariantConverter();
+        VariantWrapper variantWrapper = new VariantWrapper(
+                converter.convertToDataModelType(constructDbObject(VariantData.getVariantWithAnnotation())));
+        List<VariantWrapper> variantWrappers = Collections.singletonList(variantWrapper);
 
         vepAnnotationFileWriter.open(null);
         vepAnnotationFileWriter.write(variantWrappers);

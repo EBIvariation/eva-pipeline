@@ -48,13 +48,13 @@ public class VepInputFlatFileWriterTest {
         ExecutionContext executionContext = MetaDataInstanceFactory.createStepExecution().getExecutionContext();
 
         DBObjectToVariantConverter converter = new DBObjectToVariantConverter();
-//        VariantWrapper variant = new VariantWrapper(converter.convertToDataModelType(constructDbObject(VariantData
-//                .getVariantWithAnnotation())));
+        VariantWrapper variant = new VariantWrapper(converter.convertToDataModelType(constructDbObject(VariantData
+                .getVariantWithAnnotation())));
 
         File tempFile = temporaryFolderRule.newFile();
         VepInputFlatFileWriter writer = new VepInputFlatFileWriter(tempFile);
         writer.open(executionContext);
-//        writer.write(Collections.singletonList(variant));
+        writer.write(Collections.singletonList(variant));
         assertEquals("20\t60344\t60348\tG/A\t+", readFirstLine(tempFile));
         writer.close();
     }
