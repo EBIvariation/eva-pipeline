@@ -15,12 +15,12 @@
  */
 package uk.ac.ebi.eva.pipeline.jobs.steps;
 
-import com.mongodb.DBObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
+import org.springframework.batch.item.ItemStreamReader;
 import org.springframework.batch.item.ItemStreamWriter;
 import org.springframework.batch.repeat.policy.SimpleCompletionPolicy;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,12 +28,11 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+
 import uk.ac.ebi.eva.pipeline.configuration.ChunkSizeCompletionPolicyConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.readers.NonAnnotatedVariantsMongoReaderConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.writers.VepInputFlatFileWriterConfiguration;
-import uk.ac.ebi.eva.pipeline.io.readers.NonAnnotatedVariantsMongoReader;
 import uk.ac.ebi.eva.pipeline.io.writers.VepInputFlatFileWriter;
-import uk.ac.ebi.eva.pipeline.jobs.steps.processors.AnnotationProcessor;
 import uk.ac.ebi.eva.pipeline.model.VariantWrapper;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 
@@ -66,7 +65,7 @@ public class VepInputGeneratorStep {
 
     @Autowired
     @Qualifier(NON_ANNOTATED_VARIANTS_READER)
-    private NonAnnotatedVariantsMongoReader reader;
+    private ItemStreamReader<VariantWrapper> reader;
 
     @Autowired
     @Qualifier(VEP_INPUT_WRITER)
@@ -78,9 +77,8 @@ public class VepInputGeneratorStep {
         logger.debug("Building '" + GENERATE_VEP_INPUT_STEP + "'");
 
         return stepBuilderFactory.get(GENERATE_VEP_INPUT_STEP)
-                .<DBObject, VariantWrapper>chunk(chunkSizeCompletionPolicy)
+                .<VariantWrapper, VariantWrapper>chunk(chunkSizeCompletionPolicy)
                 .reader(reader)
-                .processor(new AnnotationProcessor())
                 .writer(writer)
                 .allowStartIfComplete(jobOptions.isAllowStartIfComplete())
                 .build();
