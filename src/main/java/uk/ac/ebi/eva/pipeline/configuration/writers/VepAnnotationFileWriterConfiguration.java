@@ -19,19 +19,23 @@ import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.item.ItemStreamWriter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import uk.ac.ebi.eva.pipeline.io.writers.VepInputFlatFileWriter;
+
+import uk.ac.ebi.eva.pipeline.io.writers.VepAnnotationFileWriter;
 import uk.ac.ebi.eva.pipeline.model.VariantWrapper;
 import uk.ac.ebi.eva.pipeline.parameters.AnnotationParameters;
+import uk.ac.ebi.eva.pipeline.parameters.ChunkSizeParameters;
 
-import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VEP_INPUT_WRITER;
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VEP_ANNOTATION_WRITER;
 
 @Configuration
-public class VepInputFlatFileWriterConfiguration {
+public class VepAnnotationFileWriterConfiguration {
 
-    @Bean(VEP_INPUT_WRITER)
+    @Bean(VEP_ANNOTATION_WRITER)
     @StepScope
-    public ItemStreamWriter<VariantWrapper> vepInputFlatFileWriter(AnnotationParameters annotationParameters) {
-        return new VepInputFlatFileWriter(annotationParameters.getVepInput());
+    public ItemStreamWriter<VariantWrapper> vepAnnotationFileWriter(AnnotationParameters annotationParameters,
+            ChunkSizeParameters chunkSizeParameters) {
+        long timeoutInSeconds = 600L;   // TODO extract as a pipeline parameter
+        return new VepAnnotationFileWriter(timeoutInSeconds, chunkSizeParameters.getChunkSize(), annotationParameters);
     }
 
 }
