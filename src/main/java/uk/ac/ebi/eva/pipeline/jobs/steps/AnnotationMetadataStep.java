@@ -29,7 +29,7 @@ import uk.ac.ebi.eva.pipeline.jobs.steps.tasklets.AnnotationMetadataTasklet;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 import uk.ac.ebi.eva.utils.TaskletUtils;
 
-import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.ANNOTATION_METADATA_STEP;
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.LOAD_ANNOTATION_METADATA_STEP;
 
 /**
  * Configuration class that inject a step created with the tasklet {@link AnnotationMetadataTasklet}
@@ -46,10 +46,10 @@ public class AnnotationMetadataStep {
         return new AnnotationMetadataTasklet();
     }
 
-    @Bean(ANNOTATION_METADATA_STEP)
+    @Bean(LOAD_ANNOTATION_METADATA_STEP)
     public TaskletStep annotationMetadataStep(StepBuilderFactory stepBuilderFactory, JobOptions jobOptions) {
-        logger.debug("Building '" + ANNOTATION_METADATA_STEP + "'");
-        return TaskletUtils.generateStep(stepBuilderFactory, ANNOTATION_METADATA_STEP, annotationMetadataTasklet(),
+        logger.debug("Building '" + LOAD_ANNOTATION_METADATA_STEP + "'");
+        return TaskletUtils.generateStep(stepBuilderFactory, LOAD_ANNOTATION_METADATA_STEP, annotationMetadataTasklet(),
                 jobOptions.isAllowStartIfComplete());
     }
 

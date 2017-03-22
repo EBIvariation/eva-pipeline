@@ -131,7 +131,7 @@ public class AnnotationJobTest {
         assertEquals(BeanNames.GENERATE_VEP_INPUT_STEP, findVariantsToAnnotateStep.getStepName());
         assertEquals(BeanNames.GENERATE_VEP_ANNOTATION_STEP, generateVepAnnotationsStep.getStepName());
         assertEquals(BeanNames.LOAD_VEP_ANNOTATION_STEP, loadVepAnnotationsStep.getStepName());
-        assertEquals(BeanNames.ANNOTATION_METADATA_STEP, loadAnnotationMetadataStep.getStepName());
+        assertEquals(BeanNames.LOAD_ANNOTATION_METADATA_STEP, loadAnnotationMetadataStep.getStepName());
 
         //check list of variants without annotation output file
         assertTrue(vepInput.exists());

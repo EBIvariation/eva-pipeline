@@ -32,7 +32,7 @@ import uk.ac.ebi.eva.pipeline.jobs.steps.AnnotationMetadataStep;
 import uk.ac.ebi.eva.pipeline.jobs.steps.GenerateVepAnnotationStep;
 import uk.ac.ebi.eva.pipeline.jobs.steps.VepInputGeneratorStep;
 
-import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.ANNOTATION_METADATA_STEP;
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.LOAD_ANNOTATION_METADATA_STEP;
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.GENERATE_VEP_ANNOTATION_STEP;
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.GENERATE_VEP_INPUT_STEP;
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.LOAD_VEP_ANNOTATION_STEP;
@@ -63,7 +63,7 @@ public class AnnotationFlow {
     private Step generateVepAnnotationStep;
 
     @Autowired
-    @Qualifier(ANNOTATION_METADATA_STEP)
+    @Qualifier(LOAD_ANNOTATION_METADATA_STEP)
     private Step annotationMetadataStep;
 
     @Bean(VEP_ANNOTATION_FLOW)

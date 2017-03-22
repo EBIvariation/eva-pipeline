@@ -51,7 +51,7 @@ public class BeanNames {
     public static final String DROP_SINGLE_STUDY_VARIANTS_STEP = "drop-single-study-variants-step";
     public static final String PULL_FILES_AND_STATISTICS_BY_STUDY_STEP = "pull-files-and-statistics-by-study-step";
     public static final String DROP_FILES_BY_STUDY_STEP = "drop-files-by-study-step";
-    public static final String ANNOTATION_METADATA_STEP = "annotation-metadata-step";
+    public static final String LOAD_ANNOTATION_METADATA_STEP = "annotation-metadata-step";
 
     public static final String AGGREGATED_VCF_JOB = "aggregated-vcf-job";
     public static final String ANNOTATE_VARIANTS_JOB = "annotate-variants-job";
