@@ -36,11 +36,11 @@ If a MongoDB instance is available in the machine where you are running the buil
 
 ## Run
 
-Arguments to run the pipeline can be provided either using the command line or property files. Skeletons to configure the application installation environment and to execute jobs to load genotyped and aggregated VCF files and to drop studies from database are provided in the `examples` folder.
+Arguments to run the pipeline can be provided either using the command line or property files. The `examples` folder contains skeletons for configuring the environment and executing jobs to load genotyped and aggregated VCF files and to drop studies from the database.
 
 `application.properties` is used to configure database connections and applications the pipeline depends on (OpenCGA and Ensembl VEP, see _Dependencies_ section).
 
-`load-genotyped-vcf.properties`, `load-aggregated-vcf.properties` , `drop-study-job` and `initialize-database.properties` are job-specific configurations.
+`load-genotyped-vcf.properties`, `load-aggregated-vcf.properties` , `drop-study-job.properties` and `initialize-database.properties` are job-specific configurations.
 
 If more convenient for your use case, the global configuration and job parameters files can be merged into one.
 
@@ -86,7 +86,7 @@ Other parameters are:
 
 ### General job tuning
 
-* `--spring.batch.job.names`: The name of the job to run. At the moment it can be `aggregated-vcf-job`, annotate-variants-job`, `init-database-job`, `genotyped-vcf-job`, `calculate-statistics-job` or `drop-study-job`
+* `--spring.batch.job.names`: The name of the job to run. At the moment it can be `genotyped-vcf-job`, `aggregated-vcf-job`, `annotate-variants-job`, `calculate-statistics-job` or `drop-study-job`
 
 Individual steps can be skipped using one of the following. This is not necessary unless they are irrelevant for the data to be processed, or some input data was generated in previous runs of the same job.
 
