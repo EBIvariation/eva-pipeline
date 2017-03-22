@@ -20,10 +20,14 @@ import com.mongodb.BasicDBObjectBuilder;
 import com.mongodb.DBObject;
 import org.opencb.biodata.models.variant.Variant;
 import org.opencb.opencga.storage.mongodb.variant.DBObjectToVariantConverter;
-import org.springframework.batch.item.support.AbstractItemCountingItemStreamItemReader;
+import org.springframework.batch.item.ExecutionContext;
+import org.springframework.batch.item.ItemStreamException;
+import org.springframework.batch.item.ItemStreamReader;
+import org.springframework.batch.item.NonTransientResourceException;
+import org.springframework.batch.item.ParseException;
+import org.springframework.batch.item.UnexpectedInputException;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.data.mongodb.core.MongoOperations;
-import org.springframework.util.ClassUtils;
 
 import uk.ac.ebi.eva.commons.models.converters.data.VariantSourceEntryToDBObjectConverter;
 import uk.ac.ebi.eva.commons.models.converters.data.VariantToDBObjectConverter;
@@ -37,8 +41,7 @@ import javax.annotation.PostConstruct;
  * {@link org.springframework.batch.item.data.MongoItemReader} is using
  * pagination and it is slow with large collections
  */
-public class NonAnnotatedVariantsMongoReader extends AbstractItemCountingItemStreamItemReader<VariantWrapper>
-        implements InitializingBean {
+public class NonAnnotatedVariantsMongoReader implements ItemStreamReader<VariantWrapper>, InitializingBean {
 
     private MongoDbCursorItemReader delegateReader;
 
@@ -53,7 +56,6 @@ public class NonAnnotatedVariantsMongoReader extends AbstractItemCountingItemStr
      * in any case.
      */
     public NonAnnotatedVariantsMongoReader(MongoOperations template, String collectionsVariantsName, String studyId) {
-        setName(ClassUtils.getShortName(NonAnnotatedVariantsMongoReader.class));
         if (studyId == null) {
             throw new IllegalArgumentException("NonAnnotatedVariantsMongoReader needs a non-null studyId " +
                     "(it can take a studyId or an empty string for reading every study)");
@@ -83,8 +85,14 @@ public class NonAnnotatedVariantsMongoReader extends AbstractItemCountingItemStr
     }
 
     @Override
-    protected VariantWrapper doRead() throws Exception {
-        DBObject dbObject = delegateReader.doRead();
+    public void open(ExecutionContext executionContext) throws ItemStreamException {
+        delegateReader.open(executionContext);
+    }
+
+    @Override
+    public VariantWrapper read()
+            throws Exception, UnexpectedInputException, ParseException, NonTransientResourceException {
+        DBObject dbObject = delegateReader.read();
         if (dbObject != null) {
             Variant variant = converter.convertToDataModelType(dbObject);
             return new VariantWrapper(variant);
@@ -94,12 +102,12 @@ public class NonAnnotatedVariantsMongoReader extends AbstractItemCountingItemStr
     }
 
     @Override
-    protected void doOpen() throws Exception {
-        delegateReader.doOpen();
+    public void update(ExecutionContext executionContext) throws ItemStreamException {
+        delegateReader.update(executionContext);
     }
 
     @Override
-    protected void doClose() throws Exception {
-        delegateReader.doClose();
+    public void close() throws ItemStreamException {
+        delegateReader.close();
     }
 }
