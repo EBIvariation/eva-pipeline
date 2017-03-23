@@ -110,12 +110,17 @@ public class NonAnnotatedVariantsMongoReaderTest {
             assertFalse(variantWrapper.getChr().isEmpty());
             assertNotEquals(0, variantWrapper.getStart());
 
-            Field privateVariantField = VariantWrapper.class.getDeclaredField("variant");
-            privateVariantField.setAccessible(true);
-            VariantAnnotation annotation = ((Variant) privateVariantField.get(variantWrapper)).getAnnotation();
-            assertNull(annotation.getConsequenceTypes());
+            assertDoesNotHaveVariantAnnotation(variantWrapper);
         }
         assertEquals(expectedNonAnnotatedVariants, itemCount);
         mongoItemReader.close();
+    }
+
+    private void assertDoesNotHaveVariantAnnotation(VariantWrapper variantWrapper)
+            throws NoSuchFieldException, IllegalAccessException {
+        Field privateVariantField = VariantWrapper.class.getDeclaredField("variant");
+        privateVariantField.setAccessible(true);
+        VariantAnnotation annotation = ((Variant) privateVariantField.get(variantWrapper)).getAnnotation();
+        assertNull(annotation.getConsequenceTypes());
     }
 }

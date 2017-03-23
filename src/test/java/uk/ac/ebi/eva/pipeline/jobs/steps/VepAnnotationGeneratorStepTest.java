@@ -34,6 +34,7 @@ import uk.ac.ebi.eva.pipeline.jobs.AnnotationJob;
 import uk.ac.ebi.eva.pipeline.jobs.steps.tasklets.VepAnnotationGeneratorStep;
 import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
+import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
 import uk.ac.ebi.eva.utils.EvaJobParameterBuilder;
 import uk.ac.ebi.eva.utils.URLHelper;
@@ -44,6 +45,7 @@ import java.util.zip.GZIPInputStream;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResourceUrl;
 import static uk.ac.ebi.eva.utils.FileUtils.getResource;
 
 /**
@@ -51,15 +53,19 @@ import static uk.ac.ebi.eva.utils.FileUtils.getResource;
  */
 @RunWith(SpringRunner.class)
 @ActiveProfiles(Application.VARIANT_ANNOTATION_MONGO_PROFILE)
-@TestPropertySource("classpath:common-configuration.properties")
+@TestPropertySource({"classpath:common-configuration.properties", "classpath:test-mongo.properties"})
 @ContextConfiguration(classes = {AnnotationJob.class, BatchTestConfiguration.class})
 public class VepAnnotationGeneratorStepTest {
+    private static final String MONGO_DUMP = "/dump/VariantStatsConfigurationTest_vl";
 
-    private static final String MOCKVEP = "/mockvep.pl";
+    private static final String MOCKVEP = "/mockvep_writeToFile.pl";
 
-    private static final String STUDY_ID = "7";
+    private static final String STUDY_ID = "1";
 
-    private static final String FILE_ID = "5";
+    private static final String FILE_ID = "1";
+
+    @Rule
+    public TemporaryMongoRule mongoRule = new TemporaryMongoRule();
 
     @Rule
     public PipelineTemporaryFolderRule temporaryFolderRule = new PipelineTemporaryFolderRule();
@@ -69,13 +75,17 @@ public class VepAnnotationGeneratorStepTest {
 
     @Test
     public void shouldGenerateVepAnnotations() throws Exception {
-        File vepOutputFolder = temporaryFolderRule.newFolder();
+        String databaseName = mongoRule.restoreDumpInTemporaryDatabase(getResourceUrl(MONGO_DUMP));
+        String outputDirAnnot = temporaryFolderRule.getRoot().getAbsolutePath();
+        File vepOutput = new File(URLHelper.resolveVepOutput(outputDirAnnot, STUDY_ID, FILE_ID));
 
         JobParameters jobParameters = new EvaJobParameterBuilder()
+                .collectionVariantsName("variants")
+                .databaseName(databaseName)
                 .inputFasta("")
                 .inputStudyId(STUDY_ID)
                 .inputVcfId(FILE_ID)
-                .outputDirAnnotation(vepOutputFolder.getAbsolutePath())
+                .outputDirAnnotation(outputDirAnnot)
                 .vepCachePath("")
                 .vepCacheSpecies("")
                 .vepCacheVersion("")
@@ -92,10 +102,10 @@ public class VepAnnotationGeneratorStepTest {
         assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());
 
         // And VEP output should exist and annotations should be in the file
-        File vepOutputFile = new File(URLHelper.resolveVepOutput(vepOutputFolder.getAbsolutePath(), STUDY_ID, FILE_ID));
-
-        assertTrue(vepOutputFile.exists());
-        assertEquals(537, JobTestUtils.getLines(new GZIPInputStream(new FileInputStream(vepOutputFile))));
+        assertTrue(vepOutput.exists());
+        int EXTRA_ANNOTATIONS = 1;
+        assertEquals(537 + EXTRA_ANNOTATIONS,
+                JobTestUtils.getLines(new GZIPInputStream(new FileInputStream(vepOutput))));
     }
 
 }

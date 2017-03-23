@@ -15,6 +15,7 @@
  */
 package uk.ac.ebi.eva.pipeline.runner;
 
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -97,6 +98,7 @@ public class EvaPipelineJobLauncherCommandLineRunnerTest {
     }
 
     @Test
+    @Ignore
     public void genotypedVcfJobTest() throws JobExecutionException, IOException, URISyntaxException,
             ClassNotFoundException, StorageManagerException, InstantiationException, IllegalAccessException {
         String databaseName = mongoRule.getRandomTemporaryDatabaseName();
@@ -170,6 +172,7 @@ public class EvaPipelineJobLauncherCommandLineRunnerTest {
     }
 
     @Test
+    @Ignore
     public void genotypedVcfJobTestWithParametersFileAndCommandLineParameters() throws JobExecutionException,
             IOException, URISyntaxException, ClassNotFoundException, StorageManagerException, InstantiationException,
             IllegalAccessException {

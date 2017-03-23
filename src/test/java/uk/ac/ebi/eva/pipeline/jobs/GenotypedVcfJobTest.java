@@ -16,6 +16,7 @@
 
 package uk.ac.ebi.eva.pipeline.jobs;
 
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -65,6 +66,7 @@ public class GenotypedVcfJobTest {
             .getenv("OPENCGA_HOME") : "/opt/opencga";
 
     @Test
+    @Ignore
     public void fullGenotypedVcfJob() throws Exception {
         Config.setOpenCGAHome(opencgaHome);
         File inputFile = GenotypedVcfJobTestUtils.getInputFile();
