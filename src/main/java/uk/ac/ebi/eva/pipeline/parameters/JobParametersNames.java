@@ -83,6 +83,8 @@ public class JobParametersNames {
 
     public static final String DB_COLLECTIONS_STATISTICS_NAME = "db.collections.stats.name";
 
+    public static final String DB_COLLECTIONS_ANNOTATION_METADATA_NAME = "db.collections.annotation.metadata.name";
+
 
     /*
      * Skip and overwrite steps
@@ -121,6 +123,8 @@ public class JobParametersNames {
      */
 
     public static final String APP_VEP_PATH = "app.vep.path";
+
+    public static final String APP_VEP_VERSION = "app.vep.version";
 
     public static final String APP_VEP_CACHE_PATH = "app.vep.cache.path";
 

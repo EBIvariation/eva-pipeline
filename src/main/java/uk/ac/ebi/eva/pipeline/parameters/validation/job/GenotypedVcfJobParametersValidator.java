@@ -23,6 +23,7 @@ import org.springframework.batch.core.job.DefaultJobParametersValidator;
 
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 import uk.ac.ebi.eva.pipeline.parameters.validation.step.AnnotationLoaderStepParametersValidator;
+import uk.ac.ebi.eva.pipeline.parameters.validation.step.AnnotationMetadataStepParametersValidator;
 import uk.ac.ebi.eva.pipeline.parameters.validation.step.FileLoaderStepParametersValidator;
 import uk.ac.ebi.eva.pipeline.parameters.validation.step.PopulationStatisticsGeneratorStepParametersValidator;
 import uk.ac.ebi.eva.pipeline.parameters.validation.step.PopulationStatisticsLoaderStepParametersValidator;
@@ -54,6 +55,7 @@ public class GenotypedVcfJobParametersValidator extends DefaultJobParametersVali
             jobParametersValidators.add(new VepInputGeneratorStepParametersValidator());
             jobParametersValidators.add(new VepAnnotationGeneratorStepParametersValidator());
             jobParametersValidators.add(new AnnotationLoaderStepParametersValidator());
+            jobParametersValidators.add(new AnnotationMetadataStepParametersValidator());
         }
 
         Boolean skipStats = Boolean.valueOf(jobParameters.getString(JobParametersNames.STATISTICS_SKIP));

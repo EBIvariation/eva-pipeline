@@ -77,7 +77,10 @@ public class GenotypedVcfJobParametersValidatorTest {
         annotationParameters.put(JobParametersNames.OUTPUT_DIR_ANNOTATION, new JobParameter(dir));
         annotationParameters.put(JobParametersNames.APP_VEP_CACHE_SPECIES, new JobParameter("Human"));
         annotationParameters.put(JobParametersNames.APP_VEP_CACHE_VERSION, new JobParameter("100_A"));
+        annotationParameters.put(JobParametersNames.APP_VEP_VERSION, new JobParameter("80"));
         annotationParameters.put(JobParametersNames.APP_VEP_NUMFORKS, new JobParameter("6"));
+        annotationParameters.put(JobParametersNames.DB_COLLECTIONS_ANNOTATION_METADATA_NAME,
+                new JobParameter("annotationMetadata"));
         annotationParameters.put(JobParametersNames.APP_VEP_CACHE_PATH,
                 new JobParameter(temporaryFolder.getRoot().getCanonicalPath()));
         annotationParameters.put(JobParametersNames.APP_VEP_PATH,

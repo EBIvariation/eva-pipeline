@@ -23,6 +23,7 @@ import org.springframework.batch.core.job.DefaultJobParametersValidator;
 
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 import uk.ac.ebi.eva.pipeline.parameters.validation.step.AnnotationLoaderStepParametersValidator;
+import uk.ac.ebi.eva.pipeline.parameters.validation.step.AnnotationMetadataStepParametersValidator;
 import uk.ac.ebi.eva.pipeline.parameters.validation.step.FileLoaderStepParametersValidator;
 import uk.ac.ebi.eva.pipeline.parameters.validation.step.VariantLoaderStepParametersValidator;
 import uk.ac.ebi.eva.pipeline.parameters.validation.step.VepAnnotationGeneratorStepParametersValidator;
@@ -52,6 +53,7 @@ public class AggregatedVcfJobParametersValidator extends DefaultJobParametersVal
             jobParametersValidators.add(new VepInputGeneratorStepParametersValidator());
             jobParametersValidators.add(new VepAnnotationGeneratorStepParametersValidator());
             jobParametersValidators.add(new AnnotationLoaderStepParametersValidator());
+            jobParametersValidators.add(new AnnotationMetadataStepParametersValidator());
         }
 
         CompositeJobParametersValidator compositeJobParametersValidator = new CompositeJobParametersValidator();

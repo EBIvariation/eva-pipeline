@@ -47,6 +47,9 @@ public class AnnotationParameters {
     @Value(PARAMETER + JobParametersNames.APP_VEP_PATH + END)
     private String vepPath;
 
+    @Value(PARAMETER + JobParametersNames.APP_VEP_VERSION + END)
+    private String vepVersion;
+
     @Value(PARAMETER + JobParametersNames.APP_VEP_CACHE_VERSION + END)
     private String vepCacheVersion;
 
@@ -64,6 +67,10 @@ public class AnnotationParameters {
 
     public String getVepPath() {
         return vepPath;
+    }
+
+    public String getVepVersion() {
+        return vepVersion;
     }
 
     public String getVepCacheVersion() {
@@ -93,7 +100,6 @@ public class AnnotationParameters {
     public String getVepOutput() {
         return URLHelper.resolveVepOutput(outputDirAnnotation, studyId, fileId);
     }
-
 }
 
 

@@ -79,8 +79,19 @@ public class EvaJobParameterBuilder extends JobParametersBuilder {
         return this;
     }
 
+    public EvaJobParameterBuilder collectionAnnotationMetadataName(String collectionAnnotationMetadataName) {
+        addParameter(JobParametersNames.DB_COLLECTIONS_ANNOTATION_METADATA_NAME,
+                new JobParameter(collectionAnnotationMetadataName));
+        return this;
+    }
+
     public EvaJobParameterBuilder vepPath(String vepPath) {
         addParameter(JobParametersNames.APP_VEP_PATH, new JobParameter(vepPath));
+        return this;
+    }
+
+    public EvaJobParameterBuilder vepVersion(String vepVersion) {
+        addParameter(JobParametersNames.APP_VEP_VERSION, new JobParameter(vepVersion));
         return this;
     }
 

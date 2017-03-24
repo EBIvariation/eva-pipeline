@@ -73,6 +73,10 @@ public class EvaCommandLineBuilder {
         return addString(JobParametersNames.APP_VEP_CACHE_VERSION, vepCacheVersion);
     }
 
+    public EvaCommandLineBuilder vepVersion(String vepVersion) {
+        return addString(JobParametersNames.APP_VEP_VERSION, vepVersion);
+    }
+
     public EvaCommandLineBuilder vepCachePath(String vepCachePath) {
         return addString(JobParametersNames.APP_VEP_CACHE_PATH, vepCachePath);
     }
@@ -157,5 +161,9 @@ public class EvaCommandLineBuilder {
 
     public EvaCommandLineBuilder dbCollectionsStatisticsName(String name) {
         return addString(JobParametersNames.DB_COLLECTIONS_STATISTICS_NAME, name);
+    }
+
+    public EvaCommandLineBuilder dbCollectionsAnnotationMetadataName(String name) {
+        return addString(JobParametersNames.DB_COLLECTIONS_ANNOTATION_METADATA_NAME, name);
     }
 }
