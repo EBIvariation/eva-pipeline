@@ -39,4 +39,6 @@ foreach my $bufferLine (@buffer) {
 }
 
 print $fileHandle "extra line as if some variant had two annotations\n";
+
+sleep 3;
 $fileHandle->close();
