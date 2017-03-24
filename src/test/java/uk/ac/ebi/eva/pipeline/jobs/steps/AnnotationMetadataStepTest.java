@@ -76,17 +76,17 @@ public class AnnotationMetadataStepTest {
         String vepCacheVersion = "87";
         String vepVersion = "88";
 
-        assertStepCompletes(databaseName, vepCacheVersion, vepVersion);
+        assertStepIsComplete(databaseName, vepCacheVersion, vepVersion);
 
         //check that the document was written in mongo
-        List<AnnotationMetadata> annotationMetadatas = mongoOperations.findAll(AnnotationMetadata.class);
+        List<AnnotationMetadata> annotationMetadataList = mongoOperations.findAll(AnnotationMetadata.class);
 
-        assertEquals(1, annotationMetadatas.size());
-        assertEquals(vepCacheVersion, annotationMetadatas.get(0).getCacheVersion());
-        assertEquals(vepVersion, annotationMetadatas.get(0).getVepVersion());
+        assertEquals(1, annotationMetadataList.size());
+        assertEquals(vepCacheVersion, annotationMetadataList.get(0).getCacheVersion());
+        assertEquals(vepVersion, annotationMetadataList.get(0).getVepVersion());
     }
 
-    private void assertStepCompletes(String databaseName, String vepCacheVersion, String vepVersion) {
+    private void assertStepIsComplete(String databaseName, String vepCacheVersion, String vepVersion) {
         String collectionAnnotationMetadataName = "annotationMetadata";
         JobParameters jobParameters = new EvaJobParameterBuilder()
                 .collectionAnnotationMetadataName(collectionAnnotationMetadataName)
@@ -102,7 +102,7 @@ public class AnnotationMetadataStepTest {
     }
 
     @Test
-    public void shouldNotAddRedundantVersions() throws Exception {
+    public void shouldKeepOtherVersions() throws Exception {
         String databaseName = mongoRule.getRandomTemporaryDatabaseName();
         MongoOperations mongoOperations = MongoConfiguration.getMongoOperations(databaseName, mongoConnection,
                 mongoMappingContext);
@@ -111,16 +111,16 @@ public class AnnotationMetadataStepTest {
         String vepCacheVersion = "87";
         String vepVersion = "88";
 
-        assertStepCompletes(databaseName, vepCacheVersion, vepVersion);
+        assertStepIsComplete(databaseName, vepCacheVersion, vepVersion);
 
         //check that the document was written in mongo
-        List<AnnotationMetadata> annotationMetadatas = mongoOperations.findAll(AnnotationMetadata.class);
+        List<AnnotationMetadata> annotationMetadataList = mongoOperations.findAll(AnnotationMetadata.class);
 
-        assertEquals(2, annotationMetadatas.size());
+        assertEquals(2, annotationMetadataList.size());
     }
 
     @Test
-    public void shouldKeepOtherVersions() throws Exception {
+    public void shouldNotAddRedundantVersions() throws Exception {
         String databaseName = mongoRule.getRandomTemporaryDatabaseName();
         MongoOperations mongoOperations = MongoConfiguration.getMongoOperations(databaseName, mongoConnection,
                 mongoMappingContext);
@@ -128,11 +128,11 @@ public class AnnotationMetadataStepTest {
         String vepVersion = "88";
         mongoOperations.save(new AnnotationMetadata(vepVersion, vepCacheVersion));
 
-        assertStepCompletes(databaseName, vepCacheVersion, vepVersion);
+        assertStepIsComplete(databaseName, vepCacheVersion, vepVersion);
 
         //check that the document was written in mongo
-        List<AnnotationMetadata> annotationMetadatas = mongoOperations.findAll(AnnotationMetadata.class);
+        List<AnnotationMetadata> annotationMetadataList = mongoOperations.findAll(AnnotationMetadata.class);
 
-        assertEquals(1, annotationMetadatas.size());
+        assertEquals(1, annotationMetadataList.size());
     }
 }

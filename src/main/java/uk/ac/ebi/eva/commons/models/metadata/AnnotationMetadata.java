@@ -20,13 +20,14 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 @Document
 public class AnnotationMetadata {
+
     private String id;
 
     private String vepVersion;
 
     private String cacheVersion;
 
-    public AnnotationMetadata() {
+    AnnotationMetadata() {
     }
 
     public AnnotationMetadata(String vepVersion, String cacheVersion) {
