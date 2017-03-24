@@ -33,6 +33,8 @@ import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.zip.GZIPOutputStream;
 
 public class VepAnnotationFileWriter implements ItemStreamWriter<VariantWrapper> {
     private static final Logger logger = LoggerFactory.getLogger(VepAnnotationFileWriter.class);
@@ -47,10 +49,21 @@ public class VepAnnotationFileWriter implements ItemStreamWriter<VariantWrapper>
 
     private final Long timeoutInSeconds;
 
+    private Thread outputCapturer;
+
+    private AtomicBoolean writingOk;
+
+    private boolean alreadyClosed;
+
     public VepAnnotationFileWriter(Long timeoutInSeconds, Integer chunkSize, AnnotationParameters annotationParameters) {
+        if (timeoutInSeconds <= 0) {
+            throw new IllegalArgumentException(
+                    "timeout (" + timeoutInSeconds + " seconds) must be strictly greater than 0");
+        }
         this.timeoutInSeconds = timeoutInSeconds;
         this.chunkSize = chunkSize;
         this.annotationParameters = annotationParameters;
+        alreadyClosed = false;
     }
 
     @Override
@@ -63,7 +76,7 @@ public class VepAnnotationFileWriter implements ItemStreamWriter<VariantWrapper>
                 "--fasta", annotationParameters.getInputFasta(),
                 "--fork", annotationParameters.getVepNumForks(),
                 "--buffer_size", chunkSize.toString(),
-                "-o", annotationParameters.getVepOutput(),
+                "-o", "STDOUT",
                 "--force_overwrite",
                 "--offline",
                 "--everything"
@@ -80,6 +93,22 @@ public class VepAnnotationFileWriter implements ItemStreamWriter<VariantWrapper>
         }
 
         perlStdin = new BufferedOutputStream(process.getOutputStream());
+        InputStream perlStdout = process.getInputStream();
+        String vepOutput = annotationParameters.getVepOutput();
+
+        writingOk = new AtomicBoolean(false);
+        outputCapturer = new Thread(() -> {
+            long written = 0;
+            try (GZIPOutputStream outputStream = new GZIPOutputStream(new FileOutputStream(vepOutput))) {
+                written = connectStreams(new BufferedInputStream(perlStdout), outputStream);
+                writingOk.set(true);
+            } catch (IOException  e) {
+                logger.error("Writing the VEP output to " + vepOutput + " failed. ", e);
+            }
+            logger.info("Finished writing VEP output (" + written + " bytes written) to " + vepOutput);
+        });
+        logger.info("Starting writing VEP output to " + vepOutput);
+        outputCapturer.start();
     }
 
     @Override
@@ -87,6 +116,7 @@ public class VepAnnotationFileWriter implements ItemStreamWriter<VariantWrapper>
         for (VariantWrapper variantWrapper : variantWrappers) {
             String line = getVariantInVepInputFormat(variantWrapper);
             perlStdin.write(line.getBytes());
+            perlStdin.write(System.lineSeparator().getBytes());
         }
         perlStdin.flush();
     }
@@ -107,9 +137,14 @@ public class VepAnnotationFileWriter implements ItemStreamWriter<VariantWrapper>
 
     @Override
     public void close() throws ItemStreamException {
-        flushToPerlStdin();
-        waitUntilProcessEnds(timeoutInSeconds);
-        checkExitStatus();
+        if (!alreadyClosed) {
+            flushToPerlStdin();
+            waitUntilProcessEnds(timeoutInSeconds);
+            checkExitStatus();
+            checkOutputWritingStatus();
+            logger.info("VEP process finished");
+            alreadyClosed = true;
+        }
     }
 
     private void flushToPerlStdin() {
@@ -136,7 +171,6 @@ public class VepAnnotationFileWriter implements ItemStreamWriter<VariantWrapper>
             process.destroy();
             throw new ItemStreamException(timeoutReachedMessage);
         }
-        logger.info("VEP process finished");
     }
 
     private void checkExitStatus() {
@@ -152,6 +186,23 @@ public class VepAnnotationFileWriter implements ItemStreamWriter<VariantWrapper>
             }
             throw new ItemStreamException("Error while running VEP (exit status " + exitValue + "). See "
                     + errorLog + " for the errors description from VEP.");
+        }
+    }
+
+    private void checkOutputWritingStatus() {
+        try {
+            final long CONVERT_SECONDS_TO_MILLISECONDS = 1000L;
+            outputCapturer.join(timeoutInSeconds * CONVERT_SECONDS_TO_MILLISECONDS);
+        } catch (InterruptedException e) {
+            throw new ItemStreamException("Interrupted while waiting for the VEP output writer thread to finish. ", e);
+        }
+        if (outputCapturer.isAlive()) {
+            outputCapturer.interrupt();
+            throw new ItemStreamException("Reached the timeout (" + timeoutInSeconds
+                    + " seconds) while waiting for VEP output writing to finish. Killed the thread.");
+        }
+        if (!writingOk.get()) {
+            throw new ItemStreamException("VEP output writer thread could not finish properly. ");
         }
     }
 
