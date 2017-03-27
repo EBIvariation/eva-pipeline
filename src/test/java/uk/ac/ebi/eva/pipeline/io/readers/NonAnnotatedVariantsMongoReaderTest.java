@@ -42,6 +42,7 @@ import java.util.Arrays;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNull;
 
 /**
@@ -108,7 +109,7 @@ public class NonAnnotatedVariantsMongoReaderTest {
         while ((variantWrapper = mongoItemReader.read()) != null) {
             itemCount++;
             assertFalse(variantWrapper.getChr().isEmpty());
-            assertFalse(variantWrapper.getStart() == 0);
+            assertNotEquals(0, variantWrapper.getStart());
 
             Field privateVariantField = VariantWrapper.class.getDeclaredField("variant");
             privateVariantField.setAccessible(true);
