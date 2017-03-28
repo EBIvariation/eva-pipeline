@@ -26,7 +26,6 @@ import uk.ac.ebi.eva.pipeline.parameters.validation.ConfigChunkSizeValidator;
 import uk.ac.ebi.eva.pipeline.parameters.validation.ConfigRestartabilityAllowValidator;
 import uk.ac.ebi.eva.pipeline.parameters.validation.DbCollectionsVariantsNameValidator;
 import uk.ac.ebi.eva.pipeline.parameters.validation.DbNameValidator;
-import uk.ac.ebi.eva.pipeline.parameters.validation.InputStudyIdValidator;
 import uk.ac.ebi.eva.pipeline.parameters.validation.InputVcfIdValidator;
 import uk.ac.ebi.eva.pipeline.parameters.validation.OptionalValidator;
 import uk.ac.ebi.eva.pipeline.parameters.validation.OutputDirAnnotationValidator;
@@ -45,7 +44,6 @@ public class VepInputGeneratorStepParametersValidator extends DefaultJobParamete
     public VepInputGeneratorStepParametersValidator() {
         super(new String[]{JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME,
                            JobParametersNames.DB_NAME,
-                           JobParametersNames.INPUT_STUDY_ID,
                            JobParametersNames.INPUT_VCF_ID,
                            JobParametersNames.OUTPUT_DIR_ANNOTATION},
               new String[]{});
@@ -61,7 +59,6 @@ public class VepInputGeneratorStepParametersValidator extends DefaultJobParamete
         final List<JobParametersValidator> jobParametersValidators = Arrays.asList(
                 new DbCollectionsVariantsNameValidator(),
                 new DbNameValidator(),
-                new InputStudyIdValidator(),
                 new InputVcfIdValidator(),
                 new OutputDirAnnotationValidator(),
                 new OptionalValidator(new ConfigChunkSizeValidator(), JobParametersNames.CONFIG_CHUNK_SIZE),
