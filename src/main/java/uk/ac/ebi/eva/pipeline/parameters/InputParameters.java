@@ -31,11 +31,12 @@ public class InputParameters {
     private static final String PARAMETER = "#{jobParameters['";
     private static final String END = "']}";
     private static final String OR_NULL = "']?:null}";
+    private static final String OR_EMPTY = "']?:''}";
 
     @Value(PARAMETER + JobParametersNames.INPUT_STUDY_ID + END)
     private String studyId;
 
-    @Value(PARAMETER + JobParametersNames.INPUT_VCF_ID + END)
+    @Value(PARAMETER + JobParametersNames.INPUT_VCF_ID + OR_EMPTY)
     private String vcfId;
 
     @Value(PARAMETER + JobParametersNames.INPUT_VCF + END)
