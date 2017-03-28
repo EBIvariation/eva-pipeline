@@ -15,8 +15,6 @@
  */
 package uk.ac.ebi.eva.pipeline.io.writers;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.item.ItemStreamException;
 import org.springframework.batch.item.ItemStreamWriter;
@@ -24,101 +22,34 @@ import org.springframework.batch.item.ItemStreamWriter;
 import uk.ac.ebi.eva.pipeline.model.VariantWrapper;
 import uk.ac.ebi.eva.pipeline.parameters.AnnotationParameters;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.zip.GZIPOutputStream;
 
+/**
+ * ItemStreamWriter that takes VariantWrappers and serialize them into a {@link VepProcess}, which will take care of
+ * annotate the variants and write them to a file.
+ */
 public class VepAnnotationFileWriter implements ItemStreamWriter<VariantWrapper> {
-    private static final Logger logger = LoggerFactory.getLogger(VepAnnotationFileWriter.class);
 
-    private AnnotationParameters annotationParameters;
-
-    private Integer chunkSize;
-
-    private Process process;
-
-    private OutputStream perlStdin;
-
-    private final Long timeoutInSeconds;
-
-    private Thread outputCapturer;
-
-    private AtomicBoolean writingOk;
-
-    private boolean alreadyClosed;
+    private final VepProcess vepProcess;
 
     public VepAnnotationFileWriter(Long timeoutInSeconds, Integer chunkSize, AnnotationParameters annotationParameters) {
-        if (timeoutInSeconds <= 0) {
-            throw new IllegalArgumentException(
-                    "timeout (" + timeoutInSeconds + " seconds) must be strictly greater than 0");
-        }
-        this.timeoutInSeconds = timeoutInSeconds;
-        this.chunkSize = chunkSize;
-        this.annotationParameters = annotationParameters;
-        alreadyClosed = false;
+        vepProcess = new VepProcess(annotationParameters, chunkSize, timeoutInSeconds);
     }
 
     @Override
     public void open(ExecutionContext executionContext) throws ItemStreamException {
-        ProcessBuilder processBuilder = new ProcessBuilder("perl", annotationParameters.getVepPath(),
-                "--cache",
-                "--cache_version", annotationParameters.getVepCacheVersion(),
-                "-dir", annotationParameters.getVepCachePath(),
-                "--species", annotationParameters.getVepCacheSpecies(),
-                "--fasta", annotationParameters.getInputFasta(),
-                "--fork", annotationParameters.getVepNumForks(),
-                "--buffer_size", chunkSize.toString(),
-                "-o", "STDOUT",
-                "--force_overwrite",
-                "--offline",
-                "--everything"
-        );
-
-        logger.debug("VEP annotation parameters = " + Arrays.toString(processBuilder.command().toArray()));
-
-        logger.info("Starting VEP process");
-        process = null;
-        try {
-            process = processBuilder.start();
-        } catch (IOException e) {
-            throw new ItemStreamException(e);
-        }
-
-        perlStdin = new BufferedOutputStream(process.getOutputStream());
-        InputStream perlStdout = process.getInputStream();
-        String vepOutput = annotationParameters.getVepOutput();
-
-        writingOk = new AtomicBoolean(false);
-        outputCapturer = new Thread(() -> {
-            long written = 0;
-            try (GZIPOutputStream outputStream = new GZIPOutputStream(new FileOutputStream(vepOutput))) {
-                written = connectStreams(new BufferedInputStream(perlStdout), outputStream);
-                writingOk.set(true);
-            } catch (IOException  e) {
-                logger.error("Writing the VEP output to " + vepOutput + " failed. ", e);
-            }
-            logger.info("Finished writing VEP output (" + written + " bytes written) to " + vepOutput);
-        });
-        logger.info("Starting writing VEP output to " + vepOutput);
-        outputCapturer.start();
+        vepProcess.open();
     }
+
 
     @Override
     public void write(List<? extends VariantWrapper> variantWrappers) throws Exception {
         for (VariantWrapper variantWrapper : variantWrappers) {
             String line = getVariantInVepInputFormat(variantWrapper);
-            perlStdin.write(line.getBytes());
-            perlStdin.write(System.lineSeparator().getBytes());
+            vepProcess.write(line.getBytes());
+            vepProcess.write(System.lineSeparator().getBytes());
         }
-        perlStdin.flush();
+        vepProcess.flush();
     }
 
     private String getVariantInVepInputFormat(VariantWrapper variantWrapper) {
@@ -137,89 +68,7 @@ public class VepAnnotationFileWriter implements ItemStreamWriter<VariantWrapper>
 
     @Override
     public void close() throws ItemStreamException {
-        if (!alreadyClosed) {
-            flushToPerlStdin();
-            waitUntilProcessEnds(timeoutInSeconds);
-            checkExitStatus();
-            checkOutputWritingStatus();
-            logger.info("VEP process finished");
-            alreadyClosed = true;
-        }
+        vepProcess.close();
     }
 
-    private void flushToPerlStdin() {
-        try {
-            perlStdin.flush();
-            perlStdin.close();
-        } catch (IOException e) {
-            logger.error("Could not close stream for VEP's stdin", e);
-        }
-    }
-
-    private void waitUntilProcessEnds(Long timeoutInSeconds) {
-        boolean finished;
-        try {
-            finished = process.waitFor(timeoutInSeconds, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-            throw new ItemStreamException(e);
-        }
-
-        if (!finished) {
-            String timeoutReachedMessage = "Reached the timeout (" + timeoutInSeconds
-                    + " seconds) while waiting for VEP to finish. Killed the process.";
-            logger.error(timeoutReachedMessage);
-            process.destroy();
-            throw new ItemStreamException(timeoutReachedMessage);
-        }
-    }
-
-    private void checkExitStatus() {
-        int exitValue = process.exitValue();
-        if (exitValue != 0) {
-            String errorLog = annotationParameters.getVepOutput() + ".errors.txt";
-            try {
-                connectStreams(new BufferedInputStream(process.getErrorStream()), new FileOutputStream(errorLog));
-            } catch (IOException e) {
-                throw new ItemStreamException("VEP exited with code " + exitValue
-                        + " but the file to dump the errors could not be created: " + errorLog,
-                        e);
-            }
-            throw new ItemStreamException("Error while running VEP (exit status " + exitValue + "). See "
-                    + errorLog + " for the errors description from VEP.");
-        }
-    }
-
-    private void checkOutputWritingStatus() {
-        try {
-            final long CONVERT_SECONDS_TO_MILLISECONDS = 1000L;
-            outputCapturer.join(timeoutInSeconds * CONVERT_SECONDS_TO_MILLISECONDS);
-        } catch (InterruptedException e) {
-            throw new ItemStreamException("Interrupted while waiting for the VEP output writer thread to finish. ", e);
-        }
-        if (outputCapturer.isAlive()) {
-            outputCapturer.interrupt();
-            throw new ItemStreamException("Reached the timeout (" + timeoutInSeconds
-                    + " seconds) while waiting for VEP output writing to finish. Killed the thread.");
-        }
-        if (!writingOk.get()) {
-            throw new ItemStreamException("VEP output writer thread could not finish properly. ");
-        }
-    }
-
-    /**
-     * read all the inputStream and write it into the outputStream
-     */
-    private long connectStreams(InputStream inputStream, OutputStream outputStream) throws IOException {
-        int read = inputStream.read();
-        long written = 0;
-        while (read != -1) {
-            written++;
-            outputStream.write(read);
-            read = inputStream.read();
-        }
-
-        outputStream.close();
-        inputStream.close();
-        return written;
-    }
 }
