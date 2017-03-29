@@ -53,6 +53,7 @@ public class GenotypedVcfJobParametersValidator extends DefaultJobParametersVali
 
         Boolean skipAnnotation = Boolean.valueOf(jobParameters.getString(JobParametersNames.ANNOTATION_SKIP));
         if (!skipAnnotation) {
+            // the next validator is required only in some jobs that use the annotation steps, the steps don't include it
             jobParametersValidators.add(new InputStudyIdValidator());
 
             jobParametersValidators.add(new VepInputGeneratorStepParametersValidator());

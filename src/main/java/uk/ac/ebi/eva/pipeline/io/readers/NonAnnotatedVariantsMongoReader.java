@@ -23,9 +23,6 @@ import org.opencb.opencga.storage.mongodb.variant.DBObjectToVariantConverter;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.item.ItemStreamException;
 import org.springframework.batch.item.ItemStreamReader;
-import org.springframework.batch.item.NonTransientResourceException;
-import org.springframework.batch.item.ParseException;
-import org.springframework.batch.item.UnexpectedInputException;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.data.mongodb.core.MongoOperations;
 
@@ -90,8 +87,7 @@ public class NonAnnotatedVariantsMongoReader implements ItemStreamReader<Variant
     }
 
     @Override
-    public VariantWrapper read()
-            throws Exception, UnexpectedInputException, ParseException, NonTransientResourceException {
+    public VariantWrapper read() throws Exception {
         DBObject dbObject = delegateReader.read();
         if (dbObject != null) {
             Variant variant = converter.convertToDataModelType(dbObject);
