@@ -48,22 +48,16 @@ public class NonAnnotatedVariantsMongoReader implements ItemStreamReader<Variant
             + VariantSourceEntryToDBObjectConverter.STUDYID_FIELD;
 
     /**
-     * @param studyId Can be the empty string, meaning to bring all non-annotated variants in the collection. If the
-     * studyId string is not empty, bring only non-annotated variants from that study. This parameter should not be null
-     * in any case.
+     * @param studyId Can be the empty string or null, meaning to bring all non-annotated variants in the collection.
+     * If the studyId string is not empty, bring only non-annotated variants from that study.
      */
     public NonAnnotatedVariantsMongoReader(MongoOperations template, String collectionsVariantsName, String studyId) {
-        if (studyId == null) {
-            throw new IllegalArgumentException("NonAnnotatedVariantsMongoReader needs a non-null studyId " +
-                    "(it can take a studyId or an empty string for reading every study)");
-        }
-
         delegateReader = new MongoDbCursorItemReader();
         delegateReader.setTemplate(template);
         delegateReader.setCollection(collectionsVariantsName);
 
         BasicDBObjectBuilder queryBuilder = BasicDBObjectBuilder.start();
-        if (!studyId.isEmpty()) {
+        if (studyId != null && !studyId.isEmpty()) {
             queryBuilder.add(STUDY_KEY, studyId);
         }
         DBObject query = queryBuilder.add("annot.ct.so", new BasicDBObject("$exists", false)).get();
