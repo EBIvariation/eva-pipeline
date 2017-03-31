@@ -1,6 +1,11 @@
 use warnings;
 use strict;
 
+my $line;
+while ($line = <STDIN>) {
+    ;
+}
+
 my $annot = "## ENSEMBL VARIANT EFFECT PREDICTOR v78
 ## Output produced at 2016-01-11 15:43:50
 ## Connected to

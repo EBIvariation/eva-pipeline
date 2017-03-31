@@ -15,6 +15,7 @@
  */
 package uk.ac.ebi.eva.pipeline.jobs.flows;
 
+import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.job.builder.FlowBuilder;
@@ -25,6 +26,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
+import uk.ac.ebi.eva.pipeline.jobs.deciders.EmptyVepOutputDecider;
 import uk.ac.ebi.eva.pipeline.jobs.steps.AnnotationLoaderStep;
 import uk.ac.ebi.eva.pipeline.jobs.steps.AnnotationMetadataStep;
 import uk.ac.ebi.eva.pipeline.jobs.steps.GenerateVepAnnotationStep;
@@ -59,10 +61,15 @@ public class AnnotationFlow {
 
     @Bean(VEP_ANNOTATION_FLOW)
     public Flow vepAnnotationFlow() {
+        EmptyVepOutputDecider emptyVepOutputDecider = new EmptyVepOutputDecider();
+
         return new FlowBuilder<Flow>(VEP_ANNOTATION_FLOW)
                 .start(generateVepAnnotationStep)
-                .next(annotationLoadStep)
+                .next(emptyVepOutputDecider).on(EmptyVepOutputDecider.CONTINUE_FLOW)
+                .to(annotationLoadStep)
                 .next(annotationMetadataStep)
+                .from(emptyVepOutputDecider).on(EmptyVepOutputDecider.STOP_FLOW)
+                .end(BatchStatus.COMPLETED.toString())
                 .build();
     }
 

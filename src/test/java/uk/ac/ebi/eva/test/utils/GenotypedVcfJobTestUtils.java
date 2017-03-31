@@ -124,8 +124,7 @@ public class GenotypedVcfJobTestUtils {
         assertEquals(EXPECTED_ANNOTATIONS, getLines(new GZIPInputStream(new FileInputStream(vepOutputFile))));
     }
 
-    public static void checkAnnotationCreateStep(File vepInputFile, File vepOutputFile) {
-        assertTrue(vepInputFile.exists());
+    public static void checkAnnotationCreateStep(File vepOutputFile) {
         assertTrue(vepOutputFile.exists());
     }
 

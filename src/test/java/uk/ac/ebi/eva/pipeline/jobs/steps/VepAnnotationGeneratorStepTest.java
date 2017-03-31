@@ -104,7 +104,7 @@ public class VepAnnotationGeneratorStepTest {
         // And VEP output should exist and annotations should be in the file
         assertTrue(vepOutput.exists());
         int EXTRA_ANNOTATIONS = 1;
-        assertEquals(537 + EXTRA_ANNOTATIONS,
+        assertEquals(300 + EXTRA_ANNOTATIONS,
                 JobTestUtils.getLines(new GZIPInputStream(new FileInputStream(vepOutput))));
     }
 

@@ -32,18 +32,25 @@ public class VepAnnotationFileWriter implements ItemStreamWriter<VariantWrapper>
 
     private final VepProcess vepProcess;
 
+    private boolean vepProcessOpened = false;
+
     public VepAnnotationFileWriter(Long timeoutInSeconds, Integer chunkSize, AnnotationParameters annotationParameters) {
         vepProcess = new VepProcess(annotationParameters, chunkSize, timeoutInSeconds);
     }
 
     @Override
     public void open(ExecutionContext executionContext) throws ItemStreamException {
-        vepProcess.open();
+        vepProcessOpened = false;   // we need lazy opening because vep fails if there are no writes
     }
 
 
     @Override
     public void write(List<? extends VariantWrapper> variantWrappers) throws Exception {
+        if (!vepProcessOpened) {
+            vepProcess.open();
+            vepProcessOpened = true;
+        }
+
         for (VariantWrapper variantWrapper : variantWrappers) {
             String line = getVariantInVepInputFormat(variantWrapper);
             vepProcess.write(line.getBytes());
@@ -68,7 +75,9 @@ public class VepAnnotationFileWriter implements ItemStreamWriter<VariantWrapper>
 
     @Override
     public void close() throws ItemStreamException {
-        vepProcess.close();
+        if (vepProcessOpened) {
+            vepProcess.close();
+        }
     }
 
 }

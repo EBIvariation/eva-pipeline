@@ -96,7 +96,6 @@ public class GenotypedVcfJobWorkflowTest {
                     BeanNames.LOAD_ANNOTATION_METADATA_STEP));
 
     @Test
-    @Ignore
     public void allStepsShouldBeExecuted() throws Exception {
         EvaJobParameterBuilder builder = initVariantConfigurationJob();
         JobParameters jobParameters = builder.toJobParameters();
@@ -149,7 +148,6 @@ public class GenotypedVcfJobWorkflowTest {
     }
 
     @Test
-    @Ignore
     public void statsStepsShouldBeSkipped() throws Exception {
         EvaJobParameterBuilder builder = initVariantConfigurationJob();
         JobParameters jobParameters = builder.statisticsSkip(true).toJobParameters();

@@ -15,7 +15,6 @@
  */
 package uk.ac.ebi.eva.pipeline.runner;
 
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -98,7 +97,6 @@ public class EvaPipelineJobLauncherCommandLineRunnerTest {
     }
 
     @Test
-    @Ignore
     public void genotypedVcfJobTest() throws JobExecutionException, IOException, URISyntaxException,
             ClassNotFoundException, StorageManagerException, InstantiationException, IllegalAccessException {
         String databaseName = mongoRule.getRandomTemporaryDatabaseName();
@@ -109,7 +107,6 @@ public class EvaPipelineJobLauncherCommandLineRunnerTest {
         File variantsStatsFile = GenotypedVcfJobTestUtils.getVariantsStatsFile(outputDirStats);
         File sourceStatsFile = GenotypedVcfJobTestUtils.getSourceStatsFile(outputDirStats);
 
-        File vepInputFile = GenotypedVcfJobTestUtils.getVepInputFile(outputDirAnnotation);
         File vepOutputFile = GenotypedVcfJobTestUtils.getVepOutputFile(outputDirAnnotation);
 
         File fasta = temporaryFolderRule.newFile();
@@ -160,9 +157,7 @@ public class EvaPipelineJobLauncherCommandLineRunnerTest {
 
         GenotypedVcfJobTestUtils.checkLoadStatsStep(databaseName);
 
-        GenotypedVcfJobTestUtils.checkAnnotationInput(vepInputFile);
-
-        GenotypedVcfJobTestUtils.checkAnnotationCreateStep(vepInputFile, vepOutputFile);
+        GenotypedVcfJobTestUtils.checkAnnotationCreateStep(vepOutputFile);
 
         GenotypedVcfJobTestUtils.checkOutputFileLength(vepOutputFile);
 
@@ -172,7 +167,6 @@ public class EvaPipelineJobLauncherCommandLineRunnerTest {
     }
 
     @Test
-    @Ignore
     public void genotypedVcfJobTestWithParametersFileAndCommandLineParameters() throws JobExecutionException,
             IOException, URISyntaxException, ClassNotFoundException, StorageManagerException, InstantiationException,
             IllegalAccessException {
@@ -185,7 +179,6 @@ public class EvaPipelineJobLauncherCommandLineRunnerTest {
         File variantsStatsFile = GenotypedVcfJobTestUtils.getVariantsStatsFile(outputDirStats);
         File sourceStatsFile = GenotypedVcfJobTestUtils.getSourceStatsFile(outputDirStats);
 
-        File vepInputFile = GenotypedVcfJobTestUtils.getVepInputFile(outputDirAnnotation);
         File vepOutputFile = GenotypedVcfJobTestUtils.getVepOutputFile(outputDirAnnotation);
 
         File fasta = temporaryFolderRule.newFile();
@@ -225,9 +218,7 @@ public class EvaPipelineJobLauncherCommandLineRunnerTest {
 
         GenotypedVcfJobTestUtils.checkLoadStatsStep(databaseName);
 
-        GenotypedVcfJobTestUtils.checkAnnotationInput(vepInputFile);
-
-        GenotypedVcfJobTestUtils.checkAnnotationCreateStep(vepInputFile, vepOutputFile);
+        GenotypedVcfJobTestUtils.checkAnnotationCreateStep(vepOutputFile);
 
         GenotypedVcfJobTestUtils.checkOutputFileLength(vepOutputFile);
 

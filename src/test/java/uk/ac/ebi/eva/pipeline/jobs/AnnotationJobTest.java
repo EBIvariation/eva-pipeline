@@ -19,7 +19,6 @@ package uk.ac.ebi.eva.pipeline.jobs;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -89,7 +88,6 @@ public class AnnotationJobTest {
     private DBObjectToVariantAnnotationConverter converter;
 
     @Test
-    @Ignore
     public void allAnnotationStepsShouldBeExecuted() throws Exception {
         String dbName = mongoRule.restoreDumpInTemporaryDatabase(getResourceUrl(MONGO_DUMP));
         String outputDirAnnot = temporaryFolderRule.getRoot().getAbsolutePath();
@@ -133,10 +131,6 @@ public class AnnotationJobTest {
         assertEquals(BeanNames.LOAD_VEP_ANNOTATION_STEP, loadVepAnnotationsStep.getStepName());
         assertEquals(BeanNames.LOAD_ANNOTATION_METADATA_STEP, loadAnnotationMetadataStep.getStepName());
 
-        //check list of variants without annotation output file
-        assertTrue(vepInput.exists());
-        assertEquals("20\t60343\t60343\tG/A\t+", JobTestUtils.readFirstLine(vepInput));
-
         //check that documents have the annotation
         DBCursor cursor = mongoRule.getCollection(dbName, COLLECTION_VARIANTS_NAME).find();
 
@@ -163,7 +157,6 @@ public class AnnotationJobTest {
     }
 
     @Test
-    @Ignore
     public void noVariantsToAnnotateOnlyGenerateAnnotationStepShouldRun() throws Exception {
         String dbName = mongoRule.getRandomTemporaryDatabaseName();
         String outputDirAnnot = temporaryFolderRule.getRoot().getAbsolutePath();

@@ -16,7 +16,6 @@
 
 package uk.ac.ebi.eva.pipeline.jobs;
 
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -66,7 +65,6 @@ public class GenotypedVcfJobTest {
             .getenv("OPENCGA_HOME") : "/opt/opencga";
 
     @Test
-    @Ignore
     public void fullGenotypedVcfJob() throws Exception {
         Config.setOpenCGAHome(opencgaHome);
         File inputFile = GenotypedVcfJobTestUtils.getInputFile();
@@ -79,7 +77,6 @@ public class GenotypedVcfJobTest {
         File variantsStatsFile = GenotypedVcfJobTestUtils.getVariantsStatsFile(outputDirStats);
         File sourceStatsFile = GenotypedVcfJobTestUtils.getSourceStatsFile(outputDirStats);
 
-        File vepInputFile = GenotypedVcfJobTestUtils.getVepInputFile(outputDirAnnotation);
         File vepOutputFile = GenotypedVcfJobTestUtils.getVepOutputFile(outputDirAnnotation);
 
         File fasta = temporaryFolderRule.newFile();
@@ -118,9 +115,7 @@ public class GenotypedVcfJobTest {
 
         GenotypedVcfJobTestUtils.checkLoadStatsStep(databaseName);
 
-        GenotypedVcfJobTestUtils.checkAnnotationInput(vepInputFile);
-
-        GenotypedVcfJobTestUtils.checkAnnotationCreateStep(vepInputFile,vepOutputFile);
+        GenotypedVcfJobTestUtils.checkAnnotationCreateStep(vepOutputFile);
 
         GenotypedVcfJobTestUtils.checkOutputFileLength(vepOutputFile);
 
