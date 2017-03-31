@@ -22,10 +22,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.util.Assert;
 
-import uk.ac.ebi.eva.commons.models.converters.data.VariantToDBObjectConverter;
-import uk.ac.ebi.eva.commons.models.converters.data.VariantSourceEntryToDBObjectConverter;
 import uk.ac.ebi.eva.commons.models.converters.data.SamplesToDBObjectConverter;
+import uk.ac.ebi.eva.commons.models.converters.data.VariantSourceEntryToDBObjectConverter;
 import uk.ac.ebi.eva.commons.models.converters.data.VariantStatsToDBObjectConverter;
+import uk.ac.ebi.eva.commons.models.converters.data.VariantToDBObjectConverter;
 import uk.ac.ebi.eva.commons.models.data.Variant;
 import uk.ac.ebi.eva.commons.models.data.VariantSourceEntry;
 

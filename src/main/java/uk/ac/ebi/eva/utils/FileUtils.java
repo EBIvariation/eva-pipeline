@@ -19,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
+
 import uk.ac.ebi.eva.pipeline.io.GzipLazyResource;
 
 import java.io.File;

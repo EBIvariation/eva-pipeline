@@ -32,7 +32,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 /**
- * Decider used to skip step(s) if the file vepInput is empty
+ * Decider used to skip step(s) if the file vepOutput is empty
  */
 public class EmptyVepOutputDecider implements JobExecutionDecider {
     private static final Logger logger = LoggerFactory.getLogger(EmptyVepOutputDecider.class);
@@ -43,10 +43,10 @@ public class EmptyVepOutputDecider implements JobExecutionDecider {
 
     @Override
     public FlowExecutionStatus decide(JobExecution jobExecution, StepExecution stepExecution) {
-        String vepInput = getVepOutput(jobExecution);
+        String vepOutput = getVepOutput(jobExecution);
 
-        if (getFileSize(vepInput) <= 0) {
-            logger.info("File {} is empty so following steps will not run", vepInput);
+        if (getFileSize(vepOutput) <= 0) {
+            logger.info("File {} is empty so following steps will not run", vepOutput);
             return new FlowExecutionStatus(STOP_FLOW);
         }
 

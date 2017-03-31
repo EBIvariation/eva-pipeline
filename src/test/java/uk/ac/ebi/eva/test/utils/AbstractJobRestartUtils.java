@@ -36,6 +36,7 @@ import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+
 import uk.ac.ebi.eva.runner.JobRestartAsynchronousTest;
 
 import java.util.Arrays;

@@ -16,6 +16,7 @@
 package uk.ac.ebi.eva.pipeline.io.readers;
 
 import org.opencb.biodata.models.variant.VariantSource;
+
 import uk.ac.ebi.eva.pipeline.io.mappers.AggregatedVcfLineMapper;
 
 import java.io.File;

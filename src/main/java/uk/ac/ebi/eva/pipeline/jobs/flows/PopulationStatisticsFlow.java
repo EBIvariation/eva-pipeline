@@ -24,6 +24,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+
 import uk.ac.ebi.eva.pipeline.jobs.steps.CalculateStatisticsStep;
 import uk.ac.ebi.eva.pipeline.jobs.steps.LoadStatisticsStep;
 

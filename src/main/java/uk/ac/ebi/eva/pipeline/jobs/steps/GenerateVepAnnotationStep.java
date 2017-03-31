@@ -41,9 +41,6 @@ import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.NON_ANNOTATED_VARIA
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VEP_ANNOTATION_WRITER;
 
 /**
- * Configuration class that inject a step created with the tasklet {@link VepAnnotationGeneratorStep}
- */
-/**
  * This step creates a file with variant annotations.
  * <p>
  * input: mongo collection with the variants. Only non-annotated variants will be retrieved.

@@ -16,6 +16,7 @@
 package uk.ac.ebi.eva.pipeline.jobs.steps.processors;
 
 import org.springframework.batch.item.ItemProcessor;
+
 import uk.ac.ebi.eva.pipeline.model.FeatureCoordinates;
 
 /**

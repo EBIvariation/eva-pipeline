@@ -17,6 +17,7 @@ package uk.ac.ebi.eva.pipeline.configuration;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
 import uk.ac.ebi.eva.pipeline.runner.JobExecutionApplicationListener;
 
 /**

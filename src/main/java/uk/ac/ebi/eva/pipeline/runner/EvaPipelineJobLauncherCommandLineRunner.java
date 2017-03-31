@@ -40,6 +40,7 @@ import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.stereotype.Component;
 import org.springframework.util.PatternMatchUtils;
 import org.springframework.util.StringUtils;
+
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 import uk.ac.ebi.eva.pipeline.runner.exceptions.NoJobToExecuteException;
 import uk.ac.ebi.eva.pipeline.runner.exceptions.NoParametersHaveBeenPassedException;

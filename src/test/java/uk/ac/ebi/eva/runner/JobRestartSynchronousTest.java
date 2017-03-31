@@ -26,6 +26,7 @@ import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
+
 import uk.ac.ebi.eva.test.configuration.SynchronousBatchTestConfiguration;
 import uk.ac.ebi.eva.test.utils.AbstractJobRestartUtils;
 

@@ -25,8 +25,8 @@ import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 import uk.ac.ebi.eva.pipeline.parameters.validation.step.AnnotationLoaderStepParametersValidator;
 import uk.ac.ebi.eva.pipeline.parameters.validation.step.AnnotationMetadataStepParametersValidator;
 import uk.ac.ebi.eva.pipeline.parameters.validation.step.FileLoaderStepParametersValidator;
+import uk.ac.ebi.eva.pipeline.parameters.validation.step.GenerateVepAnnotationStepParametersValidator;
 import uk.ac.ebi.eva.pipeline.parameters.validation.step.VariantLoaderStepParametersValidator;
-import uk.ac.ebi.eva.pipeline.parameters.validation.step.VepAnnotationGeneratorStepParametersValidator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,7 +51,7 @@ public class AggregatedVcfJobParametersValidator extends DefaultJobParametersVal
         if (!skipAnnotation) {
             boolean studyIdRequired = true;
 
-            jobParametersValidators.add(new VepAnnotationGeneratorStepParametersValidator(studyIdRequired));
+            jobParametersValidators.add(new GenerateVepAnnotationStepParametersValidator(studyIdRequired));
             jobParametersValidators.add(new AnnotationLoaderStepParametersValidator(studyIdRequired));
             jobParametersValidators.add(new AnnotationMetadataStepParametersValidator());
         }

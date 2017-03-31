@@ -18,6 +18,7 @@ package uk.ac.ebi.eva.pipeline.io.writers;
 
 import org.springframework.batch.item.data.MongoItemWriter;
 import org.springframework.data.mongodb.core.MongoOperations;
+
 import uk.ac.ebi.eva.pipeline.model.PopulationStatistics;
 
 /**

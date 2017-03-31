@@ -151,7 +151,7 @@ public class AggregatedVcfJobParametersValidatorTest {
     /**
      * The parameter APP_VEP_CACHE_SPECIES is chosen as one belonging to the annotation parameters. We don't check
      * for every annotation parameter, because in AnnotationLoaderStepParametersValidatorTest and
-     * VepAnnotationGeneratorStepParametersValidatorTest, it is already
+     * GenerateVepAnnotationStepParametersValidatorTest, it is already
      * checked that every missing required parameter makes the validation fail.
      */
     @Test(expected = JobParametersInvalidException.class)

@@ -34,8 +34,26 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.zip.GZIPOutputStream;
 
 /**
- * Class that launches a VEP process, and allows to write bytes to it (variant coordinates seralized), which will be
- * annotated and written to a file.
+ * Class that launches a VEP process (@see <a href="http://www.ensembl.org/info/docs/tools/vep/index.html">VEP</a>),
+ * and allows to write bytes to it (variant coordinates seralized), which will be annotated and written to a file.
+ * Tasklet that runs @see <a href="http://www.ensembl.org/info/docs/tools/vep/index.html">VEP</a> over a list of
+ * coordinates of variants and nucleotide changes to determines the effect of the mutations.
+ * <p>
+ * Input: each line (in bytes) of the coordinates of variants and nucleotide changes like:
+ * {@code
+ * 20	60343	60343	G/A	+
+ * 20	60419	60419	A/G	+
+ * 20	60479	60479	C/T	+
+ * ...
+ * }
+ * <p>
+ * {@code
+ * Output: file containing the VEP output
+ * 20_60343_G/A	20:60343	A	-	-	-	intergenic_variant	-	-	-	-	-	-
+ * 20_60419_A/G	20:60419	G	-	-	-	intergenic_variant	-	-	-	-	-	-
+ * 20_60479_C/T	20:60479	T	-	-	-	intergenic_variant	-	-	-	-	-	rs149529999	GMAF=T:0.0018;AFR_MAF=T:0.01;AMR_MAF=T:0.0028
+ * ..
+ * }
  */
 public class VepProcess {
     private static final Logger logger = LoggerFactory.getLogger(VepProcess.class);
