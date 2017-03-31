@@ -22,7 +22,6 @@ import org.springframework.batch.core.job.CompositeJobParametersValidator;
 import org.springframework.batch.core.job.DefaultJobParametersValidator;
 
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
-import uk.ac.ebi.eva.pipeline.parameters.validation.InputStudyIdValidator;
 import uk.ac.ebi.eva.pipeline.parameters.validation.step.AnnotationLoaderStepParametersValidator;
 import uk.ac.ebi.eva.pipeline.parameters.validation.step.AnnotationMetadataStepParametersValidator;
 import uk.ac.ebi.eva.pipeline.parameters.validation.step.FileLoaderStepParametersValidator;
@@ -53,11 +52,10 @@ public class GenotypedVcfJobParametersValidator extends DefaultJobParametersVali
 
         Boolean skipAnnotation = Boolean.valueOf(jobParameters.getString(JobParametersNames.ANNOTATION_SKIP));
         if (!skipAnnotation) {
-            // the next validator is required only in some jobs that use the annotation steps, the steps don't include it
-            jobParametersValidators.add(new InputStudyIdValidator());
+            boolean studyIdRequired = true;
 
             jobParametersValidators.add(new VepInputGeneratorStepParametersValidator());
-            jobParametersValidators.add(new VepAnnotationGeneratorStepParametersValidator());
+            jobParametersValidators.add(new VepAnnotationGeneratorStepParametersValidator(studyIdRequired));
             jobParametersValidators.add(new AnnotationLoaderStepParametersValidator());
             jobParametersValidators.add(new AnnotationMetadataStepParametersValidator());
         }

@@ -30,14 +30,12 @@ import uk.ac.ebi.eva.pipeline.parameters.validation.InputVcfIdValidator;
 import uk.ac.ebi.eva.pipeline.parameters.validation.OptionalValidator;
 import uk.ac.ebi.eva.pipeline.parameters.validation.OutputDirAnnotationValidator;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 /**
  * Validates the job parameters necessary to execute a {@link uk.ac.ebi.eva.pipeline.jobs.steps.VepInputGeneratorStep}
- * <p>
- * The parameters OUTPUT_DIR_ANNOTATION, INPUT_STUDY_ID and INPUT_VCF_ID are used to build the VEP input option
- * {@see uk.ac.ebi.eva.pipeline.configuration.JobOptions#loadPipelineOptions()}
  */
 public class VepInputGeneratorStepParametersValidator extends DefaultJobParametersValidator {
 
@@ -56,14 +54,14 @@ public class VepInputGeneratorStepParametersValidator extends DefaultJobParamete
     }
 
     private CompositeJobParametersValidator compositeJobParametersValidator() {
-        final List<JobParametersValidator> jobParametersValidators = Arrays.asList(
+        final List<JobParametersValidator> jobParametersValidators = new ArrayList<>(Arrays.asList(
                 new DbCollectionsVariantsNameValidator(),
                 new DbNameValidator(),
                 new InputVcfIdValidator(),
                 new OutputDirAnnotationValidator(),
                 new OptionalValidator(new ConfigChunkSizeValidator(), JobParametersNames.CONFIG_CHUNK_SIZE),
                 new OptionalValidator(new ConfigRestartabilityAllowValidator(), JobParametersNames.CONFIG_RESTARTABILITY_ALLOW)
-        );
+        ));
 
         CompositeJobParametersValidator compositeJobParametersValidator = new CompositeJobParametersValidator();
         compositeJobParametersValidator.setValidators(jobParametersValidators);

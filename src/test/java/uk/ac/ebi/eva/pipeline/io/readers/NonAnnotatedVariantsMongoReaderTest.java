@@ -81,12 +81,11 @@ public class NonAnnotatedVariantsMongoReaderTest {
     }
 
     @Test
-    public void shouldReadVariantsWithoutAnnotationField() throws Exception {
+    public void shouldReadVariantsWithoutAnnotationFieldInAllStudies() throws Exception {
         checkNonAnnotatedVariantsRead(EXPECTED_NON_ANNOTATED_VARIANTS_IN_DB, ALL_STUDIES);
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void testStudyIdIsRequired() throws Exception {
+    public void shouldReadVariantsWithoutAnnotationFieldInAllStudiesUsingNull() throws Exception {
         checkNonAnnotatedVariantsRead(EXPECTED_NON_ANNOTATED_VARIANTS_IN_DB, null);
     }
 
