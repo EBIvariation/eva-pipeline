@@ -100,6 +100,42 @@ public class AnnotationParameters {
     public String getVepOutput() {
         return URLHelper.resolveVepOutput(outputDirAnnotation, studyId, fileId);
     }
+
+    public void setOutputDirAnnotation(String outputDirAnnotation) {
+        this.outputDirAnnotation = outputDirAnnotation;
+    }
+
+    public void setStudyId(String studyId) {
+        this.studyId = studyId;
+    }
+
+    public void setFileId(String fileId) {
+        this.fileId = fileId;
+    }
+
+    public void setVepPath(String vepPath) {
+        this.vepPath = vepPath;
+    }
+
+    public void setVepCacheVersion(String vepCacheVersion) {
+        this.vepCacheVersion = vepCacheVersion;
+    }
+
+    public void setVepCachePath(String vepCachePath) {
+        this.vepCachePath = vepCachePath;
+    }
+
+    public void setVepCacheSpecies(String vepCacheSpecies) {
+        this.vepCacheSpecies = vepCacheSpecies;
+    }
+
+    public void setVepNumForks(String vepNumForks) {
+        this.vepNumForks = vepNumForks;
+    }
+
+    public void setInputFasta(String inputFasta) {
+        this.inputFasta = inputFasta;
+    }
 }
 
 
