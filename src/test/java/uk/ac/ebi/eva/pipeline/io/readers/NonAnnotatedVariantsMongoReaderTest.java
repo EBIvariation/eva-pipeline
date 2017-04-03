@@ -15,11 +15,11 @@
  */
 package uk.ac.ebi.eva.pipeline.io.readers;
 
-import com.mongodb.DBObject;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.batch.core.JobParametersInvalidException;
+import org.opencb.biodata.models.variant.Variant;
+import org.opencb.biodata.models.variant.annotation.VariantAnnotation;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.test.MetaDataInstanceFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,18 +30,20 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import uk.ac.ebi.eva.commons.models.converters.data.VariantToDBObjectConverter;
 import uk.ac.ebi.eva.pipeline.Application;
 import uk.ac.ebi.eva.pipeline.configuration.MongoConfiguration;
+import uk.ac.ebi.eva.pipeline.model.VariantWrapper;
 import uk.ac.ebi.eva.pipeline.parameters.MongoConnection;
 import uk.ac.ebi.eva.test.data.VariantData;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 
+import java.lang.reflect.Field;
 import java.util.Arrays;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNull;
 
 /**
  * {@link NonAnnotatedVariantsMongoReader}
@@ -79,12 +81,11 @@ public class NonAnnotatedVariantsMongoReaderTest {
     }
 
     @Test
-    public void shouldReadVariantsWithoutAnnotationField() throws Exception {
+    public void shouldReadVariantsWithoutAnnotationFieldInAllStudies() throws Exception {
         checkNonAnnotatedVariantsRead(EXPECTED_NON_ANNOTATED_VARIANTS_IN_DB, ALL_STUDIES);
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void testStudyIdIsRequired() throws Exception {
+    public void shouldReadVariantsWithoutAnnotationFieldInAllStudiesUsingNull() throws Exception {
         checkNonAnnotatedVariantsRead(EXPECTED_NON_ANNOTATED_VARIANTS_IN_DB, null);
     }
 
@@ -103,12 +104,16 @@ public class NonAnnotatedVariantsMongoReaderTest {
         mongoItemReader.open(executionContext);
 
         int itemCount = 0;
-        DBObject variantMongoDocument;
-        while ((variantMongoDocument = mongoItemReader.read()) != null) {
+        VariantWrapper variantWrapper;
+        while ((variantWrapper = mongoItemReader.read()) != null) {
             itemCount++;
-            assertTrue(variantMongoDocument.containsField(VariantToDBObjectConverter.CHROMOSOME_FIELD));
-            assertTrue(variantMongoDocument.containsField(VariantToDBObjectConverter.START_FIELD));
-            assertFalse(variantMongoDocument.containsField(VariantToDBObjectConverter.ANNOTATION_FIELD));
+            assertFalse(variantWrapper.getChr().isEmpty());
+            assertNotEquals(0, variantWrapper.getStart());
+
+            Field privateVariantField = VariantWrapper.class.getDeclaredField("variant");
+            privateVariantField.setAccessible(true);
+            VariantAnnotation annotation = ((Variant) privateVariantField.get(variantWrapper)).getAnnotation();
+            assertNull(annotation.getConsequenceTypes());
         }
         assertEquals(expectedNonAnnotatedVariants, itemCount);
         mongoItemReader.close();

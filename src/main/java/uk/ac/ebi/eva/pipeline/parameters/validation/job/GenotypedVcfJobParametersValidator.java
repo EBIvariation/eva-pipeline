@@ -52,9 +52,11 @@ public class GenotypedVcfJobParametersValidator extends DefaultJobParametersVali
 
         Boolean skipAnnotation = Boolean.valueOf(jobParameters.getString(JobParametersNames.ANNOTATION_SKIP));
         if (!skipAnnotation) {
+            boolean studyIdRequired = true;
+
             jobParametersValidators.add(new VepInputGeneratorStepParametersValidator());
-            jobParametersValidators.add(new VepAnnotationGeneratorStepParametersValidator());
-            jobParametersValidators.add(new AnnotationLoaderStepParametersValidator());
+            jobParametersValidators.add(new VepAnnotationGeneratorStepParametersValidator(studyIdRequired));
+            jobParametersValidators.add(new AnnotationLoaderStepParametersValidator(studyIdRequired));
             jobParametersValidators.add(new AnnotationMetadataStepParametersValidator());
         }
 

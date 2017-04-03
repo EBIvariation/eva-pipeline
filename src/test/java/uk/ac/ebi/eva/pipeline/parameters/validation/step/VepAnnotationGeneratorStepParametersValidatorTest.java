@@ -45,7 +45,8 @@ public class VepAnnotationGeneratorStepParametersValidatorTest {
 
     @Before
     public void setUp() throws IOException {
-        validator = new VepAnnotationGeneratorStepParametersValidator();
+        boolean studyIdRequired = true;
+        validator = new VepAnnotationGeneratorStepParametersValidator(studyIdRequired);
 
         requiredParameters = new TreeMap<>();
         requiredParameters.put(JobParametersNames.APP_VEP_CACHE_PATH,
@@ -111,9 +112,27 @@ public class VepAnnotationGeneratorStepParametersValidatorTest {
         validator.validate(new JobParameters(requiredParameters));
     }
 
+    @Test
+    public void inputStudyIdIsNotRequired() throws JobParametersInvalidException, IOException {
+        requiredParameters.remove(JobParametersNames.INPUT_STUDY_ID);
+
+        boolean studyIdNotRequired = false;
+        validator = new VepAnnotationGeneratorStepParametersValidator(studyIdNotRequired);
+        validator.validate(new JobParameters(requiredParameters));
+    }
+
     @Test(expected = JobParametersInvalidException.class)
     public void inputVcfIdIsRequired() throws JobParametersInvalidException, IOException {
         requiredParameters.remove(JobParametersNames.INPUT_VCF_ID);
+        validator.validate(new JobParameters(requiredParameters));
+    }
+
+    @Test
+    public void inputVcfIdIsNotRequired() throws JobParametersInvalidException, IOException {
+        requiredParameters.remove(JobParametersNames.INPUT_VCF_ID);
+
+        boolean studyIdNotRequired = false;
+        validator = new VepAnnotationGeneratorStepParametersValidator(studyIdNotRequired);
         validator.validate(new JobParameters(requiredParameters));
     }
 

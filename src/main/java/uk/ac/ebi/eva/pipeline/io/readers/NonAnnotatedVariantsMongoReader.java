@@ -18,10 +18,17 @@ package uk.ac.ebi.eva.pipeline.io.readers;
 import com.mongodb.BasicDBObject;
 import com.mongodb.BasicDBObjectBuilder;
 import com.mongodb.DBObject;
+import org.opencb.biodata.models.variant.Variant;
+import org.opencb.opencga.storage.mongodb.variant.DBObjectToVariantConverter;
+import org.springframework.batch.item.ExecutionContext;
+import org.springframework.batch.item.ItemStreamException;
+import org.springframework.batch.item.ItemStreamReader;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.data.mongodb.core.MongoOperations;
 
 import uk.ac.ebi.eva.commons.models.converters.data.VariantSourceEntryToDBObjectConverter;
 import uk.ac.ebi.eva.commons.models.converters.data.VariantToDBObjectConverter;
+import uk.ac.ebi.eva.pipeline.model.VariantWrapper;
 
 import javax.annotation.PostConstruct;
 
@@ -31,39 +38,66 @@ import javax.annotation.PostConstruct;
  * {@link org.springframework.batch.item.data.MongoItemReader} is using
  * pagination and it is slow with large collections
  */
-public class NonAnnotatedVariantsMongoReader extends MongoDbCursorItemReader {
+public class NonAnnotatedVariantsMongoReader implements ItemStreamReader<VariantWrapper>, InitializingBean {
+
+    private MongoDbCursorItemReader delegateReader;
+
+    private DBObjectToVariantConverter converter;
 
     private static final String STUDY_KEY = VariantToDBObjectConverter.FILES_FIELD + "."
             + VariantSourceEntryToDBObjectConverter.STUDYID_FIELD;
 
     /**
-     * @param studyId Can be the empty string, meaning to bring all non-annotated variants in the collection.
-     *  If the studyId string is not empty, bring only non-annotated variants from that study. This parameter should
-     *  not be null in any case.
+     * @param studyId Can be the empty string or null, meaning to bring all non-annotated variants in the collection.
+     * If the studyId string is not empty, bring only non-annotated variants from that study.
      */
     public NonAnnotatedVariantsMongoReader(MongoOperations template, String collectionsVariantsName, String studyId) {
-        if (studyId == null) {
-            throw new IllegalArgumentException("NonAnnotatedVariantsMongoReader needs a non-null studyId " +
-                    "(it can take a studyId or an empty string for reading every study)");
-        }
-
-        setTemplate(template);
-        setCollection(collectionsVariantsName);
+        delegateReader = new MongoDbCursorItemReader();
+        delegateReader.setTemplate(template);
+        delegateReader.setCollection(collectionsVariantsName);
 
         BasicDBObjectBuilder queryBuilder = BasicDBObjectBuilder.start();
-        if (!studyId.isEmpty()) {
+        if (studyId != null && !studyId.isEmpty()) {
             queryBuilder.add(STUDY_KEY, studyId);
         }
         DBObject query = queryBuilder.add("annot.ct.so", new BasicDBObject("$exists", false)).get();
-        setQuery(query);
+        delegateReader.setQuery(query);
 
-        String[] fields = { "chr", "start", "end", "ref", "alt" };
-        setFields(fields);
+        String[] fields = {"chr", "start", "end", "ref", "alt"};
+        delegateReader.setFields(fields);
+
+        converter = new DBObjectToVariantConverter();
     }
 
     @PostConstruct
     @Override
     public void afterPropertiesSet() throws Exception {
-        super.afterPropertiesSet();
+        delegateReader.afterPropertiesSet();
+    }
+
+    @Override
+    public void open(ExecutionContext executionContext) throws ItemStreamException {
+        delegateReader.open(executionContext);
+    }
+
+    @Override
+    public VariantWrapper read() throws Exception {
+        DBObject dbObject = delegateReader.read();
+        if (dbObject != null) {
+            Variant variant = converter.convertToDataModelType(dbObject);
+            return new VariantWrapper(variant);
+        } else {
+            return null;
+        }
+    }
+
+    @Override
+    public void update(ExecutionContext executionContext) throws ItemStreamException {
+        delegateReader.update(executionContext);
+    }
+
+    @Override
+    public void close() throws ItemStreamException {
+        delegateReader.close();
     }
 }

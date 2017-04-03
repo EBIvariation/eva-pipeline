@@ -34,14 +34,15 @@ import uk.ac.ebi.eva.utils.URLHelper;
 public class AnnotationParameters {
     private static final String PARAMETER = "#{jobParameters['";
     private static final String END = "']}";
+    private static final String OR_EMPTY = "']?:''}";
 
     @Value(PARAMETER + JobParametersNames.OUTPUT_DIR_ANNOTATION + END)
     private String outputDirAnnotation;
 
-    @Value(PARAMETER + JobParametersNames.INPUT_STUDY_ID + END)
+    @Value(PARAMETER + JobParametersNames.INPUT_STUDY_ID + OR_EMPTY)
     private String studyId;
 
-    @Value(PARAMETER + JobParametersNames.INPUT_VCF_ID + END)
+    @Value(PARAMETER + JobParametersNames.INPUT_VCF_ID + OR_EMPTY)
     private String fileId;
 
     @Value(PARAMETER + JobParametersNames.APP_VEP_PATH + END)

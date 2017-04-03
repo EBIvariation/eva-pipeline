@@ -24,7 +24,9 @@ import org.springframework.batch.core.job.DefaultJobParametersValidator;
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 import uk.ac.ebi.eva.pipeline.parameters.validation.*;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -32,13 +34,14 @@ import java.util.List;
  */
 public class AnnotationLoaderStepParametersValidator extends DefaultJobParametersValidator {
 
-    public AnnotationLoaderStepParametersValidator() {
+    private boolean isStudyIdRequired;
+
+    public AnnotationLoaderStepParametersValidator(boolean isStudyIdRequired) {
         super(new String[]{JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME,
                            JobParametersNames.DB_NAME,
-                           JobParametersNames.OUTPUT_DIR_ANNOTATION,
-                           JobParametersNames.INPUT_STUDY_ID,
-                           JobParametersNames.INPUT_VCF_ID},
+                           JobParametersNames.OUTPUT_DIR_ANNOTATION},
                 new String[]{});
+        this.isStudyIdRequired = isStudyIdRequired;
     }
 
     @Override
@@ -48,16 +51,20 @@ public class AnnotationLoaderStepParametersValidator extends DefaultJobParameter
     }
 
     private CompositeJobParametersValidator compositeJobParametersValidator() {
-        final List<JobParametersValidator> jobParametersValidators = Arrays.asList(
+        List<JobParametersValidator> jobParametersValidators = new ArrayList<>();
+        Collections.addAll(jobParametersValidators,
                 new DbCollectionsVariantsNameValidator(),
                 new DbNameValidator(),
                 new OutputDirAnnotationValidator(),
-                new InputStudyIdValidator(),
-                new InputVcfIdValidator(),
                 new OptionalValidator(new ConfigRestartabilityAllowValidator(),
                                       JobParametersNames.CONFIG_RESTARTABILITY_ALLOW),
                 new OptionalValidator(new ConfigChunkSizeValidator(), JobParametersNames.CONFIG_CHUNK_SIZE)
         );
+
+        if (isStudyIdRequired) {
+            jobParametersValidators.add(new InputStudyIdValidator());
+            jobParametersValidators.add(new InputVcfIdValidator());
+        }
 
         CompositeJobParametersValidator compositeJobParametersValidator = new CompositeJobParametersValidator();
         compositeJobParametersValidator.setValidators(jobParametersValidators);
