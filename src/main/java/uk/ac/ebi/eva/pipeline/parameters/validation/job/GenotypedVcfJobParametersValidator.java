@@ -56,7 +56,7 @@ public class GenotypedVcfJobParametersValidator extends DefaultJobParametersVali
 
             jobParametersValidators.add(new VepInputGeneratorStepParametersValidator());
             jobParametersValidators.add(new VepAnnotationGeneratorStepParametersValidator(studyIdRequired));
-            jobParametersValidators.add(new AnnotationLoaderStepParametersValidator());
+            jobParametersValidators.add(new AnnotationLoaderStepParametersValidator(studyIdRequired));
             jobParametersValidators.add(new AnnotationMetadataStepParametersValidator());
         }
 

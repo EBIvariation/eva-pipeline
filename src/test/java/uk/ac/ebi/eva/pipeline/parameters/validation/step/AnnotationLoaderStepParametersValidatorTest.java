@@ -45,7 +45,8 @@ public class AnnotationLoaderStepParametersValidatorTest {
 
     @Before
     public void setUp() throws Exception {
-        validator = new AnnotationLoaderStepParametersValidator();
+        boolean studyIdRequired = true;
+        validator = new AnnotationLoaderStepParametersValidator(studyIdRequired);
         final String dir = temporaryFolder.getRoot().getCanonicalPath();
 
         requiredParameters = new TreeMap<>();
@@ -98,9 +99,27 @@ public class AnnotationLoaderStepParametersValidatorTest {
         validator.validate(new JobParameters(requiredParameters));
     }
 
+    @Test
+    public void inputVcfIdIsNotRequired() throws JobParametersInvalidException, IOException {
+        requiredParameters.remove(JobParametersNames.INPUT_VCF_ID);
+
+        boolean studyIdNotRequired = false;
+        validator = new AnnotationLoaderStepParametersValidator(studyIdNotRequired);
+        validator.validate(new JobParameters(requiredParameters));
+    }
+
     @Test(expected = JobParametersInvalidException.class)
     public void inputStudyIdIsRequired() throws JobParametersInvalidException, IOException {
         requiredParameters.remove(JobParametersNames.INPUT_STUDY_ID);
+        validator.validate(new JobParameters(requiredParameters));
+    }
+
+    @Test
+    public void inputStudyIdIsNotRequired() throws JobParametersInvalidException, IOException {
+        requiredParameters.remove(JobParametersNames.INPUT_STUDY_ID);
+
+        boolean studyIdNotRequired = false;
+        validator = new AnnotationLoaderStepParametersValidator(studyIdNotRequired);
         validator.validate(new JobParameters(requiredParameters));
     }
 }

@@ -127,6 +127,15 @@ public class VepAnnotationGeneratorStepParametersValidatorTest {
         validator.validate(new JobParameters(requiredParameters));
     }
 
+    @Test
+    public void inputVcfIdIsNotRequired() throws JobParametersInvalidException, IOException {
+        requiredParameters.remove(JobParametersNames.INPUT_VCF_ID);
+
+        boolean studyIdNotRequired = false;
+        validator = new VepAnnotationGeneratorStepParametersValidator(studyIdNotRequired);
+        validator.validate(new JobParameters(requiredParameters));
+    }
+
     @Test(expected = JobParametersInvalidException.class)
     public void outputDirAnnotationIsRequired() throws JobParametersInvalidException, IOException {
         requiredParameters.remove(JobParametersNames.OUTPUT_DIR_ANNOTATION);
