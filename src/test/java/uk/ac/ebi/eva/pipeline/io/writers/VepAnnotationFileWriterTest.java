@@ -84,8 +84,8 @@ public class VepAnnotationFileWriterTest {
         List<VariantWrapper> variantWrappers = Collections.singletonList(variantWrapper);
         int chunkSize = variantWrappers.size();
 
-        VepAnnotationFileWriter vepAnnotationFileWriter = new VepAnnotationFileWriter(TIMEOUT_IN_SECONDS, chunkSize,
-                annotationParameters);
+        VepAnnotationFileWriter vepAnnotationFileWriter = new VepAnnotationFileWriter(annotationParameters, chunkSize,
+                TIMEOUT_IN_SECONDS);
 
         vepAnnotationFileWriter.open(null);
         vepAnnotationFileWriter.write(variantWrappers);
@@ -108,8 +108,8 @@ public class VepAnnotationFileWriterTest {
         }
         int chunkSize = 5;
 
-        VepAnnotationFileWriter vepAnnotationFileWriter = new VepAnnotationFileWriter(TIMEOUT_IN_SECONDS, chunkSize,
-                annotationParameters);
+        VepAnnotationFileWriter vepAnnotationFileWriter = new VepAnnotationFileWriter(annotationParameters, chunkSize,
+                TIMEOUT_IN_SECONDS);
 
         vepAnnotationFileWriter.open(null);
         vepAnnotationFileWriter.write(variantWrappers);
@@ -129,8 +129,8 @@ public class VepAnnotationFileWriterTest {
         List<VariantWrapper> variantWrappers = Collections.singletonList(variantWrapper);
         int chunkSizeGreaterThanActualVariants = variantWrappers.size() * 10;
 
-        VepAnnotationFileWriter vepAnnotationFileWriter = new VepAnnotationFileWriter(TIMEOUT_IN_SECONDS,
-                chunkSizeGreaterThanActualVariants, annotationParameters);
+        VepAnnotationFileWriter vepAnnotationFileWriter = new VepAnnotationFileWriter(annotationParameters,
+                chunkSizeGreaterThanActualVariants, TIMEOUT_IN_SECONDS);
 
         vepAnnotationFileWriter.open(null);
         vepAnnotationFileWriter.write(variantWrappers);
@@ -152,8 +152,8 @@ public class VepAnnotationFileWriterTest {
         annotationParameters.setVepPath(getResource("/mockvep_writeToFile_delayed.pl").getAbsolutePath());
 
         long vepTimeouts = 1;
-        VepAnnotationFileWriter vepAnnotationFileWriter = new VepAnnotationFileWriter(vepTimeouts,
-                chunkSizeGreaterThanActualVariants, annotationParameters);
+        VepAnnotationFileWriter vepAnnotationFileWriter = new VepAnnotationFileWriter(annotationParameters,
+                chunkSizeGreaterThanActualVariants, vepTimeouts);
 
         vepAnnotationFileWriter.open(null);
         vepAnnotationFileWriter.write(variantWrappers);

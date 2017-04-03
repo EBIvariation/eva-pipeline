@@ -35,7 +35,7 @@ public class VepAnnotationFileWriterConfiguration {
     public ItemStreamWriter<VariantWrapper> vepAnnotationFileWriter(AnnotationParameters annotationParameters,
             ChunkSizeParameters chunkSizeParameters) {
         long timeoutInSeconds = 600L;   // TODO extract as a pipeline parameter
-        return new VepAnnotationFileWriter(timeoutInSeconds, chunkSizeParameters.getChunkSize(), annotationParameters);
+        return new VepAnnotationFileWriter(annotationParameters, chunkSizeParameters.getChunkSize(), timeoutInSeconds);
     }
 
 }

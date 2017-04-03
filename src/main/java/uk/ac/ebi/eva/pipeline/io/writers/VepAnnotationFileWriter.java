@@ -34,7 +34,7 @@ public class VepAnnotationFileWriter implements ItemStreamWriter<VariantWrapper>
 
     private boolean vepProcessOpened = false;
 
-    public VepAnnotationFileWriter(Long timeoutInSeconds, Integer chunkSize, AnnotationParameters annotationParameters) {
+    public VepAnnotationFileWriter(AnnotationParameters annotationParameters, Integer chunkSize, Long timeoutInSeconds) {
         vepProcess = new VepProcess(annotationParameters, chunkSize, timeoutInSeconds);
     }
 
