@@ -35,6 +35,7 @@ import uk.ac.ebi.eva.pipeline.parameters.validation.VepPathValidator;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -54,7 +55,6 @@ public class VepAnnotationGeneratorStepParametersValidator extends DefaultJobPar
                            JobParametersNames.APP_VEP_NUMFORKS,
                            JobParametersNames.APP_VEP_PATH,
                            JobParametersNames.INPUT_FASTA,
-                           JobParametersNames.INPUT_VCF_ID,
                            JobParametersNames.OUTPUT_DIR_ANNOTATION},
               new String[]{});
         this.isStudyIdRequired = isStudyIdRequired;
@@ -67,19 +67,20 @@ public class VepAnnotationGeneratorStepParametersValidator extends DefaultJobPar
     }
 
     private CompositeJobParametersValidator compositeJobParametersValidator() {
-        List<JobParametersValidator> jobParametersValidators = new ArrayList<>(Arrays.asList(
+        List<JobParametersValidator> jobParametersValidators = new ArrayList<>();
+        Collections.addAll(jobParametersValidators,
                 new VepPathValidator(),
                 new VepCacheVersionValidator(),
                 new VepCachePathValidator(),
                 new VepCacheSpeciesValidator(),
                 new InputFastaValidator(),
                 new VepNumForksValidator(),
-                new OutputDirAnnotationValidator(),
-                new InputVcfIdValidator()
-        ));
+                new OutputDirAnnotationValidator()
+        );
 
         if (isStudyIdRequired) {
             jobParametersValidators.add(new InputStudyIdValidator());
+            jobParametersValidators.add(new InputVcfIdValidator());
         }
 
         CompositeJobParametersValidator compositeJobParametersValidator = new CompositeJobParametersValidator();

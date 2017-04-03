@@ -42,7 +42,7 @@ public class AnnotationParameters {
     @Value(PARAMETER + JobParametersNames.INPUT_STUDY_ID + OR_EMPTY)
     private String studyId;
 
-    @Value(PARAMETER + JobParametersNames.INPUT_VCF_ID + END)
+    @Value(PARAMETER + JobParametersNames.INPUT_VCF_ID + OR_EMPTY)
     private String fileId;
 
     @Value(PARAMETER + JobParametersNames.APP_VEP_PATH + END)
