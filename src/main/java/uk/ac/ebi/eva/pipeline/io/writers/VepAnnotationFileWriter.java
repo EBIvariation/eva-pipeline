@@ -19,6 +19,7 @@ import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.item.ItemStreamException;
 import org.springframework.batch.item.ItemStreamWriter;
 
+import uk.ac.ebi.eva.pipeline.io.VepProcess;
 import uk.ac.ebi.eva.pipeline.model.VariantWrapper;
 import uk.ac.ebi.eva.pipeline.parameters.AnnotationParameters;
 
@@ -38,7 +39,7 @@ public class VepAnnotationFileWriter implements ItemStreamWriter<VariantWrapper>
 
     @Override
     public void open(ExecutionContext executionContext) throws ItemStreamException {
-        // don't open: we need lazy opening because vep fails if there are no writes
+        // don't open: we need lazy opening because vep fails if there is nothing to write
     }
 
 

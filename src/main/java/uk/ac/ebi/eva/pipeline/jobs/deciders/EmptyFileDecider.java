@@ -45,7 +45,7 @@ public class EmptyFileDecider implements JobExecutionDecider {
     public FlowExecutionStatus decide(JobExecution jobExecution, StepExecution stepExecution) {
 
         if (getFileSize() <= 0) {
-            logger.info("File {} is empty so following steps will not run", file);
+            logger.info("File {} is empty so subsequent steps will not run", file);
             return new FlowExecutionStatus(STOP_FLOW);
         }
 

@@ -46,7 +46,7 @@ public class EmptyVepOutputDecider implements JobExecutionDecider {
         String vepOutput = getVepOutput(jobExecution);
 
         if (getFileSize(vepOutput) <= 0) {
-            logger.info("File {} is empty so following steps will not run", vepOutput);
+            logger.info("File {} is empty so subsequent steps will not run", vepOutput);
             return new FlowExecutionStatus(STOP_FLOW);
         }
 

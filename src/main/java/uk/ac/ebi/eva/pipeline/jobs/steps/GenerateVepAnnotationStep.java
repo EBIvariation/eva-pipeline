@@ -43,18 +43,10 @@ import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VEP_ANNOTATION_WRIT
 /**
  * This step creates a file with variant annotations.
  * <p>
- * input: mongo collection with the variants. Only non-annotated variants will be retrieved.
+ * Input: mongo collection with the variants. Only non-annotated variants will be retrieved.
  * <p>
- * output: file with the list of annotated variants, in a format written by VEP, readable with ({@link AnnotationFlatFileReader})
- * <p>
- * TODO:
- * - Handle the overwrite
- * - The variant list should be compressed. It is not possible to write into a zipped file with FlatFile item writer
- * see jmmut comment at https://github.com/EBIvariation/eva-v2/pull/22
- * We can create an extra step to convert the file and remove the nonp-zipped one
- * https://www.mkyong.com/java/how-to-compress-a-file-in-gzip-format/
- * https://examples.javacodegeeks.com/core-java/io/fileinputstream/compress-a-file-in-gzip-format-in-java/
- * http://www.journaldev.com/966/java-gzip-example-compress-and-decompress-file-in-gzip-format-in-java
+ * Output: file with the list of annotated variants, in a format written by VEP, readable with
+ * {@link AnnotationFlatFileReader}
  */
 @Configuration
 @EnableBatchProcessing

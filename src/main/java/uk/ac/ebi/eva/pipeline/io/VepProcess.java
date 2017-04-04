@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.ac.ebi.eva.pipeline.io.writers;
+package uk.ac.ebi.eva.pipeline.io;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,10 +34,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.zip.GZIPOutputStream;
 
 /**
- * Class that launches a VEP process (@see <a href="http://www.ensembl.org/info/docs/tools/vep/index.html">VEP</a>),
- * and allows to write bytes to it (variant coordinates seralized), which will be annotated and written to a file.
- * Tasklet that runs @see <a href="http://www.ensembl.org/info/docs/tools/vep/index.html">VEP</a> over a list of
- * coordinates of variants and nucleotide changes to determines the effect of the mutations.
+ * Class that launches a VEP process (@see <a href="http://www.ensembl.org/info/docs/tools/vep/index.html">VEP</a>)
+ * that generates variant annotation for a given set of variants. Variant coordinates
+ * are piped into the process via its standard input; variant annotations are read from the process' standard output
+ * and written to a compressed file.
  * <p>
  * Input: each line (in bytes) of the coordinates of variants and nucleotide changes like:
  * {@code
@@ -113,26 +113,26 @@ public class VepProcess {
         }
 
         processStandardInput = new BufferedOutputStream(process.getOutputStream());
-        String vepOutput = annotationParameters.getVepOutput();
+        String vepOutputPath = annotationParameters.getVepOutput();
 
-        captureOutput(process, vepOutput);
+        captureOutput(process, vepOutputPath);
     }
 
 
-    private void captureOutput(Process process, String vepOutput) {
+    private void captureOutput(Process process, String vepOutputPath) {
         InputStream processStandardOutput = process.getInputStream();
         writingOk = new AtomicBoolean(false);
         outputCapturer = new Thread(() -> {
             long written = 0;
-            try (GZIPOutputStream outputStream = new GZIPOutputStream(new FileOutputStream(vepOutput, APPEND))) {
+            try (GZIPOutputStream outputStream = new GZIPOutputStream(new FileOutputStream(vepOutputPath, APPEND))) {
                 written = connectStreams(new BufferedInputStream(processStandardOutput), outputStream);
                 writingOk.set(true);
             } catch (IOException e) {
-                logger.error("Writing the VEP output to " + vepOutput + " failed. ", e);
+                logger.error("Writing the VEP output to " + vepOutputPath + " failed. ", e);
             }
-            logger.info("Finished writing VEP output (" + written + " bytes written) to " + vepOutput);
+            logger.info("Finished writing VEP output (" + written + " bytes written) to " + vepOutputPath);
         });
-        logger.info("Starting writing VEP output to " + vepOutput);
+        logger.info("Starting writing VEP output to " + vepOutputPath);
         outputCapturer.start();
     }
 
@@ -157,8 +157,9 @@ public class VepProcess {
     /**
      * It is safe to call this method several times; it's idempotent.
      */
-    public void close () {
+    public void close() {
         if (isOpen()) {
+            logger.debug("About to close VEP process");
             flushToPerlStdin();
             waitUntilProcessEnds(timeoutInSeconds);
             checkExitStatus();
@@ -228,7 +229,8 @@ public class VepProcess {
 
 
     /**
-     * read all the inputStream and write it into the outputStream
+     * read all the inputStream and write it into the outputStream. This method blocks until input data is available,
+     * the end of the stream is detected, or an exception is thrown.
      */
     private long connectStreams(InputStream inputStream, OutputStream outputStream) throws IOException {
         int read = inputStream.read();
