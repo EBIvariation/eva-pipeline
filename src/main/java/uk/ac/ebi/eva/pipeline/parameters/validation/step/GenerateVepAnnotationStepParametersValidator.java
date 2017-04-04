@@ -32,6 +32,7 @@ import uk.ac.ebi.eva.pipeline.parameters.validation.VepCacheSpeciesValidator;
 import uk.ac.ebi.eva.pipeline.parameters.validation.VepCacheVersionValidator;
 import uk.ac.ebi.eva.pipeline.parameters.validation.VepNumForksValidator;
 import uk.ac.ebi.eva.pipeline.parameters.validation.VepPathValidator;
+import uk.ac.ebi.eva.pipeline.parameters.validation.VepTimeoutValidator;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -53,6 +54,7 @@ public class GenerateVepAnnotationStepParametersValidator extends DefaultJobPara
                            JobParametersNames.APP_VEP_CACHE_VERSION,
                            JobParametersNames.APP_VEP_NUMFORKS,
                            JobParametersNames.APP_VEP_PATH,
+                           JobParametersNames.APP_VEP_TIMEOUT,
                            JobParametersNames.INPUT_FASTA,
                            JobParametersNames.OUTPUT_DIR_ANNOTATION},
               new String[]{});
@@ -68,12 +70,13 @@ public class GenerateVepAnnotationStepParametersValidator extends DefaultJobPara
     private CompositeJobParametersValidator compositeJobParametersValidator() {
         List<JobParametersValidator> jobParametersValidators = new ArrayList<>();
         Collections.addAll(jobParametersValidators,
-                new VepPathValidator(),
-                new VepCacheVersionValidator(),
                 new VepCachePathValidator(),
                 new VepCacheSpeciesValidator(),
-                new InputFastaValidator(),
+                new VepCacheVersionValidator(),
                 new VepNumForksValidator(),
+                new VepPathValidator(),
+                new VepTimeoutValidator(),
+                new InputFastaValidator(),
                 new OutputDirAnnotationValidator()
         );
 

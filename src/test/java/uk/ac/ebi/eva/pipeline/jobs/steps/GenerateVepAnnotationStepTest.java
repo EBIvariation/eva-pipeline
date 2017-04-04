@@ -91,6 +91,7 @@ public class GenerateVepAnnotationStepTest {
                 .vepCacheVersion("")
                 .vepNumForks("")
                 .vepPath(getResource(MOCKVEP).getPath())
+                .vepTimeout("60")
                 .toJobParameters();
 
         // When the execute method in variantsAnnotCreate is executed

@@ -102,6 +102,7 @@ public class GenotypedVcfJobTest {
                 .vepCacheVersion("1")
                 .vepNumForks("1")
                 .vepPath(mockVep.getPath())
+                .vepTimeout("60")
                 .vepVersion("1")
                 .toJobParameters();
 
@@ -156,6 +157,7 @@ public class GenotypedVcfJobTest {
                 .vepCacheVersion("1")
                 .vepNumForks("1")
                 .vepPath(mockVep.getPath())
+                .vepTimeout("60")
                 .vepVersion("1")
                 .timestamp()
                 .toJobParameters();

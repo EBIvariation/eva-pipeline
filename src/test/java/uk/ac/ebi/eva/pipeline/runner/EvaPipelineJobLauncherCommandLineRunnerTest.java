@@ -127,6 +127,7 @@ public class EvaPipelineJobLauncherCommandLineRunnerTest {
                 .vepCacheSpecies("human")
                 .vepCacheVersion("1")
                 .vepNumForks("1")
+                .appVepTimeout("60")
                 .vepVersion("1")
                 .inputFasta(fasta.getAbsolutePath())
                 .configDbReadPreference("secondary")
@@ -195,6 +196,7 @@ public class EvaPipelineJobLauncherCommandLineRunnerTest {
                 .outputDirStatistics(outputDirStats)
                 .databaseName(databaseName)
                 .appVepPath(GenotypedVcfJobTestUtils.getMockVep().getPath())
+                .appVepTimeout("60")
                 .inputFasta(fasta.getAbsolutePath())
                 .build()
         );

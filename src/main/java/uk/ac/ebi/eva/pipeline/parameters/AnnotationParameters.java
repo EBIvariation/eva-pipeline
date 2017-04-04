@@ -63,6 +63,9 @@ public class AnnotationParameters {
     @Value(PARAMETER + JobParametersNames.APP_VEP_NUMFORKS + END)
     private String vepNumForks;
 
+    @Value(PARAMETER + JobParametersNames.APP_VEP_TIMEOUT + END)
+    private Long timeout;
+
     @Value(PARAMETER + JobParametersNames.INPUT_FASTA + END)
     private String inputFasta;
 
@@ -88,6 +91,10 @@ public class AnnotationParameters {
 
     public String getVepNumForks() {
         return vepNumForks;
+    }
+
+    public Long getTimeout() {
+        return timeout;
     }
 
     public String getInputFasta() {
@@ -132,6 +139,10 @@ public class AnnotationParameters {
 
     public void setVepNumForks(String vepNumForks) {
         this.vepNumForks = vepNumForks;
+    }
+
+    public void setTimeout(Long timeout) {
+        this.timeout = timeout;
     }
 
     public void setInputFasta(String inputFasta) {

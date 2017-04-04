@@ -112,6 +112,7 @@ public class AnnotationJobTest {
                 .vepCacheVersion("80")
                 .vepNumForks("")
                 .vepPath(getResource(MOCK_VEP).getPath())
+                .vepTimeout("60")
                 .vepVersion("80")
                 .toJobParameters();
 
@@ -177,6 +178,7 @@ public class AnnotationJobTest {
                 .vepCacheVersion("80")
                 .vepNumForks("")
                 .vepPath(getResource(MOCK_VEP).getPath())
+                .vepTimeout("60")
                 .vepVersion("80")
                 .toJobParameters();
 

@@ -62,6 +62,7 @@ public class GenerateVepAnnotationStepParametersValidatorTest {
         requiredParameters.put(JobParametersNames.INPUT_VCF_ID, new JobParameter("inputVcfId"));
         requiredParameters.put(JobParametersNames.OUTPUT_DIR_ANNOTATION,
                                new JobParameter(temporaryFolderRule.getRoot().getCanonicalPath()));
+        requiredParameters.put(JobParametersNames.APP_VEP_TIMEOUT, new JobParameter("600"));
 
     }
 
@@ -142,4 +143,9 @@ public class GenerateVepAnnotationStepParametersValidatorTest {
         validator.validate(new JobParameters(requiredParameters));
     }
 
+    @Test(expected = JobParametersInvalidException.class)
+    public void appVepTimeoutIsRequired() throws JobParametersInvalidException, IOException {
+        requiredParameters.remove(JobParametersNames.APP_VEP_TIMEOUT);
+        validator.validate(new JobParameters(requiredParameters));
+    }
 }

@@ -239,6 +239,7 @@ public class GenotypedVcfJobWorkflowTest {
                 .vepCacheVersion("1")
                 .vepNumForks("1")
                 .vepPath(getResource(MOCK_VEP).getPath())
+                .vepTimeout("60")
                 .vepVersion("1");
 
         return evaJobParameterBuilder;

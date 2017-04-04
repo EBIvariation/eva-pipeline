@@ -144,6 +144,10 @@ public class EvaCommandLineBuilder {
         return addString(JobParametersNames.APP_VEP_CACHE_SPECIES, appVepCacheSpecies);
     }
 
+    public EvaCommandLineBuilder appVepTimeout(String appVepTimeout) {
+        return addString(JobParametersNames.APP_VEP_TIMEOUT, appVepTimeout);
+    }
+
     public EvaCommandLineBuilder configDbReadPreference(String preference) {
         return addString(JobParametersNames.CONFIG_DB_READPREFERENCE, preference);
     }
