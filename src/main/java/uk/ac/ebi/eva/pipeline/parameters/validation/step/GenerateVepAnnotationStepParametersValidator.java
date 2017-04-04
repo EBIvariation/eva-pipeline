@@ -21,7 +21,7 @@ import org.springframework.batch.core.JobParametersValidator;
 import org.springframework.batch.core.job.CompositeJobParametersValidator;
 import org.springframework.batch.core.job.DefaultJobParametersValidator;
 
-import uk.ac.ebi.eva.pipeline.jobs.steps.GenerateVepAnnotationStep;
+import uk.ac.ebi.eva.pipeline.configuration.jobs.steps.GenerateVepAnnotationStepConfiguration;
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 import uk.ac.ebi.eva.pipeline.parameters.validation.AnnotationOverwriteValidator;
 import uk.ac.ebi.eva.pipeline.parameters.validation.ConfigChunkSizeValidator;
@@ -44,7 +44,7 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Validates the job parameters necessary to execute a {@link GenerateVepAnnotationStep}
+ * Validates the job parameters necessary to execute a {@link GenerateVepAnnotationStepConfiguration}
  * <p>
  * The parameters OUTPUT_DIR_ANNOTATION, INPUT_STUDY_ID and INPUT_VCF_ID are used to build the VEP input/output options
  * {@see uk.ac.ebi.eva.pipeline.configuration.JobOptions#loadPipelineOptions()}
