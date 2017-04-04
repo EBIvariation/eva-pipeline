@@ -118,6 +118,7 @@ public class VepProcess {
         captureOutput(process, vepOutput);
     }
 
+
     private void captureOutput(Process process, String vepOutput) {
         InputStream processStandardOutput = process.getInputStream();
         writingOk = new AtomicBoolean(false);
@@ -136,21 +137,28 @@ public class VepProcess {
     }
 
     public void write(byte[] bytes) throws IOException {
-        if (process == null) {
+        if (!isOpen()) {
             throw new IllegalStateException("Process must be initialized (hint: call open() before write())");
         }
         processStandardInput.write(bytes);
     }
 
+    public boolean isOpen() {
+        return process != null;
+    }
+
     public void flush() throws IOException {
-        if (process == null) {
+        if (!isOpen()) {
             throw new IllegalStateException("Process must be initialized (hint: call open() before flush())");
         }
         processStandardInput.flush();
     }
 
+    /**
+     * It is safe to call this method several times; it's idempotent.
+     */
     public void close () {
-        if (process != null) {
+        if (isOpen()) {
             flushToPerlStdin();
             waitUntilProcessEnds(timeoutInSeconds);
             checkExitStatus();
