@@ -44,7 +44,7 @@ public class BeanNames {
     public static final String LOAD_VEP_ANNOTATION_STEP = "load-vep-annotation-step";
     public static final String CALCULATE_STATISTICS_STEP = "calculate-statistics-step";
     public static final String CREATE_DATABASE_INDEXES_STEP = "create-database-indexes-step";
-    public static final String GENES_LOAD_STEP = "genes-load-step";
+    public static final String LOAD_GENES_STEP = "load-genes-step";
     public static final String GENERATE_VEP_ANNOTATION_STEP = "generate-vep-annotation";
     public static final String LOAD_STATISTICS_STEP = "load-statistics-step";
     public static final String LOAD_VARIANTS_STEP = "load-variants-step";
