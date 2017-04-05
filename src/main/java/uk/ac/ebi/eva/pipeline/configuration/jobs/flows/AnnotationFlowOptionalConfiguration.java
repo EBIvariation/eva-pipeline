@@ -28,25 +28,27 @@ import org.springframework.context.annotation.Import;
 import uk.ac.ebi.eva.pipeline.configuration.JobExecutionDeciderConfiguration;
 import uk.ac.ebi.eva.pipeline.jobs.deciders.SkipStepDecider;
 
-import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.CALCULATE_STATISTICS_FLOW;
-import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.CALCULATE_STATISTICS_OPTIONAL_FLOW;
-import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.STATISTICS_SKIP_STEP_DECIDER;
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.ANNOTATION_SKIP_STEP_DECIDER;
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VEP_ANNOTATION_FLOW;
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VEP_ANNOTATION_OPTIONAL_FLOW;
 
 /**
- * Configuration that defines a calculate statistics flow that can be skipped depending on property 'statistics.skip'
- * In the case that the property is set to false, then the process executes the flow at {@link PopulationStatisticsFlow}
+ * Configuration class that defines an annotation process that can be skipped.
+ * <p>
+ * The flow uses the skipStepDecider to execute or not the pipeline depending 'annotation.skip' flag. In the case
+ * that the annotation flag is enabled, then the annotation flow proceeds as described in {@link AnnotationFlowConfiguration}
  */
 @Configuration
 @EnableBatchProcessing
-@Import({PopulationStatisticsFlow.class, JobExecutionDeciderConfiguration.class})
-public class PopulationStatisticsOptionalFlow {
+@Import({AnnotationFlowConfiguration.class, JobExecutionDeciderConfiguration.class})
+public class AnnotationFlowOptionalConfiguration {
 
-    @Bean(CALCULATE_STATISTICS_OPTIONAL_FLOW)
-    public Flow calculateStatisticsOptionalFlow(@Qualifier(CALCULATE_STATISTICS_FLOW) Flow calculateStatisticsflow,
-                                                @Qualifier(STATISTICS_SKIP_STEP_DECIDER) JobExecutionDecider decider) {
-        return new FlowBuilder<Flow>(CALCULATE_STATISTICS_OPTIONAL_FLOW)
+    @Bean(VEP_ANNOTATION_OPTIONAL_FLOW)
+    public Flow vepAnnotationOptionalFlow(@Qualifier(VEP_ANNOTATION_FLOW) Flow vepAnnotationFlow,
+                                   @Qualifier(ANNOTATION_SKIP_STEP_DECIDER) JobExecutionDecider decider) {
+        return new FlowBuilder<Flow>(VEP_ANNOTATION_OPTIONAL_FLOW)
                 .start(decider).on(SkipStepDecider.DO_STEP)
-                .to(calculateStatisticsflow)
+                .to(vepAnnotationFlow)
                 .from(decider).on(SkipStepDecider.SKIP_STEP)
                 .end(BatchStatus.COMPLETED.toString())
                 .build();

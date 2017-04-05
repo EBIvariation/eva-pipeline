@@ -21,7 +21,7 @@ import org.springframework.batch.core.JobParametersValidator;
 import org.springframework.batch.core.job.CompositeJobParametersValidator;
 import org.springframework.batch.core.job.DefaultJobParametersValidator;
 
-import uk.ac.ebi.eva.pipeline.configuration.jobs.DropStudyJob;
+import uk.ac.ebi.eva.pipeline.configuration.jobs.DropStudyJobConfiguration;
 import uk.ac.ebi.eva.pipeline.parameters.validation.step.DropFilesByStudyStepParametersValidator;
 import uk.ac.ebi.eva.pipeline.parameters.validation.step.DropSingleStudyVariantsStepParametersValidator;
 import uk.ac.ebi.eva.pipeline.parameters.validation.step.PullFilesAndStatisticsByStudyStepParametersValidator;
@@ -30,7 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Validates the job parameters necessary to execute an {@link DropStudyJob}
+ * Validates the job parameters necessary to execute an {@link DropStudyJobConfiguration}
  */
 public class DropStudyJobParametersValidator extends DefaultJobParametersValidator {
 

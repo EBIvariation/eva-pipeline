@@ -50,9 +50,9 @@ import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.PULL_FILES_AND_STAT
 @Configuration
 @EnableBatchProcessing
 @Import({DropSingleStudyVariantsStepConfiguration.class, PullFilesAndStatisticsByStudyStepConfiguration.class, DropFilesByStudyStepConfiguration.class})
-public class DropStudyJob {
+public class DropStudyJobConfiguration {
 
-    private static final Logger logger = LoggerFactory.getLogger(DropStudyJob.class);
+    private static final Logger logger = LoggerFactory.getLogger(DropStudyJobConfiguration.class);
 
     @Autowired
     @Qualifier(DROP_SINGLE_STUDY_VARIANTS_STEP)

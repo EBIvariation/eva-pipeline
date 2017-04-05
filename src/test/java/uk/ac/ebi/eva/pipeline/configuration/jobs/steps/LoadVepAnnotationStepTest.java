@@ -34,7 +34,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import uk.ac.ebi.eva.commons.models.mongo.entity.VariantDocument;
 import uk.ac.ebi.eva.pipeline.Application;
 import uk.ac.ebi.eva.pipeline.configuration.BeanNames;
-import uk.ac.ebi.eva.pipeline.configuration.jobs.AnnotationJob;
+import uk.ac.ebi.eva.pipeline.configuration.jobs.AnnotationJobConfiguration;
 import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
 import uk.ac.ebi.eva.test.data.VepOutputContent;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
@@ -55,14 +55,14 @@ import static uk.ac.ebi.eva.test.utils.JobTestUtils.assertCompleted;
 import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResourceUrl;
 
 /**
- * Test for {@link LoadVepAnnotationStepConfiguration}. In the context it is loaded {@link AnnotationJob}
+ * Test for {@link LoadVepAnnotationStepConfiguration}. In the context it is loaded {@link AnnotationJobConfiguration}
  * because {@link JobLauncherTestUtils} require one {@link org.springframework.batch.core.Job} to be present in order
  * to run properly.
  */
 @RunWith(SpringRunner.class)
 @ActiveProfiles(Application.VARIANT_ANNOTATION_MONGO_PROFILE)
 @TestPropertySource({"classpath:common-configuration.properties", "classpath:test-mongo.properties"})
-@ContextConfiguration(classes = {AnnotationJob.class, BatchTestConfiguration.class})
+@ContextConfiguration(classes = {AnnotationJobConfiguration.class, BatchTestConfiguration.class})
 public class LoadVepAnnotationStepTest {
     private static final String MONGO_DUMP = "/dump/VariantStatsConfigurationTest_vl";
 

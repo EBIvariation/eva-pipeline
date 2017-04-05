@@ -15,7 +15,6 @@
  */
 package uk.ac.ebi.eva.pipeline.configuration.jobs.flows;
 
-import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.job.builder.FlowBuilder;
 import org.springframework.batch.core.job.flow.Flow;
@@ -24,35 +23,34 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.core.task.SimpleAsyncTaskExecutor;
 
-import uk.ac.ebi.eva.pipeline.configuration.jobs.steps.CalculateStatisticsStepConfiguration;
-import uk.ac.ebi.eva.pipeline.configuration.jobs.steps.LoadStatisticsStepConfiguration;
-
-import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.CALCULATE_STATISTICS_FLOW;
-import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.CALCULATE_STATISTICS_STEP;
-import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.LOAD_STATISTICS_STEP;
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.CALCULATE_STATISTICS_OPTIONAL_FLOW;
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.PARALLEL_STATISTICS_AND_ANNOTATION;
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VEP_ANNOTATION_OPTIONAL_FLOW;
 
 /**
- * Configurations that defines the calcule statistics process. First calculate the statistics then load them to
- * the knowledge base.
+ * Configuration class that defines a flow that executes in parallel the annotation and the statistics flows.
  */
 @Configuration
 @EnableBatchProcessing
-@Import({CalculateStatisticsStepConfiguration.class, LoadStatisticsStepConfiguration.class})
-public class PopulationStatisticsFlow {
+@Import({AnnotationFlowOptionalConfiguration.class, PopulationStatisticsOptionalFlowConfiguration.class})
+public class ParallelStatisticsAndAnnotationFlowConfiguration {
 
     @Autowired
-    @Qualifier(CALCULATE_STATISTICS_STEP)
-    private Step calculateStatisticsStep;
+    @Qualifier(VEP_ANNOTATION_OPTIONAL_FLOW)
+    private Flow annotationFlowOptional;
 
     @Autowired
-    @Qualifier(LOAD_STATISTICS_STEP)
-    private Step loadStatisticsStep;
+    @Qualifier(CALCULATE_STATISTICS_OPTIONAL_FLOW)
+    private Flow optionalStatisticsFlow;
 
-    @Bean(CALCULATE_STATISTICS_FLOW)
-    public Flow calculateStatisticsOptionalFlow() {
-        return new FlowBuilder<Flow>(CALCULATE_STATISTICS_FLOW)
-                .start(calculateStatisticsStep).next(loadStatisticsStep).build();
+    @Bean(PARALLEL_STATISTICS_AND_ANNOTATION)
+    public Flow parallelStatisticsAndAnnotation() {
+        return new FlowBuilder<Flow>(PARALLEL_STATISTICS_AND_ANNOTATION)
+                .split(new SimpleAsyncTaskExecutor())
+                .add(optionalStatisticsFlow, annotationFlowOptional)
+                .build();
     }
 
 }

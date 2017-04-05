@@ -42,7 +42,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import uk.ac.ebi.eva.pipeline.Application;
 import uk.ac.ebi.eva.pipeline.configuration.BeanNames;
-import uk.ac.ebi.eva.pipeline.configuration.jobs.AggregatedVcfJob;
 import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
@@ -67,13 +66,13 @@ import static uk.ac.ebi.eva.test.utils.JobTestUtils.assertFailed;
 import static uk.ac.ebi.eva.utils.FileUtils.getResource;
 
 /**
- * Test for {@link AggregatedVcfJob}
+ * Test for {@link AggregatedVcfJobConfiguration}
  */
 
 @RunWith(SpringRunner.class)
 @ActiveProfiles({Application.VARIANT_WRITER_MONGO_PROFILE, Application.VARIANT_ANNOTATION_MONGO_PROFILE})
 @TestPropertySource({"classpath:variant-aggregated.properties", "classpath:test-mongo.properties"})
-@ContextConfiguration(classes = {AggregatedVcfJob.class, BatchTestConfiguration.class})
+@ContextConfiguration(classes = {AggregatedVcfJobConfiguration.class, BatchTestConfiguration.class})
 public class AggregatedVcfJobTest {
     public static final String INPUT = "/input-files/vcf/aggregated.vcf.gz";
 

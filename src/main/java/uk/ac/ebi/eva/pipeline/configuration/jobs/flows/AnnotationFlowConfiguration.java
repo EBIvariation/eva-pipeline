@@ -45,7 +45,7 @@ import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VEP_ANNOTATION_FLOW
 @Configuration
 @EnableBatchProcessing
 @Import({GenerateVepAnnotationStepConfiguration.class, LoadVepAnnotationStepConfiguration.class, AnnotationMetadataStepConfiguration.class})
-public class AnnotationFlow {
+public class AnnotationFlowConfiguration {
 
     @Autowired
     @Qualifier(GENERATE_VEP_ANNOTATION_STEP)

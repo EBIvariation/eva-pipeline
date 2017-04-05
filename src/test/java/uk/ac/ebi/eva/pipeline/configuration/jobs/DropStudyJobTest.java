@@ -30,8 +30,6 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import uk.ac.ebi.eva.pipeline.configuration.jobs.DropStudyJob;
-import uk.ac.ebi.eva.pipeline.configuration.jobs.PopulationStatisticsJob;
 import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
 import uk.ac.ebi.eva.test.data.VariantData;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
@@ -48,11 +46,11 @@ import static uk.ac.ebi.eva.test.utils.DropStudyJobTestUtils.assertPullStudy;
 import static uk.ac.ebi.eva.test.utils.JobTestUtils.assertCompleted;
 
 /**
- * Test for {@link DropStudyJob}
+ * Test for {@link DropStudyJobConfiguration}
  */
 @RunWith(SpringRunner.class)
 @TestPropertySource({"classpath:common-configuration.properties", "classpath:test-mongo.properties"})
-@ContextConfiguration(classes = {DropStudyJob.class, BatchTestConfiguration.class})
+@ContextConfiguration(classes = {DropStudyJobConfiguration.class, BatchTestConfiguration.class})
 public class DropStudyJobTest {
 
     private static final String COLLECTION_VARIANTS_NAME = "variants";
