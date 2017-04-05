@@ -33,7 +33,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import uk.ac.ebi.eva.pipeline.Application;
 import uk.ac.ebi.eva.pipeline.configuration.BeanNames;
-import uk.ac.ebi.eva.pipeline.configuration.jobs.DropStudyJob;
+import uk.ac.ebi.eva.pipeline.configuration.jobs.DropStudyJobConfiguration;
 import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
@@ -52,7 +52,7 @@ import static uk.ac.ebi.eva.test.utils.JobTestUtils.assertCompleted;
 @RunWith(SpringRunner.class)
 @ActiveProfiles({Application.VARIANT_WRITER_MONGO_PROFILE, Application.VARIANT_ANNOTATION_MONGO_PROFILE})
 @TestPropertySource({"classpath:common-configuration.properties", "classpath:test-mongo.properties"})
-@ContextConfiguration(classes = {DropStudyJob.class, BatchTestConfiguration.class})
+@ContextConfiguration(classes = {DropStudyJobConfiguration.class, BatchTestConfiguration.class})
 public class DropFilesByStudyStepTest {
 
     private static final String COLLECTION_FILES_NAME = "files";

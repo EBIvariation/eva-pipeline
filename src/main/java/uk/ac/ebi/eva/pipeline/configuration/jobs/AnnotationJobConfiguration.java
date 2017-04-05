@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package uk.ac.ebi.eva.pipeline.configuration.jobs;
 
 import org.slf4j.Logger;
@@ -29,40 +30,46 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
 
-import uk.ac.ebi.eva.pipeline.configuration.jobs.flows.PopulationStatisticsFlow;
+import uk.ac.ebi.eva.pipeline.configuration.jobs.flows.AnnotationFlowConfiguration;
 import uk.ac.ebi.eva.pipeline.parameters.NewJobIncrementer;
+import uk.ac.ebi.eva.pipeline.parameters.validation.job.AnnotationJobParametersValidator;
 
-import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.CALCULATE_STATISTICS_FLOW;
-import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.CALCULATE_STATISTICS_JOB;
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.ANNOTATE_VARIANTS_JOB;
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VEP_ANNOTATION_FLOW;
 
 /**
- * Configuration to run a full Statistics job: variantStatsFlow: statsCreate --> statsLoad
+ * Batch class to wire together:
+ * 1) generateVepInputStep - Dump a list of variants without annotations and run VEP with them
+ * 3) annotationLoadBatchStep - Load VEP annotations into mongo
+ * <p>
+ * Optional flow: variantsAnnotGenerateInput --> (annotationLoad)
+ * annotationLoad step is only executed if variantsAnnotGenerateInput is generating a
+ * non-empty VEP input file
  *
- * TODO add a new PopulationStatisticsJobParametersValidator
+ * TODO add a new AnnotationJobParametersValidator
  */
+
 @Configuration
 @EnableBatchProcessing
-@Import({PopulationStatisticsFlow.class})
-public class PopulationStatisticsJob {
+@Import({AnnotationFlowConfiguration.class})
+public class AnnotationJobConfiguration {
 
-    private static final Logger logger = LoggerFactory.getLogger(PopulationStatisticsJob.class);
+    private static final Logger logger = LoggerFactory.getLogger(AnnotationJobConfiguration.class);
 
     @Autowired
-    @Qualifier(CALCULATE_STATISTICS_FLOW)
-    private Flow optionalStatisticsFlow;
+    @Qualifier(VEP_ANNOTATION_FLOW)
+    private Flow annotation;
 
-    @Bean(CALCULATE_STATISTICS_JOB)
+    @Bean(ANNOTATE_VARIANTS_JOB)
     @Scope("prototype")
-    public Job calculateStatisticsJob(JobBuilderFactory jobBuilderFactory) {
-        logger.debug("Building '" + CALCULATE_STATISTICS_JOB + "'");
+    public Job annotateVariantsJob(JobBuilderFactory jobBuilderFactory) {
+        logger.debug("Building '" + ANNOTATE_VARIANTS_JOB + "'");
 
         JobBuilder jobBuilder = jobBuilderFactory
-                .get(CALCULATE_STATISTICS_JOB)
-                .incrementer(new NewJobIncrementer());
-
-        return jobBuilder
-                .start(optionalStatisticsFlow)
-                .build().build();
+                .get(ANNOTATE_VARIANTS_JOB)
+                .incrementer(new NewJobIncrementer())
+                .validator(new AnnotationJobParametersValidator());
+        return jobBuilder.start(annotation).build().build();
     }
 
 }

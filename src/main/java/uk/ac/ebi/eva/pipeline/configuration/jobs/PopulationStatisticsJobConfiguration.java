@@ -18,10 +18,10 @@ package uk.ac.ebi.eva.pipeline.configuration.jobs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.Job;
-import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.job.builder.JobBuilder;
+import org.springframework.batch.core.job.flow.Flow;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -29,50 +29,40 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
 
-import uk.ac.ebi.eva.pipeline.configuration.jobs.steps.CreateDatabaseIndexesStepConfiguration;
-import uk.ac.ebi.eva.pipeline.configuration.jobs.steps.LoadGenesStepConfiguration;
+import uk.ac.ebi.eva.pipeline.configuration.jobs.flows.PopulationStatisticsFlowConfiguration;
 import uk.ac.ebi.eva.pipeline.parameters.NewJobIncrementer;
 
-import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.CREATE_DATABASE_INDEXES_STEP;
-import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.INIT_DATABASE_JOB;
-import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.LOAD_GENES_STEP;
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.CALCULATE_STATISTICS_FLOW;
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.CALCULATE_STATISTICS_JOB;
 
 /**
- * Job to initialize the databases that will be used in later jobs.
- * <p>
- * 1. create the needed indexes in the DBs
- * 2. load genomic features for the species
+ * Configuration to run a full Statistics job: variantStatsFlow: statsCreate --> statsLoad
  *
- * TODO add a new DatabaseInitializationJobParametersValidator
+ * TODO add a new PopulationStatisticsJobParametersValidator
  */
 @Configuration
 @EnableBatchProcessing
-@Import({LoadGenesStepConfiguration.class, CreateDatabaseIndexesStepConfiguration.class})
-public class DatabaseInitializationJob {
+@Import({PopulationStatisticsFlowConfiguration.class})
+public class PopulationStatisticsJobConfiguration {
 
-    private static final Logger logger = LoggerFactory.getLogger(DatabaseInitializationJob.class);
-
-    @Autowired
-    @Qualifier(LOAD_GENES_STEP)
-    private Step genesLoadStep;
+    private static final Logger logger = LoggerFactory.getLogger(PopulationStatisticsJobConfiguration.class);
 
     @Autowired
-    @Qualifier(CREATE_DATABASE_INDEXES_STEP)
-    private Step createDatabaseIndexesStep;
+    @Qualifier(CALCULATE_STATISTICS_FLOW)
+    private Flow optionalStatisticsFlow;
 
-    @Bean(INIT_DATABASE_JOB)
+    @Bean(CALCULATE_STATISTICS_JOB)
     @Scope("prototype")
-    public Job initDatabaseJob(JobBuilderFactory jobBuilderFactory) {
-        logger.debug("Building '" + INIT_DATABASE_JOB + "'");
+    public Job calculateStatisticsJob(JobBuilderFactory jobBuilderFactory) {
+        logger.debug("Building '" + CALCULATE_STATISTICS_JOB + "'");
 
         JobBuilder jobBuilder = jobBuilderFactory
-                .get(INIT_DATABASE_JOB)
+                .get(CALCULATE_STATISTICS_JOB)
                 .incrementer(new NewJobIncrementer());
 
         return jobBuilder
-                .start(createDatabaseIndexesStep)
-                .next(genesLoadStep)
-                .build();
+                .start(optionalStatisticsFlow)
+                .build().build();
     }
 
 }

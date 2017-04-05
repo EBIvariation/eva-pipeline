@@ -22,7 +22,7 @@ import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersInvalidException;
 
-import uk.ac.ebi.eva.pipeline.configuration.jobs.DropStudyJob;
+import uk.ac.ebi.eva.pipeline.configuration.jobs.DropStudyJobConfiguration;
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 
@@ -30,7 +30,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 /**
- * Tests that the arguments necessary to run a {@link DropStudyJob} are
+ * Tests that the arguments necessary to run a {@link DropStudyJobConfiguration} are
  * correctly validated
  */
 public class DropStudyJobParametersValidatorTest {

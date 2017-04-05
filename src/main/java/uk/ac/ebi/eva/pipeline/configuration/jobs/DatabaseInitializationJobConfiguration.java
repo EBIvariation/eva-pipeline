@@ -13,16 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package uk.ac.ebi.eva.pipeline.configuration.jobs;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.Job;
+import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.job.builder.JobBuilder;
-import org.springframework.batch.core.job.flow.Flow;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -30,46 +29,50 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
 
-import uk.ac.ebi.eva.pipeline.configuration.jobs.flows.AnnotationFlow;
+import uk.ac.ebi.eva.pipeline.configuration.jobs.steps.CreateDatabaseIndexesStepConfiguration;
+import uk.ac.ebi.eva.pipeline.configuration.jobs.steps.LoadGenesStepConfiguration;
 import uk.ac.ebi.eva.pipeline.parameters.NewJobIncrementer;
-import uk.ac.ebi.eva.pipeline.parameters.validation.job.AnnotationJobParametersValidator;
 
-import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.ANNOTATE_VARIANTS_JOB;
-import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VEP_ANNOTATION_FLOW;
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.CREATE_DATABASE_INDEXES_STEP;
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.INIT_DATABASE_JOB;
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.LOAD_GENES_STEP;
 
 /**
- * Batch class to wire together:
- * 1) generateVepInputStep - Dump a list of variants without annotations and run VEP with them
- * 3) annotationLoadBatchStep - Load VEP annotations into mongo
+ * Job to initialize the databases that will be used in later jobs.
  * <p>
- * Optional flow: variantsAnnotGenerateInput --> (annotationLoad)
- * annotationLoad step is only executed if variantsAnnotGenerateInput is generating a
- * non-empty VEP input file
+ * 1. create the needed indexes in the DBs
+ * 2. load genomic features for the species
  *
- * TODO add a new AnnotationJobParametersValidator
+ * TODO add a new DatabaseInitializationJobParametersValidator
  */
-
 @Configuration
 @EnableBatchProcessing
-@Import({AnnotationFlow.class})
-public class AnnotationJob {
+@Import({LoadGenesStepConfiguration.class, CreateDatabaseIndexesStepConfiguration.class})
+public class DatabaseInitializationJobConfiguration {
 
-    private static final Logger logger = LoggerFactory.getLogger(AnnotationJob.class);
+    private static final Logger logger = LoggerFactory.getLogger(DatabaseInitializationJobConfiguration.class);
 
     @Autowired
-    @Qualifier(VEP_ANNOTATION_FLOW)
-    private Flow annotation;
+    @Qualifier(LOAD_GENES_STEP)
+    private Step genesLoadStep;
 
-    @Bean(ANNOTATE_VARIANTS_JOB)
+    @Autowired
+    @Qualifier(CREATE_DATABASE_INDEXES_STEP)
+    private Step createDatabaseIndexesStep;
+
+    @Bean(INIT_DATABASE_JOB)
     @Scope("prototype")
-    public Job annotateVariantsJob(JobBuilderFactory jobBuilderFactory) {
-        logger.debug("Building '" + ANNOTATE_VARIANTS_JOB + "'");
+    public Job initDatabaseJob(JobBuilderFactory jobBuilderFactory) {
+        logger.debug("Building '" + INIT_DATABASE_JOB + "'");
 
         JobBuilder jobBuilder = jobBuilderFactory
-                .get(ANNOTATE_VARIANTS_JOB)
-                .incrementer(new NewJobIncrementer())
-                .validator(new AnnotationJobParametersValidator());
-        return jobBuilder.start(annotation).build().build();
+                .get(INIT_DATABASE_JOB)
+                .incrementer(new NewJobIncrementer());
+
+        return jobBuilder
+                .start(createDatabaseIndexesStep)
+                .next(genesLoadStep)
+                .build();
     }
 
 }
