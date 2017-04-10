@@ -15,8 +15,8 @@
  */
 package uk.ac.ebi.eva.pipeline.io.writers;
 
+import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
-import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import org.junit.Before;
@@ -30,26 +30,31 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-
-import uk.ac.ebi.eva.commons.models.converters.data.DBObjectToVariantAnnotationConverter;
-import uk.ac.ebi.eva.commons.models.converters.data.VariantToDBObjectConverter;
+import uk.ac.ebi.eva.commons.models.data.ConsequenceType;
+import uk.ac.ebi.eva.commons.models.data.Score;
 import uk.ac.ebi.eva.commons.models.data.VariantAnnotation;
 import uk.ac.ebi.eva.pipeline.Application;
 import uk.ac.ebi.eva.pipeline.configuration.MongoConfiguration;
 import uk.ac.ebi.eva.pipeline.io.mappers.AnnotationLineMapper;
 import uk.ac.ebi.eva.pipeline.parameters.MongoConnection;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
-import uk.ac.ebi.eva.utils.MongoDBHelper;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static uk.ac.ebi.eva.commons.models.converters.data.AnnotationFieldNames.CONSEQUENCE_TYPE_FIELD;
+import static uk.ac.ebi.eva.commons.models.converters.data.AnnotationFieldNames.POLYPHEN_FIELD;
+import static uk.ac.ebi.eva.commons.models.converters.data.AnnotationFieldNames.SCORE_DESCRIPTION_FIELD;
+import static uk.ac.ebi.eva.commons.models.converters.data.AnnotationFieldNames.SCORE_SCORE_FIELD;
+import static uk.ac.ebi.eva.commons.models.converters.data.AnnotationFieldNames.SIFT_FIELD;
+import static uk.ac.ebi.eva.commons.models.converters.data.AnnotationFieldNames.XREFS_FIELD;
 import static uk.ac.ebi.eva.test.data.VepOutputContent.vepOutputContent;
 
 /**
@@ -63,8 +68,11 @@ import static uk.ac.ebi.eva.test.data.VepOutputContent.vepOutputContent;
 @TestPropertySource({"classpath:test-mongo.properties"})
 @ContextConfiguration(classes = {MongoConnection.class, MongoMappingContext.class})
 public class VepAnnotationMongoWriterTest {
+    private static final String COLLECTION_ANNOTATIONS_NAME = "annotations";
 
-    private static final String COLLECTION_VARIANTS_NAME = "variants";
+    private static final String VEP_VERSION = "1";
+
+    private static final String VEP_CACHE_VERSION = "1";
 
     @Autowired
     private MongoConnection mongoConnection;
@@ -75,9 +83,14 @@ public class VepAnnotationMongoWriterTest {
     @Rule
     public TemporaryMongoRule mongoRule = new TemporaryMongoRule();
 
-    private DBObjectToVariantAnnotationConverter converter;
     private VepAnnotationMongoWriter annotationWriter;
+
     private AnnotationLineMapper AnnotationLineMapper;
+
+    @Before
+    public void setUp() throws Exception {
+        AnnotationLineMapper = new AnnotationLineMapper();
+    }
 
     @Test
     public void shouldWriteAllFieldsIntoMongoDb() throws Exception {
@@ -88,29 +101,26 @@ public class VepAnnotationMongoWriterTest {
             annotations.add(AnnotationLineMapper.mapLine(annotLine, 0));
         }
 
-        DBCollection variants = mongoRule.getCollection(databaseName, COLLECTION_VARIANTS_NAME);
-
-        // first do a mock of a "variants" collection, with just the _id
-        writeIdsIntoMongo(annotations, variants);
-
-        // now, load the annotation
+        // load the annotation
         MongoOperations operations = MongoConfiguration.getMongoOperations(databaseName, mongoConnection,
-                mongoMappingContext);
-        annotationWriter = new VepAnnotationMongoWriter(operations, COLLECTION_VARIANTS_NAME);
+                                                                           mongoMappingContext);
+        annotationWriter = new VepAnnotationMongoWriter(operations, COLLECTION_ANNOTATIONS_NAME, VEP_VERSION,
+                                                        VEP_CACHE_VERSION);
         annotationWriter.write(annotations);
 
-        // and finally check that documents in DB have annotation (only consequence type)
-        DBCursor cursor = variants.find();
+        // and finally check that documents in annotation collection have annotations
+        DBCursor cursor = mongoRule.getCollection(databaseName, COLLECTION_ANNOTATIONS_NAME).find();
 
         int count = 0;
         int consequenceTypeCount = 0;
         while (cursor.hasNext()) {
             count++;
-            VariantAnnotation annot = converter.convert(
-                    (DBObject) cursor.next().get(VariantToDBObjectConverter.ANNOTATION_FIELD));
-            assertNotNull(annot.getConsequenceTypes());
-            consequenceTypeCount += annot.getConsequenceTypes().size();
+            DBObject annotation = cursor.next();
+            BasicDBList consequenceTypes = (BasicDBList) annotation.get(CONSEQUENCE_TYPE_FIELD);
+            assertNotNull(consequenceTypes);
+            consequenceTypeCount += consequenceTypes.size();
         }
+
         assertTrue(count > 0);
         assertEquals(annotations.size(), consequenceTypeCount);
     }
@@ -128,11 +138,6 @@ public class VepAnnotationMongoWriterTest {
         for (String annotLine : vepOutputContent.split("\n")) {
             annotations.add(AnnotationLineMapper.mapLine(annotLine, 0));
         }
-        String dbCollectionVariantsName = COLLECTION_VARIANTS_NAME;
-        DBCollection variants = mongoRule.getCollection(databaseName, dbCollectionVariantsName);
-
-        // first do a mock of a "variants" collection, with just the _id
-        writeIdsIntoMongo(annotations, variants);
 
         //prepare annotation sets
         List<VariantAnnotation> annotationSet1 = new ArrayList<>();
@@ -153,51 +158,69 @@ public class VepAnnotationMongoWriterTest {
             annotationSet3.add(AnnotationLineMapper.mapLine(annotLine, 0));
         }
 
-        // now, load the annotation
+        // load the annotation
         MongoOperations operations = MongoConfiguration.getMongoOperations(databaseName, mongoConnection,
-                mongoMappingContext);
-        annotationWriter = new VepAnnotationMongoWriter(operations, dbCollectionVariantsName);
+                                                                           mongoMappingContext);
+        annotationWriter = new VepAnnotationMongoWriter(operations, COLLECTION_ANNOTATIONS_NAME, VEP_VERSION,
+                                                        VEP_CACHE_VERSION);
 
         annotationWriter.write(annotationSet1);
         annotationWriter.write(annotationSet2);
         annotationWriter.write(annotationSet3);
 
         // and finally check that documents in DB have the correct number of annotation
-        DBCursor cursor = variants.find();
+        DBCursor cursor = mongoRule.getCollection(databaseName, COLLECTION_ANNOTATIONS_NAME).find();
 
         while (cursor.hasNext()) {
-            DBObject dbObject = cursor.next();
-            String id = dbObject.get("_id").toString();
-
-            VariantAnnotation annot = converter.convert(
-                    (DBObject) dbObject.get(VariantToDBObjectConverter.ANNOTATION_FIELD));
+            DBObject annotation = cursor.next();
+            String id = annotation.get("_id").toString();
 
             if (id.equals("20_63360_C_T") || id.equals("20_63399_G_A") || id.equals("20_63426_G_T")) {
-                assertEquals(2, annot.getConsequenceTypes().size());
-                assertEquals(4, annot.getXrefs().size());
+                assertEquals(2, ((BasicDBList) annotation.get(CONSEQUENCE_TYPE_FIELD)).size());
+                assertEquals(4, ((BasicDBList) annotation.get(XREFS_FIELD)).size());
             }
         }
     }
 
-    @Before
-    public void setUp() throws Exception {
-        converter = new DBObjectToVariantAnnotationConverter();
-        AnnotationLineMapper = new AnnotationLineMapper();
-    }
+    @Test
+    public void shouldWriteSubstitutionScoresIntoMongoDb() throws Exception {
+        String databaseName = mongoRule.getRandomTemporaryDatabaseName();
 
-    private void writeIdsIntoMongo(List<VariantAnnotation> annotations, DBCollection variants) {
-        Set<String> uniqueIdsLoaded = new HashSet<>();
-        for (VariantAnnotation annotation : annotations) {
-            String id = MongoDBHelper.buildStorageId(
-                    annotation.getChromosome(),
-                    annotation.getStart(),
-                    annotation.getReferenceAllele(),
-                    annotation.getAlternativeAllele());
+        VariantAnnotation variantAnnotation = new VariantAnnotation("X", 1, 10, "A", "T");
 
-            if (!uniqueIdsLoaded.contains(id)) {
-                variants.insert(new BasicDBObject("_id", id));
-                uniqueIdsLoaded.add(id);
-            }
+        Score siftScore = new Score(0.02, "deleterious");
+        Score polyphenScore = new Score(0.846, "possibly_damaging");
+
+        ConsequenceType consequenceType = new ConsequenceType();
+        consequenceType.setSifts(siftScore);
+        consequenceType.setPolyphen(polyphenScore);
+
+        variantAnnotation.setConsequenceTypes(new HashSet<>(Collections.singletonList(consequenceType)));
+
+        MongoOperations operations = MongoConfiguration.getMongoOperations(databaseName, mongoConnection,
+                                                                           mongoMappingContext);
+        annotationWriter = new VepAnnotationMongoWriter(operations, COLLECTION_ANNOTATIONS_NAME, VEP_VERSION,
+                                                        VEP_CACHE_VERSION);
+
+        annotationWriter.write(Collections.singletonList(variantAnnotation));
+
+        DBCursor cursor = mongoRule.getCollection(databaseName, COLLECTION_ANNOTATIONS_NAME).find();
+        while (cursor.hasNext()) {
+            DBObject annotation = cursor.next();
+            BasicDBList consequenceTypes = (BasicDBList) annotation.get(CONSEQUENCE_TYPE_FIELD);
+
+            assertNotNull(consequenceTypes);
+
+            LinkedHashMap consequenceTypeMap = (LinkedHashMap) consequenceTypes.get(0);
+
+            BasicDBObject sift = (BasicDBObject) consequenceTypeMap.get(SIFT_FIELD);
+            BasicDBObject polyphen = (BasicDBObject) consequenceTypeMap.get(POLYPHEN_FIELD);
+
+            assertEquals(sift.getString(SCORE_DESCRIPTION_FIELD), siftScore.getDescription());
+            assertEquals(sift.get(SCORE_SCORE_FIELD), siftScore.getScore());
+
+            assertEquals(polyphen.getString(SCORE_DESCRIPTION_FIELD), polyphenScore.getDescription());
+            assertEquals(polyphen.get(SCORE_SCORE_FIELD), polyphenScore.getScore());
 
         }
     }

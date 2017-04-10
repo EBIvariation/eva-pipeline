@@ -51,17 +51,15 @@ public class MongoDBHelper {
         return serverAddresses;
     }
 
-    public static String buildStorageId(Variant v) {
-        return buildStorageId(v.getChromosome(), v.getStart(), v.getReference(), v.getAlternate());
+    public static String buildVariantStorageId(Variant v) {
+        return buildVariantStorageId(v.getChromosome(), v.getStart(), v.getReference(), v.getAlternate());
     }
 
     /**
      * From org.opencb.opencga.storage.mongodb.variant.VariantToDBObjectConverter
-     * #buildStorageId(java.lang.String, int, java.lang.String, java.lang.String)
-     * <p>
-     * To avoid the initialization of VariantSourceEntryToDBObjectConverter and VariantToDBObjectConverter
+     * #buildVariantStorageId(java.lang.String, int, java.lang.String, java.lang.String)
      */
-    public static String buildStorageId(String chromosome, int start, String reference, String alternate) {
+    public static String buildVariantStorageId(String chromosome, int start, String reference, String alternate) {
         StringBuilder builder = new StringBuilder(chromosome);
         builder.append("_");
         builder.append(start);
@@ -82,6 +80,21 @@ public class MongoDBHelper {
                 builder.append(new String(CryptoUtils.encryptSha1(alternate)));
             }
         }
+
+        return builder.toString();
+    }
+
+    public static String buildAnnotationStorageId(String chromosome,
+                                                  int start,
+                                                  String reference,
+                                                  String alternate,
+                                                  String vepVersion,
+                                                  String vepCacheVersion) {
+        StringBuilder builder = new StringBuilder(buildVariantStorageId(chromosome, start, reference, alternate));
+        builder.append("_");
+        builder.append(vepVersion);
+        builder.append("_");
+        builder.append(vepCacheVersion);
 
         return builder.toString();
     }

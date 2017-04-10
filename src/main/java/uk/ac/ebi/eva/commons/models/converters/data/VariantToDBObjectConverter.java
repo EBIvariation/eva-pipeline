@@ -83,8 +83,6 @@ public class VariantToDBObjectConverter implements Converter<Variant, DBObject> 
 
     private VariantSourceEntryToDBObjectConverter variantSourceEntryConverter;
 
-    private VariantAnnotationToDBObjectConverter variantAnnotationConverter;
-
     private VariantStatsToDBObjectConverter statsConverter;
 
     /**
@@ -92,7 +90,7 @@ public class VariantToDBObjectConverter implements Converter<Variant, DBObject> 
      * VariantAnnotation and VariantStats should not be written.
      */
     public VariantToDBObjectConverter() {
-        this(null, null, null);
+        this(null, null);
     }
 
     /**
@@ -101,22 +99,19 @@ public class VariantToDBObjectConverter implements Converter<Variant, DBObject> 
      * should not be written.
      *
      * @param variantSourceEntryConverter Nullable
-     * @param variantAnnotationConverter  Nullable
      * @param VariantStatsConverter       Nullable
      */
     public VariantToDBObjectConverter(
             VariantSourceEntryToDBObjectConverter variantSourceEntryConverter,
-            VariantAnnotationToDBObjectConverter variantAnnotationConverter,
             VariantStatsToDBObjectConverter VariantStatsConverter) {
         this.variantSourceEntryConverter = variantSourceEntryConverter;
-        this.variantAnnotationConverter = variantAnnotationConverter;
         this.statsConverter = VariantStatsConverter;
     }
 
     @Override
     public DBObject convert(Variant object) {
-        String id = MongoDBHelper.buildStorageId(object.getChromosome(), object.getStart(), object.getReference(),
-                                   object.getAlternate());
+        String id = MongoDBHelper.buildVariantStorageId(object.getChromosome(), object.getStart(), object.getReference(),
+                                                        object.getAlternate());
 
         BasicDBObject mongoVariant = new BasicDBObject("_id", id)
                 // Do not include IDs: the MongoWriter will take care in the query using an $addToSet
@@ -132,7 +127,6 @@ public class VariantToDBObjectConverter implements Converter<Variant, DBObject> 
         appendAt(object, mongoVariant);
         appendHgvs(object, mongoVariant);
         appendFiles(object, mongoVariant);
-        appendAnnotations(object, mongoVariant);
         appendStatistics(object, mongoVariant);
 
         return mongoVariant;
@@ -185,15 +179,6 @@ public class VariantToDBObjectConverter implements Converter<Variant, DBObject> 
                 mongoFiles.add(variantSourceEntryConverter.convert(archiveFile));
             }
             mongoVariant.append(FILES_FIELD, mongoFiles);
-        }
-    }
-
-    private void appendAnnotations(Variant object, BasicDBObject mongoVariant) {
-        if (variantAnnotationConverter != null) {
-            if (object.getAnnotation() != null) {
-                DBObject annotation = variantAnnotationConverter.convert(object.getAnnotation());
-                mongoVariant.append(ANNOTATION_FIELD, annotation);
-            }
         }
     }
 

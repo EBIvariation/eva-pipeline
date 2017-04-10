@@ -85,6 +85,8 @@ public class JobParametersNames {
 
     public static final String DB_COLLECTIONS_ANNOTATION_METADATA_NAME = "db.collections.annotation.metadata.name";
 
+    public static final String DB_COLLECTIONS_ANNOTATIONS_NAME = "db.collections.annotations.name";
+
 
     /*
      * Skip and overwrite steps
