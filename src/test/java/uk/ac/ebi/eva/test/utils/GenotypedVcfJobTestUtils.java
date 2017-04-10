@@ -1,6 +1,8 @@
 package uk.ac.ebi.eva.test.utils;
 
-import org.opencb.biodata.models.variant.Variant;
+import com.mongodb.BasicDBList;
+import com.mongodb.DBCursor;
+import com.mongodb.DBObject;
 import org.opencb.datastore.core.QueryOptions;
 import org.opencb.opencga.storage.core.StorageManagerException;
 import org.opencb.opencga.storage.core.StorageManagerFactory;
@@ -11,6 +13,7 @@ import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.StepExecution;
 
 import uk.ac.ebi.eva.pipeline.configuration.BeanNames;
+import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 import uk.ac.ebi.eva.utils.URLHelper;
 
 import java.io.BufferedReader;
@@ -26,8 +29,10 @@ import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static uk.ac.ebi.eva.commons.models.converters.data.AnnotationFieldNames.CONSEQUENCE_TYPE_FIELD;
 import static uk.ac.ebi.eva.test.utils.JobTestUtils.count;
 import static uk.ac.ebi.eva.test.utils.JobTestUtils.getLines;
 import static uk.ac.ebi.eva.utils.FileUtils.getResource;
@@ -49,6 +54,8 @@ public class GenotypedVcfJobTestUtils {
 
     public static final String COLLECTION_VARIANTS_NAME = "variants";
 
+    public static final String COLLECTION_ANNOTATIONS_NAME = "annotations";
+
     public static final String COLLECTION_ANNOTATION_METADATA_NAME = "annotationMetadata";
 
     private static final int EXPECTED_ANNOTATIONS = 537;
@@ -62,6 +69,10 @@ public class GenotypedVcfJobTestUtils {
         VariantStorageManager variantStorageManager = StorageManagerFactory.getVariantStorageManager();
         VariantDBAdaptor variantDBAdaptor = variantStorageManager.getDBAdaptor(dbName, null);
         return variantDBAdaptor.iterator(new QueryOptions());
+    }
+
+    public static DBCursor getAnnotationDBCursor(TemporaryMongoRule mongoRule, String databaseName){
+        return mongoRule.getCollection(databaseName, COLLECTION_ANNOTATIONS_NAME).find();
     }
 
     /**
@@ -95,30 +106,23 @@ public class GenotypedVcfJobTestUtils {
 
     /**
      * Annotation load step: check documents in DB have annotation (only consequence type)
-     *
-     * @param dbName
-     * @throws IllegalAccessException
-     * @throws ClassNotFoundException
-     * @throws InstantiationException
-     * @throws StorageManagerException
      */
-    public static void checkLoadedAnnotation(String dbName) throws IllegalAccessException, ClassNotFoundException,
-            InstantiationException, StorageManagerException {
-        VariantDBIterator iterator;
-        iterator = getVariantDBIterator(dbName);
+    public static void checkLoadedAnnotation(TemporaryMongoRule mongoRule, String databaseName) {
+        DBCursor cursor = getAnnotationDBCursor(mongoRule, databaseName);
 
         int count = 0;
         int consequenceTypeCount = 0;
-        while (iterator.hasNext()) {
+        while (cursor.hasNext()) {
             count++;
-            Variant next = iterator.next();
-            if (next.getAnnotation().getConsequenceTypes() != null) {
-                consequenceTypeCount += next.getAnnotation().getConsequenceTypes().size();
-            }
+            DBObject annotation = cursor.next();
+            BasicDBList consequenceTypes = (BasicDBList) annotation.get(CONSEQUENCE_TYPE_FIELD);
+            assertNotNull(consequenceTypes);
+            consequenceTypeCount += consequenceTypes.size();
         }
 
-        assertEquals(EXPECTED_VARIANTS, count);
+        assertTrue(count > 0);
         assertEquals(EXPECTED_VALID_ANNOTATIONS, consequenceTypeCount);
+
     }
 
     public static void checkOutputFileLength(File vepOutputFile) throws IOException {

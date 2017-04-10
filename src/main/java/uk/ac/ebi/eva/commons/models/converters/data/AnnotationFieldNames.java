@@ -16,6 +16,16 @@
 package uk.ac.ebi.eva.commons.models.converters.data;
 
 public class AnnotationFieldNames {
+    public static final String CHROMOSOME_FIELD = "chr";
+
+    public static final String START_FIELD = "start";
+
+    public static final String END_FIELD = "end";
+
+    public static final String ENSEMBL_VERSION_FIELD = "ensemblVer";
+
+    public static final String VEP_CACHE_VERSION_FIELD = "cacheVer";
+
     public static final String CONSEQUENCE_TYPE_FIELD = "ct";
 
     public static final String GENE_NAME_FIELD = "gn";
@@ -42,8 +52,6 @@ public class AnnotationFieldNames {
 
     public static final String SO_ACCESSION_FIELD = "so";
 
-    public static final String PROTEIN_SUBSTITUTION_SCORE_FIELD = "ps_score";
-
     public static final String POLYPHEN_FIELD = "polyphen";
 
     public static final String SIFT_FIELD = "sift";
@@ -55,8 +63,6 @@ public class AnnotationFieldNames {
     public final static String XREF_SOURCE_FIELD = "src";
 
     public final static String SCORE_SCORE_FIELD = "sc";
-
-    public final static String SCORE_SOURCE_FIELD = "src";
 
     public final static String SCORE_DESCRIPTION_FIELD = "desc";
 }

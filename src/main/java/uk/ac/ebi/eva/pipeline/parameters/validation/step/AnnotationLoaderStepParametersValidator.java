@@ -24,6 +24,7 @@ import org.springframework.batch.core.job.DefaultJobParametersValidator;
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 import uk.ac.ebi.eva.pipeline.parameters.validation.ConfigChunkSizeValidator;
 import uk.ac.ebi.eva.pipeline.parameters.validation.ConfigRestartabilityAllowValidator;
+import uk.ac.ebi.eva.pipeline.parameters.validation.DbCollectionsAnnotationsNameValidator;
 import uk.ac.ebi.eva.pipeline.parameters.validation.DbCollectionsVariantsNameValidator;
 import uk.ac.ebi.eva.pipeline.parameters.validation.DbNameValidator;
 import uk.ac.ebi.eva.pipeline.parameters.validation.InputStudyIdValidator;
@@ -59,6 +60,7 @@ public class AnnotationLoaderStepParametersValidator extends DefaultJobParameter
     private CompositeJobParametersValidator compositeJobParametersValidator() {
         List<JobParametersValidator> jobParametersValidators = new ArrayList<>();
         Collections.addAll(jobParametersValidators,
+                           new DbCollectionsAnnotationsNameValidator(),
                 new DbCollectionsVariantsNameValidator(),
                 new DbNameValidator(),
                 new OutputDirAnnotationValidator(),

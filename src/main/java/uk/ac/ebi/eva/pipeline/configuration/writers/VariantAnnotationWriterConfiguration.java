@@ -25,6 +25,7 @@ import org.springframework.data.mongodb.core.MongoOperations;
 import uk.ac.ebi.eva.commons.models.data.VariantAnnotation;
 import uk.ac.ebi.eva.pipeline.Application;
 import uk.ac.ebi.eva.pipeline.io.writers.VepAnnotationMongoWriter;
+import uk.ac.ebi.eva.pipeline.parameters.AnnotationParameters;
 import uk.ac.ebi.eva.pipeline.parameters.DatabaseParameters;
 
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VARIANT_ANNOTATION_WRITER;
@@ -36,7 +37,10 @@ public class VariantAnnotationWriterConfiguration {
     @StepScope
     @Profile(Application.VARIANT_ANNOTATION_MONGO_PROFILE)
     public ItemWriter<VariantAnnotation> variantAnnotationItemWriter(MongoOperations mongoOperations,
-                                                                     DatabaseParameters databaseParameters) {
-        return new VepAnnotationMongoWriter(mongoOperations, databaseParameters.getCollectionVariantsName());
+                                                                     DatabaseParameters databaseParameters,
+                                                                     AnnotationParameters annotationParameters) {
+        return new VepAnnotationMongoWriter(mongoOperations, databaseParameters.getCollectionAnnotationsName(),
+                                            annotationParameters.getVepVersion(),
+                                            annotationParameters.getVepCacheVersion());
     }
 }

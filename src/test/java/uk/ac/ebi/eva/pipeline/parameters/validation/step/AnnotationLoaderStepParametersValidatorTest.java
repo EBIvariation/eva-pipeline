@@ -50,6 +50,8 @@ public class AnnotationLoaderStepParametersValidatorTest {
         final String dir = temporaryFolder.getRoot().getCanonicalPath();
 
         requiredParameters = new TreeMap<>();
+        requiredParameters.put(JobParametersNames.DB_COLLECTIONS_ANNOTATIONS_NAME,
+                               new JobParameter("dbCollectionsAnnotationName"));
         requiredParameters.put(JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME,
                                new JobParameter("dbCollectionsVariantName"));
         requiredParameters.put(JobParametersNames.DB_NAME, new JobParameter("dbName"));
@@ -78,6 +80,12 @@ public class AnnotationLoaderStepParametersValidatorTest {
     @Test(expected = JobParametersInvalidException.class)
     public void dbCollectionsVariantsNameIsRequired() throws JobParametersInvalidException, IOException {
         requiredParameters.remove(JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME);
+        validator.validate(new JobParameters(requiredParameters));
+    }
+
+    @Test(expected = JobParametersInvalidException.class)
+    public void dbCollectionsAnnotationsNameIsRequired() throws JobParametersInvalidException, IOException {
+        requiredParameters.remove(JobParametersNames.DB_COLLECTIONS_ANNOTATIONS_NAME);
         validator.validate(new JobParameters(requiredParameters));
     }
 

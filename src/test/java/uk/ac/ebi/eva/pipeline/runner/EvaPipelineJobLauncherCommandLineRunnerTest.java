@@ -29,12 +29,10 @@ import org.springframework.boot.test.rule.OutputCapture;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 import uk.ac.ebi.eva.test.utils.GenotypedVcfJobTestUtils;
-import uk.ac.ebi.eva.test.utils.JobTestUtils;
 import uk.ac.ebi.eva.utils.EvaCommandLineBuilder;
 
 import java.io.File;
@@ -65,7 +63,9 @@ import static uk.ac.ebi.eva.utils.FileUtils.getResource;
 public class EvaPipelineJobLauncherCommandLineRunnerTest {
 
     private static final String GENOTYPED_PROPERTIES_FILE = "/genotype-test.properties";
+
     private static final String NO_JOB_NAME_HAS_BEEN_PROVIDED = "No job name has been provided";
+
     private static final String NO_JOB_PARAMETERS_HAVE_BEEN_PROVIDED = "No job parameters have been provided";
 
     @Autowired
@@ -119,30 +119,31 @@ public class EvaPipelineJobLauncherCommandLineRunnerTest {
 
         evaPipelineJobLauncherCommandLineRunner.setJobNames(GENOTYPED_VCF_JOB);
         evaPipelineJobLauncherCommandLineRunner.run(new EvaCommandLineBuilder()
-                .inputVcf(inputFile.getAbsolutePath())
-                .inputVcfId(GenotypedVcfJobTestUtils.INPUT_VCF_ID)
-                .inputVcfAggregation("NONE")
-                .inputStudyName("small vcf")
+                .annotationOverwrite("false")
+                .appVepPath(GenotypedVcfJobTestUtils.getMockVep().getPath())
+                .appVepTimeout("60")
+                .configDbReadPreference("secondary")
+                .databaseName(databaseName)
+                .dbCollectionsAnnotationMetadataName("annotationMetadata")
+                .dbCollectionsAnnotationsName(GenotypedVcfJobTestUtils.COLLECTION_ANNOTATIONS_NAME)
+                .dbCollectionsFeaturesName("features")
+                .dbCollectionsFilesName("files")
+                .dbCollectionsStatisticsName("populationStatistics")
+                .dbCollectionsVariantsName("variants")
+                .inputFasta(fasta.getAbsolutePath())
                 .inputStudyId(GenotypedVcfJobTestUtils.INPUT_STUDY_ID)
+                .inputStudyName("small vcf")
                 .inputStudyType("COLLECTION")
+                .inputVcf(inputFile.getAbsolutePath())
+                .inputVcfAggregation("NONE")
+                .inputVcfId(GenotypedVcfJobTestUtils.INPUT_VCF_ID)
                 .outputDirAnnotation(outputDirAnnotation)
                 .outputDirStatistics(outputDirStats)
-                .databaseName(databaseName)
-                .appVepPath(GenotypedVcfJobTestUtils.getMockVep().getPath())
                 .vepCachePath("")
                 .vepCacheSpecies("human")
                 .vepCacheVersion("1")
                 .vepNumForks("1")
-                .appVepTimeout("60")
                 .vepVersion("1")
-                .annotationOverwrite("false")
-                .inputFasta(fasta.getAbsolutePath())
-                .configDbReadPreference("secondary")
-                .dbCollectionsVariantsName("variants")
-                .dbCollectionsFilesName("files")
-                .dbCollectionsFeaturesName("features")
-                .dbCollectionsStatisticsName("populationStatistics")
-                .dbCollectionsAnnotationMetadataName("annotationMetadata")
                 .build()
         );
 
@@ -158,7 +159,9 @@ public class EvaPipelineJobLauncherCommandLineRunnerTest {
 
         GenotypedVcfJobTestUtils.checkAnnotationCreateStep(vepOutputFile);
         GenotypedVcfJobTestUtils.checkOutputFileLength(vepOutputFile);
-        GenotypedVcfJobTestUtils.checkLoadedAnnotation(databaseName);
+
+        GenotypedVcfJobTestUtils.checkLoadedAnnotation(mongoRule, databaseName);
+
         GenotypedVcfJobTestUtils.checkSkippedOneMalformedLine(jobExecution);
     }
 
@@ -247,6 +250,7 @@ public class EvaPipelineJobLauncherCommandLineRunnerTest {
                 .outputDirAnnotation(outputDirAnnotation)
                 .outputDirStatistics(outputDirStats)
                 .databaseName(databaseName)
+                .dbCollectionsAnnotationsName(GenotypedVcfJobTestUtils.COLLECTION_ANNOTATIONS_NAME)
                 .appVepPath(GenotypedVcfJobTestUtils.getMockVep().getPath())
                 .appVepTimeout("60")
                 .inputFasta(fasta.getAbsolutePath())
@@ -265,7 +269,9 @@ public class EvaPipelineJobLauncherCommandLineRunnerTest {
 
         GenotypedVcfJobTestUtils.checkAnnotationCreateStep(vepOutputFile);
         GenotypedVcfJobTestUtils.checkOutputFileLength(vepOutputFile);
-        GenotypedVcfJobTestUtils.checkLoadedAnnotation(databaseName);
+
+        GenotypedVcfJobTestUtils.checkLoadedAnnotation(mongoRule, databaseName);
+
         GenotypedVcfJobTestUtils.checkSkippedOneMalformedLine(jobExecution);
     }
 
@@ -282,6 +288,6 @@ public class EvaPipelineJobLauncherCommandLineRunnerTest {
         evaPipelineJobLauncherCommandLineRunner.run(new EvaCommandLineBuilder().build());
 
         assertEquals(EvaPipelineJobLauncherCommandLineRunner.EXIT_WITH_ERRORS,
-                evaPipelineJobLauncherCommandLineRunner.getExitCode());
+                     evaPipelineJobLauncherCommandLineRunner.getExitCode());
     }
 }
