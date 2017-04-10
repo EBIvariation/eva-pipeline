@@ -44,10 +44,10 @@ public class AnnotationLoaderStepParametersValidator extends DefaultJobParameter
     private boolean isStudyIdRequired;
 
     public AnnotationLoaderStepParametersValidator(boolean isStudyIdRequired) {
-        super(new String[]{JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME,
-                           JobParametersNames.DB_NAME,
-                           JobParametersNames.OUTPUT_DIR_ANNOTATION},
-                new String[]{});
+        super(new String[]{JobParametersNames.DB_COLLECTIONS_ANNOTATIONS_NAME,
+                      JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME, JobParametersNames.DB_NAME,
+                      JobParametersNames.OUTPUT_DIR_ANNOTATION},
+              new String[]{});
         this.isStudyIdRequired = isStudyIdRequired;
     }
 
@@ -61,12 +61,12 @@ public class AnnotationLoaderStepParametersValidator extends DefaultJobParameter
         List<JobParametersValidator> jobParametersValidators = new ArrayList<>();
         Collections.addAll(jobParametersValidators,
                            new DbCollectionsAnnotationsNameValidator(),
-                new DbCollectionsVariantsNameValidator(),
-                new DbNameValidator(),
-                new OutputDirAnnotationValidator(),
-                new OptionalValidator(new ConfigRestartabilityAllowValidator(),
-                                      JobParametersNames.CONFIG_RESTARTABILITY_ALLOW),
-                new OptionalValidator(new ConfigChunkSizeValidator(), JobParametersNames.CONFIG_CHUNK_SIZE)
+                           new DbCollectionsVariantsNameValidator(),
+                           new DbNameValidator(),
+                           new OutputDirAnnotationValidator(),
+                           new OptionalValidator(new ConfigRestartabilityAllowValidator(),
+                                                 JobParametersNames.CONFIG_RESTARTABILITY_ALLOW),
+                           new OptionalValidator(new ConfigChunkSizeValidator(), JobParametersNames.CONFIG_CHUNK_SIZE)
         );
 
         if (isStudyIdRequired) {
