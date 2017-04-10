@@ -16,20 +16,17 @@
 package uk.ac.ebi.eva.pipeline.io.mappers;
 
 import org.junit.Test;
-import org.opencb.biodata.models.variant.annotation.ConsequenceType;
-import org.opencb.biodata.models.variant.annotation.Score;
 
+import uk.ac.ebi.eva.commons.models.data.ConsequenceType;
+import uk.ac.ebi.eva.commons.models.data.Score;
 import uk.ac.ebi.eva.commons.models.data.VariantAnnotation;
 import uk.ac.ebi.eva.test.data.VepOutputContent;
 
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.Set;
 
 import static junit.framework.TestCase.assertNull;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 /**
  * {@link AnnotationLineMapper}
@@ -51,12 +48,12 @@ public class AnnotationLineMapperTest {
     public void shouldParseAllTranscriptFieldsInVepOutput() {
         AnnotationLineMapper lineMapper = new AnnotationLineMapper();
         VariantAnnotation variantAnnotation = lineMapper.mapLine(VepOutputContent.vepOutputContentTranscriptFields, 0);
-        List<ConsequenceType> consequenceTypes = variantAnnotation.getConsequenceTypes();
+        Set<ConsequenceType> consequenceTypes = variantAnnotation.getConsequenceTypes();
 
         assertNotNull(consequenceTypes);
         assertEquals(1, consequenceTypes.size());
 
-        ConsequenceType consequenceType = consequenceTypes.get(0);
+        ConsequenceType consequenceType = consequenceTypes.iterator().next();
 
         assertEquals(Integer.valueOf(1), consequenceType.getcDnaPosition());
         assertEquals(Integer.valueOf(4), consequenceType.getCdsPosition());
@@ -69,14 +66,14 @@ public class AnnotationLineMapperTest {
     public void shouldParseVepOutputWithoutTranscript() {
         AnnotationLineMapper lineMapper = new AnnotationLineMapper();
         VariantAnnotation variantAnnotation = lineMapper.mapLine(VepOutputContent.vepOutputContentWithOutTranscript, 0);
-        List<ConsequenceType> consequenceTypes = variantAnnotation.getConsequenceTypes();
+        Set<ConsequenceType> consequenceTypes = variantAnnotation.getConsequenceTypes();
 
         assertNotNull(consequenceTypes);
         assertEquals(1, consequenceTypes.size());
 
-        ConsequenceType consequenceType = consequenceTypes.get(0);
+        ConsequenceType consequenceType = consequenceTypes.iterator().next();
 
-        assertNotNull(consequenceType.getSoTerms());
+        assertNotNull(consequenceType.getSoAccessions());
         assertNull(consequenceType.getcDnaPosition());
         assertNull(consequenceType.getCdsPosition());
         assertNull(consequenceType.getAaPosition());
@@ -110,25 +107,23 @@ public class AnnotationLineMapperTest {
         AnnotationLineMapper lineMapper = new AnnotationLineMapper();
         VariantAnnotation variantAnnotation = lineMapper.mapLine(VepOutputContent.vepOutputContentWithExtraFields, 0);
 
-        List<ConsequenceType> consequenceTypes = variantAnnotation.getConsequenceTypes();
+        Set<ConsequenceType> consequenceTypes = variantAnnotation.getConsequenceTypes();
 
         assertNotNull(consequenceTypes);
         assertEquals(1, consequenceTypes.size());
 
-        ConsequenceType consequenceType = consequenceTypes.get(0);
+        ConsequenceType consequenceType = consequenceTypes.iterator().next();
 
-        List<Score> actualScores = consequenceType.getProteinSubstitutionScores();
-        assertNotNull(actualScores);
-        assertEquals(2, actualScores.size());
+        Score polyphen = consequenceType.getPolyphen();
+        Score sifts = consequenceType.getSifts();
 
-        Score expectedSift = new Score(0.07, "Sift", "tolerated");
-        Score expectedPolyphen = new Score(0.859, "Polyphen", "possibly_damaging");
+        assertNotNull(polyphen);
+        assertNotNull(sifts);
 
-        Comparator<Score> scoreComparator = Comparator.comparing(Score::getSource).thenComparing(Score::getDescription)
-                .thenComparing(Score::getScore);
-        actualScores.sort(scoreComparator);
+        Score expectedSift = new Score(0.07, "tolerated");
+        Score expectedPolyphen = new Score(0.859, "possibly_damaging");
 
-        assertTrue(Collections.binarySearch(actualScores, expectedSift, scoreComparator) >= 0);
-        assertTrue(Collections.binarySearch(actualScores, expectedPolyphen, scoreComparator) >= 0);
+        assertEquals(sifts, expectedSift);
+        assertEquals(polyphen, expectedPolyphen);
     }
 }

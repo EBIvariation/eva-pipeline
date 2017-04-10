@@ -15,44 +15,59 @@
  */
 package uk.ac.ebi.eva.commons.models.data;
 
-import org.opencb.biodata.models.variant.annotation.ConsequenceType;
-import org.opencb.biodata.models.variant.annotation.Xref;
+import com.google.common.base.Strings;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Transient;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 
-import java.util.ArrayList;
+import uk.ac.ebi.eva.commons.models.converters.data.AnnotationFieldNames;
+
 import java.util.HashMap;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Slim version of {@link org.opencb.biodata.models.variant.annotation.VariantAnnotation}
  * Unused fields removed.
  *
  */
+@Document
 public class VariantAnnotation {
 
+    @Field(value = AnnotationFieldNames.CHROMOSOME_FIELD)
     private String chromosome;
 
+    @Field(value = AnnotationFieldNames.START_FIELD)
     private int start;
 
+    @Field(value = AnnotationFieldNames.END_FIELD)
     private int end;
 
+    @Transient
     private String referenceAllele;
 
+    @Transient
     private String alternativeAllele;
 
+    @Id
     private String id;
 
-    private List<Xref> xrefs;
+    @Field(value = AnnotationFieldNames.ENSEMBL_VERSION_FIELD)
+    private String ensmblVersion;
 
-    private List<String> hgvs;
+    @Field(value = AnnotationFieldNames.VEP_CACHE_VERSION_FIELD)
+    private String vepCacheVersion;
 
-    private List<ConsequenceType> consequenceTypes;
+    @Field(value = AnnotationFieldNames.XREFS_FIELD)
+    private Set<Xref> xrefs;
 
+    @Field(value = AnnotationFieldNames.CONSEQUENCE_TYPE_FIELD)
+    private Set<ConsequenceType> consequenceTypes;
+
+    @Transient
     private Map<String, Object> additionalAttributes;
-
-    public VariantAnnotation() {
-        this("", -1, -1, "");
-    }
 
     public VariantAnnotation(String chromosome, int start, int end, String referenceAllele) {
         this(chromosome, start, end, referenceAllele, "");
@@ -66,9 +81,8 @@ public class VariantAnnotation {
         this.alternativeAllele = alternativeAllele;
 
         this.id = "";
-        this.xrefs = new ArrayList<>();
-        this.hgvs = new ArrayList<>();
-        this.consequenceTypes = new ArrayList<>();
+        this.xrefs = new HashSet<>();
+        this.consequenceTypes = new HashSet<>();
         this.additionalAttributes = new HashMap<>();
     }
 
@@ -112,27 +126,50 @@ public class VariantAnnotation {
         this.id = id;
     }
 
-    public List<Xref> getXrefs() {
+    public Set<Xref> getXrefs() {
         return xrefs;
     }
 
-    public void setXrefs(List<Xref> xrefs) {
+    public void setXrefs(Set<Xref> xrefs) {
         this.xrefs = xrefs;
     }
 
-    public List<String> getHgvs() {
-        return hgvs;
-    }
-
-    public void setHgvs(List<String> hgvs) {
-        this.hgvs = hgvs;
-    }
-
-    public List<ConsequenceType> getConsequenceTypes() {
+    public Set<ConsequenceType> getConsequenceTypes() {
         return consequenceTypes;
     }
 
-    public void setConsequenceTypes(List<ConsequenceType> consequenceTypes) {
+    public void setConsequenceTypes(Set<ConsequenceType> consequenceTypes) {
         this.consequenceTypes = consequenceTypes;
     }
+
+    public String getEnsmblVersion() {
+        return ensmblVersion;
+    }
+
+    public void setEnsmblVersion(String ensmblVersion) {
+        this.ensmblVersion = ensmblVersion;
+    }
+
+    public String getVepCacheVersion() {
+        return vepCacheVersion;
+    }
+
+    public void setVepCacheVersion(String vepCacheVersion) {
+        this.vepCacheVersion = vepCacheVersion;
+    }
+
+    public void extractXrefsFromConsequenceTypes(){
+        for (ConsequenceType consequenceType : consequenceTypes) {
+            if (!Strings.isNullOrEmpty(consequenceType.getGeneName())) {
+                xrefs.add(new Xref(consequenceType.getGeneName(), "HGNC"));
+            }
+            if (!Strings.isNullOrEmpty(consequenceType.getEnsemblGeneId())) {
+                xrefs.add(new Xref(consequenceType.getEnsemblGeneId(), "ensemblGene"));
+            }
+            if (!Strings.isNullOrEmpty(consequenceType.getEnsemblTranscriptId())) {
+                xrefs.add(new Xref(consequenceType.getEnsemblTranscriptId(), "ensemblTranscript"));
+            }
+        }
+    }
+
 }
