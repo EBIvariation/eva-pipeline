@@ -20,17 +20,13 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.mockito.Matchers;
-import org.opencb.opencga.storage.mongodb.variant.DBObjectToVariantConverter;
 
 import uk.ac.ebi.eva.pipeline.model.VariantWrapper;
 import uk.ac.ebi.eva.pipeline.parameters.AnnotationParameters;
-import uk.ac.ebi.eva.test.data.VariantData;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 
 import java.io.File;
 
-import static uk.ac.ebi.eva.test.rules.TemporaryMongoRule.constructDbObject;
 import static uk.ac.ebi.eva.utils.FileUtils.getResource;
 
 public class VepProcessTest {
@@ -47,7 +43,7 @@ public class VepProcessTest {
 
     private static final long VEP_TIMEOUT = 1;
 
-    private static final String HINT_CALL_OPEN = "hint: call open() before";
+    private final VariantWrapper VARIANT_WRAPPER = new VariantWrapper("1", 100, 105, "A", "T");
 
     @Before
     public void setUp() throws Exception {
@@ -67,16 +63,10 @@ public class VepProcessTest {
 
     @Test
     public void testWorkflowWriteWithoutOpening() throws Exception {
-        DBObjectToVariantConverter converter = new DBObjectToVariantConverter();
-        VariantWrapper variantWrapper = new VariantWrapper(
-                converter.convertToDataModelType(constructDbObject(VariantData.getVariantWithAnnotation())));
-        annotationParameters.setVepPath(getResource("/mockvep_writeToFile_delayed.pl").getAbsolutePath());
-
         VepProcess vepAnnotationFileWriter = new VepProcess(annotationParameters, CHUNK_SIZE, VEP_TIMEOUT);
 
         exception.expect(IllegalStateException.class);
-        exception.expectMessage(Matchers.contains(HINT_CALL_OPEN));
-        vepAnnotationFileWriter.write(getVariantInVepInputFormat(variantWrapper).getBytes());
+        vepAnnotationFileWriter.write(getVariantInVepInputFormat(VARIANT_WRAPPER).getBytes());
     }
 
     private String getVariantInVepInputFormat(VariantWrapper variantWrapper) {
@@ -90,19 +80,14 @@ public class VepProcessTest {
 
     @Test
     public void testWorkflowFlushWithoutOpening() throws Exception {
-        annotationParameters.setVepPath(getResource("/mockvep_writeToFile_delayed.pl").getAbsolutePath());
-
         VepProcess vepAnnotationFileWriter = new VepProcess(annotationParameters, CHUNK_SIZE, VEP_TIMEOUT);
 
         exception.expect(IllegalStateException.class);
-        exception.expectMessage(Matchers.contains(HINT_CALL_OPEN));
         vepAnnotationFileWriter.flush();
     }
 
     @Test
     public void testWorkflowCloseWithoutOpening() throws Exception {
-        annotationParameters.setVepPath(getResource("/mockvep_writeToFile_delayed.pl").getAbsolutePath());
-
         VepProcess vepAnnotationFileWriter = new VepProcess(annotationParameters, CHUNK_SIZE, VEP_TIMEOUT);
         vepAnnotationFileWriter.close();
     }
