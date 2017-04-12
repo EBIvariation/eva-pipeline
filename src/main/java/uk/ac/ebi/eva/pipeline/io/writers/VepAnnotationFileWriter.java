@@ -15,6 +15,8 @@
  */
 package uk.ac.ebi.eva.pipeline.io.writers;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.item.ItemStreamException;
 import org.springframework.batch.item.ItemStreamWriter;
@@ -30,6 +32,8 @@ import java.util.List;
  * annotate the variants and write them to a file.
  */
 public class VepAnnotationFileWriter implements ItemStreamWriter<VariantWrapper> {
+
+    private static final Logger logger = LoggerFactory.getLogger(VepAnnotationFileWriter.class);
 
     private final VepProcess vepProcess;
 
@@ -54,6 +58,14 @@ public class VepAnnotationFileWriter implements ItemStreamWriter<VariantWrapper>
             vepProcess.write(line.getBytes());
             vepProcess.write(System.lineSeparator().getBytes());
         }
+
+        if (variantWrappers.size() > 0) {
+            VariantWrapper first = variantWrappers.get(0);
+            VariantWrapper last = variantWrappers.get(variantWrappers.size() - 1);
+            logger.debug("VEP has received {} variants from {}:{} to {}:{}", variantWrappers.size(),
+                    first.getChr(), first.getStart(), last.getChr(), last.getStart());
+        }
+
         vepProcess.flush();
     }
 

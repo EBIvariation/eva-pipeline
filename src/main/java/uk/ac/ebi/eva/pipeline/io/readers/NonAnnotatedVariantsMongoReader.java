@@ -20,11 +20,10 @@ import com.mongodb.BasicDBObjectBuilder;
 import com.mongodb.DBObject;
 import org.opencb.biodata.models.variant.Variant;
 import org.opencb.opencga.storage.mongodb.variant.DBObjectToVariantConverter;
-import org.springframework.batch.item.ExecutionContext;
-import org.springframework.batch.item.ItemStreamException;
-import org.springframework.batch.item.ItemStreamReader;
+import org.springframework.batch.item.support.AbstractItemCountingItemStreamItemReader;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.data.mongodb.core.MongoOperations;
+import org.springframework.util.ClassUtils;
 
 import uk.ac.ebi.eva.commons.models.converters.data.VariantSourceEntryToDBObjectConverter;
 import uk.ac.ebi.eva.commons.models.converters.data.VariantToDBObjectConverter;
@@ -38,7 +37,8 @@ import javax.annotation.PostConstruct;
  * {@link org.springframework.batch.item.data.MongoItemReader} is using
  * pagination and it is slow with large collections
  */
-public class NonAnnotatedVariantsMongoReader implements ItemStreamReader<VariantWrapper>, InitializingBean {
+public class NonAnnotatedVariantsMongoReader
+        extends AbstractItemCountingItemStreamItemReader<VariantWrapper> implements InitializingBean {
 
     private MongoDbCursorItemReader delegateReader;
 
@@ -52,6 +52,7 @@ public class NonAnnotatedVariantsMongoReader implements ItemStreamReader<Variant
      * If the studyId string is not empty, bring only non-annotated variants from that study.
      */
     public NonAnnotatedVariantsMongoReader(MongoOperations template, String collectionsVariantsName, String studyId) {
+        setName(ClassUtils.getShortName(NonAnnotatedVariantsMongoReader.class));
         delegateReader = new MongoDbCursorItemReader();
         delegateReader.setTemplate(template);
         delegateReader.setCollection(collectionsVariantsName);
@@ -76,13 +77,13 @@ public class NonAnnotatedVariantsMongoReader implements ItemStreamReader<Variant
     }
 
     @Override
-    public void open(ExecutionContext executionContext) throws ItemStreamException {
-        delegateReader.open(executionContext);
+    protected void doOpen() throws Exception {
+        delegateReader.doOpen();
     }
 
     @Override
-    public VariantWrapper read() throws Exception {
-        DBObject dbObject = delegateReader.read();
+    protected VariantWrapper doRead() throws Exception {
+        DBObject dbObject = delegateReader.doRead();
         if (dbObject != null) {
             Variant variant = converter.convertToDataModelType(dbObject);
             return new VariantWrapper(variant);
@@ -92,12 +93,8 @@ public class NonAnnotatedVariantsMongoReader implements ItemStreamReader<Variant
     }
 
     @Override
-    public void update(ExecutionContext executionContext) throws ItemStreamException {
-        delegateReader.update(executionContext);
+    protected void doClose() throws Exception {
+        delegateReader.doClose();
     }
 
-    @Override
-    public void close() throws ItemStreamException {
-        delegateReader.close();
-    }
 }

@@ -159,13 +159,16 @@ public class VepProcess {
      */
     public void close() {
         if (isOpen()) {
-            logger.debug("About to close VEP process");
-            flushToPerlStdin();
-            waitUntilProcessEnds(timeoutInSeconds);
-            checkExitStatus();
-            checkOutputWritingStatus();
-            process = null;
-            logger.info("VEP process finished");
+            try {
+                logger.debug("About to close VEP process");
+                flushToPerlStdin();
+                waitUntilProcessEnds(timeoutInSeconds);
+                checkExitStatus();
+                checkOutputWritingStatus();
+            } finally {
+                process = null;
+                logger.info("VEP process finished");
+            }
         }
     }
 

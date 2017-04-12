@@ -85,6 +85,7 @@ public class NonAnnotatedVariantsMongoReaderTest {
         checkNonAnnotatedVariantsRead(EXPECTED_NON_ANNOTATED_VARIANTS_IN_DB, ALL_STUDIES);
     }
 
+    @Test
     public void shouldReadVariantsWithoutAnnotationFieldInAllStudiesUsingNull() throws Exception {
         checkNonAnnotatedVariantsRead(EXPECTED_NON_ANNOTATED_VARIANTS_IN_DB, null);
     }
