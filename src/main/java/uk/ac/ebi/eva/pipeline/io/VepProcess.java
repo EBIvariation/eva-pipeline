@@ -34,6 +34,7 @@ import java.util.Arrays;
 import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.zip.GZIPOutputStream;
 
 /**
@@ -79,6 +80,8 @@ public class VepProcess {
 
     private static final long CONVERT_SECONDS_TO_MILLISECONDS = 1000L;
 
+    private AtomicLong outputIdleSince;
+
     public VepProcess(AnnotationParameters annotationParameters, int chunkSize, Long timeoutInSeconds) {
         if (timeoutInSeconds <= 0) {
             throw new IllegalArgumentException(
@@ -87,6 +90,7 @@ public class VepProcess {
         this.annotationParameters = annotationParameters;
         this.chunkSize = chunkSize;
         this.timeoutInSeconds = timeoutInSeconds;
+        this.outputIdleSince = new AtomicLong(System.currentTimeMillis());
     }
 
     public void open() throws ItemStreamException {
@@ -187,14 +191,22 @@ public class VepProcess {
     private void waitUntilProcessEnds(Long timeoutInSeconds) {
         boolean finished;
         try {
-            finished = process.waitFor(timeoutInSeconds, TimeUnit.SECONDS);
+            boolean processWroteDuringTimeout;
+            do {
+                finished = process.waitFor(timeoutInSeconds, TimeUnit.SECONDS);
+                long idlePeriod = System.currentTimeMillis() - outputIdleSince.get();
+                processWroteDuringTimeout = idlePeriod < timeoutInSeconds * CONVERT_SECONDS_TO_MILLISECONDS;
+                if (!writingOk.get() && processWroteDuringTimeout) {
+                    logger.debug("Extending the timeout, as the process wrote more lines (it's still active)");
+                }
+            } while (!writingOk.get() && processWroteDuringTimeout);
         } catch (InterruptedException e) {
             throw new ItemStreamException(e);
         }
 
         if (!finished) {
-            String timeoutReachedMessage = "Reached the timeout (" + timeoutInSeconds
-                    + " seconds) while waiting for VEP to finish. Killed the process.";
+            String timeoutReachedMessage = "VEP has been idle for more than the timeout (" + timeoutInSeconds
+                    + " seconds). Killed the process.";
             logger.error(timeoutReachedMessage);
             process.destroy();
             throw new ItemStreamException(timeoutReachedMessage);
@@ -250,10 +262,13 @@ public class VepProcess {
             if (writtenLines % chunkSize == 0) {
                 logCoordinates(line);
                 writer.flush();
+                outputIdleSince.set(System.currentTimeMillis());
             }
             line = reader.readLine();
         }
 
+        writer.flush();
+        outputIdleSince.set(System.currentTimeMillis());
         writer.close();
         reader.close();
         return writtenLines;
