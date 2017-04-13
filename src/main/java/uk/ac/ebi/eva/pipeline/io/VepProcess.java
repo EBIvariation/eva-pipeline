@@ -191,15 +191,15 @@ public class VepProcess {
     private void waitUntilProcessEnds(Long timeoutInSeconds) {
         boolean finished;
         try {
-            boolean processWroteDuringTimeout;
+            boolean processWroteDuringWait;
             do {
+                long beforeWaiting = System.currentTimeMillis();
                 finished = process.waitFor(timeoutInSeconds, TimeUnit.SECONDS);
-                long idlePeriod = System.currentTimeMillis() - outputIdleSince.get();
-                processWroteDuringTimeout = idlePeriod < timeoutInSeconds * CONVERT_SECONDS_TO_MILLISECONDS;
-                if (!writingOk.get() && processWroteDuringTimeout) {
+                processWroteDuringWait = beforeWaiting < outputIdleSince.get();
+                if (processWroteDuringWait && !finished) {
                     logger.debug("Extending the timeout, as the process wrote more lines (it's still active)");
                 }
-            } while (!writingOk.get() && processWroteDuringTimeout);
+            } while (processWroteDuringWait && !finished);
         } catch (InterruptedException e) {
             throw new ItemStreamException(e);
         }
@@ -255,31 +255,36 @@ public class VepProcess {
         long writtenLines = 0;
 
         String line = reader.readLine();
+        String lastLine = line;
         while (line != null) {
             writer.write(line);
-            writer.write(System.lineSeparator());
+            writer.write('\n');
             writtenLines++;
+
+            lastLine = line;
+            line = reader.readLine();
             if (writtenLines % chunkSize == 0) {
-                logCoordinates(line);
                 writer.flush();
                 outputIdleSince.set(System.currentTimeMillis());
+                logCoordinates(lastLine, this.chunkSize);
             }
-            line = reader.readLine();
         }
 
         writer.flush();
         outputIdleSince.set(System.currentTimeMillis());
+        logCoordinates(lastLine, writtenLines % chunkSize);
+
         writer.close();
         reader.close();
         return writtenLines;
     }
 
-    private void logCoordinates(String line) {
+    private void logCoordinates(String line, long chunkSize) {
         if (line.charAt(0) == '#') {
-            logger.debug("VEP wrote {} more lines (still writing the header)", this.chunkSize);
+            logger.debug("VEP wrote {} more lines (still writing the header)", chunkSize);
         } else {
             Scanner scanner = new Scanner(line);
-            logger.debug("VEP wrote {} more lines, last one was {}", this.chunkSize, scanner.next());
+            logger.debug("VEP wrote {} more lines, last one was {}", chunkSize, scanner.next());
         }
     }
 
