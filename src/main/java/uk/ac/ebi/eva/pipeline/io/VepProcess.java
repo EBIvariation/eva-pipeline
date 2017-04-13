@@ -22,13 +22,16 @@ import org.springframework.batch.item.ItemStreamException;
 
 import uk.ac.ebi.eva.pipeline.parameters.AnnotationParameters;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.util.Arrays;
+import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.zip.GZIPOutputStream;
@@ -123,14 +126,14 @@ public class VepProcess {
         InputStream processStandardOutput = process.getInputStream();
         writingOk = new AtomicBoolean(false);
         outputCapturer = new Thread(() -> {
-            long written = 0;
+            long writtenLines = 0;
             try (GZIPOutputStream outputStream = new GZIPOutputStream(new FileOutputStream(vepOutputPath, APPEND))) {
-                written = connectStreams(new BufferedInputStream(processStandardOutput), outputStream);
+                writtenLines = copyVepOutput(processStandardOutput, outputStream);
                 writingOk.set(true);
             } catch (IOException e) {
                 logger.error("Writing the VEP output to " + vepOutputPath + " failed. ", e);
             }
-            logger.info("Finished writing VEP output (" + written + " bytes written) to " + vepOutputPath);
+            logger.info("Finished writing VEP output (" + writtenLines + " lines written) to " + vepOutputPath);
         });
         logger.info("Starting writing VEP output to " + vepOutputPath);
         outputCapturer.start();
@@ -203,7 +206,7 @@ public class VepProcess {
         if (exitValue != 0) {
             String errorLog = annotationParameters.getVepOutput() + ".errors.txt";
             try {
-                connectStreams(new BufferedInputStream(process.getErrorStream()), new FileOutputStream(errorLog));
+                connectStreams(process.getErrorStream(), new FileOutputStream(errorLog));
             } catch (IOException e) {
                 throw new ItemStreamException("VEP exited with code " + exitValue
                         + " but the file to dump the errors could not be created: " + errorLog,
@@ -229,11 +232,46 @@ public class VepProcess {
             throw new ItemStreamException("VEP output writer thread could not finish properly. ");
         }
     }
+    /**
+     * read all the vep output in inputStream and write it into the outputStream, logging the coordinates once in each
+     * chunk.
+     * @return written lines.
+     */
+    private long copyVepOutput(InputStream inputStream, OutputStream outputStream) throws IOException {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+        OutputStreamWriter writer = new OutputStreamWriter(outputStream);
+        long writtenLines = 0;
 
+        String line = reader.readLine();
+        while (line != null) {
+            writer.write(line);
+            writer.write(System.lineSeparator());
+            writtenLines++;
+            if (writtenLines % chunkSize == 0) {
+                logCoordinates(line);
+                writer.flush();
+            }
+            line = reader.readLine();
+        }
+
+        writer.close();
+        reader.close();
+        return writtenLines;
+    }
+
+    private void logCoordinates(String line) {
+        if (line.charAt(0) == '#') {
+            logger.debug("VEP wrote {} more lines (still writing the header)", this.chunkSize);
+        } else {
+            Scanner scanner = new Scanner(line);
+            logger.debug("VEP wrote {} more lines, last one was {}", this.chunkSize, scanner.next());
+        }
+    }
 
     /**
      * read all the inputStream and write it into the outputStream. This method blocks until input data is available,
      * the end of the stream is detected, or an exception is thrown.
+     * @return written bytes.
      */
     private long connectStreams(InputStream inputStream, OutputStream outputStream) throws IOException {
         int read = inputStream.read();
