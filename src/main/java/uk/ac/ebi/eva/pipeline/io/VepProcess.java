@@ -127,12 +127,15 @@ public class VepProcess {
 
 
     private void captureOutput(Process process, String vepOutputPath) {
-        InputStream processStandardOutput = process.getInputStream();
         writingOk = new AtomicBoolean(false);
         outputCapturer = new Thread(() -> {
             long writtenLines = 0;
-            try (GZIPOutputStream outputStream = new GZIPOutputStream(new FileOutputStream(vepOutputPath, APPEND))) {
-                writtenLines = copyVepOutput(processStandardOutput, outputStream);
+            try (OutputStreamWriter writer = new OutputStreamWriter(new GZIPOutputStream(
+                    new FileOutputStream(vepOutputPath, APPEND)));
+                    BufferedReader processStandardOutput = new BufferedReader(
+                            new InputStreamReader(process.getInputStream()))
+            ) {
+                writtenLines = copyVepOutput(processStandardOutput, writer);
                 writingOk.set(true);
             } catch (IOException e) {
                 logger.error("Writing the VEP output to " + vepOutputPath + " failed. ", e);
@@ -247,11 +250,11 @@ public class VepProcess {
     /**
      * read all the vep output in inputStream and write it into the outputStream, logging the coordinates once in each
      * chunk.
+     * @param reader must be closed externally
+     * @param writer must be closed externally
      * @return written lines.
      */
-    private long copyVepOutput(InputStream inputStream, OutputStream outputStream) throws IOException {
-        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-        OutputStreamWriter writer = new OutputStreamWriter(outputStream);
+    private long copyVepOutput(BufferedReader reader, OutputStreamWriter writer) throws IOException {
         long writtenLines = 0;
 
         String line = reader.readLine();
@@ -274,8 +277,6 @@ public class VepProcess {
         outputIdleSince.set(System.currentTimeMillis());
         logCoordinates(lastLine, writtenLines % chunkSize);
 
-        writer.close();
-        reader.close();
         return writtenLines;
     }
 
