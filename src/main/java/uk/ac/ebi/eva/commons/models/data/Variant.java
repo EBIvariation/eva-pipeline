@@ -117,7 +117,7 @@ public class Variant {
     /**
      * Annotations of the genomic variation.
      */
-    private VariantAnnotation annotation;
+    private Annotation annotation;
 
 
     public Variant() {
@@ -147,7 +147,7 @@ public class Variant {
         }
 
         this.sourceEntries = new HashMap<>();
-        this.annotation = new VariantAnnotation(this.chromosome, this.start, this.end, this.reference);
+        this.annotation = new Annotation(this.chromosome, this.start, this.end, this.reference);
     }
 
     public VariantType getType() {
@@ -287,11 +287,11 @@ public class Variant {
         return file.getStats();
     }
 
-    public VariantAnnotation getAnnotation() {
+    public Annotation getAnnotation() {
         return annotation;
     }
 
-    public void setAnnotation(VariantAnnotation annotation) {
+    public void setAnnotation(Annotation annotation) {
         this.annotation = annotation;
     }
 
@@ -391,7 +391,7 @@ public class Variant {
     }
 
     /**
-     * As the clone in the classes Map, Set and VariantAnnotation doesn't exist, this is a shallow clone.
+     * As the clone in the classes Map, Set and Annotation doesn't exist, this is a shallow clone.
      *
      * @return a shallow copy of this variant.
      */

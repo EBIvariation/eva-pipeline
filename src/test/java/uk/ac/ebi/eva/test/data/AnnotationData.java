@@ -15,7 +15,7 @@
  */
 package uk.ac.ebi.eva.test.data;
 
-public class VariantAnnotationData {
+public class AnnotationData {
     public final static String VARIANT_ANNOTATION_JSON = "{  \n" +
             "   \"ct\":[  \n" +
             "      {  \n" +

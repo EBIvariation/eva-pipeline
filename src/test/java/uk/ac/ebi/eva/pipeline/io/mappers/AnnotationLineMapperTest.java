@@ -17,9 +17,9 @@ package uk.ac.ebi.eva.pipeline.io.mappers;
 
 import org.junit.Test;
 
+import uk.ac.ebi.eva.commons.models.data.Annotation;
 import uk.ac.ebi.eva.commons.models.data.ConsequenceType;
 import uk.ac.ebi.eva.commons.models.data.Score;
-import uk.ac.ebi.eva.commons.models.data.VariantAnnotation;
 import uk.ac.ebi.eva.test.data.VepOutputContent;
 
 import java.util.Set;
@@ -31,7 +31,7 @@ import static org.junit.Assert.assertNotNull;
 /**
  * {@link AnnotationLineMapper}
  * input: an annotation line from VEP
- * output: a VariantAnnotation with at least: consequence types
+ * output: a Annotation with at least: consequence types
  */
 public class AnnotationLineMapperTest {
 
@@ -39,16 +39,16 @@ public class AnnotationLineMapperTest {
     public void shouldParseAllDefaultFieldsInVepOutput() throws Exception {
         AnnotationLineMapper lineMapper = new AnnotationLineMapper();
         for (String annotLine : VepOutputContent.vepOutputContent.split("\n")) {
-            VariantAnnotation variantAnnotation = lineMapper.mapLine(annotLine, 0);
-            assertNotNull(variantAnnotation.getConsequenceTypes());
+            Annotation annotation = lineMapper.mapLine(annotLine, 0);
+            assertNotNull(annotation.getConsequenceTypes());
         }
     }
 
     @Test
     public void shouldParseAllTranscriptFieldsInVepOutput() {
         AnnotationLineMapper lineMapper = new AnnotationLineMapper();
-        VariantAnnotation variantAnnotation = lineMapper.mapLine(VepOutputContent.vepOutputContentTranscriptFields, 0);
-        Set<ConsequenceType> consequenceTypes = variantAnnotation.getConsequenceTypes();
+        Annotation annotation = lineMapper.mapLine(VepOutputContent.vepOutputContentTranscriptFields, 0);
+        Set<ConsequenceType> consequenceTypes = annotation.getConsequenceTypes();
 
         assertNotNull(consequenceTypes);
         assertEquals(1, consequenceTypes.size());
@@ -65,8 +65,8 @@ public class AnnotationLineMapperTest {
     @Test
     public void shouldParseVepOutputWithoutTranscript() {
         AnnotationLineMapper lineMapper = new AnnotationLineMapper();
-        VariantAnnotation variantAnnotation = lineMapper.mapLine(VepOutputContent.vepOutputContentWithOutTranscript, 0);
-        Set<ConsequenceType> consequenceTypes = variantAnnotation.getConsequenceTypes();
+        Annotation annotation = lineMapper.mapLine(VepOutputContent.vepOutputContentWithOutTranscript, 0);
+        Set<ConsequenceType> consequenceTypes = annotation.getConsequenceTypes();
 
         assertNotNull(consequenceTypes);
         assertEquals(1, consequenceTypes.size());
@@ -90,10 +90,10 @@ public class AnnotationLineMapperTest {
     @Test
     public void shouldParseVepOutputWithChromosomeIdWithUnderscore() {
         AnnotationLineMapper lineMapper = new AnnotationLineMapper();
-        VariantAnnotation variantAnnotation = lineMapper
+        Annotation annotation = lineMapper
                 .mapLine(VepOutputContent.vepOutputContentChromosomeIdWithUnderscore, 0);
 
-        assertEquals("20_1", variantAnnotation.getChromosome());
+        assertEquals("20_1", annotation.getChromosome());
     }
 
     @Test(expected = ArrayIndexOutOfBoundsException.class)
@@ -105,9 +105,9 @@ public class AnnotationLineMapperTest {
     @Test
     public void shouldParseVepOutputWithExtraFields() {
         AnnotationLineMapper lineMapper = new AnnotationLineMapper();
-        VariantAnnotation variantAnnotation = lineMapper.mapLine(VepOutputContent.vepOutputContentWithExtraFields, 0);
+        Annotation annotation = lineMapper.mapLine(VepOutputContent.vepOutputContentWithExtraFieldsSingleAnnotation, 0);
 
-        Set<ConsequenceType> consequenceTypes = variantAnnotation.getConsequenceTypes();
+        Set<ConsequenceType> consequenceTypes = annotation.getConsequenceTypes();
 
         assertNotNull(consequenceTypes);
         assertEquals(1, consequenceTypes.size());
@@ -115,7 +115,7 @@ public class AnnotationLineMapperTest {
         ConsequenceType consequenceType = consequenceTypes.iterator().next();
 
         Score polyphen = consequenceType.getPolyphen();
-        Score sifts = consequenceType.getSifts();
+        Score sifts = consequenceType.getSift();
 
         assertNotNull(polyphen);
         assertNotNull(sifts);

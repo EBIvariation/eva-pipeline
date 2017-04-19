@@ -77,7 +77,7 @@ public class VariantMongoWriterTest {
     public void noVariantsNothingShouldBeWritten() throws UnknownHostException {
         String dbName = mongoRule.getRandomTemporaryDatabaseName();
         MongoOperations mongoOperations = MongoConfiguration.getMongoOperations(dbName, mongoConnection,
-                mongoMappingContext);
+                                                                                mongoMappingContext);
         DBCollection dbCollection = mongoOperations.getCollection(collectionName);
 
         VariantMongoWriter variantMongoWriter = new VariantMongoWriter(collectionName, mongoOperations, false, false);
@@ -93,7 +93,7 @@ public class VariantMongoWriterTest {
 
         String dbName = mongoRule.getRandomTemporaryDatabaseName();
         MongoOperations mongoOperations = MongoConfiguration.getMongoOperations(dbName, mongoConnection,
-                mongoMappingContext);
+                                                                                mongoMappingContext);
         DBCollection dbCollection = mongoOperations.getCollection(collectionName);
 
         BasicDBObject dbObject = new BasicDBObject();
@@ -109,7 +109,7 @@ public class VariantMongoWriterTest {
     public void indexesShouldBeCreatedInBackground() throws UnknownHostException {
         String dbName = mongoRule.getRandomTemporaryDatabaseName();
         MongoOperations mongoOperations = MongoConfiguration.getMongoOperations(dbName, mongoConnection,
-                mongoMappingContext);
+                                                                                mongoMappingContext);
         DBCollection dbCollection = mongoOperations.getCollection(collectionName);
 
         VariantMongoWriter variantMongoWriter = new VariantMongoWriter(collectionName, mongoOperations, false, false);
@@ -119,13 +119,13 @@ public class VariantMongoWriterTest {
         Set<String> createdIndexes = indexInfo.stream().map(index -> index.get("name").toString())
                 .collect(Collectors.toSet());
         Set<String> expectedIndexes = new HashSet<>();
-        expectedIndexes.addAll(Arrays.asList("annot.ct.so_1", "annot.xrefs.id_1", "chr_1_start_1_end_1",
-                "files.sid_1_files.fid_1", "_id_", "ids_1"));
+        expectedIndexes.addAll(Arrays.asList("so_1", "chr_1_start_1_end_1", "files.sid_1_files.fid_1", "_id_",
+                "ids_1"));
         assertEquals(expectedIndexes, createdIndexes);
 
         indexInfo.stream().filter(index -> !("_id_".equals(index.get("name").toString())))
-                .forEach(index -> assertEquals("true",
-                        index.get(MongoDBHelper.BACKGROUND_INDEX).toString()));
+                .forEach(index -> assertEquals("true", index.get(MongoDBHelper.BACKGROUND_INDEX).toString()));
+
     }
 
     @Test
@@ -135,7 +135,7 @@ public class VariantMongoWriterTest {
 
         String dbName = mongoRule.getRandomTemporaryDatabaseName();
         MongoOperations mongoOperations = MongoConfiguration.getMongoOperations(dbName, mongoConnection,
-                mongoMappingContext);
+                                                                                mongoMappingContext);
 
         VariantMongoWriter variantMongoWriter = new VariantMongoWriter(collectionName, mongoOperations, false, false);
         variantMongoWriter.write(Collections.singletonList(variant1));

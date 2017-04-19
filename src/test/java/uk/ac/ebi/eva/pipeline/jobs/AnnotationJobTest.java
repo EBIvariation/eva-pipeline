@@ -45,7 +45,7 @@ import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static uk.ac.ebi.eva.commons.models.converters.data.AnnotationFieldNames.CONSEQUENCE_TYPE_FIELD;
+import static uk.ac.ebi.eva.commons.models.data.AnnotationFieldNames.CONSEQUENCE_TYPE_FIELD;
 import static uk.ac.ebi.eva.test.utils.JobTestUtils.assertCompleted;
 import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResourceUrl;
 import static uk.ac.ebi.eva.utils.FileUtils.getResource;
@@ -132,15 +132,16 @@ public class AnnotationJobTest {
             assertNotNull(consequenceTypes);
             consequenceTypeCount += consequenceTypes.size();
         }
+        cursor.close();
 
         assertEquals(299, annotationCount);
         assertEquals(536, consequenceTypeCount);
 
         //check that one line is skipped because malformed
-        List<StepExecution> variantAnnotationLoadStepExecution = jobExecution.getStepExecutions().stream()
+        List<StepExecution> annotationLoadStepExecution = jobExecution.getStepExecutions().stream()
                 .filter(stepExecution -> stepExecution.getStepName().equals(BeanNames.LOAD_VEP_ANNOTATION_STEP))
                 .collect(Collectors.toList());
-        assertEquals(1, variantAnnotationLoadStepExecution.get(0).getReadSkipCount());
+        assertEquals(1, annotationLoadStepExecution.get(0).getReadSkipCount());
     }
 
     @Test

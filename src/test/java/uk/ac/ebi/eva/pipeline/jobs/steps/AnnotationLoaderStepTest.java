@@ -15,16 +15,13 @@
  */
 package uk.ac.ebi.eva.pipeline.jobs.steps;
 
+import com.mongodb.BasicDBList;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.opencb.biodata.models.variant.annotation.VariantAnnotation;
-import org.opencb.opencga.storage.mongodb.variant.DBObjectToVariantAnnotationConverter;
-import org.springframework.batch.core.BatchStatus;
-import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.test.JobLauncherTestUtils;
@@ -33,7 +30,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-
 import uk.ac.ebi.eva.pipeline.Application;
 import uk.ac.ebi.eva.pipeline.configuration.BeanNames;
 import uk.ac.ebi.eva.pipeline.jobs.AnnotationJob;
@@ -41,17 +37,20 @@ import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
 import uk.ac.ebi.eva.test.data.VepOutputContent;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
-import uk.ac.ebi.eva.test.utils.JobTestUtils;
 import uk.ac.ebi.eva.utils.EvaJobParameterBuilder;
 import uk.ac.ebi.eva.utils.URLHelper;
 
 import java.nio.file.Paths;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static uk.ac.ebi.eva.commons.models.data.AnnotationFieldNames.CONSEQUENCE_TYPE_FIELD;
+import static uk.ac.ebi.eva.commons.models.data.AnnotationFieldNames.GENE_NAME_FIELD;
+import static uk.ac.ebi.eva.commons.models.data.AnnotationFieldNames.POLYPHEN_FIELD;
+import static uk.ac.ebi.eva.commons.models.data.AnnotationFieldNames.SIFT_FIELD;
+import static uk.ac.ebi.eva.commons.models.data.AnnotationFieldNames.SO_ACCESSION_FIELD;
 import static uk.ac.ebi.eva.test.utils.JobTestUtils.assertCompleted;
 import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResourceUrl;
-
 
 /**
  * Test for {@link AnnotationLoaderStep}. In the context it is loaded {@link AnnotationJob}
@@ -68,6 +67,9 @@ public class AnnotationLoaderStepTest {
     private static final String COLLECTION_VARIANTS_NAME = "variants";
     private static final String INPUT_STUDY_ID = "1";
     private static final String INPUT_VCF_ID = "1";
+    private static final String VEP_VERSION = "1";
+    private static final String VEP_CACHE_VERSION = "1";
+
     @Rule
     public TemporaryMongoRule mongoRule = new TemporaryMongoRule();
 
@@ -92,31 +94,45 @@ public class AnnotationLoaderStepTest {
                 .inputStudyId(INPUT_STUDY_ID)
                 .inputVcfId(INPUT_VCF_ID)
                 .outputDirAnnotation(annotationFolder)
+                .vepCacheVersion(VEP_CACHE_VERSION)
+                .vepVersion(VEP_VERSION)
                 .toJobParameters();
 
         JobExecution jobExecution = jobLauncherTestUtils.launchStep(BeanNames.LOAD_VEP_ANNOTATION_STEP, jobParameters);
 
         assertCompleted(jobExecution);
 
-        //check that documents have the annotation
-        DBCursor cursor = mongoRule.getCollection(dbName, COLLECTION_ANNOTATIONS_NAME).find();
-
-        DBObjectToVariantAnnotationConverter converter = new DBObjectToVariantAnnotationConverter();
+        //check that the annotation collection has been populated properly
+        DBCursor annotationCursor = mongoRule.getCollection(dbName, COLLECTION_ANNOTATIONS_NAME).find();
 
         int annotationCount = 0;
         int consequenceTypeCount = 0;
-        while (cursor.hasNext()) {
+        while (annotationCursor.hasNext()) {
             annotationCount++;
-            DBObject dbObject = cursor.next();
+            DBObject dbObject = annotationCursor.next();
             if (dbObject != null) {
-                VariantAnnotation annotation = converter.convertToDataModelType(dbObject);
-                Assert.assertNotNull(annotation.getConsequenceTypes());
-                consequenceTypeCount += annotation.getConsequenceTypes().size();
+                BasicDBList consequenceTypes = ((BasicDBList) dbObject.get(CONSEQUENCE_TYPE_FIELD));
+                Assert.assertNotNull(consequenceTypes);
+                consequenceTypeCount += consequenceTypes.size();
             }
         }
+        annotationCursor.close();
 
         assertTrue("Annotations not found", annotationCount == 4);
         assertTrue("ConsequenceType not found", consequenceTypeCount == 7);
+
+        //check that the annotation fields are present in the variant
+        DBCursor variantCursor = mongoRule.getCollection(dbName, COLLECTION_VARIANTS_NAME).find();
+        while (variantCursor.hasNext()) {
+            DBObject variant = variantCursor.next();
+            if (variant.get("_id").equals("20_63351_A_G")) {
+                assertNotNull(variant.get(SIFT_FIELD));
+                assertNotNull(variant.get(SO_ACCESSION_FIELD));
+                assertNotNull(variant.get(POLYPHEN_FIELD));
+                assertNotNull(variant.get(GENE_NAME_FIELD));
+            }
+        }
+        variantCursor.close();
     }
 
 }

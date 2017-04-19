@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2017 EMBL - European Bioinformatics Institute
+ * Copyright 2017 EMBL - European Bioinformatics Institute
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,25 +22,22 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.mongodb.core.MongoOperations;
 
-import uk.ac.ebi.eva.commons.models.data.VariantAnnotation;
+import uk.ac.ebi.eva.commons.models.data.Annotation;
 import uk.ac.ebi.eva.pipeline.Application;
-import uk.ac.ebi.eva.pipeline.io.writers.VepAnnotationMongoWriter;
-import uk.ac.ebi.eva.pipeline.parameters.AnnotationParameters;
+import uk.ac.ebi.eva.pipeline.io.writers.AnnotationInVariantMongoWriter;
 import uk.ac.ebi.eva.pipeline.parameters.DatabaseParameters;
 
-import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VARIANT_ANNOTATION_WRITER;
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.ANNOTATION_IN_VARIANT_WRITER;
 
 @Configuration
-public class VariantAnnotationWriterConfiguration {
+public class AnnotationInVariantWriterConfiguration {
 
-    @Bean(VARIANT_ANNOTATION_WRITER)
+    @Bean(ANNOTATION_IN_VARIANT_WRITER)
     @StepScope
     @Profile(Application.VARIANT_ANNOTATION_MONGO_PROFILE)
-    public ItemWriter<VariantAnnotation> variantAnnotationItemWriter(MongoOperations mongoOperations,
-                                                                     DatabaseParameters databaseParameters,
-                                                                     AnnotationParameters annotationParameters) {
-        return new VepAnnotationMongoWriter(mongoOperations, databaseParameters.getCollectionAnnotationsName(),
-                                            annotationParameters.getVepVersion(),
-                                            annotationParameters.getVepCacheVersion());
+    public ItemWriter<Annotation> variantAnnotationItemWriter(MongoOperations mongoOperations,
+                                                              DatabaseParameters databaseParameters) {
+        return new AnnotationInVariantMongoWriter(mongoOperations, databaseParameters.getCollectionVariantsName());
     }
+
 }
