@@ -87,6 +87,17 @@ public class VepProcessTest {
     }
 
     @Test
+    public void testWorkflowFlushAfterClosing() throws Exception {
+        VepProcess vepAnnotationFileWriter = new VepProcess(annotationParameters, CHUNK_SIZE, VEP_TIMEOUT);
+
+        vepAnnotationFileWriter.open();
+        vepAnnotationFileWriter.close();
+
+        exception.expect(IllegalStateException.class);
+        vepAnnotationFileWriter.flush();
+    }
+
+    @Test
     public void testWorkflowCloseWithoutOpening() throws Exception {
         VepProcess vepAnnotationFileWriter = new VepProcess(annotationParameters, CHUNK_SIZE, VEP_TIMEOUT);
         vepAnnotationFileWriter.close();

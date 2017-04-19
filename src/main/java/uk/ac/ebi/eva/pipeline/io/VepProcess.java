@@ -130,10 +130,8 @@ public class VepProcess {
         writingOk = new AtomicBoolean(false);
         outputCapturer = new Thread(() -> {
             long writtenLines = 0;
-            try (OutputStreamWriter writer = new OutputStreamWriter(new GZIPOutputStream(
-                    new FileOutputStream(vepOutputPath, APPEND)));
-                    BufferedReader processStandardOutput = new BufferedReader(
-                            new InputStreamReader(process.getInputStream()))
+            try (OutputStreamWriter writer = getOutputStreamWriter(vepOutputPath);
+                    BufferedReader processStandardOutput = getBufferedReader(process)
             ) {
                 writtenLines = copyVepOutput(processStandardOutput, writer);
                 writingOk.set(true);
@@ -144,6 +142,14 @@ public class VepProcess {
         });
         logger.info("Starting writing VEP output to " + vepOutputPath);
         outputCapturer.start();
+    }
+
+    private BufferedReader getBufferedReader(Process process) {
+        return new BufferedReader(new InputStreamReader(process.getInputStream()));
+    }
+
+    private OutputStreamWriter getOutputStreamWriter(String vepOutputPath) throws IOException {
+        return new OutputStreamWriter(new GZIPOutputStream(new FileOutputStream(vepOutputPath, APPEND)));
     }
 
     public void write(byte[] bytes) throws IOException {
