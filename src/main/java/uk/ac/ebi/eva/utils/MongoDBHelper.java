@@ -19,6 +19,7 @@ import com.mongodb.ServerAddress;
 import org.opencb.commons.utils.CryptoUtils;
 
 import uk.ac.ebi.eva.commons.models.data.Variant;
+import uk.ac.ebi.eva.commons.models.data.Annotation;
 
 import java.net.UnknownHostException;
 import java.util.LinkedList;
@@ -53,6 +54,10 @@ public class MongoDBHelper {
 
     public static String buildVariantStorageId(Variant v) {
         return buildVariantStorageId(v.getChromosome(), v.getStart(), v.getReference(), v.getAlternate());
+    }
+
+    public static String buildVariantStorageId(Annotation va) {
+        return buildVariantStorageId(va.getChromosome(), va.getStart(), va.getReferenceAllele(), va.getAlternativeAllele());
     }
 
     /**

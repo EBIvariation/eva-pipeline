@@ -15,161 +15,56 @@
  */
 package uk.ac.ebi.eva.commons.models.data;
 
-import com.google.common.base.Strings;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.annotation.Transient;
-import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.data.mongodb.core.mapping.Field;
-
-import uk.ac.ebi.eva.commons.models.converters.data.AnnotationFieldNames;
-
-import java.util.HashMap;
+import java.util.Collection;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 /**
- * Slim version of {@link org.opencb.biodata.models.variant.annotation.VariantAnnotation}
- * Unused fields removed.
  *
  */
-@Document
 public class VariantAnnotation {
+    private Set<Double> sifts = new HashSet<>();
+    private Set<Double> polyphens = new HashSet<>();
+    private Set<Integer> soAccessions = new HashSet<>();
+    private Set<String> xrefIds = new HashSet<>();
 
-    @Field(value = AnnotationFieldNames.CHROMOSOME_FIELD)
-    private String chromosome;
-
-    @Field(value = AnnotationFieldNames.START_FIELD)
-    private int start;
-
-    @Field(value = AnnotationFieldNames.END_FIELD)
-    private int end;
-
-    @Transient
-    private String referenceAllele;
-
-    @Transient
-    private String alternativeAllele;
-
-    @Id
-    private String id;
-
-    @Field(value = AnnotationFieldNames.ENSEMBL_VERSION_FIELD)
-    private String ensmblVersion;
-
-    @Field(value = AnnotationFieldNames.VEP_CACHE_VERSION_FIELD)
-    private String vepCacheVersion;
-
-    @Field(value = AnnotationFieldNames.XREFS_FIELD)
-    private Set<Xref> xrefs;
-
-    @Field(value = AnnotationFieldNames.CONSEQUENCE_TYPE_FIELD)
-    private Set<ConsequenceType> consequenceTypes;
-
-    @Transient
-    private Map<String, Object> additionalAttributes;
-
-    public VariantAnnotation(String chromosome, int start, int end, String referenceAllele) {
-        this(chromosome, start, end, referenceAllele, "");
+    public void addSift(Double sift) {
+        this.sifts.add(sift);
     }
 
-    public VariantAnnotation(String chromosome, int start, int end, String referenceAllele, String alternativeAllele) {
-        this.chromosome = chromosome;
-        this.start = start;
-        this.end = end;
-        this.referenceAllele = referenceAllele;
-        this.alternativeAllele = alternativeAllele;
-
-        this.id = "";
-        this.xrefs = new HashSet<>();
-        this.consequenceTypes = new HashSet<>();
-        this.additionalAttributes = new HashMap<>();
+    public void addSifts(Collection<Double> sifts) {
+        this.sifts.addAll(sifts);
     }
 
-    public String getChromosome() {
-        return chromosome;
+    public void addPolyphen(Double polyphen) {
+        this.polyphens.add(polyphen);
     }
 
-    public void setChromosome(String chromosome) {
-        this.chromosome = chromosome;
+    public void addPolyphens(Collection<Double> polyphens) {
+        this.polyphens.addAll(polyphens);
     }
 
-    public int getStart() {
-        return start;
+    public void addXrefIds(Set<String> xrefIds) {
+        this.xrefIds.addAll(xrefIds);
     }
 
-    public void setStart(int start) {
-        this.start = start;
+    public void addsoAccessions(Set<Integer> soAccessions) {
+        this.soAccessions.addAll(soAccessions);
     }
 
-    public int getEnd() {
-        return end;
+    public Set<Double> getSifts() {
+        return sifts;
     }
 
-    public void setEnd(int end) {
-        this.end = end;
+    public Set<Double> getPolyphens() {
+        return polyphens;
     }
 
-    public String getReferenceAllele() {
-        return referenceAllele;
+    public Set<Integer> getSoAccessions() {
+        return soAccessions;
     }
 
-    public String getAlternativeAllele() {
-        return alternativeAllele;
+    public Set<String> getXrefIds() {
+        return xrefIds;
     }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public Set<Xref> getXrefs() {
-        return xrefs;
-    }
-
-    public void setXrefs(Set<Xref> xrefs) {
-        this.xrefs = xrefs;
-    }
-
-    public Set<ConsequenceType> getConsequenceTypes() {
-        return consequenceTypes;
-    }
-
-    public void setConsequenceTypes(Set<ConsequenceType> consequenceTypes) {
-        this.consequenceTypes = consequenceTypes;
-    }
-
-    public String getEnsmblVersion() {
-        return ensmblVersion;
-    }
-
-    public void setEnsmblVersion(String ensmblVersion) {
-        this.ensmblVersion = ensmblVersion;
-    }
-
-    public String getVepCacheVersion() {
-        return vepCacheVersion;
-    }
-
-    public void setVepCacheVersion(String vepCacheVersion) {
-        this.vepCacheVersion = vepCacheVersion;
-    }
-
-    public void extractXrefsFromConsequenceTypes(){
-        for (ConsequenceType consequenceType : consequenceTypes) {
-            if (!Strings.isNullOrEmpty(consequenceType.getGeneName())) {
-                xrefs.add(new Xref(consequenceType.getGeneName(), "HGNC"));
-            }
-            if (!Strings.isNullOrEmpty(consequenceType.getEnsemblGeneId())) {
-                xrefs.add(new Xref(consequenceType.getEnsemblGeneId(), "ensemblGene"));
-            }
-            if (!Strings.isNullOrEmpty(consequenceType.getEnsemblTranscriptId())) {
-                xrefs.add(new Xref(consequenceType.getEnsemblTranscriptId(), "ensemblTranscript"));
-            }
-        }
-    }
-
 }

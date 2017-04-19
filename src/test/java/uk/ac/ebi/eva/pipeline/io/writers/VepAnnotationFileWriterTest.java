@@ -48,7 +48,7 @@ public class VepAnnotationFileWriterTest {
 
     /**
      * the mockvep writes an extra line as if some variant had two annotations, to check that the writer is not assuming
-     * that the count of variants to annotate is the same as variantAnnotations to write in the file.
+     * that the count of variants to annotate is the same as annotations to write in the file.
      */
     private static final int EXTRA_ANNOTATIONS = 1;
 

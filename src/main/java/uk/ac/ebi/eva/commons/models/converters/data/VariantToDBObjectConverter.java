@@ -87,7 +87,7 @@ public class VariantToDBObjectConverter implements Converter<Variant, DBObject> 
 
     /**
      * Create a converter between Variant and DBObject entities when the fields of VariantSourceEntry,
-     * VariantAnnotation and VariantStats should not be written.
+     * Annotation and VariantStats should not be written.
      */
     public VariantToDBObjectConverter() {
         this(null, null);
@@ -95,7 +95,7 @@ public class VariantToDBObjectConverter implements Converter<Variant, DBObject> 
 
     /**
      * Create a converter between Variant and DBObject entities. For complex inner fields  (VariantSourceEntry,
-     * VariantStats, VariantAnnotation), converters must be provided. If they are null, it is assumed that the field
+     * VariantStats, Annotation), converters must be provided. If they are null, it is assumed that the field
      * should not be written.
      *
      * @param variantSourceEntryConverter Nullable
