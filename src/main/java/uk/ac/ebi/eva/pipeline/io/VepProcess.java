@@ -33,7 +33,12 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.util.Arrays;
 import java.util.Scanner;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.zip.GZIPOutputStream;
@@ -81,6 +86,8 @@ public class VepProcess {
 
     private AtomicLong outputIdleSince;
 
+    private ExecutorService executorService;
+
     public VepProcess(AnnotationParameters annotationParameters, int chunkSize, Long timeoutInSeconds) {
         if (timeoutInSeconds <= 0) {
             throw new IllegalArgumentException(
@@ -90,6 +97,7 @@ public class VepProcess {
         this.chunkSize = chunkSize;
         this.timeoutInSeconds = timeoutInSeconds;
         this.outputIdleSince = new AtomicLong(System.currentTimeMillis());
+        this.executorService = Executors.newCachedThreadPool();
     }
 
     public void open() throws ItemStreamException {
@@ -132,8 +140,7 @@ public class VepProcess {
             boolean skipComments = new File(vepOutputPath).exists();
 
             try (OutputStreamWriter writer = getOutputStreamWriter(vepOutputPath);
-                    BufferedReader processStandardOutput = getBufferedReader(process)
-            ) {
+                    BufferedReader processStandardOutput = getBufferedReader(process)) {
                 writtenLines = copyVepOutput(processStandardOutput, writer, skipComments);
                 writingOk.set(true);
             } catch (IOException e) {
@@ -168,7 +175,23 @@ public class VepProcess {
         if (!isOpen()) {
             throw new IllegalStateException("Process must be initialized (hint: call open() before flush())");
         }
-        processStandardInput.flush();
+        flushToProcessStandardInputWithTimeout();
+    }
+
+    private void flushToProcessStandardInputWithTimeout() {
+        Callable<Void> callable = () -> {
+            processStandardInput.flush();
+            return null;
+        };
+
+        Future<Void> future = executorService.submit(callable);
+        try {
+            future.get(timeoutInSeconds, TimeUnit.SECONDS);
+        } catch (TimeoutException e) {
+            throw new ItemStreamException("Error flushing the writes to VEP: timeout reached", e);
+        } catch (Exception e) {
+            throw new ItemStreamException("Error flushing the writes to VEP", e);
+        }
     }
 
     /**
@@ -191,7 +214,7 @@ public class VepProcess {
 
     private void flushProcessStdin() {
         try {
-            processStandardInput.flush();
+            flushToProcessStandardInputWithTimeout();
             processStandardInput.close();
         } catch (IOException e) {
             logger.error("Could not close stream for VEP's stdin", e);
