@@ -20,7 +20,7 @@ import org.springframework.batch.item.ItemStreamReader;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import uk.ac.ebi.eva.commons.models.data.VariantAnnotation;
+import uk.ac.ebi.eva.commons.models.data.Annotation;
 import uk.ac.ebi.eva.pipeline.io.readers.AnnotationFlatFileReader;
 import uk.ac.ebi.eva.pipeline.parameters.AnnotationParameters;
 
@@ -30,11 +30,11 @@ import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VARIANT_ANNOTATION_
  * Configuration to inject a AnnotationFlatFileReader as a Variant Annotation Reader in the pipeline.
  */
 @Configuration
-public class VariantAnnotationReaderConfiguration {
+public class AnnotationReaderConfiguration {
 
     @Bean(VARIANT_ANNOTATION_READER)
     @StepScope
-    public ItemStreamReader<VariantAnnotation> variantAnnotationReader(AnnotationParameters annotationParameters) {
+    public ItemStreamReader<Annotation> annotationReader(AnnotationParameters annotationParameters) {
         return new AnnotationFlatFileReader(annotationParameters.getVepOutput());
     }
 

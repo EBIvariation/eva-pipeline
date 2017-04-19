@@ -22,29 +22,28 @@ import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.item.ItemStreamReader;
-import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.file.FlatFileParseException;
+import org.springframework.batch.item.support.CompositeItemWriter;
 import org.springframework.batch.repeat.policy.SimpleCompletionPolicy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-
-import uk.ac.ebi.eva.commons.models.data.VariantAnnotation;
+import uk.ac.ebi.eva.commons.models.data.Annotation;
 import uk.ac.ebi.eva.pipeline.configuration.ChunkSizeCompletionPolicyConfiguration;
-import uk.ac.ebi.eva.pipeline.configuration.readers.VariantAnnotationReaderConfiguration;
-import uk.ac.ebi.eva.pipeline.configuration.writers.VariantAnnotationWriterConfiguration;
+import uk.ac.ebi.eva.pipeline.configuration.readers.AnnotationReaderConfiguration;
+import uk.ac.ebi.eva.pipeline.configuration.writers.AnnotationCompositeWriterConfiguration;
 import uk.ac.ebi.eva.pipeline.io.readers.AnnotationFlatFileReader;
-import uk.ac.ebi.eva.pipeline.io.writers.VepAnnotationMongoWriter;
+import uk.ac.ebi.eva.pipeline.io.writers.AnnotationMongoWriter;
 import uk.ac.ebi.eva.pipeline.listeners.AnnotationLoaderStepStatisticsListener;
 import uk.ac.ebi.eva.pipeline.listeners.SkippedItemListener;
 import uk.ac.ebi.eva.pipeline.listeners.StepProgressListener;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.COMPOSITE_ANNOTATION_VARIANT_WRITER;
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.LOAD_VEP_ANNOTATION_STEP;
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VARIANT_ANNOTATION_READER;
-import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VARIANT_ANNOTATION_WRITER;
 
 /**
  * This step loads annotations into MongoDB.
@@ -57,24 +56,23 @@ import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VARIANT_ANNOTATION_
  * 20_60419_A/G	20:60419	G	-	-	-	intergenic_variant	-	-	-	-	-	-
  * 20_60479_C/T	20:60479	T	-	-	-	intergenic_variant	-	-	-	-	-	rs149529999	GMAF=T:0.0018;AFR_MAF=T:0.01;AMR_MAF=T:0.0028
  * <p>
- * each line of the file is loaded with {@link AnnotationFlatFileReader} into a {@link VariantAnnotation} and then sent
- * to mongo with {@link VepAnnotationMongoWriter}.
+ * each line of the file is loaded with {@link AnnotationFlatFileReader} into a {@link Annotation} and then sent
+ * to mongo with {@link AnnotationMongoWriter}.
  */
 
 @Configuration
 @EnableBatchProcessing
-@Import({VariantAnnotationReaderConfiguration.class, VariantAnnotationWriterConfiguration.class,
-        ChunkSizeCompletionPolicyConfiguration.class})
+@Import({AnnotationReaderConfiguration.class, AnnotationCompositeWriterConfiguration.class, ChunkSizeCompletionPolicyConfiguration.class})
 public class AnnotationLoaderStep {
     private static final Logger logger = LoggerFactory.getLogger(AnnotationLoaderStep.class);
 
     @Autowired
     @Qualifier(VARIANT_ANNOTATION_READER)
-    private ItemStreamReader<VariantAnnotation> variantAnnotationReader;
+    private ItemStreamReader<Annotation> annotationReader;
 
     @Autowired
-    @Qualifier(VARIANT_ANNOTATION_WRITER)
-    private ItemWriter<VariantAnnotation> variantAnnotationItemWriter;
+    @Qualifier(COMPOSITE_ANNOTATION_VARIANT_WRITER)
+    private CompositeItemWriter<Annotation> compositeAnnotationVariantItemWriter;
 
     @Bean(LOAD_VEP_ANNOTATION_STEP)
     public Step loadVepAnnotationStep(StepBuilderFactory stepBuilderFactory, JobOptions jobOptions,
@@ -82,9 +80,9 @@ public class AnnotationLoaderStep {
         logger.debug("Building '" + LOAD_VEP_ANNOTATION_STEP + "'");
 
         return stepBuilderFactory.get(LOAD_VEP_ANNOTATION_STEP)
-                .<VariantAnnotation, VariantAnnotation>chunk(chunkSizeCompletionPolicy)
-                .reader(variantAnnotationReader)
-                .writer(variantAnnotationItemWriter)
+                .<Annotation, Annotation>chunk(chunkSizeCompletionPolicy)
+                .reader(annotationReader)
+                .writer(compositeAnnotationVariantItemWriter)
                 .faultTolerant().skipLimit(50).skip(FlatFileParseException.class)
                 .allowStartIfComplete(jobOptions.isAllowStartIfComplete())
                 .listener(new SkippedItemListener())

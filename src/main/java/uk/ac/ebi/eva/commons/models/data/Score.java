@@ -19,8 +19,6 @@ package uk.ac.ebi.eva.commons.models.data;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
-import uk.ac.ebi.eva.commons.models.converters.data.AnnotationFieldNames;
-
 /**
  * From {@link org.opencb.biodata.models.variant.annotation.Score}
  */

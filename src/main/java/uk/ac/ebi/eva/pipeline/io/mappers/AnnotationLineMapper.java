@@ -22,18 +22,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.item.file.LineMapper;
 
+import uk.ac.ebi.eva.commons.models.data.Annotation;
 import uk.ac.ebi.eva.commons.models.data.ConsequenceType;
 import uk.ac.ebi.eva.commons.models.data.Score;
-import uk.ac.ebi.eva.commons.models.data.VariantAnnotation;
 
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * Map a line in VEP output file to {@link VariantAnnotation}
+ * Map a line in VEP output file to {@link Annotation}
  *
  * Example of VEP output line
  * 20_60343_G/A	20:60343	A	-	-	-	intergenic_variant	-	-	-	-	-	-
@@ -45,19 +45,19 @@ import java.util.stream.Collectors;
  * public methods in VepFormatReader can't be reused because there is a reference to the previous line (currentVariantString)
  * that prevent each line to be independent
  *
- * Here each line is mapped to {@link VariantAnnotation}; in case of two annotations for the same variant, a new
- * {@link VariantAnnotation} object is created containing only the fields that will be appended:
+ * Here each line is mapped to {@link Annotation}; in case of two annotations for the same variant, a new
+ * {@link Annotation} object is created containing only the fields that will be appended:
  *  - ConsequenceTypes
  *  - Hgvs
  */
-public class AnnotationLineMapper implements LineMapper<VariantAnnotation> {
+public class AnnotationLineMapper implements LineMapper<Annotation> {
     private static final Logger logger = LoggerFactory.getLogger(AnnotationLineMapper.class);
 
     /**
-     * Map a line in VEP output file to {@link VariantAnnotation}
+     * Map a line in VEP output file to {@link Annotation}
      * @param line in VEP output
      * @param lineNumber
-     * @return a {@link VariantAnnotation}
+     * @return a {@link Annotation}
      *
      * Most of the code is from org.opencb.biodata.formats.annotation.io.VepFormatReader#read() with few differences:
      *  - An empty array is initialized for Hgvs (like ConsequenceTypes);
@@ -65,13 +65,13 @@ public class AnnotationLineMapper implements LineMapper<VariantAnnotation> {
      *  - The logic to move around the file (read line) and reference to previous line (currentVariantString) are removed;
      */
     @Override
-    public VariantAnnotation mapLine(String line, int lineNumber) {
-        //logger.debug("Mapping line {} to VariantAnnotation", line);
+    public Annotation mapLine(String line, int lineNumber) {
+        //logger.debug("Mapping line {} to Annotation", line);
         ConsequenceType consequenceType = new ConsequenceType();
         String[] lineFields = line.split("\t");
 
         Map<String,String> variantMap = parseVariant(lineFields[0], lineFields[1]);  // coordinates and alternative are only parsed once
-        VariantAnnotation currentAnnotation = new VariantAnnotation(
+        Annotation currentAnnotation = new Annotation(
                 variantMap.get("chromosome"),
                 Integer.valueOf(variantMap.get("start")),
                 Integer.valueOf(variantMap.get("end")), variantMap.get("reference"),
@@ -82,7 +82,7 @@ public class AnnotationLineMapper implements LineMapper<VariantAnnotation> {
          * Some lines do not have extra field and end with a \t: the split function above does not return that field
          */
         if(lineFields.length == 14) {
-            parseExtraField(consequenceType, lineFields[13], currentAnnotation);
+            parseExtraField(consequenceType, lineFields[13]);
         }
 
         // Remaining fields only of interest if the feature is a transcript
@@ -120,8 +120,8 @@ public class AnnotationLineMapper implements LineMapper<VariantAnnotation> {
         consequenceType.setCodon(lineFields[11]);
     }
 
-    private List<Integer> mapSoTermsToSoAccessions(String[] soTerms){
-        return Arrays.stream(soTerms).map(ConsequenceTypeMappings.termToAccession::get).collect(Collectors.toList());
+    private Set<Integer> mapSoTermsToSoAccessions(String[] soTerms){
+        return Arrays.stream(soTerms).map(ConsequenceTypeMappings.termToAccession::get).collect(Collectors.toSet());
     }
 
     /**
@@ -189,8 +189,7 @@ public class AnnotationLineMapper implements LineMapper<VariantAnnotation> {
      *
      * The parseFrequencies option has been removed
      */
-    private void parseExtraField(ConsequenceType consequenceType, String extraField, VariantAnnotation currentAnnotation) {
-
+    private void parseExtraField(ConsequenceType consequenceType, String extraField) {
         for (String field : extraField.split(";")) {
             String[] keyValue = field.split("=");
 
@@ -202,7 +201,7 @@ public class AnnotationLineMapper implements LineMapper<VariantAnnotation> {
                     consequenceType.setPolyphen(parseProteinSubstitutionScore(keyValue[1]));
                     break;
                 case "sift": // Format is SIFT=tolerated(0.07)
-                    consequenceType.setSifts(parseProteinSubstitutionScore(keyValue[1]));
+                    consequenceType.setSift(parseProteinSubstitutionScore(keyValue[1]));
                     break;
                 case "strand":
                     consequenceType.setStrand(keyValue[1].equals("1")?"+":"-");

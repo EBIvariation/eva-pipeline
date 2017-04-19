@@ -19,9 +19,8 @@ package uk.ac.ebi.eva.commons.models.data;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
-import uk.ac.ebi.eva.commons.models.converters.data.AnnotationFieldNames;
-
 import java.util.List;
+import java.util.Set;
 
 /**
  * org.opencb.biodata.models.variant.annotation.ConsequenceType
@@ -60,13 +59,13 @@ public class ConsequenceType {
     private String codon;
 
     @Field(value = AnnotationFieldNames.SIFT_FIELD)
-    private Score sifts;
+    private Score sift;
 
     @Field(value = AnnotationFieldNames.POLYPHEN_FIELD)
     private Score polyphen;
 
     @Field(value = AnnotationFieldNames.SO_ACCESSION_FIELD)
-    private List<Integer> soAccessions;
+    private Set<Integer> soAccessions;
 
     @Field(value = AnnotationFieldNames.RELATIVE_POS_FIELD)
     private Integer relativePosition;
@@ -162,20 +161,20 @@ public class ConsequenceType {
         return aaChange;
     }
 
-    public List<Integer> getSoAccessions() {
+    public Set<Integer> getSoAccessions() {
         return soAccessions;
     }
 
-    public void setSoAccessions(List<Integer> soAccessions) {
+    public void setSoAccessions(Set<Integer> soAccessions) {
         this.soAccessions = soAccessions;
     }
 
-    public Score getSifts() {
-        return sifts;
+    public Score getSift() {
+        return sift;
     }
 
-    public void setSifts(Score sifts) {
-        this.sifts = sifts;
+    public void setSift(Score sift) {
+        this.sift = sift;
     }
 
     public Score getPolyphen() {
@@ -205,7 +204,7 @@ public class ConsequenceType {
         if (aaPosition != null ? !aaPosition.equals(that.aaPosition) : that.aaPosition != null) return false;
         if (aaChange != null ? !aaChange.equals(that.aaChange) : that.aaChange != null) return false;
         if (codon != null ? !codon.equals(that.codon) : that.codon != null) return false;
-        if (sifts != null ? !sifts.equals(that.sifts) : that.sifts != null) return false;
+        if (sift != null ? !sift.equals(that.sift) : that.sift != null) return false;
         if (polyphen != null ? !polyphen.equals(that.polyphen) : that.polyphen != null) return false;
         if (soAccessions != null ? !soAccessions.equals(that.soAccessions) : that.soAccessions != null) return false;
         return relativePosition != null ? relativePosition
@@ -224,7 +223,7 @@ public class ConsequenceType {
         result = 31 * result + (aaPosition != null ? aaPosition.hashCode() : 0);
         result = 31 * result + (aaChange != null ? aaChange.hashCode() : 0);
         result = 31 * result + (codon != null ? codon.hashCode() : 0);
-        result = 31 * result + (sifts != null ? sifts.hashCode() : 0);
+        result = 31 * result + (sift != null ? sift.hashCode() : 0);
         result = 31 * result + (polyphen != null ? polyphen.hashCode() : 0);
         result = 31 * result + (soAccessions != null ? soAccessions.hashCode() : 0);
         result = 31 * result + (relativePosition != null ? relativePosition.hashCode() : 0);

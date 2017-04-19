@@ -32,7 +32,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static uk.ac.ebi.eva.commons.models.converters.data.AnnotationFieldNames.CONSEQUENCE_TYPE_FIELD;
+import static uk.ac.ebi.eva.commons.models.data.AnnotationFieldNames.CONSEQUENCE_TYPE_FIELD;
 import static uk.ac.ebi.eva.test.utils.JobTestUtils.count;
 import static uk.ac.ebi.eva.test.utils.JobTestUtils.getLines;
 import static uk.ac.ebi.eva.utils.FileUtils.getResource;
@@ -119,10 +119,10 @@ public class GenotypedVcfJobTestUtils {
             assertNotNull(consequenceTypes);
             consequenceTypeCount += consequenceTypes.size();
         }
+        cursor.close();
 
         assertTrue(count > 0);
         assertEquals(EXPECTED_VALID_ANNOTATIONS, consequenceTypeCount);
-
     }
 
     public static void checkOutputFileLength(File vepOutputFile) throws IOException {
@@ -170,10 +170,10 @@ public class GenotypedVcfJobTestUtils {
 
     public static void checkSkippedOneMalformedLine(JobExecution jobExecution) {
         //check that one line is skipped because malformed
-        List<StepExecution> variantAnnotationLoadStepExecution = jobExecution.getStepExecutions().stream()
+        List<StepExecution> annotationLoadStepExecution = jobExecution.getStepExecutions().stream()
                 .filter(stepExecution -> stepExecution.getStepName().equals(BeanNames.LOAD_VEP_ANNOTATION_STEP))
                 .collect(Collectors.toList());
-        assertEquals(1, variantAnnotationLoadStepExecution.get(0).getReadSkipCount());
+        assertEquals(1, annotationLoadStepExecution.get(0).getReadSkipCount());
     }
 
     public static File getVariantsStatsFile(String outputDirStats) throws URISyntaxException {

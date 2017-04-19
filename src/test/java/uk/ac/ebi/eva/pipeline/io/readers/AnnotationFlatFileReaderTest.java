@@ -21,7 +21,7 @@ import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.item.file.FlatFileParseException;
 import org.springframework.batch.test.MetaDataInstanceFactory;
 
-import uk.ac.ebi.eva.commons.models.data.VariantAnnotation;
+import uk.ac.ebi.eva.commons.models.data.Annotation;
 import uk.ac.ebi.eva.test.data.VepOutputContent;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
@@ -35,7 +35,7 @@ import static org.junit.Assert.assertEquals;
 /**
  * {@link AnnotationFlatFileReader}
  * input: a File written by VEP
- * output: a VariantAnnotation each time its `.read()` is called
+ * output: a Annotation each time its `.read()` is called
  * <p>
  * incorrect input lines should not make the reader fail.
  */
@@ -55,12 +55,12 @@ public class AnnotationFlatFileReaderTest {
         annotationFlatFileReader.setSaveState(false);
         annotationFlatFileReader.open(executionContext);
 
-        VariantAnnotation variantAnnotation;
+        Annotation annotation;
         int consequenceTypeCount = 0;
         int count = 0;
-        while ((variantAnnotation = annotationFlatFileReader.read()) != null) {
+        while ((annotation = annotationFlatFileReader.read()) != null) {
             count++;
-            if (variantAnnotation.getConsequenceTypes() != null && !variantAnnotation.getConsequenceTypes().isEmpty()) {
+            if (annotation.getConsequenceTypes() != null && !annotation.getConsequenceTypes().isEmpty()) {
                 consequenceTypeCount++;
             }
         }
