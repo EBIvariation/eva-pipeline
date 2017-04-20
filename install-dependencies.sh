@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
 
 mkdir opencga
-cp -r src/main/resources/opencga/conf $OPENCGA_HOME
+cp -r src/test/resources/opencga/conf $OPENCGA_HOME
 
