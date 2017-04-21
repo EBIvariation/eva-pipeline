@@ -32,8 +32,10 @@ import uk.ac.ebi.eva.commons.models.data.VariantAnnotation;
 import uk.ac.ebi.eva.commons.models.data.Xref;
 import uk.ac.ebi.eva.utils.MongoDBHelper;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -76,8 +78,7 @@ public class AnnotationInVariantMongoWriter extends MongoItemWriter<Annotation> 
 
     @Override
     protected void doWrite(List<? extends Annotation> annotations) {
-        Map<String, List<Annotation>> annotationsByStorageId = annotations.stream()
-                .collect(Collectors.groupingBy(MongoDBHelper::buildVariantStorageId));
+        Map<String, List<Annotation>> annotationsByStorageId = groupAnnotationById(annotations);
 
         for (Map.Entry<String, List<Annotation>> annotationsIdEntry : annotationsByStorageId.entrySet()) {
             VariantAnnotation variantAnnotation = extractFieldsFromAnnotations(annotationsIdEntry.getValue());
@@ -201,6 +202,18 @@ public class AnnotationInVariantMongoWriter extends MongoItemWriter<Annotation> 
         } else {
             return new HashSet<>(Arrays.asList(Collections.min(scores), Collections.max(scores)));
         }
+    }
+
+    private Map<String, List<Annotation>> groupAnnotationById(List<? extends Annotation> annotations) {
+        Map<String, List<Annotation>> annotationsByStorageId = new HashMap<>();
+        for (Annotation annotation : annotations) {
+            String id = MongoDBHelper.buildVariantStorageId(annotation);
+
+            annotationsByStorageId.putIfAbsent(id, new ArrayList<>());
+            annotationsByStorageId.get(id).add(annotation);
+        }
+
+        return annotationsByStorageId;
     }
 
 }
