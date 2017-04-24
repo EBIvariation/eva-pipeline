@@ -35,10 +35,16 @@ public class VepAnnotationFileWriter implements ItemStreamWriter<VariantWrapper>
 
     private static final Logger logger = LoggerFactory.getLogger(VepAnnotationFileWriter.class);
 
-    private final VepProcess vepProcess;
+    private final AnnotationParameters annotationParameters;
+
+    private final Integer chunkSize;
+
+    private final Long timeoutInSeconds;
 
     public VepAnnotationFileWriter(AnnotationParameters annotationParameters, Integer chunkSize, Long timeoutInSeconds) {
-        vepProcess = new VepProcess(annotationParameters, chunkSize, timeoutInSeconds);
+        this.annotationParameters = annotationParameters;
+        this.chunkSize = chunkSize;
+        this.timeoutInSeconds = timeoutInSeconds;
     }
 
     @Override
@@ -49,9 +55,8 @@ public class VepAnnotationFileWriter implements ItemStreamWriter<VariantWrapper>
 
     @Override
     public void write(List<? extends VariantWrapper> variantWrappers) throws Exception {
-        if (!vepProcess.isOpen()) {
-            vepProcess.open();
-        }
+        VepProcess vepProcess = new VepProcess(annotationParameters, chunkSize, timeoutInSeconds);
+        vepProcess.open();
 
         for (VariantWrapper variantWrapper : variantWrappers) {
             String line = getVariantInVepInputFormat(variantWrapper);
@@ -67,6 +72,7 @@ public class VepAnnotationFileWriter implements ItemStreamWriter<VariantWrapper>
         }
 
         vepProcess.flush();
+        vepProcess.close();
     }
 
     private String getVariantInVepInputFormat(VariantWrapper variantWrapper) {
@@ -85,7 +91,6 @@ public class VepAnnotationFileWriter implements ItemStreamWriter<VariantWrapper>
 
     @Override
     public void close() throws ItemStreamException {
-        vepProcess.close();
     }
 
 }

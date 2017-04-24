@@ -143,10 +143,8 @@ public class VepAnnotationFileWriterTest {
                 chunkSizeGreaterThanActualVariants, vepTimeouts);
 
         vepAnnotationFileWriter.open(null);
-        vepAnnotationFileWriter.write(variantWrappers);
-
         exception.expect(ItemStreamException.class);
-        vepAnnotationFileWriter.close();
+        vepAnnotationFileWriter.write(variantWrappers);
     }
 
 }

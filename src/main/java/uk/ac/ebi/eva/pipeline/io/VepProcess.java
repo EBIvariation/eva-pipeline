@@ -111,7 +111,7 @@ public class VepProcess {
 
         logger.debug("VEP annotation parameters = " + Arrays.toString(processBuilder.command().toArray()));
 
-        logger.info("Starting VEP process");
+        logger.debug("Starting VEP process");
 
         try {
             process = processBuilder.start();
@@ -138,9 +138,9 @@ public class VepProcess {
             } catch (IOException e) {
                 logger.error("Writing the VEP output to " + vepOutputPath + " failed. ", e);
             }
-            logger.info("Finished writing VEP output (" + writtenLines + " lines written) to " + vepOutputPath);
+            logger.debug("Finished writing VEP output (" + writtenLines + " lines written) to " + vepOutputPath);
         });
-        logger.info("Starting writing VEP output to " + vepOutputPath);
+        logger.debug("Starting writing VEP output to " + vepOutputPath);
         outputCapturer.start();
     }
 
@@ -183,7 +183,7 @@ public class VepProcess {
                 checkOutputWritingStatus();
             } finally {
                 process = null;
-                logger.info("VEP process finished");
+                logger.debug("VEP process finished");
             }
         }
     }
@@ -287,11 +287,13 @@ public class VepProcess {
     }
 
     private void logCoordinates(String line, long chunkSize) {
-        if (line.charAt(0) == '#') {
-            logger.debug("VEP wrote {} more lines (still writing the header)", chunkSize);
-        } else {
-            Scanner scanner = new Scanner(line);
-            logger.debug("VEP wrote {} more lines, last one was {}", chunkSize, scanner.next());
+        if (chunkSize > 0) {
+            if (line.charAt(0) == '#') {
+                logger.debug("VEP wrote {} more lines (still writing the header)", chunkSize);
+            } else {
+                Scanner scanner = new Scanner(line);
+                logger.debug("VEP wrote {} more lines, last one was {}", chunkSize, scanner.next());
+            }
         }
     }
 
