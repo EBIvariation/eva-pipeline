@@ -24,6 +24,7 @@ import uk.ac.ebi.eva.pipeline.parameters.AnnotationParameters;
 
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -130,10 +131,12 @@ public class VepProcess {
         writingOk = new AtomicBoolean(false);
         outputCapturer = new Thread(() -> {
             long writtenLines = 0;
+            boolean skipComments = new File(vepOutputPath).exists();
+
             try (OutputStreamWriter writer = getOutputStreamWriter(vepOutputPath);
                     BufferedReader processStandardOutput = getBufferedReader(process)
             ) {
-                writtenLines = copyVepOutput(processStandardOutput, writer);
+                writtenLines = copyVepOutput(processStandardOutput, writer, skipComments);
                 writingOk.set(true);
             } catch (IOException e) {
                 logger.error("Writing the VEP output to " + vepOutputPath + " failed. ", e);
@@ -253,17 +256,21 @@ public class VepProcess {
             throw new ItemStreamException("VEP output writer thread could not finish properly. ");
         }
     }
+
     /**
      * read all the vep output in inputStream and write it into the outputStream, logging the coordinates once in each
      * chunk.
+     *
      * @param reader must be closed externally
      * @param writer must be closed externally
+     * @param skipComments if false, will write all lines starting with '#', if true, will not write any.
      * @return written lines.
      */
-    private long copyVepOutput(BufferedReader reader, OutputStreamWriter writer) throws IOException {
+    private long copyVepOutput(BufferedReader reader, OutputStreamWriter writer, boolean skipComments)
+            throws IOException {
         long writtenLines = 0;
 
-        String line = reader.readLine();
+        String line = getNextLine(reader, skipComments);
         String lastLine = line;
         while (line != null) {
             writer.write(line);
@@ -271,7 +278,7 @@ public class VepProcess {
             writtenLines++;
 
             lastLine = line;
-            line = reader.readLine();
+            line = getNextLine(reader, skipComments);
             if (writtenLines % chunkSize == 0) {
                 writer.flush();
                 outputIdleSince.set(System.currentTimeMillis());
@@ -286,9 +293,23 @@ public class VepProcess {
         return writtenLines;
     }
 
+    private String getNextLine(BufferedReader reader, boolean skipComments) throws IOException {
+        String line = reader.readLine();
+        if (skipComments) {
+            while (line != null && isComment(line)) {
+                line = reader.readLine();
+            }
+        }
+        return line;
+    }
+
+    private boolean isComment(String line) {
+        return line.charAt(0) == '#';
+    }
+
     private void logCoordinates(String line, long chunkSize) {
         if (chunkSize > 0) {
-            if (line.charAt(0) == '#') {
+            if (isComment(line)) {
                 logger.debug("VEP wrote {} more lines (still writing the header)", chunkSize);
             } else {
                 Scanner scanner = new Scanner(line);

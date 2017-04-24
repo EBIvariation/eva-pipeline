@@ -26,8 +26,12 @@ import uk.ac.ebi.eva.pipeline.model.VariantWrapper;
 import uk.ac.ebi.eva.pipeline.parameters.AnnotationParameters;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -47,6 +51,8 @@ public class VepAnnotationFileWriterTest {
      * that the count of variants to annotate is the same as variantAnnotations to write in the file.
      */
     private static final int EXTRA_ANNOTATIONS = 1;
+
+    private static final int HEADER_LINES = 3;
 
     private final VariantWrapper VARIANT_WRAPPER = new VariantWrapper("1", 100, 105, "A", "T");
 
@@ -130,6 +136,50 @@ public class VepAnnotationFileWriterTest {
         assertTrue(vepOutputFile.exists());
         assertEquals(variantWrappers.size() + EXTRA_ANNOTATIONS,
                 getLines(new GZIPInputStream(new FileInputStream(vepOutputFile))));
+    }
+
+    @Test
+    public void testHeaderIsWrittenOnlyOnce() throws Exception {
+        List<VariantWrapper> variantWrappers = Collections.singletonList(VARIANT_WRAPPER);
+        int chunkSize = variantWrappers.size();
+
+        VepAnnotationFileWriter vepAnnotationFileWriter = new VepAnnotationFileWriter(annotationParameters,
+                chunkSize, TIMEOUT_IN_SECONDS);
+
+        vepAnnotationFileWriter.open(null);
+        long chunks = 3;
+        for (int i = 0; i < chunks; i++) {
+            vepAnnotationFileWriter.write(variantWrappers);
+        }
+        vepAnnotationFileWriter.close();
+
+        File vepOutputFile = new File(annotationParameters.getVepOutput());
+        assertTrue(vepOutputFile.exists());
+        assertEquals((variantWrappers.size() + EXTRA_ANNOTATIONS)*chunks,
+                getLines(new GZIPInputStream(new FileInputStream(vepOutputFile))));
+
+        assertEquals(HEADER_LINES, getCommentLines(new GZIPInputStream(new FileInputStream(vepOutputFile))));
+        BufferedReader reader = new BufferedReader(new InputStreamReader(new GZIPInputStream(
+                new FileInputStream(vepOutputFile))));
+        for (int i = 0; i < HEADER_LINES; i++) {
+            assertEquals('#', reader.readLine().charAt(0));
+        }
+    }
+
+    /**
+     * counts non-comment lines in an InputStream
+     */
+    public static long getCommentLines(InputStream in) throws IOException {
+        BufferedReader file = new BufferedReader(new InputStreamReader(in));
+        long lines = 0;
+        String line;
+        while ((line = file.readLine()) != null) {
+            if (line.charAt(0) == '#') {
+                lines++;
+            }
+        }
+        file.close();
+        return lines;
     }
 
     @Test

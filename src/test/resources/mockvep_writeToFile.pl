@@ -19,6 +19,9 @@ if  ($file eq "STDOUT") {
     $fileHandle->open(">> $file");
 }
 
+print $fileHandle "## This line acts as the beginning of the header\n";
+print $fileHandle "## More header lines\n";
+print $fileHandle "# This line acts as the end of the header\n";
 my @buffer = ();
 my $line;
 while ($line = <STDIN>) {
