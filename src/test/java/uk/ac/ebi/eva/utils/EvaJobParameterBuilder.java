@@ -144,4 +144,9 @@ public class EvaJobParameterBuilder extends JobParametersBuilder {
         addParameter(JobParametersNames.STATISTICS_SKIP, new JobParameter(Boolean.toString(statisticsSkip)));
         return this;
     }
+
+    public EvaJobParameterBuilder chunkSize(String chunkSize) {
+        addParameter(JobParametersNames.CONFIG_CHUNK_SIZE, new JobParameter(chunkSize));
+        return this;
+    }
 }

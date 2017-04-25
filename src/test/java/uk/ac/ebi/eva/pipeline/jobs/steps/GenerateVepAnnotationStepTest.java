@@ -15,6 +15,8 @@
  */
 package uk.ac.ebi.eva.pipeline.jobs.steps;
 
+import com.mongodb.BasicDBObject;
+import com.mongodb.DBCollection;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -60,6 +62,8 @@ public class GenerateVepAnnotationStepTest {
 
     private static final String MOCKVEP = "/mockvep_writeToFile.pl";
 
+    private static final String FAILING_MOCKVEP = "/mockvep_writeToFile_error.pl";
+
     private static final String STUDY_ID = "1";
 
     private static final String FILE_ID = "1";
@@ -72,6 +76,8 @@ public class GenerateVepAnnotationStepTest {
 
     @Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
+
+    private static final int EXTRA_ANNOTATIONS = 1;
 
     @Test
     public void shouldGenerateVepAnnotations() throws Exception {
@@ -104,9 +110,70 @@ public class GenerateVepAnnotationStepTest {
 
         // And VEP output should exist and annotations should be in the file
         assertTrue(vepOutput.exists());
-        int EXTRA_ANNOTATIONS = 1;
         assertEquals(300 + EXTRA_ANNOTATIONS,
                 JobTestUtils.getLines(new GZIPInputStream(new FileInputStream(vepOutput))));
+    }
+
+    @Test
+    public void shouldResumeJob() throws Exception {
+        String databaseName = mongoRule.restoreDumpInTemporaryDatabase(getResourceUrl(MONGO_DUMP));
+        String collectionVariantsName = "variants";
+        String outputDirAnnot = temporaryFolderRule.getRoot().getAbsolutePath();
+        File vepOutput = new File(URLHelper.resolveVepOutput(outputDirAnnot, STUDY_ID, FILE_ID));
+        int chunkSize = 100;
+
+        JobParameters jobParameters = new EvaJobParameterBuilder()
+                .collectionVariantsName(collectionVariantsName)
+                .chunkSize(Integer.toString(chunkSize))
+                .databaseName(databaseName)
+                .inputFasta("")
+                .inputStudyId(STUDY_ID)
+                .inputVcfId(FILE_ID)
+                .outputDirAnnotation(outputDirAnnot)
+                .vepCachePath("")
+                .vepCacheSpecies("")
+                .vepCacheVersion("")
+                .vepNumForks("")
+                .vepPath(getResource(FAILING_MOCKVEP).getPath())
+                .vepTimeout("10").toJobParameters();
+
+        JobExecution jobExecution = jobLauncherTestUtils
+                .launchStep(BeanNames.GENERATE_VEP_ANNOTATION_STEP, jobParameters);
+
+        assertEquals(ExitStatus.FAILED.getExitCode(), jobExecution.getExitStatus().getExitCode());
+        assertEquals(BatchStatus.FAILED, jobExecution.getStatus());
+
+        assertTrue(vepOutput.exists());
+        assertEquals(chunkSize + EXTRA_ANNOTATIONS,
+                JobTestUtils.getLines(new GZIPInputStream(new FileInputStream(vepOutput))));
+
+        simulateFix(databaseName, collectionVariantsName);
+
+        JobExecution secondJobExecution = jobLauncherTestUtils
+                .launchStep(BeanNames.GENERATE_VEP_ANNOTATION_STEP, jobParameters);
+
+        assertEquals(ExitStatus.COMPLETED, secondJobExecution.getExitStatus());
+        assertEquals(BatchStatus.COMPLETED, secondJobExecution.getStatus());
+
+        assertTrue(vepOutput.exists());
+        int chunks = 3;
+        int expectedTotalAnnotations = (chunkSize + EXTRA_ANNOTATIONS) * chunks;
+        assertEquals(expectedTotalAnnotations,
+                JobTestUtils.getLines(new GZIPInputStream(new FileInputStream(vepOutput))));
+    }
+
+    /**
+     * mockvep_writeToFile_error.pl returns 1 immediately if it finds a variant on chromosome 20 and position 65900
+     */
+    private void simulateFix(String databaseName, String collectionVariantsName) {
+        DBCollection collection = mongoRule.getCollection(databaseName, collectionVariantsName);
+        int startThatProvokesError = 65900;
+        BasicDBObject query = new BasicDBObject("start", startThatProvokesError);
+
+        int fixedStart = startThatProvokesError - 1;
+        BasicDBObject update = new BasicDBObject("$set", new BasicDBObject("start", fixedStart));
+
+        collection.update(query, update);
     }
 
 }
