@@ -110,9 +110,7 @@ public class VepProcess {
                 "--everything"
         );
 
-        logger.debug("VEP annotation parameters = " + Arrays.toString(processBuilder.command().toArray()));
-
-        logger.debug("Starting VEP process");
+        logger.trace("Starting VEP annotation with parameters = {}", Arrays.toString(processBuilder.command().toArray()));
 
         try {
             process = processBuilder.start();
@@ -141,9 +139,9 @@ public class VepProcess {
             } catch (IOException e) {
                 logger.error("Writing the VEP output to " + vepOutputPath + " failed. ", e);
             }
-            logger.debug("Finished writing VEP output (" + writtenLines + " lines written) to " + vepOutputPath);
+            logger.trace("Finished writing VEP output ({} lines written) to {}", writtenLines, vepOutputPath);
         });
-        logger.debug("Starting writing VEP output to " + vepOutputPath);
+        logger.trace("Starting writing VEP output to {}", vepOutputPath);
         outputCapturer.start();
     }
 
@@ -179,14 +177,14 @@ public class VepProcess {
     public void close() {
         if (isOpen()) {
             try {
-                logger.debug("About to close VEP process");
+                logger.trace("About to close VEP process");
                 flushToPerlStdin();
                 waitUntilProcessEnds(timeoutInSeconds);
                 checkExitStatus();
                 checkOutputWritingStatus();
             } finally {
                 process = null;
-                logger.debug("VEP process finished");
+                logger.trace("VEP process finished");
             }
         }
     }
@@ -279,16 +277,11 @@ public class VepProcess {
 
             lastLine = line;
             line = getNextLine(reader, skipComments);
-            if (writtenLines % chunkSize == 0) {
-                writer.flush();
-                outputIdleSince.set(System.currentTimeMillis());
-                logCoordinates(lastLine, this.chunkSize);
-            }
         }
 
         writer.flush();
         outputIdleSince.set(System.currentTimeMillis());
-        logCoordinates(lastLine, writtenLines % chunkSize);
+        logCoordinates(lastLine, writtenLines);
 
         return writtenLines;
     }
@@ -310,10 +303,10 @@ public class VepProcess {
     private void logCoordinates(String line, long chunkSize) {
         if (chunkSize > 0) {
             if (isComment(line)) {
-                logger.debug("VEP wrote {} more lines (still writing the header)", chunkSize);
+                logger.trace("VEP wrote {} more lines (still writing the header)", chunkSize);
             } else {
                 Scanner scanner = new Scanner(line);
-                logger.debug("VEP wrote {} more lines, last one was {}", chunkSize, scanner.next());
+                logger.trace("VEP wrote {} more lines, last one was {}", chunkSize, scanner.next());
             }
         }
     }
@@ -336,4 +329,5 @@ public class VepProcess {
         inputStream.close();
         return written;
     }
+
 }

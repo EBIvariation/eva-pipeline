@@ -33,6 +33,7 @@ import uk.ac.ebi.eva.pipeline.configuration.ChunkSizeCompletionPolicyConfigurati
 import uk.ac.ebi.eva.pipeline.configuration.readers.NonAnnotatedVariantsMongoReaderConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.writers.VepAnnotationFileWriterConfiguration;
 import uk.ac.ebi.eva.pipeline.io.readers.AnnotationFlatFileReader;
+import uk.ac.ebi.eva.pipeline.listeners.StepProgressListener;
 import uk.ac.ebi.eva.pipeline.model.VariantWrapper;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 
@@ -74,6 +75,7 @@ public class GenerateVepAnnotationStep {
                 .reader(nonAnnotatedVariantsReader)
                 .writer(vepAnnotationWriter)
                 .allowStartIfComplete(jobOptions.isAllowStartIfComplete())
+                .listener(new StepProgressListener())
                 .build();
     }
 }

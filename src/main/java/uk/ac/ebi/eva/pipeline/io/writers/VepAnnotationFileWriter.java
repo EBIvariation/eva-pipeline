@@ -67,7 +67,7 @@ public class VepAnnotationFileWriter implements ItemStreamWriter<VariantWrapper>
         if (variantWrappers.size() > 0) {
             VariantWrapper first = variantWrappers.get(0);
             VariantWrapper last = variantWrappers.get(variantWrappers.size() - 1);
-            logger.debug("VEP has received {} variants from {}:{} to {}:{}", variantWrappers.size(),
+            logger.trace("VEP has received {} variants from {}:{} to {}:{}", variantWrappers.size(),
                     first.getChr(), first.getStart(), last.getChr(), last.getStart());
         }
 
