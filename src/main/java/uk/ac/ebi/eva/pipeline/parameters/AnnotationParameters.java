@@ -101,10 +101,6 @@ public class AnnotationParameters {
         return inputFasta;
     }
 
-    public String getVepInput() {
-        return URLHelper.resolveVepInput(outputDirAnnotation, studyId, fileId);
-    }
-
     public String getVepOutput() {
         return URLHelper.resolveVepOutput(outputDirAnnotation, studyId, fileId);
     }

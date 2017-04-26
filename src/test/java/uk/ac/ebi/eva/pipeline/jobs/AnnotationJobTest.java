@@ -91,10 +91,6 @@ public class AnnotationJobTest {
         String dbName = mongoRule.restoreDumpInTemporaryDatabase(getResourceUrl(MONGO_DUMP));
         String outputDirAnnot = temporaryFolderRule.getRoot().getAbsolutePath();
 
-        File vepInput = new File(URLHelper.resolveVepInput(outputDirAnnot, INPUT_STUDY_ID, INPUT_VCF_ID));
-        String vepInputName = vepInput.getName();
-        temporaryFolderRule.newFile(vepInputName);
-
         File vepOutput = new File(URLHelper.resolveVepOutput(outputDirAnnot, INPUT_STUDY_ID, INPUT_VCF_ID));
         String vepOutputName = vepOutput.getName();
         temporaryFolderRule.newFile(vepOutputName);
@@ -161,10 +157,6 @@ public class AnnotationJobTest {
         String dbName = mongoRule.getRandomTemporaryDatabaseName();
         String outputDirAnnot = temporaryFolderRule.getRoot().getAbsolutePath();
 
-        File vepInput = new File(URLHelper.resolveVepInput(outputDirAnnot, INPUT_STUDY_ID, INPUT_VCF_ID));
-        String vepInputName = vepInput.getName();
-        temporaryFolderRule.newFile(vepInputName);
-
         JobParameters jobParameters = new EvaJobParameterBuilder()
                 .collectionAnnotationMetadataName(COLLECTION_ANNOTATION_METADATA_NAME)
                 .collectionVariantsName(COLLECTION_VARIANTS_NAME)
@@ -191,9 +183,6 @@ public class AnnotationJobTest {
         StepExecution findVariantsToAnnotateStep = new ArrayList<>(jobExecution.getStepExecutions()).get(0);
 
         assertEquals(BeanNames.GENERATE_VEP_ANNOTATION_STEP, findVariantsToAnnotateStep.getStepName());
-
-        assertTrue(vepInput.exists());
-        assertTrue(Files.size(Paths.get(vepInput.toPath().toUri())) == 0);
     }
 
     @Before

@@ -180,10 +180,6 @@ public class GenotypedVcfJobTestUtils {
         return new File(URLHelper.getSourceStatsUri(outputDirStats, INPUT_STUDY_ID, INPUT_VCF_ID));
     }
 
-    public static File getVepInputFile(String outputDirAnnotation) {
-        return new File(URLHelper.resolveVepInput(outputDirAnnotation, INPUT_STUDY_ID, INPUT_VCF_ID));
-    }
-
     public static File getVepOutputFile(String outputDirAnnotation) {
         return new File(URLHelper.resolveVepOutput(outputDirAnnotation, INPUT_STUDY_ID, INPUT_VCF_ID));
     }

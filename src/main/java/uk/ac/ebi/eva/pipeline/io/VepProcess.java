@@ -226,13 +226,21 @@ public class VepProcess {
     private void checkExitStatus() {
         int exitValue = process.exitValue();
         if (exitValue != 0) {
-            String errorLog = annotationParameters.getVepOutput() + ".errors.txt";
+            String timestamp = Long.toString(System.currentTimeMillis());
+            String backupVepOutput = annotationParameters.getVepOutput().replaceFirst("tsv\\.gz$",
+                    timestamp + ".tsv.gz");
+
+            String errorLog = backupVepOutput + ".errors.txt";
             try {
                 connectStreams(process.getErrorStream(), new FileOutputStream(errorLog));
             } catch (IOException e) {
                 throw new ItemStreamException("VEP exited with code " + exitValue
                         + " but the file to dump the errors could not be created: " + errorLog,
                         e);
+            }
+            boolean renamed = new File(annotationParameters.getVepOutput()).renameTo(new File(backupVepOutput));
+            if (renamed) {
+                logger.info("Renamed VEP output to " + backupVepOutput + " as backup because VEP failed");
             }
             throw new ItemStreamException("Error while running VEP (exit status " + exitValue + "). See "
                     + errorLog + " for the errors description from VEP.");

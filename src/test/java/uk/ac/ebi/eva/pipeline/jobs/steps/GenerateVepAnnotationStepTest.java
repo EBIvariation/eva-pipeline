@@ -43,6 +43,11 @@ import uk.ac.ebi.eva.utils.URLHelper;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
+import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
 
 import static org.junit.Assert.assertEquals;
@@ -143,9 +148,13 @@ public class GenerateVepAnnotationStepTest {
         assertEquals(ExitStatus.FAILED.getExitCode(), jobExecution.getExitStatus().getExitCode());
         assertEquals(BatchStatus.FAILED, jobExecution.getStatus());
 
-        assertTrue(vepOutput.exists());
+        assertTrue(!vepOutput.exists());
+        List<Path> files = Files.list(Paths.get(outputDirAnnot))
+                .filter(path -> !path.getFileName().toString().contains("error"))
+                .collect(Collectors.toList());
+        assertEquals(1, files.size());
         assertEquals(chunkSize + EXTRA_ANNOTATIONS,
-                JobTestUtils.getLines(new GZIPInputStream(new FileInputStream(vepOutput))));
+                JobTestUtils.getLines(new GZIPInputStream(new FileInputStream(files.get(0).toFile()))));
 
         simulateFix(databaseName, collectionVariantsName);
 
