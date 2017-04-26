@@ -21,7 +21,7 @@ import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.item.ItemStreamReader;
-import org.springframework.batch.item.ItemStreamWriter;
+import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.repeat.policy.SimpleCompletionPolicy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -63,7 +63,7 @@ public class GenerateVepAnnotationStep {
 
     @Autowired
     @Qualifier(VEP_ANNOTATION_WRITER)
-    private ItemStreamWriter<VariantWrapper> vepAnnotationWriter;
+    private ItemWriter<VariantWrapper> vepAnnotationWriter;
 
     @Bean(GENERATE_VEP_ANNOTATION_STEP)
     public Step generateVepInputStep(StepBuilderFactory stepBuilderFactory, JobOptions jobOptions,

@@ -89,9 +89,7 @@ public class VepAnnotationFileWriterTest {
         VepAnnotationFileWriter vepAnnotationFileWriter = new VepAnnotationFileWriter(annotationParameters, chunkSize,
                 TIMEOUT_IN_SECONDS);
 
-        vepAnnotationFileWriter.open(null);
         vepAnnotationFileWriter.write(variantWrappers);
-        vepAnnotationFileWriter.close();
 
         File vepOutputFile = new File(annotationParameters.getVepOutput());
         assertTrue(vepOutputFile.exists());
@@ -110,9 +108,7 @@ public class VepAnnotationFileWriterTest {
         VepAnnotationFileWriter vepAnnotationFileWriter = new VepAnnotationFileWriter(annotationParameters, chunkSize,
                 TIMEOUT_IN_SECONDS);
 
-        vepAnnotationFileWriter.open(null);
         vepAnnotationFileWriter.write(variantWrappers);
-        vepAnnotationFileWriter.close();
 
         File vepOutputFile = new File(annotationParameters.getVepOutput());
         assertTrue(vepOutputFile.exists());
@@ -128,9 +124,7 @@ public class VepAnnotationFileWriterTest {
         VepAnnotationFileWriter vepAnnotationFileWriter = new VepAnnotationFileWriter(annotationParameters,
                 chunkSizeGreaterThanActualVariants, TIMEOUT_IN_SECONDS);
 
-        vepAnnotationFileWriter.open(null);
         vepAnnotationFileWriter.write(variantWrappers);
-        vepAnnotationFileWriter.close();
 
         File vepOutputFile = new File(annotationParameters.getVepOutput());
         assertTrue(vepOutputFile.exists());
@@ -146,12 +140,10 @@ public class VepAnnotationFileWriterTest {
         VepAnnotationFileWriter vepAnnotationFileWriter = new VepAnnotationFileWriter(annotationParameters,
                 chunkSize, TIMEOUT_IN_SECONDS);
 
-        vepAnnotationFileWriter.open(null);
         long chunks = 3;
         for (int i = 0; i < chunks; i++) {
             vepAnnotationFileWriter.write(variantWrappers);
         }
-        vepAnnotationFileWriter.close();
 
         File vepOutputFile = new File(annotationParameters.getVepOutput());
         assertTrue(vepOutputFile.exists());
@@ -192,7 +184,6 @@ public class VepAnnotationFileWriterTest {
         VepAnnotationFileWriter vepAnnotationFileWriter = new VepAnnotationFileWriter(annotationParameters,
                 chunkSizeGreaterThanActualVariants, vepTimeouts);
 
-        vepAnnotationFileWriter.open(null);
         exception.expect(ItemStreamException.class);
         vepAnnotationFileWriter.write(variantWrappers);
     }

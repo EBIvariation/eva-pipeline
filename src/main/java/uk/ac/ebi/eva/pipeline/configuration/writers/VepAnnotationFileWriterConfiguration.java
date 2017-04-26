@@ -16,7 +16,7 @@
 package uk.ac.ebi.eva.pipeline.configuration.writers;
 
 import org.springframework.batch.core.configuration.annotation.StepScope;
-import org.springframework.batch.item.ItemStreamWriter;
+import org.springframework.batch.item.ItemWriter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -32,7 +32,7 @@ public class VepAnnotationFileWriterConfiguration {
 
     @Bean(VEP_ANNOTATION_WRITER)
     @StepScope
-    public ItemStreamWriter<VariantWrapper> vepAnnotationFileWriter(AnnotationParameters annotationParameters,
+    public ItemWriter<VariantWrapper> vepAnnotationFileWriter(AnnotationParameters annotationParameters,
             ChunkSizeParameters chunkSizeParameters) {
         return new VepAnnotationFileWriter(annotationParameters, chunkSizeParameters.getChunkSize(),
                 annotationParameters.getTimeout());

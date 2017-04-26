@@ -17,9 +17,7 @@ package uk.ac.ebi.eva.pipeline.io.writers;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.batch.item.ExecutionContext;
-import org.springframework.batch.item.ItemStreamException;
-import org.springframework.batch.item.ItemStreamWriter;
+import org.springframework.batch.item.ItemWriter;
 
 import uk.ac.ebi.eva.pipeline.io.VepProcess;
 import uk.ac.ebi.eva.pipeline.model.VariantWrapper;
@@ -31,7 +29,7 @@ import java.util.List;
  * ItemStreamWriter that takes VariantWrappers and serialize them into a {@link VepProcess}, which will take care of
  * annotate the variants and write them to a file.
  */
-public class VepAnnotationFileWriter implements ItemStreamWriter<VariantWrapper> {
+public class VepAnnotationFileWriter implements ItemWriter<VariantWrapper> {
 
     private static final Logger logger = LoggerFactory.getLogger(VepAnnotationFileWriter.class);
 
@@ -46,12 +44,6 @@ public class VepAnnotationFileWriter implements ItemStreamWriter<VariantWrapper>
         this.chunkSize = chunkSize;
         this.timeoutInSeconds = timeoutInSeconds;
     }
-
-    @Override
-    public void open(ExecutionContext executionContext) throws ItemStreamException {
-        // don't open: we need lazy opening because vep fails if there is nothing to write
-    }
-
 
     @Override
     public void write(List<? extends VariantWrapper> variantWrappers) throws Exception {
@@ -82,15 +74,6 @@ public class VepAnnotationFileWriter implements ItemStreamWriter<VariantWrapper>
                 Integer.toString(variantWrapper.getEnd()),
                 variantWrapper.getRefAlt(),
                 variantWrapper.getStrand());
-    }
-
-    @Override
-    public void update(ExecutionContext executionContext) throws ItemStreamException {
-
-    }
-
-    @Override
-    public void close() throws ItemStreamException {
     }
 
 }

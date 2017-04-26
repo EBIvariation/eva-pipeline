@@ -37,10 +37,12 @@ public class NonAnnotatedVariantsMongoReaderConfiguration {
     public NonAnnotatedVariantsMongoReader nonAnnotatedVariantsMongoReader(MongoOperations mongoOperations,
                                                                            DatabaseParameters databaseParameters,
                                                                            InputParameters inputParameters) {
-        return new NonAnnotatedVariantsMongoReader(
+        NonAnnotatedVariantsMongoReader nonAnnotatedVariantsMongoReader = new NonAnnotatedVariantsMongoReader(
                 mongoOperations,
                 databaseParameters.getCollectionVariantsName(),
                 inputParameters.getStudyId());
+        nonAnnotatedVariantsMongoReader.setSaveState(false);
+        return nonAnnotatedVariantsMongoReader;
     }
 
 }
