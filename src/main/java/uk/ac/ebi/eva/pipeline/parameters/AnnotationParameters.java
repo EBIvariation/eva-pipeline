@@ -61,7 +61,7 @@ public class AnnotationParameters {
     private String vepCacheSpecies;
 
     @Value(PARAMETER + JobParametersNames.APP_VEP_NUMFORKS + END)
-    private String vepNumForks;
+    private Integer vepNumForks;
 
     @Value(PARAMETER + JobParametersNames.APP_VEP_TIMEOUT + END)
     private Long timeout;
@@ -89,7 +89,7 @@ public class AnnotationParameters {
         return vepCacheSpecies;
     }
 
-    public String getVepNumForks() {
+    public Integer getVepNumForks() {
         return vepNumForks;
     }
 
@@ -133,7 +133,7 @@ public class AnnotationParameters {
         this.vepCacheSpecies = vepCacheSpecies;
     }
 
-    public void setVepNumForks(String vepNumForks) {
+    public void setVepNumForks(Integer vepNumForks) {
         this.vepNumForks = vepNumForks;
     }
 

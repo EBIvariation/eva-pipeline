@@ -66,7 +66,7 @@ public class GenerateVepAnnotationStep {
     private ItemWriter<VariantWrapper> vepAnnotationWriter;
 
     @Bean(GENERATE_VEP_ANNOTATION_STEP)
-    public Step generateVepInputStep(StepBuilderFactory stepBuilderFactory, JobOptions jobOptions,
+    public Step generateVepAnnotationStep(StepBuilderFactory stepBuilderFactory, JobOptions jobOptions,
             SimpleCompletionPolicy chunkSizeCompletionPolicy) {
         logger.debug("Building '" + GENERATE_VEP_ANNOTATION_STEP + "'");
 

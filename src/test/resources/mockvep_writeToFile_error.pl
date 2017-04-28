@@ -1,3 +1,9 @@
+# mockvep_writeToFile_error.pl
+#
+# This file is a mock for VEP, just as mockvep_writeToFile.pl, with the difference that for a specific variant
+# (chromosome 20, position 65900), this script stops and returns 1.
+# This is used for testing that we handle properly the cases when VEP can not annotate and dies abruptly.
+
 use warnings;
 use strict;
 use IO::File;

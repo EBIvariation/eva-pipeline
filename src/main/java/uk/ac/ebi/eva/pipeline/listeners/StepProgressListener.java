@@ -35,10 +35,8 @@ public class StepProgressListener implements ChunkListener {
 
     @Override
     public void afterChunk(ChunkContext context) {
-
-        Object lines = context.getStepContext().getStepExecutionContext()
-                .get(ExecutionContextParametersNames.NUMBER_OF_LINES);
-        long estimatedTotalNumberOfLines = lines != null? (long) lines : 0;
+        long estimatedTotalNumberOfLines = (long) context.getStepContext().getStepExecutionContext()
+                .getOrDefault(ExecutionContextParametersNames.NUMBER_OF_LINES, 0L);
 
         long read = context.getStepContext().getStepExecution().getReadCount();
         long write = context.getStepContext().getStepExecution().getWriteCount();

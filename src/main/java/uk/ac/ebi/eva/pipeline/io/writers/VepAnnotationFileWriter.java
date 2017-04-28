@@ -26,8 +26,8 @@ import uk.ac.ebi.eva.pipeline.parameters.AnnotationParameters;
 import java.util.List;
 
 /**
- * ItemStreamWriter that takes VariantWrappers and serialize them into a {@link VepProcess}, which will take care of
- * annotate the variants and write them to a file.
+ * ItemStreamWriter that takes VariantWrappers and serialize them into a {@link VepProcess}, which will be responsible
+ * for annotating the variants and writing them to a file.
  */
 public class VepAnnotationFileWriter implements ItemWriter<VariantWrapper> {
 

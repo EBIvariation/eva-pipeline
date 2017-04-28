@@ -1,4 +1,10 @@
-use warnings;
+# mockvep_writeToFile_delayed.pl
+#
+# This file is a mock for VEP, just as mockvep_writeToFile.pl, with the difference that it waits for 3 seconds before
+# writing the last annotation and closing stdout. This is used for testing that we handle properly the cases when:
+# 1: VEP is slow and needs a bit more time to finish annotating.
+# 2: Some of the threads of VEP died but the parent didn't notice, so VEP will block forever and we have to kill it.
+
 use strict;
 use IO::File;
 

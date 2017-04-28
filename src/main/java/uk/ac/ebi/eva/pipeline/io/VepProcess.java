@@ -63,9 +63,11 @@ import java.util.zip.GZIPOutputStream;
 public class VepProcess {
     private static final Logger logger = LoggerFactory.getLogger(VepProcess.class);
 
+    private static final boolean APPEND = true;
+
     private AnnotationParameters annotationParameters;
 
-    private Integer chunkSize;
+    private int chunkSize;
 
     private final Long timeoutInSeconds;
 
@@ -73,13 +75,9 @@ public class VepProcess {
 
     private OutputStream processStandardInput;
 
-    private Thread outputCapturer;
+    private Thread outputCaptureThread;
 
     private AtomicBoolean writingOk;
-
-    private static final boolean APPEND = true;
-
-    private static final long CONVERT_SECONDS_TO_MILLISECONDS = 1000L;
 
     private AtomicLong outputIdleSince;
 
@@ -102,8 +100,8 @@ public class VepProcess {
                 "-dir", annotationParameters.getVepCachePath(),
                 "--species", annotationParameters.getVepCacheSpecies(),
                 "--fasta", annotationParameters.getInputFasta(),
-                "--fork", annotationParameters.getVepNumForks(),
-                "--buffer_size", chunkSize.toString(),
+                "--fork", Integer.toString(annotationParameters.getVepNumForks()),
+                "--buffer_size", Integer.toString(chunkSize),
                 "-o", "STDOUT",
                 "--force_overwrite",
                 "--offline",
@@ -127,8 +125,10 @@ public class VepProcess {
 
     private void captureOutput(Process process, String vepOutputPath) {
         writingOk = new AtomicBoolean(false);
-        outputCapturer = new Thread(() -> {
+        outputCaptureThread = new Thread(() -> {
             long writtenLines = 0;
+
+            // if vepOutput exists, the header (the comments) is already written, and the header should appear only once
             boolean skipComments = new File(vepOutputPath).exists();
 
             try (OutputStreamWriter writer = getOutputStreamWriter(vepOutputPath);
@@ -142,7 +142,7 @@ public class VepProcess {
             logger.trace("Finished writing VEP output ({} lines written) to {}", writtenLines, vepOutputPath);
         });
         logger.trace("Starting writing VEP output to {}", vepOutputPath);
-        outputCapturer.start();
+        outputCaptureThread.start();
     }
 
     private BufferedReader getBufferedReader(Process process) {
@@ -178,7 +178,7 @@ public class VepProcess {
         if (isOpen()) {
             try {
                 logger.trace("About to close VEP process");
-                flushToPerlStdin();
+                flushProcessStdin();
                 waitUntilProcessEnds(timeoutInSeconds);
                 checkExitStatus();
                 checkOutputWritingStatus();
@@ -189,7 +189,7 @@ public class VepProcess {
         }
     }
 
-    private void flushToPerlStdin() {
+    private void flushProcessStdin() {
         try {
             processStandardInput.flush();
             processStandardInput.close();
@@ -215,10 +215,10 @@ public class VepProcess {
         }
 
         if (!finished) {
-            String timeoutReachedMessage = "VEP has been idle for more than the timeout (" + timeoutInSeconds
-                    + " seconds). Killed the process.";
-            logger.error(timeoutReachedMessage);
             process.destroy();
+            String timeoutReachedMessage = "VEP has been idle for more than the timeout (" + timeoutInSeconds
+                    + " seconds). The process has been killed.";
+            logger.error(timeoutReachedMessage);
             throw new ItemStreamException(timeoutReachedMessage);
         }
     }
@@ -240,7 +240,7 @@ public class VepProcess {
             }
             boolean renamed = new File(annotationParameters.getVepOutput()).renameTo(new File(backupVepOutput));
             if (renamed) {
-                logger.info("Renamed VEP output to " + backupVepOutput + " as backup because VEP failed");
+                logger.info("Failed VEP output saved to " + backupVepOutput);
             }
             throw new ItemStreamException("Error while running VEP (exit status " + exitValue + "). See "
                     + errorLog + " for the errors description from VEP.");
@@ -249,14 +249,14 @@ public class VepProcess {
 
     private void checkOutputWritingStatus() {
         try {
-            outputCapturer.join(timeoutInSeconds * CONVERT_SECONDS_TO_MILLISECONDS);
+            outputCaptureThread.join(timeoutInSeconds * 1000L);
         } catch (InterruptedException e) {
             throw new ItemStreamException("Interrupted while waiting for the VEP output writer thread to finish. ", e);
         }
-        if (outputCapturer.isAlive()) {
-            outputCapturer.interrupt();
+        if (outputCaptureThread.isAlive()) {
+            outputCaptureThread.interrupt();
             throw new ItemStreamException("Reached the timeout (" + timeoutInSeconds
-                    + " seconds) while waiting for VEP output writing to finish. Killed the thread.");
+                    + " seconds) while waiting for VEP output writing to finish. The thread has been killed.");
         }
         if (!writingOk.get()) {
             throw new ItemStreamException("VEP output writer thread could not finish properly. ");
@@ -264,8 +264,8 @@ public class VepProcess {
     }
 
     /**
-     * read all the vep output in inputStream and write it into the outputStream, logging the coordinates once in each
-     * chunk.
+     * Read the whole VEP output from the input stream and write it into the output stream,
+     * logging the coordinates once per chunk.
      *
      * @param reader must be closed externally
      * @param writer must be closed externally
@@ -309,19 +309,19 @@ public class VepProcess {
     }
 
     private void logCoordinates(String line, long chunkSize) {
-        if (chunkSize > 0) {
-            if (isComment(line)) {
-                logger.trace("VEP wrote {} more lines (still writing the header)", chunkSize);
-            } else {
-                Scanner scanner = new Scanner(line);
-                logger.trace("VEP wrote {} more lines, last one was {}", chunkSize, scanner.next());
-            }
+        if (chunkSize == 0 || line == null) {
+            logger.warn("VEP didn't write any annotations, this might be a symptom of a previous error");
+        } else if (isComment(line)) {
+            logger.trace("VEP wrote {} more lines (still writing the header)", chunkSize);
+        } else {
+            Scanner scanner = new Scanner(line);
+            logger.trace("VEP wrote {} more lines, last one was {}", chunkSize, scanner.next());
         }
     }
 
     /**
-     * read all the inputStream and write it into the outputStream. This method blocks until input data is available,
-     * the end of the stream is detected, or an exception is thrown.
+     * Read the whole input stream and write it into the output stream.
+     * This method blocks until input data is available, the end of the stream is detected, or an exception is thrown.
      * @return written bytes.
      */
     private long connectStreams(InputStream inputStream, OutputStream outputStream) throws IOException {

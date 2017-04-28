@@ -31,6 +31,7 @@ import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import uk.ac.ebi.eva.pipeline.parameters.ChunkSizeParameters;
 import uk.ac.ebi.eva.pipeline.parameters.DatabaseParameters;
 import uk.ac.ebi.eva.pipeline.parameters.InputParameters;
 import uk.ac.ebi.eva.pipeline.parameters.MongoConnection;
@@ -53,6 +54,9 @@ public class PopulationStatisticsGeneratorStep implements Tasklet {
 
     @Autowired
     private InputParameters inputParameters;
+
+    @Autowired
+    private ChunkSizeParameters chunkSizeParameters;
 
     @Autowired
     private OutputParameters outputParameters;
@@ -99,7 +103,7 @@ public class PopulationStatisticsGeneratorStep implements Tasklet {
         variantOptions.put(VariantStorageManager.INCLUDE_SRC, includeSourceLine);
         variantOptions.put("compressExtension", compressExtension);
         variantOptions.put(VariantStorageManager.ANNOTATE, annotate);
-        variantOptions.put(VariantStatisticsManager.BATCH_SIZE, inputParameters.getChunkSize());
+        variantOptions.put(VariantStatisticsManager.BATCH_SIZE, chunkSizeParameters.getChunkSize());
 
         variantOptions.put(VariantStorageManager.DB_NAME, dbParameters.getDatabaseName());
         MongoConnection mongoConnection = dbParameters.getMongoConnection();

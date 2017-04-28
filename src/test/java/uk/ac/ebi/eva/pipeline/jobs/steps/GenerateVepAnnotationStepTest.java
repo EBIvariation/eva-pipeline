@@ -73,6 +73,8 @@ public class GenerateVepAnnotationStepTest {
 
     private static final String FILE_ID = "1";
 
+    private static final int EXTRA_ANNOTATIONS = 1;
+
     @Rule
     public TemporaryMongoRule mongoRule = new TemporaryMongoRule();
 
@@ -81,8 +83,6 @@ public class GenerateVepAnnotationStepTest {
 
     @Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
-
-    private static final int EXTRA_ANNOTATIONS = 1;
 
     @Test
     public void shouldGenerateVepAnnotations() throws Exception {
@@ -100,7 +100,7 @@ public class GenerateVepAnnotationStepTest {
                 .vepCachePath("")
                 .vepCacheSpecies("")
                 .vepCacheVersion("")
-                .vepNumForks("")
+                .vepNumForks("4")
                 .vepPath(getResource(MOCKVEP).getPath())
                 .vepTimeout("60")
                 .toJobParameters();
@@ -138,7 +138,7 @@ public class GenerateVepAnnotationStepTest {
                 .vepCachePath("")
                 .vepCacheSpecies("")
                 .vepCacheVersion("")
-                .vepNumForks("")
+                .vepNumForks("4")
                 .vepPath(getResource(FAILING_MOCKVEP).getPath())
                 .vepTimeout("10").toJobParameters();
 

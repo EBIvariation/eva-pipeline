@@ -75,7 +75,7 @@ public class VepAnnotationFileWriterTest {
         annotationParameters.setVepPath(getResource("/mockvep_writeToFile.pl").getAbsolutePath());
         annotationParameters.setVepCacheSpecies("hsapiens");
         annotationParameters.setInputFasta("fasta");
-        annotationParameters.setVepNumForks("4");
+        annotationParameters.setVepNumForks(4);
 
         File annotationFolder = temporaryFolder.newFolder();
         annotationParameters.setOutputDirAnnotation(annotationFolder.getAbsolutePath());

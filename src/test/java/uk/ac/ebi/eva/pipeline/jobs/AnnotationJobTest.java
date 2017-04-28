@@ -106,7 +106,7 @@ public class AnnotationJobTest {
                 .vepCachePath("")
                 .vepCacheSpecies("")
                 .vepCacheVersion("80")
-                .vepNumForks("")
+                .vepNumForks("4")
                 .vepPath(getResource(MOCK_VEP).getPath())
                 .vepTimeout("60")
                 .vepVersion("80")
