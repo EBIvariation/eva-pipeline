@@ -152,10 +152,11 @@ public class EvaPipelineJobLauncherCommandLineRunnerTest {
         JobExecution jobExecution = getLastJobExecution(GENOTYPED_VCF_JOB);
         assertCompleted(jobExecution);
 
-        GenotypedVcfJobTestUtils.checkLoadStep(databaseName);
+        GenotypedVcfJobTestUtils.checkLoadStep(mongoRule, databaseName);
 
         GenotypedVcfJobTestUtils.checkCreateStatsStep(variantsStatsFile, sourceStatsFile);
-        GenotypedVcfJobTestUtils.checkLoadStatsStep(databaseName);
+
+        GenotypedVcfJobTestUtils.checkLoadStatsStep(mongoRule, databaseName);
 
         GenotypedVcfJobTestUtils.checkAnnotationCreateStep(vepOutputFile);
         GenotypedVcfJobTestUtils.checkOutputFileLength(vepOutputFile);
@@ -262,10 +263,11 @@ public class EvaPipelineJobLauncherCommandLineRunnerTest {
         JobExecution jobExecution = getLastJobExecution(GENOTYPED_VCF_JOB);
         assertCompleted(jobExecution);
 
-        GenotypedVcfJobTestUtils.checkLoadStep(databaseName);
+        GenotypedVcfJobTestUtils.checkLoadStep(mongoRule, databaseName);
 
         GenotypedVcfJobTestUtils.checkCreateStatsStep(variantsStatsFile, sourceStatsFile);
-        GenotypedVcfJobTestUtils.checkLoadStatsStep(databaseName);
+
+        GenotypedVcfJobTestUtils.checkLoadStatsStep(mongoRule, databaseName);
 
         GenotypedVcfJobTestUtils.checkAnnotationCreateStep(vepOutputFile);
         GenotypedVcfJobTestUtils.checkOutputFileLength(vepOutputFile);
@@ -288,6 +290,6 @@ public class EvaPipelineJobLauncherCommandLineRunnerTest {
         evaPipelineJobLauncherCommandLineRunner.run(new EvaCommandLineBuilder().build());
 
         assertEquals(EvaPipelineJobLauncherCommandLineRunner.EXIT_WITH_ERRORS,
-                     evaPipelineJobLauncherCommandLineRunner.getExitCode());
+                evaPipelineJobLauncherCommandLineRunner.getExitCode());
     }
 }

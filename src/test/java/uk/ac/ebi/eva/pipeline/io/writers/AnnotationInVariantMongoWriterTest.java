@@ -16,6 +16,7 @@
 package uk.ac.ebi.eva.pipeline.io.writers;
 
 import com.mongodb.BasicDBList;
+import com.mongodb.BasicDBObject;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import org.junit.Before;
@@ -30,6 +31,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import uk.ac.ebi.eva.commons.models.converters.data.VariantToDBObjectConverter;
 import uk.ac.ebi.eva.commons.models.data.Annotation;
 import uk.ac.ebi.eva.pipeline.Application;
 import uk.ac.ebi.eva.pipeline.configuration.MongoConfiguration;
@@ -43,10 +45,10 @@ import java.util.List;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static uk.ac.ebi.eva.commons.models.data.AnnotationFieldNames.GENE_NAME_FIELD;
 import static uk.ac.ebi.eva.commons.models.data.AnnotationFieldNames.POLYPHEN_FIELD;
 import static uk.ac.ebi.eva.commons.models.data.AnnotationFieldNames.SIFT_FIELD;
 import static uk.ac.ebi.eva.commons.models.data.AnnotationFieldNames.SO_ACCESSION_FIELD;
+import static uk.ac.ebi.eva.commons.models.data.AnnotationFieldNames.XREFS_FIELD;
 import static uk.ac.ebi.eva.test.data.VepOutputContent.vepOutputContentWithExtraFields;
 import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResourceUrl;
 
@@ -61,6 +63,10 @@ public class AnnotationInVariantMongoWriterTest {
     private static final String MONGO_DUMP = "/dump/VariantStatsConfigurationTest_vl";
 
     private static final String COLLECTION_VARIANTS_NAME = "variants";
+
+    private static final String VEP_VERSION = "1";
+
+    private static final String VEP_CACHE_VERSION = "1";
 
     @Autowired
     private MongoConnection mongoConnection;
@@ -106,7 +112,8 @@ public class AnnotationInVariantMongoWriterTest {
         // load the annotation
         MongoOperations operations = MongoConfiguration.getMongoOperations(databaseName, mongoConnection,
                                                                            mongoMappingContext);
-        annotationInVariantMongoWriter = new AnnotationInVariantMongoWriter(operations, COLLECTION_VARIANTS_NAME);
+        annotationInVariantMongoWriter = new AnnotationInVariantMongoWriter(operations, COLLECTION_VARIANTS_NAME,
+                                                                            VEP_VERSION, VEP_CACHE_VERSION);
 
         annotationInVariantMongoWriter.write(annotationSet1);
         annotationInVariantMongoWriter.write(annotationSet2);
@@ -120,38 +127,44 @@ public class AnnotationInVariantMongoWriterTest {
             String id = (String) variant.get("_id");
 
             if (id.equals("20_63360_C_T")) {
-                BasicDBList sifts = (BasicDBList) variant.get(SIFT_FIELD);
+                BasicDBObject annotationField = (BasicDBObject) ((BasicDBList) (variant).get(
+                        VariantToDBObjectConverter.ANNOTATION_FIELD)).get(0);
+
+                BasicDBList sifts = (BasicDBList) annotationField.get(SIFT_FIELD);
                 assertNotNull(sifts);
                 assertTrue(sifts.containsAll(Arrays.asList(0.1, 0.2)));
 
-                BasicDBList so = (BasicDBList) variant.get(SO_ACCESSION_FIELD);
+                BasicDBList so = (BasicDBList) annotationField.get(SO_ACCESSION_FIELD);
                 assertNotNull(so);
                 assertTrue(so.contains(1631));
 
-                BasicDBList polyphen = (BasicDBList) variant.get(POLYPHEN_FIELD);
+                BasicDBList polyphen = (BasicDBList) annotationField.get(POLYPHEN_FIELD);
                 assertNotNull(polyphen);
                 assertTrue(polyphen.containsAll(Arrays.asList(0.1, 0.2)));
 
-                BasicDBList geneNames = (BasicDBList) variant.get(GENE_NAME_FIELD);
+                BasicDBList geneNames = (BasicDBList) annotationField.get(XREFS_FIELD);
                 assertNotNull(geneNames);
                 assertTrue(geneNames.containsAll(
                         Arrays.asList("ENST00000382410", "DEFB125", "ENST00000608838", "ENSG00000178591")));
             }
 
-            if (id.equals("20_63399_G_A")){
-                BasicDBList sifts = (BasicDBList) variant.get(SIFT_FIELD);
+            if (id.equals("20_63399_G_A")) {
+                BasicDBObject annotationField = (BasicDBObject) ((BasicDBList) (variant).get(
+                        VariantToDBObjectConverter.ANNOTATION_FIELD)).get(0);
+
+                BasicDBList sifts = (BasicDBList) annotationField.get(SIFT_FIELD);
                 assertNotNull(sifts);
                 assertTrue(sifts.size() == 1);
 
-                BasicDBList so = (BasicDBList) variant.get(SO_ACCESSION_FIELD);
+                BasicDBList so = (BasicDBList) annotationField.get(SO_ACCESSION_FIELD);
                 assertNotNull(so);
                 assertTrue(so.size() == 1);
 
-                BasicDBList polyphen = (BasicDBList) variant.get(POLYPHEN_FIELD);
+                BasicDBList polyphen = (BasicDBList) annotationField.get(POLYPHEN_FIELD);
                 assertNotNull(polyphen);
                 assertTrue(polyphen.size() == 1);
 
-                BasicDBList geneNames = (BasicDBList) variant.get(GENE_NAME_FIELD);
+                BasicDBList geneNames = (BasicDBList) annotationField.get(XREFS_FIELD);
                 assertNotNull(geneNames);
                 assertTrue(geneNames.size() == 4);
             }

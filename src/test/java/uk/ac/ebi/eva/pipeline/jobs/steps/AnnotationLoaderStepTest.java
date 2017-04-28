@@ -16,6 +16,7 @@
 package uk.ac.ebi.eva.pipeline.jobs.steps;
 
 import com.mongodb.BasicDBList;
+import com.mongodb.BasicDBObject;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import org.junit.Assert;
@@ -30,6 +31,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
+import uk.ac.ebi.eva.commons.models.converters.data.VariantToDBObjectConverter;
 import uk.ac.ebi.eva.pipeline.Application;
 import uk.ac.ebi.eva.pipeline.configuration.BeanNames;
 import uk.ac.ebi.eva.pipeline.jobs.AnnotationJob;
@@ -45,10 +47,10 @@ import java.nio.file.Paths;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static uk.ac.ebi.eva.commons.models.data.AnnotationFieldNames.CONSEQUENCE_TYPE_FIELD;
-import static uk.ac.ebi.eva.commons.models.data.AnnotationFieldNames.GENE_NAME_FIELD;
 import static uk.ac.ebi.eva.commons.models.data.AnnotationFieldNames.POLYPHEN_FIELD;
 import static uk.ac.ebi.eva.commons.models.data.AnnotationFieldNames.SIFT_FIELD;
 import static uk.ac.ebi.eva.commons.models.data.AnnotationFieldNames.SO_ACCESSION_FIELD;
+import static uk.ac.ebi.eva.commons.models.data.AnnotationFieldNames.XREFS_FIELD;
 import static uk.ac.ebi.eva.test.utils.JobTestUtils.assertCompleted;
 import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResourceUrl;
 
@@ -63,11 +65,17 @@ import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResourceUrl;
 @ContextConfiguration(classes = {AnnotationJob.class, BatchTestConfiguration.class})
 public class AnnotationLoaderStepTest {
     private static final String MONGO_DUMP = "/dump/VariantStatsConfigurationTest_vl";
+
     private static final String COLLECTION_ANNOTATIONS_NAME = "annotations";
+
     private static final String COLLECTION_VARIANTS_NAME = "variants";
+
     private static final String INPUT_STUDY_ID = "1";
+
     private static final String INPUT_VCF_ID = "1";
+
     private static final String VEP_VERSION = "1";
+
     private static final String VEP_CACHE_VERSION = "1";
 
     @Rule
@@ -126,10 +134,12 @@ public class AnnotationLoaderStepTest {
         while (variantCursor.hasNext()) {
             DBObject variant = variantCursor.next();
             if (variant.get("_id").equals("20_63351_A_G")) {
-                assertNotNull(variant.get(SIFT_FIELD));
-                assertNotNull(variant.get(SO_ACCESSION_FIELD));
-                assertNotNull(variant.get(POLYPHEN_FIELD));
-                assertNotNull(variant.get(GENE_NAME_FIELD));
+                BasicDBObject annotationField = (BasicDBObject) ((BasicDBList) (variant).get(
+                        VariantToDBObjectConverter.ANNOTATION_FIELD)).get(0);
+                assertNotNull(annotationField.get(SIFT_FIELD));
+                assertNotNull(annotationField.get(SO_ACCESSION_FIELD));
+                assertNotNull(annotationField.get(POLYPHEN_FIELD));
+                assertNotNull(annotationField.get(XREFS_FIELD));
             }
         }
         variantCursor.close();
