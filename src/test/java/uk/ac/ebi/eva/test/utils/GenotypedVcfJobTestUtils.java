@@ -3,12 +3,7 @@ package uk.ac.ebi.eva.test.utils;
 import com.mongodb.BasicDBList;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
-import org.opencb.datastore.core.QueryOptions;
 import org.opencb.opencga.storage.core.StorageManagerException;
-import org.opencb.opencga.storage.core.StorageManagerFactory;
-import org.opencb.opencga.storage.core.variant.VariantStorageManager;
-import org.opencb.opencga.storage.core.variant.adaptors.VariantDBAdaptor;
-import org.opencb.opencga.storage.core.variant.adaptors.VariantDBIterator;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.StepExecution;
 
@@ -64,45 +59,13 @@ public class GenotypedVcfJobTestUtils {
 
     private static final int EXPECTED_VALID_ANNOTATIONS = 536;
 
-    public static VariantDBIterator getVariantDBIterator(String dbName) throws IllegalAccessException,
-            ClassNotFoundException, InstantiationException, StorageManagerException {
-        VariantStorageManager variantStorageManager = StorageManagerFactory.getVariantStorageManager();
-        VariantDBAdaptor variantDBAdaptor = variantStorageManager.getDBAdaptor(dbName, null);
-        return variantDBAdaptor.iterator(new QueryOptions());
+    public static DBCursor getVariantDBCursor(TemporaryMongoRule mongoRule, String databaseName) {
+        return mongoRule.getCollection(databaseName, COLLECTION_VARIANTS_NAME).find();
     }
 
-    public static DBCursor getAnnotationDBCursor(TemporaryMongoRule mongoRule, String databaseName){
+    public static DBCursor getAnnotationDBCursor(TemporaryMongoRule mongoRule, String databaseName) {
         return mongoRule.getCollection(databaseName, COLLECTION_ANNOTATIONS_NAME).find();
     }
-
-    /**
-     * 4 annotation flow annotation input vep generate step
-     *
-     * @param vepInputFile
-     * @throws IOException
-     */
-    public static void checkAnnotationInput(File vepInputFile) throws IOException {
-        BufferedReader testReader = new BufferedReader(new InputStreamReader(new FileInputStream(
-                getResource("/expected-output/preannot.sorted"))));
-        BufferedReader actualReader = new BufferedReader(new InputStreamReader(new FileInputStream(
-                vepInputFile.toString())));
-
-        ArrayList<String> rows = new ArrayList<>();
-
-        String s;
-        while ((s = actualReader.readLine()) != null) {
-            rows.add(s);
-        }
-        Collections.sort(rows);
-
-        String testLine = testReader.readLine();
-        for (String row : rows) {
-            assertEquals(testLine, row);
-            testLine = testReader.readLine();
-        }
-        assertNull(testLine); // if both files have the same length testReader should be after the last line
-    }
-
 
     /**
      * Annotation load step: check documents in DB have annotation (only consequence type)
@@ -135,26 +98,28 @@ public class GenotypedVcfJobTestUtils {
 
     /**
      * load stats step: check the DB docs have the field "st"
-     *
-     * @param dbName
      */
-    public static void checkLoadStatsStep(String dbName) throws ClassNotFoundException, StorageManagerException,
-            InstantiationException, IllegalAccessException {
-        VariantDBIterator iterator = GenotypedVcfJobTestUtils.getVariantDBIterator(dbName);
-        assertEquals(1, iterator.next().getSourceEntries().values().iterator().next().getCohortStats().size());
+    public static void checkLoadStatsStep(TemporaryMongoRule mongoRule,
+                                          String databaseName) throws ClassNotFoundException, StorageManagerException, InstantiationException, IllegalAccessException {
+        DBCursor iterator = getVariantDBCursor(mongoRule, databaseName);
+        DBObject stField = ((DBObject) iterator.next().get("st"));
+
+        assertNotNull(stField);
+        iterator.close();
     }
 
     /**
      * 1 load step: check ((documents in DB) == (lines in transformed file))
      * variantStorageManager = StorageManagerFactory.getVariantStorageManager();
      * variantDBAdaptor = variantStorageManager.getDBAdaptor(dbName, null);
-     *
-     * @param dbName
      */
-    public static void checkLoadStep(String dbName) throws ClassNotFoundException, StorageManagerException,
+    public static void checkLoadStep(TemporaryMongoRule mongoRule,
+                                     String databaseName) throws ClassNotFoundException, StorageManagerException,
             InstantiationException, IllegalAccessException {
-        VariantDBIterator iterator = GenotypedVcfJobTestUtils.getVariantDBIterator(dbName);
+        DBCursor iterator = getVariantDBCursor(mongoRule, databaseName);
+
         assertEquals(EXPECTED_VARIANTS, count(iterator));
+        iterator.close();
     }
 
     /**

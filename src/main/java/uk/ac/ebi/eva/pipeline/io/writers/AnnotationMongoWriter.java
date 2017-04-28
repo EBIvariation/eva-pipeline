@@ -24,9 +24,6 @@ import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.data.mongodb.core.query.BasicQuery;
 import org.springframework.data.mongodb.core.query.BasicUpdate;
 import org.springframework.util.Assert;
-import uk.ac.ebi.eva.commons.models.data.VariantAnnotation;
-import uk.ac.ebi.eva.commons.models.converters.data.VariantSourceEntryToDBObjectConverter;
-import uk.ac.ebi.eva.commons.models.converters.data.VariantToDBObjectConverter;
 import uk.ac.ebi.eva.commons.models.data.Annotation;
 import uk.ac.ebi.eva.utils.MongoDBHelper;
 
@@ -110,7 +107,7 @@ public class AnnotationMongoWriter extends MongoItemWriter<Annotation> {
             }
 
             annotation.setId(storageId);
-            annotation.setEnsmblVersion(vepVersion);
+            annotation.setEnsemblVersion(vepVersion);
             annotation.setVepCacheVersion(vepCacheVersion);
 
             annotation.generateXrefsFromConsequenceTypes();
@@ -135,7 +132,7 @@ public class AnnotationMongoWriter extends MongoItemWriter<Annotation> {
      * Append multiple annotation into a single {@link Annotation}
      * Updated fields are ConsequenceTypes and Hgvs
      *
-     * @param annotation             annotation where other annotations will be appended
+     * @param annotation                    annotation where other annotations will be appended
      * @param otherAnnotationsToConcatenate annotations to be appended
      * @return a single {@link Annotation} ready to be persisted
      */
@@ -178,7 +175,7 @@ public class AnnotationMongoWriter extends MongoItemWriter<Annotation> {
     }
 
     private void createIndexes() {
-                mongoOperations.getCollection(collection).createIndex(
+        mongoOperations.getCollection(collection).createIndex(
                 new BasicDBObject(ANNOTATION_XREF_ID_FIELD, 1),
                 new BasicDBObject(MongoDBHelper.BACKGROUND_INDEX, true));
         mongoOperations.getCollection(collection).createIndex(

@@ -15,18 +15,48 @@
  */
 package uk.ac.ebi.eva.commons.models.data;
 
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
+import org.springframework.util.Assert;
+
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
 /**
- *
+ * Annotations of the genomic variation
  */
+@Document
 public class VariantAnnotation {
+    @Field(value = AnnotationFieldNames.ENSEMBL_VERSION_FIELD)
+    private String ensemblVersion;
+
+    @Field(value = AnnotationFieldNames.VEP_CACHE_VERSION_FIELD)
+    private String vepCacheVersion;
+
+    @Field(value = AnnotationFieldNames.SIFT_FIELD)
     private Set<Double> sifts = new HashSet<>();
+
+    @Field(value = AnnotationFieldNames.POLYPHEN_FIELD)
     private Set<Double> polyphens = new HashSet<>();
+
+    @Field(value = AnnotationFieldNames.SO_ACCESSION_FIELD)
     private Set<Integer> soAccessions = new HashSet<>();
+
+    @Field(value = AnnotationFieldNames.XREFS_FIELD)
     private Set<String> xrefIds = new HashSet<>();
+
+    /**
+     * Make sure to specify the ensemblVersion and vepCacheVersion
+     * @param ensemblVersion
+     * @param vepCacheVersion
+     */
+    public VariantAnnotation(String ensemblVersion, String vepCacheVersion) {
+        Assert.notNull(ensemblVersion);
+        Assert.notNull(vepCacheVersion);
+        this.ensemblVersion = ensemblVersion;
+        this.vepCacheVersion = vepCacheVersion;
+    }
 
     public void addSift(Double sift) {
         this.sifts.add(sift);
@@ -66,5 +96,13 @@ public class VariantAnnotation {
 
     public Set<String> getXrefIds() {
         return xrefIds;
+    }
+
+    public String getEnsemblVersion() {
+        return ensemblVersion;
+    }
+
+    public String getVepCacheVersion() {
+        return vepCacheVersion;
     }
 }
