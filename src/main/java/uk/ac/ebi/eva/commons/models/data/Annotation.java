@@ -29,11 +29,9 @@ import java.util.Set;
 /**
  * Slim version of {@link org.opencb.biodata.models.variant.annotation.VariantAnnotation}
  * Unused fields removed.
- *
  */
 @Document
 public class Annotation {
-
     @Field(value = AnnotationFieldNames.CHROMOSOME_FIELD)
     private String chromosome;
 
@@ -53,7 +51,7 @@ public class Annotation {
     private String id;
 
     @Field(value = AnnotationFieldNames.ENSEMBL_VERSION_FIELD)
-    private String ensmblVersion;
+    private String ensemblVersion;
 
     @Field(value = AnnotationFieldNames.VEP_CACHE_VERSION_FIELD)
     private String vepCacheVersion;
@@ -140,12 +138,12 @@ public class Annotation {
         this.consequenceTypes = consequenceTypes;
     }
 
-    public String getEnsmblVersion() {
-        return ensmblVersion;
+    public String getEnsemblVersion() {
+        return ensemblVersion;
     }
 
-    public void setEnsmblVersion(String ensmblVersion) {
-        this.ensmblVersion = ensmblVersion;
+    public void setEnsemblVersion(String ensemblVersion) {
+        this.ensemblVersion = ensemblVersion;
     }
 
     public String getVepCacheVersion() {
@@ -156,7 +154,7 @@ public class Annotation {
         this.vepCacheVersion = vepCacheVersion;
     }
 
-    public void generateXrefsFromConsequenceTypes(){
+    public void generateXrefsFromConsequenceTypes() {
         for (ConsequenceType consequenceType : consequenceTypes) {
             if (!Strings.isNullOrEmpty(consequenceType.getGeneName())) {
                 xrefs.add(new Xref(consequenceType.getGeneName(), "HGNC"));

@@ -17,6 +17,7 @@ package uk.ac.ebi.eva.pipeline.io.writers;
 
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
+import com.mongodb.DBObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.item.data.MongoItemWriter;
@@ -25,7 +26,9 @@ import org.springframework.data.mongodb.core.query.BasicQuery;
 import org.springframework.data.mongodb.core.query.BasicUpdate;
 import org.springframework.util.Assert;
 
+import uk.ac.ebi.eva.commons.models.converters.data.VariantToDBObjectConverter;
 import uk.ac.ebi.eva.commons.models.data.Annotation;
+import uk.ac.ebi.eva.commons.models.data.AnnotationFieldNames;
 import uk.ac.ebi.eva.commons.models.data.ConsequenceType;
 import uk.ac.ebi.eva.commons.models.data.Score;
 import uk.ac.ebi.eva.commons.models.data.VariantAnnotation;
@@ -42,16 +45,15 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static uk.ac.ebi.eva.commons.models.data.AnnotationFieldNames.GENE_NAME_FIELD;
 import static uk.ac.ebi.eva.commons.models.data.AnnotationFieldNames.POLYPHEN_FIELD;
 import static uk.ac.ebi.eva.commons.models.data.AnnotationFieldNames.SIFT_FIELD;
 import static uk.ac.ebi.eva.commons.models.data.AnnotationFieldNames.SO_ACCESSION_FIELD;
+import static uk.ac.ebi.eva.commons.models.data.AnnotationFieldNames.XREFS_FIELD;
 
 /**
- * Update the {@link uk.ac.ebi.eva.commons.models.data.Variant} mongo document with some fields from {@link Annotation}
- * and {@link ConsequenceType}
+ * Update the {@link uk.ac.ebi.eva.commons.models.data.Variant} mongo document with {@link VariantAnnotation}
  * <p>
- * The fields are:
+ * The fields updated are:
  * - sifts
  * - polyphens
  * - soAccessions
@@ -64,7 +66,26 @@ public class AnnotationInVariantMongoWriter extends MongoItemWriter<Annotation> 
 
     private final String collection;
 
-    public AnnotationInVariantMongoWriter(MongoOperations mongoOperations, String collection) {
+    private String vepVersion;
+
+    private String vepCacheVersion;
+
+    private final String ANNOTATION_XREFS = VariantToDBObjectConverter.ANNOTATION_FIELD + ".$." + XREFS_FIELD;
+
+    private final String ANNOTATION_SO = VariantToDBObjectConverter.ANNOTATION_FIELD + ".$." + SO_ACCESSION_FIELD;
+
+    private final String ANNOTATION_SIFT = VariantToDBObjectConverter.ANNOTATION_FIELD + ".$." + SIFT_FIELD;
+
+    private final String ANNOTATION_POLYPHEN = VariantToDBObjectConverter.ANNOTATION_FIELD + ".$." + POLYPHEN_FIELD;
+
+    private final String ANNOTATION_ENSEMBL_VERSION = VariantToDBObjectConverter.ANNOTATION_FIELD + "." + AnnotationFieldNames.ENSEMBL_VERSION_FIELD;
+
+    private final String ANNOTATION_VEP_CACHE_VERSION = VariantToDBObjectConverter.ANNOTATION_FIELD + "." + AnnotationFieldNames.VEP_CACHE_VERSION_FIELD;
+
+    public AnnotationInVariantMongoWriter(MongoOperations mongoOperations,
+                                          String collection,
+                                          String vepVersion,
+                                          String vepCacheVersion) {
         super();
         Assert.notNull(mongoOperations, "A Mongo instance is required");
         Assert.hasText(collection, "A collection name is required");
@@ -74,6 +95,8 @@ public class AnnotationInVariantMongoWriter extends MongoItemWriter<Annotation> 
 
         this.mongoOperations = mongoOperations;
         this.collection = collection;
+        this.vepVersion = vepVersion;
+        this.vepCacheVersion = vepCacheVersion;
     }
 
     @Override
@@ -86,81 +109,97 @@ public class AnnotationInVariantMongoWriter extends MongoItemWriter<Annotation> 
             String storageId = annotationsIdEntry.getKey();
             BasicDBObject id = new BasicDBObject("_id", storageId);
 
-            if (mongoOperations.exists(new BasicQuery(id), collection)) {
-                logger.trace("Writing annotations fields into mongo id: {}, collection: {}", storageId, collection);
+            DBObject dbObject = mongoOperations.getCollection(collection).findOne(id);
 
-                Set<String> xrefs = variantAnnotation.getXrefIds();
-                BasicDBObject updateGeneNames = new BasicDBObject("$addToSet", new BasicDBObject(GENE_NAME_FIELD,
-                                                                                                 new BasicDBObject(
-                                                                                                         "$each",
-                                                                                                         xrefs)));
-                mongoOperations.upsert(new BasicQuery(id), new BasicUpdate(updateGeneNames), collection);
+            if (dbObject != null) {
+                logger.trace("Writing annotations into variant : {}, collection: {}", storageId, collection);
 
-                Set<Integer> soAccessions = variantAnnotation.getSoAccessions();
-                BasicDBObject updateConsequenceTypes = new BasicDBObject("$addToSet",
-                                                                         new BasicDBObject(SO_ACCESSION_FIELD,
-                                                                                           new BasicDBObject("$each",
-                                                                                                             soAccessions)));
-                mongoOperations.upsert(new BasicQuery(id), new BasicUpdate(updateConsequenceTypes), collection);
+                List<BasicDBObject> existingAnnotations = (List<BasicDBObject>) dbObject
+                        .get(VariantToDBObjectConverter.ANNOTATION_FIELD);
 
-                variantAnnotation.addSifts(lookupExistingSubstitutionScore(SIFT_FIELD, storageId));
-                Set<Double> sifts = calculateRangeOfScores(variantAnnotation.getSifts());
-                updateSubstitutionScore(sifts, SIFT_FIELD, id);
+                if (existingAnnotations != null) {
+                    updateExistingVariantAnnotation(variantAnnotation, storageId, existingAnnotations);
+                } else {
+                    addNewVariantAnnotation(variantAnnotation, id);
+                }
 
-                variantAnnotation.addPolyphens(lookupExistingSubstitutionScore(POLYPHEN_FIELD, storageId));
-                Set<Double> polyphens = calculateRangeOfScores(variantAnnotation.getPolyphens());
-                updateSubstitutionScore(polyphens, POLYPHEN_FIELD, id);
-
-            } else {
-                logger.info("Unable to update annotation fields into variant {} because it doesn't exist", storageId);
             }
-
-        }
-    }
-
-    private void updateSubstitutionScore(Set<Double> substitutionScores,
-                                         String substitutionScoreName,
-                                         BasicDBObject id) {
-        if (!substitutionScores.isEmpty()) {
-            BasicDBObject updateSubstitutionScore = new BasicDBObject("$set", new BasicDBObject(substitutionScoreName,
-                                                                                                substitutionScores));
-            mongoOperations.upsert(new BasicQuery(id), new BasicUpdate(updateSubstitutionScore), collection);
         }
     }
 
     /**
-     * Checks for a given variant if a protein substitution score is already present
+     * Update {@link VariantAnnotation} fields if some are already present in the {@link uk.ac.ebi.eva.commons.models.data.Variant}
+     * Just make sure to update the specific version of annotation!
      *
-     * @param substitutionScoreField substitution score name like POLYPHEN_FIELD, SIFT_FIELD etc.
-     * @param storageId              variant ID
-     * @return a set containing all the substitution scores if any already loaded, or an empty set otherwise
+     * @param variantAnnotation   the current annotation to append
+     * @param storageId
+     * @param existingAnnotations already in {@link uk.ac.ebi.eva.commons.models.data.Variant}
      */
-    private Set<Double> lookupExistingSubstitutionScore(String substitutionScoreField, String storageId) {
+    private void updateExistingVariantAnnotation(VariantAnnotation variantAnnotation,
+                                                 String storageId,
+                                                 List<BasicDBObject> existingAnnotations) {
+        for (BasicDBObject existingAnnotation : existingAnnotations) {
+            if (existingAnnotation.getString(AnnotationFieldNames.ENSEMBL_VERSION_FIELD)
+                    .equals(vepVersion) && existingAnnotation.getString(AnnotationFieldNames.VEP_CACHE_VERSION_FIELD)
+                    .equals(vepCacheVersion)) {
+
+                Set<String> xrefs = variantAnnotation.getXrefIds();
+                BasicDBObject addToSetValue = new BasicDBObject(ANNOTATION_XREFS, new BasicDBObject("$each", xrefs));
+
+                Set<Integer> soAccessions = variantAnnotation.getSoAccessions();
+                addToSetValue.append(ANNOTATION_SO, new BasicDBObject("$each", soAccessions));
+
+                BasicDBObject update = new BasicDBObject("$addToSet", addToSetValue);
+
+                variantAnnotation
+                        .addSifts(lookupExistingSubstitutionScore((BasicDBList) existingAnnotation.get(SIFT_FIELD)));
+                Set<Double> sifts = calculateRangeOfScores(variantAnnotation.getSifts());
+                BasicDBObject setValue = new BasicDBObject(ANNOTATION_SIFT, sifts);
+
+                variantAnnotation.addPolyphens(
+                        lookupExistingSubstitutionScore((BasicDBList) existingAnnotation.get(POLYPHEN_FIELD)));
+                Set<Double> polyphens = calculateRangeOfScores(variantAnnotation.getPolyphens());
+                setValue.append(ANNOTATION_POLYPHEN, polyphens);
+
+                update.append("$set", setValue);
+
+                BasicDBObject versionedId = new BasicDBObject("_id", storageId);
+                versionedId.append(ANNOTATION_ENSEMBL_VERSION, vepVersion);
+                versionedId.append(ANNOTATION_VEP_CACHE_VERSION, vepCacheVersion);
+
+                mongoOperations.updateFirst(new BasicQuery(versionedId), new BasicUpdate(update), collection);
+            }
+        }
+    }
+
+    /**
+     * Append a new {@link VariantAnnotation} field into {@link uk.ac.ebi.eva.commons.models.data.Variant}
+     *
+     * @param variantAnnotation
+     * @param id
+     */
+    private void addNewVariantAnnotation(VariantAnnotation variantAnnotation, BasicDBObject id) {
+        Set<VariantAnnotation> variantAnnotations = new HashSet<>(Collections.singletonList(variantAnnotation));
+        BasicDBObject updateAnnotation = new BasicDBObject("$set", new BasicDBObject(
+                VariantToDBObjectConverter.ANNOTATION_FIELD, variantAnnotations));
+        mongoOperations.upsert(new BasicQuery(id), new BasicUpdate(updateAnnotation), collection);
+    }
+
+    private Set<Double> lookupExistingSubstitutionScore(BasicDBList scores) {
         Set<Double> substitutionScores = new HashSet<>();
 
-        BasicDBObject field = new BasicDBObject(substitutionScoreField, new BasicDBObject("$exists", true))
-                .append("_id", storageId);
-
-        BasicQuery fieldQuery = new BasicQuery(field);
-        fieldQuery.fields().include(substitutionScoreField);
-        fieldQuery.fields().exclude("_id");
-
-        BasicDBObject existingFields = mongoOperations.findOne(fieldQuery, BasicDBObject.class, collection);
-
-        if (existingFields != null) {
-            BasicDBList scores = (BasicDBList) existingFields.getOrDefault(substitutionScoreField, new BasicDBList());
+        if (scores != null) {
             substitutionScores.addAll(scores.stream().map(score -> (Double) score).collect(Collectors.toSet()));
         }
 
         return substitutionScores;
     }
 
-
     /**
      * Extract Xrefs, so terms and protein substitution score from {@link Annotation}
      */
     private VariantAnnotation extractFieldsFromAnnotations(List<Annotation> annotations) {
-        VariantAnnotation variantAnnotation = new VariantAnnotation();
+        VariantAnnotation variantAnnotation = new VariantAnnotation(vepVersion, vepCacheVersion);
 
         for (Annotation annotation : annotations) {
             annotation.generateXrefsFromConsequenceTypes();

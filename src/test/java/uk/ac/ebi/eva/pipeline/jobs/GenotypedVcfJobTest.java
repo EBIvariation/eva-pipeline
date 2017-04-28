@@ -113,11 +113,11 @@ public class GenotypedVcfJobTest {
 
         assertCompleted(jobExecution);
 
-        GenotypedVcfJobTestUtils.checkLoadStep(databaseName);
+        GenotypedVcfJobTestUtils.checkLoadStep(mongoRule, databaseName);
 
         GenotypedVcfJobTestUtils.checkCreateStatsStep(variantsStatsFile, sourceStatsFile);
 
-        GenotypedVcfJobTestUtils.checkLoadStatsStep(databaseName);
+        GenotypedVcfJobTestUtils.checkLoadStatsStep(mongoRule, databaseName);
 
         GenotypedVcfJobTestUtils.checkAnnotationCreateStep(vepOutputFile);
 
