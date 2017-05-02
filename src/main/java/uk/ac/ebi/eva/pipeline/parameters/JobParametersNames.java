@@ -134,6 +134,8 @@ public class JobParametersNames {
 
     public static final String APP_VEP_NUMFORKS = "app.vep.num-forks";
 
+    public static final String APP_VEP_TIMEOUT = "app.vep.timeout";
+
 
     /*
      * Other configuration

@@ -29,6 +29,10 @@ public class VariantWrapper {
         this.variant = variant.copyInEnsemblFormat();
     }
 
+    public VariantWrapper(String chromosome, int start, int end, String reference, String alternate) {
+        this.variant = new Variant(chromosome, start, end, reference, alternate).copyInEnsemblFormat();
+    }
+
     public String getChr() {
         return variant.getChromosome();
     }

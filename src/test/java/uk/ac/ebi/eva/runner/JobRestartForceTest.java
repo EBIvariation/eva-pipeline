@@ -27,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
+
 import uk.ac.ebi.eva.pipeline.runner.ManageJobsUtils;
 import uk.ac.ebi.eva.test.configuration.AsynchronousBatchTestConfiguration;
 import uk.ac.ebi.eva.test.utils.AbstractJobRestartUtils;

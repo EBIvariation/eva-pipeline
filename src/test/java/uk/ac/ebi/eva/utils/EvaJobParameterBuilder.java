@@ -115,6 +115,11 @@ public class EvaJobParameterBuilder extends JobParametersBuilder {
         return this;
     }
 
+    public EvaJobParameterBuilder vepTimeout(String vepTimeout) {
+        addParameter(JobParametersNames.APP_VEP_TIMEOUT, new JobParameter(vepTimeout));
+        return this;
+    }
+
     public EvaJobParameterBuilder inputFasta(String inputFasta) {
         addParameter(JobParametersNames.INPUT_FASTA, new JobParameter(inputFasta));
         return this;
@@ -137,6 +142,11 @@ public class EvaJobParameterBuilder extends JobParametersBuilder {
 
     public EvaJobParameterBuilder statisticsSkip(boolean statisticsSkip) {
         addParameter(JobParametersNames.STATISTICS_SKIP, new JobParameter(Boolean.toString(statisticsSkip)));
+        return this;
+    }
+
+    public EvaJobParameterBuilder chunkSize(String chunkSize) {
+        addParameter(JobParametersNames.CONFIG_CHUNK_SIZE, new JobParameter(chunkSize));
         return this;
     }
 }

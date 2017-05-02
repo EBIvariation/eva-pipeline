@@ -21,7 +21,7 @@ import org.springframework.batch.core.JobParametersValidator;
 import org.springframework.batch.core.job.CompositeJobParametersValidator;
 import org.springframework.batch.core.job.DefaultJobParametersValidator;
 
-import uk.ac.ebi.eva.pipeline.jobs.steps.tasklets.VepAnnotationGeneratorStep;
+import uk.ac.ebi.eva.pipeline.jobs.steps.GenerateVepAnnotationStep;
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 import uk.ac.ebi.eva.pipeline.parameters.validation.InputFastaValidator;
 import uk.ac.ebi.eva.pipeline.parameters.validation.InputStudyIdValidator;
@@ -32,28 +32,29 @@ import uk.ac.ebi.eva.pipeline.parameters.validation.VepCacheSpeciesValidator;
 import uk.ac.ebi.eva.pipeline.parameters.validation.VepCacheVersionValidator;
 import uk.ac.ebi.eva.pipeline.parameters.validation.VepNumForksValidator;
 import uk.ac.ebi.eva.pipeline.parameters.validation.VepPathValidator;
+import uk.ac.ebi.eva.pipeline.parameters.validation.VepTimeoutValidator;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 /**
- * Validates the job parameters necessary to execute a {@link VepAnnotationGeneratorStep}
+ * Validates the job parameters necessary to execute a {@link GenerateVepAnnotationStep}
  * <p>
  * The parameters OUTPUT_DIR_ANNOTATION, INPUT_STUDY_ID and INPUT_VCF_ID are used to build the VEP input/output options
  * {@see uk.ac.ebi.eva.pipeline.configuration.JobOptions#loadPipelineOptions()}
  */
-public class VepAnnotationGeneratorStepParametersValidator extends DefaultJobParametersValidator {
+public class GenerateVepAnnotationStepParametersValidator extends DefaultJobParametersValidator {
 
     private boolean isStudyIdRequired;
 
-    public VepAnnotationGeneratorStepParametersValidator(boolean isStudyIdRequired) {
+    public GenerateVepAnnotationStepParametersValidator(boolean isStudyIdRequired) {
         super(new String[]{JobParametersNames.APP_VEP_CACHE_PATH,
                            JobParametersNames.APP_VEP_CACHE_SPECIES,
                            JobParametersNames.APP_VEP_CACHE_VERSION,
                            JobParametersNames.APP_VEP_NUMFORKS,
                            JobParametersNames.APP_VEP_PATH,
+                           JobParametersNames.APP_VEP_TIMEOUT,
                            JobParametersNames.INPUT_FASTA,
                            JobParametersNames.OUTPUT_DIR_ANNOTATION},
               new String[]{});
@@ -69,12 +70,13 @@ public class VepAnnotationGeneratorStepParametersValidator extends DefaultJobPar
     private CompositeJobParametersValidator compositeJobParametersValidator() {
         List<JobParametersValidator> jobParametersValidators = new ArrayList<>();
         Collections.addAll(jobParametersValidators,
-                new VepPathValidator(),
-                new VepCacheVersionValidator(),
                 new VepCachePathValidator(),
                 new VepCacheSpeciesValidator(),
-                new InputFastaValidator(),
+                new VepCacheVersionValidator(),
                 new VepNumForksValidator(),
+                new VepPathValidator(),
+                new VepTimeoutValidator(),
+                new InputFastaValidator(),
                 new OutputDirAnnotationValidator()
         );
 

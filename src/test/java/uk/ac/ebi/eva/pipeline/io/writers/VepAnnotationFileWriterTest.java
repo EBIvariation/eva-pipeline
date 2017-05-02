@@ -20,16 +20,18 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.opencb.opencga.storage.mongodb.variant.DBObjectToVariantConverter;
 import org.springframework.batch.item.ItemStreamException;
 
 import uk.ac.ebi.eva.pipeline.model.VariantWrapper;
 import uk.ac.ebi.eva.pipeline.parameters.AnnotationParameters;
-import uk.ac.ebi.eva.test.data.VariantData;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -37,7 +39,6 @@ import java.util.zip.GZIPInputStream;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static uk.ac.ebi.eva.test.rules.TemporaryMongoRule.constructDbObject;
 import static uk.ac.ebi.eva.test.utils.JobTestUtils.getLines;
 import static uk.ac.ebi.eva.utils.FileUtils.getResource;
 
@@ -50,6 +51,10 @@ public class VepAnnotationFileWriterTest {
      * that the count of variants to annotate is the same as variantAnnotations to write in the file.
      */
     private static final int EXTRA_ANNOTATIONS = 1;
+
+    private static final int HEADER_LINES = 3;
+
+    private final VariantWrapper VARIANT_WRAPPER = new VariantWrapper("1", 100, 105, "A", "T");
 
     private AnnotationParameters annotationParameters;
 
@@ -70,7 +75,7 @@ public class VepAnnotationFileWriterTest {
         annotationParameters.setVepPath(getResource("/mockvep_writeToFile.pl").getAbsolutePath());
         annotationParameters.setVepCacheSpecies("hsapiens");
         annotationParameters.setInputFasta("fasta");
-        annotationParameters.setVepNumForks("4");
+        annotationParameters.setVepNumForks(4);
 
         File annotationFolder = temporaryFolder.newFolder();
         annotationParameters.setOutputDirAnnotation(annotationFolder.getAbsolutePath());
@@ -78,18 +83,13 @@ public class VepAnnotationFileWriterTest {
 
     @Test
     public void testMockVep() throws Exception {
-        DBObjectToVariantConverter converter = new DBObjectToVariantConverter();
-        VariantWrapper variantWrapper = new VariantWrapper(
-                converter.convertToDataModelType(constructDbObject(VariantData.getVariantWithAnnotation())));
-        List<VariantWrapper> variantWrappers = Collections.singletonList(variantWrapper);
+        List<VariantWrapper> variantWrappers = Collections.singletonList(VARIANT_WRAPPER);
         int chunkSize = variantWrappers.size();
 
-        VepAnnotationFileWriter vepAnnotationFileWriter = new VepAnnotationFileWriter(TIMEOUT_IN_SECONDS, chunkSize,
-                annotationParameters);
+        VepAnnotationFileWriter vepAnnotationFileWriter = new VepAnnotationFileWriter(annotationParameters, chunkSize,
+                TIMEOUT_IN_SECONDS);
 
-        vepAnnotationFileWriter.open(null);
         vepAnnotationFileWriter.write(variantWrappers);
-        vepAnnotationFileWriter.close();
 
         File vepOutputFile = new File(annotationParameters.getVepOutput());
         assertTrue(vepOutputFile.exists());
@@ -99,21 +99,16 @@ public class VepAnnotationFileWriterTest {
 
     @Test
     public void testMockVepSeveralChunks() throws Exception {
-        DBObjectToVariantConverter converter = new DBObjectToVariantConverter();
-        VariantWrapper variantWrapper = new VariantWrapper(
-                converter.convertToDataModelType(constructDbObject(VariantData.getVariantWithAnnotation())));
         List<VariantWrapper> variantWrappers = new ArrayList<>();
         for (int i = 0; i < 20; i++) {
-            variantWrappers.add(variantWrapper);
+            variantWrappers.add(VARIANT_WRAPPER);
         }
         int chunkSize = 5;
 
-        VepAnnotationFileWriter vepAnnotationFileWriter = new VepAnnotationFileWriter(TIMEOUT_IN_SECONDS, chunkSize,
-                annotationParameters);
+        VepAnnotationFileWriter vepAnnotationFileWriter = new VepAnnotationFileWriter(annotationParameters, chunkSize,
+                TIMEOUT_IN_SECONDS);
 
-        vepAnnotationFileWriter.open(null);
         vepAnnotationFileWriter.write(variantWrappers);
-        vepAnnotationFileWriter.close();
 
         File vepOutputFile = new File(annotationParameters.getVepOutput());
         assertTrue(vepOutputFile.exists());
@@ -123,18 +118,13 @@ public class VepAnnotationFileWriterTest {
 
     @Test
     public void testVepWriterWritesLastSmallerChunk() throws Exception {
-        DBObjectToVariantConverter converter = new DBObjectToVariantConverter();
-        VariantWrapper variantWrapper = new VariantWrapper(
-                converter.convertToDataModelType(constructDbObject(VariantData.getVariantWithAnnotation())));
-        List<VariantWrapper> variantWrappers = Collections.singletonList(variantWrapper);
+        List<VariantWrapper> variantWrappers = Collections.singletonList(VARIANT_WRAPPER);
         int chunkSizeGreaterThanActualVariants = variantWrappers.size() * 10;
 
-        VepAnnotationFileWriter vepAnnotationFileWriter = new VepAnnotationFileWriter(TIMEOUT_IN_SECONDS,
-                chunkSizeGreaterThanActualVariants, annotationParameters);
+        VepAnnotationFileWriter vepAnnotationFileWriter = new VepAnnotationFileWriter(annotationParameters,
+                chunkSizeGreaterThanActualVariants, TIMEOUT_IN_SECONDS);
 
-        vepAnnotationFileWriter.open(null);
         vepAnnotationFileWriter.write(variantWrappers);
-        vepAnnotationFileWriter.close();
 
         File vepOutputFile = new File(annotationParameters.getVepOutput());
         assertTrue(vepOutputFile.exists());
@@ -143,25 +133,59 @@ public class VepAnnotationFileWriterTest {
     }
 
     @Test
+    public void testHeaderIsWrittenOnlyOnce() throws Exception {
+        List<VariantWrapper> variantWrappers = Collections.singletonList(VARIANT_WRAPPER);
+        int chunkSize = variantWrappers.size();
+
+        VepAnnotationFileWriter vepAnnotationFileWriter = new VepAnnotationFileWriter(annotationParameters,
+                chunkSize, TIMEOUT_IN_SECONDS);
+
+        long chunks = 3;
+        for (int i = 0; i < chunks; i++) {
+            vepAnnotationFileWriter.write(variantWrappers);
+        }
+
+        File vepOutputFile = new File(annotationParameters.getVepOutput());
+        assertTrue(vepOutputFile.exists());
+        assertEquals((variantWrappers.size() + EXTRA_ANNOTATIONS)*chunks,
+                getLines(new GZIPInputStream(new FileInputStream(vepOutputFile))));
+
+        assertEquals(HEADER_LINES, getCommentLines(new GZIPInputStream(new FileInputStream(vepOutputFile))));
+        BufferedReader reader = new BufferedReader(new InputStreamReader(new GZIPInputStream(
+                new FileInputStream(vepOutputFile))));
+        for (int i = 0; i < HEADER_LINES; i++) {
+            assertEquals('#', reader.readLine().charAt(0));
+        }
+    }
+
+    /**
+     * counts non-comment lines in an InputStream
+     */
+    public static long getCommentLines(InputStream in) throws IOException {
+        BufferedReader file = new BufferedReader(new InputStreamReader(in));
+        long lines = 0;
+        String line;
+        while ((line = file.readLine()) != null) {
+            if (line.charAt(0) == '#') {
+                lines++;
+            }
+        }
+        file.close();
+        return lines;
+    }
+
+    @Test
     public void testVepTimeouts() throws Exception {
-        DBObjectToVariantConverter converter = new DBObjectToVariantConverter();
-        VariantWrapper variantWrapper = new VariantWrapper(
-                converter.convertToDataModelType(constructDbObject(VariantData.getVariantWithAnnotation())));
-        List<VariantWrapper> variantWrappers = Collections.singletonList(variantWrapper);
+        List<VariantWrapper> variantWrappers = Collections.singletonList(VARIANT_WRAPPER);
         int chunkSizeGreaterThanActualVariants = variantWrappers.size() * 10;
         annotationParameters.setVepPath(getResource("/mockvep_writeToFile_delayed.pl").getAbsolutePath());
 
         long vepTimeouts = 1;
-        VepAnnotationFileWriter vepAnnotationFileWriter = new VepAnnotationFileWriter(vepTimeouts,
-                chunkSizeGreaterThanActualVariants, annotationParameters);
-
-        vepAnnotationFileWriter.open(null);
-        vepAnnotationFileWriter.write(variantWrappers);
+        VepAnnotationFileWriter vepAnnotationFileWriter = new VepAnnotationFileWriter(annotationParameters,
+                chunkSizeGreaterThanActualVariants, vepTimeouts);
 
         exception.expect(ItemStreamException.class);
-        exception.expectMessage("Reached the timeout (" + vepTimeouts
-                + " seconds) while waiting for VEP to finish. Killed the process.");
-        vepAnnotationFileWriter.close();
+        vepAnnotationFileWriter.write(variantWrappers);
     }
 
 }

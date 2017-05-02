@@ -75,7 +75,7 @@ public class MongoDbCursorItemReader extends AbstractItemCountingItemStreamItemR
      */
     public void setQuery(DBObject query) {
         if (query == null) {
-            query = new BasicDBObject();
+            this.query = new BasicDBObject();
         } else {
             this.query = query;
         }

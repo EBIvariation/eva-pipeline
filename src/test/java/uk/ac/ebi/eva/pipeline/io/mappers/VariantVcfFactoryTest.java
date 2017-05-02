@@ -16,6 +16,7 @@
 package uk.ac.ebi.eva.pipeline.io.mappers;
 
 import org.junit.Test;
+
 import uk.ac.ebi.eva.commons.models.data.Variant;
 import uk.ac.ebi.eva.commons.models.data.VariantSourceEntry;
 

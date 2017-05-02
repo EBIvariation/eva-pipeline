@@ -22,10 +22,16 @@ import org.springframework.batch.core.job.CompositeJobParametersValidator;
 import org.springframework.batch.core.job.DefaultJobParametersValidator;
 
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
-import uk.ac.ebi.eva.pipeline.parameters.validation.*;
+import uk.ac.ebi.eva.pipeline.parameters.validation.ConfigChunkSizeValidator;
+import uk.ac.ebi.eva.pipeline.parameters.validation.ConfigRestartabilityAllowValidator;
+import uk.ac.ebi.eva.pipeline.parameters.validation.DbCollectionsVariantsNameValidator;
+import uk.ac.ebi.eva.pipeline.parameters.validation.DbNameValidator;
+import uk.ac.ebi.eva.pipeline.parameters.validation.InputStudyIdValidator;
+import uk.ac.ebi.eva.pipeline.parameters.validation.InputVcfIdValidator;
+import uk.ac.ebi.eva.pipeline.parameters.validation.OptionalValidator;
+import uk.ac.ebi.eva.pipeline.parameters.validation.OutputDirAnnotationValidator;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 

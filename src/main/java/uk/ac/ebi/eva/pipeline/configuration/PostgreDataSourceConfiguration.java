@@ -15,15 +15,16 @@
  */
 package uk.ac.ebi.eva.pipeline.configuration;
 
-import javax.sql.DataSource;
-
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.env.Environment;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
+
 import uk.ac.ebi.eva.pipeline.Application;
+
+import javax.sql.DataSource;
 
 /**
  * Configuration will be loaded from the file "application-production.properties".

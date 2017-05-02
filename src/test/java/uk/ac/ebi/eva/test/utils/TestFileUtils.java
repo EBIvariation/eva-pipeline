@@ -2,7 +2,11 @@ package uk.ac.ebi.eva.test.utils;
 
 import org.springframework.util.FileCopyUtils;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.net.URL;
 import java.util.zip.GZIPOutputStream;
 

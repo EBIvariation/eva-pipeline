@@ -26,7 +26,7 @@ public class BeanNames {
     public static final String VARIANT_READER = "variant-reader";
 
     public static final String GENE_WRITER = "gene-writer";
-    public static final String VEP_INPUT_WRITER = "vep-input-writer";
+    public static final String VEP_ANNOTATION_WRITER = "vep-annotation-writer";
     public static final String VARIANT_ANNOTATION_WRITER = "variant-annotation-writer";
     public static final String VARIANT_WRITER = "variant-writer";
 
@@ -47,7 +47,6 @@ public class BeanNames {
     public static final String LOAD_STATISTICS_STEP = "load-statistics-step";
     public static final String LOAD_VARIANTS_STEP = "load-variants-step";
     public static final String LOAD_FILE_STEP = "load-file-step";
-    public static final String GENERATE_VEP_INPUT_STEP = "generate-vep-input-step";
     public static final String DROP_SINGLE_STUDY_VARIANTS_STEP = "drop-single-study-variants-step";
     public static final String PULL_FILES_AND_STATISTICS_BY_STUDY_STEP = "pull-files-and-statistics-by-study-step";
     public static final String DROP_FILES_BY_STUDY_STEP = "drop-files-by-study-step";

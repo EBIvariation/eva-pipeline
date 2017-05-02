@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 EMBL - European Bioinformatics Institute
+ * Copyright 2015-2017 EMBL - European Bioinformatics Institute
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,65 +13,65 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package uk.ac.ebi.eva.pipeline.parameters.validation;
 
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.JobParametersInvalidException;
 
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
-import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 
-import java.io.File;
-import java.io.IOException;
-
-public class InputVcfAggregationMappingPathValidatorTest {
-
-    private InputVcfAggregationMappingPathValidator validator;
+public class ConfigChunkSizeValidatorTest {
+    private ConfigChunkSizeValidator validator;
 
     private JobParametersBuilder jobParametersBuilder;
 
-    @Rule
-    public PipelineTemporaryFolderRule temporaryFolder = new PipelineTemporaryFolderRule();
-
     @Before
     public void setUp() throws Exception {
-        validator = new InputVcfAggregationMappingPathValidator();
+        validator = new ConfigChunkSizeValidator();
     }
 
     @Test
-    public void inputVcfAggregationMappingPathIsValid() throws JobParametersInvalidException, IOException {
+    public void chunkSizeIsValid() throws JobParametersInvalidException {
         jobParametersBuilder = new JobParametersBuilder();
-        jobParametersBuilder.addString(JobParametersNames.INPUT_VCF_AGGREGATION_MAPPING_PATH,
-                temporaryFolder.newFile().getCanonicalPath());
+        jobParametersBuilder.addString(JobParametersNames.CONFIG_CHUNK_SIZE, "11");
         validator.validate(jobParametersBuilder.toJobParameters());
     }
 
     @Test(expected = JobParametersInvalidException.class)
-    public void inputVcfAggregationMappingPathNotExist() throws JobParametersInvalidException {
+    public void chunkSizeIsZero() throws JobParametersInvalidException {
         jobParametersBuilder = new JobParametersBuilder();
-        jobParametersBuilder.addString(JobParametersNames.INPUT_VCF_AGGREGATION_MAPPING_PATH, "file://path/to/file");
+        jobParametersBuilder.addString(JobParametersNames.CONFIG_CHUNK_SIZE, "0");
         validator.validate(jobParametersBuilder.toJobParameters());
     }
 
     @Test(expected = JobParametersInvalidException.class)
-    public void inputVcfAggregationMappingPathNotReadable() throws JobParametersInvalidException, IOException {
-        File file = temporaryFolder.newFile("not_readable");
-        file.setReadable(false);
-
+    public void chunkSizeIsNegative() throws JobParametersInvalidException {
         jobParametersBuilder = new JobParametersBuilder();
-        jobParametersBuilder.addString(JobParametersNames.INPUT_VCF_AGGREGATION_MAPPING_PATH, file.getCanonicalPath());
+        jobParametersBuilder.addString(JobParametersNames.CONFIG_CHUNK_SIZE, "-1");
         validator.validate(jobParametersBuilder.toJobParameters());
     }
 
     @Test(expected = JobParametersInvalidException.class)
-    public void inputVcfAggregationMappingPathIsADirectory() throws JobParametersInvalidException, IOException {
+    public void chunkSizeIsNotValid() throws JobParametersInvalidException {
         jobParametersBuilder = new JobParametersBuilder();
-        jobParametersBuilder.addString(JobParametersNames.INPUT_VCF_AGGREGATION_MAPPING_PATH,
-                temporaryFolder.getRoot().getCanonicalPath());
+        jobParametersBuilder.addString(JobParametersNames.CONFIG_CHUNK_SIZE, "hello");
         validator.validate(jobParametersBuilder.toJobParameters());
     }
 
+    @Test(expected = JobParametersInvalidException.class)
+    public void chunkSizeIsEmpty() throws JobParametersInvalidException {
+        jobParametersBuilder = new JobParametersBuilder();
+        jobParametersBuilder.addString(JobParametersNames.CONFIG_CHUNK_SIZE, "");
+        validator.validate(jobParametersBuilder.toJobParameters());
+    }
+
+    @Test(expected = JobParametersInvalidException.class)
+    public void chunkSizeIsNull() throws JobParametersInvalidException {
+        jobParametersBuilder = new JobParametersBuilder();
+        jobParametersBuilder.addString(JobParametersNames.CONFIG_CHUNK_SIZE, null);
+        validator.validate(jobParametersBuilder.toJobParameters());
+    }
 }

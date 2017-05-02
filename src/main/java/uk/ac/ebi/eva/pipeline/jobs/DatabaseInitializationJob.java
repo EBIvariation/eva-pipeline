@@ -29,6 +29,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
+
 import uk.ac.ebi.eva.pipeline.jobs.steps.CreateDatabaseIndexesStep;
 import uk.ac.ebi.eva.pipeline.jobs.steps.GeneLoaderStep;
 

@@ -17,38 +17,65 @@ package uk.ac.ebi.eva.pipeline.jobs.steps;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
-import org.springframework.batch.core.configuration.annotation.StepScope;
-import org.springframework.batch.core.step.tasklet.TaskletStep;
+import org.springframework.batch.item.ItemStreamReader;
+import org.springframework.batch.item.ItemWriter;
+import org.springframework.batch.repeat.policy.SimpleCompletionPolicy;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import uk.ac.ebi.eva.pipeline.jobs.steps.tasklets.VepAnnotationGeneratorStep;
+import org.springframework.context.annotation.Import;
+
+import uk.ac.ebi.eva.pipeline.configuration.ChunkSizeCompletionPolicyConfiguration;
+import uk.ac.ebi.eva.pipeline.configuration.readers.NonAnnotatedVariantsMongoReaderConfiguration;
+import uk.ac.ebi.eva.pipeline.configuration.writers.VepAnnotationFileWriterConfiguration;
+import uk.ac.ebi.eva.pipeline.io.readers.AnnotationFlatFileReader;
+import uk.ac.ebi.eva.pipeline.listeners.StepProgressListener;
+import uk.ac.ebi.eva.pipeline.model.VariantWrapper;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
-import uk.ac.ebi.eva.utils.TaskletUtils;
 
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.GENERATE_VEP_ANNOTATION_STEP;
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.NON_ANNOTATED_VARIANTS_READER;
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VEP_ANNOTATION_WRITER;
 
 /**
- * Configuration class that inject a step created with the tasklet {@link VepAnnotationGeneratorStep}
+ * This step creates a file with variant annotations.
+ * <p>
+ * Input: mongo collection with the variants. Only non-annotated variants will be retrieved.
+ * <p>
+ * Output: file with the list of annotated variants, in a format written by VEP, readable with
+ * {@link AnnotationFlatFileReader}
  */
 @Configuration
 @EnableBatchProcessing
+@Import({NonAnnotatedVariantsMongoReaderConfiguration.class, VepAnnotationFileWriterConfiguration.class,
+        ChunkSizeCompletionPolicyConfiguration.class})
 public class GenerateVepAnnotationStep {
 
     private static final Logger logger = LoggerFactory.getLogger(GenerateVepAnnotationStep.class);
 
-    @Bean
-    @StepScope
-    public VepAnnotationGeneratorStep vepAnnotationGeneratorStep() {
-        return new VepAnnotationGeneratorStep();
-    }
+    @Autowired
+    @Qualifier(NON_ANNOTATED_VARIANTS_READER)
+    private ItemStreamReader<VariantWrapper> nonAnnotatedVariantsReader;
+
+    @Autowired
+    @Qualifier(VEP_ANNOTATION_WRITER)
+    private ItemWriter<VariantWrapper> vepAnnotationWriter;
 
     @Bean(GENERATE_VEP_ANNOTATION_STEP)
-    public TaskletStep generateVepAnnotationStep(StepBuilderFactory stepBuilderFactory, JobOptions jobOptions) {
+    public Step generateVepAnnotationStep(StepBuilderFactory stepBuilderFactory, JobOptions jobOptions,
+            SimpleCompletionPolicy chunkSizeCompletionPolicy) {
         logger.debug("Building '" + GENERATE_VEP_ANNOTATION_STEP + "'");
-        return TaskletUtils.generateStep(stepBuilderFactory, GENERATE_VEP_ANNOTATION_STEP,
-                vepAnnotationGeneratorStep(), jobOptions.isAllowStartIfComplete());
-    }
 
+        return stepBuilderFactory.get(GENERATE_VEP_ANNOTATION_STEP)
+                .<VariantWrapper, VariantWrapper>chunk(chunkSizeCompletionPolicy)
+                .reader(nonAnnotatedVariantsReader)
+                .writer(vepAnnotationWriter)
+                .allowStartIfComplete(jobOptions.isAllowStartIfComplete())
+                .listener(new StepProgressListener())
+                .build();
+    }
 }

@@ -60,9 +60,6 @@ public class InputParameters {
     @Value(PARAMETER + JobParametersNames.INPUT_VCF_AGGREGATION_MAPPING_PATH + OR_NULL)
     private String aggregatedMappingFile;
 
-    @Value(PARAMETER + JobParametersNames.CONFIG_CHUNK_SIZE + "']?:1000}")
-    private int chunkSize;
-
     public String getVcf() {
         return vcf;
     }
@@ -85,10 +82,6 @@ public class InputParameters {
 
     public VariantStudy.StudyType getStudyType() {
         return studyType;
-    }
-
-    public int getChunkSize() {
-        return chunkSize;
     }
 
     public String getGtf() {

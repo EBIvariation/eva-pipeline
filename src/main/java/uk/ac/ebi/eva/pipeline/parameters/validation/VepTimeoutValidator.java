@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 EMBL - European Bioinformatics Institute
+ * Copyright 2015-2017 EMBL - European Bioinformatics Institute
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package uk.ac.ebi.eva.pipeline.parameters.validation;
 
 import org.springframework.batch.core.JobParameters;
@@ -21,19 +22,12 @@ import org.springframework.batch.core.JobParametersValidator;
 
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 
-/**
- * Checks that the aggregated mapping file exists and is readable.
- *
- * @throws JobParametersInvalidException If the file is not a valid path, does not exist or is not readable
- */
-public class InputVcfAggregationMappingPathValidator implements JobParametersValidator {
+public class VepTimeoutValidator implements JobParametersValidator {
+
     @Override
     public void validate(JobParameters parameters) throws JobParametersInvalidException {
-        ParametersValidatorUtil.checkFileExists(parameters.getString(
-                JobParametersNames.INPUT_VCF_AGGREGATION_MAPPING_PATH),
-                JobParametersNames.INPUT_VCF_AGGREGATION_MAPPING_PATH);
-        ParametersValidatorUtil.checkFileIsReadable(parameters.getString(
-                JobParametersNames.INPUT_VCF_AGGREGATION_MAPPING_PATH),
-                JobParametersNames.INPUT_VCF_AGGREGATION_MAPPING_PATH);
+        ParametersValidatorUtil.checkIsPositiveInteger(
+                parameters.getString(JobParametersNames.APP_VEP_TIMEOUT),
+                JobParametersNames.APP_VEP_TIMEOUT);
     }
 }

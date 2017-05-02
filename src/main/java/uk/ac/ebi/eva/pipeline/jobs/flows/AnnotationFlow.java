@@ -26,15 +26,13 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
-import uk.ac.ebi.eva.pipeline.jobs.deciders.EmptyVepInputDecider;
+import uk.ac.ebi.eva.pipeline.jobs.deciders.EmptyVepOutputDecider;
 import uk.ac.ebi.eva.pipeline.jobs.steps.AnnotationLoaderStep;
 import uk.ac.ebi.eva.pipeline.jobs.steps.AnnotationMetadataStep;
 import uk.ac.ebi.eva.pipeline.jobs.steps.GenerateVepAnnotationStep;
-import uk.ac.ebi.eva.pipeline.jobs.steps.VepInputGeneratorStep;
 
-import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.LOAD_ANNOTATION_METADATA_STEP;
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.GENERATE_VEP_ANNOTATION_STEP;
-import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.GENERATE_VEP_INPUT_STEP;
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.LOAD_ANNOTATION_METADATA_STEP;
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.LOAD_VEP_ANNOTATION_STEP;
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VEP_ANNOTATION_FLOW;
 
@@ -46,21 +44,16 @@ import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VEP_ANNOTATION_FLOW
  */
 @Configuration
 @EnableBatchProcessing
-@Import({VepInputGeneratorStep.class, AnnotationLoaderStep.class, GenerateVepAnnotationStep.class,
-        AnnotationMetadataStep.class})
+@Import({GenerateVepAnnotationStep.class, AnnotationLoaderStep.class, AnnotationMetadataStep.class})
 public class AnnotationFlow {
-
-    @Autowired
-    @Qualifier(GENERATE_VEP_INPUT_STEP)
-    public Step generateVepInputStep;
-
-    @Autowired
-    @Qualifier(LOAD_VEP_ANNOTATION_STEP)
-    private Step annotationLoadStep;
 
     @Autowired
     @Qualifier(GENERATE_VEP_ANNOTATION_STEP)
     private Step generateVepAnnotationStep;
+
+    @Autowired
+    @Qualifier(LOAD_VEP_ANNOTATION_STEP)
+    private Step annotationLoadStep;
 
     @Autowired
     @Qualifier(LOAD_ANNOTATION_METADATA_STEP)
@@ -68,15 +61,14 @@ public class AnnotationFlow {
 
     @Bean(VEP_ANNOTATION_FLOW)
     public Flow vepAnnotationFlow() {
-        EmptyVepInputDecider emptyVepInputDecider = new EmptyVepInputDecider();
+        EmptyVepOutputDecider emptyVepOutputDecider = new EmptyVepOutputDecider();
 
         return new FlowBuilder<Flow>(VEP_ANNOTATION_FLOW)
-                .start(generateVepInputStep)
-                .next(emptyVepInputDecider).on(EmptyVepInputDecider.CONTINUE_FLOW)
-                .to(generateVepAnnotationStep)
-                .next(annotationLoadStep)
+                .start(generateVepAnnotationStep)
+                .next(emptyVepOutputDecider).on(EmptyVepOutputDecider.CONTINUE_FLOW)
+                .to(annotationLoadStep)
                 .next(annotationMetadataStep)
-                .from(emptyVepInputDecider).on(EmptyVepInputDecider.STOP_FLOW)
+                .from(emptyVepOutputDecider).on(EmptyVepOutputDecider.STOP_FLOW)
                 .end(BatchStatus.COMPLETED.toString())
                 .build();
     }

@@ -22,7 +22,7 @@ import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersInvalidException;
 
-import uk.ac.ebi.eva.pipeline.jobs.steps.tasklets.VepAnnotationGeneratorStep;
+import uk.ac.ebi.eva.pipeline.jobs.steps.GenerateVepAnnotationStep;
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 
@@ -31,12 +31,12 @@ import java.util.Map;
 import java.util.TreeMap;
 
 /**
- * Tests that the arguments necessary to run a {@link VepAnnotationGeneratorStep} are
+ * Tests that the arguments necessary to run a {@link GenerateVepAnnotationStep} are
  * correctly validated
  */
-public class VepAnnotationGeneratorStepParametersValidatorTest {
+public class GenerateVepAnnotationStepParametersValidatorTest {
 
-    private VepAnnotationGeneratorStepParametersValidator validator;
+    private GenerateVepAnnotationStepParametersValidator validator;
 
     private Map<String, JobParameter> requiredParameters;
 
@@ -46,7 +46,7 @@ public class VepAnnotationGeneratorStepParametersValidatorTest {
     @Before
     public void setUp() throws IOException {
         boolean studyIdRequired = true;
-        validator = new VepAnnotationGeneratorStepParametersValidator(studyIdRequired);
+        validator = new GenerateVepAnnotationStepParametersValidator(studyIdRequired);
 
         requiredParameters = new TreeMap<>();
         requiredParameters.put(JobParametersNames.APP_VEP_CACHE_PATH,
@@ -62,6 +62,7 @@ public class VepAnnotationGeneratorStepParametersValidatorTest {
         requiredParameters.put(JobParametersNames.INPUT_VCF_ID, new JobParameter("inputVcfId"));
         requiredParameters.put(JobParametersNames.OUTPUT_DIR_ANNOTATION,
                                new JobParameter(temporaryFolderRule.getRoot().getCanonicalPath()));
+        requiredParameters.put(JobParametersNames.APP_VEP_TIMEOUT, new JobParameter("600"));
 
     }
 
@@ -117,7 +118,7 @@ public class VepAnnotationGeneratorStepParametersValidatorTest {
         requiredParameters.remove(JobParametersNames.INPUT_STUDY_ID);
 
         boolean studyIdNotRequired = false;
-        validator = new VepAnnotationGeneratorStepParametersValidator(studyIdNotRequired);
+        validator = new GenerateVepAnnotationStepParametersValidator(studyIdNotRequired);
         validator.validate(new JobParameters(requiredParameters));
     }
 
@@ -132,7 +133,7 @@ public class VepAnnotationGeneratorStepParametersValidatorTest {
         requiredParameters.remove(JobParametersNames.INPUT_VCF_ID);
 
         boolean studyIdNotRequired = false;
-        validator = new VepAnnotationGeneratorStepParametersValidator(studyIdNotRequired);
+        validator = new GenerateVepAnnotationStepParametersValidator(studyIdNotRequired);
         validator.validate(new JobParameters(requiredParameters));
     }
 
@@ -142,4 +143,9 @@ public class VepAnnotationGeneratorStepParametersValidatorTest {
         validator.validate(new JobParameters(requiredParameters));
     }
 
+    @Test(expected = JobParametersInvalidException.class)
+    public void appVepTimeoutIsRequired() throws JobParametersInvalidException, IOException {
+        requiredParameters.remove(JobParametersNames.APP_VEP_TIMEOUT);
+        validator.validate(new JobParameters(requiredParameters));
+    }
 }

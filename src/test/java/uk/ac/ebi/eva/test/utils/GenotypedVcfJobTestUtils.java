@@ -9,6 +9,7 @@ import org.opencb.opencga.storage.core.variant.adaptors.VariantDBAdaptor;
 import org.opencb.opencga.storage.core.variant.adaptors.VariantDBIterator;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.StepExecution;
+
 import uk.ac.ebi.eva.pipeline.configuration.BeanNames;
 import uk.ac.ebi.eva.utils.URLHelper;
 
@@ -124,8 +125,7 @@ public class GenotypedVcfJobTestUtils {
         assertEquals(EXPECTED_ANNOTATIONS, getLines(new GZIPInputStream(new FileInputStream(vepOutputFile))));
     }
 
-    public static void checkAnnotationCreateStep(File vepInputFile, File vepOutputFile) {
-        assertTrue(vepInputFile.exists());
+    public static void checkAnnotationCreateStep(File vepOutputFile) {
         assertTrue(vepOutputFile.exists());
     }
 
@@ -178,10 +178,6 @@ public class GenotypedVcfJobTestUtils {
 
     public static File getSourceStatsFile(String outputDirStats) throws URISyntaxException {
         return new File(URLHelper.getSourceStatsUri(outputDirStats, INPUT_STUDY_ID, INPUT_VCF_ID));
-    }
-
-    public static File getVepInputFile(String outputDirAnnotation) {
-        return new File(URLHelper.resolveVepInput(outputDirAnnotation, INPUT_STUDY_ID, INPUT_VCF_ID));
     }
 
     public static File getVepOutputFile(String outputDirAnnotation) {

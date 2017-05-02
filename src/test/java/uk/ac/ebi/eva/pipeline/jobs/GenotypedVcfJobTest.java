@@ -30,6 +30,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
+
 import uk.ac.ebi.eva.pipeline.Application;
 import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
@@ -77,7 +78,6 @@ public class GenotypedVcfJobTest {
         File variantsStatsFile = GenotypedVcfJobTestUtils.getVariantsStatsFile(outputDirStats);
         File sourceStatsFile = GenotypedVcfJobTestUtils.getSourceStatsFile(outputDirStats);
 
-        File vepInputFile = GenotypedVcfJobTestUtils.getVepInputFile(outputDirAnnotation);
         File vepOutputFile = GenotypedVcfJobTestUtils.getVepOutputFile(outputDirAnnotation);
 
         File fasta = temporaryFolderRule.newFile();
@@ -102,6 +102,7 @@ public class GenotypedVcfJobTest {
                 .vepCacheVersion("1")
                 .vepNumForks("1")
                 .vepPath(mockVep.getPath())
+                .vepTimeout("60")
                 .vepVersion("1")
                 .toJobParameters();
 
@@ -116,9 +117,7 @@ public class GenotypedVcfJobTest {
 
         GenotypedVcfJobTestUtils.checkLoadStatsStep(databaseName);
 
-        GenotypedVcfJobTestUtils.checkAnnotationInput(vepInputFile);
-
-        GenotypedVcfJobTestUtils.checkAnnotationCreateStep(vepInputFile,vepOutputFile);
+        GenotypedVcfJobTestUtils.checkAnnotationCreateStep(vepOutputFile);
 
         GenotypedVcfJobTestUtils.checkOutputFileLength(vepOutputFile);
 
@@ -158,6 +157,7 @@ public class GenotypedVcfJobTest {
                 .vepCacheVersion("1")
                 .vepNumForks("1")
                 .vepPath(mockVep.getPath())
+                .vepTimeout("60")
                 .vepVersion("1")
                 .timestamp()
                 .toJobParameters();

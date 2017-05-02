@@ -26,15 +26,16 @@ import org.springframework.batch.core.job.flow.JobExecutionDecider;
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 import uk.ac.ebi.eva.utils.URLHelper;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
 /**
- * Decider used to skip step(s) if the file vepInput is empty
+ * Decider used to skip step(s) if the file vepOutput is empty
  */
-public class EmptyVepInputDecider implements JobExecutionDecider {
-    private static final Logger logger = LoggerFactory.getLogger(EmptyVepInputDecider.class);
+public class EmptyVepOutputDecider implements JobExecutionDecider {
+    private static final Logger logger = LoggerFactory.getLogger(EmptyVepOutputDecider.class);
 
     public static final String STOP_FLOW = "STOP_FLOW";
 
@@ -42,20 +43,20 @@ public class EmptyVepInputDecider implements JobExecutionDecider {
 
     @Override
     public FlowExecutionStatus decide(JobExecution jobExecution, StepExecution stepExecution) {
-        String vepInput = getVepInput(jobExecution);
+        String vepOutput = getVepOutput(jobExecution);
 
-        if (getFileSize(vepInput) <= 0) {
-            logger.info("File {} is empty so following steps will not run", vepInput);
-            return new FlowExecutionStatus(STOP_FLOW);
+        if (getFileSize(vepOutput) > 0) {
+            return new FlowExecutionStatus(CONTINUE_FLOW);
         }
 
-        return new FlowExecutionStatus(CONTINUE_FLOW);
+        logger.info("File {} is empty so subsequent steps will not run", vepOutput);
+        return new FlowExecutionStatus(STOP_FLOW);
     }
 
-    private String getVepInput(JobExecution jobExecution) {
+    private String getVepOutput(JobExecution jobExecution) {
         JobParameters jobParameters = jobExecution.getJobParameters();
 
-        return URLHelper.resolveVepInput(
+        return URLHelper.resolveVepOutput(
                 jobParameters.getString(JobParametersNames.OUTPUT_DIR_ANNOTATION),
                 jobParameters.getString(JobParametersNames.INPUT_STUDY_ID),
                 jobParameters.getString(JobParametersNames.INPUT_VCF_ID));
@@ -64,10 +65,14 @@ public class EmptyVepInputDecider implements JobExecutionDecider {
     private long getFileSize(String file) {
         long fileSize;
 
-        try {
-            fileSize = Files.size(Paths.get(file));
-        } catch (IOException e) {
-            throw new RuntimeException("File {} is not readable", e);
+        if (!new File(file).exists()) {
+            fileSize = 0;
+        } else {
+            try {
+                fileSize = Files.size(Paths.get(file));
+            } catch (IOException e) {
+                throw new RuntimeException("File " + file + " is not readable", e);
+            }
         }
         return fileSize;
     }

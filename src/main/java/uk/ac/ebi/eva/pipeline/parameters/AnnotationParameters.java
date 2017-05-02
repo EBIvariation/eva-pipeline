@@ -25,7 +25,7 @@ import uk.ac.ebi.eva.utils.URLHelper;
  * Service that holds access to the values for annotatation steps like VEP etc.
  *
  * NOTE the @StepScope this is probably because the Step/Tasklet in this case the
- * {@link uk.ac.ebi.eva.pipeline.jobs.steps.tasklets.VepAnnotationGeneratorStep} is executed in parallel with statistics
+ * {@link uk.ac.ebi.eva.pipeline.jobs.flows.AnnotationFlow} is executed in parallel with statistics
  * {@link uk.ac.ebi.eva.pipeline.jobs.flows.PopulationStatisticsFlow} and they are not sharing the same context.
  * With @JobScope will not work!
  */
@@ -61,7 +61,10 @@ public class AnnotationParameters {
     private String vepCacheSpecies;
 
     @Value(PARAMETER + JobParametersNames.APP_VEP_NUMFORKS + END)
-    private String vepNumForks;
+    private Integer vepNumForks;
+
+    @Value(PARAMETER + JobParametersNames.APP_VEP_TIMEOUT + END)
+    private Long timeout;
 
     @Value(PARAMETER + JobParametersNames.INPUT_FASTA + END)
     private String inputFasta;
@@ -86,16 +89,16 @@ public class AnnotationParameters {
         return vepCacheSpecies;
     }
 
-    public String getVepNumForks() {
+    public Integer getVepNumForks() {
         return vepNumForks;
+    }
+
+    public Long getTimeout() {
+        return timeout;
     }
 
     public String getInputFasta() {
         return inputFasta;
-    }
-
-    public String getVepInput() {
-        return URLHelper.resolveVepInput(outputDirAnnotation, studyId, fileId);
     }
 
     public String getVepOutput() {
@@ -130,8 +133,12 @@ public class AnnotationParameters {
         this.vepCacheSpecies = vepCacheSpecies;
     }
 
-    public void setVepNumForks(String vepNumForks) {
+    public void setVepNumForks(Integer vepNumForks) {
         this.vepNumForks = vepNumForks;
+    }
+
+    public void setTimeout(Long timeout) {
+        this.timeout = timeout;
     }
 
     public void setInputFasta(String inputFasta) {

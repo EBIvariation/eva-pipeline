@@ -44,8 +44,8 @@ import static org.hamcrest.core.StringContains.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
-import static uk.ac.ebi.eva.pipeline.runner.EvaPipelineJobLauncherCommandLineRunner.SPRING_BATCH_JOB_NAME_PROPERTY;
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.GENOTYPED_VCF_JOB;
+import static uk.ac.ebi.eva.pipeline.runner.EvaPipelineJobLauncherCommandLineRunner.SPRING_BATCH_JOB_NAME_PROPERTY;
 import static uk.ac.ebi.eva.utils.FileUtils.getResource;
 
 /**
@@ -107,7 +107,6 @@ public class EvaPipelineJobLauncherCommandLineRunnerTest {
         File variantsStatsFile = GenotypedVcfJobTestUtils.getVariantsStatsFile(outputDirStats);
         File sourceStatsFile = GenotypedVcfJobTestUtils.getSourceStatsFile(outputDirStats);
 
-        File vepInputFile = GenotypedVcfJobTestUtils.getVepInputFile(outputDirAnnotation);
         File vepOutputFile = GenotypedVcfJobTestUtils.getVepOutputFile(outputDirAnnotation);
 
         File fasta = temporaryFolderRule.newFile();
@@ -128,6 +127,7 @@ public class EvaPipelineJobLauncherCommandLineRunnerTest {
                 .vepCacheSpecies("human")
                 .vepCacheVersion("1")
                 .vepNumForks("1")
+                .appVepTimeout("60")
                 .vepVersion("1")
                 .inputFasta(fasta.getAbsolutePath())
                 .configDbReadPreference("secondary")
@@ -158,9 +158,7 @@ public class EvaPipelineJobLauncherCommandLineRunnerTest {
 
         GenotypedVcfJobTestUtils.checkLoadStatsStep(databaseName);
 
-        GenotypedVcfJobTestUtils.checkAnnotationInput(vepInputFile);
-
-        GenotypedVcfJobTestUtils.checkAnnotationCreateStep(vepInputFile, vepOutputFile);
+        GenotypedVcfJobTestUtils.checkAnnotationCreateStep(vepOutputFile);
 
         GenotypedVcfJobTestUtils.checkOutputFileLength(vepOutputFile);
 
@@ -182,7 +180,6 @@ public class EvaPipelineJobLauncherCommandLineRunnerTest {
         File variantsStatsFile = GenotypedVcfJobTestUtils.getVariantsStatsFile(outputDirStats);
         File sourceStatsFile = GenotypedVcfJobTestUtils.getSourceStatsFile(outputDirStats);
 
-        File vepInputFile = GenotypedVcfJobTestUtils.getVepInputFile(outputDirAnnotation);
         File vepOutputFile = GenotypedVcfJobTestUtils.getVepOutputFile(outputDirAnnotation);
 
         File fasta = temporaryFolderRule.newFile();
@@ -199,6 +196,7 @@ public class EvaPipelineJobLauncherCommandLineRunnerTest {
                 .outputDirStatistics(outputDirStats)
                 .databaseName(databaseName)
                 .appVepPath(GenotypedVcfJobTestUtils.getMockVep().getPath())
+                .appVepTimeout("60")
                 .inputFasta(fasta.getAbsolutePath())
                 .build()
         );
@@ -222,9 +220,7 @@ public class EvaPipelineJobLauncherCommandLineRunnerTest {
 
         GenotypedVcfJobTestUtils.checkLoadStatsStep(databaseName);
 
-        GenotypedVcfJobTestUtils.checkAnnotationInput(vepInputFile);
-
-        GenotypedVcfJobTestUtils.checkAnnotationCreateStep(vepInputFile, vepOutputFile);
+        GenotypedVcfJobTestUtils.checkAnnotationCreateStep(vepOutputFile);
 
         GenotypedVcfJobTestUtils.checkOutputFileLength(vepOutputFile);
 

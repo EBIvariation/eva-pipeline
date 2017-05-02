@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 EMBL - European Bioinformatics Institute
+ * Copyright 2015-2017 EMBL - European Bioinformatics Institute
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,62 +16,61 @@
 package uk.ac.ebi.eva.pipeline.parameters.validation;
 
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.JobParametersInvalidException;
 
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
-import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 
-import java.io.File;
-import java.io.IOException;
-
-public class InputVcfAggregationMappingPathValidatorTest {
-
-    private InputVcfAggregationMappingPathValidator validator;
+public class VepTimeoutValidatorTest {
+    private VepTimeoutValidator validator;
 
     private JobParametersBuilder jobParametersBuilder;
 
-    @Rule
-    public PipelineTemporaryFolderRule temporaryFolder = new PipelineTemporaryFolderRule();
-
     @Before
     public void setUp() throws Exception {
-        validator = new InputVcfAggregationMappingPathValidator();
+        validator = new VepTimeoutValidator();
     }
 
     @Test
-    public void inputVcfAggregationMappingPathIsValid() throws JobParametersInvalidException, IOException {
+    public void vepTimeoutIsValid() throws JobParametersInvalidException {
         jobParametersBuilder = new JobParametersBuilder();
-        jobParametersBuilder.addString(JobParametersNames.INPUT_VCF_AGGREGATION_MAPPING_PATH,
-                temporaryFolder.newFile().getCanonicalPath());
+        jobParametersBuilder.addString(JobParametersNames.APP_VEP_TIMEOUT, "11");
         validator.validate(jobParametersBuilder.toJobParameters());
     }
 
     @Test(expected = JobParametersInvalidException.class)
-    public void inputVcfAggregationMappingPathNotExist() throws JobParametersInvalidException {
+    public void vepTimeoutIsZero() throws JobParametersInvalidException {
         jobParametersBuilder = new JobParametersBuilder();
-        jobParametersBuilder.addString(JobParametersNames.INPUT_VCF_AGGREGATION_MAPPING_PATH, "file://path/to/file");
+        jobParametersBuilder.addString(JobParametersNames.APP_VEP_TIMEOUT, "0");
         validator.validate(jobParametersBuilder.toJobParameters());
     }
 
     @Test(expected = JobParametersInvalidException.class)
-    public void inputVcfAggregationMappingPathNotReadable() throws JobParametersInvalidException, IOException {
-        File file = temporaryFolder.newFile("not_readable");
-        file.setReadable(false);
-
+    public void vepTimeoutIsNegative() throws JobParametersInvalidException {
         jobParametersBuilder = new JobParametersBuilder();
-        jobParametersBuilder.addString(JobParametersNames.INPUT_VCF_AGGREGATION_MAPPING_PATH, file.getCanonicalPath());
+        jobParametersBuilder.addString(JobParametersNames.APP_VEP_TIMEOUT, "-1");
         validator.validate(jobParametersBuilder.toJobParameters());
     }
 
     @Test(expected = JobParametersInvalidException.class)
-    public void inputVcfAggregationMappingPathIsADirectory() throws JobParametersInvalidException, IOException {
+    public void vepTimeoutIsNotValid() throws JobParametersInvalidException {
         jobParametersBuilder = new JobParametersBuilder();
-        jobParametersBuilder.addString(JobParametersNames.INPUT_VCF_AGGREGATION_MAPPING_PATH,
-                temporaryFolder.getRoot().getCanonicalPath());
+        jobParametersBuilder.addString(JobParametersNames.APP_VEP_TIMEOUT, "hello");
         validator.validate(jobParametersBuilder.toJobParameters());
     }
 
+    @Test(expected = JobParametersInvalidException.class)
+    public void vepTimeoutIsEmpty() throws JobParametersInvalidException {
+        jobParametersBuilder = new JobParametersBuilder();
+        jobParametersBuilder.addString(JobParametersNames.APP_VEP_TIMEOUT, "");
+        validator.validate(jobParametersBuilder.toJobParameters());
+    }
+
+    @Test(expected = JobParametersInvalidException.class)
+    public void vepTimeoutIsNull() throws JobParametersInvalidException {
+        jobParametersBuilder = new JobParametersBuilder();
+        jobParametersBuilder.addString(JobParametersNames.APP_VEP_TIMEOUT, null);
+        validator.validate(jobParametersBuilder.toJobParameters());
+    }
 }

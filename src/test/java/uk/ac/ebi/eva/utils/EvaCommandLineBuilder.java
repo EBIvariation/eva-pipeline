@@ -16,6 +16,7 @@
 package uk.ac.ebi.eva.utils;
 
 import org.springframework.util.Assert;
+
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 
 import java.util.ArrayList;
@@ -141,6 +142,10 @@ public class EvaCommandLineBuilder {
 
     public EvaCommandLineBuilder appVepCacheSpecies(String appVepCacheSpecies) {
         return addString(JobParametersNames.APP_VEP_CACHE_SPECIES, appVepCacheSpecies);
+    }
+
+    public EvaCommandLineBuilder appVepTimeout(String appVepTimeout) {
+        return addString(JobParametersNames.APP_VEP_TIMEOUT, appVepTimeout);
     }
 
     public EvaCommandLineBuilder configDbReadPreference(String preference) {

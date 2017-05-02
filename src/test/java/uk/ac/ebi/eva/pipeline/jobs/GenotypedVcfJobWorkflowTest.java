@@ -30,6 +30,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
+
 import uk.ac.ebi.eva.pipeline.Application;
 import uk.ac.ebi.eva.pipeline.configuration.BeanNames;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
@@ -90,7 +91,6 @@ public class GenotypedVcfJobWorkflowTest {
             Arrays.asList(BeanNames.CALCULATE_STATISTICS_STEP, BeanNames.LOAD_STATISTICS_STEP));
 
     public static final Set<String> EXPECTED_ANNOTATION_STEP_NAMES = new TreeSet<>(Arrays.asList(
-                    BeanNames.GENERATE_VEP_INPUT_STEP,
                     BeanNames.GENERATE_VEP_ANNOTATION_STEP,
                     BeanNames.LOAD_VEP_ANNOTATION_STEP,
                     BeanNames.LOAD_ANNOTATION_METADATA_STEP));
@@ -122,12 +122,10 @@ public class GenotypedVcfJobWorkflowTest {
         assertTrue(lastRequiredStep.getEndTime()
                 .before(nameToStepExecution.get(BeanNames.CALCULATE_STATISTICS_STEP).getStartTime()));
         assertTrue(lastRequiredStep.getEndTime()
-                .before(nameToStepExecution.get(BeanNames.GENERATE_VEP_INPUT_STEP).getStartTime()));
+                .before(nameToStepExecution.get(BeanNames.GENERATE_VEP_ANNOTATION_STEP).getStartTime()));
 
         assertTrue(nameToStepExecution.get(BeanNames.CALCULATE_STATISTICS_STEP).getEndTime()
                 .before(nameToStepExecution.get(BeanNames.LOAD_STATISTICS_STEP).getStartTime()));
-        assertTrue(nameToStepExecution.get(BeanNames.GENERATE_VEP_INPUT_STEP).getEndTime()
-                .before(nameToStepExecution.get(BeanNames.GENERATE_VEP_ANNOTATION_STEP).getStartTime()));
         assertTrue(nameToStepExecution.get(BeanNames.GENERATE_VEP_ANNOTATION_STEP).getEndTime()
                 .before(nameToStepExecution.get(BeanNames.LOAD_VEP_ANNOTATION_STEP).getStartTime()));
         assertTrue(nameToStepExecution.get(BeanNames.LOAD_VEP_ANNOTATION_STEP).getEndTime()
@@ -173,10 +171,8 @@ public class GenotypedVcfJobWorkflowTest {
         assertEquals(BeanNames.LOAD_FILE_STEP, lastRequiredStep.getStepName());
 
         assertTrue(lastRequiredStep.getEndTime()
-                .before(nameToStepExecution.get(BeanNames.GENERATE_VEP_INPUT_STEP).getStartTime()));
-
-        assertTrue(nameToStepExecution.get(BeanNames.GENERATE_VEP_INPUT_STEP).getEndTime()
                 .before(nameToStepExecution.get(BeanNames.GENERATE_VEP_ANNOTATION_STEP).getStartTime()));
+
         assertTrue(nameToStepExecution.get(BeanNames.GENERATE_VEP_ANNOTATION_STEP).getEndTime()
                 .before(nameToStepExecution.get(BeanNames.LOAD_VEP_ANNOTATION_STEP).getStartTime()));
         assertTrue(nameToStepExecution.get(BeanNames.LOAD_VEP_ANNOTATION_STEP).getEndTime()
@@ -243,6 +239,7 @@ public class GenotypedVcfJobWorkflowTest {
                 .vepCacheVersion("1")
                 .vepNumForks("1")
                 .vepPath(getResource(MOCK_VEP).getPath())
+                .vepTimeout("60")
                 .vepVersion("1");
 
         return evaJobParameterBuilder;

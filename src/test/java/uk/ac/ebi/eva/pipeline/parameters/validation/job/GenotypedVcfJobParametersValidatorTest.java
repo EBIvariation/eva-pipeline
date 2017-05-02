@@ -79,6 +79,7 @@ public class GenotypedVcfJobParametersValidatorTest {
         annotationParameters.put(JobParametersNames.APP_VEP_CACHE_VERSION, new JobParameter("100_A"));
         annotationParameters.put(JobParametersNames.APP_VEP_VERSION, new JobParameter("80"));
         annotationParameters.put(JobParametersNames.APP_VEP_NUMFORKS, new JobParameter("6"));
+        annotationParameters.put(JobParametersNames.APP_VEP_TIMEOUT, new JobParameter("600"));
         annotationParameters.put(JobParametersNames.DB_COLLECTIONS_ANNOTATION_METADATA_NAME,
                 new JobParameter("annotationMetadata"));
         annotationParameters.put(JobParametersNames.APP_VEP_CACHE_PATH,
@@ -188,8 +189,8 @@ public class GenotypedVcfJobParametersValidatorTest {
 
     /**
      * The parameter APP_VEP_CACHE_SPECIES is chosen as one belonging to the annotation parameters. We don't check
-     * for every annotation parameter, because in AnnotationLoaderStepParametersValidatorTest,
-     * VepAnnotationGeneratorStepParametersValidatorTest and VepInputGeneratorStepParametersValidatorTest, it is already
+     * for every annotation parameter, because in AnnotationLoaderStepParametersValidatorTest and
+     * GenerateVepAnnotationStepParametersValidatorTest, it is already
      * checked that every missing required parameter makes the validation fail.
      */
     @Test(expected = JobParametersInvalidException.class)

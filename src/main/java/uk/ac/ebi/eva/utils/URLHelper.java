@@ -25,8 +25,6 @@ public class URLHelper {
 
     private static final String SOURCE_STATS_SUFFIX = ".source.stats.json.gz";
 
-    public static final String VARIANTS_TO_ANNOTATE_SUFFIX = "_variants_to_annotate.tsv";
-
     public static final String ANNOTATED_VARIANTS_SUFFIX = "_vep_annotation.tsv.gz";
 
     public static URI createUri(String input) throws URISyntaxException {
@@ -56,11 +54,7 @@ public class URLHelper {
         return studyId + "_" + fileId;
     }
 
-    public static String resolveVepInput(String outputDirAnnotation, String studyId, String vcfId){
-        return outputDirAnnotation + "/" + studyId + "_" + vcfId + VARIANTS_TO_ANNOTATE_SUFFIX;
-    }
-
-    public static String resolveVepOutput(String outputDirAnnotation, String studyId, String vcfId){
+    public static String resolveVepOutput(String outputDirAnnotation, String studyId, String vcfId) {
         return outputDirAnnotation + "/" + studyId + "_" + vcfId + ANNOTATED_VARIANTS_SUFFIX;
     }
 }
