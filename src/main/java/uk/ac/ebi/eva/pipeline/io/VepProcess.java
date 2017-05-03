@@ -33,7 +33,12 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.util.Arrays;
 import java.util.Scanner;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.zip.GZIPOutputStream;
@@ -132,8 +137,7 @@ public class VepProcess {
             boolean skipComments = new File(vepOutputPath).exists();
 
             try (OutputStreamWriter writer = getOutputStreamWriter(vepOutputPath);
-                    BufferedReader processStandardOutput = getBufferedReader(process)
-            ) {
+                    BufferedReader processStandardOutput = getBufferedReader(process)) {
                 writtenLines = copyVepOutput(processStandardOutput, writer, skipComments);
                 writingOk.set(true);
             } catch (IOException e) {
@@ -157,7 +161,25 @@ public class VepProcess {
         if (!isOpen()) {
             throw new IllegalStateException("Process must be initialized (hint: call open() before write())");
         }
-        processStandardInput.write(bytes);
+        tryWithTimeout(() -> {
+            processStandardInput.write(bytes);
+            return null;
+        });
+    }
+
+    private void tryWithTimeout(Callable<Void> callable) {
+        ExecutorService executorService = Executors.newSingleThreadExecutor();
+        Future<Void> future = executorService.submit(callable);
+        try {
+            future.get(timeoutInSeconds, TimeUnit.SECONDS);
+        } catch (TimeoutException e) {
+            throw new ItemStreamException("Error writing to VEP: timeout reached", e);
+        } catch (Exception e) {
+            throw new ItemStreamException("Error writing to VEP", e);
+        } finally {
+            executorService.shutdown();
+            executorService.shutdownNow();
+        }
     }
 
     public boolean isOpen() {
@@ -168,7 +190,10 @@ public class VepProcess {
         if (!isOpen()) {
             throw new IllegalStateException("Process must be initialized (hint: call open() before flush())");
         }
-        processStandardInput.flush();
+        tryWithTimeout(() -> {
+            processStandardInput.flush();
+            return null;
+        });
     }
 
     /**
@@ -191,7 +216,10 @@ public class VepProcess {
 
     private void flushProcessStdin() {
         try {
-            processStandardInput.flush();
+            tryWithTimeout(() -> {
+                processStandardInput.flush();
+                return null;
+            });
             processStandardInput.close();
         } catch (IOException e) {
             logger.error("Could not close stream for VEP's stdin", e);
