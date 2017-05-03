@@ -167,20 +167,6 @@ public class VepProcess {
         });
     }
 
-    public boolean isOpen() {
-        return process != null;
-    }
-
-    public void flush() throws IOException {
-        if (!isOpen()) {
-            throw new IllegalStateException("Process must be initialized (hint: call open() before flush())");
-        }
-        tryWithTimeout(() -> {
-            processStandardInput.flush();
-            return null;
-        });
-    }
-
     private void tryWithTimeout(Callable<Void> callable) {
         ExecutorService executorService = Executors.newSingleThreadExecutor();
         Future<Void> future = executorService.submit(callable);
@@ -194,6 +180,20 @@ public class VepProcess {
             executorService.shutdown();
             executorService.shutdownNow();
         }
+    }
+
+    public boolean isOpen() {
+        return process != null;
+    }
+
+    public void flush() throws IOException {
+        if (!isOpen()) {
+            throw new IllegalStateException("Process must be initialized (hint: call open() before flush())");
+        }
+        tryWithTimeout(() -> {
+            processStandardInput.flush();
+            return null;
+        });
     }
 
     /**
