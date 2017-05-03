@@ -18,8 +18,6 @@ package uk.ac.ebi.eva.utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.ac.ebi.eva.pipeline.listeners.StepProgressListener;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -32,114 +30,104 @@ import java.util.zip.GZIPInputStream;
 public class FileWithHeaderNumberOfLinesEstimator {
     private static final Logger logger = LoggerFactory.getLogger(FileWithHeaderNumberOfLinesEstimator.class);
 
-    private static final int NUMBER_OF_LINES = 150;
+    private static final int MAX_NUMBER_OF_LINES = 150;
 
     private static final String HEADER_PREFIX = "#";
+
+    private String head;
+
+    private String body;
 
     /**
      * Given that a file with header could be VERY big then we estimate the number of lines using the following steps:
      * 1) retrieve the size in bytes of the whole zipped file (fileSize)
      * 2) retrieve the size in bytes of the head of the file in a zipped file (headFileSize)
-     * 3) retrieve the size in bytes of the first 100 lines of the file in a zipped file and divide the value by 100 to
-     * obtain the size of a single line (singleLineSize)
+     * 3) retrieve the size in bytes of the first MAX_NUMBER_OF_LINES lines of the file in a zipped file and divide the
+     * value by MAX_NUMBER_OF_LINES to obtain the size of a single line (singleLineSize)
      * 4) calculate the (fileSize - headFileSize) / singleLineSize to estimate the total number of line in the file.
      * <p>
-     * Why 100 in point 3?
-     * Tested on a file with 157049 lines, 100 is the best and minimum number of lines to compress. This should generate an
-     * estimated total number of lines similar to the real one.
+     * Why MAX_NUMBER_OF_LINES in point 3?
+     * Tested on a file with 157049 lines, MAX_NUMBER_OF_LINES is the best and minimum number of lines to compress. This
+     * should generate an estimated total number of lines similar to the real one.
      * <p>
-     * In case of small files the NUMBER_OF_LINES will be 0 and no % will be printed in {@link StepProgressListener#afterChunk}
+     * In case of small files the MAX_NUMBER_OF_LINES will be the actual number of lines.
      *
      * @param filePath location of the file
      * @return the approximated number of lines in the file
      */
     public long estimateNumberOfLines(String filePath) {
         logger.debug("Estimating the number of lines in file {}", filePath);
-        long estimatedTotalNumberOfLines = 0;
 
-        String head;
-        String section;
+        long linesReadInBody = readHeadAndBody(filePath);
 
-        try {
-            head = retrieveHead(filePath);
-            section = retrieveSection(filePath);
-        } catch (IOException e) {
-            throw new RuntimeException("Error reading file " + filePath, e);
-        }
-
-        if (!section.isEmpty()) {
-            File headFile;
-            File sectionFile;
-
-            try {
-                headFile = FileUtils.newGzipFile(head, "headFile");
-                sectionFile = FileUtils.newGzipFile(section, "sectionFile");
-            } catch (IOException e) {
-                throw new RuntimeException("Error while creating zip file", e);
-            }
-
-            long fileSize = new File(filePath).length();
-            long singleLineSize = (sectionFile.length() / NUMBER_OF_LINES);
-            long headFileSize = headFile.length();
-
-            estimatedTotalNumberOfLines = ((fileSize - headFileSize) / singleLineSize);
-        }
-
-        if (estimatedTotalNumberOfLines == 0) {
-            logger.info("The file: {} is too small so the number of lines will not be estimated",
-                        estimatedTotalNumberOfLines);
+        long estimatedTotalNumberOfLines;
+        if (skipEstimation(linesReadInBody)) {
+            estimatedTotalNumberOfLines = linesReadInBody;
+            logger.info("Number of lines in file {}: {} lines", filePath, estimatedTotalNumberOfLines);
         } else {
-            logger.info("Approximate number of lines in file: {}", filePath);
+            estimatedTotalNumberOfLines = getEstimatedTotalNumberOfLines(filePath);
+            logger.info("Estimated number of lines in file {}: {} lines", filePath, estimatedTotalNumberOfLines);
         }
+
         return estimatedTotalNumberOfLines;
     }
 
-    /**
-     * @param filePath location of the file to parse
-     * @return the head of the file
-     * @throws IOException
-     */
-    private String retrieveHead(String filePath) throws IOException {
-        String head = "";
-
-        Scanner scanner = new Scanner(new GZIPInputStream(new FileInputStream(filePath)));
-        while (scanner.hasNextLine()) {
-            String line = scanner.nextLine();
-            if (line.startsWith("#")) {
-                head += line + "\n";
-            } else {
-                break;
-            }
-        }
-        scanner.close();
-
-        return head;
+    private boolean skipEstimation(long linesReadInBody) {
+        return linesReadInBody < MAX_NUMBER_OF_LINES;
     }
 
     /**
-     * @param filePath location of the file to parse
-     * @return first NUMBER_OF_LINES of the file, empty sting in case of file smaller than NUMBER_OF_LINES
-     * @throws IOException
+     * @return lines in the body. It will be min(MAX_NUMBER_OF_LINES, actualLinesInTheBody)
      */
-    private String retrieveSection(String filePath) throws IOException {
-        String section = "";
+    private long readHeadAndBody(String filePath) {
+        long linesRead = 0;
+        try {
+            StringBuilder headBuilder = new StringBuilder();
+            StringBuilder bodyBuilder = new StringBuilder();
 
-        int lineCount = NUMBER_OF_LINES;
-        Scanner scanner = new Scanner(new GZIPInputStream(new FileInputStream(filePath)));
-        while (scanner.hasNextLine() && lineCount > 0) {
-            String line = scanner.nextLine();
-            if (!line.startsWith(HEADER_PREFIX)) {
-                lineCount--;
-                section += line + "\n";
+            Scanner scanner = new Scanner(new GZIPInputStream(new FileInputStream(filePath)));
+            while (scanner.hasNextLine() && linesRead < MAX_NUMBER_OF_LINES) {
+                String line = scanner.nextLine();
+                if (line.startsWith(HEADER_PREFIX)) {
+                    headBuilder.append(line).append("\n");
+                } else {
+                    linesRead++;
+                    bodyBuilder.append(line).append("\n");
+                }
             }
-        }
-        scanner.close();
+            scanner.close();
 
-        //in case of small file
-        if (lineCount > 0) {
-            return "";
+            head = headBuilder.toString();
+            body = bodyBuilder.toString();
+        } catch (IOException e) {
+            throw new RuntimeException("Error reading file " + filePath, e);
         }
-
-        return section;
+        return linesRead;
     }
+
+    private long getEstimatedTotalNumberOfLines(String filePath) {
+        File headFile;
+        File bodyFile;
+
+        try {
+            headFile = FileUtils.newGzipFile(head, "headFile");
+            bodyFile = FileUtils.newGzipFile(body, "bodyFile");
+        } catch (IOException e) {
+            throw new RuntimeException("Error while creating zip file", e);
+        }
+
+        long fileSize = new File(filePath).length();
+        long singleLineSize = (bodyFile.length() / MAX_NUMBER_OF_LINES);
+        long headFileSize = headFile.length();
+
+        boolean headDeleted = headFile.delete();
+        boolean bodyDeleted = bodyFile.delete();
+        if (!headDeleted || !bodyDeleted) {
+            logger.debug("Couldn't delete the temporary files used for the estimation: {} and {}", headFile, bodyFile);
+        }
+
+        long estimatedTotalNumberOfLines = ((fileSize - headFileSize) / singleLineSize);
+        return estimatedTotalNumberOfLines;
+    }
+
 }

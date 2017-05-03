@@ -67,7 +67,7 @@ public class FileWithHeaderNumberOfLinesEstimatorTest {
         String smallGenotypedVcfPath = getResource(SMALL_VCF).getAbsolutePath();
         long estimatedNumberOfLines = numberOfLinesEstimator.estimateNumberOfLines(smallGenotypedVcfPath);
 
-        assertEquals(0, estimatedNumberOfLines);
+        assertEquals(21, estimatedNumberOfLines);
     }
 
     @Test
@@ -77,7 +77,7 @@ public class FileWithHeaderNumberOfLinesEstimatorTest {
         int expectedNumberOfLines = 199948;
 
         assertEquals(expectedNumberOfLines, estimatedNumberOfLines,
-                     (expectedNumberOfLines / 100) * PERCENTAGE_SIMILARITY);
+                     expectedNumberOfLines * (PERCENTAGE_SIMILARITY / 100.0));
     }
 
 }
