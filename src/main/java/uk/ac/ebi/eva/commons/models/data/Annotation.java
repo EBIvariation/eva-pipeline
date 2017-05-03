@@ -17,6 +17,7 @@ package uk.ac.ebi.eva.commons.models.data;
 
 import com.google.common.base.Strings;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.PersistenceConstructor;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
@@ -32,6 +33,10 @@ import java.util.Set;
  */
 @Document
 public class Annotation {
+
+    @Id
+    private String id;
+
     @Field(value = AnnotationFieldNames.CHROMOSOME_FIELD)
     private String chromosome;
 
@@ -47,9 +52,6 @@ public class Annotation {
     @Transient
     private String alternativeAllele;
 
-    @Id
-    private String id;
-
     @Field(value = AnnotationFieldNames.ENSEMBL_VERSION_FIELD)
     private String ensemblVersion;
 
@@ -64,6 +66,10 @@ public class Annotation {
 
     @Transient
     private Map<String, Object> additionalAttributes;
+
+    Annotation(){
+        // Empty document constructor for spring-data
+    }
 
     public Annotation(String chromosome, int start, int end, String referenceAllele) {
         this(chromosome, start, end, referenceAllele, "");
