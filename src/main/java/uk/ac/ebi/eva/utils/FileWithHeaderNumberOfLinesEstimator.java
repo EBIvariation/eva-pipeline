@@ -20,9 +20,13 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.util.Scanner;
 import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 /**
  * Estimate the number of lines in a file.
@@ -30,13 +34,13 @@ import java.util.zip.GZIPInputStream;
 public class FileWithHeaderNumberOfLinesEstimator {
     private static final Logger logger = LoggerFactory.getLogger(FileWithHeaderNumberOfLinesEstimator.class);
 
-    private static final int MAX_NUMBER_OF_LINES = 150;
+    private static final int MAX_NUMBER_OF_LINES = 10000;
 
     private static final String HEADER_PREFIX = "#";
 
-    private String head;
+    private File bodyFile;
 
-    private String body;
+    private File headFile;
 
     /**
      * Given that a file with header could be VERY big then we estimate the number of lines using the following steps:
@@ -58,11 +62,11 @@ public class FileWithHeaderNumberOfLinesEstimator {
     public long estimateNumberOfLines(String filePath) {
         logger.debug("Estimating the number of lines in file {}", filePath);
 
-        long linesReadInBody = readHeadAndBody(filePath);
+        long linesInBody = copyHeadAndBody(filePath);
 
         long estimatedTotalNumberOfLines;
-        if (skipEstimation(linesReadInBody)) {
-            estimatedTotalNumberOfLines = linesReadInBody;
+        if (skipEstimation(linesInBody)) {
+            estimatedTotalNumberOfLines = linesInBody;
             logger.info("Number of lines in file {}: {} lines", filePath, estimatedTotalNumberOfLines);
         } else {
             estimatedTotalNumberOfLines = getEstimatedTotalNumberOfLines(filePath);
@@ -79,45 +83,41 @@ public class FileWithHeaderNumberOfLinesEstimator {
     /**
      * @return lines in the body. It will be min(MAX_NUMBER_OF_LINES, actualLinesInTheBody)
      */
-    private long readHeadAndBody(String filePath) {
-        long linesRead = 0;
+    private long copyHeadAndBody(String filePath) {
+        long linesInBody = 0;
         try {
-            StringBuilder headBuilder = new StringBuilder();
-            StringBuilder bodyBuilder = new StringBuilder();
+            headFile = File.createTempFile("headFile", ".gz");
+            bodyFile = File.createTempFile("bodyFile", ".gz");
+        } catch (IOException e) {
+            throw new RuntimeException("Error creating file", e);
+        }
 
-            Scanner scanner = new Scanner(new GZIPInputStream(new FileInputStream(filePath)));
-            while (scanner.hasNextLine() && linesRead < MAX_NUMBER_OF_LINES) {
+        try (Writer head = getOutputStreamWriter(headFile); Writer body = getOutputStreamWriter(bodyFile);
+             Scanner scanner = new Scanner(new GZIPInputStream(new FileInputStream(filePath)))) {
+            while (scanner.hasNextLine() && linesInBody < MAX_NUMBER_OF_LINES) {
                 String line = scanner.nextLine();
                 if (line.startsWith(HEADER_PREFIX)) {
-                    headBuilder.append(line).append("\n");
+                    head.write(line);
+                    head.write("\n");
                 } else {
-                    linesRead++;
-                    bodyBuilder.append(line).append("\n");
+                    linesInBody++;
+                    body.write(line);
+                    body.write("\n");
                 }
             }
-            scanner.close();
-
-            head = headBuilder.toString();
-            body = bodyBuilder.toString();
         } catch (IOException e) {
-            throw new RuntimeException("Error reading file " + filePath, e);
+            throw new RuntimeException("Error writing to file", e);
         }
-        return linesRead;
+        return linesInBody;
+    }
+
+    private OutputStreamWriter getOutputStreamWriter(File file) throws IOException {
+        return new OutputStreamWriter(new GZIPOutputStream(new FileOutputStream(file)), "UTF-8");
     }
 
     private long getEstimatedTotalNumberOfLines(String filePath) {
-        File headFile;
-        File bodyFile;
-
-        try {
-            headFile = FileUtils.newGzipFile(head, "headFile");
-            bodyFile = FileUtils.newGzipFile(body, "bodyFile");
-        } catch (IOException e) {
-            throw new RuntimeException("Error while creating zip file", e);
-        }
-
         long fileSize = new File(filePath).length();
-        long singleLineSize = (bodyFile.length() / MAX_NUMBER_OF_LINES);
+        long singleLineSize = bodyFile.length() / MAX_NUMBER_OF_LINES;
         long headFileSize = headFile.length();
 
         boolean headDeleted = headFile.delete();
