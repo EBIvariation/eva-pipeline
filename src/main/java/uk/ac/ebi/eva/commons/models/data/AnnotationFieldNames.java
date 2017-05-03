@@ -16,6 +16,7 @@
 package uk.ac.ebi.eva.commons.models.data;
 
 public class AnnotationFieldNames {
+
     public static final String CHROMOSOME_FIELD = "chr";
 
     public static final String START_FIELD = "start";
@@ -65,4 +66,5 @@ public class AnnotationFieldNames {
     public final static String SCORE_SCORE_FIELD = "sc";
 
     public final static String SCORE_DESCRIPTION_FIELD = "desc";
+
 }

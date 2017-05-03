@@ -28,6 +28,7 @@ import java.util.Set;
  */
 @Document
 public class VariantAnnotation {
+
     @Field(value = AnnotationFieldNames.ENSEMBL_VERSION_FIELD)
     private String ensemblVersion;
 
@@ -47,13 +48,14 @@ public class VariantAnnotation {
     private Set<String> xrefIds = new HashSet<>();
 
     /**
-     * Make sure to specify the ensemblVersion and vepCacheVersion
-     * @param ensemblVersion
-     * @param vepCacheVersion
+     * Variant annotation constructor. Requires non empty values, otherwise throws {@link IllegalArgumentException}
+     *
+     * @param ensemblVersion non empty value required, otherwise throws {@link IllegalArgumentException}
+     * @param vepCacheVersion non empty value required, otherwise throws {@link IllegalArgumentException}
      */
     public VariantAnnotation(String ensemblVersion, String vepCacheVersion) {
-        Assert.notNull(ensemblVersion);
-        Assert.notNull(vepCacheVersion);
+        Assert.hasText(ensemblVersion, "A non empty ensemblVersion is required");
+        Assert.hasText(vepCacheVersion, "A non empty vepCacheVersion is required");
         this.ensemblVersion = ensemblVersion;
         this.vepCacheVersion = vepCacheVersion;
     }
