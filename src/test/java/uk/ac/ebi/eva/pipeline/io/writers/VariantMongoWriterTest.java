@@ -30,6 +30,7 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.ac.ebi.eva.commons.models.data.Variant;
 import uk.ac.ebi.eva.commons.models.data.VariantSourceEntry;
+import uk.ac.ebi.eva.commons.models.data.VariantStats;
 import uk.ac.ebi.eva.pipeline.configuration.MongoConfiguration;
 import uk.ac.ebi.eva.pipeline.parameters.MongoConnection;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
@@ -40,11 +41,16 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 /**
  * Testing {@link VariantMongoWriter}
@@ -131,8 +137,6 @@ public class VariantMongoWriterTest {
         MongoOperations mongoOperations = MongoConfiguration.getMongoOperations(dbName, mongoConnection,
                 mongoMappingContext);
 
-        BasicDBObject dbObject = new BasicDBObject();
-
         VariantMongoWriter variantMongoWriter = new VariantMongoWriter(collectionName, mongoOperations, false, false);
         variantMongoWriter.write(Collections.singletonList(variant1));
 
@@ -141,6 +145,123 @@ public class VariantMongoWriterTest {
         assertEquals(1, dbCollection.count());
         final DBObject storedVariant = dbCollection.findOne();
         assertEquals(1, ((BasicDBList) storedVariant.get("files")).size());
+    }
+
+    @Test
+    public void allFieldsOfVariantShouldBeStored() throws Exception {
+        final String chromosome = "12";
+        final int start = 3;
+        final int end = 4;
+        final String reference = "A";
+        final String alternate = "T";
+        final String fileId = "fileId";
+        final String studyId = "studyId";
+        Variant variant = buildVariant(chromosome, start, end, reference, alternate, fileId, studyId);
+
+        String dbName = mongoRule.getRandomTemporaryDatabaseName();
+        MongoOperations mongoOperations = MongoConfiguration.getMongoOperations(dbName, mongoConnection,
+                mongoMappingContext);
+
+        VariantMongoWriter variantMongoWriter = new VariantMongoWriter(collectionName, mongoOperations, false, true);
+        variantMongoWriter.write(Collections.singletonList(variant));
+
+        DBCollection dbCollection = mongoOperations.getCollection(collectionName);
+        assertEquals(1, dbCollection.count());
+        final DBObject storedVariant = dbCollection.findOne();
+        final BasicDBList variantSources = (BasicDBList) storedVariant.get("files");
+        assertNotNull(variantSources);
+        assertFalse(variantSources.isEmpty());
+        assertEquals(fileId, ((DBObject) variantSources.get(0)).get("fid"));
+        assertEquals(studyId, ((DBObject) variantSources.get(0)).get("sid"));
+        assertEquals(String.format("%s_%s_%s_%s", chromosome, start, reference, alternate), storedVariant.get("_id"));
+        assertEquals(chromosome, storedVariant.get("chr"));
+        assertEquals(start, storedVariant.get("start"));
+        assertEquals(end, storedVariant.get("end"));
+        assertEquals(reference, storedVariant.get("ref"));
+        assertEquals(alternate, storedVariant.get("alt"));
+    }
+
+    @Test
+    public void includeStatsTrueShouldIncludeStatistics() throws Exception {
+        Variant variant = buildVariant("12", 3, 4, "A", "T", "fileId", "studyId");
+
+        String dbName = mongoRule.getRandomTemporaryDatabaseName();
+        MongoOperations mongoOperations = MongoConfiguration.getMongoOperations(dbName, mongoConnection,
+                mongoMappingContext);
+
+        VariantMongoWriter variantMongoWriter = new VariantMongoWriter(collectionName, mongoOperations, true, false);
+        variantMongoWriter.write(Collections.singletonList(variant));
+
+        DBCollection dbCollection = mongoOperations.getCollection(collectionName);
+        assertEquals(1, dbCollection.count());
+        final DBObject storedVariant = dbCollection.findOne();
+        assertNotNull(storedVariant.get("st"));
+    }
+
+    @Test
+    public void includeStatsFalseShouldNotIncludeStatistics() throws Exception {
+        Variant variant = buildVariant("12", 3, 4, "A", "T", "fileId", "studyId");
+
+        String dbName = mongoRule.getRandomTemporaryDatabaseName();
+        MongoOperations mongoOperations = MongoConfiguration.getMongoOperations(dbName, mongoConnection,
+                mongoMappingContext);
+
+        VariantMongoWriter variantMongoWriter = new VariantMongoWriter(collectionName, mongoOperations, false, true);
+        variantMongoWriter.write(Collections.singletonList(variant));
+
+        DBCollection dbCollection = mongoOperations.getCollection(collectionName);
+        assertEquals(1, dbCollection.count());
+        final DBObject storedVariant = dbCollection.findOne();
+        assertNull(storedVariant.get("st"));
+    }
+
+    @Test
+    public void idsIfPresentShouldBeWrittenIntoTheVariant() throws Exception {
+        Variant variant = buildVariant("12", 3, 4, "A", "T", "fileId", "studyId");
+        variant.setIds(new HashSet<>(Arrays.asList("a", "b", "c")));
+
+        String dbName = mongoRule.getRandomTemporaryDatabaseName();
+        MongoOperations mongoOperations = MongoConfiguration.getMongoOperations(dbName, mongoConnection,
+                mongoMappingContext);
+
+        VariantMongoWriter variantMongoWriter = new VariantMongoWriter(collectionName, mongoOperations, false, true);
+        variantMongoWriter.write(Collections.singletonList(variant));
+
+        DBCollection dbCollection = mongoOperations.getCollection(collectionName);
+        assertEquals(1, dbCollection.count());
+        final DBObject storedVariant = dbCollection.findOne();
+        assertNotNull(storedVariant.get("ids"));
+    }
+
+    @Test
+    public void idsIfNotPresentShouldNotBeWrittenIntoTheVariant() throws Exception {
+        Variant variant = buildVariant("12", 3, 4, "A", "T", "fileId", "studyId");
+
+        String dbName = mongoRule.getRandomTemporaryDatabaseName();
+        MongoOperations mongoOperations = MongoConfiguration.getMongoOperations(dbName, mongoConnection,
+                mongoMappingContext);
+
+        VariantMongoWriter variantMongoWriter = new VariantMongoWriter(collectionName, mongoOperations, false, true);
+        variantMongoWriter.write(Collections.singletonList(variant));
+
+        DBCollection dbCollection = mongoOperations.getCollection(collectionName);
+        assertEquals(1, dbCollection.count());
+        final DBObject storedVariant = dbCollection.findOne();
+        assertNull(storedVariant.get("ids"));
+    }
+
+    private Variant buildVariant(String chromosome, int start, int end, String reference, String alternate,
+                                 String fileId, String studyId) {
+        Variant variant = new Variant(chromosome, start, end, reference, alternate);
+
+        Map<String, VariantSourceEntry> sourceEntries = new LinkedHashMap<>();
+        VariantSourceEntry variantSourceEntry = new VariantSourceEntry(fileId, studyId);
+        variantSourceEntry.setCohortStats("cohortStats",
+                new VariantStats(reference, alternate, Variant.VariantType.SNV));
+        sourceEntries.put("variant", variantSourceEntry);
+        variant.setSourceEntries(sourceEntries);
+
+        return variant;
     }
 
 }
