@@ -120,11 +120,8 @@ public class FileWithHeaderNumberOfLinesEstimator {
         long singleLineSize = bodyFile.length() / MAX_NUMBER_OF_LINES;
         long headFileSize = headFile.length();
 
-        boolean headDeleted = headFile.delete();
-        boolean bodyDeleted = bodyFile.delete();
-        if (!headDeleted || !bodyDeleted) {
-            logger.debug("Couldn't delete the temporary files used for the estimation: {} and {}", headFile, bodyFile);
-        }
+        headFile.deleteOnExit();
+        bodyFile.deleteOnExit();
 
         long estimatedTotalNumberOfLines = ((fileSize - headFileSize) / singleLineSize);
         return estimatedTotalNumberOfLines;
