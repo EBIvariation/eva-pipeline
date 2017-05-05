@@ -15,24 +15,22 @@
  */
 package uk.ac.ebi.eva.pipeline.io.writers;
 
+import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
-import com.mongodb.BulkWriteException;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.data.mongodb.core.mapping.MongoMappingContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-
 import uk.ac.ebi.eva.commons.models.data.Variant;
+import uk.ac.ebi.eva.commons.models.data.VariantSourceEntry;
 import uk.ac.ebi.eva.pipeline.configuration.MongoConfiguration;
-import uk.ac.ebi.eva.pipeline.model.converters.data.VariantToMongoDbObjectConverter;
 import uk.ac.ebi.eva.pipeline.parameters.MongoConnection;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 import uk.ac.ebi.eva.utils.MongoDBHelper;
@@ -46,11 +44,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.when;
 
 /**
  * Testing {@link VariantMongoWriter}
@@ -61,9 +55,6 @@ import static org.mockito.Mockito.when;
 public class VariantMongoWriterTest {
 
     private static final List<? extends Variant> EMPTY_LIST = new ArrayList<>();
-
-    private VariantToMongoDbObjectConverter variantToMongoDbObjectConverter =
-            Mockito.mock(VariantToMongoDbObjectConverter.class);
 
     private final String collectionName = "variants";
 
@@ -83,8 +74,7 @@ public class VariantMongoWriterTest {
                 mongoMappingContext);
         DBCollection dbCollection = mongoOperations.getCollection(collectionName);
 
-        VariantMongoWriter variantMongoWriter = new VariantMongoWriter(collectionName, mongoOperations,
-                                                                       variantToMongoDbObjectConverter);
+        VariantMongoWriter variantMongoWriter = new VariantMongoWriter(collectionName, mongoOperations, false, false);
         variantMongoWriter.doWrite(EMPTY_LIST);
 
         assertEquals(0, dbCollection.count());
@@ -101,11 +91,8 @@ public class VariantMongoWriterTest {
         DBCollection dbCollection = mongoOperations.getCollection(collectionName);
 
         BasicDBObject dbObject = new BasicDBObject();
-
-        when(variantToMongoDbObjectConverter.convert(any(Variant.class))).thenReturn(dbObject).thenReturn(dbObject);
-
-        VariantMongoWriter variantMongoWriter = new VariantMongoWriter(collectionName, mongoOperations,
-                                                                       variantToMongoDbObjectConverter);
+        
+        VariantMongoWriter variantMongoWriter = new VariantMongoWriter(collectionName, mongoOperations, false, false);
         variantMongoWriter.write(Collections.singletonList(variant1));
         variantMongoWriter.write(Collections.singletonList(variant2));
 
@@ -119,8 +106,7 @@ public class VariantMongoWriterTest {
                 mongoMappingContext);
         DBCollection dbCollection = mongoOperations.getCollection(collectionName);
 
-        VariantMongoWriter variantMongoWriter = new VariantMongoWriter(collectionName, mongoOperations,
-                                                                       variantToMongoDbObjectConverter);
+        VariantMongoWriter variantMongoWriter = new VariantMongoWriter(collectionName, mongoOperations, false, false);
 
         List<DBObject> indexInfo = dbCollection.getIndexInfo();
 
@@ -128,17 +114,18 @@ public class VariantMongoWriterTest {
                 .collect(Collectors.toSet());
         Set<String> expectedIndexes = new HashSet<>();
         expectedIndexes.addAll(Arrays.asList("annot.ct.so_1", "annot.xrefs.id_1", "chr_1_start_1_end_1",
-                                             "files.sid_1_files.fid_1", "_id_", "ids_1"));
+                "files.sid_1_files.fid_1", "_id_", "ids_1"));
         assertEquals(expectedIndexes, createdIndexes);
 
         indexInfo.stream().filter(index -> !("_id_".equals(index.get("name").toString())))
-                          .forEach(index -> assertEquals("true",
-                                                         index.get(MongoDBHelper.BACKGROUND_INDEX).toString()));
+                .forEach(index -> assertEquals("true",
+                        index.get(MongoDBHelper.BACKGROUND_INDEX).toString()));
     }
 
     @Test
-    public void testNoDuplicatesCanBeInserted() throws Exception {
+    public void writeTwiceSameVariantShouldUpdate() throws Exception {
         Variant variant1 = new Variant("1", 1, 2, "A", "T");
+        variant1.addSourceEntry(new VariantSourceEntry("test_file", "test_study_id"));
 
         String dbName = mongoRule.getRandomTemporaryDatabaseName();
         MongoOperations mongoOperations = MongoConfiguration.getMongoOperations(dbName, mongoConnection,
@@ -146,18 +133,14 @@ public class VariantMongoWriterTest {
 
         BasicDBObject dbObject = new BasicDBObject();
 
-        when(variantToMongoDbObjectConverter.convert(any(Variant.class))).thenReturn(dbObject).thenReturn(dbObject);
-
-        VariantMongoWriter variantMongoWriter = new VariantMongoWriter(collectionName, mongoOperations,
-                                                                       variantToMongoDbObjectConverter);
+        VariantMongoWriter variantMongoWriter = new VariantMongoWriter(collectionName, mongoOperations, false, false);
         variantMongoWriter.write(Collections.singletonList(variant1));
 
-        try {
-            variantMongoWriter.write(Collections.singletonList(variant1));
-            fail("Should have thrown a mongo write exception due to duplicate key");
-        } catch (BulkWriteException e) {
-            assertTrue(e.getMessage().contains("duplicate key"));
-        }
+        variantMongoWriter.write(Collections.singletonList(variant1));
+        DBCollection dbCollection = mongoOperations.getCollection(collectionName);
+        assertEquals(1, dbCollection.count());
+        final DBObject storedVariant = dbCollection.findOne();
+        assertEquals(1, ((BasicDBList) storedVariant.get("files")).size());
     }
 
 }

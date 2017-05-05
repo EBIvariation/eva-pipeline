@@ -65,14 +65,17 @@ public class VariantToMongoDbObjectConverter implements Converter<Variant, DBObj
 
         variant.setAnnotation(null);
 
-        VariantSourceEntry variantSourceEntry = variant.getSourceEntries().values().iterator().next();
+        BasicDBObject addToSet = new BasicDBObject();
 
-        BasicDBObject addToSet = new BasicDBObject().append(VariantToDBObjectConverter.FILES_FIELD,
-                sourceEntryConverter.convert(variantSourceEntry));
+        if(!variant.getSourceEntries().isEmpty()) {
+            VariantSourceEntry variantSourceEntry = variant.getSourceEntries().values().iterator().next();
 
-        if (includeStats) {
-            List<DBObject> sourceEntryStats = statsConverter.convert(variantSourceEntry);
-            addToSet.put(VariantToDBObjectConverter.STATS_FIELD, new BasicDBObject("$each", sourceEntryStats));
+            addToSet.put(VariantToDBObjectConverter.FILES_FIELD, sourceEntryConverter.convert(variantSourceEntry));
+
+            if (includeStats) {
+                List<DBObject> sourceEntryStats = statsConverter.convert(variantSourceEntry);
+                addToSet.put(VariantToDBObjectConverter.STATS_FIELD, new BasicDBObject("$each", sourceEntryStats));
+            }
         }
 
         if (variant.getIds() != null && !variant.getIds().isEmpty()) {
@@ -80,7 +83,10 @@ public class VariantToMongoDbObjectConverter implements Converter<Variant, DBObj
         }
 
         BasicDBObject update = new BasicDBObject();
-        update.append("$addToSet", addToSet).append("$setOnInsert", variantConverter.convert(variant));
+        if(!addToSet.isEmpty()) {
+            update.put("$addToSet", addToSet);
+        }
+        update.append("$setOnInsert", variantConverter.convert(variant));
 
         return update;
     }

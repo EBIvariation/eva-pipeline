@@ -40,13 +40,6 @@ public class VariantWriterConfiguration {
     @Profile(Application.VARIANT_WRITER_MONGO_PROFILE)
     public ItemWriter<Variant> variantMongoWriter(InputParameters inputParameters, MongoOperations mongoOperations,
                                                   DatabaseParameters databaseParameters) {
-        return new VariantMongoWriter(databaseParameters.getCollectionVariantsName(), mongoOperations,
-                variantToMongoDbObjectConverter(inputParameters));
-    }
-
-    @Bean
-    @StepScope
-    public VariantToMongoDbObjectConverter variantToMongoDbObjectConverter(InputParameters inputParameters) {
         boolean includeSamples, includeStats;
         if (VariantSource.Aggregation.NONE.equals(inputParameters.getVcfAggregation())) {
             includeSamples = true;
@@ -55,7 +48,9 @@ public class VariantWriterConfiguration {
             includeSamples = false;
             includeStats = true;
         }
-        return new VariantToMongoDbObjectConverter(includeStats, includeSamples);
+
+        return new VariantMongoWriter(databaseParameters.getCollectionVariantsName(), mongoOperations, includeStats,
+                includeSamples);
     }
 
 }

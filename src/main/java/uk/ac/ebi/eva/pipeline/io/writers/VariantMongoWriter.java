@@ -50,16 +50,15 @@ public class VariantMongoWriter extends MongoItemWriter<Variant> {
 
     private final VariantToMongoDbObjectConverter variantToMongoDbObjectConverter;
 
-    public VariantMongoWriter(String collection, MongoOperations mongoOperations,
-                              VariantToMongoDbObjectConverter variantToMongoDbObjectConverter) {
+    public VariantMongoWriter(String collection, MongoOperations mongoOperations, boolean includeStats,
+                              boolean includeSamples) {
         Assert.notNull(mongoOperations, "A Mongo instance is required");
         Assert.hasText(collection, "A collection name is required");
 
-        this.variantToMongoDbObjectConverter = variantToMongoDbObjectConverter;
+        this.variantToMongoDbObjectConverter = new VariantToMongoDbObjectConverter(includeStats, includeSamples);
         this.mongoOperations = mongoOperations;
         this.collection = collection;
         setTemplate(mongoOperations);
-
         createIndexes();
     }
 
