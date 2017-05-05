@@ -91,7 +91,7 @@ public class VariantMongoWriterTest {
         DBCollection dbCollection = mongoOperations.getCollection(collectionName);
 
         BasicDBObject dbObject = new BasicDBObject();
-        
+
         VariantMongoWriter variantMongoWriter = new VariantMongoWriter(collectionName, mongoOperations, false, false);
         variantMongoWriter.write(Collections.singletonList(variant1));
         variantMongoWriter.write(Collections.singletonList(variant2));
