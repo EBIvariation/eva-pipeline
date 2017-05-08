@@ -23,11 +23,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.batch.item.data.MongoItemWriter;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.util.Assert;
-
+import uk.ac.ebi.eva.commons.models.converters.data.SamplesToDBObjectConverter;
 import uk.ac.ebi.eva.commons.models.converters.data.VariantSourceEntryToDBObjectConverter;
+import uk.ac.ebi.eva.commons.models.converters.data.VariantStatsToDBObjectConverter;
 import uk.ac.ebi.eva.commons.models.converters.data.VariantToDBObjectConverter;
 import uk.ac.ebi.eva.commons.models.data.Variant;
-import uk.ac.ebi.eva.pipeline.model.converters.data.VariantToMongoDbObjectConverter;
+import uk.ac.ebi.eva.commons.models.data.VariantSourceEntry;
 import uk.ac.ebi.eva.utils.MongoDBHelper;
 
 import java.util.List;
@@ -48,19 +49,28 @@ public class VariantMongoWriter extends MongoItemWriter<Variant> {
 
     private final String collection;
 
-    private final VariantToMongoDbObjectConverter variantToMongoDbObjectConverter;
+    private VariantToDBObjectConverter variantConverter;
+    private VariantStatsToDBObjectConverter statsConverter;
+    private VariantSourceEntryToDBObjectConverter sourceEntryConverter;
 
-    public VariantMongoWriter(String collection, MongoOperations mongoOperations,
-                              VariantToMongoDbObjectConverter variantToMongoDbObjectConverter) {
+    public VariantMongoWriter(String collection, MongoOperations mongoOperations, boolean includeStats,
+                              boolean includeSamples) {
         Assert.notNull(mongoOperations, "A Mongo instance is required");
         Assert.hasText(collection, "A collection name is required");
 
-        this.variantToMongoDbObjectConverter = variantToMongoDbObjectConverter;
         this.mongoOperations = mongoOperations;
         this.collection = collection;
         setTemplate(mongoOperations);
 
+        initializeConverters(includeStats, includeSamples);
         createIndexes();
+    }
+
+    private void initializeConverters(boolean includeStats, boolean includeSamples) {
+        this.statsConverter = includeStats ? new VariantStatsToDBObjectConverter() : null;
+        SamplesToDBObjectConverter sampleConverter = includeSamples ? new SamplesToDBObjectConverter() : null;
+        this.sourceEntryConverter = new VariantSourceEntryToDBObjectConverter(sampleConverter);
+        this.variantConverter = new VariantToDBObjectConverter(null, null, null);
     }
 
     @Override
@@ -75,9 +85,7 @@ public class VariantMongoWriter extends MongoItemWriter<Variant> {
                     .append(VariantToDBObjectConverter.CHROMOSOME_FIELD, variant.getChromosome())
                     .append(VariantToDBObjectConverter.START_FIELD, variant.getStart());
 
-            DBObject update = variantToMongoDbObjectConverter.convert(variant);
-
-            bulk.find(query).upsert().updateOne(update);
+            bulk.find(query).upsert().updateOne(generateUpdate(variant));
 
         }
 
@@ -115,5 +123,37 @@ public class VariantMongoWriter extends MongoItemWriter<Variant> {
         mongoOperations.getCollection(collection).createIndex(
                 new BasicDBObject(ANNOTATION_CT_SO_FIELD, 1),
                 new BasicDBObject(MongoDBHelper.BACKGROUND_INDEX, true));
+    }
+
+    private DBObject generateUpdate(Variant variant) {
+        Assert.notNull(variant, "Variant should not be null. Please provide a valid Variant object");
+        logger.trace("Convert variant {} into mongo object", variant);
+
+        variant.setAnnotation(null);
+
+        BasicDBObject addToSet = new BasicDBObject();
+
+        if (!variant.getSourceEntries().isEmpty()) {
+            VariantSourceEntry variantSourceEntry = variant.getSourceEntries().values().iterator().next();
+
+            addToSet.put(VariantToDBObjectConverter.FILES_FIELD, sourceEntryConverter.convert(variantSourceEntry));
+
+            if (statsConverter != null) {
+                List<DBObject> sourceEntryStats = statsConverter.convert(variantSourceEntry);
+                addToSet.put(VariantToDBObjectConverter.STATS_FIELD, new BasicDBObject("$each", sourceEntryStats));
+            }
+        }
+
+        if (variant.getIds() != null && !variant.getIds().isEmpty()) {
+            addToSet.put(VariantToDBObjectConverter.IDS_FIELD, new BasicDBObject("$each", variant.getIds()));
+        }
+
+        BasicDBObject update = new BasicDBObject();
+        if (!addToSet.isEmpty()) {
+            update.put("$addToSet", addToSet);
+        }
+        update.append("$setOnInsert", variantConverter.convert(variant));
+
+        return update;
     }
 }
