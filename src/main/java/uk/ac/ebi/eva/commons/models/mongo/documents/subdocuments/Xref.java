@@ -13,10 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.ac.ebi.eva.commons.models.data;
+package uk.ac.ebi.eva.commons.models.mongo.documents.subdocuments;
 
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
+import uk.ac.ebi.eva.commons.models.data.AnnotationFieldNames;
 
 /**
  * From org.opencb.biodata.models.variant.annotation.Xref

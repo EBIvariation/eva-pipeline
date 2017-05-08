@@ -20,7 +20,7 @@ import org.springframework.batch.item.ItemStreamReader;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import uk.ac.ebi.eva.commons.models.data.Annotation;
+import uk.ac.ebi.eva.commons.models.mongo.documents.Annotation;
 import uk.ac.ebi.eva.pipeline.io.readers.AnnotationFlatFileReader;
 import uk.ac.ebi.eva.pipeline.parameters.AnnotationParameters;
 

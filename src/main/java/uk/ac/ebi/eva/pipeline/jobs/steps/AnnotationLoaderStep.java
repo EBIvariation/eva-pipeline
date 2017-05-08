@@ -30,7 +30,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import uk.ac.ebi.eva.commons.models.data.Annotation;
+import uk.ac.ebi.eva.commons.models.mongo.documents.Annotation;
 import uk.ac.ebi.eva.pipeline.configuration.ChunkSizeCompletionPolicyConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.readers.AnnotationReaderConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.writers.AnnotationCompositeWriterConfiguration;

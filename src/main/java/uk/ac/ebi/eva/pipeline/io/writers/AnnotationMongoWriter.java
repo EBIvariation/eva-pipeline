@@ -24,7 +24,7 @@ import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.data.mongodb.core.query.BasicQuery;
 import org.springframework.data.mongodb.core.query.BasicUpdate;
 import org.springframework.util.Assert;
-import uk.ac.ebi.eva.commons.models.data.Annotation;
+import uk.ac.ebi.eva.commons.models.mongo.documents.Annotation;
 import uk.ac.ebi.eva.utils.MongoDBHelper;
 
 import java.util.ArrayList;
