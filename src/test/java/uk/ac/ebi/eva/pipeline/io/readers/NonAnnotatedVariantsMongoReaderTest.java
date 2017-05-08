@@ -100,8 +100,9 @@ public class NonAnnotatedVariantsMongoReaderTest {
         MongoOperations mongoOperations = MongoConfiguration.getMongoOperations(databaseName, mongoConnection,
                 mongoMappingContext);
 
+        boolean onlyNonAnnotated = true;
         NonAnnotatedVariantsMongoReader mongoItemReader = new NonAnnotatedVariantsMongoReader(
-                mongoOperations, COLLECTION_VARIANTS_NAME, study);
+                mongoOperations, COLLECTION_VARIANTS_NAME, study, onlyNonAnnotated);
         mongoItemReader.open(executionContext);
 
         int itemCount = 0;

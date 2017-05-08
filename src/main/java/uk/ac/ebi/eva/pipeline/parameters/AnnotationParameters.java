@@ -69,6 +69,9 @@ public class AnnotationParameters {
     @Value(PARAMETER + JobParametersNames.INPUT_FASTA + END)
     private String inputFasta;
 
+    @Value(PARAMETER + JobParametersNames.ANNOTATION_OVERWRITE + END)
+    private Boolean overwriteAnnotation;
+
     public String getVepPath() {
         return vepPath;
     }
@@ -99,6 +102,10 @@ public class AnnotationParameters {
 
     public String getInputFasta() {
         return inputFasta;
+    }
+
+    public Boolean getOverwriteAnnotation() {
+        return overwriteAnnotation;
     }
 
     public String getVepOutput() {

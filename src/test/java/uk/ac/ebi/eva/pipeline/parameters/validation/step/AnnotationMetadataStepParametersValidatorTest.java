@@ -44,17 +44,23 @@ public class AnnotationMetadataStepParametersValidatorTest {
     @Before
     public void setUp() throws Exception {
         validator = new AnnotationMetadataStepParametersValidator();
-        final String dir = temporaryFolder.getRoot().getCanonicalPath();
 
         requiredParameters = new TreeMap<>();
         requiredParameters.put(JobParametersNames.DB_COLLECTIONS_ANNOTATION_METADATA_NAME,
                                new JobParameter("dbCollectionsVariantName"));
+        requiredParameters.put(JobParametersNames.DB_NAME, new JobParameter("eva_testing"));
         requiredParameters.put(JobParametersNames.APP_VEP_VERSION, new JobParameter("80"));
         requiredParameters.put(JobParametersNames.APP_VEP_CACHE_VERSION, new JobParameter("81"));
     }
 
     @Test
     public void allJobParametersAreValid() throws JobParametersInvalidException, IOException {
+        validator.validate(new JobParameters(requiredParameters));
+    }
+
+    @Test(expected = JobParametersInvalidException.class)
+    public void dbNameIsRequired() throws JobParametersInvalidException, IOException {
+        requiredParameters.remove(JobParametersNames.DB_NAME);
         validator.validate(new JobParameters(requiredParameters));
     }
 

@@ -51,7 +51,8 @@ public class NonAnnotatedVariantsMongoReader
      * @param studyId Can be the empty string or null, meaning to bring all non-annotated variants in the collection.
      * If the studyId string is not empty, bring only non-annotated variants from that study.
      */
-    public NonAnnotatedVariantsMongoReader(MongoOperations template, String collectionsVariantsName, String studyId) {
+    public NonAnnotatedVariantsMongoReader(MongoOperations template, String collectionsVariantsName, String studyId,
+                                           boolean onlyNonAnnotated) {
         setName(ClassUtils.getShortName(NonAnnotatedVariantsMongoReader.class));
         delegateReader = new MongoDbCursorItemReader();
         delegateReader.setTemplate(template);
@@ -61,8 +62,10 @@ public class NonAnnotatedVariantsMongoReader
         if (studyId != null && !studyId.isEmpty()) {
             queryBuilder.add(STUDY_KEY, studyId);
         }
-        DBObject query = queryBuilder.add("annot.ct.so", new BasicDBObject("$exists", false)).get();
-        delegateReader.setQuery(query);
+        if (onlyNonAnnotated) {
+            queryBuilder.add("annot.ct.so", new BasicDBObject("$exists", false));
+        }
+        delegateReader.setQuery(queryBuilder.get());
 
         String[] fields = {"chr", "start", "end", "ref", "alt"};
         delegateReader.setFields(fields);

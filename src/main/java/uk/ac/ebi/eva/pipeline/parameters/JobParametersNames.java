@@ -94,7 +94,9 @@ public class JobParametersNames {
 
     public static final String STATISTICS_SKIP = "statistics.skip";
 
-    public static final String STATISTICS_OVERWRITE = "statistics.overwrite";
+    public static final String STATISTICS_OVERWRITE = "statistics.overwrite";   // FIXME this is only used in tests
+
+    public static final String ANNOTATION_OVERWRITE = "annotation.overwrite";
 
 
     /*

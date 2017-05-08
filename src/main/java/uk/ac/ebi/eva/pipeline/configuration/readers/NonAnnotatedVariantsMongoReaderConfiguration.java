@@ -21,6 +21,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mongodb.core.MongoOperations;
 
 import uk.ac.ebi.eva.pipeline.io.readers.NonAnnotatedVariantsMongoReader;
+import uk.ac.ebi.eva.pipeline.parameters.AnnotationParameters;
 import uk.ac.ebi.eva.pipeline.parameters.DatabaseParameters;
 import uk.ac.ebi.eva.pipeline.parameters.InputParameters;
 
@@ -36,11 +37,16 @@ public class NonAnnotatedVariantsMongoReaderConfiguration {
     @StepScope
     public NonAnnotatedVariantsMongoReader nonAnnotatedVariantsMongoReader(MongoOperations mongoOperations,
                                                                            DatabaseParameters databaseParameters,
-                                                                           InputParameters inputParameters) {
+                                                                           InputParameters inputParameters,
+                                                                           AnnotationParameters annotationParameters) {
+        // to overwrite annotation we have to bring all variants (non annotated and annotated)
+        boolean onlyNonAnnotated = !annotationParameters.getOverwriteAnnotation();
+
         NonAnnotatedVariantsMongoReader nonAnnotatedVariantsMongoReader = new NonAnnotatedVariantsMongoReader(
                 mongoOperations,
                 databaseParameters.getCollectionVariantsName(),
-                inputParameters.getStudyId());
+                inputParameters.getStudyId(),
+                onlyNonAnnotated);
         nonAnnotatedVariantsMongoReader.setSaveState(false);
         return nonAnnotatedVariantsMongoReader;
     }

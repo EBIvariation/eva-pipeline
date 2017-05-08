@@ -40,6 +40,8 @@ public class GenerateVepAnnotationStepParametersValidatorTest {
 
     private Map<String, JobParameter> requiredParameters;
 
+    private Map<String, JobParameter> optionalParameters;
+
     @Rule
     public PipelineTemporaryFolderRule temporaryFolderRule = new PipelineTemporaryFolderRule();
 
@@ -49,6 +51,9 @@ public class GenerateVepAnnotationStepParametersValidatorTest {
         validator = new GenerateVepAnnotationStepParametersValidator(studyIdRequired);
 
         requiredParameters = new TreeMap<>();
+
+        requiredParameters.put(JobParametersNames.DB_NAME, new JobParameter("eva_testing"));
+        requiredParameters.put(JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME, new JobParameter("variants"));
         requiredParameters.put(JobParametersNames.APP_VEP_CACHE_PATH,
                                new JobParameter(temporaryFolderRule.getRoot().getCanonicalPath()));
         requiredParameters.put(JobParametersNames.APP_VEP_CACHE_SPECIES, new JobParameter("Human"));
@@ -63,11 +68,34 @@ public class GenerateVepAnnotationStepParametersValidatorTest {
         requiredParameters.put(JobParametersNames.OUTPUT_DIR_ANNOTATION,
                                new JobParameter(temporaryFolderRule.getRoot().getCanonicalPath()));
         requiredParameters.put(JobParametersNames.APP_VEP_TIMEOUT, new JobParameter("600"));
+        requiredParameters.put(JobParametersNames.ANNOTATION_OVERWRITE, new JobParameter("false"));
 
+        optionalParameters = new TreeMap<>();
+        optionalParameters.put(JobParametersNames.CONFIG_CHUNK_SIZE, new JobParameter("100"));
     }
 
     @Test
     public void allJobParametersAreValid() throws JobParametersInvalidException, IOException {
+        validator.validate(new JobParameters(requiredParameters));
+    }
+
+    @Test
+    public void allJobParametersIncludingOptionalAreValid() throws JobParametersInvalidException, IOException {
+        Map<String, JobParameter> parameters = new TreeMap<>();
+        parameters.putAll(requiredParameters);
+        parameters.putAll(optionalParameters);
+        validator.validate(new JobParameters(parameters));
+    }
+
+    @Test(expected = JobParametersInvalidException.class)
+    public void dbNameIsRequired() throws JobParametersInvalidException, IOException {
+        requiredParameters.remove(JobParametersNames.DB_NAME);
+        validator.validate(new JobParameters(requiredParameters));
+    }
+
+    @Test(expected = JobParametersInvalidException.class)
+    public void dbCollectionsVariantsNameIsRequired() throws JobParametersInvalidException, IOException {
+        requiredParameters.remove(JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME);
         validator.validate(new JobParameters(requiredParameters));
     }
 
@@ -146,6 +174,12 @@ public class GenerateVepAnnotationStepParametersValidatorTest {
     @Test(expected = JobParametersInvalidException.class)
     public void appVepTimeoutIsRequired() throws JobParametersInvalidException, IOException {
         requiredParameters.remove(JobParametersNames.APP_VEP_TIMEOUT);
+        validator.validate(new JobParameters(requiredParameters));
+    }
+
+    @Test(expected = JobParametersInvalidException.class)
+    public void annotationOverwriteIsRequired() throws JobParametersInvalidException, IOException {
+        requiredParameters.remove(JobParametersNames.ANNOTATION_OVERWRITE);
         validator.validate(new JobParameters(requiredParameters));
     }
 }
