@@ -32,8 +32,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static uk.ac.ebi.eva.commons.models.data.AnnotationFieldNames.CONSEQUENCE_TYPE_FIELD;
-import static uk.ac.ebi.eva.commons.models.data.AnnotationFieldNames.XREFS_FIELD;
+import static uk.ac.ebi.eva.commons.models.mongo.documents.Annotation.CONSEQUENCE_TYPE_FIELD;
+import static uk.ac.ebi.eva.commons.models.mongo.documents.Annotation.XREFS_FIELD;
 
 /**
  * Write a list of {@link Annotation} into MongoDB
@@ -107,7 +107,7 @@ public class AnnotationMongoWriter extends MongoItemWriter<Annotation> {
             }
 
             annotation.setId(storageId);
-            annotation.setEnsemblVersion(vepVersion);
+            annotation.setVepVersion(vepVersion);
             annotation.setVepCacheVersion(vepCacheVersion);
 
             annotation.generateXrefsFromConsequenceTypes();

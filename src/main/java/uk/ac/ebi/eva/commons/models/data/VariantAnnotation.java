@@ -29,34 +29,46 @@ import java.util.Set;
 @Document
 public class VariantAnnotation {
 
-    @Field(value = AnnotationFieldNames.ENSEMBL_VERSION_FIELD)
-    private String ensemblVersion;
+    public static final String VEP_VERSION_FIELD = "vepVer";
 
-    @Field(value = AnnotationFieldNames.VEP_CACHE_VERSION_FIELD)
+    public static final String VEP_CACHE_VERSION_FIELD = "cacheVer";
+
+    public static final String SIFT_FIELD = "sift";
+
+    public static final String POLYPHEN_FIELD = "polyphen";
+
+    public static final String SO_ACCESSION_FIELD = "so";
+
+    public static final String XREFS_FIELD = "xrefs";
+
+    @Field(value = VEP_VERSION_FIELD)
+    private String vepVersion;
+
+    @Field(value = VEP_CACHE_VERSION_FIELD)
     private String vepCacheVersion;
 
-    @Field(value = AnnotationFieldNames.SIFT_FIELD)
+    @Field(value = SIFT_FIELD)
     private Set<Double> sifts = new HashSet<>();
 
-    @Field(value = AnnotationFieldNames.POLYPHEN_FIELD)
+    @Field(value = POLYPHEN_FIELD)
     private Set<Double> polyphens = new HashSet<>();
 
-    @Field(value = AnnotationFieldNames.SO_ACCESSION_FIELD)
+    @Field(value = SO_ACCESSION_FIELD)
     private Set<Integer> soAccessions = new HashSet<>();
 
-    @Field(value = AnnotationFieldNames.XREFS_FIELD)
+    @Field(value = XREFS_FIELD)
     private Set<String> xrefIds = new HashSet<>();
 
     /**
      * Variant annotation constructor. Requires non empty values, otherwise throws {@link IllegalArgumentException}
      *
-     * @param ensemblVersion non empty value required, otherwise throws {@link IllegalArgumentException}
+     * @param vepVersion non empty value required, otherwise throws {@link IllegalArgumentException}
      * @param vepCacheVersion non empty value required, otherwise throws {@link IllegalArgumentException}
      */
-    public VariantAnnotation(String ensemblVersion, String vepCacheVersion) {
-        Assert.hasText(ensemblVersion, "A non empty ensemblVersion is required");
+    public VariantAnnotation(String vepVersion, String vepCacheVersion) {
+        Assert.hasText(vepVersion, "A non empty vepVersion is required");
         Assert.hasText(vepCacheVersion, "A non empty vepCacheVersion is required");
-        this.ensemblVersion = ensemblVersion;
+        this.vepVersion = vepVersion;
         this.vepCacheVersion = vepCacheVersion;
     }
 
@@ -100,8 +112,8 @@ public class VariantAnnotation {
         return xrefIds;
     }
 
-    public String getEnsemblVersion() {
-        return ensemblVersion;
+    public String getVepVersion() {
+        return vepVersion;
     }
 
     public String getVepCacheVersion() {

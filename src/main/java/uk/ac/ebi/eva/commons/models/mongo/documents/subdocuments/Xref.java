@@ -17,7 +17,6 @@ package uk.ac.ebi.eva.commons.models.mongo.documents.subdocuments;
 
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
-import uk.ac.ebi.eva.commons.models.data.AnnotationFieldNames;
 
 /**
  * From org.opencb.biodata.models.variant.annotation.Xref
@@ -25,10 +24,14 @@ import uk.ac.ebi.eva.commons.models.data.AnnotationFieldNames;
 @Document
 public class Xref {
 
-    @Field(value = AnnotationFieldNames.XREF_ID_FIELD)
+    private final static String XREF_ID_FIELD = "id";
+
+    private final static String XREF_SOURCE_FIELD = "src";
+
+    @Field(value = XREF_ID_FIELD)
     private String id;
 
-    @Field(value = AnnotationFieldNames.XREF_SOURCE_FIELD)
+    @Field(value = XREF_SOURCE_FIELD)
     private String src;
 
     public Xref(String id, String src) {

@@ -25,13 +25,11 @@ import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.data.mongodb.core.query.BasicQuery;
 import org.springframework.data.mongodb.core.query.BasicUpdate;
 import org.springframework.util.Assert;
-
 import uk.ac.ebi.eva.commons.models.converters.data.VariantToDBObjectConverter;
-import uk.ac.ebi.eva.commons.models.mongo.documents.Annotation;
-import uk.ac.ebi.eva.commons.models.data.AnnotationFieldNames;
-import uk.ac.ebi.eva.commons.models.mongo.documents.subdocuments.ConsequenceType;
-import uk.ac.ebi.eva.commons.models.data.Score;
+import uk.ac.ebi.eva.commons.models.mongo.documents.subdocuments.Score;
 import uk.ac.ebi.eva.commons.models.data.VariantAnnotation;
+import uk.ac.ebi.eva.commons.models.mongo.documents.Annotation;
+import uk.ac.ebi.eva.commons.models.mongo.documents.subdocuments.ConsequenceType;
 import uk.ac.ebi.eva.commons.models.mongo.documents.subdocuments.Xref;
 import uk.ac.ebi.eva.utils.MongoDBHelper;
 
@@ -45,10 +43,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static uk.ac.ebi.eva.commons.models.data.AnnotationFieldNames.POLYPHEN_FIELD;
-import static uk.ac.ebi.eva.commons.models.data.AnnotationFieldNames.SIFT_FIELD;
-import static uk.ac.ebi.eva.commons.models.data.AnnotationFieldNames.SO_ACCESSION_FIELD;
-import static uk.ac.ebi.eva.commons.models.data.AnnotationFieldNames.XREFS_FIELD;
+import static uk.ac.ebi.eva.commons.models.data.VariantAnnotation.VEP_VERSION_FIELD;
+import static uk.ac.ebi.eva.commons.models.data.VariantAnnotation.XREFS_FIELD;
+import static uk.ac.ebi.eva.commons.models.mongo.documents.Annotation.VEP_CACHE_VERSION_FIELD;
+import static uk.ac.ebi.eva.commons.models.mongo.documents.subdocuments.ConsequenceType.POLYPHEN_FIELD;
+import static uk.ac.ebi.eva.commons.models.mongo.documents.subdocuments.ConsequenceType.SIFT_FIELD;
+import static uk.ac.ebi.eva.commons.models.mongo.documents.subdocuments.ConsequenceType.SO_ACCESSION_FIELD;
 
 /**
  * Update the {@link uk.ac.ebi.eva.commons.models.data.Variant} mongo document with {@link VariantAnnotation}
@@ -78,9 +78,9 @@ public class AnnotationInVariantMongoWriter extends MongoItemWriter<Annotation> 
 
     private final String ANNOTATION_POLYPHEN = VariantToDBObjectConverter.ANNOTATION_FIELD + ".$." + POLYPHEN_FIELD;
 
-    private final String ANNOTATION_ENSEMBL_VERSION = VariantToDBObjectConverter.ANNOTATION_FIELD + "." + AnnotationFieldNames.ENSEMBL_VERSION_FIELD;
+    private final String ANNOTATION_ENSEMBL_VERSION = VariantToDBObjectConverter.ANNOTATION_FIELD + "." + VEP_VERSION_FIELD;
 
-    private final String ANNOTATION_VEP_CACHE_VERSION = VariantToDBObjectConverter.ANNOTATION_FIELD + "." + AnnotationFieldNames.VEP_CACHE_VERSION_FIELD;
+    private final String ANNOTATION_VEP_CACHE_VERSION = VariantToDBObjectConverter.ANNOTATION_FIELD + "." + VEP_CACHE_VERSION_FIELD;
 
     public AnnotationInVariantMongoWriter(MongoOperations mongoOperations,
                                           String collection,
@@ -139,8 +139,8 @@ public class AnnotationInVariantMongoWriter extends MongoItemWriter<Annotation> 
                                                  String storageId,
                                                  List<BasicDBObject> existingAnnotations) {
         for (BasicDBObject existingAnnotation : existingAnnotations) {
-            if (existingAnnotation.getString(AnnotationFieldNames.ENSEMBL_VERSION_FIELD)
-                    .equals(vepVersion) && existingAnnotation.getString(AnnotationFieldNames.VEP_CACHE_VERSION_FIELD)
+            if (existingAnnotation.getString(VEP_VERSION_FIELD)
+                    .equals(vepVersion) && existingAnnotation.getString(VEP_CACHE_VERSION_FIELD)
                     .equals(vepCacheVersion)) {
 
                 Set<String> xrefs = variantAnnotation.getXrefIds();
