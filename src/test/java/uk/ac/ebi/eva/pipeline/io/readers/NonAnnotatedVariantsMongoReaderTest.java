@@ -62,6 +62,10 @@ public class NonAnnotatedVariantsMongoReaderTest {
 
     private static final int EXPECTED_NON_ANNOTATED_VARIANTS_IN_DB = 2;
 
+    private static final int EXPECTED_VARIANTS_IN_STUDY = 2;
+
+    private static final int EXPECTED_VARIANTS_IN_DB = 3;
+
     private static final String STUDY_ID = "7";
 
     private static final String ALL_STUDIES = "";
@@ -124,5 +128,41 @@ public class NonAnnotatedVariantsMongoReaderTest {
         privateVariantField.setAccessible(true);
         VariantAnnotation annotation = ((Variant) privateVariantField.get(variantWrapper)).getAnnotation();
         assertNull(annotation.getConsequenceTypes());
+    }
+
+    @Test
+    public void shouldReadVariantsInAllStudies() throws Exception {
+        checkAllVariantsRead(EXPECTED_VARIANTS_IN_STUDY, STUDY_ID);
+    }
+
+    @Test
+    public void shouldReadVariantsInAllStudiesUsingNull() throws Exception {
+        checkAllVariantsRead(EXPECTED_VARIANTS_IN_DB, ALL_STUDIES);
+    }
+
+    private void checkAllVariantsRead(int expectedVariants, String study) throws Exception {
+        ExecutionContext executionContext = MetaDataInstanceFactory.createStepExecution().getExecutionContext();
+        String databaseName = mongoRule.createDBAndInsertDocuments(COLLECTION_VARIANTS_NAME, Arrays.asList(
+                VariantData.getVariantWithAnnotation(),
+                VariantData.getVariantWithoutAnnotation(),
+                VariantData.getVariantWithoutAnnotationOtherStudy()));
+
+        MongoOperations mongoOperations = MongoConfiguration.getMongoOperations(databaseName, mongoConnection,
+                mongoMappingContext);
+
+        boolean onlyNonAnnotated = false;
+        NonAnnotatedVariantsMongoReader mongoItemReader = new NonAnnotatedVariantsMongoReader(
+                mongoOperations, COLLECTION_VARIANTS_NAME, study, onlyNonAnnotated);
+        mongoItemReader.open(executionContext);
+
+        int itemCount = 0;
+        VariantWrapper variantWrapper;
+        while ((variantWrapper = mongoItemReader.read()) != null) {
+            itemCount++;
+            assertFalse(variantWrapper.getChr().isEmpty());
+            assertNotEquals(0, variantWrapper.getStart());
+        }
+        assertEquals(expectedVariants, itemCount);
+        mongoItemReader.close();
     }
 }
