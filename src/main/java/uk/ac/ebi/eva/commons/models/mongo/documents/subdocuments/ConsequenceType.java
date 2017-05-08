@@ -18,8 +18,6 @@ package uk.ac.ebi.eva.commons.models.mongo.documents.subdocuments;
 
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
-import uk.ac.ebi.eva.commons.models.data.AnnotationFieldNames;
-import uk.ac.ebi.eva.commons.models.data.Score;
 
 import java.util.Set;
 
@@ -29,46 +27,74 @@ import java.util.Set;
 @Document
 public class ConsequenceType {
 
-    @Field(value = AnnotationFieldNames.GENE_NAME_FIELD)
+    private static final String GENE_NAME_FIELD = "gn";
+
+    private static final String ENSEMBL_GENE_ID_FIELD = "ensg";
+
+    private static final String ENSEMBL_TRANSCRIPT_ID_FIELD = "enst";
+
+    private static final String STRAND_FIELD = "strand";
+
+    private static final String BIOTYPE_FIELD = "bt";
+
+    private static final String C_DNA_POSITION_FIELD = "cDnaPos";
+
+    private static final String CDS_POSITION_FIELD = "cdsPos";
+
+    private static final String AA_POSITION_FIELD = "aaPos";
+
+    private static final String AA_CHANGE_FIELD = "aaChange";
+
+    private static final String CODON_FIELD = "codon";
+
+    public static final String SIFT_FIELD = "sift";
+
+    public static final String POLYPHEN_FIELD = "polyphen";
+
+    public static final String SO_ACCESSION_FIELD = "so";
+
+    private static final String RELATIVE_POS_FIELD = "relPos";
+
+    @Field(value = GENE_NAME_FIELD)
     private String geneName;
 
-    @Field(value = AnnotationFieldNames.ENSEMBL_GENE_ID_FIELD)
+    @Field(value = ENSEMBL_GENE_ID_FIELD)
     private String ensemblGeneId;
 
-    @Field(value = AnnotationFieldNames.ENSEMBL_TRANSCRIPT_ID_FIELD)
+    @Field(value = ENSEMBL_TRANSCRIPT_ID_FIELD)
     private String ensemblTranscriptId;
 
-    @Field(value = AnnotationFieldNames.STRAND_FIELD)
+    @Field(value = STRAND_FIELD)
     private String strand;
 
-    @Field(value = AnnotationFieldNames.BIOTYPE_FIELD)
+    @Field(value = BIOTYPE_FIELD)
     private String biotype;
 
-    @Field(value = AnnotationFieldNames.C_DNA_POSITION_FIELD)
+    @Field(value = C_DNA_POSITION_FIELD)
     private Integer cDnaPosition;
 
-    @Field(value = AnnotationFieldNames.CDS_POSITION_FIELD)
+    @Field(value = CDS_POSITION_FIELD)
     private Integer cdsPosition;
 
-    @Field(value = AnnotationFieldNames.AA_POSITION_FIELD)
+    @Field(value = AA_POSITION_FIELD)
     private Integer aaPosition;
 
-    @Field(value = AnnotationFieldNames.AA_CHANGE_FIELD)
+    @Field(value = AA_CHANGE_FIELD)
     private String aaChange;
 
-    @Field(value = AnnotationFieldNames.CODON_FIELD)
+    @Field(value = CODON_FIELD)
     private String codon;
 
-    @Field(value = AnnotationFieldNames.SIFT_FIELD)
+    @Field(value = SIFT_FIELD)
     private Score sift;
 
-    @Field(value = AnnotationFieldNames.POLYPHEN_FIELD)
+    @Field(value = POLYPHEN_FIELD)
     private Score polyphen;
 
-    @Field(value = AnnotationFieldNames.SO_ACCESSION_FIELD)
+    @Field(value = SO_ACCESSION_FIELD)
     private Set<Integer> soAccessions;
 
-    @Field(value = AnnotationFieldNames.RELATIVE_POS_FIELD)
+    @Field(value = RELATIVE_POS_FIELD)
     private Integer relativePosition;
 
     public ConsequenceType() {

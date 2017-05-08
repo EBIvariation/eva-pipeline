@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.ac.ebi.eva.commons.models.data;
+package uk.ac.ebi.eva.commons.models.mongo.documents.subdocuments;
 
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
@@ -25,10 +25,14 @@ import org.springframework.data.mongodb.core.mapping.Field;
 @Document
 public class Score {
 
-    @Field(value = AnnotationFieldNames.SCORE_SCORE_FIELD)
+    public final static String SCORE_SCORE_FIELD = "sc";
+
+    public final static String SCORE_DESCRIPTION_FIELD = "desc";
+
+    @Field(value = SCORE_SCORE_FIELD)
     private Double score;
 
-    @Field(value = AnnotationFieldNames.SCORE_DESCRIPTION_FIELD)
+    @Field(value = SCORE_DESCRIPTION_FIELD)
     private String description;
 
     public Score(Double score, String description) {
