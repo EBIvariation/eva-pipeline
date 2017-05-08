@@ -69,6 +69,14 @@ The contents from the configuration files can be also provided directly as comma
 * `spring.profiles.active`: "production" to keep track of half-executed jobs using a job repository database, "test" to use an in-memory database that will record a single run
 * `app.opencga.path`: Path to the OpenCGA installation folder. An `ls` in that path should show the conf, analysis, bin and libs folders.
 
+Database credentials, all these are used to connect to a MongoDB instance. See [MongoDB options documentation](https://docs.mongodb.com/manual/reference/program/mongo/#options):
+
+* `spring.data.mongodb.authentication-database`
+* `spring.data.mongodb.host`
+* `spring.data.mongodb.password`
+* `spring.data.mongodb.port`
+* `spring.data.mongodb.username`
+
 If using a persistent (not in-memory database), the following information needs to be filled in:
 
 * `job.repository.driverClassName`: JDBC-specific argument that points to the database to use for the job repository (PostgreSQL tested and supported, driver name is `org.postgresql.Driver`)
@@ -109,13 +117,24 @@ Other parameters are:
 
 * `input.pedigree`: PED file if available, in order to calculate population-based statistics.
 * `input.fasta`: Path to the FASTA file with the reference sequence, in order to generate the VEP annotation.
+* `annotation.overwrite`: False in the common case (annotate only variants without annotation) . If true, annotation in all variants will be (over)written. Please note that if the `input.study.id` parameter is specified, annotation will be limited to variants in that study.
 
 * `output.dir`: Already existing folder to store the transformed VCF and statistics files.
 * `output.dir.annotation`: Already existing folder to store VEP output files.
 * `output.dir.statistics`: Already existing folder to store statistics output files.
 
 * `app.vep.cache.path`: Path to the VEP cache root folder.
-* `app.vep.version`: Version of the VEP cache.
+* `app.vep.version`: Version of the VEP executable.
+* `app.vep.cache.version`: Version of the VEP cache.
 * `app.vep.species`: Name of the species as stored in the cache folder.
 * `app.vep.path`: Path to the VEP installation folder.
 * `app.vep.num-forks`: Number of processes to run VEP in parallel (recommended 4).
+* `app.vep.timeout`: In seconds. If VEP doesn't respond anything during this given period, the pipeline will assume that the step failed (recommended 300).
+
+* `config.chunk.size`: Size of batches across the pipeline (recommended from 100 to 5000).
+
+* `spring.data.mongodb.database`: Database name, that contain all the collections
+* `db.collections.variants.name`: Main collection. Has variant coordinates, sample information, and some statistics and annotation.
+* `db.collections.files.name`: File (and study) metadata information.
+* `db.collections.stats.name`: Main collection for statistics. The variants collection might contain a subset of this.
+* `db.collections.annotation.metadata.name`: Main collection for annotation. The variants collection might contain a subset of this.

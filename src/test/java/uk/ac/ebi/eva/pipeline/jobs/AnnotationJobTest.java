@@ -96,17 +96,19 @@ public class AnnotationJobTest {
         File vepOutput = new File(URLHelper.resolveVepOutput(outputDirAnnot, INPUT_STUDY_ID, INPUT_VCF_ID));
         String vepOutputName = vepOutput.getName();
         temporaryFolderRule.newFile(vepOutputName);
+        File fasta = temporaryFolderRule.newFile();
 
         JobParameters jobParameters = new EvaJobParameterBuilder()
+                .annotationOverwrite("false")
                 .collectionAnnotationMetadataName(COLLECTION_ANNOTATION_METADATA_NAME)
                 .collectionVariantsName(COLLECTION_VARIANTS_NAME)
                 .databaseName(dbName)
-                .inputFasta("")
+                .inputFasta(fasta.getAbsolutePath())
                 .inputStudyId(INPUT_STUDY_ID)
                 .inputVcfId(INPUT_VCF_ID)
                 .outputDirAnnotation(outputDirAnnot)
                 .vepCachePath("")
-                .vepCacheSpecies("")
+                .vepCacheSpecies("human")
                 .vepCacheVersion("80")
                 .vepNumForks("4")
                 .vepPath(getResource(MOCK_VEP).getPath())
@@ -157,19 +159,21 @@ public class AnnotationJobTest {
     public void noVariantsToAnnotateOnlyGenerateAnnotationStepShouldRun() throws Exception {
         String dbName = mongoRule.getRandomTemporaryDatabaseName();
         String outputDirAnnot = temporaryFolderRule.getRoot().getAbsolutePath();
+        File fasta = temporaryFolderRule.newFile();
 
         JobParameters jobParameters = new EvaJobParameterBuilder()
+                .annotationOverwrite("false")
                 .collectionAnnotationMetadataName(COLLECTION_ANNOTATION_METADATA_NAME)
                 .collectionVariantsName(COLLECTION_VARIANTS_NAME)
                 .databaseName(dbName)
-                .inputFasta("")
+                .inputFasta(fasta.getAbsolutePath())
                 .inputStudyId(INPUT_STUDY_ID)
                 .inputVcfId(INPUT_VCF_ID)
                 .outputDirAnnotation(outputDirAnnot)
                 .vepCachePath("")
-                .vepCacheSpecies("")
+                .vepCacheSpecies("Human")
                 .vepCacheVersion("80")
-                .vepNumForks("")
+                .vepNumForks("4")
                 .vepPath(getResource(MOCK_VEP).getPath())
                 .vepTimeout("60")
                 .vepVersion("80")

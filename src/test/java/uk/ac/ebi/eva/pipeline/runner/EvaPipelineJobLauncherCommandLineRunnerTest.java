@@ -135,6 +135,7 @@ public class EvaPipelineJobLauncherCommandLineRunnerTest {
                 .vepNumForks("1")
                 .appVepTimeout("60")
                 .vepVersion("1")
+                .annotationOverwrite("false")
                 .inputFasta(fasta.getAbsolutePath())
                 .configDbReadPreference("secondary")
                 .dbCollectionsVariantsName("variants")
@@ -239,6 +240,7 @@ public class EvaPipelineJobLauncherCommandLineRunnerTest {
                 getResource(GENOTYPED_PROPERTIES_FILE).getAbsolutePath());
 
         evaPipelineJobLauncherCommandLineRunner.run(new EvaCommandLineBuilder()
+                .annotationOverwrite("false")
                 .inputVcf(inputFile.getAbsolutePath())
                 .inputVcfId(GenotypedVcfJobTestUtils.INPUT_VCF_ID)
                 .inputStudyId(GenotypedVcfJobTestUtils.INPUT_STUDY_ID)

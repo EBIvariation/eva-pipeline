@@ -97,6 +97,7 @@ public class GenerateVepAnnotationStepTest {
                 .inputStudyId(STUDY_ID)
                 .inputVcfId(FILE_ID)
                 .outputDirAnnotation(outputDirAnnot)
+                .annotationOverwrite("false")
                 .vepCachePath("")
                 .vepCacheSpecies("")
                 .vepCacheVersion("")
@@ -127,6 +128,7 @@ public class GenerateVepAnnotationStepTest {
         int chunkSize = 100;
 
         JobParameters jobParameters = new EvaJobParameterBuilder()
+                .annotationOverwrite("false")
                 .collectionVariantsName(collectionVariantsName)
                 .chunkSize(Integer.toString(chunkSize))
                 .databaseName(databaseName)

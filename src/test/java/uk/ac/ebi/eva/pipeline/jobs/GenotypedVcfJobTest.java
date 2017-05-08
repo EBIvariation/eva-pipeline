@@ -87,6 +87,7 @@ public class GenotypedVcfJobTest {
 
         // Run the Job
         JobParameters jobParameters = new EvaJobParameterBuilder()
+                .annotationOverwrite("false")
                 .collectionAnnotationMetadataName(GenotypedVcfJobTestUtils.COLLECTION_ANNOTATION_METADATA_NAME)
                 .collectionFilesName(GenotypedVcfJobTestUtils.COLLECTION_FILES_NAME)
                 .collectionVariantsName(GenotypedVcfJobTestUtils.COLLECTION_VARIANTS_NAME)
@@ -141,6 +142,7 @@ public class GenotypedVcfJobTest {
         File fasta = temporaryFolderRule.newFile();
 
         JobParameters jobParameters = new EvaJobParameterBuilder()
+                .annotationOverwrite("false")
                 .collectionAnnotationMetadataName(GenotypedVcfJobTestUtils.COLLECTION_ANNOTATION_METADATA_NAME)
                 .collectionFilesName(GenotypedVcfJobTestUtils.COLLECTION_FILES_NAME)
                 .collectionVariantsName(GenotypedVcfJobTestUtils.COLLECTION_VARIANTS_NAME)
