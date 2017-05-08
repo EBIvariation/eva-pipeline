@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-package uk.ac.ebi.eva.commons.models.data;
+package uk.ac.ebi.eva.commons.models.mongo.documents.subdocuments;
 
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
+import uk.ac.ebi.eva.commons.models.data.AnnotationFieldNames;
+import uk.ac.ebi.eva.commons.models.data.Score;
 
-import java.util.List;
 import java.util.Set;
 
 /**

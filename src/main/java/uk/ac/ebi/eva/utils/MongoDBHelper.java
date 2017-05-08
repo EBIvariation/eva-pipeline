@@ -19,7 +19,7 @@ import com.mongodb.ServerAddress;
 import org.opencb.commons.utils.CryptoUtils;
 
 import uk.ac.ebi.eva.commons.models.data.Variant;
-import uk.ac.ebi.eva.commons.models.data.Annotation;
+import uk.ac.ebi.eva.commons.models.mongo.documents.Annotation;
 
 import java.net.UnknownHostException;
 import java.util.LinkedList;

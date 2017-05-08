@@ -16,6 +16,8 @@
  */
 package uk.ac.ebi.eva.commons.models.data;
 
+import uk.ac.ebi.eva.commons.models.mongo.documents.Annotation;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;

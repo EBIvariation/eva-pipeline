@@ -22,8 +22,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.item.file.LineMapper;
 
-import uk.ac.ebi.eva.commons.models.data.Annotation;
-import uk.ac.ebi.eva.commons.models.data.ConsequenceType;
+import uk.ac.ebi.eva.commons.models.mongo.documents.Annotation;
+import uk.ac.ebi.eva.commons.models.mongo.documents.subdocuments.ConsequenceType;
 import uk.ac.ebi.eva.commons.models.data.Score;
 
 import java.util.Arrays;
