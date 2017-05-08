@@ -13,14 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.ac.ebi.eva.commons.models.data;
+package uk.ac.ebi.eva.commons.models.mongo.documents;
 
 import com.google.common.base.Strings;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.annotation.PersistenceConstructor;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
+import uk.ac.ebi.eva.commons.models.data.AnnotationFieldNames;
+import uk.ac.ebi.eva.commons.models.mongo.documents.subdocuments.ConsequenceType;
+import uk.ac.ebi.eva.commons.models.mongo.documents.subdocuments.Xref;
 
 import java.util.HashMap;
 import java.util.HashSet;
