@@ -20,7 +20,6 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
-import uk.ac.ebi.eva.commons.models.data.AnnotationFieldNames;
 import uk.ac.ebi.eva.commons.models.mongo.documents.subdocuments.ConsequenceType;
 import uk.ac.ebi.eva.commons.models.mongo.documents.subdocuments.Xref;
 
@@ -36,16 +35,30 @@ import java.util.Set;
 @Document
 public class Annotation {
 
+    private static final String CHROMOSOME_FIELD = "chr";
+
+    private static final String START_FIELD = "start";
+
+    private static final String END_FIELD = "end";
+
+    public static final String XREFS_FIELD = "xrefs";
+
+    private static final String VEP_VERSION_FIELD = "vepVer";
+
+    public static final String VEP_CACHE_VERSION_FIELD = "cacheVer";
+
+    public static final String CONSEQUENCE_TYPE_FIELD = "ct";
+
     @Id
     private String id;
 
-    @Field(value = AnnotationFieldNames.CHROMOSOME_FIELD)
+    @Field(value = CHROMOSOME_FIELD)
     private String chromosome;
 
-    @Field(value = AnnotationFieldNames.START_FIELD)
+    @Field(value = START_FIELD)
     private int start;
 
-    @Field(value = AnnotationFieldNames.END_FIELD)
+    @Field(value = END_FIELD)
     private int end;
 
     @Transient
@@ -54,16 +67,16 @@ public class Annotation {
     @Transient
     private String alternativeAllele;
 
-    @Field(value = AnnotationFieldNames.ENSEMBL_VERSION_FIELD)
-    private String ensemblVersion;
+    @Field(value = VEP_VERSION_FIELD)
+    private String vepVersion;
 
-    @Field(value = AnnotationFieldNames.VEP_CACHE_VERSION_FIELD)
+    @Field(value = VEP_CACHE_VERSION_FIELD)
     private String vepCacheVersion;
 
-    @Field(value = AnnotationFieldNames.XREFS_FIELD)
+    @Field(value = XREFS_FIELD)
     private Set<Xref> xrefs;
 
-    @Field(value = AnnotationFieldNames.CONSEQUENCE_TYPE_FIELD)
+    @Field(value = CONSEQUENCE_TYPE_FIELD)
     private Set<ConsequenceType> consequenceTypes;
 
     @Transient
@@ -146,12 +159,12 @@ public class Annotation {
         this.consequenceTypes = consequenceTypes;
     }
 
-    public String getEnsemblVersion() {
-        return ensemblVersion;
+    public String getVepVersion() {
+        return vepVersion;
     }
 
-    public void setEnsemblVersion(String ensemblVersion) {
-        this.ensemblVersion = ensemblVersion;
+    public void setVepVersion(String vepVersion) {
+        this.vepVersion = vepVersion;
     }
 
     public String getVepCacheVersion() {

@@ -33,7 +33,7 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.ac.ebi.eva.commons.models.mongo.documents.Annotation;
 import uk.ac.ebi.eva.commons.models.mongo.documents.subdocuments.ConsequenceType;
-import uk.ac.ebi.eva.commons.models.data.Score;
+import uk.ac.ebi.eva.commons.models.mongo.documents.subdocuments.Score;
 import uk.ac.ebi.eva.pipeline.Application;
 import uk.ac.ebi.eva.pipeline.configuration.MongoConfiguration;
 import uk.ac.ebi.eva.pipeline.io.mappers.AnnotationLineMapper;
@@ -54,12 +54,13 @@ import java.util.stream.Collectors;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static uk.ac.ebi.eva.commons.models.data.AnnotationFieldNames.CONSEQUENCE_TYPE_FIELD;
-import static uk.ac.ebi.eva.commons.models.data.AnnotationFieldNames.POLYPHEN_FIELD;
-import static uk.ac.ebi.eva.commons.models.data.AnnotationFieldNames.SCORE_DESCRIPTION_FIELD;
-import static uk.ac.ebi.eva.commons.models.data.AnnotationFieldNames.SCORE_SCORE_FIELD;
-import static uk.ac.ebi.eva.commons.models.data.AnnotationFieldNames.SIFT_FIELD;
-import static uk.ac.ebi.eva.commons.models.data.AnnotationFieldNames.XREFS_FIELD;
+
+import static uk.ac.ebi.eva.commons.models.data.VariantAnnotation.POLYPHEN_FIELD;
+import static uk.ac.ebi.eva.commons.models.data.VariantAnnotation.SIFT_FIELD;
+import static uk.ac.ebi.eva.commons.models.mongo.documents.Annotation.CONSEQUENCE_TYPE_FIELD;
+import static uk.ac.ebi.eva.commons.models.mongo.documents.Annotation.XREFS_FIELD;
+import static uk.ac.ebi.eva.commons.models.mongo.documents.subdocuments.Score.SCORE_DESCRIPTION_FIELD;
+import static uk.ac.ebi.eva.commons.models.mongo.documents.subdocuments.Score.SCORE_SCORE_FIELD;
 import static uk.ac.ebi.eva.test.data.VepOutputContent.vepOutputContent;
 
 /**

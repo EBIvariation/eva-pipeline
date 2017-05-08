@@ -45,10 +45,10 @@ import java.util.List;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static uk.ac.ebi.eva.commons.models.data.AnnotationFieldNames.POLYPHEN_FIELD;
-import static uk.ac.ebi.eva.commons.models.data.AnnotationFieldNames.SIFT_FIELD;
-import static uk.ac.ebi.eva.commons.models.data.AnnotationFieldNames.SO_ACCESSION_FIELD;
-import static uk.ac.ebi.eva.commons.models.data.AnnotationFieldNames.XREFS_FIELD;
+import static uk.ac.ebi.eva.commons.models.data.VariantAnnotation.POLYPHEN_FIELD;
+import static uk.ac.ebi.eva.commons.models.data.VariantAnnotation.SIFT_FIELD;
+import static uk.ac.ebi.eva.commons.models.data.VariantAnnotation.SO_ACCESSION_FIELD;
+import static uk.ac.ebi.eva.commons.models.data.VariantAnnotation.XREFS_FIELD;
 import static uk.ac.ebi.eva.test.data.VepOutputContent.vepOutputContentWithExtraFields;
 import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResourceUrl;
 
