@@ -32,6 +32,7 @@ import org.springframework.context.annotation.Scope;
 
 import uk.ac.ebi.eva.pipeline.jobs.steps.CreateDatabaseIndexesStep;
 import uk.ac.ebi.eva.pipeline.jobs.steps.GeneLoaderStep;
+import uk.ac.ebi.eva.pipeline.parameters.NewJobIncrementer;
 
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.CREATE_DATABASE_INDEXES_STEP;
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.GENES_LOAD_STEP;
@@ -67,7 +68,7 @@ public class DatabaseInitializationJob {
 
         JobBuilder jobBuilder = jobBuilderFactory
                 .get(INIT_DATABASE_JOB)
-                .incrementer(new RunIdIncrementer());
+                .incrementer(new NewJobIncrementer());
 
         return jobBuilder
                 .start(createDatabaseIndexesStep)

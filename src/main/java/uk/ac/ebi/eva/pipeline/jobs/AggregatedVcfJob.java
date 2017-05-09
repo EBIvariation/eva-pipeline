@@ -35,6 +35,7 @@ import org.springframework.context.annotation.Scope;
 import uk.ac.ebi.eva.pipeline.jobs.flows.AnnotationFlowOptional;
 import uk.ac.ebi.eva.pipeline.jobs.steps.LoadFileStep;
 import uk.ac.ebi.eva.pipeline.jobs.steps.VariantLoaderStep;
+import uk.ac.ebi.eva.pipeline.parameters.NewJobIncrementer;
 import uk.ac.ebi.eva.pipeline.parameters.validation.job.AggregatedVcfJobParametersValidator;
 
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.AGGREGATED_VCF_JOB;
@@ -76,7 +77,7 @@ public class AggregatedVcfJob {
 
         JobBuilder jobBuilder = jobBuilderFactory
                 .get(AGGREGATED_VCF_JOB)
-                .incrementer(new RunIdIncrementer())
+                .incrementer(new NewJobIncrementer())
                 .validator(new AggregatedVcfJobParametersValidator());
         FlowJobBuilder builder = jobBuilder
                 .flow(variantLoaderStep)
