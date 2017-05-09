@@ -16,6 +16,7 @@
  */
 package uk.ac.ebi.eva.commons.models.data;
 
+import org.opencb.commons.utils.CryptoUtils;
 import uk.ac.ebi.eva.commons.models.mongo.documents.Annotation;
 
 import java.util.HashMap;
@@ -117,7 +118,7 @@ public class Variant {
     /**
      * Annotations of the genomic variation.
      */
-    private Annotation annotation;
+    private Set<Annotation> annotations;
 
 
     public Variant() {
@@ -147,7 +148,6 @@ public class Variant {
         }
 
         this.sourceEntries = new HashMap<>();
-        this.annotation = new Annotation(this.chromosome, this.start, this.end, this.reference);
     }
 
     public VariantType getType() {
@@ -285,14 +285,6 @@ public class Variant {
         return file.getStats();
     }
 
-    public Annotation getAnnotation() {
-        return annotation;
-    }
-
-    public void setAnnotation(Annotation annotation) {
-        this.annotation = annotation;
-    }
-
     /**
      * Copies the current variant and returns the copy in Ensembl format.
      * see http://www.ensembl.org/info/docs/tools/vep/vep_formats.html
@@ -395,7 +387,6 @@ public class Variant {
      */
     public Variant clone() {
         Variant variant = new Variant(chromosome, start, end, reference, alternate);
-        variant.setAnnotation(this.getAnnotation());
         variant.setIds(this.getIds());
         variant.setSourceEntries(this.getSourceEntries());
         variant.setType(this.getType());
@@ -408,4 +399,32 @@ public class Variant {
         return studyId + "_" + fileId;
     }
 
+    public String buildVariantId(){
+        return buildVariantId(chromosome, start, reference, alternate);
+    }
+
+    public static String buildVariantId(String chromosome, int start, String reference, String alternate) {
+        StringBuilder builder = new StringBuilder(chromosome);
+        builder.append("_");
+        builder.append(start);
+        builder.append("_");
+        if (!reference.equals("-")) {
+            if (reference.length() < 50) {
+                builder.append(reference);
+            } else {
+                builder.append(new String(CryptoUtils.encryptSha1(reference)));
+            }
+        }
+
+        builder.append("_");
+        if (!alternate.equals("-")) {
+            if (alternate.length() < 50) {
+                builder.append(alternate);
+            } else {
+                builder.append(new String(CryptoUtils.encryptSha1(alternate)));
+            }
+        }
+
+        return builder.toString();
+    }
 }
