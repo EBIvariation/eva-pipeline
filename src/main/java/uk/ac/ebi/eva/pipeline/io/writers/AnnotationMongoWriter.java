@@ -68,10 +68,6 @@ public class AnnotationMongoWriter extends MongoItemWriter<Annotation> {
 
     private String collection;
 
-    private String vepVersion;
-
-    private String vepCacheVersion;
-
     public AnnotationMongoWriter(MongoOperations mongoOperations,
                                  String collection,
                                  String vepVersion,
@@ -85,8 +81,6 @@ public class AnnotationMongoWriter extends MongoItemWriter<Annotation> {
 
         this.mongoOperations = mongoOperations;
         this.collection = collection;
-        this.vepVersion = vepVersion;
-        this.vepCacheVersion = vepCacheVersion;
 
         createIndexes();
     }
