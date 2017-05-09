@@ -36,13 +36,13 @@ import java.io.File;
  */
 public class AnnotationFlatFileReader extends FlatFileItemReader<Annotation> {
 
-    public AnnotationFlatFileReader(File file) {
+    public AnnotationFlatFileReader(File file, String vepVersion, String vepCacheVersion) {
         Resource resource = new GzipLazyResource(file);
         setResource(resource);
-        setLineMapper(new AnnotationLineMapper());
+        setLineMapper(new AnnotationLineMapper(vepVersion, vepCacheVersion));
     }
 
-    public AnnotationFlatFileReader(String string) {
-        this(new File(string));
+    public AnnotationFlatFileReader(String string, String vepVersion, String vepCacheVersion) {
+        this(new File(string), vepVersion, vepCacheVersion);
     }
 }

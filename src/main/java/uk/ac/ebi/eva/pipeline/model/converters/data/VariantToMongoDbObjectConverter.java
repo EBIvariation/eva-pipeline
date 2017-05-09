@@ -63,8 +63,6 @@ public class VariantToMongoDbObjectConverter implements Converter<Variant, DBObj
         Assert.notNull(variant, "Variant should not be null. Please provide a valid Variant object");
         logger.trace("Convert variant {} into mongo object", variant);
 
-        variant.setAnnotation(null);
-
         VariantSourceEntry variantSourceEntry = variant.getSourceEntries().values().iterator().next();
 
         BasicDBObject addToSet = new BasicDBObject().append(VariantToDBObjectConverter.FILES_FIELD,

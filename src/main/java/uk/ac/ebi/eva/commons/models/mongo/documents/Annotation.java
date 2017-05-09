@@ -17,15 +17,14 @@ package uk.ac.ebi.eva.commons.models.mongo.documents;
 
 import com.google.common.base.Strings;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
+import uk.ac.ebi.eva.commons.models.data.Variant;
 import uk.ac.ebi.eva.commons.models.mongo.documents.subdocuments.ConsequenceType;
 import uk.ac.ebi.eva.commons.models.mongo.documents.subdocuments.Xref;
 
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -61,132 +60,106 @@ public class Annotation {
     @Field(value = END_FIELD)
     private int end;
 
-    @Transient
-    private String referenceAllele;
-
-    @Transient
-    private String alternativeAllele;
-
     @Field(value = VEP_VERSION_FIELD)
     private String vepVersion;
 
     @Field(value = VEP_CACHE_VERSION_FIELD)
     private String vepCacheVersion;
 
-    @Field(value = XREFS_FIELD)
-    private Set<Xref> xrefs;
-
     @Field(value = CONSEQUENCE_TYPE_FIELD)
     private Set<ConsequenceType> consequenceTypes;
 
-    @Transient
-    private Map<String, Object> additionalAttributes;
+    @Field(value = XREFS_FIELD)
+    private Set<Xref> xrefs;
 
-    Annotation(){
+    Annotation() {
         // Empty document constructor for spring-data
     }
 
-    public Annotation(String chromosome, int start, int end, String referenceAllele) {
-        this(chromosome, start, end, referenceAllele, "");
-    }
-
-    public Annotation(String chromosome, int start, int end, String referenceAllele, String alternativeAllele) {
+    public Annotation(String chromosome, int start, int end, String referenceAllele, String alternativeAllele,
+                      String vepVersion, String vepCacheVersion) {
         this.chromosome = chromosome;
         this.start = start;
         this.end = end;
-        this.referenceAllele = referenceAllele;
-        this.alternativeAllele = alternativeAllele;
+        this.vepVersion = vepVersion;
+        this.vepCacheVersion = vepCacheVersion;
 
-        this.id = "";
+        this.id = buildAnnotationId(chromosome, start, referenceAllele, alternativeAllele, vepVersion, vepCacheVersion);
         this.xrefs = new HashSet<>();
         this.consequenceTypes = new HashSet<>();
-        this.additionalAttributes = new HashMap<>();
     }
 
     public String getChromosome() {
         return chromosome;
     }
 
-    public void setChromosome(String chromosome) {
-        this.chromosome = chromosome;
-    }
-
     public int getStart() {
         return start;
-    }
-
-    public void setStart(int start) {
-        this.start = start;
     }
 
     public int getEnd() {
         return end;
     }
 
-    public void setEnd(int end) {
-        this.end = end;
-    }
-
-    public String getReferenceAllele() {
-        return referenceAllele;
-    }
-
-    public String getAlternativeAllele() {
-        return alternativeAllele;
-    }
-
     public String getId() {
         return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
     }
 
     public Set<Xref> getXrefs() {
         return xrefs;
     }
 
-    public void setXrefs(Set<Xref> xrefs) {
-        this.xrefs = xrefs;
-    }
-
     public Set<ConsequenceType> getConsequenceTypes() {
-        return consequenceTypes;
+        return Collections.unmodifiableSet(consequenceTypes);
     }
 
-    public void setConsequenceTypes(Set<ConsequenceType> consequenceTypes) {
-        this.consequenceTypes = consequenceTypes;
+    public void addConsequenceType(ConsequenceType consequenceType) {
+        consequenceTypes.add(consequenceType);
+        generateXrefsFromConsequenceType(consequenceType);
+    }
+
+    public void addConsequenceTypes(Set<ConsequenceType> consequenceTypes) {
+        for(ConsequenceType consequenceType: consequenceTypes){
+            addConsequenceType(consequenceType);
+        }
     }
 
     public String getVepVersion() {
         return vepVersion;
     }
 
-    public void setVepVersion(String vepVersion) {
-        this.vepVersion = vepVersion;
-    }
-
     public String getVepCacheVersion() {
         return vepCacheVersion;
     }
 
-    public void setVepCacheVersion(String vepCacheVersion) {
-        this.vepCacheVersion = vepCacheVersion;
-    }
-
-    public void generateXrefsFromConsequenceTypes() {
-        for (ConsequenceType consequenceType : consequenceTypes) {
-            if (!Strings.isNullOrEmpty(consequenceType.getGeneName())) {
-                xrefs.add(new Xref(consequenceType.getGeneName(), "HGNC"));
-            }
-            if (!Strings.isNullOrEmpty(consequenceType.getEnsemblGeneId())) {
-                xrefs.add(new Xref(consequenceType.getEnsemblGeneId(), "ensemblGene"));
-            }
-            if (!Strings.isNullOrEmpty(consequenceType.getEnsemblTranscriptId())) {
-                xrefs.add(new Xref(consequenceType.getEnsemblTranscriptId(), "ensemblTranscript"));
-            }
+    private void generateXrefsFromConsequenceType(ConsequenceType consequenceType) {
+        if (!Strings.isNullOrEmpty(consequenceType.getGeneName())) {
+            xrefs.add(new Xref(consequenceType.getGeneName(), "HGNC"));
+        }
+        if (!Strings.isNullOrEmpty(consequenceType.getEnsemblGeneId())) {
+            xrefs.add(new Xref(consequenceType.getEnsemblGeneId(), "ensemblGene"));
+        }
+        if (!Strings.isNullOrEmpty(consequenceType.getEnsemblTranscriptId())) {
+            xrefs.add(new Xref(consequenceType.getEnsemblTranscriptId(), "ensemblTranscript"));
         }
     }
 
+    public static String buildAnnotationId(String chromosome, int start, String reference, String alternate,
+                                           String vepVersion, String vepCacheVersion) {
+        StringBuilder builder = new StringBuilder(Variant.buildVariantId(chromosome, start, reference, alternate));
+        builder.append("_");
+        builder.append(vepVersion);
+        builder.append("_");
+        builder.append(vepCacheVersion);
+        return builder.toString();
+    }
+
+    /**
+     * Builds the variant id from the current annotation id. In essence we remove the two extra fields added at the end
+     * of the id and the underscores.
+     * @return
+     */
+    public String buildVariantId() {
+        return getId().substring(0, getId().length() - vepVersion.length() -vepCacheVersion.length() -2);
+    }
 }

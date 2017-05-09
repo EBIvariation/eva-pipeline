@@ -95,7 +95,7 @@ public class AnnotationMongoWriterTest {
 
     @Before
     public void setUp() throws Exception {
-        AnnotationLineMapper = new AnnotationLineMapper();
+        AnnotationLineMapper = new AnnotationLineMapper(VEP_VERSION, VEP_CACHE_VERSION);
     }
 
     @Test
@@ -188,7 +188,8 @@ public class AnnotationMongoWriterTest {
     public void shouldWriteSubstitutionScoresIntoMongoDb() throws Exception {
         String databaseName = mongoRule.getRandomTemporaryDatabaseName();
 
-        Annotation annotation = new Annotation("X", 1, 10, "A", "T");
+        Annotation annotation = new Annotation("X", 1, 10, "A", "T",
+                VEP_VERSION, VEP_CACHE_VERSION);
 
         Score siftScore = new Score(0.02, "deleterious");
         Score polyphenScore = new Score(0.846, "possibly_damaging");
@@ -197,7 +198,7 @@ public class AnnotationMongoWriterTest {
         consequenceType.setSift(siftScore);
         consequenceType.setPolyphen(polyphenScore);
 
-        annotation.setConsequenceTypes(new HashSet<>(Collections.singletonList(consequenceType)));
+        annotation.addConsequenceType(consequenceType);
 
         MongoOperations operations = MongoConfiguration.getMongoOperations(databaseName, mongoConnection,
                                                                            mongoMappingContext);

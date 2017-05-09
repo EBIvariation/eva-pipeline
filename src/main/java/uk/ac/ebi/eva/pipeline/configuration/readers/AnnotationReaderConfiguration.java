@@ -35,7 +35,8 @@ public class AnnotationReaderConfiguration {
     @Bean(VARIANT_ANNOTATION_READER)
     @StepScope
     public ItemStreamReader<Annotation> annotationReader(AnnotationParameters annotationParameters) {
-        return new AnnotationFlatFileReader(annotationParameters.getVepOutput());
+        return new AnnotationFlatFileReader(annotationParameters.getVepOutput(), annotationParameters.getVepVersion(),
+                annotationParameters.getVepCacheVersion());
     }
 
 }

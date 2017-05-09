@@ -75,8 +75,8 @@ public class VariantMongoWriter extends MongoItemWriter<Variant> {
     protected void doWrite(List<? extends Variant> variants) {
         BulkWriteOperation bulk = mongoOperations.getCollection(collection).initializeUnorderedBulkOperation();
         for (Variant variant : variants) {
-            String id = MongoDBHelper.buildVariantStorageId(variant.getChromosome(), variant.getStart(),
-                                                            variant.getReference(), variant.getAlternate());
+            String id = Variant.buildVariantId(variant.getChromosome(), variant.getStart(),
+                    variant.getReference(), variant.getAlternate());
 
             // the chromosome and start appear just as shard keys, in an unsharded cluster they wouldn't be needed
             BasicDBObject query = new BasicDBObject("_id", id)
@@ -123,8 +123,6 @@ public class VariantMongoWriter extends MongoItemWriter<Variant> {
     private DBObject generateUpdate(Variant variant) {
         Assert.notNull(variant, "Variant should not be null. Please provide a valid Variant object");
         logger.trace("Convert variant {} into mongo object", variant);
-
-        variant.setAnnotation(null);
 
         BasicDBObject addToSet = new BasicDBObject();
 
