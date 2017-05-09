@@ -22,8 +22,8 @@ import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.item.ItemStreamReader;
+import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.file.FlatFileParseException;
-import org.springframework.batch.item.support.CompositeItemWriter;
 import org.springframework.batch.repeat.policy.SimpleCompletionPolicy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -72,7 +72,7 @@ public class AnnotationLoaderStep {
 
     @Autowired
     @Qualifier(COMPOSITE_ANNOTATION_VARIANT_WRITER)
-    private CompositeItemWriter<Annotation> compositeAnnotationVariantItemWriter;
+    private ItemWriter<Annotation> compositeAnnotationVariantItemWriter;
 
     @Bean(LOAD_VEP_ANNOTATION_STEP)
     public Step loadVepAnnotationStep(StepBuilderFactory stepBuilderFactory, JobOptions jobOptions,
