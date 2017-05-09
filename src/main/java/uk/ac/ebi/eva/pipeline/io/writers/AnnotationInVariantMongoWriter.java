@@ -31,7 +31,6 @@ import uk.ac.ebi.eva.commons.models.data.VariantAnnotation;
 import uk.ac.ebi.eva.commons.models.mongo.documents.Annotation;
 import uk.ac.ebi.eva.commons.models.mongo.documents.subdocuments.ConsequenceType;
 import uk.ac.ebi.eva.commons.models.mongo.documents.subdocuments.Xref;
-import uk.ac.ebi.eva.utils.MongoDBHelper;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -99,9 +98,10 @@ public class AnnotationInVariantMongoWriter extends MongoItemWriter<Annotation> 
         this.vepCacheVersion = vepCacheVersion;
     }
 
+    // TODO rewrite this to be bulk-friendly
     @Override
     protected void doWrite(List<? extends Annotation> annotations) {
-        Map<String, List<Annotation>> annotationsByStorageId = groupAnnotationById(annotations);
+        Map<String, List<Annotation>> annotationsByStorageId = groupAnnotationByVariantId(annotations);
 
         for (Map.Entry<String, List<Annotation>> annotationsIdEntry : annotationsByStorageId.entrySet()) {
             VariantAnnotation variantAnnotation = extractFieldsFromAnnotations(annotationsIdEntry.getValue());
@@ -202,7 +202,6 @@ public class AnnotationInVariantMongoWriter extends MongoItemWriter<Annotation> 
         VariantAnnotation variantAnnotation = new VariantAnnotation(vepVersion, vepCacheVersion);
 
         for (Annotation annotation : annotations) {
-            annotation.generateXrefsFromConsequenceTypes();
             Set<Xref> xrefs = annotation.getXrefs();
             if (xrefs != null) {
                 variantAnnotation.addXrefIds(xrefs.stream().map(Xref::getId).collect(Collectors.toSet()));
@@ -243,16 +242,15 @@ public class AnnotationInVariantMongoWriter extends MongoItemWriter<Annotation> 
         }
     }
 
-    private Map<String, List<Annotation>> groupAnnotationById(List<? extends Annotation> annotations) {
-        Map<String, List<Annotation>> annotationsByStorageId = new HashMap<>();
+    private Map<String, List<Annotation>> groupAnnotationByVariantId(List<? extends Annotation> annotations) {
+        Map<String, List<Annotation>> annotationsByVariantId = new HashMap<>();
         for (Annotation annotation : annotations) {
-            String id = MongoDBHelper.buildVariantStorageId(annotation);
-
-            annotationsByStorageId.putIfAbsent(id, new ArrayList<>());
-            annotationsByStorageId.get(id).add(annotation);
+            String id = annotation.buildVariantId();
+            annotationsByVariantId.putIfAbsent(id, new ArrayList<>());
+            annotationsByVariantId.get(id).add(annotation);
         }
 
-        return annotationsByStorageId;
+        return annotationsByVariantId;
     }
 
 }

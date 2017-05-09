@@ -41,6 +41,10 @@ import static org.junit.Assert.assertEquals;
  */
 public class AnnotationFlatFileReaderTest {
 
+    private static final String VEP_VERSION = "1";
+
+    private static final String VEP_CACHE_VERSION = "1";
+
     @Rule
     public PipelineTemporaryFolderRule temporaryFolderRule = new PipelineTemporaryFolderRule();
 
@@ -51,7 +55,8 @@ public class AnnotationFlatFileReaderTest {
         //simulate VEP output file
         File file = temporaryFolderRule.newGzipFile(VepOutputContent.vepOutputContent);
 
-        AnnotationFlatFileReader annotationFlatFileReader = new AnnotationFlatFileReader(file);
+        AnnotationFlatFileReader annotationFlatFileReader = new AnnotationFlatFileReader(file, VEP_VERSION,
+                VEP_CACHE_VERSION);
         annotationFlatFileReader.setSaveState(false);
         annotationFlatFileReader.open(executionContext);
 
@@ -78,7 +83,8 @@ public class AnnotationFlatFileReaderTest {
         ExecutionContext executionContext = MetaDataInstanceFactory.createStepExecution().getExecutionContext();
 
         File file = temporaryFolderRule.newGzipFile(VepOutputContent.vepOutputContentMalformedCoordinates);
-        AnnotationFlatFileReader annotationFlatFileReader = new AnnotationFlatFileReader(file);
+        AnnotationFlatFileReader annotationFlatFileReader = new AnnotationFlatFileReader(file, VEP_VERSION,
+                VEP_CACHE_VERSION);
         annotationFlatFileReader.open(executionContext);
         annotationFlatFileReader.read();
     }
@@ -89,7 +95,8 @@ public class AnnotationFlatFileReaderTest {
         ExecutionContext executionContext = MetaDataInstanceFactory.createStepExecution().getExecutionContext();
 
         File file = temporaryFolderRule.newGzipFile(VepOutputContent.vepOutputContentMalformedVariantFields);
-        AnnotationFlatFileReader annotationFlatFileReader = new AnnotationFlatFileReader(file);
+        AnnotationFlatFileReader annotationFlatFileReader = new AnnotationFlatFileReader(file, VEP_VERSION,
+                VEP_CACHE_VERSION);
         annotationFlatFileReader.open(executionContext);
         annotationFlatFileReader.read();
     }

@@ -83,7 +83,7 @@ public class AnnotationInVariantMongoWriterTest {
 
     @Before
     public void setUp() throws Exception {
-        AnnotationLineMapper = new AnnotationLineMapper();
+        AnnotationLineMapper = new AnnotationLineMapper(VEP_VERSION, VEP_CACHE_VERSION);
     }
 
     @Test

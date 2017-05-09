@@ -105,13 +105,6 @@ public class AnnotationMongoWriter extends MongoItemWriter<Annotation> {
                 annotation = concatenateOtherAnnotations(
                         annotation, annotationsById.subList(1, annotationsById.size()));
             }
-
-            annotation.setId(storageId);
-            annotation.setVepVersion(vepVersion);
-            annotation.setVepCacheVersion(vepCacheVersion);
-
-            annotation.generateXrefsFromConsequenceTypes();
-
             writeAnnotationInMongoDb(storageId, annotation);
         }
     }
@@ -119,8 +112,7 @@ public class AnnotationMongoWriter extends MongoItemWriter<Annotation> {
     private Map<String, List<Annotation>> groupAnnotationById(List<? extends Annotation> annotations) {
         Map<String, List<Annotation>> annotationsByStorageId = new HashMap<>();
         for (Annotation annotation : annotations) {
-            String id = buildAnnotationtorageId(annotation);
-
+            String id = annotation.getId();
             annotationsByStorageId.putIfAbsent(id, new ArrayList<>());
             annotationsByStorageId.get(id).add(annotation);
         }
@@ -138,10 +130,9 @@ public class AnnotationMongoWriter extends MongoItemWriter<Annotation> {
      */
     private Annotation concatenateOtherAnnotations(Annotation annotation,
                                                    List<Annotation> otherAnnotationsToConcatenate) {
-
         for (Annotation annotationToAppend : otherAnnotationsToConcatenate) {
             if (annotationToAppend.getConsequenceTypes() != null) {
-                annotation.getConsequenceTypes().addAll(annotationToAppend.getConsequenceTypes());
+                annotation.addConsequenceTypes(annotationToAppend.getConsequenceTypes());
             }
         }
 
@@ -165,13 +156,6 @@ public class AnnotationMongoWriter extends MongoItemWriter<Annotation> {
         } else {
             mongoOperations.save(annotation, collection);
         }
-    }
-
-    private String buildAnnotationtorageId(Annotation annotation) {
-        return MongoDBHelper.buildAnnotationStorageId(annotation.getChromosome(), annotation.getStart(),
-                                                      annotation.getReferenceAllele(),
-                                                      annotation.getAlternativeAllele(), vepVersion,
-                                                      vepCacheVersion);
     }
 
     private void createIndexes() {

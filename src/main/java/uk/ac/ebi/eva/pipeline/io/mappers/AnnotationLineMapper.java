@@ -53,6 +53,14 @@ import java.util.stream.Collectors;
 public class AnnotationLineMapper implements LineMapper<Annotation> {
     private static final Logger logger = LoggerFactory.getLogger(AnnotationLineMapper.class);
 
+    private final String vepVersion;
+    private final String vepCacheVersion;
+
+    public AnnotationLineMapper(String vepVersion, String vepCacheVersion) {
+        this.vepVersion = vepVersion;
+        this.vepCacheVersion = vepCacheVersion;
+    }
+
     /**
      * Map a line in VEP output file to {@link Annotation}
      * @param line in VEP output
@@ -75,7 +83,9 @@ public class AnnotationLineMapper implements LineMapper<Annotation> {
                 variantMap.get("chromosome"),
                 Integer.valueOf(variantMap.get("start")),
                 Integer.valueOf(variantMap.get("end")), variantMap.get("reference"),
-                variantMap.get("alternative"));
+                variantMap.get("alternative"),
+                vepVersion,
+                vepCacheVersion);
 
         /**
          * parses extra column and populates fields as required.
@@ -92,7 +102,7 @@ public class AnnotationLineMapper implements LineMapper<Annotation> {
         } else {
             consequenceType.setSoAccessions(mapSoTermsToSoAccessions(lineFields[6].split(",")));
         }
-        currentAnnotation.getConsequenceTypes().add(consequenceType);
+        currentAnnotation.addConsequenceType(consequenceType);
         
         return currentAnnotation;
     }

@@ -35,9 +35,13 @@ import static org.junit.Assert.assertNotNull;
  */
 public class AnnotationLineMapperTest {
 
+    private static final String VEP_VERSION = "1";
+
+    private static final String VEP_CACHE_VERSION = "1";
+
     @Test
     public void shouldParseAllDefaultFieldsInVepOutput() throws Exception {
-        AnnotationLineMapper lineMapper = new AnnotationLineMapper();
+        AnnotationLineMapper lineMapper = new AnnotationLineMapper(VEP_VERSION, VEP_CACHE_VERSION);
         for (String annotLine : VepOutputContent.vepOutputContent.split("\n")) {
             Annotation annotation = lineMapper.mapLine(annotLine, 0);
             assertNotNull(annotation.getConsequenceTypes());
@@ -46,7 +50,7 @@ public class AnnotationLineMapperTest {
 
     @Test
     public void shouldParseAllTranscriptFieldsInVepOutput() {
-        AnnotationLineMapper lineMapper = new AnnotationLineMapper();
+        AnnotationLineMapper lineMapper = new AnnotationLineMapper(VEP_VERSION, VEP_CACHE_VERSION);
         Annotation annotation = lineMapper.mapLine(VepOutputContent.vepOutputContentTranscriptFields, 0);
         Set<ConsequenceType> consequenceTypes = annotation.getConsequenceTypes();
 
@@ -64,7 +68,7 @@ public class AnnotationLineMapperTest {
 
     @Test
     public void shouldParseVepOutputWithoutTranscript() {
-        AnnotationLineMapper lineMapper = new AnnotationLineMapper();
+        AnnotationLineMapper lineMapper = new AnnotationLineMapper(VEP_VERSION, VEP_CACHE_VERSION);
         Annotation annotation = lineMapper.mapLine(VepOutputContent.vepOutputContentWithOutTranscript, 0);
         Set<ConsequenceType> consequenceTypes = annotation.getConsequenceTypes();
 
@@ -83,13 +87,13 @@ public class AnnotationLineMapperTest {
 
     @Test(expected = ArrayIndexOutOfBoundsException.class)
     public void shouldNotParseVepOutputWithMalformedCoordinates() {
-        AnnotationLineMapper lineMapper = new AnnotationLineMapper();
+        AnnotationLineMapper lineMapper = new AnnotationLineMapper(VEP_VERSION, VEP_CACHE_VERSION);
         lineMapper.mapLine(VepOutputContent.vepOutputContentMalformedCoordinates, 0);
     }
 
     @Test
     public void shouldParseVepOutputWithChromosomeIdWithUnderscore() {
-        AnnotationLineMapper lineMapper = new AnnotationLineMapper();
+        AnnotationLineMapper lineMapper = new AnnotationLineMapper(VEP_VERSION, VEP_CACHE_VERSION);
         Annotation annotation = lineMapper
                 .mapLine(VepOutputContent.vepOutputContentChromosomeIdWithUnderscore, 0);
 
@@ -98,13 +102,13 @@ public class AnnotationLineMapperTest {
 
     @Test(expected = ArrayIndexOutOfBoundsException.class)
     public void shouldNotParseVepOutputWithMalformedVariantFields() {
-        AnnotationLineMapper lineMapper = new AnnotationLineMapper();
+        AnnotationLineMapper lineMapper = new AnnotationLineMapper(VEP_VERSION, VEP_CACHE_VERSION);
         lineMapper.mapLine(VepOutputContent.vepOutputContentMalformedVariantFields, 0);
     }
 
     @Test
     public void shouldParseVepOutputWithExtraFields() {
-        AnnotationLineMapper lineMapper = new AnnotationLineMapper();
+        AnnotationLineMapper lineMapper = new AnnotationLineMapper(VEP_VERSION, VEP_CACHE_VERSION);
         Annotation annotation = lineMapper.mapLine(VepOutputContent.vepOutputContentWithExtraFieldsSingleAnnotation, 0);
 
         Set<ConsequenceType> consequenceTypes = annotation.getConsequenceTypes();
