@@ -16,7 +16,6 @@
 
 package uk.ac.ebi.eva.commons.models.mongo.documents.subdocuments;
 
-import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.util.Set;
@@ -24,7 +23,6 @@ import java.util.Set;
 /**
  * org.opencb.biodata.models.variant.annotation.ConsequenceType
  */
-@Document
 public class ConsequenceType {
 
     private static final String GENE_NAME_FIELD = "gn";
