@@ -16,13 +16,11 @@
 
 package uk.ac.ebi.eva.commons.models.mongo.documents.subdocuments;
 
-import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
 /**
  * From {@link org.opencb.biodata.models.variant.annotation.Score}
  */
-@Document
 public class Score {
 
     public final static String SCORE_SCORE_FIELD = "sc";
