@@ -31,6 +31,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 import uk.ac.ebi.eva.test.utils.GenotypedVcfJobTestUtils;
@@ -43,8 +44,11 @@ import java.net.URISyntaxException;
 import static org.hamcrest.core.StringContains.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.GENOTYPED_VCF_JOB;
+import static uk.ac.ebi.eva.pipeline.runner.EvaPipelineJobLauncherCommandLineRunner.EXIT_WITHOUT_ERRORS;
 import static uk.ac.ebi.eva.pipeline.runner.EvaPipelineJobLauncherCommandLineRunner.SPRING_BATCH_JOB_NAME_PROPERTY;
 import static uk.ac.ebi.eva.utils.FileUtils.getResource;
 
@@ -139,8 +143,7 @@ public class EvaPipelineJobLauncherCommandLineRunnerTest {
                 .build()
         );
 
-        assertEquals(EvaPipelineJobLauncherCommandLineRunner.EXIT_WITHOUT_ERRORS,
-                evaPipelineJobLauncherCommandLineRunner.getExitCode());
+        assertEquals(EXIT_WITHOUT_ERRORS, evaPipelineJobLauncherCommandLineRunner.getExitCode());
 
         assertFalse(jobExplorer.getJobInstances(GENOTYPED_VCF_JOB, 0, 1).isEmpty());
         JobExecution jobExecution = jobExplorer.getJobExecution(jobExplorer.getJobInstances(GENOTYPED_VCF_JOB, 0, 1)
@@ -165,6 +168,63 @@ public class EvaPipelineJobLauncherCommandLineRunnerTest {
         GenotypedVcfJobTestUtils.checkLoadedAnnotation(databaseName);
 
         GenotypedVcfJobTestUtils.checkSkippedOneMalformedLine(jobExecution);
+    }
+
+    @Test
+    public void doNotReuseParametersFromPreviousCompletedJobs() throws JobExecutionException, IOException, URISyntaxException,
+            ClassNotFoundException, StorageManagerException, InstantiationException, IllegalAccessException {
+        String databaseName = mongoRule.getRandomTemporaryDatabaseName();
+        File inputFile = GenotypedVcfJobTestUtils.getInputFile();
+
+        evaPipelineJobLauncherCommandLineRunner.setJobNames(GENOTYPED_VCF_JOB);
+        EvaCommandLineBuilder evaCommandLineBuilderWithoutChunksize = new EvaCommandLineBuilder()
+                .inputVcf(inputFile.getAbsolutePath())
+                .inputVcfAggregation("NONE")
+                .inputStudyName("small vcf")
+                .inputStudyId(GenotypedVcfJobTestUtils.INPUT_STUDY_ID)
+                .inputStudyType("COLLECTION")
+                .databaseName(databaseName)
+                .configDbReadPreference("secondary")
+                .dbCollectionsVariantsName("variants")
+                .dbCollectionsFilesName("files")
+                .dbCollectionsFeaturesName("features")
+                .annotationSkip(true)
+                .statisticsSkip(true);
+
+        String[] commandLineWithoutChunksize = evaCommandLineBuilderWithoutChunksize
+                .inputVcfId("second_" + GenotypedVcfJobTestUtils.INPUT_VCF_ID)
+                .build();
+
+        String[] completeCommandLine = evaCommandLineBuilderWithoutChunksize
+                .inputVcfId("first_" + GenotypedVcfJobTestUtils.INPUT_VCF_ID)
+                .chunksize("100")
+                .build();
+
+        evaPipelineJobLauncherCommandLineRunner.run(completeCommandLine);
+
+        assertEquals(EXIT_WITHOUT_ERRORS, evaPipelineJobLauncherCommandLineRunner.getExitCode());
+
+        assertFalse(jobExplorer.getJobInstances(GENOTYPED_VCF_JOB, 0, 1).isEmpty());
+        JobExecution jobExecution = jobExplorer.getJobExecution(jobExplorer.getJobInstances(GENOTYPED_VCF_JOB, 0, 1)
+                .get(0).getInstanceId());
+
+        assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
+        assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());
+
+        assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
+        assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());
+
+
+        // check second run doesn't include the chunksize parameter
+        evaPipelineJobLauncherCommandLineRunner.run(commandLineWithoutChunksize);
+        assertEquals(EXIT_WITHOUT_ERRORS, evaPipelineJobLauncherCommandLineRunner.getExitCode());
+
+        assertFalse(jobExplorer.getJobInstances(GENOTYPED_VCF_JOB, 0, 1).isEmpty());
+        JobExecution secondJobExecution = jobExplorer.getJobExecution(jobExplorer.getJobInstances(GENOTYPED_VCF_JOB, 0, 1)
+                .get(0).getInstanceId());
+
+        assertNotNull(secondJobExecution.getJobParameters().getString(JobParametersNames.DB_NAME));
+        assertNull(secondJobExecution.getJobParameters().getString(JobParametersNames.CONFIG_CHUNK_SIZE));
     }
 
     @Test
@@ -201,8 +261,7 @@ public class EvaPipelineJobLauncherCommandLineRunnerTest {
                 .build()
         );
 
-        assertEquals(EvaPipelineJobLauncherCommandLineRunner.EXIT_WITHOUT_ERRORS,
-                evaPipelineJobLauncherCommandLineRunner.getExitCode());
+        assertEquals(EXIT_WITHOUT_ERRORS, evaPipelineJobLauncherCommandLineRunner.getExitCode());
 
         assertFalse(jobExplorer.getJobInstances(GENOTYPED_VCF_JOB, 0, 1).isEmpty());
         JobExecution jobExecution = jobExplorer.getJobExecution(jobExplorer.getJobInstances(GENOTYPED_VCF_JOB, 0, 1)
