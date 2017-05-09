@@ -15,13 +15,11 @@
  */
 package uk.ac.ebi.eva.commons.models.mongo.documents.subdocuments;
 
-import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
 /**
  * From org.opencb.biodata.models.variant.annotation.Xref
  */
-@Document
 public class Xref {
 
     private final static String XREF_ID_FIELD = "id";
