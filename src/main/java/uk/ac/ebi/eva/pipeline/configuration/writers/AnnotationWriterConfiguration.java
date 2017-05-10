@@ -37,10 +37,7 @@ public class AnnotationWriterConfiguration {
     @StepScope
     @Profile(Application.VARIANT_ANNOTATION_MONGO_PROFILE)
     public ItemWriter<Annotation> annotationItemWriter(MongoOperations mongoOperations,
-                                                              DatabaseParameters databaseParameters,
-                                                              AnnotationParameters annotationParameters) {
-        return new AnnotationMongoWriter(mongoOperations, databaseParameters.getCollectionAnnotationsName(),
-                                         annotationParameters.getVepVersion(),
-                                         annotationParameters.getVepCacheVersion());
+                                                       DatabaseParameters databaseParameters) {
+        return new AnnotationMongoWriter(mongoOperations, databaseParameters.getCollectionAnnotationsName());
     }
 }

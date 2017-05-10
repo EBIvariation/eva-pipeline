@@ -22,7 +22,7 @@ import org.springframework.data.mongodb.core.mapping.Field;
  */
 public class Xref {
 
-    private final static String XREF_ID_FIELD = "id";
+    public final static String XREF_ID_FIELD = "id";
 
     private final static String XREF_SOURCE_FIELD = "src";
 

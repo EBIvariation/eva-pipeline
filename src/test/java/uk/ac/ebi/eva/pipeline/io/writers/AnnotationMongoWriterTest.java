@@ -74,6 +74,7 @@ import static uk.ac.ebi.eva.test.data.VepOutputContent.vepOutputContent;
 @TestPropertySource({"classpath:test-mongo.properties"})
 @ContextConfiguration(classes = {MongoConnection.class, MongoMappingContext.class})
 public class AnnotationMongoWriterTest {
+
     private static final String COLLECTION_ANNOTATIONS_NAME = "annotations";
 
     private static final String VEP_VERSION = "1";
@@ -110,8 +111,7 @@ public class AnnotationMongoWriterTest {
         // load the annotation
         MongoOperations operations = MongoConfiguration.getMongoOperations(databaseName, mongoConnection,
                                                                            mongoMappingContext);
-        annotationWriter = new AnnotationMongoWriter(operations, COLLECTION_ANNOTATIONS_NAME, VEP_VERSION,
-                                                     VEP_CACHE_VERSION);
+        annotationWriter = new AnnotationMongoWriter(operations, COLLECTION_ANNOTATIONS_NAME);
         annotationWriter.write(annotations);
 
         // and finally check that documents in annotation collection have annotations
@@ -163,8 +163,7 @@ public class AnnotationMongoWriterTest {
         // load the annotation
         MongoOperations operations = MongoConfiguration.getMongoOperations(databaseName, mongoConnection,
                                                                            mongoMappingContext);
-        annotationWriter = new AnnotationMongoWriter(operations, COLLECTION_ANNOTATIONS_NAME, VEP_VERSION,
-                                                     VEP_CACHE_VERSION);
+        annotationWriter = new AnnotationMongoWriter(operations, COLLECTION_ANNOTATIONS_NAME);
 
         annotationWriter.write(annotationSet1);
         annotationWriter.write(annotationSet2);
@@ -202,8 +201,7 @@ public class AnnotationMongoWriterTest {
 
         MongoOperations operations = MongoConfiguration.getMongoOperations(databaseName, mongoConnection,
                                                                            mongoMappingContext);
-        annotationWriter = new AnnotationMongoWriter(operations, COLLECTION_ANNOTATIONS_NAME, VEP_VERSION,
-                                                     VEP_CACHE_VERSION);
+        annotationWriter = new AnnotationMongoWriter(operations, COLLECTION_ANNOTATIONS_NAME);
 
         annotationWriter.write(Collections.singletonList(annotation));
 
@@ -234,7 +232,7 @@ public class AnnotationMongoWriterTest {
         MongoOperations mongoOperations = MongoConfiguration.getMongoOperations(dbName, mongoConnection, mongoMappingContext);
         DBCollection dbCollection = mongoOperations.getCollection(COLLECTION_ANNOTATIONS_NAME);
 
-        AnnotationMongoWriter writer = new AnnotationMongoWriter(mongoOperations, COLLECTION_ANNOTATIONS_NAME, VEP_VERSION, VEP_CACHE_VERSION);
+        AnnotationMongoWriter writer = new AnnotationMongoWriter(mongoOperations, COLLECTION_ANNOTATIONS_NAME);
 
         List<DBObject> indexInfo = dbCollection.getIndexInfo();
 
