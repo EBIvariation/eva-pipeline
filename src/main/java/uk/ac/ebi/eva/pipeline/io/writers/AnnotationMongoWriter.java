@@ -17,17 +17,22 @@
 package uk.ac.ebi.eva.pipeline.io.writers;
 
 import com.mongodb.BasicDBObject;
+import com.mongodb.BulkWriteOperation;
+import com.mongodb.DBObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.item.data.MongoItemWriter;
+import org.springframework.data.mongodb.core.BulkOperations;
 import org.springframework.data.mongodb.core.MongoOperations;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.BasicQuery;
 import org.springframework.data.mongodb.core.query.BasicUpdate;
 import org.springframework.util.Assert;
+import uk.ac.ebi.eva.commons.models.converters.data.AnnotationToSimplifiedDBObjectConverter;
 import uk.ac.ebi.eva.commons.models.mongo.documents.Annotation;
+import uk.ac.ebi.eva.commons.models.mongo.documents.subdocuments.ConsequenceType;
 import uk.ac.ebi.eva.utils.MongoDBHelper;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -68,6 +73,8 @@ public class AnnotationMongoWriter extends MongoItemWriter<Annotation> {
 
     private String collection;
 
+    private final AnnotationToSimplifiedDBObjectConverter converter;
+
     public AnnotationMongoWriter(MongoOperations mongoOperations,
                                  String collection,
                                  String vepVersion,
@@ -75,80 +82,58 @@ public class AnnotationMongoWriter extends MongoItemWriter<Annotation> {
         super();
         Assert.notNull(mongoOperations, "A Mongo instance is required");
         Assert.hasText(collection, "A collection name is required");
-
-        setCollection(collection);
-        setTemplate(mongoOperations);
+        converter = new AnnotationToSimplifiedDBObjectConverter();
 
         this.mongoOperations = mongoOperations;
         this.collection = collection;
+        setCollection(collection);
+        setTemplate(mongoOperations);
 
         createIndexes();
     }
 
     @Override
     protected void doWrite(List<? extends Annotation> annotations) {
-        Map<String, List<Annotation>> annotationsByStorageId = groupAnnotationById(annotations);
+        BulkOperations bulk = mongoOperations.bulkOps(BulkOperations.BulkMode.UNORDERED, collection);
+        System.out.println(mongoOperations.getConverter().getClass());
 
-        for (Map.Entry<String, List<Annotation>> annotationsIdEntry : annotationsByStorageId.entrySet()) {
-            String storageId = annotationsIdEntry.getKey();
-            List<Annotation> annotationsById = annotationsIdEntry.getValue();
-
-            Annotation annotation = annotationsById.get(0);
-
-            if (annotationsById.size() > 1) {
-                annotation = concatenateOtherAnnotations(
-                        annotation, annotationsById.subList(1, annotationsById.size()));
-            }
-            writeAnnotationInMongoDb(storageId, annotation);
+        Map<String, Annotation> annotationsByStorageId = groupAnnotationById(annotations);
+        for (Annotation annotation : annotationsByStorageId.values()) {
+            writeAnnotationInMongoDb(bulk, annotation);
         }
+        executeBulk(bulk, annotationsByStorageId.size());
     }
 
-    private Map<String, List<Annotation>> groupAnnotationById(List<? extends Annotation> annotations) {
-        Map<String, List<Annotation>> annotationsByStorageId = new HashMap<>();
+    private Map<String, Annotation> groupAnnotationById(List<? extends Annotation> annotations) {
+        Map<String, Annotation> groupedAnnotations = new HashMap<>();
         for (Annotation annotation : annotations) {
             String id = annotation.getId();
-            annotationsByStorageId.putIfAbsent(id, new ArrayList<>());
-            annotationsByStorageId.get(id).add(annotation);
+            groupedAnnotations.computeIfPresent(id, (key, oldVar) -> oldVar.concatenate(annotation));
+            groupedAnnotations.putIfAbsent(id, annotation);
         }
-
-        return annotationsByStorageId;
+        return groupedAnnotations;
     }
 
-    /**
-     * Append multiple annotation into a single {@link Annotation}
-     * Updated fields are ConsequenceTypes and Hgvs
-     *
-     * @param annotation                    annotation where other annotations will be appended
-     * @param otherAnnotationsToConcatenate annotations to be appended
-     * @return a single {@link Annotation} ready to be persisted
-     */
-    private Annotation concatenateOtherAnnotations(Annotation annotation,
-                                                   List<Annotation> otherAnnotationsToConcatenate) {
-        for (Annotation annotationToAppend : otherAnnotationsToConcatenate) {
-            if (annotationToAppend.getConsequenceTypes() != null) {
-                annotation.addConsequenceTypes(annotationToAppend.getConsequenceTypes());
-            }
-        }
+    private void writeAnnotationInMongoDb(BulkOperations bulk, Annotation annotation) {
+        logger.trace("Writing annotations into mongo id: {}", annotation.getId());
 
-        return annotation;
+        DBObject convertedSimplifiedAnnotation = converter.convert(annotation);
+        final BasicDBObject addToSetValue = new BasicDBObject();
+
+        addToSetValue.append(CONSEQUENCE_TYPE_FIELD, new BasicDBObject("$each",
+                mongoOperations.getConverter().convertToMongoType(annotation.getConsequenceTypes())));
+        addToSetValue.append(XREFS_FIELD, new BasicDBObject("$each",
+                mongoOperations.getConverter().convertToMongoType(annotation.getXrefs())));
+
+        BasicDBObject update = new BasicDBObject("$addToSet", addToSetValue);
+
+        bulk.upsert(new BasicQuery(convertedSimplifiedAnnotation),new BasicUpdate(update));
     }
 
-    private void writeAnnotationInMongoDb(String storageId, Annotation annotation) {
-        logger.trace("Writing annotations into mongo id: {}", storageId);
-
-        BasicDBObject id = new BasicDBObject("_id", storageId);
-
-        if (mongoOperations.exists(new BasicQuery(id), collection)) {
-            BasicDBObject updateConsequenceTypes = new BasicDBObject("$addToSet",
-                    new BasicDBObject(CONSEQUENCE_TYPE_FIELD,
-                            new BasicDBObject("$each",annotation.getConsequenceTypes())));
-            BasicDBObject updateXrefs = new BasicDBObject("$addToSet",
-                    new BasicDBObject(XREFS_FIELD, new BasicDBObject("$each", annotation.getXrefs())));
-
-            mongoOperations.upsert(new BasicQuery(id), new BasicUpdate(updateConsequenceTypes), collection);
-            mongoOperations.upsert(new BasicQuery(id), new BasicUpdate(updateXrefs), collection);
-        } else {
-            mongoOperations.save(annotation, collection);
+    private void executeBulk(BulkOperations bulk, int currentBulkSize) {
+        if (currentBulkSize != 0) {
+            logger.trace("Execute mongo bulk. BulkSize : " + currentBulkSize);
+            bulk.execute();
         }
     }
 

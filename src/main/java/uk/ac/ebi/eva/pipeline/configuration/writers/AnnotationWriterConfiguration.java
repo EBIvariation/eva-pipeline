@@ -21,7 +21,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.mongodb.core.MongoOperations;
-
+import org.springframework.data.mongodb.core.MongoTemplate;
 import uk.ac.ebi.eva.commons.models.mongo.documents.Annotation;
 import uk.ac.ebi.eva.pipeline.Application;
 import uk.ac.ebi.eva.pipeline.io.writers.AnnotationMongoWriter;
