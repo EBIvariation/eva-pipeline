@@ -20,16 +20,16 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.batch.item.data.MongoItemWriter;
+import org.springframework.batch.item.ItemWriter;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.data.mongodb.core.query.BasicQuery;
 import org.springframework.data.mongodb.core.query.BasicUpdate;
 import org.springframework.util.Assert;
 import uk.ac.ebi.eva.commons.models.converters.data.VariantToDBObjectConverter;
-import uk.ac.ebi.eva.commons.models.mongo.documents.subdocuments.Score;
 import uk.ac.ebi.eva.commons.models.data.VariantAnnotation;
 import uk.ac.ebi.eva.commons.models.mongo.documents.Annotation;
 import uk.ac.ebi.eva.commons.models.mongo.documents.subdocuments.ConsequenceType;
+import uk.ac.ebi.eva.commons.models.mongo.documents.subdocuments.Score;
 import uk.ac.ebi.eva.commons.models.mongo.documents.subdocuments.Xref;
 
 import java.util.ArrayList;
@@ -58,7 +58,7 @@ import static uk.ac.ebi.eva.commons.models.mongo.documents.subdocuments.Conseque
  * - soAccessions
  * - Xref Ids
  */
-public class AnnotationInVariantMongoWriter extends MongoItemWriter<Annotation> {
+public class AnnotationInVariantMongoWriter implements ItemWriter<Annotation> {
     private static final Logger logger = LoggerFactory.getLogger(AnnotationInVariantMongoWriter.class);
 
     private final MongoOperations mongoOperations;
@@ -89,9 +89,6 @@ public class AnnotationInVariantMongoWriter extends MongoItemWriter<Annotation> 
         Assert.notNull(mongoOperations, "A Mongo instance is required");
         Assert.hasText(collection, "A collection name is required");
 
-        setCollection(collection);
-        setTemplate(mongoOperations);
-
         this.mongoOperations = mongoOperations;
         this.collection = collection;
         this.vepVersion = vepVersion;
@@ -100,7 +97,7 @@ public class AnnotationInVariantMongoWriter extends MongoItemWriter<Annotation> 
 
     // TODO rewrite this to be bulk-friendly
     @Override
-    protected void doWrite(List<? extends Annotation> annotations) {
+    public void write(List<? extends Annotation> annotations) throws Exception {
         Map<String, List<Annotation>> annotationsByStorageId = groupAnnotationByVariantId(annotations);
 
         for (Map.Entry<String, List<Annotation>> annotationsIdEntry : annotationsByStorageId.entrySet()) {
