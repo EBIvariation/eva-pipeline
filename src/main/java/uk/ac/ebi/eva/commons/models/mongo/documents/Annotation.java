@@ -34,19 +34,19 @@ import java.util.Set;
 @Document
 public class Annotation {
 
-    private static final String CHROMOSOME_FIELD = "chr";
+    public static final String CHROMOSOME_FIELD = "chr";
 
-    private static final String START_FIELD = "start";
+    public static final String START_FIELD = "start";
 
-    private static final String END_FIELD = "end";
+    public static final String END_FIELD = "end";
 
-    public static final String XREFS_FIELD = "xrefs";
-
-    private static final String VEP_VERSION_FIELD = "vepVer";
+    public static final String VEP_VERSION_FIELD = "vepVer";
 
     public static final String VEP_CACHE_VERSION_FIELD = "cacheVer";
 
     public static final String CONSEQUENCE_TYPE_FIELD = "ct";
+
+    public static final String XREFS_FIELD = "xrefs";
 
     @Id
     private String id;
@@ -161,5 +161,12 @@ public class Annotation {
      */
     public String buildVariantId() {
         return getId().substring(0, getId().length() - vepVersion.length() -vepCacheVersion.length() -2);
+    }
+
+    public Annotation concatenate(Annotation annotation) {
+        if(annotation.getConsequenceTypes()!=null){
+            addConsequenceTypes(annotation.getConsequenceTypes());
+        }
+        return this;
     }
 }
