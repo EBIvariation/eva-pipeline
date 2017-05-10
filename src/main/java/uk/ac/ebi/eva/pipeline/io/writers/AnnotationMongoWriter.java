@@ -17,20 +17,20 @@
 package uk.ac.ebi.eva.pipeline.io.writers;
 
 import com.mongodb.BasicDBObject;
-import com.mongodb.BulkWriteOperation;
-import com.mongodb.DBObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.batch.item.data.MongoItemWriter;
+import org.springframework.batch.item.ItemWriter;
 import org.springframework.data.mongodb.core.BulkOperations;
 import org.springframework.data.mongodb.core.MongoOperations;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.BasicQuery;
 import org.springframework.data.mongodb.core.query.BasicUpdate;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.util.Assert;
 import uk.ac.ebi.eva.commons.models.converters.data.AnnotationToSimplifiedDBObjectConverter;
 import uk.ac.ebi.eva.commons.models.mongo.documents.Annotation;
 import uk.ac.ebi.eva.commons.models.mongo.documents.subdocuments.ConsequenceType;
+import uk.ac.ebi.eva.commons.models.mongo.documents.subdocuments.Xref;
 import uk.ac.ebi.eva.utils.MongoDBHelper;
 
 import java.util.HashMap;
@@ -62,38 +62,33 @@ import static uk.ac.ebi.eva.commons.models.mongo.documents.Annotation.XREFS_FIEL
  * { "id" : "ENST00000608838", "src" : "ensemblTranscript" },
  * { "id" : "ENSG00000178591", "src" : "ensemblGene"
  */
-public class AnnotationMongoWriter extends MongoItemWriter<Annotation> {
+public class AnnotationMongoWriter implements ItemWriter<Annotation> {
     private static final Logger logger = LoggerFactory.getLogger(AnnotationMongoWriter.class);
 
-    private static final String ANNOTATION_XREF_ID_FIELD = "xrefs.id";
+    private static final String ANNOTATION_XREF_ID_FIELD = Annotation.XREFS_FIELD + "." + Xref.XREF_ID_FIELD;
 
-    private static final String ANNOTATION_CT_SO_FIELD = "ct.so";
+    private static final String ANNOTATION_CT_SO_FIELD = Annotation.CONSEQUENCE_TYPE_FIELD + "."
+            + ConsequenceType.SO_ACCESSION_FIELD;
 
-    private MongoOperations mongoOperations;
+    private final MongoOperations mongoOperations;
 
-    private String collection;
+    private final String collection;
 
     private final AnnotationToSimplifiedDBObjectConverter converter;
 
-    public AnnotationMongoWriter(MongoOperations mongoOperations,
-                                 String collection,
-                                 String vepVersion,
-                                 String vepCacheVersion) {
+    public AnnotationMongoWriter(MongoOperations mongoOperations, String collection) {
         super();
         Assert.notNull(mongoOperations, "A Mongo instance is required");
         Assert.hasText(collection, "A collection name is required");
         converter = new AnnotationToSimplifiedDBObjectConverter();
-
         this.mongoOperations = mongoOperations;
         this.collection = collection;
-        setCollection(collection);
-        setTemplate(mongoOperations);
 
         createIndexes();
     }
 
     @Override
-    protected void doWrite(List<? extends Annotation> annotations) {
+    public void write(List<? extends Annotation> annotations) throws Exception {
         BulkOperations bulk = mongoOperations.bulkOps(BulkOperations.BulkMode.UNORDERED, collection);
         System.out.println(mongoOperations.getConverter().getClass());
 
@@ -115,19 +110,30 @@ public class AnnotationMongoWriter extends MongoItemWriter<Annotation> {
     }
 
     private void writeAnnotationInMongoDb(BulkOperations bulk, Annotation annotation) {
-        logger.trace("Writing annotations into mongo id: {}", annotation.getId());
+        logger.trace("Adding annotations into mongo bulk id: {}", annotation.getId());
 
-        DBObject convertedSimplifiedAnnotation = converter.convert(annotation);
+        Query upsertQuery = new BasicQuery(converter.convert(annotation));
+        Update update = buildUpdateQuery(annotation);
+        bulk.upsert(upsertQuery, update);
+    }
+
+    private BasicUpdate buildUpdateQuery(Annotation annotation) {
         final BasicDBObject addToSetValue = new BasicDBObject();
+        addToSetValue.append(CONSEQUENCE_TYPE_FIELD, buildInsertConsequenceTypeQuery(annotation));
+        addToSetValue.append(XREFS_FIELD, buildInsertXrefsQuery(annotation));
+        return new BasicUpdate(new BasicDBObject("$addToSet", addToSetValue));
+    }
 
-        addToSetValue.append(CONSEQUENCE_TYPE_FIELD, new BasicDBObject("$each",
-                mongoOperations.getConverter().convertToMongoType(annotation.getConsequenceTypes())));
-        addToSetValue.append(XREFS_FIELD, new BasicDBObject("$each",
-                mongoOperations.getConverter().convertToMongoType(annotation.getXrefs())));
+    private BasicDBObject buildInsertXrefsQuery(Annotation annotation) {
+        return new BasicDBObject("$each", convertToMongo(annotation.getXrefs()));
+    }
 
-        BasicDBObject update = new BasicDBObject("$addToSet", addToSetValue);
+    private BasicDBObject buildInsertConsequenceTypeQuery(Annotation annotation) {
+        return new BasicDBObject("$each", convertToMongo(annotation.getConsequenceTypes()));
+    }
 
-        bulk.upsert(new BasicQuery(convertedSimplifiedAnnotation),new BasicUpdate(update));
+    private Object convertToMongo(Object object) {
+        return mongoOperations.getConverter().convertToMongoType(object);
     }
 
     private void executeBulk(BulkOperations bulk, int currentBulkSize) {
