@@ -110,8 +110,7 @@ public class DropFilesByStudyStepTest {
         JobExecution jobExecution = jobLauncherTestUtils.launchStep(BeanNames.DROP_FILES_BY_STUDY_STEP,
                 jobParameters);
 
-        assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
-        assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());
+        JobTestUtils.assertCompleted(jobExecution);
 
         DBCollection filesCollection = mongoRule.getCollection(databaseName, COLLECTION_FILES_NAME);
         assertDropFiles(filesCollection, STUDY_ID_TO_DROP, expectedFilesAfterDropStudy);

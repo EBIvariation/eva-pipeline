@@ -21,6 +21,9 @@ import com.mongodb.DBObject;
 import com.mongodb.util.JSON;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.batch.core.BatchStatus;
+import org.springframework.batch.core.ExitStatus;
+import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
 
@@ -38,6 +41,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.zip.GZIPInputStream;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -150,5 +154,15 @@ public abstract class JobTestUtils {
     public static String buildFilesDocumentString(String studyId, String fileId) {
         return "{\"" + STUDYID_FIELD + "\":\"" + studyId
                 + "\", \"" + FILEID_FIELD + "\":\"" + fileId + "\"}";
+    }
+
+    public static void assertCompleted(JobExecution jobExecution) {
+        assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
+        assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());
+    }
+
+    public static void assertFailed(JobExecution jobExecution) {
+        assertEquals(ExitStatus.FAILED.getExitCode(), jobExecution.getExitStatus().getExitCode());
+        assertEquals(BatchStatus.FAILED, jobExecution.getStatus());
     }
 }

@@ -20,8 +20,6 @@ import com.mongodb.DBCollection;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.batch.core.BatchStatus;
-import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.test.JobLauncherTestUtils;
@@ -110,8 +108,7 @@ public class GenerateVepAnnotationStepTest {
                 .launchStep(BeanNames.GENERATE_VEP_ANNOTATION_STEP, jobParameters);
 
         //Then variantsAnnotCreate step should complete correctly
-        assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
-        assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());
+        JobTestUtils.assertCompleted(jobExecution);
 
         // And VEP output should exist and annotations should be in the file
         assertTrue(vepOutput.exists());
@@ -145,8 +142,7 @@ public class GenerateVepAnnotationStepTest {
         JobExecution jobExecution = jobLauncherTestUtils
                 .launchStep(BeanNames.GENERATE_VEP_ANNOTATION_STEP, jobParameters);
 
-        assertEquals(ExitStatus.FAILED.getExitCode(), jobExecution.getExitStatus().getExitCode());
-        assertEquals(BatchStatus.FAILED, jobExecution.getStatus());
+        JobTestUtils.assertFailed(jobExecution);
 
         assertTrue(!vepOutput.exists());
         List<Path> files = Files.list(Paths.get(outputDirAnnot))
@@ -161,8 +157,7 @@ public class GenerateVepAnnotationStepTest {
         JobExecution secondJobExecution = jobLauncherTestUtils
                 .launchStep(BeanNames.GENERATE_VEP_ANNOTATION_STEP, jobParameters);
 
-        assertEquals(ExitStatus.COMPLETED, secondJobExecution.getExitStatus());
-        assertEquals(BatchStatus.COMPLETED, secondJobExecution.getStatus());
+        JobTestUtils.assertCompleted(secondJobExecution);
 
         assertTrue(vepOutput.exists());
         int chunks = 3;

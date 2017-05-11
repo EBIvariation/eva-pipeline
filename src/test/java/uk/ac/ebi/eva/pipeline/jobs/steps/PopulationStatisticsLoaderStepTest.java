@@ -29,6 +29,7 @@ import uk.ac.ebi.eva.pipeline.jobs.steps.tasklets.PopulationStatisticsLoaderStep
 import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
+import uk.ac.ebi.eva.test.utils.JobTestUtils;
 import uk.ac.ebi.eva.utils.EvaJobParameterBuilder;
 
 import java.io.IOException;
@@ -37,6 +38,7 @@ import java.util.Map;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
+import static uk.ac.ebi.eva.test.utils.JobTestUtils.assertFailed;
 import static uk.ac.ebi.eva.test.utils.TestFileUtils.copyResource;
 import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResourceUrl;
 import static uk.ac.ebi.eva.utils.FileUtils.getResource;
@@ -98,8 +100,7 @@ public class PopulationStatisticsLoaderStepTest {
         JobExecution jobExecution = jobLauncherTestUtils.launchStep(BeanNames.LOAD_STATISTICS_STEP, jobParameters);
 
         // Then variantsStatsLoad step should complete correctly
-        assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
-        assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());
+        JobTestUtils.assertCompleted(jobExecution);
 
         // The DB docs should have the field "st"
         DBCursor cursor = mongoRule.getCollection(dbName, COLLECTION_VARIANTS_NAME).find();
@@ -147,7 +148,7 @@ public class PopulationStatisticsLoaderStepTest {
         JobExecution jobExecution = jobLauncherTestUtils.launchStep(BeanNames.LOAD_STATISTICS_STEP, jobParameters);
         assertThat(capture.toString(), containsString(FILE_NOT_FOUND_EXCEPTION));
 
-        assertEquals(ExitStatus.FAILED.getExitCode(), jobExecution.getExitStatus().getExitCode());
+        assertFailed(jobExecution);
     }
 
 }

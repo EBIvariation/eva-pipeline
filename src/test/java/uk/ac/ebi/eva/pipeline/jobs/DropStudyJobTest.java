@@ -99,8 +99,7 @@ public class DropStudyJobTest {
                 .toJobParameters();
 
         JobExecution jobExecution = jobLauncherTestUtils.launchJob(jobParameters);
-        assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
-        assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());
+        JobTestUtils.assertCompleted(jobExecution);
 
         assertDropSingleStudy(variantsCollection, STUDY_ID_TO_DROP, EXPECTED_VARIANTS_AFTER_DROP_STUDY);
         assertPullStudy(variantsCollection, STUDY_ID_TO_DROP, EXPECTED_FILE_COUNT, EXPECTED_STATS_COUNT);

@@ -36,6 +36,7 @@ import uk.ac.ebi.eva.pipeline.jobs.DropStudyJob;
 import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
 import uk.ac.ebi.eva.test.data.VariantData;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
+import uk.ac.ebi.eva.test.utils.JobTestUtils;
 import uk.ac.ebi.eva.utils.EvaJobParameterBuilder;
 
 import java.io.IOException;
@@ -139,8 +140,7 @@ public class PullFilesAndStatisticsByStudyStepTest {
         JobExecution jobExecution = jobLauncherTestUtils.launchStep(BeanNames.PULL_FILES_AND_STATISTICS_BY_STUDY_STEP,
                 jobParameters);
 
-        assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
-        assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());
+        JobTestUtils.assertCompleted(jobExecution);
     }
 
     private void checkPull(String databaseName, int expectedFileCount, int expectedStatsCount) {

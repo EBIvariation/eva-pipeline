@@ -36,6 +36,7 @@ import uk.ac.ebi.eva.pipeline.configuration.BeanNames;
 import uk.ac.ebi.eva.pipeline.jobs.GenotypedVcfJob;
 import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
+import uk.ac.ebi.eva.test.utils.JobTestUtils;
 import uk.ac.ebi.eva.utils.EvaJobParameterBuilder;
 
 import static org.junit.Assert.assertEquals;
@@ -82,8 +83,7 @@ public class LoadFileStepTest {
         JobExecution jobExecution = jobLauncherTestUtils.launchStep(BeanNames.LOAD_FILE_STEP, jobParameters);
 
         //Then variantsLoad step should complete correctly
-        assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
-        assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());
+        JobTestUtils.assertCompleted(jobExecution);
 
         // And the number of documents in the DB should be equals to the number of VCF files loaded
         DBCollection fileCollection = mongoRule.getCollection(databaseName, COLLECTION_FILES_NAME);

@@ -42,6 +42,7 @@ import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
 import uk.ac.ebi.eva.test.data.VepOutputContent;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
+import uk.ac.ebi.eva.test.utils.JobTestUtils;
 import uk.ac.ebi.eva.utils.EvaJobParameterBuilder;
 import uk.ac.ebi.eva.utils.URLHelper;
 
@@ -94,8 +95,7 @@ public class AnnotationLoaderStepTest {
 
         JobExecution jobExecution = jobLauncherTestUtils.launchStep(BeanNames.LOAD_VEP_ANNOTATION_STEP, jobParameters);
 
-        assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
-        assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());
+        JobTestUtils.assertCompleted(jobExecution);
 
         //check that documents have the annotation
         DBCursor cursor = mongoRule.getCollection(dbName, collectionVariantsName).find();

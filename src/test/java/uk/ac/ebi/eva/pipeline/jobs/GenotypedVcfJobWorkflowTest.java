@@ -52,6 +52,7 @@ import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static uk.ac.ebi.eva.test.utils.JobTestUtils.assertCompleted;
 import static uk.ac.ebi.eva.utils.FileUtils.getResource;
 
 /**
@@ -101,8 +102,7 @@ public class GenotypedVcfJobWorkflowTest {
         JobParameters jobParameters = builder.toJobParameters();
 
         JobExecution execution = jobLauncherTestUtils.launchJob(jobParameters);
-
-        assertEquals(ExitStatus.COMPLETED, execution.getExitStatus());
+        assertCompleted(execution);
 
         Collection<StepExecution> stepExecutions = execution.getStepExecutions();
         Map<String, StepExecution> nameToStepExecution = stepExecutions.stream().collect(
@@ -138,8 +138,7 @@ public class GenotypedVcfJobWorkflowTest {
         JobParameters jobParameters = builder.annotationSkip(true).statisticsSkip(true).toJobParameters();
 
         JobExecution execution = jobLauncherTestUtils.launchJob(jobParameters);
-
-        assertEquals(ExitStatus.COMPLETED, execution.getExitStatus());
+        assertCompleted(execution);
 
         Set<String> names = execution.getStepExecutions().stream().map(StepExecution::getStepName)
                 .collect(Collectors.toSet());
@@ -153,8 +152,7 @@ public class GenotypedVcfJobWorkflowTest {
         JobParameters jobParameters = builder.statisticsSkip(true).toJobParameters();
 
         JobExecution execution = jobLauncherTestUtils.launchJob(jobParameters);
-
-        assertEquals(ExitStatus.COMPLETED, execution.getExitStatus());
+        assertCompleted(execution);
 
         Collection<StepExecution> stepExecutions = execution.getStepExecutions();
         Map<String, StepExecution> nameToStepExecution = stepExecutions.stream().collect(
@@ -185,8 +183,7 @@ public class GenotypedVcfJobWorkflowTest {
         JobParameters jobParameters = builder.annotationSkip(true).toJobParameters();
 
         JobExecution execution = jobLauncherTestUtils.launchJob(jobParameters);
-
-        assertEquals(ExitStatus.COMPLETED, execution.getExitStatus());
+        assertCompleted(execution);
 
         Collection<StepExecution> stepExecutions = execution.getStepExecutions();
         Map<String, StepExecution> nameToStepExecution = stepExecutions.stream().collect(

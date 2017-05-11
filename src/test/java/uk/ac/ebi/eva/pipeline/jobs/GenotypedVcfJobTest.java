@@ -36,11 +36,13 @@ import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 import uk.ac.ebi.eva.test.utils.GenotypedVcfJobTestUtils;
+import uk.ac.ebi.eva.test.utils.JobTestUtils;
 import uk.ac.ebi.eva.utils.EvaJobParameterBuilder;
 
 import java.io.File;
 
 import static org.junit.Assert.assertEquals;
+import static uk.ac.ebi.eva.test.utils.JobTestUtils.assertFailed;
 
 /**
  * Test for {@link GenotypedVcfJob}
@@ -108,8 +110,7 @@ public class GenotypedVcfJobTest {
 
         JobExecution jobExecution = jobLauncherTestUtils.launchJob(jobParameters);
 
-        assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
-        assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());
+        JobTestUtils.assertCompleted(jobExecution);
 
         GenotypedVcfJobTestUtils.checkLoadStep(databaseName);
 
@@ -163,7 +164,6 @@ public class GenotypedVcfJobTest {
                 .toJobParameters();
         JobExecution jobExecution = jobLauncherTestUtils.launchJob(jobParameters);
 
-        assertEquals(ExitStatus.FAILED, jobExecution.getExitStatus());
-        assertEquals(BatchStatus.FAILED, jobExecution.getStatus());
+        assertFailed(jobExecution);
     }
 }

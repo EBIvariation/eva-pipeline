@@ -59,6 +59,8 @@ import java.util.zip.GZIPInputStream;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static uk.ac.ebi.eva.test.utils.JobTestUtils.assertCompleted;
+import static uk.ac.ebi.eva.test.utils.JobTestUtils.assertFailed;
 import static uk.ac.ebi.eva.utils.FileUtils.getResource;
 
 /**
@@ -111,11 +113,8 @@ public class AggregatedVcfJobTest {
                 .toJobParameters();
         JobExecution jobExecution = jobLauncherTestUtils.launchJob(jobParameters);
 
-        assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
-        assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());
-
         // check execution flow
-        assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
+        assertCompleted(jobExecution);
 
         Collection<StepExecution> stepExecutions = jobExecution.getStepExecutions();
         Set<String> names = stepExecutions.stream().map(StepExecution::getStepName)
@@ -161,7 +160,6 @@ public class AggregatedVcfJobTest {
                 .toJobParameters();
         JobExecution jobExecution = jobLauncherTestUtils.launchJob(jobParameters);
 
-        assertEquals(ExitStatus.FAILED, jobExecution.getExitStatus());
-        assertEquals(BatchStatus.FAILED, jobExecution.getStatus());
+        assertFailed(jobExecution);
     }
 }
