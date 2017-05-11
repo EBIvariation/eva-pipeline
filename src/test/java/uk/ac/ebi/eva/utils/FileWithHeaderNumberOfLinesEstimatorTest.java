@@ -22,28 +22,30 @@ import static org.junit.Assert.assertEquals;
 import static uk.ac.ebi.eva.utils.FileUtils.getResource;
 
 /**
- * Test for {@link VcfNumberOfLinesEstimator}
+ * Test for {@link FileWithHeaderNumberOfLinesEstimator}
  */
-public class VcfNumberOfLinesEstimatorTest {
+public class FileWithHeaderNumberOfLinesEstimatorTest {
     private static final String GENOTYPED_VCF = "/input-files/vcf/genotyped.vcf.gz";
 
     private static final String AGGREGATED_VCF = "/input-files/vcf/aggregated.vcf.gz";
 
     private static final String SMALL_VCF = "/input-files/vcf/small_genotyped.vcf.gz";
 
+    private static final String VEP_ANNOTATIONS = "/input-files/annotation/vep-annotations.tsv.gz";
+
     private static final int PERCENTAGE_SIMILARITY = 20;
 
-    private VcfNumberOfLinesEstimator numberOfLinesEstimator;
+    private FileWithHeaderNumberOfLinesEstimator numberOfLinesEstimator;
 
     @Before
     public void setUp() throws Exception {
-        numberOfLinesEstimator = new VcfNumberOfLinesEstimator();
+        numberOfLinesEstimator = new FileWithHeaderNumberOfLinesEstimator();
     }
 
     @Test
     public void predictedGenotypedVcfNumberOfLines() {
         String genotypedVcfPath = getResource(GENOTYPED_VCF).getAbsolutePath();
-        long estimatedNumberOfLines = numberOfLinesEstimator.estimateVcfNumberOfLines(genotypedVcfPath);
+        long estimatedNumberOfLines = numberOfLinesEstimator.estimateNumberOfLines(genotypedVcfPath);
         int expectedNumberOfLines = 298;
 
         assertEquals(expectedNumberOfLines, estimatedNumberOfLines,
@@ -53,7 +55,7 @@ public class VcfNumberOfLinesEstimatorTest {
     @Test
     public void predictedAggregatedVcfNumberOfLines() {
         String aggregatedVcfPath = getResource(AGGREGATED_VCF).getAbsolutePath();
-        long estimatedNumberOfLines = numberOfLinesEstimator.estimateVcfNumberOfLines(aggregatedVcfPath);
+        long estimatedNumberOfLines = numberOfLinesEstimator.estimateNumberOfLines(aggregatedVcfPath);
         int expectedNumberOfLines = 156;
 
         assertEquals(expectedNumberOfLines, estimatedNumberOfLines,
@@ -63,9 +65,19 @@ public class VcfNumberOfLinesEstimatorTest {
     @Test
     public void smallVcfNumberOfLines() {
         String smallGenotypedVcfPath = getResource(SMALL_VCF).getAbsolutePath();
-        long estimatedNumberOfLines = numberOfLinesEstimator.estimateVcfNumberOfLines(smallGenotypedVcfPath);
+        long estimatedNumberOfLines = numberOfLinesEstimator.estimateNumberOfLines(smallGenotypedVcfPath);
 
-        assertEquals(0, estimatedNumberOfLines);
+        assertEquals(21, estimatedNumberOfLines);
+    }
+
+    @Test
+    public void predictedVepAnnotationNumberOfLines() {
+        String vepAnnotationsPath = getResource(VEP_ANNOTATIONS).getAbsolutePath();
+        long estimatedNumberOfLines = numberOfLinesEstimator.estimateNumberOfLines(vepAnnotationsPath);
+        int expectedNumberOfLines = 199948;
+
+        assertEquals(expectedNumberOfLines, estimatedNumberOfLines,
+                     expectedNumberOfLines * (PERCENTAGE_SIMILARITY / 100.0));
     }
 
 }

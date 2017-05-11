@@ -37,7 +37,9 @@ import uk.ac.ebi.eva.pipeline.configuration.readers.VariantAnnotationReaderConfi
 import uk.ac.ebi.eva.pipeline.configuration.writers.VariantAnnotationWriterConfiguration;
 import uk.ac.ebi.eva.pipeline.io.readers.AnnotationFlatFileReader;
 import uk.ac.ebi.eva.pipeline.io.writers.VepAnnotationMongoWriter;
+import uk.ac.ebi.eva.pipeline.listeners.AnnotationLoaderStepStatisticsListener;
 import uk.ac.ebi.eva.pipeline.listeners.SkippedItemListener;
+import uk.ac.ebi.eva.pipeline.listeners.StepProgressListener;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.LOAD_VEP_ANNOTATION_STEP;
@@ -86,6 +88,8 @@ public class AnnotationLoaderStep {
                 .faultTolerant().skipLimit(50).skip(FlatFileParseException.class)
                 .allowStartIfComplete(jobOptions.isAllowStartIfComplete())
                 .listener(new SkippedItemListener())
+                .listener(new StepProgressListener())
+                .listener(new AnnotationLoaderStepStatisticsListener())
                 .build();
     }
 
