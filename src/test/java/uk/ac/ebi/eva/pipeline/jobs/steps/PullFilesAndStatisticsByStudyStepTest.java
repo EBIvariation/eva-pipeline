@@ -44,6 +44,7 @@ import java.util.Arrays;
 
 import static org.junit.Assert.assertEquals;
 import static uk.ac.ebi.eva.test.utils.DropStudyJobTestUtils.assertPullStudy;
+import static uk.ac.ebi.eva.test.utils.JobTestUtils.assertCompleted;
 
 /**
  * Test for {@link PullFilesAndStatisticsByStudyStep}
@@ -140,7 +141,7 @@ public class PullFilesAndStatisticsByStudyStepTest {
         JobExecution jobExecution = jobLauncherTestUtils.launchStep(BeanNames.PULL_FILES_AND_STATISTICS_BY_STUDY_STEP,
                 jobParameters);
 
-        JobTestUtils.assertCompleted(jobExecution);
+        assertCompleted(jobExecution);
     }
 
     private void checkPull(String databaseName, int expectedFileCount, int expectedStatsCount) {

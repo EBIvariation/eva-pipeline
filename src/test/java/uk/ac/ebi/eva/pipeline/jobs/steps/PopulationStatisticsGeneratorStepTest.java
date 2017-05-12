@@ -45,6 +45,7 @@ import java.net.URISyntaxException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static uk.ac.ebi.eva.test.utils.JobTestUtils.assertCompleted;
 import static uk.ac.ebi.eva.test.utils.JobTestUtils.assertFailed;
 import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResourceUrl;
 
@@ -94,7 +95,7 @@ public class PopulationStatisticsGeneratorStepTest {
         JobExecution jobExecution = jobLauncherTestUtils.launchStep(BeanNames.CALCULATE_STATISTICS_STEP, jobParameters);
 
         //Then variantsStatsCreate step should complete correctly
-        JobTestUtils.assertCompleted(jobExecution);
+        assertCompleted(jobExecution);
 
         //and the file containing statistics should exist
         assertTrue(statsFile.exists());

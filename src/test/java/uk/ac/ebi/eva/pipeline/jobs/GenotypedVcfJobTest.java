@@ -42,6 +42,7 @@ import uk.ac.ebi.eva.utils.EvaJobParameterBuilder;
 import java.io.File;
 
 import static org.junit.Assert.assertEquals;
+import static uk.ac.ebi.eva.test.utils.JobTestUtils.assertCompleted;
 import static uk.ac.ebi.eva.test.utils.JobTestUtils.assertFailed;
 
 /**
@@ -110,7 +111,7 @@ public class GenotypedVcfJobTest {
 
         JobExecution jobExecution = jobLauncherTestUtils.launchJob(jobParameters);
 
-        JobTestUtils.assertCompleted(jobExecution);
+        assertCompleted(jobExecution);
 
         GenotypedVcfJobTestUtils.checkLoadStep(databaseName);
 

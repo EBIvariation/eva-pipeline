@@ -45,6 +45,7 @@ import uk.ac.ebi.eva.test.utils.JobTestUtils;
 import uk.ac.ebi.eva.utils.EvaJobParameterBuilder;
 
 import static org.junit.Assert.assertEquals;
+import static uk.ac.ebi.eva.test.utils.JobTestUtils.assertCompleted;
 import static uk.ac.ebi.eva.test.utils.JobTestUtils.count;
 import static uk.ac.ebi.eva.utils.FileUtils.getResource;
 
@@ -90,7 +91,7 @@ public class VariantLoaderStepTest {
         JobExecution jobExecution = jobLauncherTestUtils.launchStep(BeanNames.LOAD_VARIANTS_STEP, jobParameters);
 
         //Then variantsLoad step should complete correctly
-        JobTestUtils.assertCompleted(jobExecution);
+        assertCompleted(jobExecution);
 
         // And the number of documents in the DB should be equals to the number of lines in the VCF file
         VariantStorageManager variantStorageManager = StorageManagerFactory.getVariantStorageManager();

@@ -50,6 +50,7 @@ import java.nio.file.Paths;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static uk.ac.ebi.eva.test.utils.JobTestUtils.assertCompleted;
 import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResourceUrl;
 
 
@@ -95,7 +96,7 @@ public class AnnotationLoaderStepTest {
 
         JobExecution jobExecution = jobLauncherTestUtils.launchStep(BeanNames.LOAD_VEP_ANNOTATION_STEP, jobParameters);
 
-        JobTestUtils.assertCompleted(jobExecution);
+        assertCompleted(jobExecution);
 
         //check that documents have the annotation
         DBCursor cursor = mongoRule.getCollection(dbName, collectionVariantsName).find();

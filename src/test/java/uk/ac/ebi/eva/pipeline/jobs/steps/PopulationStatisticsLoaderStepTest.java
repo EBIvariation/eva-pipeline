@@ -38,6 +38,7 @@ import java.util.Map;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
+import static uk.ac.ebi.eva.test.utils.JobTestUtils.assertCompleted;
 import static uk.ac.ebi.eva.test.utils.JobTestUtils.assertFailed;
 import static uk.ac.ebi.eva.test.utils.TestFileUtils.copyResource;
 import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResourceUrl;
@@ -100,7 +101,7 @@ public class PopulationStatisticsLoaderStepTest {
         JobExecution jobExecution = jobLauncherTestUtils.launchStep(BeanNames.LOAD_STATISTICS_STEP, jobParameters);
 
         // Then variantsStatsLoad step should complete correctly
-        JobTestUtils.assertCompleted(jobExecution);
+        assertCompleted(jobExecution);
 
         // The DB docs should have the field "st"
         DBCursor cursor = mongoRule.getCollection(dbName, COLLECTION_VARIANTS_NAME).find();

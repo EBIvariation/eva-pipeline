@@ -51,6 +51,7 @@ import static org.junit.Assert.assertThat;
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.GENOTYPED_VCF_JOB;
 import static uk.ac.ebi.eva.pipeline.runner.EvaPipelineJobLauncherCommandLineRunner.EXIT_WITHOUT_ERRORS;
 import static uk.ac.ebi.eva.pipeline.runner.EvaPipelineJobLauncherCommandLineRunner.SPRING_BATCH_JOB_NAME_PROPERTY;
+import static uk.ac.ebi.eva.test.utils.JobTestUtils.assertCompleted;
 import static uk.ac.ebi.eva.utils.FileUtils.getResource;
 
 /**
@@ -147,7 +148,7 @@ public class EvaPipelineJobLauncherCommandLineRunnerTest {
         assertEquals(EXIT_WITHOUT_ERRORS, evaPipelineJobLauncherCommandLineRunner.getExitCode());
 
         JobExecution jobExecution = getLastJobExecution(GENOTYPED_VCF_JOB);
-        JobTestUtils.assertCompleted(jobExecution);
+        assertCompleted(jobExecution);
 
         GenotypedVcfJobTestUtils.checkLoadStep(databaseName);
 
@@ -200,7 +201,7 @@ public class EvaPipelineJobLauncherCommandLineRunnerTest {
         assertEquals(EXIT_WITHOUT_ERRORS, evaPipelineJobLauncherCommandLineRunner.getExitCode());
 
         JobExecution firstJobExecution = getLastJobExecution(GENOTYPED_VCF_JOB);
-        JobTestUtils.assertCompleted(firstJobExecution);
+        assertCompleted(firstJobExecution);
 
         assertNotNull(firstJobExecution.getJobParameters().getString(JobParametersNames.DB_NAME));
         assertNotNull(firstJobExecution.getJobParameters().getString(JobParametersNames.CONFIG_CHUNK_SIZE));
@@ -210,7 +211,7 @@ public class EvaPipelineJobLauncherCommandLineRunnerTest {
         assertEquals(EXIT_WITHOUT_ERRORS, evaPipelineJobLauncherCommandLineRunner.getExitCode());
 
         JobExecution secondJobExecution = getLastJobExecution(GENOTYPED_VCF_JOB);
-        JobTestUtils.assertCompleted(secondJobExecution);
+        assertCompleted(secondJobExecution);
 
         assertNotNull(secondJobExecution.getJobParameters().getString(JobParametersNames.DB_NAME));
         assertNull(secondJobExecution.getJobParameters().getString(JobParametersNames.CONFIG_CHUNK_SIZE));
@@ -253,7 +254,7 @@ public class EvaPipelineJobLauncherCommandLineRunnerTest {
         assertEquals(EXIT_WITHOUT_ERRORS, evaPipelineJobLauncherCommandLineRunner.getExitCode());
 
         JobExecution jobExecution = getLastJobExecution(GENOTYPED_VCF_JOB);
-        JobTestUtils.assertCompleted(jobExecution);
+        assertCompleted(jobExecution);
 
         GenotypedVcfJobTestUtils.checkLoadStep(databaseName);
 

@@ -46,6 +46,7 @@ import uk.ac.ebi.eva.utils.EvaJobParameterBuilder;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static uk.ac.ebi.eva.test.utils.JobTestUtils.assertCompleted;
 
 /**
  * TODO jmmut remove import AnnotationJob when we add the stepLauncherTestUtils
@@ -99,7 +100,7 @@ public class AnnotationMetadataStepTest {
 
         JobExecution jobExecution = jobLauncherTestUtils.launchStep(BeanNames.LOAD_ANNOTATION_METADATA_STEP, jobParameters);
 
-        JobTestUtils.assertCompleted(jobExecution);
+        assertCompleted(jobExecution);
     }
 
     @Test

@@ -50,6 +50,8 @@ import java.util.zip.GZIPInputStream;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static uk.ac.ebi.eva.test.utils.JobTestUtils.assertCompleted;
+import static uk.ac.ebi.eva.test.utils.JobTestUtils.assertFailed;
 import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResourceUrl;
 import static uk.ac.ebi.eva.utils.FileUtils.getResource;
 
@@ -108,7 +110,7 @@ public class GenerateVepAnnotationStepTest {
                 .launchStep(BeanNames.GENERATE_VEP_ANNOTATION_STEP, jobParameters);
 
         //Then variantsAnnotCreate step should complete correctly
-        JobTestUtils.assertCompleted(jobExecution);
+        assertCompleted(jobExecution);
 
         // And VEP output should exist and annotations should be in the file
         assertTrue(vepOutput.exists());
@@ -142,7 +144,7 @@ public class GenerateVepAnnotationStepTest {
         JobExecution jobExecution = jobLauncherTestUtils
                 .launchStep(BeanNames.GENERATE_VEP_ANNOTATION_STEP, jobParameters);
 
-        JobTestUtils.assertFailed(jobExecution);
+        assertFailed(jobExecution);
 
         assertTrue(!vepOutput.exists());
         List<Path> files = Files.list(Paths.get(outputDirAnnot))
@@ -157,7 +159,7 @@ public class GenerateVepAnnotationStepTest {
         JobExecution secondJobExecution = jobLauncherTestUtils
                 .launchStep(BeanNames.GENERATE_VEP_ANNOTATION_STEP, jobParameters);
 
-        JobTestUtils.assertCompleted(secondJobExecution);
+        assertCompleted(secondJobExecution);
 
         assertTrue(vepOutput.exists());
         int chunks = 3;
