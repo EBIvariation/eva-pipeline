@@ -40,11 +40,13 @@ import uk.ac.ebi.eva.pipeline.parameters.MongoConnection;
 import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
+import uk.ac.ebi.eva.test.utils.JobTestUtils;
 import uk.ac.ebi.eva.utils.EvaJobParameterBuilder;
 
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static uk.ac.ebi.eva.test.utils.JobTestUtils.assertCompleted;
 
 /**
  * TODO jmmut remove import AnnotationJob when we add the stepLauncherTestUtils
@@ -98,8 +100,7 @@ public class AnnotationMetadataStepTest {
 
         JobExecution jobExecution = jobLauncherTestUtils.launchStep(BeanNames.LOAD_ANNOTATION_METADATA_STEP, jobParameters);
 
-        assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
-        assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());
+        assertCompleted(jobExecution);
     }
 
     @Test

@@ -31,6 +31,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
 
 import uk.ac.ebi.eva.pipeline.jobs.flows.PopulationStatisticsFlow;
+import uk.ac.ebi.eva.pipeline.parameters.NewJobIncrementer;
 
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.CALCULATE_STATISTICS_FLOW;
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.CALCULATE_STATISTICS_JOB;
@@ -58,7 +59,7 @@ public class PopulationStatisticsJob {
 
         JobBuilder jobBuilder = jobBuilderFactory
                 .get(CALCULATE_STATISTICS_JOB)
-                .incrementer(new RunIdIncrementer());
+                .incrementer(new NewJobIncrementer());
 
         return jobBuilder
                 .start(optionalStatisticsFlow)

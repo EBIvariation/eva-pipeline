@@ -42,6 +42,7 @@ import static org.junit.Assert.assertEquals;
 import static uk.ac.ebi.eva.test.utils.DropStudyJobTestUtils.assertDropFiles;
 import static uk.ac.ebi.eva.test.utils.DropStudyJobTestUtils.assertDropSingleStudy;
 import static uk.ac.ebi.eva.test.utils.DropStudyJobTestUtils.assertPullStudy;
+import static uk.ac.ebi.eva.test.utils.JobTestUtils.assertCompleted;
 
 /**
  * Test for {@link PopulationStatisticsJob}
@@ -99,8 +100,7 @@ public class DropStudyJobTest {
                 .toJobParameters();
 
         JobExecution jobExecution = jobLauncherTestUtils.launchJob(jobParameters);
-        assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
-        assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());
+        assertCompleted(jobExecution);
 
         assertDropSingleStudy(variantsCollection, STUDY_ID_TO_DROP, EXPECTED_VARIANTS_AFTER_DROP_STUDY);
         assertPullStudy(variantsCollection, STUDY_ID_TO_DROP, EXPECTED_FILE_COUNT, EXPECTED_STATS_COUNT);

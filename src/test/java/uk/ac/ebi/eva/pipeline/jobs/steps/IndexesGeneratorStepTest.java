@@ -36,9 +36,11 @@ import uk.ac.ebi.eva.pipeline.jobs.DatabaseInitializationJob;
 import uk.ac.ebi.eva.pipeline.jobs.steps.tasklets.IndexesGeneratorStep;
 import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
+import uk.ac.ebi.eva.test.utils.JobTestUtils;
 import uk.ac.ebi.eva.utils.EvaJobParameterBuilder;
 
 import static org.junit.Assert.assertEquals;
+import static uk.ac.ebi.eva.test.utils.JobTestUtils.assertCompleted;
 
 
 /**
@@ -68,8 +70,7 @@ public class IndexesGeneratorStepTest {
         JobExecution jobExecution = jobLauncherTestUtils.launchStep(BeanNames.CREATE_DATABASE_INDEXES_STEP,
                 jobParameters);
 
-        assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
-        assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());
+        assertCompleted(jobExecution);
 
         DBCollection genesCollection = mongoRule.getCollection(databaseName, COLLECTION_FEATURES_NAME);
         assertEquals("[{ \"v\" : 1 , \"key\" : { \"_id\" : 1} , \"name\" : \"_id_\" , \"ns\" : \"" +
@@ -90,8 +91,7 @@ public class IndexesGeneratorStepTest {
         JobExecution jobExecution = jobLauncherTestUtils.launchStep(BeanNames.CREATE_DATABASE_INDEXES_STEP,
                 jobParameters);
 
-        assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
-        assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());
+        assertCompleted(jobExecution);
 
         DBCollection genesCollection = mongoRule.getCollection(databaseName, COLLECTION_FEATURES_NAME);
         genesCollection.insert(new BasicDBObject("_id", "example_id"));

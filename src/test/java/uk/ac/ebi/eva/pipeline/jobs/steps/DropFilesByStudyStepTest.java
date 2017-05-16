@@ -44,6 +44,7 @@ import java.util.Collections;
 
 import static org.junit.Assert.assertEquals;
 import static uk.ac.ebi.eva.test.utils.DropStudyJobTestUtils.assertDropFiles;
+import static uk.ac.ebi.eva.test.utils.JobTestUtils.assertCompleted;
 
 /**
  * Test for {@link DropFilesByStudyStep}
@@ -110,8 +111,7 @@ public class DropFilesByStudyStepTest {
         JobExecution jobExecution = jobLauncherTestUtils.launchStep(BeanNames.DROP_FILES_BY_STUDY_STEP,
                 jobParameters);
 
-        assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
-        assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());
+        assertCompleted(jobExecution);
 
         DBCollection filesCollection = mongoRule.getCollection(databaseName, COLLECTION_FILES_NAME);
         assertDropFiles(filesCollection, STUDY_ID_TO_DROP, expectedFilesAfterDropStudy);

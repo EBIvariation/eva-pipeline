@@ -35,6 +35,7 @@ import org.springframework.context.annotation.Scope;
 import uk.ac.ebi.eva.pipeline.jobs.steps.DropFilesByStudyStep;
 import uk.ac.ebi.eva.pipeline.jobs.steps.DropSingleStudyVariantsStep;
 import uk.ac.ebi.eva.pipeline.jobs.steps.PullFilesAndStatisticsByStudyStep;
+import uk.ac.ebi.eva.pipeline.parameters.NewJobIncrementer;
 import uk.ac.ebi.eva.pipeline.parameters.validation.job.DropStudyJobParametersValidator;
 
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.DROP_FILES_BY_STUDY_STEP;
@@ -73,7 +74,7 @@ public class DropStudyJob {
 
         JobBuilder jobBuilder = jobBuilderFactory
                 .get(DROP_STUDY_JOB)
-                .incrementer(new RunIdIncrementer())
+                .incrementer(new NewJobIncrementer())
                 .validator(new DropStudyJobParametersValidator());
 
         SimpleJobBuilder builder = jobBuilder

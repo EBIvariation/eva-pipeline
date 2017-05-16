@@ -35,6 +35,7 @@ import org.springframework.context.annotation.Scope;
 import uk.ac.ebi.eva.pipeline.jobs.flows.ParallelStatisticsAndAnnotationFlow;
 import uk.ac.ebi.eva.pipeline.jobs.steps.LoadFileStep;
 import uk.ac.ebi.eva.pipeline.jobs.steps.VariantLoaderStep;
+import uk.ac.ebi.eva.pipeline.parameters.NewJobIncrementer;
 import uk.ac.ebi.eva.pipeline.parameters.validation.job.GenotypedVcfJobParametersValidator;
 
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.GENOTYPED_VCF_JOB;
@@ -77,7 +78,7 @@ public class GenotypedVcfJob {
 
         JobBuilder jobBuilder = jobBuilderFactory
                 .get(GENOTYPED_VCF_JOB)
-                .incrementer(new RunIdIncrementer())
+                .incrementer(new NewJobIncrementer())
                 .validator(new GenotypedVcfJobParametersValidator());
         FlowJobBuilder builder = jobBuilder
                 .flow(variantLoaderStep)
