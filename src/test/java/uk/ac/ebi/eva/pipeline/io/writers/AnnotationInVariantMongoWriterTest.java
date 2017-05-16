@@ -45,10 +45,10 @@ import java.util.List;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static uk.ac.ebi.eva.commons.models.data.VariantAnnotation.POLYPHEN_FIELD;
-import static uk.ac.ebi.eva.commons.models.data.VariantAnnotation.SIFT_FIELD;
-import static uk.ac.ebi.eva.commons.models.data.VariantAnnotation.SO_ACCESSION_FIELD;
-import static uk.ac.ebi.eva.commons.models.data.VariantAnnotation.XREFS_FIELD;
+import static uk.ac.ebi.eva.commons.models.mongo.documents.subdocuments.VariantAnnotation.POLYPHEN_FIELD;
+import static uk.ac.ebi.eva.commons.models.mongo.documents.subdocuments.VariantAnnotation.SIFT_FIELD;
+import static uk.ac.ebi.eva.commons.models.mongo.documents.subdocuments.VariantAnnotation.SO_ACCESSION_FIELD;
+import static uk.ac.ebi.eva.commons.models.mongo.documents.subdocuments.VariantAnnotation.XREFS_FIELD;
 import static uk.ac.ebi.eva.test.data.VepOutputContent.vepOutputContentWithExtraFields;
 import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResourceUrl;
 
@@ -60,6 +60,7 @@ import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResourceUrl;
 @TestPropertySource({"classpath:test-mongo.properties"})
 @ContextConfiguration(classes = {MongoConnection.class, MongoMappingContext.class})
 public class AnnotationInVariantMongoWriterTest {
+
     private static final String MONGO_DUMP = "/dump/VariantStatsConfigurationTest_vl";
 
     private static final String COLLECTION_VARIANTS_NAME = "variants";
@@ -79,7 +80,7 @@ public class AnnotationInVariantMongoWriterTest {
 
     private AnnotationInVariantMongoWriter annotationInVariantMongoWriter;
 
-    private uk.ac.ebi.eva.pipeline.io.mappers.AnnotationLineMapper AnnotationLineMapper;
+    private AnnotationLineMapper AnnotationLineMapper;
 
     @Before
     public void setUp() throws Exception {

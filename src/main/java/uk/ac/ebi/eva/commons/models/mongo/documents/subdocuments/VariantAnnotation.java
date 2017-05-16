@@ -13,16 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.ac.ebi.eva.commons.models.data;
+package uk.ac.ebi.eva.commons.models.mongo.documents.subdocuments;
 
-import org.springframework.data.annotation.Transient;
-import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 import org.springframework.util.Assert;
 import uk.ac.ebi.eva.commons.models.mongo.documents.Annotation;
-import uk.ac.ebi.eva.commons.models.mongo.documents.subdocuments.ConsequenceType;
-import uk.ac.ebi.eva.commons.models.mongo.documents.subdocuments.Score;
-import uk.ac.ebi.eva.commons.models.mongo.documents.subdocuments.Xref;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -36,9 +31,9 @@ import java.util.Set;
  */
 public class VariantAnnotation {
 
-    public static final String VEP_VERSION_FIELD = "vepVer";
+    public static final String VEP_VERSION_FIELD = "vepv";
 
-    public static final String VEP_CACHE_VERSION_FIELD = "cacheVer";
+    public static final String VEP_CACHE_VERSION_FIELD = "cachev";
 
     public static final String SIFT_FIELD = "sift";
 
@@ -55,10 +50,10 @@ public class VariantAnnotation {
     private String vepCacheVersion;
 
     @Field(value = SIFT_FIELD)
-    private List<Double> sifts = new ArrayList<>();
+    private List<Double> sifts;
 
     @Field(value = POLYPHEN_FIELD)
-    private List<Double> polyphens = new ArrayList<>();
+    private List<Double> polyphens;
 
     @Field(value = SO_ACCESSION_FIELD)
     private Set<Integer> soAccessions = new HashSet<>();
@@ -77,13 +72,18 @@ public class VariantAnnotation {
      * @param vepCacheVersion non empty value required, otherwise throws {@link IllegalArgumentException}
      */
     public VariantAnnotation(String vepVersion, String vepCacheVersion) {
-        Assert.hasText(vepVersion, "A non empty vepVersion is required");
-        Assert.hasText(vepCacheVersion, "A non empty vepCacheVersion is required");
+        Assert.hasText(vepVersion);
+        Assert.hasText(vepCacheVersion);
         this.vepVersion = vepVersion;
         this.vepCacheVersion = vepCacheVersion;
     }
 
-    VariantAnnotation(VariantAnnotation variantAnnotation) {
+    /**
+     * Private copy constructor
+     *
+     * @param variantAnnotation
+     */
+    private VariantAnnotation(VariantAnnotation variantAnnotation) {
         this(variantAnnotation.getVepVersion(), variantAnnotation.getVepCacheVersion());
         doConcatenate(variantAnnotation);
     }
@@ -94,19 +94,27 @@ public class VariantAnnotation {
     }
 
     private void doConcatenate(VariantAnnotation variantAnnotation) {
-        xrefIds.addAll(variantAnnotation.getXrefIds());
-        for (Double siftLimit : variantAnnotation.getSifts()) {
-            concatenateSiftRange(siftLimit);
+        if (variantAnnotation.getXrefIds() != null) {
+            addXrefIds(variantAnnotation.getXrefIds());
         }
-        for (Double polyphenLimit : variantAnnotation.getPolyphens()) {
-            concatenatePolyphenRange(polyphenLimit);
+        if (variantAnnotation.getSifts() != null) {
+            for (Double siftLimit : variantAnnotation.getSifts()) {
+                concatenateSiftRange(siftLimit);
+            }
         }
-        soAccessions.addAll(variantAnnotation.getSoAccessions());
+        if (variantAnnotation.getPolyphens() != null) {
+            for (Double polyphenLimit : variantAnnotation.getPolyphens()) {
+                concatenatePolyphenRange(polyphenLimit);
+            }
+        }
+        if (variantAnnotation.getSoAccessions() != null) {
+            addsoAccessions(variantAnnotation.getSoAccessions());
+        }
     }
 
     private void doConcatenate(Annotation annotation) {
         for (Xref xref : annotation.getXrefs()) {
-            xrefIds.add(xref.getId());
+            addXrefId(xref.getId());
         }
         for (ConsequenceType consequenceType : annotation.getConsequenceTypes()) {
             final Score sift = consequenceType.getSift();
@@ -119,7 +127,7 @@ public class VariantAnnotation {
             }
             final Set<Integer> soAccessions = consequenceType.getSoAccessions();
             if (soAccessions != null) {
-                this.soAccessions.addAll(soAccessions);
+                addsoAccessions(soAccessions);
             }
         }
     }
@@ -141,11 +149,11 @@ public class VariantAnnotation {
     private void concatenateRange(Collection<Double> collection, Double score) {
         Double min = minOf(collection);
         Double max = maxOf(collection);
-        if(min == null || max == null){
+        if (min == null || max == null) {
             setRange(collection, score, score);
-        } else if (score < min){
+        } else if (score < min) {
             setRange(collection, score, max);
-        } else if (score > max){
+        } else if (score > max) {
             setRange(collection, min, score);
         }
     }
@@ -157,34 +165,37 @@ public class VariantAnnotation {
     }
 
     private void concatenateSiftRange(Double score) {
+        if (sifts == null) {
+            sifts = new ArrayList<>();
+        }
         concatenateRange(sifts, score);
     }
 
     private void concatenatePolyphenRange(Double score) {
+        if (polyphens == null) {
+            polyphens = new ArrayList<>();
+        }
         concatenateRange(polyphens, score);
     }
 
-    public void addSift(Double sift) {
-        this.sifts.add(sift);
+    private void addXrefId(String id) {
+        if(xrefIds==null){
+            xrefIds = new HashSet<>();
+        }
+        xrefIds.add(id);
     }
 
-    public void addSifts(Collection<Double> sifts) {
-        this.sifts.addAll(sifts);
+    private void addXrefIds(Set<String> ids) {
+        if(xrefIds==null){
+            xrefIds = new HashSet<>();
+        }
+        xrefIds.addAll(ids);
     }
 
-    public void addPolyphen(Double polyphen) {
-        this.polyphens.add(polyphen);
-    }
-
-    public void addPolyphens(Collection<Double> polyphens) {
-        this.polyphens.addAll(polyphens);
-    }
-
-    public void addXrefIds(Set<String> xrefIds) {
-        this.xrefIds.addAll(xrefIds);
-    }
-
-    public void addsoAccessions(Set<Integer> soAccessions) {
+    private void addsoAccessions(Set<Integer> soAccessions) {
+        if (this.soAccessions == null) {
+            this.soAccessions = new HashSet<>();
+        }
         this.soAccessions.addAll(soAccessions);
     }
 
@@ -218,6 +229,14 @@ public class VariantAnnotation {
         return temp;
     }
 
+    /**
+     * Concatenate two VariantAnnotations in a new one. This method returns a new instance of VariantAnnotation with
+     * the concatenation of xrefIds and soAccessions. This concatenation also has new values for the ranges of
+     * polyphen and sift values to include the values expressend in the concatenated VariantAnnotation.
+     *
+     * @param annotation
+     * @return
+     */
     public VariantAnnotation concatenate(VariantAnnotation annotation) {
         VariantAnnotation temp = new VariantAnnotation(this);
         temp.doConcatenate(annotation);
