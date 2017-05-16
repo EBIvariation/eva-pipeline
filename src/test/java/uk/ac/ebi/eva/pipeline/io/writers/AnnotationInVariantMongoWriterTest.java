@@ -154,7 +154,7 @@ public class AnnotationInVariantMongoWriterTest {
 
                 BasicDBList sifts = (BasicDBList) annotationField.get(SIFT_FIELD);
                 assertNotNull(sifts);
-                assertTrue(sifts.size() == 1);
+                assertTrue(sifts.size() == 2);
 
                 BasicDBList so = (BasicDBList) annotationField.get(SO_ACCESSION_FIELD);
                 assertNotNull(so);
@@ -162,7 +162,7 @@ public class AnnotationInVariantMongoWriterTest {
 
                 BasicDBList polyphen = (BasicDBList) annotationField.get(POLYPHEN_FIELD);
                 assertNotNull(polyphen);
-                assertTrue(polyphen.size() == 1);
+                assertTrue(polyphen.size() == 2);
 
                 BasicDBList geneNames = (BasicDBList) annotationField.get(XREFS_FIELD);
                 assertNotNull(geneNames);
