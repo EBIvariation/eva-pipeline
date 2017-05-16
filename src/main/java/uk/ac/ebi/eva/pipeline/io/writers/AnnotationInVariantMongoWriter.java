@@ -24,17 +24,17 @@ import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.data.mongodb.core.query.BasicQuery;
 import org.springframework.data.mongodb.core.query.BasicUpdate;
 import org.springframework.util.Assert;
-import uk.ac.ebi.eva.commons.models.data.VariantAnnotation;
 import uk.ac.ebi.eva.commons.models.mongo.documents.Annotation;
+import uk.ac.ebi.eva.commons.models.mongo.documents.subdocuments.VariantAnnotation;
 
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import static org.opencb.opencga.storage.mongodb.variant.DBObjectToVariantConverter.ANNOTATION_FIELD;
-import static uk.ac.ebi.eva.commons.models.data.VariantAnnotation.VEP_VERSION_FIELD;
-import static uk.ac.ebi.eva.commons.models.mongo.documents.Annotation.VEP_CACHE_VERSION_FIELD;
+import static uk.ac.ebi.eva.commons.models.converters.data.VariantToDBObjectConverter.ANNOTATION_FIELD;
+import static uk.ac.ebi.eva.commons.models.mongo.documents.subdocuments.VariantAnnotation.VEP_CACHE_VERSION_FIELD;
+import static uk.ac.ebi.eva.commons.models.mongo.documents.subdocuments.VariantAnnotation.VEP_VERSION_FIELD;
 
 /**
  * Update the {@link uk.ac.ebi.eva.commons.models.data.Variant} mongo document with {@link VariantAnnotation}
@@ -77,7 +77,7 @@ public class AnnotationInVariantMongoWriter implements ItemWriter<Annotation> {
         this.vepVersion = vepVersion;
         this.vepCacheVersion = vepCacheVersion;
     }
-    
+
     private HashMap<String, VariantAnnotation> generateVariantAnnotations(List<? extends Annotation> annotations) {
         HashMap<String, VariantAnnotation> variantAnnotations = new HashMap<>();
 
