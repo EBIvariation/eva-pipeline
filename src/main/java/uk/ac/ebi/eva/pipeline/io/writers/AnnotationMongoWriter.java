@@ -17,8 +17,6 @@
 package uk.ac.ebi.eva.pipeline.io.writers;
 
 import com.mongodb.BasicDBObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.data.mongodb.core.BulkOperations;
 import org.springframework.data.mongodb.core.MongoOperations;
@@ -63,12 +61,13 @@ import static uk.ac.ebi.eva.commons.models.mongo.documents.Annotation.XREFS_FIEL
  * { "id" : "ENSG00000178591", "src" : "ensemblGene"
  */
 public class AnnotationMongoWriter implements ItemWriter<Annotation> {
-    private static final Logger logger = LoggerFactory.getLogger(AnnotationMongoWriter.class);
 
     private static final String ANNOTATION_XREF_ID_FIELD = Annotation.XREFS_FIELD + "." + Xref.XREF_ID_FIELD;
 
     private static final String ANNOTATION_CT_SO_FIELD = Annotation.CONSEQUENCE_TYPE_FIELD + "."
             + ConsequenceType.SO_ACCESSION_FIELD;
+    public static final String EACH = "$each";
+    public static final String ADD_TO_SET = "$addToSet";
 
     private final MongoOperations mongoOperations;
 
@@ -78,8 +77,8 @@ public class AnnotationMongoWriter implements ItemWriter<Annotation> {
 
     public AnnotationMongoWriter(MongoOperations mongoOperations, String collection) {
         super();
-        Assert.notNull(mongoOperations, "A Mongo instance is required");
-        Assert.hasText(collection, "A collection name is required");
+        Assert.notNull(mongoOperations);
+        Assert.hasText(collection);
         converter = new AnnotationToSimplifiedDBObjectConverter();
         this.mongoOperations = mongoOperations;
         this.collection = collection;
@@ -90,13 +89,15 @@ public class AnnotationMongoWriter implements ItemWriter<Annotation> {
     @Override
     public void write(List<? extends Annotation> annotations) throws Exception {
         BulkOperations bulk = mongoOperations.bulkOps(BulkOperations.BulkMode.UNORDERED, collection);
-        System.out.println(mongoOperations.getConverter().getClass());
+        prepareBulk(annotations, bulk);
+        bulk.execute();
+    }
 
+    private void prepareBulk(List<? extends Annotation> annotations, BulkOperations bulk) {
         Map<String, Annotation> annotationsByStorageId = groupAnnotationById(annotations);
         for (Annotation annotation : annotationsByStorageId.values()) {
             writeAnnotationInMongoDb(bulk, annotation);
         }
-        executeBulk(bulk, annotationsByStorageId.size());
     }
 
     private Map<String, Annotation> groupAnnotationById(List<? extends Annotation> annotations) {
@@ -110,8 +111,6 @@ public class AnnotationMongoWriter implements ItemWriter<Annotation> {
     }
 
     private void writeAnnotationInMongoDb(BulkOperations bulk, Annotation annotation) {
-        logger.trace("Adding annotations into mongo bulk id: {}", annotation.getId());
-
         Query upsertQuery = new BasicQuery(converter.convert(annotation));
         Update update = buildUpdateQuery(annotation);
         bulk.upsert(upsertQuery, update);
@@ -121,26 +120,19 @@ public class AnnotationMongoWriter implements ItemWriter<Annotation> {
         final BasicDBObject addToSetValue = new BasicDBObject();
         addToSetValue.append(CONSEQUENCE_TYPE_FIELD, buildInsertConsequenceTypeQuery(annotation));
         addToSetValue.append(XREFS_FIELD, buildInsertXrefsQuery(annotation));
-        return new BasicUpdate(new BasicDBObject("$addToSet", addToSetValue));
+        return new BasicUpdate(new BasicDBObject(ADD_TO_SET, addToSetValue));
     }
 
     private BasicDBObject buildInsertXrefsQuery(Annotation annotation) {
-        return new BasicDBObject("$each", convertToMongo(annotation.getXrefs()));
+        return new BasicDBObject(EACH, convertToMongo(annotation.getXrefs()));
     }
 
     private BasicDBObject buildInsertConsequenceTypeQuery(Annotation annotation) {
-        return new BasicDBObject("$each", convertToMongo(annotation.getConsequenceTypes()));
+        return new BasicDBObject(EACH, convertToMongo(annotation.getConsequenceTypes()));
     }
 
     private Object convertToMongo(Object object) {
         return mongoOperations.getConverter().convertToMongoType(object);
-    }
-
-    private void executeBulk(BulkOperations bulk, int currentBulkSize) {
-        if (currentBulkSize != 0) {
-            logger.trace("Execute mongo bulk. BulkSize : " + currentBulkSize);
-            bulk.execute();
-        }
     }
 
     private void createIndexes() {

@@ -27,10 +27,12 @@ import uk.ac.ebi.eva.commons.models.mongo.documents.Annotation;
  */
 public class AnnotationToSimplifiedDBObjectConverter implements Converter<Annotation, DBObject> {
 
+    public static final String ID = "_id";
+
     @Override
     public DBObject convert(Annotation source) {
         DBObject dbObject = new BasicDBObject();
-        dbObject.put("_id",source.getId());
+        dbObject.put(ID,source.getId());
         dbObject.put(Annotation.CHROMOSOME_FIELD,source.getChromosome());
         dbObject.put(Annotation.START_FIELD,source.getStart());
         dbObject.put(Annotation.END_FIELD,source.getEnd());
