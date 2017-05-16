@@ -40,9 +40,9 @@ public class Annotation {
 
     public static final String END_FIELD = "end";
 
-    public static final String VEP_VERSION_FIELD = "vepVer";
+    public static final String VEP_VERSION_FIELD = "vepv";
 
-    public static final String VEP_CACHE_VERSION_FIELD = "cacheVer";
+    public static final String VEP_CACHE_VERSION_FIELD = "cachev";
 
     public static final String CONSEQUENCE_TYPE_FIELD = "ct";
 
@@ -87,6 +87,26 @@ public class Annotation {
         this.id = buildAnnotationId(chromosome, start, referenceAllele, alternativeAllele, vepVersion, vepCacheVersion);
         this.xrefs = new HashSet<>();
         this.consequenceTypes = new HashSet<>();
+    }
+
+    /**
+     * Private copy constructor
+     *
+     * @param annotation
+     */
+    private Annotation(Annotation annotation) {
+        chromosome = annotation.chromosome;
+        start = annotation.start;
+        end = annotation.end;
+        vepVersion = annotation.vepVersion;
+        vepCacheVersion = annotation.vepCacheVersion;
+
+        id = annotation.id;
+        xrefs = new HashSet<>();
+        consequenceTypes = new HashSet<>();
+
+        xrefs.addAll(annotation.xrefs);
+        consequenceTypes.addAll(annotation.consequenceTypes);
     }
 
     public String getChromosome() {
@@ -163,10 +183,18 @@ public class Annotation {
         return getId().substring(0, getId().length() - vepVersion.length() -vepCacheVersion.length() -2);
     }
 
+    /**
+     * Concatenate two annotations in a new one. This method returns a new instance with the concatenated array of
+     * consequence types and computed xrefs.
+     *
+     * @param annotation
+     * @return
+     */
     public Annotation concatenate(Annotation annotation) {
+        Annotation temp = new Annotation(this);
         if(annotation.getConsequenceTypes()!=null){
-            addConsequenceTypes(annotation.getConsequenceTypes());
+            temp.addConsequenceTypes(annotation.getConsequenceTypes());
         }
-        return this;
+        return temp;
     }
 }
