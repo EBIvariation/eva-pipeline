@@ -285,52 +285,6 @@ public class Variant {
         return file.getStats();
     }
 
-    /**
-     * Copies the current variant and returns the copy in Ensembl format.
-     * see http://www.ensembl.org/info/docs/tools/vep/vep_formats.html
-     * <p>
-     * This variant remains unchanged, but the copy is a shallow copy, so any changes to the copy will affect the
-     * original as well.
-     *
-     * @return a modified copy
-     */
-    public Variant copyInEnsemblFormat() {
-        Variant variant = this.clone();
-        variant.transformToEnsemblFormat();
-        return variant;
-    }
-
-    /**
-     * see http://www.ensembl.org/info/docs/tools/vep/vep_formats.html
-     */
-    private void transformToEnsemblFormat() {
-        if (type == VariantType.INDEL || type == VariantType.SV || length > 1) {
-            if (!reference.isEmpty() && !alternate.isEmpty() && reference.charAt(0) == alternate.charAt(0)) {
-                reference = reference.substring(1);
-                alternate = alternate.substring(1);
-                start++;
-            }
-
-            // opencb sets: end = start + max(referenceAllele.length, alternateAllele.length) -1
-            // ensembl sets: end = start + reference.length -1
-            end = start + reference.length() - 1;    // -1 because the range is inclusive: [start, end]
-
-            if (reference.length() < alternate.length()) {  // insertion
-                // and ensembl in insertions sets: start = end+1
-                start = end + 1;
-            }
-
-            length = reference.length();
-
-            if (reference.equals("")) {
-                reference = "-";
-            }
-            if (alternate.equals("")) {
-                alternate = "-";
-            }
-        }
-    }
-
     @Override
     public String toString() {
         return "Variant{" +
