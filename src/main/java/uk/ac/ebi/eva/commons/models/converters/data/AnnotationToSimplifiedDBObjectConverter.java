@@ -18,7 +18,7 @@ package uk.ac.ebi.eva.commons.models.converters.data;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 import org.springframework.core.convert.converter.Converter;
-import uk.ac.ebi.eva.commons.models.mongo.documents.Annotation;
+import uk.ac.ebi.eva.commons.models.mongo.entity.Annotation;
 
 /**
  * Class to convert a Annotation document to a DBObject that contains a simplified version of the document.

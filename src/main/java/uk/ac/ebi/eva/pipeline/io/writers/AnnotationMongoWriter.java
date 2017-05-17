@@ -26,17 +26,17 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.util.Assert;
 import uk.ac.ebi.eva.commons.models.converters.data.AnnotationToSimplifiedDBObjectConverter;
-import uk.ac.ebi.eva.commons.models.mongo.documents.Annotation;
-import uk.ac.ebi.eva.commons.models.mongo.documents.subdocuments.ConsequenceType;
-import uk.ac.ebi.eva.commons.models.mongo.documents.subdocuments.Xref;
+import uk.ac.ebi.eva.commons.models.mongo.entity.Annotation;
+import uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.ConsequenceType;
+import uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.Xref;
 import uk.ac.ebi.eva.utils.MongoDBHelper;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static uk.ac.ebi.eva.commons.models.mongo.documents.Annotation.CONSEQUENCE_TYPE_FIELD;
-import static uk.ac.ebi.eva.commons.models.mongo.documents.Annotation.XREFS_FIELD;
+import static uk.ac.ebi.eva.commons.models.mongo.entity.Annotation.CONSEQUENCE_TYPE_FIELD;
+import static uk.ac.ebi.eva.commons.models.mongo.entity.Annotation.XREFS_FIELD;
 
 /**
  * Write a list of {@link Annotation} into MongoDB
