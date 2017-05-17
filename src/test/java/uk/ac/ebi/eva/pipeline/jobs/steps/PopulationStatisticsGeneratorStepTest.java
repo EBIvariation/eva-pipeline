@@ -41,6 +41,7 @@ import uk.ac.ebi.eva.utils.URLHelper;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.HashMap;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -100,6 +101,8 @@ public class PopulationStatisticsGeneratorStepTest {
         //and the file containing statistics should exist
         assertTrue(statsFile.exists());
         assertTrue(sourceStatsFile.exists());
+        HashMap hashMap = new HashMap();
+        hashMap.putIfAbsent()
     }
 
     /**
