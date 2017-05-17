@@ -17,9 +17,9 @@ package uk.ac.ebi.eva.pipeline.io.mappers;
 
 import org.junit.Test;
 
-import uk.ac.ebi.eva.commons.models.mongo.documents.Annotation;
-import uk.ac.ebi.eva.commons.models.mongo.documents.subdocuments.ConsequenceType;
-import uk.ac.ebi.eva.commons.models.mongo.documents.subdocuments.Score;
+import uk.ac.ebi.eva.commons.models.mongo.entity.Annotation;
+import uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.ConsequenceType;
+import uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.Score;
 import uk.ac.ebi.eva.test.data.VepOutputContent;
 
 import java.util.Set;

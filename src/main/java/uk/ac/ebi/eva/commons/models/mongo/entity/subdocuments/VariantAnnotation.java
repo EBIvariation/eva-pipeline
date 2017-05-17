@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.ac.ebi.eva.commons.models.mongo.documents.subdocuments;
+package uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments;
 
 import org.springframework.data.mongodb.core.mapping.Field;
 import org.springframework.util.Assert;
-import uk.ac.ebi.eva.commons.models.mongo.documents.Annotation;
+import uk.ac.ebi.eva.commons.models.mongo.entity.Annotation;
 
 import java.util.ArrayList;
 import java.util.Collection;

@@ -32,7 +32,7 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import uk.ac.ebi.eva.commons.models.converters.data.VariantToDBObjectConverter;
-import uk.ac.ebi.eva.commons.models.mongo.documents.Annotation;
+import uk.ac.ebi.eva.commons.models.mongo.entity.Annotation;
 import uk.ac.ebi.eva.pipeline.Application;
 import uk.ac.ebi.eva.pipeline.configuration.MongoConfiguration;
 import uk.ac.ebi.eva.pipeline.io.mappers.AnnotationLineMapper;
@@ -46,10 +46,10 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static uk.ac.ebi.eva.commons.models.mongo.documents.subdocuments.VariantAnnotation.POLYPHEN_FIELD;
-import static uk.ac.ebi.eva.commons.models.mongo.documents.subdocuments.VariantAnnotation.SIFT_FIELD;
-import static uk.ac.ebi.eva.commons.models.mongo.documents.subdocuments.VariantAnnotation.SO_ACCESSION_FIELD;
-import static uk.ac.ebi.eva.commons.models.mongo.documents.subdocuments.VariantAnnotation.XREFS_FIELD;
+import static uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantAnnotation.POLYPHEN_FIELD;
+import static uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantAnnotation.SIFT_FIELD;
+import static uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantAnnotation.SO_ACCESSION_FIELD;
+import static uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantAnnotation.XREFS_FIELD;
 import static uk.ac.ebi.eva.test.data.VepOutputContent.vepOutputContentWithExtraFields;
 import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResourceUrl;
 

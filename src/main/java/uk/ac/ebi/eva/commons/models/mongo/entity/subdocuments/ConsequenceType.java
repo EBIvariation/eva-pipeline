@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.ac.ebi.eva.commons.models.mongo.documents.subdocuments;
+package uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments;
 
 import org.springframework.data.mongodb.core.mapping.Field;
 
