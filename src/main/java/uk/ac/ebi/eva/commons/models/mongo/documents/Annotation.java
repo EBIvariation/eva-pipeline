@@ -28,8 +28,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * Slim version of {@link org.opencb.biodata.models.variant.annotation.VariantAnnotation}
- * Unused fields removed.
+ * Mongo database representation of a variant annotation.
  */
 @Document
 public class Annotation {
@@ -139,7 +138,7 @@ public class Annotation {
     }
 
     public void addConsequenceTypes(Set<ConsequenceType> consequenceTypes) {
-        for(ConsequenceType consequenceType: consequenceTypes){
+        for (ConsequenceType consequenceType : consequenceTypes) {
             addConsequenceType(consequenceType);
         }
     }
@@ -177,10 +176,11 @@ public class Annotation {
     /**
      * Builds the variant id from the current annotation id. In essence we remove the two extra fields added at the end
      * of the id and the underscores.
+     *
      * @return
      */
     public String buildVariantId() {
-        return getId().substring(0, getId().length() - vepVersion.length() -vepCacheVersion.length() -2);
+        return getId().substring(0, getId().length() - vepVersion.length() - vepCacheVersion.length() - 2);
     }
 
     /**
@@ -192,7 +192,7 @@ public class Annotation {
      */
     public Annotation concatenate(Annotation annotation) {
         Annotation temp = new Annotation(this);
-        if(annotation.getConsequenceTypes()!=null){
+        if (annotation.getConsequenceTypes() != null) {
             temp.addConsequenceTypes(annotation.getConsequenceTypes());
         }
         return temp;

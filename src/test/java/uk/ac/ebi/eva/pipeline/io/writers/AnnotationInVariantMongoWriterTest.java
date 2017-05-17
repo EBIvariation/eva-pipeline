@@ -43,6 +43,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static uk.ac.ebi.eva.commons.models.mongo.documents.subdocuments.VariantAnnotation.POLYPHEN_FIELD;
@@ -112,9 +113,9 @@ public class AnnotationInVariantMongoWriterTest {
 
         // load the annotation
         MongoOperations operations = MongoConfiguration.getMongoOperations(databaseName, mongoConnection,
-                                                                           mongoMappingContext);
+                mongoMappingContext);
         annotationInVariantMongoWriter = new AnnotationInVariantMongoWriter(operations, COLLECTION_VARIANTS_NAME,
-                                                                            VEP_VERSION, VEP_CACHE_VERSION);
+                VEP_VERSION, VEP_CACHE_VERSION);
 
         annotationInVariantMongoWriter.write(annotationSet1);
         annotationInVariantMongoWriter.write(annotationSet2);
@@ -155,19 +156,19 @@ public class AnnotationInVariantMongoWriterTest {
 
                 BasicDBList sifts = (BasicDBList) annotationField.get(SIFT_FIELD);
                 assertNotNull(sifts);
-                assertTrue(sifts.size() == 2);
+                assertEquals(2, sifts.size());
 
                 BasicDBList so = (BasicDBList) annotationField.get(SO_ACCESSION_FIELD);
                 assertNotNull(so);
-                assertTrue(so.size() == 1);
+                assertEquals(1, so.size());
 
                 BasicDBList polyphen = (BasicDBList) annotationField.get(POLYPHEN_FIELD);
                 assertNotNull(polyphen);
-                assertTrue(polyphen.size() == 2);
+                assertEquals(2, polyphen.size());
 
                 BasicDBList geneNames = (BasicDBList) annotationField.get(XREFS_FIELD);
                 assertNotNull(geneNames);
-                assertTrue(geneNames.size() == 4);
+                assertEquals(4, geneNames.size());
             }
         }
         cursor.close();

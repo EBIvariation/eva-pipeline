@@ -127,7 +127,7 @@ public class AnnotationLineMapperTest {
         Score expectedSift = new Score(0.07, "tolerated");
         Score expectedPolyphen = new Score(0.859, "possibly_damaging");
 
-        assertEquals(sifts, expectedSift);
-        assertEquals(polyphen, expectedPolyphen);
+        assertEquals(expectedSift, sifts);
+        assertEquals(expectedPolyphen, polyphen);
     }
 }
