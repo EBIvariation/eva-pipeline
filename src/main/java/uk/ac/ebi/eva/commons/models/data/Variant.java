@@ -17,7 +17,7 @@
 package uk.ac.ebi.eva.commons.models.data;
 
 import org.opencb.commons.utils.CryptoUtils;
-import uk.ac.ebi.eva.commons.models.mongo.documents.Annotation;
+import uk.ac.ebi.eva.commons.models.mongo.entity.Annotation;
 
 import java.util.HashMap;
 import java.util.HashSet;

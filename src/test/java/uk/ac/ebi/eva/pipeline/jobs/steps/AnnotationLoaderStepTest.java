@@ -47,11 +47,11 @@ import java.nio.file.Paths;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static uk.ac.ebi.eva.test.utils.JobTestUtils.assertCompleted;
-import static uk.ac.ebi.eva.commons.models.mongo.documents.subdocuments.VariantAnnotation.POLYPHEN_FIELD;
-import static uk.ac.ebi.eva.commons.models.mongo.documents.subdocuments.VariantAnnotation.SO_ACCESSION_FIELD;
-import static uk.ac.ebi.eva.commons.models.mongo.documents.Annotation.CONSEQUENCE_TYPE_FIELD;
-import static uk.ac.ebi.eva.commons.models.mongo.documents.Annotation.XREFS_FIELD;
-import static uk.ac.ebi.eva.commons.models.mongo.documents.subdocuments.ConsequenceType.SIFT_FIELD;
+import static uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantAnnotation.POLYPHEN_FIELD;
+import static uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantAnnotation.SO_ACCESSION_FIELD;
+import static uk.ac.ebi.eva.commons.models.mongo.entity.Annotation.CONSEQUENCE_TYPE_FIELD;
+import static uk.ac.ebi.eva.commons.models.mongo.entity.Annotation.XREFS_FIELD;
+import static uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.ConsequenceType.SIFT_FIELD;
 import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResourceUrl;
 
 /**

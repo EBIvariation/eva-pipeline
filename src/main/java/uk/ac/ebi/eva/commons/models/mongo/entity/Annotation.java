@@ -13,15 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.ac.ebi.eva.commons.models.mongo.documents;
+package uk.ac.ebi.eva.commons.models.mongo.entity;
 
 import com.google.common.base.Strings;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 import uk.ac.ebi.eva.commons.models.data.Variant;
-import uk.ac.ebi.eva.commons.models.mongo.documents.subdocuments.ConsequenceType;
-import uk.ac.ebi.eva.commons.models.mongo.documents.subdocuments.Xref;
+import uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.ConsequenceType;
+import uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.Xref;
 
 import java.util.Collections;
 import java.util.HashSet;
