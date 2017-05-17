@@ -32,12 +32,12 @@ public class AnnotationToSimplifiedDBObjectConverter implements Converter<Annota
     @Override
     public DBObject convert(Annotation source) {
         DBObject dbObject = new BasicDBObject();
-        dbObject.put(ID,source.getId());
-        dbObject.put(Annotation.CHROMOSOME_FIELD,source.getChromosome());
-        dbObject.put(Annotation.START_FIELD,source.getStart());
-        dbObject.put(Annotation.END_FIELD,source.getEnd());
-        dbObject.put(Annotation.VEP_VERSION_FIELD,source.getVepVersion());
-        dbObject.put(Annotation.VEP_CACHE_VERSION_FIELD,source.getVepCacheVersion());
+        dbObject.put(ID, source.getId());
+        dbObject.put(Annotation.CHROMOSOME_FIELD, source.getChromosome());
+        dbObject.put(Annotation.START_FIELD, source.getStart());
+        dbObject.put(Annotation.END_FIELD, source.getEnd());
+        dbObject.put(Annotation.VEP_VERSION_FIELD, source.getVepVersion());
+        dbObject.put(Annotation.VEP_CACHE_VERSION_FIELD, source.getVepCacheVersion());
         return dbObject;
     }
 

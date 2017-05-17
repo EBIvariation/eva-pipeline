@@ -110,8 +110,7 @@ public class VariantToDBObjectConverter implements Converter<Variant, DBObject> 
 
     @Override
     public DBObject convert(Variant object) {
-        String id = Variant.buildVariantId(object.getChromosome(), object.getStart(), object.getReference(),
-                object.getAlternate());
+        String id = object.buildVariantId();
 
         BasicDBObject mongoVariant = new BasicDBObject("_id", id)
                 // Do not include IDs: the MongoWriter will take care in the query using an $addToSet

@@ -19,7 +19,7 @@ package uk.ac.ebi.eva.commons.models.mongo.documents.subdocuments;
 import org.springframework.data.mongodb.core.mapping.Field;
 
 /**
- * From {@link org.opencb.biodata.models.variant.annotation.Score}
+ * Mongo database representation of a score / description pair of values.
  */
 public class Score {
 

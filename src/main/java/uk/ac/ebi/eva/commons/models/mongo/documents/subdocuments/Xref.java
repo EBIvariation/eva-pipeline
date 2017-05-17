@@ -18,7 +18,7 @@ package uk.ac.ebi.eva.commons.models.mongo.documents.subdocuments;
 import org.springframework.data.mongodb.core.mapping.Field;
 
 /**
- * From org.opencb.biodata.models.variant.annotation.Xref
+ * Mongo database representation of Xref field in a genomic variant annotation
  */
 public class Xref {
 
