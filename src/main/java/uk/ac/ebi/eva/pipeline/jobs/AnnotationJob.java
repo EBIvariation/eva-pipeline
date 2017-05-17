@@ -43,7 +43,7 @@ import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VEP_ANNOTATION_FLOW
  * 3) annotationLoadBatchStep - Load VEP annotations into mongo
  * <p>
  * Optional flow: variantsAnnotGenerateInput --> (annotationLoad)
- * annotationLoad steps are only executed if variantsAnnotGenerateInput is generating a
+ * annotationLoad step is only executed if variantsAnnotGenerateInput is generating a
  * non-empty VEP input file
  *
  * TODO add a new AnnotationJobParametersValidator

@@ -46,7 +46,7 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNull;
 
 /**
- * {@link NonAnnotatedVariantsMongoReader}
+ * {@link VariantsMongoReader}
  * input: a variants collection address
  * output: a DBObject each time `.read()` is called, with at least: chr, start, annot
  */
@@ -54,7 +54,7 @@ import static org.junit.Assert.assertNull;
 @ActiveProfiles(Application.VARIANT_ANNOTATION_MONGO_PROFILE)
 @TestPropertySource({"classpath:test-mongo.properties"})
 @ContextConfiguration(classes = {MongoConnection.class, MongoMappingContext.class})
-public class NonAnnotatedVariantsMongoReaderTest {
+public class VariantsMongoReaderTest {
 
     private static final String COLLECTION_VARIANTS_NAME = "variants";
 
@@ -80,7 +80,7 @@ public class NonAnnotatedVariantsMongoReaderTest {
     public TemporaryMongoRule mongoRule = new TemporaryMongoRule();
 
     @Test
-    public void shouldReadVariantsWithoutAnnotationFieldInStudy() throws Exception {
+    public void shouldReadVariantsWithoutAnnotationFieldInAStudy() throws Exception {
         checkNonAnnotatedVariantsRead(EXPECTED_NON_ANNOTATED_VARIANTS_IN_STUDY, STUDY_ID);
     }
 
@@ -90,7 +90,7 @@ public class NonAnnotatedVariantsMongoReaderTest {
     }
 
     @Test
-    public void shouldReadVariantsWithoutAnnotationFieldInAllStudiesUsingNull() throws Exception {
+    public void shouldReadVariantsWithoutAnnotationFieldInAllStudiesWhenNoStudySpecified() throws Exception {
         checkNonAnnotatedVariantsRead(EXPECTED_NON_ANNOTATED_VARIANTS_IN_DB, null);
     }
 
@@ -104,9 +104,9 @@ public class NonAnnotatedVariantsMongoReaderTest {
         MongoOperations mongoOperations = MongoConfiguration.getMongoOperations(databaseName, mongoConnection,
                 mongoMappingContext);
 
-        boolean onlyNonAnnotated = true;
-        NonAnnotatedVariantsMongoReader mongoItemReader = new NonAnnotatedVariantsMongoReader(
-                mongoOperations, COLLECTION_VARIANTS_NAME, study, onlyNonAnnotated);
+        boolean excludeAnnotated = true;
+        VariantsMongoReader mongoItemReader = new VariantsMongoReader(
+                mongoOperations, COLLECTION_VARIANTS_NAME, study, excludeAnnotated);
         mongoItemReader.open(executionContext);
 
         int itemCount = 0;
@@ -131,13 +131,18 @@ public class NonAnnotatedVariantsMongoReaderTest {
     }
 
     @Test
-    public void shouldReadVariantsInAllStudies() throws Exception {
+    public void shouldReadVariantsInAStudy() throws Exception {
         checkAllVariantsRead(EXPECTED_VARIANTS_IN_STUDY, STUDY_ID);
     }
 
     @Test
-    public void shouldReadVariantsInAllStudiesUsingNull() throws Exception {
+    public void shouldReadVariantsInAllStudies() throws Exception {
         checkAllVariantsRead(EXPECTED_VARIANTS_IN_DB, ALL_STUDIES);
+    }
+
+    @Test
+    public void shouldReadVariantsInAllStudiesWhenNoStudySpecified() throws Exception {
+        checkAllVariantsRead(EXPECTED_VARIANTS_IN_DB, null);
     }
 
     private void checkAllVariantsRead(int expectedVariants, String study) throws Exception {
@@ -150,9 +155,9 @@ public class NonAnnotatedVariantsMongoReaderTest {
         MongoOperations mongoOperations = MongoConfiguration.getMongoOperations(databaseName, mongoConnection,
                 mongoMappingContext);
 
-        boolean onlyNonAnnotated = false;
-        NonAnnotatedVariantsMongoReader mongoItemReader = new NonAnnotatedVariantsMongoReader(
-                mongoOperations, COLLECTION_VARIANTS_NAME, study, onlyNonAnnotated);
+        boolean excludeAnnotated = false;
+        VariantsMongoReader mongoItemReader = new VariantsMongoReader(
+                mongoOperations, COLLECTION_VARIANTS_NAME, study, excludeAnnotated);
         mongoItemReader.open(executionContext);
 
         int itemCount = 0;

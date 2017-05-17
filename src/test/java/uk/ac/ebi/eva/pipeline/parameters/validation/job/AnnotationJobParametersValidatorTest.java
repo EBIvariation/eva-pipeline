@@ -72,7 +72,6 @@ public class AnnotationJobParametersValidatorTest {
         optionalParameters = new TreeMap<>();
         optionalParameters.put(JobParametersNames.CONFIG_CHUNK_SIZE, new JobParameter("100"));
         optionalParameters.put(JobParametersNames.CONFIG_RESTARTABILITY_ALLOW, new JobParameter("true"));
-        optionalParameters.put(JobParametersNames.STATISTICS_OVERWRITE, new JobParameter("true"));
     }
 
     // The next tests show behaviour about the required parameters

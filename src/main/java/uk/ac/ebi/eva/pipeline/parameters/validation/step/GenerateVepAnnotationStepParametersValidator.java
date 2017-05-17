@@ -54,16 +54,16 @@ public class GenerateVepAnnotationStepParametersValidator extends DefaultJobPara
     private boolean isStudyIdRequired;
 
     public GenerateVepAnnotationStepParametersValidator(boolean isStudyIdRequired) {
-        super(new String[]{JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME,
-                           JobParametersNames.DB_NAME,
+        super(new String[]{JobParametersNames.ANNOTATION_OVERWRITE,
                            JobParametersNames.APP_VEP_CACHE_PATH,
                            JobParametersNames.APP_VEP_CACHE_SPECIES,
                            JobParametersNames.APP_VEP_CACHE_VERSION,
                            JobParametersNames.APP_VEP_NUMFORKS,
                            JobParametersNames.APP_VEP_PATH,
                            JobParametersNames.APP_VEP_TIMEOUT,
+                           JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME,
+                           JobParametersNames.DB_NAME,
                            JobParametersNames.INPUT_FASTA,
-                           JobParametersNames.ANNOTATION_OVERWRITE,
                            JobParametersNames.OUTPUT_DIR_ANNOTATION},
               new String[]{});
         this.isStudyIdRequired = isStudyIdRequired;

@@ -69,7 +69,7 @@ public class AnnotationParameters {
     @Value(PARAMETER + JobParametersNames.INPUT_FASTA + END)
     private String inputFasta;
 
-    @Value(PARAMETER + JobParametersNames.ANNOTATION_OVERWRITE + END)
+    @Value(PARAMETER + JobParametersNames.ANNOTATION_OVERWRITE + "']?:false}")
     private Boolean overwriteAnnotation;
 
     public String getVepPath() {
