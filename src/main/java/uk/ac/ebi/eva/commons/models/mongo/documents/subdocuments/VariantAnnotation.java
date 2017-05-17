@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Annotations of the genomic variation
+ * Lite version of genomic variant annotation generated using Ensembl VEP for indexing purposes.
  */
 public class VariantAnnotation {
 
@@ -68,8 +68,9 @@ public class VariantAnnotation {
     /**
      * Variant annotation constructor. Requires non empty values, otherwise throws {@link IllegalArgumentException}
      *
-     * @param vepVersion      non empty value required, otherwise throws {@link IllegalArgumentException}
-     * @param vepCacheVersion non empty value required, otherwise throws {@link IllegalArgumentException}
+     * @param vepVersion
+     * @param vepCacheVersion
+     * @throws IllegalArgumentException
      */
     public VariantAnnotation(String vepVersion, String vepCacheVersion) {
         Assert.hasText(vepVersion);
@@ -146,7 +147,7 @@ public class VariantAnnotation {
         return Collections.min(collection);
     }
 
-    private void concatenateRange(Collection<Double> collection, Double score) {
+    private void concatenateRange(Collection<Double> collection, double score) {
         Double min = minOf(collection);
         Double max = maxOf(collection);
         if (min == null || max == null) {
@@ -158,20 +159,20 @@ public class VariantAnnotation {
         }
     }
 
-    private void setRange(Collection<Double> collection, Double minScore, Double maxScore) {
+    private void setRange(Collection<Double> collection, double minScore, double maxScore) {
         collection.clear();
         collection.add(minScore);
         collection.add(maxScore);
     }
 
-    private void concatenateSiftRange(Double score) {
+    private void concatenateSiftRange(double score) {
         if (sifts == null) {
             sifts = new ArrayList<>();
         }
         concatenateRange(sifts, score);
     }
 
-    private void concatenatePolyphenRange(Double score) {
+    private void concatenatePolyphenRange(double score) {
         if (polyphens == null) {
             polyphens = new ArrayList<>();
         }

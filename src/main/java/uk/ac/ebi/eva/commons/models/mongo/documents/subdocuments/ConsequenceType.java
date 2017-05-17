@@ -21,7 +21,7 @@ import org.springframework.data.mongodb.core.mapping.Field;
 import java.util.Set;
 
 /**
- * org.opencb.biodata.models.variant.annotation.ConsequenceType
+ * Mongo database representation of a consequence type in a genomic variant annotation.
  */
 public class ConsequenceType {
 

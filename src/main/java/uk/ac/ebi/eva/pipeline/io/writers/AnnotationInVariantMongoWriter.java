@@ -66,7 +66,6 @@ public class AnnotationInVariantMongoWriter implements ItemWriter<Annotation> {
                                           String collection,
                                           String vepVersion,
                                           String vepCacheVersion) {
-        super();
         Assert.notNull(mongoOperations);
         Assert.hasText(collection);
         Assert.hasText(vepVersion);
@@ -78,7 +77,7 @@ public class AnnotationInVariantMongoWriter implements ItemWriter<Annotation> {
         this.vepCacheVersion = vepCacheVersion;
     }
 
-    private HashMap<String, VariantAnnotation> generateVariantAnnotations(List<? extends Annotation> annotations) {
+    private Map<String, VariantAnnotation> generateVariantAnnotations(List<? extends Annotation> annotations) {
         HashMap<String, VariantAnnotation> variantAnnotations = new HashMap<>();
 
         for (Annotation annotation : annotations) {
@@ -102,11 +101,11 @@ public class AnnotationInVariantMongoWriter implements ItemWriter<Annotation> {
         Map<String, VariantAnnotation> storedVariantAnnotations = getStoredVariantAnnotations(variantAnnotations);
 
         for (Map.Entry<String, VariantAnnotation> entry : variantAnnotations.entrySet()) {
-            final String key = entry.getKey();
-            if (storedVariantAnnotations.containsKey(key)) {
-                bulkUpdate(bulkOperations, key, storedVariantAnnotations.get(key).concatenate(entry.getValue()));
+            final String variantId = entry.getKey();
+            if (storedVariantAnnotations.containsKey(variantId)) {
+                bulkUpdate(bulkOperations, variantId, storedVariantAnnotations.get(variantId).concatenate(entry.getValue()));
             } else {
-                bulkAddToSet(bulkOperations, key, entry.getValue());
+                bulkAddToSet(bulkOperations, variantId, entry.getValue());
             }
         }
     }
@@ -153,11 +152,11 @@ public class AnnotationInVariantMongoWriter implements ItemWriter<Annotation> {
         Iterator<DBObject> iterator = mongoOperations.getCollection(collection).find(query).iterator();
         while (iterator.hasNext()) {
             final DBObject object = iterator.next();
-            final String id = (String) object.get(ID);
+            final String variantId = (String) object.get(ID);
             final BasicDBList dbAnnotations = (BasicDBList) object.get(ANNOTATION_FIELD);
             if (dbAnnotations != null && !dbAnnotations.isEmpty()) {
                 final DBObject dbAnnotation = (DBObject) dbAnnotations.get(0);
-                storedVariantAnnotations.put(id, convertToVariantAnnotation(dbAnnotation));
+                storedVariantAnnotations.put(variantId, convertToVariantAnnotation(dbAnnotation));
             }
         }
         return storedVariantAnnotations;

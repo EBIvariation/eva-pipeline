@@ -74,7 +74,6 @@ public class AnnotationLineMapper implements LineMapper<Annotation> {
      */
     @Override
     public Annotation mapLine(String line, int lineNumber) {
-        //logger.debug("Mapping line {} to Annotation", line);
         ConsequenceType consequenceType = new ConsequenceType();
         String[] lineFields = line.split("\t");
 

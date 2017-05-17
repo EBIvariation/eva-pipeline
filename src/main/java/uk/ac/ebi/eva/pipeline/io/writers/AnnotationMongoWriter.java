@@ -76,10 +76,9 @@ public class AnnotationMongoWriter implements ItemWriter<Annotation> {
     private final AnnotationToSimplifiedDBObjectConverter converter;
 
     public AnnotationMongoWriter(MongoOperations mongoOperations, String collection) {
-        super();
         Assert.notNull(mongoOperations);
         Assert.hasText(collection);
-        converter = new AnnotationToSimplifiedDBObjectConverter();
+        this.converter = new AnnotationToSimplifiedDBObjectConverter();
         this.mongoOperations = mongoOperations;
         this.collection = collection;
 
