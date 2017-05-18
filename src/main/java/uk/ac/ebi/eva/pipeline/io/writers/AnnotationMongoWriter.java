@@ -17,6 +17,7 @@
 package uk.ac.ebi.eva.pipeline.io.writers;
 
 import com.mongodb.BasicDBObject;
+import com.mongodb.DBObject;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.data.mongodb.core.BulkOperations;
 import org.springframework.data.mongodb.core.MongoOperations;
@@ -25,8 +26,8 @@ import org.springframework.data.mongodb.core.query.BasicUpdate;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.util.Assert;
-import uk.ac.ebi.eva.commons.models.converters.data.AnnotationToSimplifiedDBObjectConverter;
 import uk.ac.ebi.eva.commons.models.mongo.entity.Annotation;
+import uk.ac.ebi.eva.commons.models.mongo.entity.projections.SimplifiedAnnotation;
 import uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.ConsequenceType;
 import uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.Xref;
 import uk.ac.ebi.eva.utils.MongoDBHelper;
@@ -73,12 +74,9 @@ public class AnnotationMongoWriter implements ItemWriter<Annotation> {
 
     private final String collection;
 
-    private final AnnotationToSimplifiedDBObjectConverter converter;
-
     public AnnotationMongoWriter(MongoOperations mongoOperations, String collection) {
         Assert.notNull(mongoOperations);
         Assert.hasText(collection);
-        this.converter = new AnnotationToSimplifiedDBObjectConverter();
         this.mongoOperations = mongoOperations;
         this.collection = collection;
 
@@ -110,7 +108,7 @@ public class AnnotationMongoWriter implements ItemWriter<Annotation> {
     }
 
     private void writeAnnotationInMongoDb(BulkOperations bulk, Annotation annotation) {
-        Query upsertQuery = new BasicQuery(converter.convert(annotation));
+        Query upsertQuery = new BasicQuery((DBObject)convertToMongo(new SimplifiedAnnotation(annotation)));
         Update update = buildUpdateQuery(annotation);
         bulk.upsert(upsertQuery, update);
     }
