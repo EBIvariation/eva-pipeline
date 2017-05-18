@@ -148,8 +148,9 @@ public class AnnotationInVariantMongoWriter implements ItemWriter<Annotation> {
     private Map<String, VariantAnnotation> getStoredVariantAnnotations(Map<String, VariantAnnotation> variantAnnotations) {
         Map<String, VariantAnnotation> storedVariantAnnotations = new HashMap<>();
         BasicDBObject query = generateQueryForAnnotationInVariant(variantAnnotations.keySet().toArray(new String[]{}));
+        BasicDBObject projection = new BasicDBObject(ANNOTATION_FIELD, 1);
 
-        Iterator<DBObject> iterator = mongoOperations.getCollection(collection).find(query).iterator();
+        Iterator<DBObject> iterator = mongoOperations.getCollection(collection).find(query, projection).iterator();
         while (iterator.hasNext()) {
             final DBObject object = iterator.next();
             final String variantId = (String) object.get(ID);
