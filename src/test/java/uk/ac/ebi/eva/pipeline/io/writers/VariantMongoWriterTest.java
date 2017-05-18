@@ -119,8 +119,8 @@ public class VariantMongoWriterTest {
         Set<String> createdIndexes = indexInfo.stream().map(index -> index.get("name").toString())
                 .collect(Collectors.toSet());
         Set<String> expectedIndexes = new HashSet<>();
-        expectedIndexes.addAll(Arrays.asList("so_1", "chr_1_start_1_end_1", "files.sid_1_files.fid_1", "_id_",
-                "ids_1"));
+        expectedIndexes.addAll(Arrays.asList("annot.xrefs_1", "files.sid_1_files.fid_1", "chr_1_start_1_end_1",
+                "annot.so_1", "_id_", "ids_1"));
         assertEquals(expectedIndexes, createdIndexes);
 
         indexInfo.stream().filter(index -> !("_id_".equals(index.get("name").toString())))

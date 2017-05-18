@@ -33,6 +33,10 @@ import uk.ac.ebi.eva.utils.MongoDBHelper;
 
 import java.util.List;
 
+import static uk.ac.ebi.eva.commons.models.converters.data.VariantToDBObjectConverter.ANNOTATION_FIELD;
+import static uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantAnnotation.XREFS_FIELD;
+import static uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantAnnotation.SO_ACCESSION_FIELD;
+
 /**
  * Write a list of {@link Variant} into MongoDB
  * See also {@link org.opencb.opencga.storage.mongodb.variant.VariantMongoDBWriter}
@@ -40,8 +44,6 @@ import java.util.List;
 public class VariantMongoWriter extends MongoItemWriter<Variant> {
 
     private static final Logger logger = LoggerFactory.getLogger(VariantMongoWriter.class);
-
-    private static final String VARIANT_ANNOTATION_SO_FIELD = "so";
 
     private final MongoOperations mongoOperations;
 
@@ -116,7 +118,10 @@ public class VariantMongoWriter extends MongoItemWriter<Variant> {
                 new BasicDBObject(MongoDBHelper.BACKGROUND_INDEX, true));
 
         mongoOperations.getCollection(collection).createIndex(
-                new BasicDBObject(VARIANT_ANNOTATION_SO_FIELD, 1),
+                new BasicDBObject(ANNOTATION_FIELD+"."+XREFS_FIELD, 1),
+                new BasicDBObject(MongoDBHelper.BACKGROUND_INDEX, true));
+        mongoOperations.getCollection(collection).createIndex(
+                new BasicDBObject(ANNOTATION_FIELD+"."+ SO_ACCESSION_FIELD, 1),
                 new BasicDBObject(MongoDBHelper.BACKGROUND_INDEX, true));
     }
 
