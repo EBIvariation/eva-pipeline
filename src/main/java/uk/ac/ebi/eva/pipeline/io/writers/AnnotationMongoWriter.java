@@ -16,6 +16,7 @@
 
 package uk.ac.ebi.eva.pipeline.io.writers;
 
+import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 import org.springframework.batch.item.ItemWriter;
@@ -32,6 +33,7 @@ import uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.ConsequenceType;
 import uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.Xref;
 import uk.ac.ebi.eva.utils.MongoDBHelper;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -108,7 +110,7 @@ public class AnnotationMongoWriter implements ItemWriter<Annotation> {
     }
 
     private void writeAnnotationInMongoDb(BulkOperations bulk, Annotation annotation) {
-        Query upsertQuery = new BasicQuery((DBObject)convertToMongo(new SimplifiedAnnotation(annotation)));
+        Query upsertQuery = new BasicQuery(convertToMongo(new SimplifiedAnnotation(annotation)));
         Update update = buildUpdateQuery(annotation);
         bulk.upsert(upsertQuery, update);
     }
@@ -128,8 +130,12 @@ public class AnnotationMongoWriter implements ItemWriter<Annotation> {
         return new BasicDBObject(EACH, convertToMongo(annotation.getConsequenceTypes()));
     }
 
-    private Object convertToMongo(Object object) {
-        return mongoOperations.getConverter().convertToMongoType(object);
+    private DBObject convertToMongo(SimplifiedAnnotation simplifiedAnnotation) {
+        return (DBObject) mongoOperations.getConverter().convertToMongoType(simplifiedAnnotation);
+    }
+
+    private BasicDBList convertToMongo(Collection<?> object) {
+        return (BasicDBList) mongoOperations.getConverter().convertToMongoType(object);
     }
 
     private void createIndexes() {
