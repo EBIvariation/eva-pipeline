@@ -106,6 +106,10 @@ public class EvaCommandLineBuilder {
         return addBoolean(JobParametersNames.ANNOTATION_SKIP, annotationSkip);
     }
 
+    public EvaCommandLineBuilder annotationOverwrite(String annotationOverwrite) {
+        return addString(JobParametersNames.ANNOTATION_OVERWRITE, annotationOverwrite);
+    }
+
     public EvaCommandLineBuilder statisticsSkip(boolean statisticsSkip) {
         return addBoolean(JobParametersNames.STATISTICS_SKIP, statisticsSkip);
     }

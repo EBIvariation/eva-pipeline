@@ -32,18 +32,18 @@ import org.springframework.context.annotation.Scope;
 
 import uk.ac.ebi.eva.pipeline.jobs.flows.AnnotationFlow;
 import uk.ac.ebi.eva.pipeline.parameters.NewJobIncrementer;
+import uk.ac.ebi.eva.pipeline.parameters.validation.job.AnnotationJobParametersValidator;
 
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.ANNOTATE_VARIANTS_JOB;
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VEP_ANNOTATION_FLOW;
 
 /**
  * Batch class to wire together:
- * 1) generateVepInputStep - Dump a list of variants without annotations to be used as input for VEP
- * 2) annotationCreate - run VEP
+ * 1) generateVepInputStep - Dump a list of variants without annotations and run VEP with them
  * 3) annotationLoadBatchStep - Load VEP annotations into mongo
  * <p>
- * Optional flow: variantsAnnotGenerateInput --> (annotationCreate --> annotationLoad)
- * annotationCreate and annotationLoad steps are only executed if variantsAnnotGenerateInput is generating a
+ * Optional flow: variantsAnnotGenerateInput --> (annotationLoad)
+ * annotationLoad step is only executed if variantsAnnotGenerateInput is generating a
  * non-empty VEP input file
  *
  * TODO add a new AnnotationJobParametersValidator
@@ -67,7 +67,8 @@ public class AnnotationJob {
 
         JobBuilder jobBuilder = jobBuilderFactory
                 .get(ANNOTATE_VARIANTS_JOB)
-                .incrementer(new NewJobIncrementer());
+                .incrementer(new NewJobIncrementer())
+                .validator(new AnnotationJobParametersValidator());
         return jobBuilder.start(annotation).build().build();
     }
 

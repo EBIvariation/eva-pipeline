@@ -69,6 +69,14 @@ The contents from the configuration files can be also provided directly as comma
 * `spring.profiles.active`: "production" to keep track of half-executed jobs using a job repository database, "test" to use an in-memory database that will record a single run
 * `app.opencga.path`: Path to the OpenCGA installation folder. An `ls` in that path should show the conf, analysis, bin and libs folders.
 
+Database credentials used to connect to a MongoDB instance. See [MongoDB options documentation](https://docs.mongodb.com/manual/reference/program/mongo/#options). The database and collection names are listed below in the "Database parameters" section.
+
+* `spring.data.mongodb.authentication-database`
+* `spring.data.mongodb.host`
+* `spring.data.mongodb.password`
+* `spring.data.mongodb.port`
+* `spring.data.mongodb.username`
+
 If using a persistent (not in-memory database), the following information needs to be filled in:
 
 * `job.repository.driverClassName`: JDBC-specific argument that points to the database to use for the job repository (PostgreSQL tested and supported, driver name is `org.postgresql.Driver`)
@@ -79,14 +87,16 @@ If using a persistent (not in-memory database), the following information needs 
 Other parameters are:
 
 * `config.db.read-preference`: In a distributed Mongo environment, replica to connect to (primary or secondary, default primary).
-* `--logging.level.uk.ac.ebi.eva`: DEBUG, INFO, WARN, ERROR supported among others. Recommended DEBUG.
-* `--logging.level.org.opencb.opencga`: Recommended DEBUG.
-* `--logging.level.org.springframework`: Recommended INFO or WARN.
+* `logging.level.uk.ac.ebi.eva`: DEBUG, INFO, WARN, ERROR supported among others. Recommended DEBUG.
+* `logging.level.org.opencb.opencga`: Recommended DEBUG.
+* `logging.level.org.springframework`: Recommended INFO or WARN.
 
 
-### General job tuning
+### Job parameters
 
-* `--spring.batch.job.names`: The name of the job to run. At the moment it can be `genotyped-vcf-job`, `aggregated-vcf-job`, `annotate-variants-job`, `calculate-statistics-job` or `drop-study-job`
+#### Job configuration
+
+* `spring.batch.job.names`: The name of the job to run. At the moment it can be `genotyped-vcf-job`, `aggregated-vcf-job`, `annotate-variants-job`, `calculate-statistics-job` or `drop-study-job`
 
 Individual steps can be skipped using one of the following. This is not necessary unless they are irrelevant for the data to be processed, or some input data was generated in previous runs of the same job.
 
@@ -95,9 +105,11 @@ Individual steps can be skipped using one of the following. This is not necessar
 
 Other parameters are:
 
+* `config.chunk.size`: Size of batches across the pipeline (recommended from 100 to 5000).
+* `annotation.overwrite`: True to overwrite annotations already associated to variants. False to annotate only variants without an existing annotation. Please note that if the `input.study.id` parameter is specified, annotation will be limited to variants from that study.
 * `force.restart`: When included as command line parameter allows to restart a a job. This will also mark the last execution not finished of the same job / parameters as cancelled in the job database.
 
-### Job run tuning
+#### Job inputs
 
 * `input.vcf`: Path to the VCF to process. May be compressed.
 * `input.vcf.id`: Unique ID for the VCF to process. Could be an analysis in the SRA model (please ignore if you don't know what SRA is).
@@ -110,12 +122,28 @@ Other parameters are:
 * `input.pedigree`: PED file if available, in order to calculate population-based statistics.
 * `input.fasta`: Path to the FASTA file with the reference sequence, in order to generate the VEP annotation.
 
+#### Job outputs
+
 * `output.dir`: Already existing folder to store the transformed VCF and statistics files.
 * `output.dir.annotation`: Already existing folder to store VEP output files.
 * `output.dir.statistics`: Already existing folder to store statistics output files.
 
+#### Database parameters
+
+Database name and collection names can be specified with these parameters. To set the database credentials, use the parameters in the "Environment" section.
+
+* `spring.data.mongodb.database`: Database name, that contain all the collections
+* `db.collections.variants.name`: Main collection. Has variant coordinates, sample information, and some statistics and annotation.
+* `db.collections.files.name`: File (and study) metadata information.
+* `db.collections.stats.name`: Main collection for statistics. The variants collection might contain a subset of this.
+* `db.collections.annotation.metadata.name`: Main collection for annotation. The variants collection might contain a subset of this.
+
+#### Configuration of third party applications
+
 * `app.vep.cache.path`: Path to the VEP cache root folder.
-* `app.vep.version`: Version of the VEP cache.
+* `app.vep.version`: Version of the VEP executable.
+* `app.vep.cache.version`: Version of the VEP cache.
 * `app.vep.species`: Name of the species as stored in the cache folder.
 * `app.vep.path`: Path to the VEP installation folder.
 * `app.vep.num-forks`: Number of processes to run VEP in parallel (recommended 4).
+* `app.vep.timeout`: If VEP doesn't respond in the specified number of seconds, the pipeline will assume that the step failed (recommended 300).

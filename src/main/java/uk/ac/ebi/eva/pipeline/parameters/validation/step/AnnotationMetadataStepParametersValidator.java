@@ -36,6 +36,7 @@ public class AnnotationMetadataStepParametersValidator extends DefaultJobParamet
 
     public AnnotationMetadataStepParametersValidator() {
         super(new String[]{JobParametersNames.DB_COLLECTIONS_ANNOTATION_METADATA_NAME,
+                           JobParametersNames.DB_NAME,
                            JobParametersNames.APP_VEP_VERSION,
                            JobParametersNames.APP_VEP_CACHE_VERSION},
                 new String[]{});

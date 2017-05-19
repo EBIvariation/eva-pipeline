@@ -30,7 +30,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 import uk.ac.ebi.eva.pipeline.configuration.ChunkSizeCompletionPolicyConfiguration;
-import uk.ac.ebi.eva.pipeline.configuration.readers.NonAnnotatedVariantsMongoReaderConfiguration;
+import uk.ac.ebi.eva.pipeline.configuration.readers.VariantsMongoReaderConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.writers.VepAnnotationFileWriterConfiguration;
 import uk.ac.ebi.eva.pipeline.io.readers.AnnotationFlatFileReader;
 import uk.ac.ebi.eva.pipeline.listeners.StepProgressListener;
@@ -38,7 +38,7 @@ import uk.ac.ebi.eva.pipeline.model.VariantWrapper;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.GENERATE_VEP_ANNOTATION_STEP;
-import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.NON_ANNOTATED_VARIANTS_READER;
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VARIANTS_READER;
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VEP_ANNOTATION_WRITER;
 
 /**
@@ -51,14 +51,14 @@ import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VEP_ANNOTATION_WRIT
  */
 @Configuration
 @EnableBatchProcessing
-@Import({NonAnnotatedVariantsMongoReaderConfiguration.class, VepAnnotationFileWriterConfiguration.class,
+@Import({VariantsMongoReaderConfiguration.class, VepAnnotationFileWriterConfiguration.class,
         ChunkSizeCompletionPolicyConfiguration.class})
 public class GenerateVepAnnotationStep {
 
     private static final Logger logger = LoggerFactory.getLogger(GenerateVepAnnotationStep.class);
 
     @Autowired
-    @Qualifier(NON_ANNOTATED_VARIANTS_READER)
+    @Qualifier(VARIANTS_READER)
     private ItemStreamReader<VariantWrapper> nonAnnotatedVariantsReader;
 
     @Autowired

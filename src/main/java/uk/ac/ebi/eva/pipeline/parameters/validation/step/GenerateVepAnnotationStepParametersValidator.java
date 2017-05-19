@@ -23,9 +23,14 @@ import org.springframework.batch.core.job.DefaultJobParametersValidator;
 
 import uk.ac.ebi.eva.pipeline.jobs.steps.GenerateVepAnnotationStep;
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
+import uk.ac.ebi.eva.pipeline.parameters.validation.AnnotationOverwriteValidator;
+import uk.ac.ebi.eva.pipeline.parameters.validation.ConfigChunkSizeValidator;
+import uk.ac.ebi.eva.pipeline.parameters.validation.DbCollectionsVariantsNameValidator;
+import uk.ac.ebi.eva.pipeline.parameters.validation.DbNameValidator;
 import uk.ac.ebi.eva.pipeline.parameters.validation.InputFastaValidator;
 import uk.ac.ebi.eva.pipeline.parameters.validation.InputStudyIdValidator;
 import uk.ac.ebi.eva.pipeline.parameters.validation.InputVcfIdValidator;
+import uk.ac.ebi.eva.pipeline.parameters.validation.OptionalValidator;
 import uk.ac.ebi.eva.pipeline.parameters.validation.OutputDirAnnotationValidator;
 import uk.ac.ebi.eva.pipeline.parameters.validation.VepCachePathValidator;
 import uk.ac.ebi.eva.pipeline.parameters.validation.VepCacheSpeciesValidator;
@@ -49,12 +54,15 @@ public class GenerateVepAnnotationStepParametersValidator extends DefaultJobPara
     private boolean isStudyIdRequired;
 
     public GenerateVepAnnotationStepParametersValidator(boolean isStudyIdRequired) {
-        super(new String[]{JobParametersNames.APP_VEP_CACHE_PATH,
+        super(new String[]{JobParametersNames.ANNOTATION_OVERWRITE,
+                           JobParametersNames.APP_VEP_CACHE_PATH,
                            JobParametersNames.APP_VEP_CACHE_SPECIES,
                            JobParametersNames.APP_VEP_CACHE_VERSION,
                            JobParametersNames.APP_VEP_NUMFORKS,
                            JobParametersNames.APP_VEP_PATH,
                            JobParametersNames.APP_VEP_TIMEOUT,
+                           JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME,
+                           JobParametersNames.DB_NAME,
                            JobParametersNames.INPUT_FASTA,
                            JobParametersNames.OUTPUT_DIR_ANNOTATION},
               new String[]{});
@@ -70,19 +78,28 @@ public class GenerateVepAnnotationStepParametersValidator extends DefaultJobPara
     private CompositeJobParametersValidator compositeJobParametersValidator() {
         List<JobParametersValidator> jobParametersValidators = new ArrayList<>();
         Collections.addAll(jobParametersValidators,
+                new AnnotationOverwriteValidator(),
+                new DbCollectionsVariantsNameValidator(),
+                new DbNameValidator(),
+                new InputFastaValidator(),
+                new OutputDirAnnotationValidator(),
                 new VepCachePathValidator(),
                 new VepCacheSpeciesValidator(),
                 new VepCacheVersionValidator(),
                 new VepNumForksValidator(),
                 new VepPathValidator(),
                 new VepTimeoutValidator(),
-                new InputFastaValidator(),
-                new OutputDirAnnotationValidator()
+                new OptionalValidator(new ConfigChunkSizeValidator(), JobParametersNames.CONFIG_CHUNK_SIZE)
         );
 
         if (isStudyIdRequired) {
             jobParametersValidators.add(new InputStudyIdValidator());
             jobParametersValidators.add(new InputVcfIdValidator());
+        } else {
+            jobParametersValidators.add(
+                    new OptionalValidator(new InputStudyIdValidator(), JobParametersNames.INPUT_STUDY_ID));
+            jobParametersValidators.add(
+                    new OptionalValidator(new InputVcfIdValidator(), JobParametersNames.INPUT_VCF_ID));
         }
 
         CompositeJobParametersValidator compositeJobParametersValidator = new CompositeJobParametersValidator();

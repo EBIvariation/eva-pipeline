@@ -20,29 +20,35 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mongodb.core.MongoOperations;
 
-import uk.ac.ebi.eva.pipeline.io.readers.NonAnnotatedVariantsMongoReader;
+import uk.ac.ebi.eva.pipeline.io.readers.VariantsMongoReader;
+import uk.ac.ebi.eva.pipeline.parameters.AnnotationParameters;
 import uk.ac.ebi.eva.pipeline.parameters.DatabaseParameters;
 import uk.ac.ebi.eva.pipeline.parameters.InputParameters;
 
-import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.NON_ANNOTATED_VARIANTS_READER;
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VARIANTS_READER;
 
 /**
- * Configuration to inject a NonAnnotatedVariantsMongoReader bean that reads from a mongo database in the pipeline
+ * Configuration to inject a VariantsMongoReader bean that reads from a mongo database in the pipeline
  */
 @Configuration
-public class NonAnnotatedVariantsMongoReaderConfiguration {
+public class VariantsMongoReaderConfiguration {
 
-    @Bean(NON_ANNOTATED_VARIANTS_READER)
+    @Bean(VARIANTS_READER)
     @StepScope
-    public NonAnnotatedVariantsMongoReader nonAnnotatedVariantsMongoReader(MongoOperations mongoOperations,
-                                                                           DatabaseParameters databaseParameters,
-                                                                           InputParameters inputParameters) {
-        NonAnnotatedVariantsMongoReader nonAnnotatedVariantsMongoReader = new NonAnnotatedVariantsMongoReader(
+    public VariantsMongoReader variantsMongoReader(MongoOperations mongoOperations,
+                                                   DatabaseParameters databaseParameters,
+                                                   InputParameters inputParameters,
+                                                   AnnotationParameters annotationParameters) {
+        // to overwrite annotation we have to bring all variants (non annotated and annotated)
+        boolean excludeAnnotated = !annotationParameters.getOverwriteAnnotation();
+
+        VariantsMongoReader variantsMongoReader = new VariantsMongoReader(
                 mongoOperations,
                 databaseParameters.getCollectionVariantsName(),
-                inputParameters.getStudyId());
-        nonAnnotatedVariantsMongoReader.setSaveState(false);
-        return nonAnnotatedVariantsMongoReader;
+                inputParameters.getStudyId(),
+                excludeAnnotated);
+        variantsMongoReader.setSaveState(false);
+        return variantsMongoReader;
     }
 
 }

@@ -25,12 +25,13 @@ public class VariantWrapper {
     private Variant variant;
     private String strand = "+";
 
-    public VariantWrapper(Variant variant) {
-        this.variant = variant.copyInEnsemblFormat();
+    public VariantWrapper(String chromosome, int start, int end, String reference, String alternate) {
+        this(new Variant(chromosome, start, end, reference, alternate));
     }
 
-    public VariantWrapper(String chromosome, int start, int end, String reference, String alternate) {
-        this.variant = new Variant(chromosome, start, end, reference, alternate).copyInEnsemblFormat();
+    public VariantWrapper(Variant variant) {
+        this.variant = variant;
+        transformToEnsemblFormat();
     }
 
     public String getChr() {
@@ -53,4 +54,15 @@ public class VariantWrapper {
         return strand;
     }
 
+    private void transformToEnsemblFormat() {
+        variant.setEnd(variant.getStart() + variant.getReference().length() - 1);
+
+        if (variant.getReference().equals("")) {
+            variant.setReference("-");
+        }
+
+        if (variant.getAlternate().equals("")) {
+            variant.setAlternate("-");
+        }
+    }
 }

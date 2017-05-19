@@ -21,7 +21,7 @@ package uk.ac.ebi.eva.pipeline.configuration;
 public class BeanNames {
 
     public static final String GENE_READER = "gene-reader";
-    public static final String NON_ANNOTATED_VARIANTS_READER = "non-annotated-variants-reader";
+    public static final String VARIANTS_READER = "variants-reader";
     public static final String VARIANT_ANNOTATION_READER = "variant-annotation-reader";
     public static final String VARIANT_READER = "variant-reader";
 

@@ -217,6 +217,7 @@ public class GenotypedVcfJobWorkflowTest {
         File fasta = temporaryFolderRule.newFile();
 
         EvaJobParameterBuilder evaJobParameterBuilder = new EvaJobParameterBuilder()
+                .annotationOverwrite("false")
                 .collectionFilesName("files")
                 .collectionVariantsName("variants")
                 .collectionAnnotationMetadataName("annotationMetadata")

@@ -37,7 +37,7 @@ import javax.annotation.PostConstruct;
  * {@link org.springframework.batch.item.data.MongoItemReader} is using
  * pagination and it is slow with large collections
  */
-public class NonAnnotatedVariantsMongoReader
+public class VariantsMongoReader
         extends AbstractItemCountingItemStreamItemReader<VariantWrapper> implements InitializingBean {
 
     private MongoDbCursorItemReader delegateReader;
@@ -50,9 +50,11 @@ public class NonAnnotatedVariantsMongoReader
     /**
      * @param studyId Can be the empty string or null, meaning to bring all non-annotated variants in the collection.
      * If the studyId string is not empty, bring only non-annotated variants from that study.
+     * @param excludeAnnotated bring only non-annotated variants.
      */
-    public NonAnnotatedVariantsMongoReader(MongoOperations template, String collectionsVariantsName, String studyId) {
-        setName(ClassUtils.getShortName(NonAnnotatedVariantsMongoReader.class));
+    public VariantsMongoReader(MongoOperations template, String collectionsVariantsName, String studyId,
+                               boolean excludeAnnotated) {
+        setName(ClassUtils.getShortName(VariantsMongoReader.class));
         delegateReader = new MongoDbCursorItemReader();
         delegateReader.setTemplate(template);
         delegateReader.setCollection(collectionsVariantsName);
@@ -61,8 +63,10 @@ public class NonAnnotatedVariantsMongoReader
         if (studyId != null && !studyId.isEmpty()) {
             queryBuilder.add(STUDY_KEY, studyId);
         }
-        DBObject query = queryBuilder.add("annot.ct.so", new BasicDBObject("$exists", false)).get();
-        delegateReader.setQuery(query);
+        if (excludeAnnotated) {
+            queryBuilder.add("annot.ct.so", new BasicDBObject("$exists", false));
+        }
+        delegateReader.setQuery(queryBuilder.get());
 
         String[] fields = {"chr", "start", "end", "ref", "alt"};
         delegateReader.setFields(fields);

@@ -25,6 +25,11 @@ import java.util.Date;
 
 public class EvaJobParameterBuilder extends JobParametersBuilder {
 
+    public EvaJobParameterBuilder annotationOverwrite(String outputDirAnnotation) {
+        addParameter(JobParametersNames.ANNOTATION_OVERWRITE, new JobParameter(outputDirAnnotation));
+        return this;
+    }
+
     public EvaJobParameterBuilder inputStudyId(String inputStudyId) {
         addParameter(JobParametersNames.INPUT_STUDY_ID, new JobParameter(inputStudyId));
         return this;
@@ -64,11 +69,11 @@ public class EvaJobParameterBuilder extends JobParametersBuilder {
         addParameter(JobParametersNames.DB_NAME, new JobParameter(databaseName));
         return this;
     }
-
     public EvaJobParameterBuilder collectionVariantsName(String collectionVariantsName) {
         addParameter(JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME, new JobParameter(collectionVariantsName));
         return this;
     }
+
     public EvaJobParameterBuilder collectionFilesName(String collectionFilesName) {
         addParameter(JobParametersNames.DB_COLLECTIONS_FILES_NAME, new JobParameter(collectionFilesName));
         return this;
