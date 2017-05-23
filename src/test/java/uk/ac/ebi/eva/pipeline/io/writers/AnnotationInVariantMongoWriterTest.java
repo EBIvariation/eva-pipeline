@@ -30,9 +30,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-
-import uk.ac.ebi.eva.commons.models.converters.data.VariantToDBObjectConverter;
 import uk.ac.ebi.eva.commons.models.mongo.entity.Annotation;
+import uk.ac.ebi.eva.commons.models.mongo.entity.VariantDocument;
 import uk.ac.ebi.eva.pipeline.Application;
 import uk.ac.ebi.eva.pipeline.configuration.MongoConfiguration;
 import uk.ac.ebi.eva.pipeline.io.mappers.AnnotationLineMapper;
@@ -130,7 +129,7 @@ public class AnnotationInVariantMongoWriterTest {
 
             if (id.equals("20_63360_C_T")) {
                 BasicDBObject annotationField = (BasicDBObject) ((BasicDBList) (variant).get(
-                        VariantToDBObjectConverter.ANNOTATION_FIELD)).get(0);
+                        VariantDocument.ANNOTATION_FIELD)).get(0);
 
                 BasicDBList sifts = (BasicDBList) annotationField.get(SIFT_FIELD);
                 assertNotNull(sifts);
@@ -152,7 +151,7 @@ public class AnnotationInVariantMongoWriterTest {
 
             if (id.equals("20_63399_G_A")) {
                 BasicDBObject annotationField = (BasicDBObject) ((BasicDBList) (variant).get(
-                        VariantToDBObjectConverter.ANNOTATION_FIELD)).get(0);
+                        VariantDocument.ANNOTATION_FIELD)).get(0);
 
                 BasicDBList sifts = (BasicDBList) annotationField.get(SIFT_FIELD);
                 assertNotNull(sifts);

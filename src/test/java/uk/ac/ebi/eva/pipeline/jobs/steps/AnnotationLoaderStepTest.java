@@ -31,7 +31,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-import uk.ac.ebi.eva.commons.models.converters.data.VariantToDBObjectConverter;
+import uk.ac.ebi.eva.commons.models.mongo.entity.VariantDocument;
 import uk.ac.ebi.eva.pipeline.Application;
 import uk.ac.ebi.eva.pipeline.configuration.BeanNames;
 import uk.ac.ebi.eva.pipeline.jobs.AnnotationJob;
@@ -46,12 +46,12 @@ import java.nio.file.Paths;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static uk.ac.ebi.eva.test.utils.JobTestUtils.assertCompleted;
-import static uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantAnnotation.POLYPHEN_FIELD;
-import static uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantAnnotation.SO_ACCESSION_FIELD;
 import static uk.ac.ebi.eva.commons.models.mongo.entity.Annotation.CONSEQUENCE_TYPE_FIELD;
 import static uk.ac.ebi.eva.commons.models.mongo.entity.Annotation.XREFS_FIELD;
 import static uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.ConsequenceType.SIFT_FIELD;
+import static uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantAnnotation.POLYPHEN_FIELD;
+import static uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantAnnotation.SO_ACCESSION_FIELD;
+import static uk.ac.ebi.eva.test.utils.JobTestUtils.assertCompleted;
 import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResourceUrl;
 
 /**
@@ -135,7 +135,7 @@ public class AnnotationLoaderStepTest {
             DBObject variant = variantCursor.next();
             if (variant.get("_id").equals("20_63351_A_G")) {
                 BasicDBObject annotationField = (BasicDBObject) ((BasicDBList) (variant).get(
-                        VariantToDBObjectConverter.ANNOTATION_FIELD)).get(0);
+                        VariantDocument.ANNOTATION_FIELD)).get(0);
                 assertNotNull(annotationField.get(SIFT_FIELD));
                 assertNotNull(annotationField.get(SO_ACCESSION_FIELD));
                 assertNotNull(annotationField.get(POLYPHEN_FIELD));
