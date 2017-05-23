@@ -32,7 +32,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import static uk.ac.ebi.eva.commons.models.converters.data.VariantToDBObjectConverter.ANNOTATION_FIELD;
+import static uk.ac.ebi.eva.commons.models.mongo.entity.VariantDocument.ANNOTATION_FIELD;
 import static uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantAnnotation.VEP_CACHE_VERSION_FIELD;
 import static uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantAnnotation.VEP_VERSION_FIELD;
 
