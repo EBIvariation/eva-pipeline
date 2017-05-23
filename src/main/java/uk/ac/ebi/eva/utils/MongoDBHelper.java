@@ -16,9 +16,6 @@
 package uk.ac.ebi.eva.utils;
 
 import com.mongodb.ServerAddress;
-import org.opencb.commons.utils.CryptoUtils;
-
-import uk.ac.ebi.eva.commons.models.data.Variant;
 
 import java.net.UnknownHostException;
 import java.util.LinkedList;
@@ -49,41 +46,6 @@ public class MongoDBHelper {
             }
         }
         return serverAddresses;
-    }
-
-    public static String buildStorageId(Variant v) {
-        return buildStorageId(v.getChromosome(), v.getStart(), v.getReference(), v.getAlternate());
-    }
-
-    /**
-     * From org.opencb.opencga.storage.mongodb.variant.VariantToDBObjectConverter
-     * #buildStorageId(java.lang.String, int, java.lang.String, java.lang.String)
-     * <p>
-     * To avoid the initialization of VariantSourceEntryToDBObjectConverter and VariantToDBObjectConverter
-     */
-    public static String buildStorageId(String chromosome, int start, String reference, String alternate) {
-        StringBuilder builder = new StringBuilder(chromosome);
-        builder.append("_");
-        builder.append(start);
-        builder.append("_");
-        if (!reference.equals("-")) {
-            if (reference.length() < 50) {
-                builder.append(reference);
-            } else {
-                builder.append(new String(CryptoUtils.encryptSha1(reference)));
-            }
-        }
-
-        builder.append("_");
-        if (!alternate.equals("-")) {
-            if (alternate.length() < 50) {
-                builder.append(alternate);
-            } else {
-                builder.append(new String(CryptoUtils.encryptSha1(alternate)));
-            }
-        }
-
-        return builder.toString();
     }
 
 }

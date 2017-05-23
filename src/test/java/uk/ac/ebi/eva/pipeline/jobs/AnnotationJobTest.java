@@ -16,16 +16,12 @@
 
 package uk.ac.ebi.eva.pipeline.jobs;
 
+import com.mongodb.BasicDBList;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.opencb.biodata.models.variant.annotation.VariantAnnotation;
-import org.opencb.opencga.storage.mongodb.variant.DBObjectToVariantAnnotationConverter;
-import org.springframework.batch.core.BatchStatus;
-import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.StepExecution;
@@ -35,33 +31,28 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-
-import uk.ac.ebi.eva.commons.models.converters.data.VariantToDBObjectConverter;
 import uk.ac.ebi.eva.pipeline.configuration.BeanNames;
 import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
-import uk.ac.ebi.eva.test.utils.JobTestUtils;
 import uk.ac.ebi.eva.utils.EvaJobParameterBuilder;
 import uk.ac.ebi.eva.utils.URLHelper;
 
 import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static uk.ac.ebi.eva.commons.models.mongo.entity.Annotation.CONSEQUENCE_TYPE_FIELD;
 import static uk.ac.ebi.eva.test.utils.JobTestUtils.assertCompleted;
 import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResourceUrl;
 import static uk.ac.ebi.eva.utils.FileUtils.getResource;
 
 /**
  * Test for {@link AnnotationJob}
- *
+ * <p>
  * TODO The test should fail when we will integrate the JobParameter validation since there are empty parameters for VEP
  */
 @RunWith(SpringRunner.class)
@@ -73,9 +64,9 @@ public class AnnotationJobTest {
     private static final String MONGO_DUMP = "/dump/VariantStatsConfigurationTest_vl";
     private static final String INPUT_STUDY_ID = "1";
     private static final String INPUT_VCF_ID = "1";
+    private static final String COLLECTION_ANNOTATIONS_NAME = "annotations";
     private static final String COLLECTION_ANNOTATION_METADATA_NAME = "annotationMetadata";
     private static final String COLLECTION_VARIANTS_NAME = "variants";
-
 
     @Rule
     public TemporaryMongoRule mongoRule = new TemporaryMongoRule();
@@ -85,8 +76,6 @@ public class AnnotationJobTest {
 
     @Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
-
-    private DBObjectToVariantAnnotationConverter converter;
 
     @Test
     public void allAnnotationStepsShouldBeExecuted() throws Exception {
@@ -98,6 +87,7 @@ public class AnnotationJobTest {
         temporaryFolderRule.newFile(vepOutputName);
 
         JobParameters jobParameters = new EvaJobParameterBuilder()
+                .collectionAnnotationsName(COLLECTION_ANNOTATIONS_NAME)
                 .collectionAnnotationMetadataName(COLLECTION_ANNOTATION_METADATA_NAME)
                 .collectionVariantsName(COLLECTION_VARIANTS_NAME)
                 .databaseName(dbName)
@@ -129,28 +119,27 @@ public class AnnotationJobTest {
         assertEquals(BeanNames.LOAD_ANNOTATION_METADATA_STEP, loadAnnotationMetadataStep.getStepName());
 
         //check that documents have the annotation
-        DBCursor cursor = mongoRule.getCollection(dbName, COLLECTION_VARIANTS_NAME).find();
+        DBCursor cursor = mongoRule.getCollection(dbName, COLLECTION_ANNOTATIONS_NAME).find();
 
-        int count = 0;
+        int annotationCount = 0;
         int consequenceTypeCount = 0;
         while (cursor.hasNext()) {
-            count++;
-            DBObject dbObject = (DBObject) cursor.next().get(VariantToDBObjectConverter.ANNOTATION_FIELD);
-            if (dbObject != null) {
-                VariantAnnotation annot = converter.convertToDataModelType(dbObject);
-                assertNotNull(annot.getConsequenceTypes());
-                consequenceTypeCount += annot.getConsequenceTypes().size();
-            }
+            annotationCount++;
+            DBObject annotation = cursor.next();
+            BasicDBList consequenceTypes = (BasicDBList) annotation.get(CONSEQUENCE_TYPE_FIELD);
+            assertNotNull(consequenceTypes);
+            consequenceTypeCount += consequenceTypes.size();
         }
+        cursor.close();
 
-        assertEquals(300, count);
+        assertEquals(299, annotationCount);
         assertEquals(536, consequenceTypeCount);
 
         //check that one line is skipped because malformed
-        List<StepExecution> variantAnnotationLoadStepExecution = jobExecution.getStepExecutions().stream()
+        List<StepExecution> annotationLoadStepExecution = jobExecution.getStepExecutions().stream()
                 .filter(stepExecution -> stepExecution.getStepName().equals(BeanNames.LOAD_VEP_ANNOTATION_STEP))
                 .collect(Collectors.toList());
-        assertEquals(1, variantAnnotationLoadStepExecution.get(0).getReadSkipCount());
+        assertEquals(1, annotationLoadStepExecution.get(0).getReadSkipCount());
     }
 
     @Test
@@ -159,6 +148,7 @@ public class AnnotationJobTest {
         String outputDirAnnot = temporaryFolderRule.getRoot().getAbsolutePath();
 
         JobParameters jobParameters = new EvaJobParameterBuilder()
+                .collectionAnnotationsName(COLLECTION_ANNOTATIONS_NAME)
                 .collectionAnnotationMetadataName(COLLECTION_ANNOTATION_METADATA_NAME)
                 .collectionVariantsName(COLLECTION_VARIANTS_NAME)
                 .databaseName(dbName)
@@ -183,11 +173,6 @@ public class AnnotationJobTest {
         StepExecution findVariantsToAnnotateStep = new ArrayList<>(jobExecution.getStepExecutions()).get(0);
 
         assertEquals(BeanNames.GENERATE_VEP_ANNOTATION_STEP, findVariantsToAnnotateStep.getStepName());
-    }
-
-    @Before
-    public void setUp() throws Exception {
-        converter = new DBObjectToVariantAnnotationConverter();
     }
 
 }

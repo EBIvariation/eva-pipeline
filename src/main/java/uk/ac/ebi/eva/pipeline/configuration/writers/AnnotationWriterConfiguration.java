@@ -21,22 +21,21 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.mongodb.core.MongoOperations;
-
-import uk.ac.ebi.eva.commons.models.data.VariantAnnotation;
+import uk.ac.ebi.eva.commons.models.mongo.entity.Annotation;
 import uk.ac.ebi.eva.pipeline.Application;
-import uk.ac.ebi.eva.pipeline.io.writers.VepAnnotationMongoWriter;
+import uk.ac.ebi.eva.pipeline.io.writers.AnnotationMongoWriter;
 import uk.ac.ebi.eva.pipeline.parameters.DatabaseParameters;
 
-import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VARIANT_ANNOTATION_WRITER;
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.ANNOTATION_WRITER;
 
 @Configuration
-public class VariantAnnotationWriterConfiguration {
+public class AnnotationWriterConfiguration {
 
-    @Bean(VARIANT_ANNOTATION_WRITER)
+    @Bean(ANNOTATION_WRITER)
     @StepScope
     @Profile(Application.VARIANT_ANNOTATION_MONGO_PROFILE)
-    public ItemWriter<VariantAnnotation> variantAnnotationItemWriter(MongoOperations mongoOperations,
-                                                                     DatabaseParameters databaseParameters) {
-        return new VepAnnotationMongoWriter(mongoOperations, databaseParameters.getCollectionVariantsName());
+    public ItemWriter<Annotation> annotationItemWriter(MongoOperations mongoOperations,
+                                                       DatabaseParameters databaseParameters) {
+        return new AnnotationMongoWriter(mongoOperations, databaseParameters.getCollectionAnnotationsName());
     }
 }

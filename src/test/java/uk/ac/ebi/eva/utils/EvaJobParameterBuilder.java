@@ -69,6 +69,7 @@ public class EvaJobParameterBuilder extends JobParametersBuilder {
         addParameter(JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME, new JobParameter(collectionVariantsName));
         return this;
     }
+
     public EvaJobParameterBuilder collectionFilesName(String collectionFilesName) {
         addParameter(JobParametersNames.DB_COLLECTIONS_FILES_NAME, new JobParameter(collectionFilesName));
         return this;
@@ -82,6 +83,12 @@ public class EvaJobParameterBuilder extends JobParametersBuilder {
     public EvaJobParameterBuilder collectionAnnotationMetadataName(String collectionAnnotationMetadataName) {
         addParameter(JobParametersNames.DB_COLLECTIONS_ANNOTATION_METADATA_NAME,
                 new JobParameter(collectionAnnotationMetadataName));
+        return this;
+    }
+
+    public EvaJobParameterBuilder collectionAnnotationsName(String collectionAnnotationsName) {
+        addParameter(JobParametersNames.DB_COLLECTIONS_ANNOTATIONS_NAME,
+                     new JobParameter(collectionAnnotationsName));
         return this;
     }
 

@@ -33,6 +33,10 @@ import uk.ac.ebi.eva.utils.MongoDBHelper;
 
 import java.util.List;
 
+import static uk.ac.ebi.eva.commons.models.converters.data.VariantToDBObjectConverter.ANNOTATION_FIELD;
+import static uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantAnnotation.XREFS_FIELD;
+import static uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantAnnotation.SO_ACCESSION_FIELD;
+
 /**
  * Write a list of {@link Variant} into MongoDB
  * See also {@link org.opencb.opencga.storage.mongodb.variant.VariantMongoDBWriter}
@@ -40,10 +44,6 @@ import java.util.List;
 public class VariantMongoWriter extends MongoItemWriter<Variant> {
 
     private static final Logger logger = LoggerFactory.getLogger(VariantMongoWriter.class);
-
-    private static final String ANNOTATION_CT_SO_FIELD = "annot.ct.so";
-
-    private static final String ANNOTATION_XREF_ID_FIELD = "annot.xrefs.id";
 
     private final MongoOperations mongoOperations;
 
@@ -70,15 +70,15 @@ public class VariantMongoWriter extends MongoItemWriter<Variant> {
         this.statsConverter = includeStats ? new VariantStatsToDBObjectConverter() : null;
         SamplesToDBObjectConverter sampleConverter = includeSamples ? new SamplesToDBObjectConverter() : null;
         this.sourceEntryConverter = new VariantSourceEntryToDBObjectConverter(sampleConverter);
-        this.variantConverter = new VariantToDBObjectConverter(null, null, null);
+        this.variantConverter = new VariantToDBObjectConverter();
     }
 
     @Override
     protected void doWrite(List<? extends Variant> variants) {
         BulkWriteOperation bulk = mongoOperations.getCollection(collection).initializeUnorderedBulkOperation();
         for (Variant variant : variants) {
-            String id = MongoDBHelper.buildStorageId(variant.getChromosome(), variant.getStart(),
-                                                     variant.getReference(), variant.getAlternate());
+            String id = Variant.buildVariantId(variant.getChromosome(), variant.getStart(),
+                    variant.getReference(), variant.getAlternate());
 
             // the chromosome and start appear just as shard keys, in an unsharded cluster they wouldn't be needed
             BasicDBObject query = new BasicDBObject("_id", id)
@@ -118,18 +118,16 @@ public class VariantMongoWriter extends MongoItemWriter<Variant> {
                 new BasicDBObject(MongoDBHelper.BACKGROUND_INDEX, true));
 
         mongoOperations.getCollection(collection).createIndex(
-                new BasicDBObject(ANNOTATION_XREF_ID_FIELD, 1),
+                new BasicDBObject(ANNOTATION_FIELD+"."+XREFS_FIELD, 1),
                 new BasicDBObject(MongoDBHelper.BACKGROUND_INDEX, true));
         mongoOperations.getCollection(collection).createIndex(
-                new BasicDBObject(ANNOTATION_CT_SO_FIELD, 1),
+                new BasicDBObject(ANNOTATION_FIELD+"."+ SO_ACCESSION_FIELD, 1),
                 new BasicDBObject(MongoDBHelper.BACKGROUND_INDEX, true));
     }
 
     private DBObject generateUpdate(Variant variant) {
         Assert.notNull(variant, "Variant should not be null. Please provide a valid Variant object");
         logger.trace("Convert variant {} into mongo object", variant);
-
-        variant.setAnnotation(null);
 
         BasicDBObject addToSet = new BasicDBObject();
 

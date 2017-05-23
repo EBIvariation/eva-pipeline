@@ -110,7 +110,7 @@ public class VariantToDBObjectConverterTest {
         mongoVariant.append("files", files);
 
         VariantToDBObjectConverter converter = new VariantToDBObjectConverter(
-                new VariantSourceEntryToDBObjectConverter(new SamplesToDBObjectConverter()), null, null);
+                new VariantSourceEntryToDBObjectConverter(new SamplesToDBObjectConverter()), null);
         DBObject converted = converter.convert(variant);
         assertFalse(converted.containsField(VariantToDBObjectConverter.IDS_FIELD)); //IDs must be added manually.
         converted.put(VariantToDBObjectConverter.IDS_FIELD, variant.getIds());  //Add IDs
