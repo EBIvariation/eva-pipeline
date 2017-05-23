@@ -352,33 +352,4 @@ public class Variant {
     private String composeId(String studyId, String fileId) {
         return studyId + "_" + fileId;
     }
-
-    public String buildVariantId(){
-        return buildVariantId(chromosome, start, reference, alternate);
-    }
-
-    public static String buildVariantId(String chromosome, int start, String reference, String alternate) {
-        StringBuilder builder = new StringBuilder(chromosome);
-        builder.append("_");
-        builder.append(start);
-        builder.append("_");
-        if (!reference.equals("-")) {
-            if (reference.length() < 50) {
-                builder.append(reference);
-            } else {
-                builder.append(new String(CryptoUtils.encryptSha1(reference)));
-            }
-        }
-
-        builder.append("_");
-        if (!alternate.equals("-")) {
-            if (alternate.length() < 50) {
-                builder.append(alternate);
-            } else {
-                builder.append(new String(CryptoUtils.encryptSha1(alternate)));
-            }
-        }
-
-        return builder.toString();
-    }
 }
