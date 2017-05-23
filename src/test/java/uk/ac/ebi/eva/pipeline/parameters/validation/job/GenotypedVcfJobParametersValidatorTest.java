@@ -81,6 +81,7 @@ public class GenotypedVcfJobParametersValidatorTest {
         annotationParameters.put(JobParametersNames.APP_VEP_NUMFORKS, new JobParameter("6"));
         annotationParameters.put(JobParametersNames.APP_VEP_TIMEOUT, new JobParameter("600"));
         annotationParameters.put(JobParametersNames.ANNOTATION_OVERWRITE, new JobParameter("false"));
+        annotationParameters.put(JobParametersNames.DB_COLLECTIONS_ANNOTATIONS_NAME, new JobParameter("annotations"));
         annotationParameters.put(JobParametersNames.DB_COLLECTIONS_ANNOTATION_METADATA_NAME,
                 new JobParameter("annotationMetadata"));
         annotationParameters.put(JobParametersNames.APP_VEP_CACHE_PATH,

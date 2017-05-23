@@ -16,47 +16,48 @@
 package uk.ac.ebi.eva.pipeline.io.mappers;
 
 import org.junit.Test;
-import org.opencb.biodata.models.variant.annotation.ConsequenceType;
-import org.opencb.biodata.models.variant.annotation.Score;
 
-import uk.ac.ebi.eva.commons.models.data.VariantAnnotation;
+import uk.ac.ebi.eva.commons.models.mongo.entity.Annotation;
+import uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.ConsequenceType;
+import uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.Score;
 import uk.ac.ebi.eva.test.data.VepOutputContent;
 
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.Set;
 
 import static junit.framework.TestCase.assertNull;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 /**
  * {@link AnnotationLineMapper}
  * input: an annotation line from VEP
- * output: a VariantAnnotation with at least: consequence types
+ * output: a Annotation with at least: consequence types
  */
 public class AnnotationLineMapperTest {
 
+    private static final String VEP_VERSION = "1";
+
+    private static final String VEP_CACHE_VERSION = "1";
+
     @Test
     public void shouldParseAllDefaultFieldsInVepOutput() throws Exception {
-        AnnotationLineMapper lineMapper = new AnnotationLineMapper();
+        AnnotationLineMapper lineMapper = new AnnotationLineMapper(VEP_VERSION, VEP_CACHE_VERSION);
         for (String annotLine : VepOutputContent.vepOutputContent.split("\n")) {
-            VariantAnnotation variantAnnotation = lineMapper.mapLine(annotLine, 0);
-            assertNotNull(variantAnnotation.getConsequenceTypes());
+            Annotation annotation = lineMapper.mapLine(annotLine, 0);
+            assertNotNull(annotation.getConsequenceTypes());
         }
     }
 
     @Test
     public void shouldParseAllTranscriptFieldsInVepOutput() {
-        AnnotationLineMapper lineMapper = new AnnotationLineMapper();
-        VariantAnnotation variantAnnotation = lineMapper.mapLine(VepOutputContent.vepOutputContentTranscriptFields, 0);
-        List<ConsequenceType> consequenceTypes = variantAnnotation.getConsequenceTypes();
+        AnnotationLineMapper lineMapper = new AnnotationLineMapper(VEP_VERSION, VEP_CACHE_VERSION);
+        Annotation annotation = lineMapper.mapLine(VepOutputContent.vepOutputContentTranscriptFields, 0);
+        Set<ConsequenceType> consequenceTypes = annotation.getConsequenceTypes();
 
         assertNotNull(consequenceTypes);
         assertEquals(1, consequenceTypes.size());
 
-        ConsequenceType consequenceType = consequenceTypes.get(0);
+        ConsequenceType consequenceType = consequenceTypes.iterator().next();
 
         assertEquals(Integer.valueOf(1), consequenceType.getcDnaPosition());
         assertEquals(Integer.valueOf(4), consequenceType.getCdsPosition());
@@ -67,16 +68,16 @@ public class AnnotationLineMapperTest {
 
     @Test
     public void shouldParseVepOutputWithoutTranscript() {
-        AnnotationLineMapper lineMapper = new AnnotationLineMapper();
-        VariantAnnotation variantAnnotation = lineMapper.mapLine(VepOutputContent.vepOutputContentWithOutTranscript, 0);
-        List<ConsequenceType> consequenceTypes = variantAnnotation.getConsequenceTypes();
+        AnnotationLineMapper lineMapper = new AnnotationLineMapper(VEP_VERSION, VEP_CACHE_VERSION);
+        Annotation annotation = lineMapper.mapLine(VepOutputContent.vepOutputContentWithOutTranscript, 0);
+        Set<ConsequenceType> consequenceTypes = annotation.getConsequenceTypes();
 
         assertNotNull(consequenceTypes);
         assertEquals(1, consequenceTypes.size());
 
-        ConsequenceType consequenceType = consequenceTypes.get(0);
+        ConsequenceType consequenceType = consequenceTypes.iterator().next();
 
-        assertNotNull(consequenceType.getSoTerms());
+        assertNotNull(consequenceType.getSoAccessions());
         assertNull(consequenceType.getcDnaPosition());
         assertNull(consequenceType.getCdsPosition());
         assertNull(consequenceType.getAaPosition());
@@ -86,49 +87,47 @@ public class AnnotationLineMapperTest {
 
     @Test(expected = ArrayIndexOutOfBoundsException.class)
     public void shouldNotParseVepOutputWithMalformedCoordinates() {
-        AnnotationLineMapper lineMapper = new AnnotationLineMapper();
+        AnnotationLineMapper lineMapper = new AnnotationLineMapper(VEP_VERSION, VEP_CACHE_VERSION);
         lineMapper.mapLine(VepOutputContent.vepOutputContentMalformedCoordinates, 0);
     }
 
     @Test
     public void shouldParseVepOutputWithChromosomeIdWithUnderscore() {
-        AnnotationLineMapper lineMapper = new AnnotationLineMapper();
-        VariantAnnotation variantAnnotation = lineMapper
+        AnnotationLineMapper lineMapper = new AnnotationLineMapper(VEP_VERSION, VEP_CACHE_VERSION);
+        Annotation annotation = lineMapper
                 .mapLine(VepOutputContent.vepOutputContentChromosomeIdWithUnderscore, 0);
 
-        assertEquals("20_1", variantAnnotation.getChromosome());
+        assertEquals("20_1", annotation.getChromosome());
     }
 
     @Test(expected = ArrayIndexOutOfBoundsException.class)
     public void shouldNotParseVepOutputWithMalformedVariantFields() {
-        AnnotationLineMapper lineMapper = new AnnotationLineMapper();
+        AnnotationLineMapper lineMapper = new AnnotationLineMapper(VEP_VERSION, VEP_CACHE_VERSION);
         lineMapper.mapLine(VepOutputContent.vepOutputContentMalformedVariantFields, 0);
     }
 
     @Test
     public void shouldParseVepOutputWithExtraFields() {
-        AnnotationLineMapper lineMapper = new AnnotationLineMapper();
-        VariantAnnotation variantAnnotation = lineMapper.mapLine(VepOutputContent.vepOutputContentWithExtraFields, 0);
+        AnnotationLineMapper lineMapper = new AnnotationLineMapper(VEP_VERSION, VEP_CACHE_VERSION);
+        Annotation annotation = lineMapper.mapLine(VepOutputContent.vepOutputContentWithExtraFieldsSingleAnnotation, 0);
 
-        List<ConsequenceType> consequenceTypes = variantAnnotation.getConsequenceTypes();
+        Set<ConsequenceType> consequenceTypes = annotation.getConsequenceTypes();
 
         assertNotNull(consequenceTypes);
         assertEquals(1, consequenceTypes.size());
 
-        ConsequenceType consequenceType = consequenceTypes.get(0);
+        ConsequenceType consequenceType = consequenceTypes.iterator().next();
 
-        List<Score> actualScores = consequenceType.getProteinSubstitutionScores();
-        assertNotNull(actualScores);
-        assertEquals(2, actualScores.size());
+        Score polyphen = consequenceType.getPolyphen();
+        Score sifts = consequenceType.getSift();
 
-        Score expectedSift = new Score(0.07, "Sift", "tolerated");
-        Score expectedPolyphen = new Score(0.859, "Polyphen", "possibly_damaging");
+        assertNotNull(polyphen);
+        assertNotNull(sifts);
 
-        Comparator<Score> scoreComparator = Comparator.comparing(Score::getSource).thenComparing(Score::getDescription)
-                .thenComparing(Score::getScore);
-        actualScores.sort(scoreComparator);
+        Score expectedSift = new Score(0.07, "tolerated");
+        Score expectedPolyphen = new Score(0.859, "possibly_damaging");
 
-        assertTrue(Collections.binarySearch(actualScores, expectedSift, scoreComparator) >= 0);
-        assertTrue(Collections.binarySearch(actualScores, expectedPolyphen, scoreComparator) >= 0);
+        assertEquals(expectedSift, sifts);
+        assertEquals(expectedPolyphen, polyphen);
     }
 }
