@@ -70,7 +70,7 @@ public class VariantAnnotation {
      *
      * @param vepVersion
      * @param vepCacheVersion
-     * @throws IllegalArgumentException
+     * @throws IllegalArgumentException If {@param vepVersion} or {@param vepCacheVersion} are null or empty values.
      */
     public VariantAnnotation(String vepVersion, String vepCacheVersion) {
         Assert.hasText(vepVersion);
@@ -180,14 +180,14 @@ public class VariantAnnotation {
     }
 
     private void addXrefId(String id) {
-        if(xrefIds==null){
+        if (xrefIds == null) {
             xrefIds = new HashSet<>();
         }
         xrefIds.add(id);
     }
 
     private void addXrefIds(Set<String> ids) {
-        if(xrefIds==null){
+        if (xrefIds == null) {
             xrefIds = new HashSet<>();
         }
         xrefIds.addAll(ids);
