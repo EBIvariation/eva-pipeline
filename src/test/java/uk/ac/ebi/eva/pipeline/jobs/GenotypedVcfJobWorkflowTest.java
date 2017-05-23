@@ -30,7 +30,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-
 import uk.ac.ebi.eva.pipeline.Application;
 import uk.ac.ebi.eva.pipeline.configuration.BeanNames;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
@@ -53,6 +52,7 @@ import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static uk.ac.ebi.eva.test.utils.GenotypedVcfJobTestUtils.COLLECTION_ANNOTATIONS_NAME;
 import static uk.ac.ebi.eva.test.utils.JobTestUtils.assertCompleted;
 import static uk.ac.ebi.eva.utils.FileUtils.getResource;
 
@@ -90,9 +90,9 @@ public class GenotypedVcfJobWorkflowTest {
             Arrays.asList(BeanNames.CALCULATE_STATISTICS_STEP, BeanNames.LOAD_STATISTICS_STEP));
 
     public static final Set<String> EXPECTED_ANNOTATION_STEP_NAMES = new TreeSet<>(Arrays.asList(
-                    BeanNames.GENERATE_VEP_ANNOTATION_STEP,
-                    BeanNames.LOAD_VEP_ANNOTATION_STEP,
-                    BeanNames.LOAD_ANNOTATION_METADATA_STEP));
+            BeanNames.GENERATE_VEP_ANNOTATION_STEP,
+            BeanNames.LOAD_VEP_ANNOTATION_STEP,
+            BeanNames.LOAD_ANNOTATION_METADATA_STEP));
 
     @Before
     public void setUp() throws Exception {
@@ -220,9 +220,10 @@ public class GenotypedVcfJobWorkflowTest {
 
         EvaJobParameterBuilder evaJobParameterBuilder = new EvaJobParameterBuilder()
                 .annotationOverwrite("false")
+                .collectionAnnotationMetadataName("annotationMetadata")
+                .collectionAnnotationsName(COLLECTION_ANNOTATIONS_NAME)
                 .collectionFilesName("files")
                 .collectionVariantsName("variants")
-                .collectionAnnotationMetadataName("annotationMetadata")
                 .databaseName(dbName)
                 .inputFasta(fasta.getAbsolutePath())
                 .inputStudyId("genotyped-job-workflow")
