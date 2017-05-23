@@ -74,7 +74,7 @@ public class VariantMongoWriter extends MongoItemWriter<Variant> {
     protected void doWrite(List<? extends Variant> variants) {
         BulkWriteOperation bulk = mongoOperations.getCollection(collection).initializeUnorderedBulkOperation();
         for (Variant variant : variants) {
-            String id = Variant.buildVariantId(variant.getChromosome(), variant.getStart(),
+            String id = VariantDocument.buildVariantId(variant.getChromosome(), variant.getStart(),
                     variant.getReference(), variant.getAlternate());
 
             // the chromosome and start appear just as shard keys, in an unsharded cluster they wouldn't be needed

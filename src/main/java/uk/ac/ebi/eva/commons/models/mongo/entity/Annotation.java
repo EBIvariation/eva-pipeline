@@ -165,7 +165,10 @@ public class Annotation {
 
     public static String buildAnnotationId(String chromosome, int start, String reference, String alternate,
                                            String vepVersion, String vepCacheVersion) {
-        StringBuilder builder = new StringBuilder(Variant.buildVariantId(chromosome, start, reference, alternate));
+        StringBuilder builder = new StringBuilder(VariantDocument.buildVariantId(
+                chromosome, start,
+                reference,
+                alternate));
         builder.append("_");
         builder.append(vepVersion);
         builder.append("_");
