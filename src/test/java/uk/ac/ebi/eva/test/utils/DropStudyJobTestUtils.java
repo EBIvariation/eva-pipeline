@@ -20,9 +20,10 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
 
 import static org.junit.Assert.assertEquals;
-import static uk.ac.ebi.eva.commons.models.converters.data.VariantToDBObjectConverter.FILES_FIELD;
-import static uk.ac.ebi.eva.commons.models.converters.data.VariantToDBObjectConverter.STATS_FIELD;
+
 import static uk.ac.ebi.eva.commons.models.data.VariantSourceEntity.STUDYID_FIELD;
+import static uk.ac.ebi.eva.commons.models.mongo.entity.VariantDocument.FILES_FIELD;
+import static uk.ac.ebi.eva.commons.models.mongo.entity.VariantDocument.STATS_FIELD;
 
 public class DropStudyJobTestUtils {
 

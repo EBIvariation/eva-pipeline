@@ -24,9 +24,8 @@ import org.springframework.batch.item.support.AbstractItemCountingItemStreamItem
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.util.ClassUtils;
-
-import uk.ac.ebi.eva.commons.models.converters.data.VariantSourceEntryToDBObjectConverter;
-import uk.ac.ebi.eva.commons.models.converters.data.VariantToDBObjectConverter;
+import uk.ac.ebi.eva.commons.models.mongo.entity.VariantDocument;
+import uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantSourceEntryMongo;
 import uk.ac.ebi.eva.pipeline.model.VariantWrapper;
 
 import javax.annotation.PostConstruct;
@@ -44,8 +43,7 @@ public class VariantsMongoReader
 
     private DBObjectToVariantConverter converter;
 
-    private static final String STUDY_KEY = VariantToDBObjectConverter.FILES_FIELD + "."
-            + VariantSourceEntryToDBObjectConverter.STUDYID_FIELD;
+    private static final String STUDY_KEY = VariantDocument.FILES_FIELD + "." + VariantSourceEntryMongo.STUDYID_FIELD;
 
     /**
      * @param studyId Can be the empty string or null, meaning to bring all non-annotated variants in the collection.
