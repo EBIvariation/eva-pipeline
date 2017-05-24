@@ -65,7 +65,6 @@ public class VariantSourceEntryMongo {
     @Field(SAMPLES_FIELD)
     private BasicDBObject samp;
 
-
     VariantSourceEntryMongo() {
         // Spring empty constructor
     }

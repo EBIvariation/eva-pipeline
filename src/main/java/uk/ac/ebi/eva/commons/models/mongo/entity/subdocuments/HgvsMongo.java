@@ -27,10 +27,14 @@ public class HgvsMongo {
     private static final String NAME_FIELD = "name";
 
     @Field(TYPE_FIELD)
-    private final String type;
+    private String type;
 
     @Field(NAME_FIELD)
-    private final String name;
+    private String name;
+
+    HgvsMongo(){
+        //Empty constructor for spring
+    }
 
     public HgvsMongo(String type, String name) {
         this.type = type;

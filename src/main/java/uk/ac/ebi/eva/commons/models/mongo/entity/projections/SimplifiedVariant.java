@@ -73,6 +73,10 @@ public class SimplifiedVariant {
     @Field(HGVS_FIELD)
     private Set<HgvsMongo> hgvs;
 
+    SimplifiedVariant(){
+        //Empty constructor for spring
+    }
+
     public SimplifiedVariant(Variant.VariantType variantType, String chromosome, int start, int end, int length,
                              String reference, String alternate, Map<String, Set<String>> hgvs) {
         this.id = buildVariantId(chromosome, start, reference, alternate);
