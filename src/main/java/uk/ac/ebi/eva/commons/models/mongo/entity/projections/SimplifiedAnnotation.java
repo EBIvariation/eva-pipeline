@@ -48,6 +48,10 @@ public class SimplifiedAnnotation {
     @Field(value = VEP_CACHE_VERSION_FIELD)
     private String vepCacheVersion;
 
+    SimplifiedAnnotation(){
+        //Empty constructor for spring
+    }
+
     public SimplifiedAnnotation(Annotation annotation) {
         this.id = annotation.getId();
         this.chromosome = annotation.getChromosome();

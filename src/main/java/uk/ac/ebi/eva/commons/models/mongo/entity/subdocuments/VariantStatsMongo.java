@@ -77,6 +77,10 @@ public class VariantStatsMongo {
     @Field(NUMGT_FIELD)
     private Map<String, Integer> numGt;
 
+    VariantStatsMongo(){
+        //Empty constructor for spring
+    }
+
     public VariantStatsMongo(String studyId, String fileId, String cohortId, VariantStats stats) {
         this.studyId = studyId;
         this.fileId = fileId;
