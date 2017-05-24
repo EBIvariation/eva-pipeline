@@ -33,6 +33,10 @@ public class Score {
     @Field(value = SCORE_DESCRIPTION_FIELD)
     private String description;
 
+    Score(){
+        //Empty constructor for spring
+    }
+
     public Score(Double score, String description) {
         this.score = score;
         this.description = description;

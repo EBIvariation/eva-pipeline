@@ -109,6 +109,10 @@ public class VariantDocument {
     @Field(ANNOTATION_FIELD)
     private Set<VariantAnnotation> annotations;
 
+    VariantDocument(){
+        //Empty constructor for spring
+    }
+
     public VariantDocument(Variant.VariantType variantType, String chromosome, int start, int end, int length,
                            String reference, String alternate, Map<String, Set<String>> hgvs, Set<String> ids,
                            Set<VariantSourceEntryMongo> variantSources) {
