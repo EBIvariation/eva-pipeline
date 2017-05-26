@@ -59,6 +59,7 @@ public class AnnotationJobParametersValidatorTest {
         requiredParameters.put(JobParametersNames.APP_VEP_NUMFORKS, new JobParameter("6"));
         requiredParameters.put(JobParametersNames.APP_VEP_TIMEOUT, new JobParameter("600"));
         requiredParameters.put(JobParametersNames.ANNOTATION_OVERWRITE, new JobParameter("false"));
+        requiredParameters.put(JobParametersNames.DB_COLLECTIONS_ANNOTATIONS_NAME, new JobParameter("annotations"));
         requiredParameters.put(JobParametersNames.DB_COLLECTIONS_ANNOTATION_METADATA_NAME,
                 new JobParameter("annotationMetadata"));
         requiredParameters.put(JobParametersNames.APP_VEP_CACHE_PATH,
