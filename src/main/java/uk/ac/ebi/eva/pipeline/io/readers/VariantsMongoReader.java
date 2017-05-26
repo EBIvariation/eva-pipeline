@@ -23,8 +23,10 @@ import org.opencb.opencga.storage.mongodb.variant.DBObjectToVariantConverter;
 import org.springframework.batch.item.support.AbstractItemCountingItemStreamItemReader;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.data.mongodb.core.MongoOperations;
+import org.springframework.data.mongodb.core.convert.MongoConverter;
 import org.springframework.util.ClassUtils;
 import uk.ac.ebi.eva.commons.models.mongo.entity.VariantDocument;
+import uk.ac.ebi.eva.commons.models.mongo.entity.projections.SimplifiedVariant;
 import uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantSourceEntryMongo;
 import uk.ac.ebi.eva.pipeline.model.VariantWrapper;
 
@@ -41,7 +43,7 @@ public class VariantsMongoReader
 
     private MongoDbCursorItemReader delegateReader;
 
-    private DBObjectToVariantConverter converter;
+    private MongoConverter converter;
 
     private static final String STUDY_KEY = VariantDocument.FILES_FIELD + "." + VariantSourceEntryMongo.STUDYID_FIELD;
 
@@ -69,7 +71,7 @@ public class VariantsMongoReader
         String[] fields = {"chr", "start", "end", "ref", "alt"};
         delegateReader.setFields(fields);
 
-        converter = new DBObjectToVariantConverter();
+        converter = template.getConverter();
     }
 
     @PostConstruct
@@ -87,11 +89,19 @@ public class VariantsMongoReader
     protected VariantWrapper doRead() throws Exception {
         DBObject dbObject = delegateReader.doRead();
         if (dbObject != null) {
-            Variant variant = converter.convertToDataModelType(dbObject);
-            return new VariantWrapper(variant);
+            SimplifiedVariant variant = converter.read(SimplifiedVariant.class, dbObject);
+            return buildVariantWrapper(variant);
         } else {
             return null;
         }
+    }
+
+    private VariantWrapper buildVariantWrapper(SimplifiedVariant variant) {
+        return new VariantWrapper(variant.getChromosome(),
+                                  variant.getStart(),
+                                  variant.getEnd(),
+                                  variant.getReference(),
+                                  variant.getAlternate());
     }
 
     @Override

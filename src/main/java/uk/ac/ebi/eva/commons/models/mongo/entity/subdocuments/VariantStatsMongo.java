@@ -103,4 +103,44 @@ public class VariantStatsMongo {
         }
         return genotypes;
     }
+
+    public String getStudyId() {
+        return studyId;
+    }
+
+    public String getFileId() {
+        return fileId;
+    }
+
+    public String getCohortId() {
+        return cohortId;
+    }
+
+    public float getMaf() {
+        return maf;
+    }
+
+    public float getMgf() {
+        return mgf;
+    }
+
+    public String getMafAllele() {
+        return mafAllele;
+    }
+
+    public String getMgfGenotype() {
+        return mgfGenotype;
+    }
+
+    public int getMissingAlleles() {
+        return missingAlleles;
+    }
+
+    public int getMissingGenotypes() {
+        return missingGenotypes;
+    }
+
+    public Map<String, Integer> getNumGt() {
+        return numGt;
+    }
 }
