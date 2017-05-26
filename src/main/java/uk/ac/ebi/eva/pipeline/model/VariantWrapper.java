@@ -26,11 +26,7 @@ public class VariantWrapper {
     private String strand = "+";
 
     public VariantWrapper(String chromosome, int start, int end, String reference, String alternate) {
-        this(new Variant(chromosome, start, end, reference, alternate));
-    }
-
-    public VariantWrapper(Variant variant) {
-        this.variant = variant;
+        this.variant = new Variant(chromosome, start, end, reference, alternate);
         transformToEnsemblFormat();
     }
 
