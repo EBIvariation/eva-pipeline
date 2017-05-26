@@ -33,9 +33,9 @@ import org.springframework.data.mongodb.core.query.Update;
 import uk.ac.ebi.eva.pipeline.parameters.DatabaseParameters;
 import uk.ac.ebi.eva.pipeline.parameters.InputParameters;
 
-import static uk.ac.ebi.eva.commons.models.converters.data.VariantToDBObjectConverter.FILES_FIELD;
-import static uk.ac.ebi.eva.commons.models.converters.data.VariantToDBObjectConverter.STATS_FIELD;
 import static uk.ac.ebi.eva.commons.models.data.VariantSourceEntity.STUDYID_FIELD;
+import static uk.ac.ebi.eva.commons.models.mongo.entity.VariantDocument.FILES_FIELD;
+import static uk.ac.ebi.eva.commons.models.mongo.entity.VariantDocument.STATS_FIELD;
 
 /**
  * Tasklet that removes the files and statistics in a variant given a studyId. The id is readed from the jobParameter

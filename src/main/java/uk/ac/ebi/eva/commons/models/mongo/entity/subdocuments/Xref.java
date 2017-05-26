@@ -32,6 +32,10 @@ public class Xref {
     @Field(value = XREF_SOURCE_FIELD)
     private String src;
 
+    Xref(){
+        //Empty constructor for spring
+    }
+
     public Xref(String id, String src) {
         this.id = id;
         this.src = src;
