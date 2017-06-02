@@ -33,7 +33,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import uk.ac.ebi.eva.pipeline.Application;
 import uk.ac.ebi.eva.pipeline.configuration.MongoConfiguration;
-import uk.ac.ebi.eva.pipeline.model.VariantWrapper;
+import uk.ac.ebi.eva.pipeline.model.EnsemblVariant;
 import uk.ac.ebi.eva.pipeline.parameters.MongoConnection;
 import uk.ac.ebi.eva.test.data.VariantData;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
@@ -111,23 +111,23 @@ public class VariantsMongoReaderTest {
         mongoItemReader.open(executionContext);
 
         int itemCount = 0;
-        VariantWrapper variantWrapper;
-        while ((variantWrapper = mongoItemReader.read()) != null) {
+        EnsemblVariant ensemblVariant;
+        while ((ensemblVariant = mongoItemReader.read()) != null) {
             itemCount++;
-            assertFalse(variantWrapper.getChr().isEmpty());
-            assertNotEquals(0, variantWrapper.getStart());
+            assertFalse(ensemblVariant.getChr().isEmpty());
+            assertNotEquals(0, ensemblVariant.getStart());
 
-            assertDoesNotHaveVariantAnnotation(variantWrapper);
+            assertDoesNotHaveVariantAnnotation(ensemblVariant);
         }
         assertEquals(expectedNonAnnotatedVariants, itemCount);
         mongoItemReader.close();
     }
 
-    private void assertDoesNotHaveVariantAnnotation(VariantWrapper variantWrapper)
+    private void assertDoesNotHaveVariantAnnotation(EnsemblVariant ensemblVariant)
             throws NoSuchFieldException, IllegalAccessException {
-        Field privateVariantField = VariantWrapper.class.getDeclaredField("variant");
+        Field privateVariantField = EnsemblVariant.class.getDeclaredField("variant");
         privateVariantField.setAccessible(true);
-        VariantAnnotation annotation = ((Variant) privateVariantField.get(variantWrapper)).getAnnotation();
+        VariantAnnotation annotation = ((Variant) privateVariantField.get(ensemblVariant)).getAnnotation();
         assertNull(annotation.getConsequenceTypes());
     }
 
@@ -162,11 +162,11 @@ public class VariantsMongoReaderTest {
         mongoItemReader.open(executionContext);
 
         int itemCount = 0;
-        VariantWrapper variantWrapper;
-        while ((variantWrapper = mongoItemReader.read()) != null) {
+        EnsemblVariant ensemblVariant;
+        while ((ensemblVariant = mongoItemReader.read()) != null) {
             itemCount++;
-            assertFalse(variantWrapper.getChr().isEmpty());
-            assertNotEquals(0, variantWrapper.getStart());
+            assertFalse(ensemblVariant.getChr().isEmpty());
+            assertNotEquals(0, ensemblVariant.getStart());
         }
         assertEquals(expectedVariants, itemCount);
         mongoItemReader.close();

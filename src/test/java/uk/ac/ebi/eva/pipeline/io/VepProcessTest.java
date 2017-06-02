@@ -21,7 +21,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import uk.ac.ebi.eva.pipeline.model.VariantWrapper;
+import uk.ac.ebi.eva.pipeline.model.EnsemblVariant;
 import uk.ac.ebi.eva.pipeline.parameters.AnnotationParameters;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 
@@ -43,7 +43,7 @@ public class VepProcessTest {
 
     private static final long VEP_TIMEOUT = 1;
 
-    private final VariantWrapper VARIANT_WRAPPER = new VariantWrapper("1", 100, 105, "A", "T");
+    private final EnsemblVariant VARIANT_WRAPPER = new EnsemblVariant("1", 100, 105, "A", "T");
 
     @Before
     public void setUp() throws Exception {
@@ -69,13 +69,13 @@ public class VepProcessTest {
         vepAnnotationFileWriter.write(getVariantInVepInputFormat(VARIANT_WRAPPER).getBytes());
     }
 
-    private String getVariantInVepInputFormat(VariantWrapper variantWrapper) {
+    private String getVariantInVepInputFormat(EnsemblVariant ensemblVariant) {
         return String.join("\t",
-                variantWrapper.getChr(),
-                Integer.toString(variantWrapper.getStart()),
-                Integer.toString(variantWrapper.getEnd()),
-                variantWrapper.getRefAlt(),
-                variantWrapper.getStrand());
+                           ensemblVariant.getChr(),
+                           Integer.toString(ensemblVariant.getStart()),
+                           Integer.toString(ensemblVariant.getEnd()),
+                           ensemblVariant.getRefAlt(),
+                           ensemblVariant.getStrand());
     }
 
     @Test

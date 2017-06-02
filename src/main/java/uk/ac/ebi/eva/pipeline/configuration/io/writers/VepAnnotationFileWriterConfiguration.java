@@ -22,7 +22,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import uk.ac.ebi.eva.pipeline.io.writers.VepAnnotationFileWriter;
-import uk.ac.ebi.eva.pipeline.model.VariantWrapper;
+import uk.ac.ebi.eva.pipeline.model.EnsemblVariant;
 import uk.ac.ebi.eva.pipeline.parameters.AnnotationParameters;
 import uk.ac.ebi.eva.pipeline.parameters.ChunkSizeParameters;
 
@@ -33,8 +33,8 @@ public class VepAnnotationFileWriterConfiguration {
 
     @Bean(VEP_ANNOTATION_WRITER)
     @StepScope
-    public ItemWriter<VariantWrapper> vepAnnotationFileWriter(AnnotationParameters annotationParameters,
-            ChunkSizeParameters chunkSizeParameters) {
+    public ItemWriter<EnsemblVariant> vepAnnotationFileWriter(AnnotationParameters annotationParameters,
+                                                              ChunkSizeParameters chunkSizeParameters) {
         return new VepAnnotationFileWriter(annotationParameters, chunkSizeParameters.getChunkSize(),
                 annotationParameters.getTimeout());
     }

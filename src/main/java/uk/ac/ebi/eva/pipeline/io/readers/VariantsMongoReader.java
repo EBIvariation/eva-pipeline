@@ -18,8 +18,6 @@ package uk.ac.ebi.eva.pipeline.io.readers;
 import com.mongodb.BasicDBObject;
 import com.mongodb.BasicDBObjectBuilder;
 import com.mongodb.DBObject;
-import org.opencb.biodata.models.variant.Variant;
-import org.opencb.opencga.storage.mongodb.variant.DBObjectToVariantConverter;
 import org.springframework.batch.item.support.AbstractItemCountingItemStreamItemReader;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.data.mongodb.core.MongoOperations;
@@ -28,7 +26,7 @@ import org.springframework.util.ClassUtils;
 import uk.ac.ebi.eva.commons.models.mongo.entity.VariantDocument;
 import uk.ac.ebi.eva.commons.models.mongo.entity.projections.SimplifiedVariant;
 import uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantSourceEntryMongo;
-import uk.ac.ebi.eva.pipeline.model.VariantWrapper;
+import uk.ac.ebi.eva.pipeline.model.EnsemblVariant;
 
 import javax.annotation.PostConstruct;
 
@@ -39,7 +37,7 @@ import javax.annotation.PostConstruct;
  * pagination and it is slow with large collections
  */
 public class VariantsMongoReader
-        extends AbstractItemCountingItemStreamItemReader<VariantWrapper> implements InitializingBean {
+        extends AbstractItemCountingItemStreamItemReader<EnsemblVariant> implements InitializingBean {
 
     private MongoDbCursorItemReader delegateReader;
 
@@ -86,7 +84,7 @@ public class VariantsMongoReader
     }
 
     @Override
-    protected VariantWrapper doRead() throws Exception {
+    protected EnsemblVariant doRead() throws Exception {
         DBObject dbObject = delegateReader.doRead();
         if (dbObject != null) {
             SimplifiedVariant variant = converter.read(SimplifiedVariant.class, dbObject);
@@ -96,8 +94,8 @@ public class VariantsMongoReader
         }
     }
 
-    private VariantWrapper buildVariantWrapper(SimplifiedVariant variant) {
-        return new VariantWrapper(variant.getChromosome(),
+    private EnsemblVariant buildVariantWrapper(SimplifiedVariant variant) {
+        return new EnsemblVariant(variant.getChromosome(),
                                   variant.getStart(),
                                   variant.getEnd(),
                                   variant.getReference(),
