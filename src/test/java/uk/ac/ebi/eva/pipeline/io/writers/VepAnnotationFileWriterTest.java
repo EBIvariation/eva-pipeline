@@ -22,7 +22,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.springframework.batch.item.ItemStreamException;
 
-import uk.ac.ebi.eva.pipeline.model.VariantWrapper;
+import uk.ac.ebi.eva.pipeline.model.EnsemblVariant;
 import uk.ac.ebi.eva.pipeline.parameters.AnnotationParameters;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 
@@ -54,7 +54,7 @@ public class VepAnnotationFileWriterTest {
 
     private static final int HEADER_LINES = 3;
 
-    private final VariantWrapper VARIANT_WRAPPER = new VariantWrapper("1", 100, 105, "A", "T");
+    private final EnsemblVariant VARIANT_WRAPPER = new EnsemblVariant("1", 100, 105, "A", "T");
 
     private AnnotationParameters annotationParameters;
 
@@ -83,71 +83,71 @@ public class VepAnnotationFileWriterTest {
 
     @Test
     public void testMockVep() throws Exception {
-        List<VariantWrapper> variantWrappers = Collections.singletonList(VARIANT_WRAPPER);
-        int chunkSize = variantWrappers.size();
+        List<EnsemblVariant> ensemblVariants = Collections.singletonList(VARIANT_WRAPPER);
+        int chunkSize = ensemblVariants.size();
 
         VepAnnotationFileWriter vepAnnotationFileWriter = new VepAnnotationFileWriter(annotationParameters, chunkSize,
                 TIMEOUT_IN_SECONDS);
 
-        vepAnnotationFileWriter.write(variantWrappers);
+        vepAnnotationFileWriter.write(ensemblVariants);
 
         File vepOutputFile = new File(annotationParameters.getVepOutput());
         assertTrue(vepOutputFile.exists());
-        assertEquals(variantWrappers.size() + EXTRA_ANNOTATIONS,
-                getLines(new GZIPInputStream(new FileInputStream(vepOutputFile))));
+        assertEquals(ensemblVariants.size() + EXTRA_ANNOTATIONS,
+                     getLines(new GZIPInputStream(new FileInputStream(vepOutputFile))));
     }
 
     @Test
     public void testMockVepSeveralChunks() throws Exception {
-        List<VariantWrapper> variantWrappers = new ArrayList<>();
+        List<EnsemblVariant> ensemblVariants = new ArrayList<>();
         for (int i = 0; i < 20; i++) {
-            variantWrappers.add(VARIANT_WRAPPER);
+            ensemblVariants.add(VARIANT_WRAPPER);
         }
         int chunkSize = 5;
 
         VepAnnotationFileWriter vepAnnotationFileWriter = new VepAnnotationFileWriter(annotationParameters, chunkSize,
                 TIMEOUT_IN_SECONDS);
 
-        vepAnnotationFileWriter.write(variantWrappers);
+        vepAnnotationFileWriter.write(ensemblVariants);
 
         File vepOutputFile = new File(annotationParameters.getVepOutput());
         assertTrue(vepOutputFile.exists());
-        assertEquals(variantWrappers.size() + EXTRA_ANNOTATIONS,
-                getLines(new GZIPInputStream(new FileInputStream(vepOutputFile))));
+        assertEquals(ensemblVariants.size() + EXTRA_ANNOTATIONS,
+                     getLines(new GZIPInputStream(new FileInputStream(vepOutputFile))));
     }
 
     @Test
     public void testVepWriterWritesLastSmallerChunk() throws Exception {
-        List<VariantWrapper> variantWrappers = Collections.singletonList(VARIANT_WRAPPER);
-        int chunkSizeGreaterThanActualVariants = variantWrappers.size() * 10;
+        List<EnsemblVariant> ensemblVariants = Collections.singletonList(VARIANT_WRAPPER);
+        int chunkSizeGreaterThanActualVariants = ensemblVariants.size() * 10;
 
         VepAnnotationFileWriter vepAnnotationFileWriter = new VepAnnotationFileWriter(annotationParameters,
                 chunkSizeGreaterThanActualVariants, TIMEOUT_IN_SECONDS);
 
-        vepAnnotationFileWriter.write(variantWrappers);
+        vepAnnotationFileWriter.write(ensemblVariants);
 
         File vepOutputFile = new File(annotationParameters.getVepOutput());
         assertTrue(vepOutputFile.exists());
-        assertEquals(variantWrappers.size() + EXTRA_ANNOTATIONS,
-                getLines(new GZIPInputStream(new FileInputStream(vepOutputFile))));
+        assertEquals(ensemblVariants.size() + EXTRA_ANNOTATIONS,
+                     getLines(new GZIPInputStream(new FileInputStream(vepOutputFile))));
     }
 
     @Test
     public void testHeaderIsWrittenOnlyOnce() throws Exception {
-        List<VariantWrapper> variantWrappers = Collections.singletonList(VARIANT_WRAPPER);
-        int chunkSize = variantWrappers.size();
+        List<EnsemblVariant> ensemblVariants = Collections.singletonList(VARIANT_WRAPPER);
+        int chunkSize = ensemblVariants.size();
 
         VepAnnotationFileWriter vepAnnotationFileWriter = new VepAnnotationFileWriter(annotationParameters,
                 chunkSize, TIMEOUT_IN_SECONDS);
 
         long chunks = 3;
         for (int i = 0; i < chunks; i++) {
-            vepAnnotationFileWriter.write(variantWrappers);
+            vepAnnotationFileWriter.write(ensemblVariants);
         }
 
         File vepOutputFile = new File(annotationParameters.getVepOutput());
         assertTrue(vepOutputFile.exists());
-        assertEquals((variantWrappers.size() + EXTRA_ANNOTATIONS)*chunks,
+        assertEquals((ensemblVariants.size() + EXTRA_ANNOTATIONS)*chunks,
                 getLines(new GZIPInputStream(new FileInputStream(vepOutputFile))));
 
         assertEquals(HEADER_LINES, getCommentLines(new GZIPInputStream(new FileInputStream(vepOutputFile))));
@@ -176,8 +176,8 @@ public class VepAnnotationFileWriterTest {
 
     @Test
     public void testVepTimeouts() throws Exception {
-        List<VariantWrapper> variantWrappers = Collections.singletonList(VARIANT_WRAPPER);
-        int chunkSizeGreaterThanActualVariants = variantWrappers.size() * 10;
+        List<EnsemblVariant> ensemblVariants = Collections.singletonList(VARIANT_WRAPPER);
+        int chunkSizeGreaterThanActualVariants = ensemblVariants.size() * 10;
         annotationParameters.setVepPath(getResource("/mockvep_writeToFile_delayed.pl").getAbsolutePath());
 
         long vepTimeouts = 1;
@@ -185,7 +185,7 @@ public class VepAnnotationFileWriterTest {
                 chunkSizeGreaterThanActualVariants, vepTimeouts);
 
         exception.expect(ItemStreamException.class);
-        vepAnnotationFileWriter.write(variantWrappers);
+        vepAnnotationFileWriter.write(ensemblVariants);
     }
 
 }
