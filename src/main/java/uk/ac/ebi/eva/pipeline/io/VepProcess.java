@@ -110,7 +110,8 @@ public class VepProcess {
                 "-o", "STDOUT",
                 "--force_overwrite",
                 "--offline",
-                "--everything"
+                "--everything",
+                "--format", "ensembl"
         );
 
         logger.trace("Starting VEP annotation with parameters = {}", Arrays.toString(processBuilder.command().toArray()));
