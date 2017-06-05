@@ -136,11 +136,6 @@ public class VariantVcfFactory {
     }
 
     private String[] getAlternateAlleles(String[] fields, String chromosome, int position, String reference) {
-        if (fields[4].equals(".")) {
-            throw new NotAVariantException(
-                    "Alternative allele is a '.'. This is not an actual variant but a reference position. " +
-                            "Variant found as: " + chromosome + ":" + position + ":" + reference + ">" + fields[4]);
-        }
         return fields[4].split(",");
     }
 
