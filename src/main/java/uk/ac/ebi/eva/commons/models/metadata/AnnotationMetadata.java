@@ -17,15 +17,20 @@
 package uk.ac.ebi.eva.commons.models.metadata;
 
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 import org.springframework.util.Assert;
+
+import uk.ac.ebi.eva.commons.models.mongo.entity.Annotation;
 
 @Document
 public class AnnotationMetadata {
 
     private String id;
 
+    @Field(Annotation.VEP_VERSION_FIELD)
     private String vepVersion;
 
+    @Field(Annotation.VEP_CACHE_VERSION_FIELD)
     private String cacheVersion;
 
     AnnotationMetadata() {
