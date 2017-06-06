@@ -15,7 +15,10 @@
  */
 package uk.ac.ebi.eva.pipeline.jobs.steps.processors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.batch.item.ItemProcessor;
+
 import uk.ac.ebi.eva.commons.models.data.Variant;
 
 /**
@@ -23,11 +26,15 @@ import uk.ac.ebi.eva.commons.models.data.Variant;
  */
 public class VariantNoAlternateFilterProcessor implements ItemProcessor<Variant, Variant> {
 
+    private static final Logger logger = LoggerFactory.getLogger(VariantNoAlternateFilterProcessor.class);
+
     @Override
     public Variant process(Variant item) throws Exception {
         if (item.getType() != Variant.VariantType.NO_ALTERNATE) {
             return item;
         } else {
+            logger.warn("Variant {}:{}:{}>{} ignored due to no alternate allele reported",
+                        item.getChromosome(), item.getStart(), item.getReference(), item.getAlternate());
             return null;
         }
     }
