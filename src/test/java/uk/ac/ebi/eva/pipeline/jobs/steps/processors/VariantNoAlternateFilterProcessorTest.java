@@ -36,7 +36,7 @@ public class VariantNoAlternateFilterProcessorTest {
 
     @Test
     public void shouldAcceptSnv() throws Exception {
-        Variant input = new Variant("1", 1000, 1001, "A", "C");
+        Variant input = new Variant("1", 1000, 1000, "A", "C");
         Variant output = processor.process(input);
         assertEquals(Variant.VariantType.SNV, input.getType());
         assertNotNull(output);
@@ -45,7 +45,7 @@ public class VariantNoAlternateFilterProcessorTest {
 
     @Test
     public void shouldAcceptMnv() throws Exception {
-        Variant input = new Variant("1", 1000, 1003, "ATG", "CGT");
+        Variant input = new Variant("1", 1000, 1002, "ATG", "CGT");
         Variant output = processor.process(input);
         assertEquals(Variant.VariantType.MNV, input.getType());
         assertNotNull(output);
@@ -54,7 +54,7 @@ public class VariantNoAlternateFilterProcessorTest {
 
     @Test
     public void shouldAcceptIndel() throws Exception {
-        Variant input = new Variant("1", 1000, 1002, "AT", "T");
+        Variant input = new Variant("1", 1000, 1001, "AT", "T");
         Variant output = processor.process(input);
         assertEquals(Variant.VariantType.INDEL, input.getType());
         assertNotNull(output);
@@ -63,7 +63,7 @@ public class VariantNoAlternateFilterProcessorTest {
 
     @Test
     public void shouldAcceptSv() throws Exception {
-        Variant input = new Variant("1", 1000, 1061,
+        Variant input = new Variant("1", 1000, 1059,
                                     "ATATATATATATATATATATATATATATATATATATATATATATATATATATATATATAT", "T");
         Variant output = processor.process(input);
         assertEquals(Variant.VariantType.SV, input.getType());
@@ -73,7 +73,7 @@ public class VariantNoAlternateFilterProcessorTest {
 
     @Test
     public void shouldRejectNoAlternateVariants() throws Exception {
-        Variant input = new Variant("1", 1000, 1001, "A", ".");
+        Variant input = new Variant("1", 1000, 1000, "A", ".");
         Variant output = processor.process(input);
         assertEquals(Variant.VariantType.NO_ALTERNATE, input.getType());
         assertNull(output);
