@@ -20,10 +20,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
-import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemStreamReader;
 import org.springframework.batch.item.ItemWriter;
-import org.springframework.batch.item.file.FlatFileParseException;
 import org.springframework.batch.repeat.policy.SimpleCompletionPolicy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -33,16 +31,15 @@ import org.springframework.context.annotation.Import;
 
 import uk.ac.ebi.eva.commons.models.data.Variant;
 import uk.ac.ebi.eva.pipeline.configuration.ChunkSizeCompletionPolicyConfiguration;
-import uk.ac.ebi.eva.pipeline.configuration.processors.VariantNoAlternateFilterProcessorConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.readers.VcfReaderConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.writers.VariantWriterConfiguration;
+import uk.ac.ebi.eva.pipeline.jobs.steps.processors.VariantNoAlternateFilterProcessor;
 import uk.ac.ebi.eva.pipeline.listeners.SkippedItemListener;
 import uk.ac.ebi.eva.pipeline.listeners.StepProgressListener;
 import uk.ac.ebi.eva.pipeline.listeners.VariantLoaderStepStatisticsListener;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.LOAD_VARIANTS_STEP;
-import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VARIANT_NO_ALTERNATE_FILTER_PROCESSOR;
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VARIANT_READER;
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VARIANT_WRITER;
 
@@ -54,8 +51,7 @@ import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VARIANT_WRITER;
  */
 @Configuration
 @EnableBatchProcessing
-@Import({VcfReaderConfiguration.class, VariantNoAlternateFilterProcessorConfiguration.class,
-        VariantWriterConfiguration.class, ChunkSizeCompletionPolicyConfiguration.class})
+@Import({VcfReaderConfiguration.class, VariantWriterConfiguration.class, ChunkSizeCompletionPolicyConfiguration.class})
 public class VariantLoaderStep {
 
     private static final Logger logger = LoggerFactory.getLogger(VariantLoaderStep.class);
@@ -63,10 +59,6 @@ public class VariantLoaderStep {
     @Autowired
     @Qualifier(VARIANT_READER)
     private ItemStreamReader<Variant> reader;
-
-    @Autowired
-    @Qualifier(VARIANT_NO_ALTERNATE_FILTER_PROCESSOR)
-    private ItemProcessor<Variant, Variant> variantProcessor;
 
     @Autowired
     @Qualifier(VARIANT_WRITER)
@@ -80,9 +72,8 @@ public class VariantLoaderStep {
         return stepBuilderFactory.get(LOAD_VARIANTS_STEP)
                 .<Variant, Variant>chunk(chunkSizeCompletionPolicy)
                 .reader(reader)
-                .processor(variantProcessor)
+                .processor(new VariantNoAlternateFilterProcessor())
                 .writer(variantWriter)
-                .faultTolerant().skipLimit(50).skip(FlatFileParseException.class)
                 .allowStartIfComplete(jobOptions.isAllowStartIfComplete())
                 .listener(new SkippedItemListener())
                 .listener(new StepProgressListener())
