@@ -46,7 +46,8 @@ public class Variant {
     }
 
     /**
-     * Type of variation: single nucleotide, indel or structural variation.
+     * Type of variation
+     * @see uk.ac.ebi.eva.commons.models.data.Variant.VariantType
      */
     private VariantType type;
 
