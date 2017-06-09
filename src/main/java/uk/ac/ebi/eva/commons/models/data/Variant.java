@@ -38,14 +38,16 @@ public class Variant {
      * <li>Indels are insertions or deletions of less than SV_THRESHOLD (50) nucleotides</li>
      * <li>Structural variations are large changes of more than SV_THRESHOLD nucleotides</li>
      * <li>Copy-number variations alter the number of copies of a region</li>
+     * <li>No alternate alleles found mean that only the reference was reported</li>
      * </ul>
      */
     public enum VariantType {
-        SNV, MNV, INDEL, SV, CNV
+        SNV, MNV, INDEL, SV, CNV, NO_ALTERNATE
     }
 
     /**
-     * Type of variation: single nucleotide, indel or structural variation.
+     * Type of variation
+     * @see uk.ac.ebi.eva.commons.models.data.Variant.VariantType
      */
     private VariantType type;
 
@@ -157,7 +159,9 @@ public class Variant {
     }
 
     private void resetType() {
-        if (this.reference.length() == this.alternate.length()) {
+        if (this.alternate.equals(".")) {
+            this.type = VariantType.NO_ALTERNATE;
+        } else if (this.reference.length() == this.alternate.length()) {
             if (this.length > 1) {
                 this.type = VariantType.MNV;
             } else {

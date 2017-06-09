@@ -22,7 +22,6 @@ import org.springframework.batch.core.configuration.annotation.EnableBatchProces
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.item.ItemStreamReader;
 import org.springframework.batch.item.ItemWriter;
-import org.springframework.batch.item.file.FlatFileParseException;
 import org.springframework.batch.repeat.policy.SimpleCompletionPolicy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -34,6 +33,7 @@ import uk.ac.ebi.eva.commons.models.data.Variant;
 import uk.ac.ebi.eva.pipeline.configuration.ChunkSizeCompletionPolicyConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.readers.VcfReaderConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.writers.VariantWriterConfiguration;
+import uk.ac.ebi.eva.pipeline.jobs.steps.processors.VariantNoAlternateFilterProcessor;
 import uk.ac.ebi.eva.pipeline.listeners.SkippedItemListener;
 import uk.ac.ebi.eva.pipeline.listeners.StepProgressListener;
 import uk.ac.ebi.eva.pipeline.listeners.VariantLoaderStepStatisticsListener;
@@ -72,8 +72,8 @@ public class VariantLoaderStep {
         return stepBuilderFactory.get(LOAD_VARIANTS_STEP)
                 .<Variant, Variant>chunk(chunkSizeCompletionPolicy)
                 .reader(reader)
+                .processor(new VariantNoAlternateFilterProcessor())
                 .writer(variantWriter)
-                .faultTolerant().skipLimit(50).skip(FlatFileParseException.class)
                 .allowStartIfComplete(jobOptions.isAllowStartIfComplete())
                 .listener(new SkippedItemListener())
                 .listener(new StepProgressListener())
