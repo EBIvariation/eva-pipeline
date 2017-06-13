@@ -25,32 +25,32 @@ import org.springframework.batch.core.step.tasklet.TaskletStep;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import uk.ac.ebi.eva.pipeline.jobs.steps.tasklets.DropSingleStudyVariantsTasklet;
+import uk.ac.ebi.eva.pipeline.jobs.steps.tasklets.DropVariantsByStudyTasklet;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 import uk.ac.ebi.eva.utils.TaskletUtils;
 
-import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.DROP_SINGLE_STUDY_VARIANTS_STEP;
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.DROP_VARIANTS_BY_STUDY_STEP;
 
 /**
- * Configuration class that inject a step created with the tasklet {@link DropSingleStudyVariantsTasklet}
+ * Configuration class that inject a step created with the tasklet {@link DropVariantsByStudyTasklet}
  */
 @Configuration
 @EnableBatchProcessing
-public class DropSingleStudyVariantsStepConfiguration {
+public class DropVariantsByStudyStepConfiguration {
 
-    private static final Logger logger = LoggerFactory.getLogger(DropSingleStudyVariantsStepConfiguration.class);
+    private static final Logger logger = LoggerFactory.getLogger(DropVariantsByStudyStepConfiguration.class);
 
     @Bean
     @StepScope
-    public DropSingleStudyVariantsTasklet dropSingleStudyVariantsTasklet() {
-        return new DropSingleStudyVariantsTasklet();
+    public DropVariantsByStudyTasklet dropVariantsByStudyTasklet() {
+        return new DropVariantsByStudyTasklet();
     }
 
-    @Bean(DROP_SINGLE_STUDY_VARIANTS_STEP)
-    public TaskletStep dropSingleStudyVariantsStep(StepBuilderFactory stepBuilderFactory, JobOptions jobOptions) {
-        logger.debug("Building '" + DROP_SINGLE_STUDY_VARIANTS_STEP + "'");
-        return TaskletUtils.generateStep(stepBuilderFactory, DROP_SINGLE_STUDY_VARIANTS_STEP,
-                dropSingleStudyVariantsTasklet(), jobOptions.isAllowStartIfComplete());
+    @Bean(DROP_VARIANTS_BY_STUDY_STEP)
+    public TaskletStep dropVariantsByStudyStep(StepBuilderFactory stepBuilderFactory, JobOptions jobOptions) {
+        logger.debug("Building '" + DROP_VARIANTS_BY_STUDY_STEP + "'");
+        return TaskletUtils.generateStep(stepBuilderFactory, DROP_VARIANTS_BY_STUDY_STEP,
+                                         dropVariantsByStudyTasklet(), jobOptions.isAllowStartIfComplete());
     }
 
 }

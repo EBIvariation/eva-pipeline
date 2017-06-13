@@ -20,8 +20,6 @@ import com.mongodb.DBCollection;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.batch.core.BatchStatus;
-import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.test.JobLauncherTestUtils;
@@ -37,23 +35,21 @@ import uk.ac.ebi.eva.pipeline.configuration.jobs.DropStudyJobConfiguration;
 import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
 import uk.ac.ebi.eva.test.data.VariantData;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
-import uk.ac.ebi.eva.test.utils.JobTestUtils;
 import uk.ac.ebi.eva.utils.EvaJobParameterBuilder;
 
 import java.util.Arrays;
 
-import static org.junit.Assert.assertEquals;
-import static uk.ac.ebi.eva.test.utils.DropStudyJobTestUtils.assertDropSingleStudy;
+import static uk.ac.ebi.eva.test.utils.DropStudyJobTestUtils.assertDropVariantsByStudy;
 import static uk.ac.ebi.eva.test.utils.JobTestUtils.assertCompleted;
 
 /**
- * Test for {@link DropSingleStudyVariantsStepConfiguration}
+ * Test for {@link DropVariantsByStudyStepConfiguration}
  */
 @RunWith(SpringRunner.class)
 @ActiveProfiles({Application.VARIANT_WRITER_MONGO_PROFILE, Application.VARIANT_ANNOTATION_MONGO_PROFILE})
 @TestPropertySource({"classpath:common-configuration.properties", "classpath:test-mongo.properties"})
 @ContextConfiguration(classes = {DropStudyJobConfiguration.class, BatchTestConfiguration.class})
-public class DropSingleStudyVariantsStepTest {
+public class DropVariantsByStudyStepTest {
 
     private static final String COLLECTION_VARIANTS_NAME = "variants";
 
@@ -104,13 +100,13 @@ public class DropSingleStudyVariantsStepTest {
                 .inputStudyId(STUDY_ID_TO_DROP)
                 .toJobParameters();
 
-        JobExecution jobExecution = jobLauncherTestUtils.launchStep(BeanNames.DROP_SINGLE_STUDY_VARIANTS_STEP,
+        JobExecution jobExecution = jobLauncherTestUtils.launchStep(BeanNames.DROP_VARIANTS_BY_STUDY_STEP,
                 jobParameters);
 
         assertCompleted(jobExecution);
 
         DBCollection variantsCollection = mongoRule.getCollection(databaseName, COLLECTION_VARIANTS_NAME);
-        assertDropSingleStudy(variantsCollection, STUDY_ID_TO_DROP, expectedVariantsAfterDropStudy);
+        assertDropVariantsByStudy(variantsCollection, STUDY_ID_TO_DROP, expectedVariantsAfterDropStudy);
     }
 
 }

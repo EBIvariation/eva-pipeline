@@ -50,7 +50,7 @@ public class BeanNames {
     public static final String LOAD_STATISTICS_STEP = "load-statistics-step";
     public static final String LOAD_VARIANTS_STEP = "load-variants-step";
     public static final String LOAD_FILE_STEP = "load-file-step";
-    public static final String DROP_SINGLE_STUDY_VARIANTS_STEP = "drop-single-study-variants-step";
+    public static final String DROP_VARIANTS_BY_STUDY_STEP = "drop-variants-by-study-step";
     public static final String PULL_FILES_AND_STATISTICS_BY_STUDY_STEP = "pull-files-and-statistics-by-study-step";
     public static final String DROP_FILES_BY_STUDY_STEP = "drop-files-by-study-step";
     public static final String LOAD_ANNOTATION_METADATA_STEP = "annotation-metadata-step";

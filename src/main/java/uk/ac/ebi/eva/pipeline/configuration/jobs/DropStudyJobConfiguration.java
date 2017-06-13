@@ -32,13 +32,13 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
 
 import uk.ac.ebi.eva.pipeline.configuration.jobs.steps.DropFilesByStudyStepConfiguration;
-import uk.ac.ebi.eva.pipeline.configuration.jobs.steps.DropSingleStudyVariantsStepConfiguration;
+import uk.ac.ebi.eva.pipeline.configuration.jobs.steps.DropVariantsByStudyStepConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.jobs.steps.PullFilesAndStatisticsByStudyStepConfiguration;
 import uk.ac.ebi.eva.pipeline.parameters.NewJobIncrementer;
 import uk.ac.ebi.eva.pipeline.parameters.validation.job.DropStudyJobParametersValidator;
 
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.DROP_FILES_BY_STUDY_STEP;
-import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.DROP_SINGLE_STUDY_VARIANTS_STEP;
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.DROP_VARIANTS_BY_STUDY_STEP;
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.DROP_STUDY_JOB;
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.PULL_FILES_AND_STATISTICS_BY_STUDY_STEP;
 
@@ -49,14 +49,14 @@ import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.PULL_FILES_AND_STAT
  */
 @Configuration
 @EnableBatchProcessing
-@Import({DropSingleStudyVariantsStepConfiguration.class, PullFilesAndStatisticsByStudyStepConfiguration.class, DropFilesByStudyStepConfiguration.class})
+@Import({DropVariantsByStudyStepConfiguration.class, PullFilesAndStatisticsByStudyStepConfiguration.class, DropFilesByStudyStepConfiguration.class})
 public class DropStudyJobConfiguration {
 
     private static final Logger logger = LoggerFactory.getLogger(DropStudyJobConfiguration.class);
 
     @Autowired
-    @Qualifier(DROP_SINGLE_STUDY_VARIANTS_STEP)
-    private Step dropSingleStudyVariantsStep;
+    @Qualifier(DROP_VARIANTS_BY_STUDY_STEP)
+    private Step dropVariantsByStudyStep;
 
     @Autowired
     @Qualifier(PULL_FILES_AND_STATISTICS_BY_STUDY_STEP)
@@ -77,7 +77,7 @@ public class DropStudyJobConfiguration {
                 .validator(new DropStudyJobParametersValidator());
 
         SimpleJobBuilder builder = jobBuilder
-                .start(dropSingleStudyVariantsStep)
+                .start(dropVariantsByStudyStep)
                 .next(dropVariantsAndStatisticsByStudyStep)
                 .next(dropFileStep);
 
