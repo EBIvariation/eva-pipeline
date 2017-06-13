@@ -75,7 +75,7 @@ public class LoadGenesStepConfiguration {
     private ItemWriter<FeatureCoordinates> writer;
 
     @Bean(LOAD_GENES_STEP)
-    public Step genesLoadStep(StepBuilderFactory stepBuilderFactory, JobOptions jobOptions,
+    public Step loadGenesStep(StepBuilderFactory stepBuilderFactory, JobOptions jobOptions,
                               SimpleCompletionPolicy chunkSizeCompletionPolicy) {
         logger.debug("Building '" + LOAD_GENES_STEP + "'");
 

@@ -22,7 +22,7 @@ import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersInvalidException;
 
-import uk.ac.ebi.eva.pipeline.configuration.jobs.steps.DropSingleStudyVariantsStepConfiguration;
+import uk.ac.ebi.eva.pipeline.configuration.jobs.steps.DropVariantsByStudyStepConfiguration;
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 
@@ -31,12 +31,12 @@ import java.util.Map;
 import java.util.TreeMap;
 
 /**
- * Tests that the arguments necessary to run a {@link DropSingleStudyVariantsStepConfiguration}
+ * Tests that the arguments necessary to run a {@link DropVariantsByStudyStepConfiguration}
  * are correctly validated
  */
-public class DropSingleStudyVariantsStepParametersValidatorTest {
+public class DropVariantsByStudyStepParametersValidatorTest {
 
-    private DropSingleStudyVariantsStepParametersValidator validator;
+    private DropVariantsByStudyStepParametersValidator validator;
 
     @Rule
     public PipelineTemporaryFolderRule temporaryFolderRule = new PipelineTemporaryFolderRule();
@@ -47,7 +47,7 @@ public class DropSingleStudyVariantsStepParametersValidatorTest {
 
     @Before
     public void setUp() throws IOException {
-        validator = new DropSingleStudyVariantsStepParametersValidator();
+        validator = new DropVariantsByStudyStepParametersValidator();
 
         requiredParameters = new TreeMap<>();
         requiredParameters.put(JobParametersNames.DB_NAME, new JobParameter("database"));

@@ -20,8 +20,6 @@ import com.mongodb.DBCollection;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.batch.core.BatchStatus;
-import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.test.JobLauncherTestUtils;
@@ -41,7 +39,7 @@ import java.util.Arrays;
 
 import static org.junit.Assert.assertEquals;
 import static uk.ac.ebi.eva.test.utils.DropStudyJobTestUtils.assertDropFiles;
-import static uk.ac.ebi.eva.test.utils.DropStudyJobTestUtils.assertDropSingleStudy;
+import static uk.ac.ebi.eva.test.utils.DropStudyJobTestUtils.assertDropVariantsByStudy;
 import static uk.ac.ebi.eva.test.utils.DropStudyJobTestUtils.assertPullStudy;
 import static uk.ac.ebi.eva.test.utils.JobTestUtils.assertCompleted;
 
@@ -103,7 +101,7 @@ public class DropStudyJobTest {
         JobExecution jobExecution = jobLauncherTestUtils.launchJob(jobParameters);
         assertCompleted(jobExecution);
 
-        assertDropSingleStudy(variantsCollection, STUDY_ID_TO_DROP, EXPECTED_VARIANTS_AFTER_DROP_STUDY);
+        assertDropVariantsByStudy(variantsCollection, STUDY_ID_TO_DROP, EXPECTED_VARIANTS_AFTER_DROP_STUDY);
         assertPullStudy(variantsCollection, STUDY_ID_TO_DROP, EXPECTED_FILE_COUNT, EXPECTED_STATS_COUNT);
         assertDropFiles(filesCollection, STUDY_ID_TO_DROP, EXPECTED_FILES_AFTER_DROP_STUDY);
     }

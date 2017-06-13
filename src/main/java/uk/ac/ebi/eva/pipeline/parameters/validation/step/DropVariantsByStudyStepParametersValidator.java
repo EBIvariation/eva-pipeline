@@ -21,7 +21,7 @@ import org.springframework.batch.core.JobParametersValidator;
 import org.springframework.batch.core.job.CompositeJobParametersValidator;
 import org.springframework.batch.core.job.DefaultJobParametersValidator;
 
-import uk.ac.ebi.eva.pipeline.configuration.jobs.steps.DropSingleStudyVariantsStepConfiguration;
+import uk.ac.ebi.eva.pipeline.configuration.jobs.steps.DropVariantsByStudyStepConfiguration;
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 import uk.ac.ebi.eva.pipeline.parameters.validation.ConfigRestartabilityAllowValidator;
 import uk.ac.ebi.eva.pipeline.parameters.validation.DbCollectionsVariantsNameValidator;
@@ -34,11 +34,11 @@ import java.util.List;
 
 /**
  * Validates the job parameters necessary to execute a
- * {@link DropSingleStudyVariantsStepConfiguration}
+ * {@link DropVariantsByStudyStepConfiguration}
  */
-public class DropSingleStudyVariantsStepParametersValidator extends DefaultJobParametersValidator {
+public class DropVariantsByStudyStepParametersValidator extends DefaultJobParametersValidator {
 
-    public DropSingleStudyVariantsStepParametersValidator() {
+    public DropVariantsByStudyStepParametersValidator() {
         super(new String[]{JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME,
                            JobParametersNames.DB_NAME,
                            JobParametersNames.INPUT_STUDY_ID},

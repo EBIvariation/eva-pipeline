@@ -42,9 +42,9 @@ import static uk.ac.ebi.eva.commons.models.mongo.entity.VariantDocument.FILES_FI
  * <p>
  * Output: those variants are removed
  */
-public class DropSingleStudyVariantsTasklet implements Tasklet {
+public class DropVariantsByStudyTasklet implements Tasklet {
 
-    private static final Logger logger = LoggerFactory.getLogger(DropSingleStudyVariantsTasklet.class);
+    private static final Logger logger = LoggerFactory.getLogger(DropVariantsByStudyTasklet.class);
 
     @Autowired
     private MongoOperations mongoOperations;
