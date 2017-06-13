@@ -25,8 +25,8 @@ import uk.ac.ebi.eva.utils.URLHelper;
  * Service that holds access to the values for annotatation steps like VEP etc.
  *
  * NOTE the @StepScope this is probably because the Step/Tasklet in this case the
- * {@link uk.ac.ebi.eva.pipeline.jobs.flows.AnnotationFlow} is executed in parallel with statistics
- * {@link uk.ac.ebi.eva.pipeline.jobs.flows.PopulationStatisticsFlow} and they are not sharing the same context.
+ * {@link uk.ac.ebi.eva.pipeline.configuration.jobs.flows.AnnotationFlowConfiguration} is executed in parallel with statistics
+ * {@link uk.ac.ebi.eva.pipeline.configuration.jobs.flows.PopulationStatisticsFlowConfiguration} and they are not sharing the same context.
  * With @JobScope will not work!
  */
 @Service

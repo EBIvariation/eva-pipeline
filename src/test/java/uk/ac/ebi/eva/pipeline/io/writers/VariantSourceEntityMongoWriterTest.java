@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2017 EMBL - European Bioinformatics Institute
+ * Copyright 2015-2017 EMBL - European Bioinformatics Institute
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package uk.ac.ebi.eva.pipeline.io.writers;
 
 import com.mongodb.DBCollection;
@@ -34,7 +35,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import uk.ac.ebi.eva.commons.models.data.VariantSourceEntity;
 import uk.ac.ebi.eva.pipeline.configuration.MongoConfiguration;
 import uk.ac.ebi.eva.pipeline.io.readers.VcfHeaderReader;
-import uk.ac.ebi.eva.pipeline.jobs.steps.LoadFileStep;
+import uk.ac.ebi.eva.pipeline.configuration.jobs.steps.LoadFileStepConfiguration;
 import uk.ac.ebi.eva.pipeline.parameters.MongoConnection;
 import uk.ac.ebi.eva.test.configuration.BaseTestConfiguration;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
@@ -63,7 +64,7 @@ import static uk.ac.ebi.eva.utils.FileUtils.getResource;
  */
 @RunWith(SpringRunner.class)
 @TestPropertySource({"classpath:common-configuration.properties", "classpath:test-mongo.properties"})
-@ContextConfiguration(classes = {BaseTestConfiguration.class, LoadFileStep.class})
+@ContextConfiguration(classes = {BaseTestConfiguration.class, LoadFileStepConfiguration.class})
 public class VariantSourceEntityMongoWriterTest {
 
     private static final String SMALL_VCF_FILE = "/input-files/vcf/genotyped.vcf.gz";

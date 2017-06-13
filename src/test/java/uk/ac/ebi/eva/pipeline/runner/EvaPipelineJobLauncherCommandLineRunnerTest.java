@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package uk.ac.ebi.eva.pipeline.runner;
 
 import org.junit.Before;
@@ -55,7 +56,7 @@ import static uk.ac.ebi.eva.test.utils.JobTestUtils.assertCompleted;
 import static uk.ac.ebi.eva.utils.FileUtils.getResource;
 
 /**
- * This suit of tests checks the behaviour of the EvaPipelineJobLauncherCommandLineRunner and launches a full execution of the
+ * This suit of tests checks the behaviour of the {@link EvaPipelineJobLauncherCommandLineRunner} and launches a full execution of the
  * genotype vcf test.
  */
 @RunWith(SpringRunner.class)
