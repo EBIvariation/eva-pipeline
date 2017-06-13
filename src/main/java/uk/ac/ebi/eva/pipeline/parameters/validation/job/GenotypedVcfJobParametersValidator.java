@@ -21,20 +21,21 @@ import org.springframework.batch.core.JobParametersValidator;
 import org.springframework.batch.core.job.CompositeJobParametersValidator;
 import org.springframework.batch.core.job.DefaultJobParametersValidator;
 
+import uk.ac.ebi.eva.pipeline.configuration.jobs.GenotypedVcfJobConfiguration;
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
-import uk.ac.ebi.eva.pipeline.parameters.validation.step.AnnotationLoaderStepParametersValidator;
+import uk.ac.ebi.eva.pipeline.parameters.validation.step.LoadVepAnnotationStepParametersValidator;
 import uk.ac.ebi.eva.pipeline.parameters.validation.step.AnnotationMetadataStepParametersValidator;
-import uk.ac.ebi.eva.pipeline.parameters.validation.step.FileLoaderStepParametersValidator;
+import uk.ac.ebi.eva.pipeline.parameters.validation.step.LoadFileStepParametersValidator;
 import uk.ac.ebi.eva.pipeline.parameters.validation.step.GenerateVepAnnotationStepParametersValidator;
-import uk.ac.ebi.eva.pipeline.parameters.validation.step.PopulationStatisticsGeneratorStepParametersValidator;
-import uk.ac.ebi.eva.pipeline.parameters.validation.step.PopulationStatisticsLoaderStepParametersValidator;
-import uk.ac.ebi.eva.pipeline.parameters.validation.step.VariantLoaderStepParametersValidator;
+import uk.ac.ebi.eva.pipeline.parameters.validation.step.CalculateStatisticsStepParametersValidator;
+import uk.ac.ebi.eva.pipeline.parameters.validation.step.LoadStatisticsStepParametersValidator;
+import uk.ac.ebi.eva.pipeline.parameters.validation.step.LoadVariantsStepParametersValidator;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Validates the job parameters necessary to execute an {@link uk.ac.ebi.eva.pipeline.jobs.GenotypedVcfJob}
+ * Validates the job parameters necessary to execute an {@link GenotypedVcfJobConfiguration}
  */
 public class GenotypedVcfJobParametersValidator extends DefaultJobParametersValidator {
 
@@ -46,22 +47,22 @@ public class GenotypedVcfJobParametersValidator extends DefaultJobParametersVali
     private CompositeJobParametersValidator compositeJobParametersValidator(JobParameters jobParameters) {
         List<JobParametersValidator> jobParametersValidators = new ArrayList<>();
 
-        jobParametersValidators.add(new VariantLoaderStepParametersValidator());
-        jobParametersValidators.add(new FileLoaderStepParametersValidator());
+        jobParametersValidators.add(new LoadVariantsStepParametersValidator());
+        jobParametersValidators.add(new LoadFileStepParametersValidator());
 
         Boolean skipAnnotation = Boolean.valueOf(jobParameters.getString(JobParametersNames.ANNOTATION_SKIP));
         if (!skipAnnotation) {
             boolean studyIdRequired = true;
 
             jobParametersValidators.add(new GenerateVepAnnotationStepParametersValidator(studyIdRequired));
-            jobParametersValidators.add(new AnnotationLoaderStepParametersValidator(studyIdRequired));
+            jobParametersValidators.add(new LoadVepAnnotationStepParametersValidator(studyIdRequired));
             jobParametersValidators.add(new AnnotationMetadataStepParametersValidator());
         }
 
         Boolean skipStats = Boolean.valueOf(jobParameters.getString(JobParametersNames.STATISTICS_SKIP));
         if (!skipStats) {
-            jobParametersValidators.add(new PopulationStatisticsGeneratorStepParametersValidator());
-            jobParametersValidators.add(new PopulationStatisticsLoaderStepParametersValidator());
+            jobParametersValidators.add(new CalculateStatisticsStepParametersValidator());
+            jobParametersValidators.add(new LoadStatisticsStepParametersValidator());
         }
 
         CompositeJobParametersValidator compositeJobParametersValidator = new CompositeJobParametersValidator();

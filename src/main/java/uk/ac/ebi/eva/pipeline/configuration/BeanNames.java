@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 EMBL - European Bioinformatics Institute
+ * Copyright 2015-2017 EMBL - European Bioinformatics Institute
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package uk.ac.ebi.eva.pipeline.configuration;
 
 /**
@@ -44,12 +45,12 @@ public class BeanNames {
     public static final String LOAD_VEP_ANNOTATION_STEP = "load-vep-annotation-step";
     public static final String CALCULATE_STATISTICS_STEP = "calculate-statistics-step";
     public static final String CREATE_DATABASE_INDEXES_STEP = "create-database-indexes-step";
-    public static final String GENES_LOAD_STEP = "genes-load-step";
+    public static final String LOAD_GENES_STEP = "load-genes-step";
     public static final String GENERATE_VEP_ANNOTATION_STEP = "generate-vep-annotation";
     public static final String LOAD_STATISTICS_STEP = "load-statistics-step";
     public static final String LOAD_VARIANTS_STEP = "load-variants-step";
     public static final String LOAD_FILE_STEP = "load-file-step";
-    public static final String DROP_SINGLE_STUDY_VARIANTS_STEP = "drop-single-study-variants-step";
+    public static final String DROP_VARIANTS_BY_STUDY_STEP = "drop-variants-by-study-step";
     public static final String PULL_FILES_AND_STATISTICS_BY_STUDY_STEP = "pull-files-and-statistics-by-study-step";
     public static final String DROP_FILES_BY_STUDY_STEP = "drop-files-by-study-step";
     public static final String LOAD_ANNOTATION_METADATA_STEP = "annotation-metadata-step";
