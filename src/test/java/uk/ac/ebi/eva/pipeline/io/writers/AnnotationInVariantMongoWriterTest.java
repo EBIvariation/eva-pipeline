@@ -30,6 +30,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
+
 import uk.ac.ebi.eva.commons.models.mongo.entity.Annotation;
 import uk.ac.ebi.eva.commons.models.mongo.entity.VariantDocument;
 import uk.ac.ebi.eva.pipeline.Application;
@@ -40,9 +41,13 @@ import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantAnnotation.POLYPHEN_FIELD;
@@ -131,46 +136,91 @@ public class AnnotationInVariantMongoWriterTest {
                 BasicDBObject annotationField = (BasicDBObject) ((BasicDBList) (variant).get(
                         VariantDocument.ANNOTATION_FIELD)).get(0);
 
-                BasicDBList sifts = (BasicDBList) annotationField.get(SIFT_FIELD);
-                assertNotNull(sifts);
-                assertTrue(sifts.containsAll(Arrays.asList(0.1, 0.2)));
-
-                BasicDBList so = (BasicDBList) annotationField.get(SO_ACCESSION_FIELD);
-                assertNotNull(so);
-                assertTrue(so.contains(1631));
-
-                BasicDBList polyphen = (BasicDBList) annotationField.get(POLYPHEN_FIELD);
-                assertNotNull(polyphen);
-                assertTrue(polyphen.containsAll(Arrays.asList(0.1, 0.2)));
-
-                BasicDBList geneNames = (BasicDBList) annotationField.get(XREFS_FIELD);
-                assertNotNull(geneNames);
-                assertTrue(geneNames.containsAll(
-                        Arrays.asList("ENST00000382410", "DEFB125", "ENST00000608838", "ENSG00000178591")));
+                checkAnnotationFields(annotationField,
+                                      Arrays.asList(0.1, 0.2),
+                                      Arrays.asList(0.1, 0.2),
+                                      new TreeSet<>(Arrays.asList(1631)),
+                                      new TreeSet<>(Arrays.asList("DEFB125", "ENSG00000178591", "ENST00000382410",
+                                                                  "ENST00000608838")));
             }
 
             if (id.equals("20_63399_G_A")) {
                 BasicDBObject annotationField = (BasicDBObject) ((BasicDBList) (variant).get(
                         VariantDocument.ANNOTATION_FIELD)).get(0);
 
-                BasicDBList sifts = (BasicDBList) annotationField.get(SIFT_FIELD);
-                assertNotNull(sifts);
-                assertEquals(2, sifts.size());
-
-                BasicDBList so = (BasicDBList) annotationField.get(SO_ACCESSION_FIELD);
-                assertNotNull(so);
-                assertEquals(1, so.size());
-
-                BasicDBList polyphen = (BasicDBList) annotationField.get(POLYPHEN_FIELD);
-                assertNotNull(polyphen);
-                assertEquals(2, polyphen.size());
-
-                BasicDBList geneNames = (BasicDBList) annotationField.get(XREFS_FIELD);
-                assertNotNull(geneNames);
-                assertEquals(4, geneNames.size());
+                checkAnnotationFields(annotationField,
+                                      Arrays.asList(0.07, 0.07),
+                                      Arrays.asList(0.859, 0.859),
+                                      new TreeSet<>(Arrays.asList(1631)),
+                                      new TreeSet<>(Arrays.asList("DEFB125", "ENSG00000178591", "ENST00000382410",
+                                                                  "ENST00000608838")));
             }
         }
         cursor.close();
+    }
+
+    private void checkAnnotationFields(BasicDBObject annotationField,
+                                       List<Double> expectedSifts, List<Double> expectedPolyphens,
+                                       Set<Integer> expectedSos, Set<String> expectedXrefs) {
+        BasicDBList sifts = (BasicDBList) annotationField.get(SIFT_FIELD);
+        assertEquals(expectedSifts, sifts);
+
+        BasicDBList polyphen = (BasicDBList) annotationField.get(POLYPHEN_FIELD);
+        assertEquals(expectedPolyphens, polyphen);
+
+        BasicDBList so = (BasicDBList) annotationField.get(SO_ACCESSION_FIELD);
+        assertEquals(expectedSos, new TreeSet<>(so));
+
+        BasicDBList geneNames = (BasicDBList) annotationField.get(XREFS_FIELD);
+        assertEquals(expectedXrefs, new TreeSet<>(geneNames));
+    }
+
+    @Test
+    public void shouldAddToSetIfThereAreOtherAnnotationsInSameVersion() throws Exception {
+        String databaseName = mongoRule.restoreDumpInTemporaryDatabase(getResourceUrl(MONGO_DUMP));
+
+        String[] vepOutputLines = vepOutputContentWithExtraFields.split("\n");
+
+        List<Annotation> annotations = new ArrayList<>();
+        annotations.add(AnnotationLineMapper.mapLine(vepOutputLines[1], 0));
+        annotations.add(AnnotationLineMapper.mapLine(vepOutputLines[2], 0));
+
+        // load the first annotation
+        MongoOperations operations = MongoConfiguration.getMongoOperations(databaseName, mongoConnection,
+                mongoMappingContext);
+        annotationInVariantMongoWriter = new AnnotationInVariantMongoWriter(operations, COLLECTION_VARIANTS_NAME,
+                VEP_VERSION, VEP_CACHE_VERSION);
+
+        BasicDBObject annotationField = writeAndGetAnnotation(databaseName, annotations.get(0));
+
+        checkAnnotationFields(annotationField,
+                              Arrays.asList(0.1, 0.1),
+                              Arrays.asList(0.1, 0.1),
+                              new TreeSet<>(Arrays.asList(1631)),
+                              new TreeSet<>(Arrays.asList("DEFB125", "ENSG00000178591", "ENST00000382410")));
+
+        // load the second annotation and check the information is updated (not overwritten)
+        BasicDBObject annotationFieldAfter = writeAndGetAnnotation(databaseName, annotations.get(1));
+
+        checkAnnotationFields(annotationFieldAfter,
+                              Arrays.asList(0.1, 0.2),
+                              Arrays.asList(0.1, 0.2),
+                              new TreeSet<>(Arrays.asList(1631)),
+                              new TreeSet<>(Arrays.asList("DEFB125", "ENSG00000178591", "ENST00000382410",
+                                                        "ENST00000608838")));
+    }
+
+    private BasicDBObject writeAndGetAnnotation(String databaseName, Annotation annotation) throws Exception {
+        annotationInVariantMongoWriter.write(Collections.singletonList(annotation));
+
+        BasicDBObject query = new BasicDBObject(Annotation.START_FIELD, annotation.getStart());
+        DBCursor cursor = mongoRule.getCollection(databaseName, COLLECTION_VARIANTS_NAME).find(query);
+
+        assertTrue(cursor.hasNext());
+        DBObject variant = cursor.next();
+        assertFalse(cursor.hasNext());
+
+        return (BasicDBObject) ((BasicDBList) variant.get(VariantDocument.ANNOTATION_FIELD)).get(0);
     }
 
 }
