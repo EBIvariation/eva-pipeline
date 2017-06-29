@@ -62,6 +62,7 @@ import static uk.ac.ebi.eva.commons.models.mongo.entity.Annotation.XREFS_FIELD;
 import static uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.Score.SCORE_DESCRIPTION_FIELD;
 import static uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.Score.SCORE_SCORE_FIELD;
 import static uk.ac.ebi.eva.test.data.VepOutputContent.vepOutputContent;
+import static uk.ac.ebi.eva.test.utils.JobTestUtils.count;
 
 /**
  * {@link AnnotationMongoWriter}
@@ -245,4 +246,53 @@ public class AnnotationMongoWriterTest {
         indexInfo.stream().filter(index -> !("_id_".equals(index.get("name").toString()))).forEach(index -> assertEquals("true", index.get(MongoDBHelper.BACKGROUND_INDEX).toString()));
     }
 
+    @Test
+    public void shouldAddToSetIfThereAreOtherAnnotationsInSameVersion() throws Exception {
+        String databaseName = mongoRule.getRandomTemporaryDatabaseName();
+
+        List<Annotation> annotations = new ArrayList<>();
+        for (String annotLine : vepOutputContent.split("\n")) {
+            annotations.add(AnnotationLineMapper.mapLine(annotLine, 0));
+        }
+
+        // load the annotation
+        MongoOperations operations = MongoConfiguration.getMongoOperations(databaseName, mongoConnection,
+                mongoMappingContext);
+        annotationWriter = new AnnotationMongoWriter(operations, COLLECTION_ANNOTATIONS_NAME);
+        annotationWriter.write(annotations.subList(1, 2));
+
+        // check that 3 consequence types were written in the annotation document
+        DBCollection annotCollection = mongoRule.getCollection(databaseName, COLLECTION_ANNOTATIONS_NAME);
+        assertEquals(1, count(annotCollection.find()));
+        assertEquals(1, countConsequenceType(annotCollection.find()));
+        assertEquals(3, countXref(annotCollection.find()));
+
+        // check that consequence types were added to that document
+        annotationWriter.write(annotations.subList(2, 3));
+        assertEquals(1, count(annotCollection.find()));
+        assertEquals(2, countConsequenceType(annotCollection.find()));
+        assertEquals(4, countXref(annotCollection.find()));
+    }
+
+    private int countConsequenceType(DBCursor cursor) {
+        int consequenceTypeCount = 0;
+        while (cursor.hasNext()) {
+            DBObject annotation = cursor.next();
+            BasicDBList consequenceTypes = (BasicDBList) annotation.get(CONSEQUENCE_TYPE_FIELD);
+            assertNotNull(consequenceTypes);
+            consequenceTypeCount += consequenceTypes.size();
+        }
+        return consequenceTypeCount;
+    }
+
+    private int countXref(DBCursor cursor) {
+        int xrefCount = 0;
+        while (cursor.hasNext()) {
+            DBObject annotation = cursor.next();
+            BasicDBList xrefs = (BasicDBList) annotation.get(XREFS_FIELD);
+            assertNotNull(xrefs);
+            xrefCount += xrefs.size();
+        }
+        return xrefCount;
+    }
 }
