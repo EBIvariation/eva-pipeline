@@ -275,24 +275,21 @@ public class AnnotationMongoWriterTest {
     }
 
     private int countConsequenceType(DBCursor cursor) {
-        int consequenceTypeCount = 0;
+        return getArrayCount(cursor, CONSEQUENCE_TYPE_FIELD);
+    }
+
+    private int getArrayCount(DBCursor cursor, String field) {
+        int count = 0;
         while (cursor.hasNext()) {
             DBObject annotation = cursor.next();
-            BasicDBList consequenceTypes = (BasicDBList) annotation.get(CONSEQUENCE_TYPE_FIELD);
-            assertNotNull(consequenceTypes);
-            consequenceTypeCount += consequenceTypes.size();
+            BasicDBList elements = (BasicDBList) annotation.get(field);
+            assertNotNull(elements);
+            count += elements.size();
         }
-        return consequenceTypeCount;
+        return count;
     }
 
     private int countXref(DBCursor cursor) {
-        int xrefCount = 0;
-        while (cursor.hasNext()) {
-            DBObject annotation = cursor.next();
-            BasicDBList xrefs = (BasicDBList) annotation.get(XREFS_FIELD);
-            assertNotNull(xrefs);
-            xrefCount += xrefs.size();
-        }
-        return xrefCount;
+        return getArrayCount(cursor, XREFS_FIELD);
     }
 }
