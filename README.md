@@ -136,7 +136,7 @@ Database name and collection names can be specified with these parameters. To se
 * `db.collections.variants.name`: Main collection. Has variant coordinates, sample information, and some statistics and annotation.
 * `db.collections.files.name`: File (and study) metadata information.
 * `db.collections.stats.name`: Main collection for statistics. The variants collection might contain a subset of this.
-* `db.collections.annotation.metadata.name`: Main collection for annotation. The variants collection might contain a subset of this.
+* `db.collections.annotation-metadata.name`: Main collection for annotation. The variants collection might contain a subset of this.
 
 #### Configuration of third party applications
 
