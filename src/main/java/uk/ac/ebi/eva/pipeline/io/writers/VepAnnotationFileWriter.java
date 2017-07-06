@@ -23,7 +23,13 @@ import uk.ac.ebi.eva.pipeline.io.VepProcess;
 import uk.ac.ebi.eva.pipeline.model.EnsemblVariant;
 import uk.ac.ebi.eva.pipeline.parameters.AnnotationParameters;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.util.List;
+import java.util.zip.GZIPOutputStream;
 
 /**
  * ItemStreamWriter that takes VariantWrappers and serialize them into a {@link VepProcess}, which will be responsible
@@ -32,6 +38,8 @@ import java.util.List;
 public class VepAnnotationFileWriter implements ItemWriter<EnsemblVariant> {
 
     private static final Logger logger = LoggerFactory.getLogger(VepAnnotationFileWriter.class);
+
+    private static final boolean APPEND = true;
 
     private final AnnotationParameters annotationParameters;
 
@@ -47,7 +55,12 @@ public class VepAnnotationFileWriter implements ItemWriter<EnsemblVariant> {
 
     @Override
     public void write(List<? extends EnsemblVariant> variantWrappers) throws Exception {
-        VepProcess vepProcess = new VepProcess(annotationParameters, chunkSize, timeoutInSeconds);
+        String vepOutputPath = annotationParameters.getVepOutput();
+        // if vepOutput exists, the header (the comments) is already written, and the header should appear only once
+        boolean skipComments = new File(vepOutputPath).exists();
+        Writer writer = getOutputStreamWriter(vepOutputPath);
+
+        VepProcess vepProcess = new VepProcess(annotationParameters, chunkSize, timeoutInSeconds, writer, skipComments);
         vepProcess.open();
 
         for (EnsemblVariant ensemblVariant : variantWrappers) {
@@ -65,6 +78,11 @@ public class VepAnnotationFileWriter implements ItemWriter<EnsemblVariant> {
 
         vepProcess.flush();
         vepProcess.close();
+        writer.close();
+    }
+
+    private OutputStreamWriter getOutputStreamWriter(String vepOutputPath) throws IOException {
+        return new OutputStreamWriter(new GZIPOutputStream(new FileOutputStream(vepOutputPath, APPEND)));
     }
 
     private String getVariantInVepInputFormat(EnsemblVariant ensemblVariant) {

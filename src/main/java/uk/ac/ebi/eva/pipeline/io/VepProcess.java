@@ -30,7 +30,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.util.Arrays;
 import java.util.Scanner;
 import java.util.concurrent.Callable;
@@ -41,7 +41,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.zip.GZIPOutputStream;
 
 /**
  * Class that launches a VEP process (@see <a href="http://www.ensembl.org/info/docs/tools/vep/index.html">VEP</a>)
@@ -68,13 +67,13 @@ import java.util.zip.GZIPOutputStream;
 public class VepProcess {
     private static final Logger logger = LoggerFactory.getLogger(VepProcess.class);
 
-    private static final boolean APPEND = true;
-
     private AnnotationParameters annotationParameters;
 
     private int chunkSize;
 
     private final Long timeoutInSeconds;
+
+    private Writer writer;
 
     private Process process;
 
@@ -86,7 +85,10 @@ public class VepProcess {
 
     private AtomicLong outputIdleSince;
 
-    public VepProcess(AnnotationParameters annotationParameters, int chunkSize, Long timeoutInSeconds) {
+    private boolean skipComments;
+
+    public VepProcess(AnnotationParameters annotationParameters, int chunkSize, Long timeoutInSeconds,
+                      Writer AnnotationWriter, boolean skipComments) {
         if (timeoutInSeconds <= 0) {
             throw new IllegalArgumentException(
                     "timeout (" + timeoutInSeconds + " seconds) must be strictly greater than 0");
@@ -94,6 +96,8 @@ public class VepProcess {
         this.annotationParameters = annotationParameters;
         this.chunkSize = chunkSize;
         this.timeoutInSeconds = timeoutInSeconds;
+        this.writer = AnnotationWriter;
+        this.skipComments = skipComments;
         this.outputIdleSince = new AtomicLong(System.currentTimeMillis());
     }
 
@@ -123,39 +127,30 @@ public class VepProcess {
         }
 
         processStandardInput = new BufferedOutputStream(process.getOutputStream());
-        String vepOutputPath = annotationParameters.getVepOutput();
 
-        captureOutput(process, vepOutputPath);
+        captureOutput(process, writer);
     }
 
 
-    private void captureOutput(Process process, String vepOutputPath) {
+    private void captureOutput(Process process, Writer writer) {
         writingOk = new AtomicBoolean(false);
         outputCaptureThread = new Thread(() -> {
             long writtenLines = 0;
 
-            // if vepOutput exists, the header (the comments) is already written, and the header should appear only once
-            boolean skipComments = new File(vepOutputPath).exists();
-
-            try (OutputStreamWriter writer = getOutputStreamWriter(vepOutputPath);
-                    BufferedReader processStandardOutput = getBufferedReader(process)) {
+            try (BufferedReader processStandardOutput = getBufferedReader(process)) {
                 writtenLines = copyVepOutput(processStandardOutput, writer, skipComments);
                 writingOk.set(true);
             } catch (IOException e) {
-                logger.error("Writing the VEP output to " + vepOutputPath + " failed. ", e);
+                logger.error("Writing the VEP output failed. ", e);
             }
-            logger.trace("Finished writing VEP output ({} lines written) to {}", writtenLines, vepOutputPath);
+            logger.trace("Finished writing VEP output ({} lines written)", writtenLines);
         });
-        logger.trace("Starting writing VEP output to {}", vepOutputPath);
+        logger.trace("Starting writing VEP output");
         outputCaptureThread.start();
     }
 
     private BufferedReader getBufferedReader(Process process) {
         return new BufferedReader(new InputStreamReader(process.getInputStream()));
-    }
-
-    private OutputStreamWriter getOutputStreamWriter(String vepOutputPath) throws IOException {
-        return new OutputStreamWriter(new GZIPOutputStream(new FileOutputStream(vepOutputPath, APPEND)));
     }
 
     public void write(byte[] bytes) throws IOException {
@@ -301,7 +296,7 @@ public class VepProcess {
      * @param skipComments if false, will write all lines starting with '#', if true, will not write any.
      * @return written lines.
      */
-    private long copyVepOutput(BufferedReader reader, OutputStreamWriter writer, boolean skipComments)
+    private long copyVepOutput(BufferedReader reader, Writer writer, boolean skipComments)
             throws IOException {
         long writtenLines = 0;
 
