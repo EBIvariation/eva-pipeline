@@ -48,7 +48,6 @@ import java.util.TreeSet;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantAnnotation.POLYPHEN_FIELD;
 import static uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantAnnotation.SIFT_FIELD;
@@ -121,9 +120,9 @@ public class AnnotationInVariantMongoWriterTest {
         annotationInVariantMongoWriter = new AnnotationInVariantMongoWriter(operations, COLLECTION_VARIANTS_NAME,
                 VEP_VERSION, VEP_CACHE_VERSION);
 
-        annotationInVariantMongoWriter.write(annotationSet1);
-        annotationInVariantMongoWriter.write(annotationSet2);
-        annotationInVariantMongoWriter.write(annotationSet3);
+        annotationInVariantMongoWriter.write(Collections.singletonList(annotationSet1));
+        annotationInVariantMongoWriter.write(Collections.singletonList(annotationSet2));
+        annotationInVariantMongoWriter.write(Collections.singletonList(annotationSet3));
 
         // and finally check that variant documents have the annotations fields
         DBCursor cursor = mongoRule.getCollection(databaseName, COLLECTION_VARIANTS_NAME).find();
@@ -211,7 +210,7 @@ public class AnnotationInVariantMongoWriterTest {
     }
 
     private BasicDBList writeAndGetAnnotation(String databaseName, Annotation annotation) throws Exception {
-        annotationInVariantMongoWriter.write(Collections.singletonList(annotation));
+        annotationInVariantMongoWriter.write(Collections.singletonList(Collections.singletonList(annotation)));
 
         BasicDBObject query = new BasicDBObject(Annotation.START_FIELD, annotation.getStart());
         DBCursor cursor = mongoRule.getCollection(databaseName, COLLECTION_VARIANTS_NAME).find(query);
