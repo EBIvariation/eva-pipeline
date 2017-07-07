@@ -32,6 +32,8 @@ import uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantSourceEntry
 import uk.ac.ebi.eva.pipeline.model.EnsemblVariant;
 
 import javax.annotation.PostConstruct;
+import java.util.ArrayList;
+import java.util.List;
 
 import static uk.ac.ebi.eva.commons.models.mongo.entity.VariantDocument.ALTERNATE_FIELD;
 import static uk.ac.ebi.eva.commons.models.mongo.entity.VariantDocument.CHROMOSOME_FIELD;
@@ -46,15 +48,19 @@ import static uk.ac.ebi.eva.commons.models.mongo.entity.VariantDocument.START_FI
  * pagination and it is slow with large collections
  */
 public class VariantsMongoReader
-        extends AbstractItemCountingItemStreamItemReader<EnsemblVariant> implements InitializingBean {
+        extends AbstractItemCountingItemStreamItemReader<List<EnsemblVariant>> implements InitializingBean {
+
+    private static final String STUDY_KEY = VariantDocument.FILES_FIELD + "." + VariantSourceEntryMongo.STUDYID_FIELD;
+
+    private static final String FILE_KEY = VariantDocument.FILES_FIELD + "." + VariantSourceEntryMongo.FILEID_FIELD;
 
     private MongoDbCursorItemReader delegateReader;
 
     private MongoConverter converter;
 
-    private static final String STUDY_KEY = VariantDocument.FILES_FIELD + "." + VariantSourceEntryMongo.STUDYID_FIELD;
+    private Integer chunkSize;
 
-    private static final String FILE_KEY = VariantDocument.FILES_FIELD + "." + VariantSourceEntryMongo.FILEID_FIELD;
+    private boolean moreElementsAvailable;
 
     /**
      * @param studyId Can be the empty string or null, meaning to bring all non-annotated variants in the collection.
@@ -66,7 +72,8 @@ public class VariantsMongoReader
      * @param excludeAnnotated bring only non-annotated variants.
      */
     public VariantsMongoReader(MongoOperations mongoOperations, String collectionVariantsName, String vepVersion,
-                               String vepCacheVersion, String studyId, String fileId, boolean excludeAnnotated) {
+                               String vepCacheVersion, String studyId, String fileId, boolean excludeAnnotated,
+                               Integer chunkSize) {
         setName(ClassUtils.getShortName(VariantsMongoReader.class));
         delegateReader = new MongoDbCursorItemReader();
         delegateReader.setTemplate(mongoOperations);
@@ -96,7 +103,9 @@ public class VariantsMongoReader
         String[] fields = {CHROMOSOME_FIELD, START_FIELD, END_FIELD, REFERENCE_FIELD, ALTERNATE_FIELD};
         delegateReader.setFields(fields);
 
-        converter = mongoOperations.getConverter();
+        this.converter = mongoOperations.getConverter();
+        this.chunkSize = chunkSize;
+        this.moreElementsAvailable = true;
     }
 
     @PostConstruct
@@ -111,14 +120,35 @@ public class VariantsMongoReader
     }
 
     @Override
-    protected EnsemblVariant doRead() throws Exception {
-        DBObject dbObject = delegateReader.doRead();
-        if (dbObject != null) {
-            SimplifiedVariant variant = converter.read(SimplifiedVariant.class, dbObject);
-            return buildVariantWrapper(variant);
+    protected List<EnsemblVariant> doRead() throws Exception {
+        if (moreElementsAvailable) {
+            DBObject firstElement = delegateReader.doRead();
+            moreElementsAvailable = firstElement != null;
+            if (moreElementsAvailable) {
+                // this batch will have at least one element
+                return fillBatch(firstElement);
+            } else {
+                // the previous batch was exactly full and there are no more elements
+                return null;
+            }
         } else {
+            // the previous batch was smaller than chunksize
             return null;
         }
+    }
+
+    private List<EnsemblVariant> fillBatch(DBObject dbObject) throws Exception {
+        List<EnsemblVariant> variants = new ArrayList<>();
+        while (moreElementsAvailable) {
+            SimplifiedVariant variant = converter.read(SimplifiedVariant.class, dbObject);
+            variants.add(buildVariantWrapper(variant));
+            if (variants.size() == chunkSize) {
+                break;
+            }
+            dbObject = delegateReader.doRead();
+            moreElementsAvailable = dbObject != null;
+        }
+        return variants;
     }
 
     private EnsemblVariant buildVariantWrapper(SimplifiedVariant variant) {

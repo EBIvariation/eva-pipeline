@@ -22,6 +22,7 @@ import org.springframework.data.mongodb.core.MongoOperations;
 
 import uk.ac.ebi.eva.pipeline.io.readers.VariantsMongoReader;
 import uk.ac.ebi.eva.pipeline.parameters.AnnotationParameters;
+import uk.ac.ebi.eva.pipeline.parameters.ChunkSizeParameters;
 import uk.ac.ebi.eva.pipeline.parameters.DatabaseParameters;
 import uk.ac.ebi.eva.pipeline.parameters.InputParameters;
 
@@ -38,7 +39,8 @@ public class VariantsMongoReaderConfiguration {
     public VariantsMongoReader variantsMongoReader(MongoOperations mongoOperations,
                                                    DatabaseParameters databaseParameters,
                                                    InputParameters inputParameters,
-                                                   AnnotationParameters annotationParameters) {
+                                                   AnnotationParameters annotationParameters,
+                                                   ChunkSizeParameters chunkSizeParameters) {
         // to overwrite annotation we have to bring all variants (non annotated and annotated)
         boolean excludeAnnotated = !annotationParameters.getOverwriteAnnotation();
 
@@ -49,7 +51,8 @@ public class VariantsMongoReaderConfiguration {
                 annotationParameters.getVepCacheVersion(),
                 inputParameters.getStudyId(),
                 inputParameters.getVcfId(),
-                excludeAnnotated);
+                excludeAnnotated,
+                chunkSizeParameters.getChunkSize());
         variantsMongoReader.setSaveState(false);
         return variantsMongoReader;
     }
