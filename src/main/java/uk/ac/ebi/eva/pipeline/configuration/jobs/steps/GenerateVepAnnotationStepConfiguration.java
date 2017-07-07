@@ -31,7 +31,7 @@ import org.springframework.context.annotation.Import;
 
 import uk.ac.ebi.eva.pipeline.configuration.ChunkSizeCompletionPolicyConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.io.readers.VariantsMongoReaderConfiguration;
-import uk.ac.ebi.eva.pipeline.configuration.io.writers.VepAnnotationFileWriterConfiguration;
+import uk.ac.ebi.eva.pipeline.configuration.io.writers.VepAnnotationProcessorConfiguration;
 import uk.ac.ebi.eva.pipeline.io.readers.AnnotationFlatFileReader;
 import uk.ac.ebi.eva.pipeline.listeners.StepProgressListener;
 import uk.ac.ebi.eva.pipeline.model.EnsemblVariant;
@@ -39,7 +39,7 @@ import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.GENERATE_VEP_ANNOTATION_STEP;
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VARIANTS_READER;
-import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VEP_ANNOTATION_WRITER;
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VEP_ANNOTATION_PROCESSOR;
 
 /**
  * This step creates a file with variant annotations.
@@ -51,7 +51,7 @@ import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VEP_ANNOTATION_WRIT
  */
 @Configuration
 @EnableBatchProcessing
-@Import({VariantsMongoReaderConfiguration.class, VepAnnotationFileWriterConfiguration.class,
+@Import({VariantsMongoReaderConfiguration.class, VepAnnotationProcessorConfiguration.class,
         ChunkSizeCompletionPolicyConfiguration.class})
 public class GenerateVepAnnotationStepConfiguration {
 
@@ -62,7 +62,7 @@ public class GenerateVepAnnotationStepConfiguration {
     private ItemStreamReader<EnsemblVariant> nonAnnotatedVariantsReader;
 
     @Autowired
-    @Qualifier(VEP_ANNOTATION_WRITER)
+    @Qualifier(VEP_ANNOTATION_PROCESSOR)
     private ItemWriter<EnsemblVariant> vepAnnotationWriter;
 
     @Bean(GENERATE_VEP_ANNOTATION_STEP)
