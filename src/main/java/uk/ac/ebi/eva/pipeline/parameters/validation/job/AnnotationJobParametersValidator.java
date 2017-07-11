@@ -32,7 +32,7 @@ import java.util.List;
  * Validates the job parameters necessary to execute an
  * {@link uk.ac.ebi.eva.pipeline.configuration.jobs.AnnotationJobConfiguration}
  */
-public class    AnnotationJobParametersValidator extends DefaultJobParametersValidator {
+public class AnnotationJobParametersValidator extends DefaultJobParametersValidator {
 
     @Override
     public void validate(JobParameters parameters) throws JobParametersInvalidException {

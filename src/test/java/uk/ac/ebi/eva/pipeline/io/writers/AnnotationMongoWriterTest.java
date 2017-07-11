@@ -247,7 +247,7 @@ public class AnnotationMongoWriterTest {
     }
 
     @Test
-    public void shouldAddToSetIfThereAreOtherAnnotationsInSameVersion() throws Exception {
+    public void shouldUpdateFieldsOfExistingAnnotationVersion() throws Exception {
         String databaseName = mongoRule.getRandomTemporaryDatabaseName();
 
         List<Annotation> annotations = new ArrayList<>();
@@ -261,7 +261,7 @@ public class AnnotationMongoWriterTest {
         annotationWriter = new AnnotationMongoWriter(operations, COLLECTION_ANNOTATIONS_NAME);
         annotationWriter.write(annotations.subList(1, 2));
 
-        // check that 3 consequence types were written in the annotation document
+        // check that consequence type was written in the annotation document
         DBCollection annotCollection = mongoRule.getCollection(databaseName, COLLECTION_ANNOTATIONS_NAME);
         assertEquals(1, count(annotCollection.find()));
         assertEquals(1, countConsequenceType(annotCollection.find()));
