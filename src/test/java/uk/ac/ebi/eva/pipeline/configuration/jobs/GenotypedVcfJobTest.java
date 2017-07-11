@@ -119,14 +119,7 @@ public class GenotypedVcfJobTest {
 
         GenotypedVcfJobTestUtils.checkLoadStatsStep(mongoRule, databaseName);
 
-        GenotypedVcfJobTestUtils.checkAnnotationCreateStep(vepOutputFile);
-
-        GenotypedVcfJobTestUtils.checkOutputFileLength(vepOutputFile);
-
         GenotypedVcfJobTestUtils.checkLoadedAnnotation(mongoRule, databaseName);
-
-        GenotypedVcfJobTestUtils.checkSkippedOneMalformedLine(jobExecution);
-
     }
 
     @Test

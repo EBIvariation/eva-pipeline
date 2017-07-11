@@ -16,15 +16,19 @@
 package uk.ac.ebi.eva.pipeline.configuration.io.readers;
 
 import org.springframework.batch.core.configuration.annotation.StepScope;
+import org.springframework.batch.item.ItemStreamReader;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mongodb.core.MongoOperations;
 
 import uk.ac.ebi.eva.pipeline.io.readers.VariantsMongoReader;
+import uk.ac.ebi.eva.pipeline.model.EnsemblVariant;
 import uk.ac.ebi.eva.pipeline.parameters.AnnotationParameters;
 import uk.ac.ebi.eva.pipeline.parameters.ChunkSizeParameters;
 import uk.ac.ebi.eva.pipeline.parameters.DatabaseParameters;
 import uk.ac.ebi.eva.pipeline.parameters.InputParameters;
+
+import java.util.List;
 
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VARIANTS_READER;
 
@@ -36,11 +40,11 @@ public class VariantsMongoReaderConfiguration {
 
     @Bean(VARIANTS_READER)
     @StepScope
-    public VariantsMongoReader variantsMongoReader(MongoOperations mongoOperations,
-                                                   DatabaseParameters databaseParameters,
-                                                   InputParameters inputParameters,
-                                                   AnnotationParameters annotationParameters,
-                                                   ChunkSizeParameters chunkSizeParameters) {
+    public ItemStreamReader<List<EnsemblVariant>> variantsMongoReader(MongoOperations mongoOperations,
+                                                                      DatabaseParameters databaseParameters,
+                                                                      InputParameters inputParameters,
+                                                                      AnnotationParameters annotationParameters,
+                                                                      ChunkSizeParameters chunkSizeParameters) {
         // to overwrite annotation we have to bring all variants (non annotated and annotated)
         boolean excludeAnnotated = !annotationParameters.getOverwriteAnnotation();
 

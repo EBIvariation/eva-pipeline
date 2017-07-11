@@ -283,14 +283,16 @@ public class AnnotationMongoWriterTest {
         String databaseName = mongoRule.getRandomTemporaryDatabaseName();
 
         String annotLine = vepOutputContent.split("\n")[1];
-        Annotation firstVersionAnnotation = annotationLineMapper.mapLine(annotLine, 0);
-        Annotation secondVersionAnnotation = differentVersionAnnotationLineMapper.mapLine(annotLine, 0);
+        List<List<Annotation>> firstVersionAnnotation = Collections.singletonList(Collections.singletonList(
+                annotationLineMapper.mapLine(annotLine, 0)));
+        List<List<Annotation>> secondVersionAnnotation = Collections.singletonList((Collections.singletonList(
+                differentVersionAnnotationLineMapper.mapLine(annotLine, 0))));
 
         // load the annotation
         MongoOperations operations = MongoConfiguration.getMongoOperations(databaseName, mongoConnection,
                 mongoMappingContext);
         annotationWriter = new AnnotationMongoWriter(operations, COLLECTION_ANNOTATIONS_NAME);
-        annotationWriter.write(Collections.singletonList(firstVersionAnnotation));
+        annotationWriter.write(firstVersionAnnotation);
 
         // check that consequence type was written in the annotation document
         DBCollection annotCollection = mongoRule.getCollection(databaseName, COLLECTION_ANNOTATIONS_NAME);
@@ -299,7 +301,7 @@ public class AnnotationMongoWriterTest {
         assertEquals(3, countXref(annotCollection.find()));
 
         // check that consequence types were added to that document
-        annotationWriter.write(Collections.singletonList(secondVersionAnnotation));
+        annotationWriter.write(secondVersionAnnotation);
         assertEquals(2, annotCollection.count());
         assertEquals(2, countConsequenceType(annotCollection.find()));
         assertEquals(6, countXref(annotCollection.find()));

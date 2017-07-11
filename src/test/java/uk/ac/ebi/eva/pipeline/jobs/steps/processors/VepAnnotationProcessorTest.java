@@ -107,7 +107,8 @@ public class VepAnnotationProcessorTest {
         int chunkSizeGreaterThanActualVariants = ensemblVariants.size() * 10;
 
         VepAnnotationProcessor vepAnnotationProcessor = new VepAnnotationProcessor(annotationParameters,
-                                                                                   chunkSizeGreaterThanActualVariants, TIMEOUT_IN_SECONDS);
+                                                                                   chunkSizeGreaterThanActualVariants,
+                                                                                   TIMEOUT_IN_SECONDS);
 
         List<String> annotations = vepAnnotationProcessor.process(ensemblVariants);
         assertEquals(ensemblVariants.size() + EXTRA_ANNOTATIONS, annotations.size());

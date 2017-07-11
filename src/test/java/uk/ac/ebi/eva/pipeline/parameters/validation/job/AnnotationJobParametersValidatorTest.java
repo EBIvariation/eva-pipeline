@@ -22,6 +22,7 @@ import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersInvalidException;
 
+import uk.ac.ebi.eva.pipeline.configuration.jobs.AnnotationJobConfiguration;
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 
@@ -29,7 +30,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 /**
- * Tests that the arguments necessary to run a {@link uk.ac.ebi.eva.pipeline.jobs.GenotypedVcfJob} are
+ * Tests that the arguments necessary to run a {@link AnnotationJobConfiguration} are
  * correctly validated
  */
 public class AnnotationJobParametersValidatorTest {

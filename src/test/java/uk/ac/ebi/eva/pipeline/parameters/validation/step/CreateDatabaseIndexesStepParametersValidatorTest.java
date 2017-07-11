@@ -21,7 +21,7 @@ import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersInvalidException;
 
-import uk.ac.ebi.eva.pipeline.configuration.jobs.steps.LoadVepAnnotationStepConfiguration;
+import uk.ac.ebi.eva.pipeline.configuration.jobs.steps.CreateDatabaseIndexesStepConfiguration;
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 
 import java.io.IOException;
@@ -29,7 +29,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 /**
- * Tests that the arguments necessary to run a {@link LoadVepAnnotationStepConfiguration} are
+ * Tests that the arguments necessary to run a {@link CreateDatabaseIndexesStepConfiguration} are
  * correctly validated
  */
 public class CreateDatabaseIndexesStepParametersValidatorTest {

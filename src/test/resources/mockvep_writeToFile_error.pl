@@ -25,12 +25,19 @@ if  ($file eq "STDOUT") {
     $fileHandle->open(">> $file");
 }
 
+sub annotate {
+    my $line = $_[0];
+    my ($chr, $start, $end, $refAlt, $strand) = split(/\t/, $line);
+
+    return "${chr}_${start}_${refAlt}\t${chr}:${start}\tA\t-\t-\t-\tintergenic_variant\t-\t-\t-\t-\t-\t-\n";
+}
+
 my @buffer = ();
 my $line;
 my $lines = 0;
 while ($line = <STDIN>) {
     chomp ($line);
-    push (@buffer, "$line annotated\n");
+    push (@buffer, annotate($line));
     $lines++;
 
     if ($line =~ /^20\t65900/) {
@@ -51,5 +58,4 @@ foreach my $bufferLine (@buffer) {
     print $fileHandle $bufferLine;
 }
 
-print $fileHandle "extra line as if some variant had two annotations\n";
 $fileHandle->close();

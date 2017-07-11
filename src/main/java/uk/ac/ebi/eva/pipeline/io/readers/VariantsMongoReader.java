@@ -78,6 +78,7 @@ public class VariantsMongoReader
         delegateReader = new MongoDbCursorItemReader();
         delegateReader.setTemplate(mongoOperations);
         delegateReader.setCollection(collectionVariantsName);
+        delegateReader.setSaveState(false);
 
         BasicDBObjectBuilder queryBuilder = BasicDBObjectBuilder.start();
 
@@ -123,13 +124,12 @@ public class VariantsMongoReader
     protected List<EnsemblVariant> doRead() throws Exception {
         if (moreElementsAvailable) {
             DBObject firstElement = delegateReader.doRead();
-            moreElementsAvailable = firstElement != null;
-            if (moreElementsAvailable) {
-                // this batch will have at least one element
-                return fillBatch(firstElement);
-            } else {
-                // the previous batch was exactly full and there are no more elements
+            boolean emptyBatch = firstElement == null;
+            if (emptyBatch) {
+                moreElementsAvailable = false;
                 return null;
+            } else {
+                return fillBatch(firstElement);
             }
         } else {
             // the previous batch was smaller than chunksize
