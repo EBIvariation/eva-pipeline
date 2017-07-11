@@ -176,7 +176,7 @@ public class AnnotationInVariantMongoWriterTest {
     }
 
     @Test
-    public void shouldAddToSetIfThereAreOtherAnnotationsInSameVersion() throws Exception {
+    public void shouldUpdateFieldsOfExistingAnnotationVersion() throws Exception {
         String databaseName = mongoRule.restoreDumpInTemporaryDatabase(getResourceUrl(MONGO_DUMP));
 
         String[] vepOutputLines = vepOutputContentWithExtraFields.split("\n");
