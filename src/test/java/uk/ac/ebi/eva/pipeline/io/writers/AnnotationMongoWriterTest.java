@@ -80,7 +80,7 @@ public class AnnotationMongoWriterTest {
 
     private static final String VEP_VERSION = "1";
 
-    private static final String VEP_CACHE_VERSION = "1";
+    private static final String VEP_CACHE_VERSION = "2";
 
     @Autowired
     private MongoConnection mongoConnection;
@@ -93,11 +93,11 @@ public class AnnotationMongoWriterTest {
 
     private AnnotationMongoWriter annotationWriter;
 
-    private AnnotationLineMapper AnnotationLineMapper;
+    private AnnotationLineMapper annotationLineMapper;
 
     @Before
     public void setUp() throws Exception {
-        AnnotationLineMapper = new AnnotationLineMapper(VEP_VERSION, VEP_CACHE_VERSION);
+        annotationLineMapper = new AnnotationLineMapper(VEP_VERSION, VEP_CACHE_VERSION);
     }
 
     @Test
@@ -106,7 +106,7 @@ public class AnnotationMongoWriterTest {
 
         List<Annotation> annotations = new ArrayList<>();
         for (String annotLine : vepOutputContent.split("\n")) {
-            annotations.add(AnnotationLineMapper.mapLine(annotLine, 0));
+            annotations.add(annotationLineMapper.mapLine(annotLine, 0));
         }
 
         // load the annotation
@@ -150,15 +150,15 @@ public class AnnotationMongoWriterTest {
         String[] vepOutputLines = vepOutputContent.split("\n");
 
         for (String annotLine : Arrays.copyOfRange(vepOutputLines, 0, 2)) {
-            annotationSet1.add(AnnotationLineMapper.mapLine(annotLine, 0));
+            annotationSet1.add(annotationLineMapper.mapLine(annotLine, 0));
         }
 
         for (String annotLine : Arrays.copyOfRange(vepOutputLines, 2, 4)) {
-            annotationSet2.add(AnnotationLineMapper.mapLine(annotLine, 0));
+            annotationSet2.add(annotationLineMapper.mapLine(annotLine, 0));
         }
 
         for (String annotLine : Arrays.copyOfRange(vepOutputLines, 4, 7)) {
-            annotationSet3.add(AnnotationLineMapper.mapLine(annotLine, 0));
+            annotationSet3.add(annotationLineMapper.mapLine(annotLine, 0));
         }
 
         // load the annotation
@@ -252,7 +252,7 @@ public class AnnotationMongoWriterTest {
 
         List<Annotation> annotations = new ArrayList<>();
         for (String annotLine : vepOutputContent.split("\n")) {
-            annotations.add(AnnotationLineMapper.mapLine(annotLine, 0));
+            annotations.add(annotationLineMapper.mapLine(annotLine, 0));
         }
 
         // load the annotation
@@ -272,6 +272,37 @@ public class AnnotationMongoWriterTest {
         assertEquals(1, count(annotCollection.find()));
         assertEquals(2, countConsequenceType(annotCollection.find()));
         assertEquals(4, countXref(annotCollection.find()));
+    }
+
+    @Test
+    public void shouldAddAnnotationIfAnnotationVersionIsNotPresent() throws Exception {
+        String differentVepVersion = "different_" + VEP_VERSION;
+        String differentVepCacheVersion = "different_" + VEP_CACHE_VERSION;
+        AnnotationLineMapper differentVersionAnnotationLineMapper = new AnnotationLineMapper(differentVepVersion,
+                                                                                             differentVepCacheVersion);
+        String databaseName = mongoRule.getRandomTemporaryDatabaseName();
+
+        String annotLine = vepOutputContent.split("\n")[1];
+        Annotation firstVersionAnnotation = annotationLineMapper.mapLine(annotLine, 0);
+        Annotation secondVersionAnnotation = differentVersionAnnotationLineMapper.mapLine(annotLine, 0);
+
+        // load the annotation
+        MongoOperations operations = MongoConfiguration.getMongoOperations(databaseName, mongoConnection,
+                mongoMappingContext);
+        annotationWriter = new AnnotationMongoWriter(operations, COLLECTION_ANNOTATIONS_NAME);
+        annotationWriter.write(Collections.singletonList(firstVersionAnnotation));
+
+        // check that consequence type was written in the annotation document
+        DBCollection annotCollection = mongoRule.getCollection(databaseName, COLLECTION_ANNOTATIONS_NAME);
+        assertEquals(1, annotCollection.count());
+        assertEquals(1, countConsequenceType(annotCollection.find()));
+        assertEquals(3, countXref(annotCollection.find()));
+
+        // check that consequence types were added to that document
+        annotationWriter.write(Collections.singletonList(secondVersionAnnotation));
+        assertEquals(2, annotCollection.count());
+        assertEquals(2, countConsequenceType(annotCollection.find()));
+        assertEquals(6, countXref(annotCollection.find()));
     }
 
     private int countConsequenceType(DBCursor cursor) {
