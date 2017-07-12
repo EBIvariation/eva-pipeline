@@ -72,7 +72,7 @@ public class AnnotationInVariantMongoWriterTest {
 
     private static final String VEP_VERSION = "1";
 
-    private static final String VEP_CACHE_VERSION = "1";
+    private static final String VEP_CACHE_VERSION = "2";
 
     @Autowired
     private MongoConnection mongoConnection;
