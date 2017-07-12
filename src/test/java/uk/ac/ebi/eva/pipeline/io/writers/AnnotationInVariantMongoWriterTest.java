@@ -85,11 +85,11 @@ public class AnnotationInVariantMongoWriterTest {
 
     private AnnotationInVariantMongoWriter annotationInVariantMongoWriter;
 
-    private AnnotationLineMapper AnnotationLineMapper;
+    private AnnotationLineMapper annotationLineMapper;
 
     @Before
     public void setUp() throws Exception {
-        AnnotationLineMapper = new AnnotationLineMapper(VEP_VERSION, VEP_CACHE_VERSION);
+        annotationLineMapper = new AnnotationLineMapper(VEP_VERSION, VEP_CACHE_VERSION);
     }
 
     @Test
@@ -104,15 +104,15 @@ public class AnnotationInVariantMongoWriterTest {
         String[] vepOutputLines = vepOutputContentWithExtraFields.split("\n");
 
         for (String annotLine : Arrays.copyOfRange(vepOutputLines, 0, 2)) {
-            annotationSet1.add(AnnotationLineMapper.mapLine(annotLine, 0));
+            annotationSet1.add(annotationLineMapper.mapLine(annotLine, 0));
         }
 
         for (String annotLine : Arrays.copyOfRange(vepOutputLines, 2, 4)) {
-            annotationSet2.add(AnnotationLineMapper.mapLine(annotLine, 0));
+            annotationSet2.add(annotationLineMapper.mapLine(annotLine, 0));
         }
 
         for (String annotLine : Arrays.copyOfRange(vepOutputLines, 4, 7)) {
-            annotationSet3.add(AnnotationLineMapper.mapLine(annotLine, 0));
+            annotationSet3.add(annotationLineMapper.mapLine(annotLine, 0));
         }
 
         // load the annotation
@@ -132,8 +132,8 @@ public class AnnotationInVariantMongoWriterTest {
             DBObject variant = cursor.next();
             String id = (String) variant.get("_id");
 
-            if (id.equals("20_63360_C_T")) {
-                BasicDBObject annotationField = (BasicDBObject) ((BasicDBList) (variant).get(
+            if (id.equals("20_63360_C_T_" + VEP_VERSION + "_" + VEP_CACHE_VERSION)) {
+                BasicDBObject annotationField = (BasicDBObject) ((BasicDBList) variant.get(
                         VariantDocument.ANNOTATION_FIELD)).get(0);
 
                 checkAnnotationFields(annotationField,
@@ -144,8 +144,8 @@ public class AnnotationInVariantMongoWriterTest {
                                                                   "ENST00000608838")));
             }
 
-            if (id.equals("20_63399_G_A")) {
-                BasicDBObject annotationField = (BasicDBObject) ((BasicDBList) (variant).get(
+            if (id.equals("20_63399_G_A_" + VEP_VERSION + "_" + VEP_CACHE_VERSION)) {
+                BasicDBObject annotationField = (BasicDBObject) ((BasicDBList) variant.get(
                         VariantDocument.ANNOTATION_FIELD)).get(0);
 
                 checkAnnotationFields(annotationField,
@@ -182,8 +182,8 @@ public class AnnotationInVariantMongoWriterTest {
         String[] vepOutputLines = vepOutputContentWithExtraFields.split("\n");
 
         List<Annotation> annotations = new ArrayList<>();
-        annotations.add(AnnotationLineMapper.mapLine(vepOutputLines[1], 0));
-        annotations.add(AnnotationLineMapper.mapLine(vepOutputLines[2], 0));
+        annotations.add(annotationLineMapper.mapLine(vepOutputLines[1], 0));
+        annotations.add(annotationLineMapper.mapLine(vepOutputLines[2], 0));
 
         // load the first annotation
         MongoOperations operations = MongoConfiguration.getMongoOperations(databaseName, mongoConnection,
@@ -191,18 +191,18 @@ public class AnnotationInVariantMongoWriterTest {
         annotationInVariantMongoWriter = new AnnotationInVariantMongoWriter(operations, COLLECTION_VARIANTS_NAME,
                 VEP_VERSION, VEP_CACHE_VERSION);
 
-        BasicDBObject annotationField = writeAndGetAnnotation(databaseName, annotations.get(0));
+        BasicDBList annotationField = writeAndGetAnnotation(databaseName, annotations.get(0));
 
-        checkAnnotationFields(annotationField,
+        checkAnnotationFields((BasicDBObject) annotationField.get(0),
                               Arrays.asList(0.1, 0.1),
                               Arrays.asList(0.1, 0.1),
                               new TreeSet<>(Arrays.asList(1631)),
                               new TreeSet<>(Arrays.asList("DEFB125", "ENSG00000178591", "ENST00000382410")));
 
         // load the second annotation and check the information is updated (not overwritten)
-        BasicDBObject annotationFieldAfter = writeAndGetAnnotation(databaseName, annotations.get(1));
+        BasicDBList annotationFieldAfter = writeAndGetAnnotation(databaseName, annotations.get(1));
 
-        checkAnnotationFields(annotationFieldAfter,
+        checkAnnotationFields((BasicDBObject) annotationFieldAfter.get(0),
                               Arrays.asList(0.1, 0.2),
                               Arrays.asList(0.1, 0.2),
                               new TreeSet<>(Arrays.asList(1631)),
@@ -210,7 +210,7 @@ public class AnnotationInVariantMongoWriterTest {
                                                         "ENST00000608838")));
     }
 
-    private BasicDBObject writeAndGetAnnotation(String databaseName, Annotation annotation) throws Exception {
+    private BasicDBList writeAndGetAnnotation(String databaseName, Annotation annotation) throws Exception {
         annotationInVariantMongoWriter.write(Collections.singletonList(annotation));
 
         BasicDBObject query = new BasicDBObject(Annotation.START_FIELD, annotation.getStart());
@@ -220,7 +220,56 @@ public class AnnotationInVariantMongoWriterTest {
         DBObject variant = cursor.next();
         assertFalse(cursor.hasNext());
 
-        return (BasicDBObject) ((BasicDBList) variant.get(VariantDocument.ANNOTATION_FIELD)).get(0);
+        return ((BasicDBList) variant.get(VariantDocument.ANNOTATION_FIELD));
     }
 
+    @Test
+    public void shouldAddAnnotationIfVersionIsNotPresent() throws Exception {
+        String differentVepVersion = "different_" + VEP_VERSION;
+        String differentVepCacheVersion = "different_" + VEP_CACHE_VERSION;
+        AnnotationLineMapper differentVersionAnnotationLineMapper = new AnnotationLineMapper(
+                differentVepVersion, differentVepCacheVersion);
+
+        String databaseName = mongoRule.restoreDumpInTemporaryDatabase(getResourceUrl(MONGO_DUMP));
+
+        String[] vepOutputLines = vepOutputContentWithExtraFields.split("\n");
+
+        Annotation firstAnnotation = annotationLineMapper.mapLine(vepOutputLines[1], 0);
+        Annotation differentVersionAnnotation = differentVersionAnnotationLineMapper.mapLine(vepOutputLines[2], 0);
+
+        // load the first annotation
+        MongoOperations operations = MongoConfiguration.getMongoOperations(databaseName, mongoConnection,
+                                                                           mongoMappingContext);
+        annotationInVariantMongoWriter = new AnnotationInVariantMongoWriter(operations, COLLECTION_VARIANTS_NAME,
+                                                                            VEP_VERSION, VEP_CACHE_VERSION);
+
+        BasicDBList annotationField = writeAndGetAnnotation(databaseName, firstAnnotation);
+
+        assertEquals(1, annotationField.size());
+        checkAnnotationFields((BasicDBObject) annotationField.get(0),
+                              Arrays.asList(0.1, 0.1),
+                              Arrays.asList(0.1, 0.1),
+                              new TreeSet<>(Arrays.asList(1631)),
+                              new TreeSet<>(Arrays.asList("DEFB125", "ENSG00000178591", "ENST00000382410")));
+
+        // load the second annotation and check the information is added to the annotation array
+        annotationInVariantMongoWriter = new AnnotationInVariantMongoWriter(operations, COLLECTION_VARIANTS_NAME,
+                                                                            differentVepVersion,
+                                                                            differentVepCacheVersion);
+        BasicDBList annotationFieldAfter = writeAndGetAnnotation(databaseName, differentVersionAnnotation);
+
+        assertEquals(2, annotationFieldAfter.size());
+        checkAnnotationFields((BasicDBObject) annotationField.get(0),
+                              Arrays.asList(0.1, 0.1),
+                              Arrays.asList(0.1, 0.1),
+                              new TreeSet<>(Arrays.asList(1631)),
+                              new TreeSet<>(Arrays.asList("DEFB125", "ENSG00000178591", "ENST00000382410")));
+
+        checkAnnotationFields((BasicDBObject) annotationFieldAfter.get(1),
+                              Arrays.asList(0.2, 0.2),
+                              Arrays.asList(0.2, 0.2),
+                              new TreeSet<>(Arrays.asList(1631)),
+                              new TreeSet<>(Arrays.asList("DEFB125", "ENSG00000178591", "ENST00000608838")));
+    }
 }
+
