@@ -19,8 +19,6 @@ package uk.ac.ebi.eva.pipeline.io.readers;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.opencb.biodata.models.variant.Variant;
-import org.opencb.biodata.models.variant.annotation.VariantAnnotation;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.test.MetaDataInstanceFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,13 +36,11 @@ import uk.ac.ebi.eva.pipeline.parameters.MongoConnection;
 import uk.ac.ebi.eva.test.data.VariantData;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 
-import java.lang.reflect.Field;
 import java.util.Arrays;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNull;
 
 /**
  * {@link VariantsMongoReader}
@@ -70,6 +66,10 @@ public class VariantsMongoReaderTest {
     private static final String STUDY_ID = "7";
 
     private static final String ALL_STUDIES = "";
+
+    private static final String VEP_VERSION = "78";
+
+    private static final String VEP_CACHE_VERSION = "78";
 
     @Autowired
     private MongoConnection mongoConnection;
@@ -107,7 +107,7 @@ public class VariantsMongoReaderTest {
 
         boolean excludeAnnotated = true;
         VariantsMongoReader mongoItemReader = new VariantsMongoReader(
-                mongoOperations, COLLECTION_VARIANTS_NAME, study, excludeAnnotated);
+                mongoOperations, COLLECTION_VARIANTS_NAME, VEP_VERSION, VEP_CACHE_VERSION, study, excludeAnnotated);
         mongoItemReader.open(executionContext);
 
         int itemCount = 0;
@@ -148,7 +148,7 @@ public class VariantsMongoReaderTest {
 
         boolean excludeAnnotated = false;
         VariantsMongoReader mongoItemReader = new VariantsMongoReader(
-                mongoOperations, COLLECTION_VARIANTS_NAME, study, excludeAnnotated);
+                mongoOperations, COLLECTION_VARIANTS_NAME, VEP_VERSION, VEP_CACHE_VERSION, study, excludeAnnotated);
         mongoItemReader.open(executionContext);
 
         int itemCount = 0;

@@ -45,6 +45,8 @@ public class VariantsMongoReaderConfiguration {
         VariantsMongoReader variantsMongoReader = new VariantsMongoReader(
                 mongoOperations,
                 databaseParameters.getCollectionVariantsName(),
+                annotationParameters.getVepVersion(),
+                annotationParameters.getVepCacheVersion(),
                 inputParameters.getStudyId(),
                 excludeAnnotated);
         variantsMongoReader.setSaveState(false);
