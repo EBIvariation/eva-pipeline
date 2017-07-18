@@ -34,7 +34,7 @@ import uk.ac.ebi.eva.pipeline.configuration.io.readers.VariantsMongoReaderConfig
 import uk.ac.ebi.eva.pipeline.configuration.io.writers.VepAnnotationFileWriterConfiguration;
 import uk.ac.ebi.eva.pipeline.io.readers.AnnotationFlatFileReader;
 import uk.ac.ebi.eva.pipeline.listeners.StepProgressListener;
-import uk.ac.ebi.eva.pipeline.model.VariantWrapper;
+import uk.ac.ebi.eva.pipeline.model.EnsemblVariant;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.GENERATE_VEP_ANNOTATION_STEP;
@@ -59,11 +59,11 @@ public class GenerateVepAnnotationStepConfiguration {
 
     @Autowired
     @Qualifier(VARIANTS_READER)
-    private ItemStreamReader<VariantWrapper> nonAnnotatedVariantsReader;
+    private ItemStreamReader<EnsemblVariant> nonAnnotatedVariantsReader;
 
     @Autowired
     @Qualifier(VEP_ANNOTATION_WRITER)
-    private ItemWriter<VariantWrapper> vepAnnotationWriter;
+    private ItemWriter<EnsemblVariant> vepAnnotationWriter;
 
     @Bean(GENERATE_VEP_ANNOTATION_STEP)
     public Step generateVepAnnotationStep(StepBuilderFactory stepBuilderFactory, JobOptions jobOptions,
@@ -71,7 +71,7 @@ public class GenerateVepAnnotationStepConfiguration {
         logger.debug("Building '" + GENERATE_VEP_ANNOTATION_STEP + "'");
 
         return stepBuilderFactory.get(GENERATE_VEP_ANNOTATION_STEP)
-                .<VariantWrapper, VariantWrapper>chunk(chunkSizeCompletionPolicy)
+                .<EnsemblVariant, EnsemblVariant>chunk(chunkSizeCompletionPolicy)
                 .reader(nonAnnotatedVariantsReader)
                 .writer(vepAnnotationWriter)
                 .allowStartIfComplete(jobOptions.isAllowStartIfComplete())

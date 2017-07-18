@@ -19,8 +19,6 @@ package uk.ac.ebi.eva.pipeline.io.readers;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.opencb.biodata.models.variant.Variant;
-import org.opencb.biodata.models.variant.annotation.VariantAnnotation;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.test.MetaDataInstanceFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,18 +31,16 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import uk.ac.ebi.eva.pipeline.Application;
 import uk.ac.ebi.eva.pipeline.configuration.MongoConfiguration;
-import uk.ac.ebi.eva.pipeline.model.VariantWrapper;
+import uk.ac.ebi.eva.pipeline.model.EnsemblVariant;
 import uk.ac.ebi.eva.pipeline.parameters.MongoConnection;
 import uk.ac.ebi.eva.test.data.VariantData;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 
-import java.lang.reflect.Field;
 import java.util.Arrays;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNull;
 
 /**
  * {@link VariantsMongoReader}
@@ -70,6 +66,10 @@ public class VariantsMongoReaderTest {
     private static final String STUDY_ID = "7";
 
     private static final String ALL_STUDIES = "";
+
+    private static final String VEP_VERSION = "78";
+
+    private static final String VEP_CACHE_VERSION = "78";
 
     @Autowired
     private MongoConnection mongoConnection;
@@ -107,28 +107,18 @@ public class VariantsMongoReaderTest {
 
         boolean excludeAnnotated = true;
         VariantsMongoReader mongoItemReader = new VariantsMongoReader(
-                mongoOperations, COLLECTION_VARIANTS_NAME, study, excludeAnnotated);
+                mongoOperations, COLLECTION_VARIANTS_NAME, VEP_VERSION, VEP_CACHE_VERSION, study, excludeAnnotated);
         mongoItemReader.open(executionContext);
 
         int itemCount = 0;
-        VariantWrapper variantWrapper;
-        while ((variantWrapper = mongoItemReader.read()) != null) {
+        EnsemblVariant ensemblVariant;
+        while ((ensemblVariant = mongoItemReader.read()) != null) {
             itemCount++;
-            assertFalse(variantWrapper.getChr().isEmpty());
-            assertNotEquals(0, variantWrapper.getStart());
-
-            assertDoesNotHaveVariantAnnotation(variantWrapper);
+            assertFalse(ensemblVariant.getChr().isEmpty());
+            assertNotEquals(0, ensemblVariant.getStart());
         }
         assertEquals(expectedNonAnnotatedVariants, itemCount);
         mongoItemReader.close();
-    }
-
-    private void assertDoesNotHaveVariantAnnotation(VariantWrapper variantWrapper)
-            throws NoSuchFieldException, IllegalAccessException {
-        Field privateVariantField = VariantWrapper.class.getDeclaredField("variant");
-        privateVariantField.setAccessible(true);
-        VariantAnnotation annotation = ((Variant) privateVariantField.get(variantWrapper)).getAnnotation();
-        assertNull(annotation.getConsequenceTypes());
     }
 
     @Test
@@ -158,15 +148,15 @@ public class VariantsMongoReaderTest {
 
         boolean excludeAnnotated = false;
         VariantsMongoReader mongoItemReader = new VariantsMongoReader(
-                mongoOperations, COLLECTION_VARIANTS_NAME, study, excludeAnnotated);
+                mongoOperations, COLLECTION_VARIANTS_NAME, VEP_VERSION, VEP_CACHE_VERSION, study, excludeAnnotated);
         mongoItemReader.open(executionContext);
 
         int itemCount = 0;
-        VariantWrapper variantWrapper;
-        while ((variantWrapper = mongoItemReader.read()) != null) {
+        EnsemblVariant ensemblVariant;
+        while ((ensemblVariant = mongoItemReader.read()) != null) {
             itemCount++;
-            assertFalse(variantWrapper.getChr().isEmpty());
-            assertNotEquals(0, variantWrapper.getStart());
+            assertFalse(ensemblVariant.getChr().isEmpty());
+            assertNotEquals(0, ensemblVariant.getStart());
         }
         assertEquals(expectedVariants, itemCount);
         mongoItemReader.close();

@@ -91,4 +91,43 @@ public class SimplifiedVariant {
         this.hgvs = createHgvsMongo(hgvs);
     }
 
+    public String getId() {
+        return id;
+    }
+
+    public Variant.VariantType getVariantType() {
+        return variantType;
+    }
+
+    public String getChromosome() {
+        return chromosome;
+    }
+
+    public int getStart() {
+        return start;
+    }
+
+    public int getEnd() {
+        return end;
+    }
+
+    public int getLength() {
+        return length;
+    }
+
+    public String getReference() {
+        return reference;
+    }
+
+    public String getAlternate() {
+        return alternate;
+    }
+
+    public VariantAt getAt() {
+        return at;
+    }
+
+    public Set<HgvsMongo> getHgvs() {
+        return hgvs;
+    }
 }

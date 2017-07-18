@@ -29,7 +29,7 @@ import static org.junit.Assert.assertEquals;
  * VEP input format uses a different end than we. These tests check that we comply with the examples in the VEP
  * documentation at: www.ensembl.org/info/docs/tools/vep/vep_formats.html ("Default" and "VCF" sections)
  */
-public class VariantWrapperTest {
+public class EnsemblVariantTest {
 
     private static final String FILE_ID = "fid";
 
@@ -39,13 +39,13 @@ public class VariantWrapperTest {
 
     @Test
     public void transformInsertionsToEnsembleCoordinates() throws Exception {
-        VariantWrapper insertion;
-        insertion = new VariantWrapper("1", 12601, 12601, "", "C");
+        EnsemblVariant insertion;
+        insertion = new EnsemblVariant("1", 12601, 12601, "", "C");
         assertEquals(12601, insertion.getStart());
         assertEquals(12600, insertion.getEnd());
         assertEquals("-/C", insertion.getRefAlt());
 
-        insertion = new VariantWrapper("20", 4, 5, "", "A");
+        insertion = new EnsemblVariant("20", 4, 5, "", "A");
         assertEquals(4, insertion.getStart());
         assertEquals(3, insertion.getEnd());
         assertEquals("-/A", insertion.getRefAlt());
@@ -53,13 +53,13 @@ public class VariantWrapperTest {
 
     @Test
     public void transformDeletionToEnsembleCoordinates() throws Exception {
-        VariantWrapper deletion;
-        deletion = new VariantWrapper("1", 12600, 12602, "CGT", "");
+        EnsemblVariant deletion;
+        deletion = new EnsemblVariant("1", 12600, 12602, "CGT", "");
         assertEquals(12600, deletion.getStart());
         assertEquals(12602, deletion.getEnd());
         assertEquals("CGT/-", deletion.getRefAlt());
 
-        deletion = new VariantWrapper("20", 3, 3, "C", "");
+        deletion = new EnsemblVariant("20", 3, 3, "C", "");
         assertEquals(3, deletion.getStart());
         assertEquals(3, deletion.getEnd());
         assertEquals("C/-", deletion.getRefAlt());
@@ -67,7 +67,7 @@ public class VariantWrapperTest {
 
     @Test
     public void transformSnvToEnsembleCoordinates() throws Exception {
-        VariantWrapper insertion = new VariantWrapper("20", 3, 3, "C", "G");
+        EnsemblVariant insertion = new EnsemblVariant("20", 3, 3, "C", "G");
         assertEquals(3, insertion.getStart());
         assertEquals(3, insertion.getEnd());
         assertEquals("C/G", insertion.getRefAlt());
@@ -87,7 +87,7 @@ public class VariantWrapperTest {
         assertEquals("", reference);
         assertEquals("A", alternate);
 
-        VariantWrapper insertion = new VariantWrapper(result.get(0).getChromosome(), start, result.get(0).getEnd(),
+        EnsemblVariant insertion = new EnsemblVariant(result.get(0).getChromosome(), start, result.get(0).getEnd(),
                                                       reference, alternate);
         assertEquals(4, insertion.getStart());
         assertEquals(3, insertion.getEnd());
@@ -108,7 +108,7 @@ public class VariantWrapperTest {
         assertEquals("C", reference);
         assertEquals("", alternate);
 
-        VariantWrapper insertion = new VariantWrapper(result.get(0).getChromosome(), start, result.get(0).getEnd(),
+        EnsemblVariant insertion = new EnsemblVariant(result.get(0).getChromosome(), start, result.get(0).getEnd(),
                                                       reference, alternate);
         assertEquals(3, insertion.getStart());
         assertEquals(3, insertion.getEnd());

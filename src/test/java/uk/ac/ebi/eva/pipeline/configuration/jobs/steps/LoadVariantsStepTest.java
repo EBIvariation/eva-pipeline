@@ -19,12 +19,6 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.opencb.datastore.core.QueryOptions;
-import org.opencb.opencga.lib.common.Config;
-import org.opencb.opencga.storage.core.StorageManagerFactory;
-import org.opencb.opencga.storage.core.variant.VariantStorageManager;
-import org.opencb.opencga.storage.core.variant.adaptors.VariantDBAdaptor;
-import org.opencb.opencga.storage.core.variant.adaptors.VariantDBIterator;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.test.JobLauncherTestUtils;
@@ -43,7 +37,6 @@ import uk.ac.ebi.eva.utils.EvaJobParameterBuilder;
 
 import static org.junit.Assert.assertEquals;
 import static uk.ac.ebi.eva.test.utils.JobTestUtils.assertCompleted;
-import static uk.ac.ebi.eva.test.utils.JobTestUtils.count;
 import static uk.ac.ebi.eva.utils.FileUtils.getResource;
 
 /**
@@ -59,6 +52,8 @@ public class LoadVariantsStepTest {
 
     private static final String SMALL_VCF_FILE = "/input-files/vcf/genotyped.vcf.gz";
 
+    private static final String COLLECTION_VARIANTS_NAME = "variants";
+
     @Rule
     public TemporaryMongoRule mongoRule = new TemporaryMongoRule();
 
@@ -67,17 +62,13 @@ public class LoadVariantsStepTest {
 
     private String input;
 
-    private static String opencgaHome = System.getenv("OPENCGA_HOME") != null ? System.getenv(
-            "OPENCGA_HOME") : "/opt/opencga";
-
     @Test
     public void loaderStepShouldLoadAllVariants() throws Exception {
-        Config.setOpenCGAHome(opencgaHome);
         String databaseName = mongoRule.getRandomTemporaryDatabaseName();
 
         // When the execute method in variantsLoad is executed
         JobParameters jobParameters = new EvaJobParameterBuilder()
-                .collectionVariantsName("variants")
+                .collectionVariantsName(COLLECTION_VARIANTS_NAME)
                 .databaseName(databaseName)
                 .inputStudyId("1")
                 .inputVcf(input)
@@ -91,11 +82,7 @@ public class LoadVariantsStepTest {
         assertCompleted(jobExecution);
 
         // And the number of documents in the DB should be equals to the number of lines in the VCF file
-        VariantStorageManager variantStorageManager = StorageManagerFactory.getVariantStorageManager();
-        VariantDBAdaptor variantDBAdaptor = variantStorageManager.getDBAdaptor(databaseName, null);
-        VariantDBIterator iterator = variantDBAdaptor.iterator(new QueryOptions());
-
-        assertEquals(EXPECTED_VARIANTS, count(iterator));
+        assertEquals(EXPECTED_VARIANTS, mongoRule.getCollection(databaseName, COLLECTION_VARIANTS_NAME).count());
     }
 
     @Before
