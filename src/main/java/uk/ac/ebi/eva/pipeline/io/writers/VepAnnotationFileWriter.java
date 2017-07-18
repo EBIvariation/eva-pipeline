@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.batch.item.ItemWriter;
 
 import uk.ac.ebi.eva.pipeline.io.VepProcess;
-import uk.ac.ebi.eva.pipeline.model.VariantWrapper;
+import uk.ac.ebi.eva.pipeline.model.EnsemblVariant;
 import uk.ac.ebi.eva.pipeline.parameters.AnnotationParameters;
 
 import java.util.List;
@@ -29,7 +29,7 @@ import java.util.List;
  * ItemStreamWriter that takes VariantWrappers and serialize them into a {@link VepProcess}, which will be responsible
  * for annotating the variants and writing them to a file.
  */
-public class VepAnnotationFileWriter implements ItemWriter<VariantWrapper> {
+public class VepAnnotationFileWriter implements ItemWriter<EnsemblVariant> {
 
     private static final Logger logger = LoggerFactory.getLogger(VepAnnotationFileWriter.class);
 
@@ -46,19 +46,19 @@ public class VepAnnotationFileWriter implements ItemWriter<VariantWrapper> {
     }
 
     @Override
-    public void write(List<? extends VariantWrapper> variantWrappers) throws Exception {
+    public void write(List<? extends EnsemblVariant> variantWrappers) throws Exception {
         VepProcess vepProcess = new VepProcess(annotationParameters, chunkSize, timeoutInSeconds);
         vepProcess.open();
 
-        for (VariantWrapper variantWrapper : variantWrappers) {
-            String line = getVariantInVepInputFormat(variantWrapper);
+        for (EnsemblVariant ensemblVariant : variantWrappers) {
+            String line = getVariantInVepInputFormat(ensemblVariant);
             vepProcess.write(line.getBytes());
             vepProcess.write(System.lineSeparator().getBytes());
         }
 
         if (variantWrappers.size() > 0) {
-            VariantWrapper first = variantWrappers.get(0);
-            VariantWrapper last = variantWrappers.get(variantWrappers.size() - 1);
+            EnsemblVariant first = variantWrappers.get(0);
+            EnsemblVariant last = variantWrappers.get(variantWrappers.size() - 1);
             logger.trace("VEP has received {} variants from {}:{} to {}:{}", variantWrappers.size(),
                     first.getChr(), first.getStart(), last.getChr(), last.getStart());
         }
@@ -67,13 +67,13 @@ public class VepAnnotationFileWriter implements ItemWriter<VariantWrapper> {
         vepProcess.close();
     }
 
-    private String getVariantInVepInputFormat(VariantWrapper variantWrapper) {
+    private String getVariantInVepInputFormat(EnsemblVariant ensemblVariant) {
         return String.join("\t",
-                variantWrapper.getChr(),
-                Integer.toString(variantWrapper.getStart()),
-                Integer.toString(variantWrapper.getEnd()),
-                variantWrapper.getRefAlt(),
-                variantWrapper.getStrand());
+                           ensemblVariant.getChr(),
+                           Integer.toString(ensemblVariant.getStart()),
+                           Integer.toString(ensemblVariant.getEnd()),
+                           ensemblVariant.getRefAlt(),
+                           ensemblVariant.getStrand());
     }
 
 }

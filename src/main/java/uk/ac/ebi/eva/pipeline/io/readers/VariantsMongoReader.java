@@ -18,17 +18,26 @@ package uk.ac.ebi.eva.pipeline.io.readers;
 import com.mongodb.BasicDBObject;
 import com.mongodb.BasicDBObjectBuilder;
 import com.mongodb.DBObject;
-import org.opencb.biodata.models.variant.Variant;
-import org.opencb.opencga.storage.mongodb.variant.DBObjectToVariantConverter;
 import org.springframework.batch.item.support.AbstractItemCountingItemStreamItemReader;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.data.mongodb.core.MongoOperations;
+import org.springframework.data.mongodb.core.convert.MongoConverter;
 import org.springframework.util.ClassUtils;
+
+import uk.ac.ebi.eva.commons.models.mongo.entity.Annotation;
 import uk.ac.ebi.eva.commons.models.mongo.entity.VariantDocument;
+import uk.ac.ebi.eva.commons.models.mongo.entity.projections.SimplifiedVariant;
+import uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantAnnotation;
 import uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantSourceEntryMongo;
-import uk.ac.ebi.eva.pipeline.model.VariantWrapper;
+import uk.ac.ebi.eva.pipeline.model.EnsemblVariant;
 
 import javax.annotation.PostConstruct;
+
+import static uk.ac.ebi.eva.commons.models.mongo.entity.VariantDocument.ALTERNATE_FIELD;
+import static uk.ac.ebi.eva.commons.models.mongo.entity.VariantDocument.CHROMOSOME_FIELD;
+import static uk.ac.ebi.eva.commons.models.mongo.entity.VariantDocument.END_FIELD;
+import static uk.ac.ebi.eva.commons.models.mongo.entity.VariantDocument.REFERENCE_FIELD;
+import static uk.ac.ebi.eva.commons.models.mongo.entity.VariantDocument.START_FIELD;
 
 /**
  * Mongo variant reader using an ItemReader cursor based. This is speeding up
@@ -37,11 +46,11 @@ import javax.annotation.PostConstruct;
  * pagination and it is slow with large collections
  */
 public class VariantsMongoReader
-        extends AbstractItemCountingItemStreamItemReader<VariantWrapper> implements InitializingBean {
+        extends AbstractItemCountingItemStreamItemReader<EnsemblVariant> implements InitializingBean {
 
     private MongoDbCursorItemReader delegateReader;
 
-    private DBObjectToVariantConverter converter;
+    private MongoConverter converter;
 
     private static final String STUDY_KEY = VariantDocument.FILES_FIELD + "." + VariantSourceEntryMongo.STUDYID_FIELD;
 
@@ -50,26 +59,32 @@ public class VariantsMongoReader
      * If the studyId string is not empty, bring only non-annotated variants from that study.
      * @param excludeAnnotated bring only non-annotated variants.
      */
-    public VariantsMongoReader(MongoOperations template, String collectionsVariantsName, String studyId,
-                               boolean excludeAnnotated) {
+    public VariantsMongoReader(MongoOperations mongoOperations, String collectionVariantsName, String vepVersion,
+                               String vepCacheVersion, String studyId, boolean excludeAnnotated) {
         setName(ClassUtils.getShortName(VariantsMongoReader.class));
         delegateReader = new MongoDbCursorItemReader();
-        delegateReader.setTemplate(template);
-        delegateReader.setCollection(collectionsVariantsName);
+        delegateReader.setTemplate(mongoOperations);
+        delegateReader.setCollection(collectionVariantsName);
 
         BasicDBObjectBuilder queryBuilder = BasicDBObjectBuilder.start();
         if (studyId != null && !studyId.isEmpty()) {
             queryBuilder.add(STUDY_KEY, studyId);
         }
         if (excludeAnnotated) {
-            queryBuilder.add("annot.ct.so", new BasicDBObject("$exists", false));
+            BasicDBObject exists = new BasicDBObject("$exists", 1);
+            BasicDBObject annotationSubdocument = new BasicDBObject(VariantAnnotation.SO_ACCESSION_FIELD, exists)
+                    .append(Annotation.VEP_VERSION_FIELD, vepVersion)
+                    .append(Annotation.VEP_CACHE_VERSION_FIELD, vepCacheVersion);
+            BasicDBObject noElementMatchesOurVersion =
+                    new BasicDBObject("$not", new BasicDBObject("$elemMatch", annotationSubdocument));
+            queryBuilder.add(VariantDocument.ANNOTATION_FIELD, noElementMatchesOurVersion);
         }
         delegateReader.setQuery(queryBuilder.get());
 
-        String[] fields = {"chr", "start", "end", "ref", "alt"};
+        String[] fields = {CHROMOSOME_FIELD, START_FIELD, END_FIELD, REFERENCE_FIELD, ALTERNATE_FIELD};
         delegateReader.setFields(fields);
 
-        converter = new DBObjectToVariantConverter();
+        converter = mongoOperations.getConverter();
     }
 
     @PostConstruct
@@ -84,14 +99,22 @@ public class VariantsMongoReader
     }
 
     @Override
-    protected VariantWrapper doRead() throws Exception {
+    protected EnsemblVariant doRead() throws Exception {
         DBObject dbObject = delegateReader.doRead();
         if (dbObject != null) {
-            Variant variant = converter.convertToDataModelType(dbObject);
-            return new VariantWrapper(variant);
+            SimplifiedVariant variant = converter.read(SimplifiedVariant.class, dbObject);
+            return buildVariantWrapper(variant);
         } else {
             return null;
         }
+    }
+
+    private EnsemblVariant buildVariantWrapper(SimplifiedVariant variant) {
+        return new EnsemblVariant(variant.getChromosome(),
+                                  variant.getStart(),
+                                  variant.getEnd(),
+                                  variant.getReference(),
+                                  variant.getAlternate());
     }
 
     @Override

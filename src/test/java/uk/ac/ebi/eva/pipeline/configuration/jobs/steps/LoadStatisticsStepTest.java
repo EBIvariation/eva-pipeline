@@ -20,21 +20,14 @@ import com.mongodb.DBCursor;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.opencb.biodata.models.variant.Variant;
-import org.opencb.biodata.models.variant.stats.VariantStats;
 import org.opencb.opencga.storage.core.StorageManagerException;
-import org.opencb.opencga.storage.core.variant.VariantStorageManager;
-import org.opencb.opencga.storage.mongodb.variant.DBObjectToVariantConverter;
-import org.opencb.opencga.storage.mongodb.variant.DBObjectToVariantSourceEntryConverter;
-import org.opencb.opencga.storage.mongodb.variant.DBObjectToVariantStatsConverter;
-import org.springframework.batch.core.BatchStatus;
-import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobExecutionException;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.rule.OutputCapture;
+import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -49,7 +42,6 @@ import uk.ac.ebi.eva.test.utils.JobTestUtils;
 import uk.ac.ebi.eva.utils.EvaJobParameterBuilder;
 
 import java.io.IOException;
-import java.util.Map;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertEquals;
@@ -69,12 +61,17 @@ import static uk.ac.ebi.eva.utils.FileUtils.getResource;
         MongoOperationConfiguration.class})
 public class LoadStatisticsStepTest {
     private static final String SMALL_VCF_FILE = "/input-files/vcf/genotyped.vcf.gz";
+
     private static final String MONGO_DUMP = "/dump/VariantStatsConfigurationTest_vl";
+
     private static final String SOURCE_FILE_NAME = "/input-files/statistics/1_1.source.stats.json.gz";
+
     private static final String VARIANTS_FILE_NAME = "/input-files/statistics/1_1.variants.stats.json.gz";
+
     private static final String FILE_NOT_FOUND_EXCEPTION = "java.io.FileNotFoundException:";
 
     private static final String COLLECTION_FILES_NAME = "files";
+
     private static final String COLLECTION_VARIANTS_NAME = "variants";
 
     @Rule
@@ -85,6 +82,9 @@ public class LoadStatisticsStepTest {
 
     @Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
+
+    @Autowired
+    private MongoOperations mongoOperations;
 
     //Capture error output
     @Rule
@@ -121,19 +121,7 @@ public class LoadStatisticsStepTest {
 
         // The DB docs should have the field "st"
         DBCursor cursor = mongoRule.getCollection(dbName, COLLECTION_VARIANTS_NAME).find();
-        assertEquals(1, getCohortStatsFromFirstVariant(cursor).size());
-    }
-
-    private Map<String, VariantStats> getCohortStatsFromFirstVariant(DBCursor cursor) {
-        DBObjectToVariantConverter variantConverter = getVariantConverter();
-        Variant variant = variantConverter.convertToDataModelType(cursor.iterator().next());
-        return variant.getSourceEntries().values().iterator().next().getCohortStats();
-    }
-
-    private DBObjectToVariantConverter getVariantConverter() {
-        return new DBObjectToVariantConverter(
-                new DBObjectToVariantSourceEntryConverter(VariantStorageManager.IncludeSrc.FIRST_8_COLUMNS),
-                new DBObjectToVariantStatsConverter());
+        assertEquals(1, JobTestUtils.getCohortStatsFromFirstVariant(cursor, mongoOperations).size());
     }
 
     private void copyFilesToOutpurDir(String outputDir) throws IOException {
