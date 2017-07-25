@@ -18,7 +18,11 @@ package uk.ac.ebi.eva.pipeline.io.readers;
 import com.mongodb.BasicDBObject;
 import com.mongodb.BasicDBObjectBuilder;
 import com.mongodb.DBObject;
-import org.springframework.batch.item.support.AbstractItemCountingItemStreamItemReader;
+import org.springframework.batch.item.ExecutionContext;
+import org.springframework.batch.item.NonTransientResourceException;
+import org.springframework.batch.item.ParseException;
+import org.springframework.batch.item.UnexpectedInputException;
+import org.springframework.batch.item.support.AbstractItemStreamItemReader;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.data.mongodb.core.convert.MongoConverter;
@@ -48,7 +52,7 @@ import static uk.ac.ebi.eva.commons.models.mongo.entity.VariantDocument.START_FI
  * pagination and it is slow with large collections
  */
 public class VariantsMongoReader
-        extends AbstractItemCountingItemStreamItemReader<List<EnsemblVariant>> implements InitializingBean {
+        extends AbstractItemStreamItemReader<List<EnsemblVariant>> implements InitializingBean {
 
     private static final String STUDY_KEY = VariantDocument.FILES_FIELD + "." + VariantSourceEntryMongo.STUDYID_FIELD;
 
@@ -59,8 +63,6 @@ public class VariantsMongoReader
     private MongoConverter converter;
 
     private Integer chunkSize;
-
-    private boolean moreElementsAvailable;
 
     /**
      * @param studyId Can be the empty string or null, meaning to bring all non-annotated variants in the collection.
@@ -106,7 +108,6 @@ public class VariantsMongoReader
 
         this.converter = mongoOperations.getConverter();
         this.chunkSize = chunkSize;
-        this.moreElementsAvailable = true;
     }
 
     @PostConstruct
@@ -116,37 +117,29 @@ public class VariantsMongoReader
     }
 
     @Override
-    protected void doOpen() throws Exception {
-        delegateReader.doOpen();
+    public void open(ExecutionContext executionContext) {
+        delegateReader.open(executionContext);
     }
 
     @Override
-    protected List<EnsemblVariant> doRead() throws Exception {
-        if (moreElementsAvailable) {
-            DBObject firstElement = delegateReader.doRead();
-            boolean emptyBatch = firstElement == null;
-            if (emptyBatch) {
-                moreElementsAvailable = false;
-                return null;
-            } else {
-                return fillBatch(firstElement);
-            }
+    public List<EnsemblVariant> read() throws Exception, UnexpectedInputException, ParseException, NonTransientResourceException {
+        DBObject firstElement = delegateReader.doRead();
+        if (firstElement != null) {
+            return fillBatch(firstElement);
         } else {
-            // the previous batch was smaller than chunksize
             return null;
         }
     }
 
     private List<EnsemblVariant> fillBatch(DBObject dbObject) throws Exception {
         List<EnsemblVariant> variants = new ArrayList<>();
-        while (moreElementsAvailable) {
+        while (dbObject != null) {
             SimplifiedVariant variant = converter.read(SimplifiedVariant.class, dbObject);
             variants.add(buildVariantWrapper(variant));
             if (variants.size() == chunkSize) {
                 break;
             }
             dbObject = delegateReader.doRead();
-            moreElementsAvailable = dbObject != null;
         }
         return variants;
     }
@@ -160,8 +153,7 @@ public class VariantsMongoReader
     }
 
     @Override
-    protected void doClose() throws Exception {
-        delegateReader.doClose();
+    public void close() {
+        delegateReader.close();
     }
-
 }

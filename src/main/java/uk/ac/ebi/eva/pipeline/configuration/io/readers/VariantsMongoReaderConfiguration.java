@@ -57,7 +57,6 @@ public class VariantsMongoReaderConfiguration {
                 inputParameters.getVcfId(),
                 excludeAnnotated,
                 chunkSizeParameters.getChunkSize());
-        variantsMongoReader.setSaveState(false);
         return variantsMongoReader;
     }
 

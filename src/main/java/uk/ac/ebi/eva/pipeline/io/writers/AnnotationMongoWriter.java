@@ -87,8 +87,8 @@ public class AnnotationMongoWriter implements ItemWriter<List<Annotation>> {
 
     @Override
     public void write(List<? extends List<Annotation>> annotations) throws Exception {
-        BulkOperations bulk = mongoOperations.bulkOps(BulkOperations.BulkMode.UNORDERED, collection);
         for (List<Annotation> annotationList : annotations) {
+            BulkOperations bulk = mongoOperations.bulkOps(BulkOperations.BulkMode.UNORDERED, collection);
             prepareBulk(annotationList, bulk);
             bulk.execute();
         }
