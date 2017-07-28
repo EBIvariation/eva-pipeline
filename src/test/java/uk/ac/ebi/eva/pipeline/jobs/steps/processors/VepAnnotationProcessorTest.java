@@ -140,7 +140,8 @@ public class VepAnnotationProcessorTest {
 
         long vepTimeouts = 1;
         VepAnnotationProcessor vepAnnotationProcessor = new VepAnnotationProcessor(annotationParameters,
-                                                                                   chunkSizeGreaterThanActualVariants, vepTimeouts);
+                                                                                   chunkSizeGreaterThanActualVariants,
+                                                                                   vepTimeouts);
 
         exception.expect(ItemStreamException.class);
         vepAnnotationProcessor.process(ensemblVariants);

@@ -22,8 +22,8 @@ import uk.ac.ebi.eva.pipeline.io.VepProcess;
 import uk.ac.ebi.eva.pipeline.io.mappers.AnnotationLineMapper;
 import uk.ac.ebi.eva.pipeline.parameters.AnnotationParameters;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * ItemStreamWriter that takes VariantWrappers and serialize them into a {@link VepProcess}, which will be responsible
@@ -42,10 +42,8 @@ public class AnnotationParserProcessor implements ItemProcessor<List<String>, Li
 
     @Override
     public List<Annotation> process(List<String> ensemblVariants) throws Exception {
-        List<Annotation> annotations = new ArrayList<>();
-        for (String ensemblVariant : ensemblVariants) {
-            annotations.add(annotationLineMapper.mapLine(ensemblVariant, UNUSED_LINE_NUMBER));
-        }
-        return annotations;
+        return ensemblVariants.stream()
+                              .map(ensemblVariant -> annotationLineMapper.mapLine(ensemblVariant, UNUSED_LINE_NUMBER))
+                              .collect(Collectors.toList());
     }
 }

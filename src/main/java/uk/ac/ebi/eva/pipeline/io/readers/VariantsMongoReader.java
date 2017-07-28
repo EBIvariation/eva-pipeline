@@ -65,13 +65,20 @@ public class VariantsMongoReader
     private Integer chunkSize;
 
     /**
+     *
+     * @param vepVersion Only bring variants whose annotation does not contain this VEP version.
+     *                   This option is ignored if excludeAnnotated is false.
+     * @param vepCacheVersion Only bring variants whose annotation does not contain this cache version.
+     *                        This option is ignored if excludeAnnotated is false.
      * @param studyId Can be the empty string or null, meaning to bring all non-annotated variants in the collection.
      *                If the studyId string is not empty, bring only non-annotated variants from that study.
      * @param fileId  File identifier that it is checked inside a study. If the study identifier is not defined, the
      *                file is ignored. This is mainly due to performance reasons.
      *                Can be the empty string or null, meaning to bring all non-annotated variants in a study.
      *                If the studyId string is not empty, bring only non-annotated variants from that study and file.
-     * @param excludeAnnotated bring only non-annotated variants.
+     * @param excludeAnnotated If true, bring only non-annotated variants. If false, bring all variants (ignoring the
+     *                         vepVersion and vepCacheVersion parameters)
+     * @param chunkSize size of the list returned by the "read" method.
      */
     public VariantsMongoReader(MongoOperations mongoOperations, String collectionVariantsName, String vepVersion,
                                String vepCacheVersion, String studyId, String fileId, boolean excludeAnnotated,
@@ -123,23 +130,23 @@ public class VariantsMongoReader
 
     @Override
     public List<EnsemblVariant> read() throws Exception, UnexpectedInputException, ParseException, NonTransientResourceException {
-        DBObject firstElement = delegateReader.doRead();
-        if (firstElement != null) {
-            return fillBatch(firstElement);
-        } else {
+        List<EnsemblVariant> variants = readBatch(chunkSize);
+        if (variants.size() == 0) {
             return null;
+        } else {
+            return variants;
         }
     }
 
-    private List<EnsemblVariant> fillBatch(DBObject dbObject) throws Exception {
+    private List<EnsemblVariant> readBatch(Integer chunkSize) throws Exception {
         List<EnsemblVariant> variants = new ArrayList<>();
-        while (dbObject != null) {
+        DBObject dbObject;
+        while ((dbObject = delegateReader.doRead()) != null) {
             SimplifiedVariant variant = converter.read(SimplifiedVariant.class, dbObject);
             variants.add(buildVariantWrapper(variant));
             if (variants.size() == chunkSize) {
                 break;
             }
-            dbObject = delegateReader.doRead();
         }
         return variants;
     }
