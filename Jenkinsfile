@@ -10,7 +10,10 @@ pipeline {
     stage('Initialize') {
       steps {
         echo 'EVA Pipeline :: Initialize'
-        sh '''chmod +x install-dependencies.sh
+        sh '''echo $MONGODB_VERSION
+echo PATH = ${PATH}
+echo M2_HOME = ${M2_HOME}
+chmod +x install-dependencies.sh
 wget http://fastdl.mongodb.org/linux/mongodb-linux-x86_64-$MONGODB_VERSION.tgz
 tar xfz mongodb-linux-x86_64-$MONGODB_VERSION.tgz
 export PATH=`pwd`/mongodb-linux-x86_64-$MONGODB_VERSION/bin:$PATH
@@ -19,8 +22,6 @@ mongod --dbpath=data/db &
 ./install-dependencies.sh
 mongod --version
 mvn clean'''
-        sh '''echo PATH = ${PATH}
-echo M2_HOME = ${M2_HOME}'''
       }
     }
     stage('Build') {
@@ -35,5 +36,8 @@ echo M2_HOME = ${M2_HOME}'''
         junit 'target/surefire-reports/**/*.xml'
       }
     }
+  }
+  environment {
+    MONGODB_VERSION = '3.0.4'
   }
 }
