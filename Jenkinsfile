@@ -20,6 +20,9 @@ export PATH=`pwd`/mongodb-linux-x86_64-$MONGODB_VERSION/bin:$PATH
 mkdir -p data/db
 mongod --dbpath=data/db &
 mongod --version
+mkdir -p data/db
+export OPENCGA_HOME=`pwd`/opencga
+./install-dependencies.sh
 mvn clean'''
       }
     }
