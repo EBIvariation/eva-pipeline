@@ -2,7 +2,7 @@ pipeline {
   agent {
     docker {
       image 'maven:3.5.0-jdk-8'
-      args '-v /root/.m2 maven'
+      args '-v /root/.m2:/root/.m2'
     }
     
   }
@@ -19,6 +19,8 @@ mongod --dbpath=data/db &
 ./install-dependencies.sh
 mongod --version
 mvn clean'''
+        sh '''echo PATH = ${PATH}
+echo M2_HOME = ${M2_HOME}'''
       }
     }
     stage('Build') {
