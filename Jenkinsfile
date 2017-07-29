@@ -26,7 +26,7 @@ mvn clean'''
     stage('Build') {
       steps {
         echo 'EVA Pipeline :: Build'
-        sh 'mvn -Dmaven.test.failure.ignore= true install'
+        sh 'mvn -Dmaven.test.failure.ignore=true install'
       }
     }
     stage('Report') {
