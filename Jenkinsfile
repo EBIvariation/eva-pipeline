@@ -29,7 +29,9 @@ mvn clean'''
     stage('Build') {
       steps {
         echo 'EVA Pipeline :: Build'
-        sh 'mvn -Dmaven.test.failure.ignore=true install'
+        sh '''export PATH=`pwd`/mongodb-linux-x86_64-$MONGODB_VERSION/bin:$PATH
+export OPENCGA_HOME=`pwd`/opencga
+mvn -Dmaven.test.failure.ignore=true install'''
       }
     }
     stage('Report') {
