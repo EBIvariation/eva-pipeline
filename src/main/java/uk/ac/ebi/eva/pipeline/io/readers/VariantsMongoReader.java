@@ -54,22 +54,34 @@ public class VariantsMongoReader
 
     private static final String STUDY_KEY = VariantDocument.FILES_FIELD + "." + VariantSourceEntryMongo.STUDYID_FIELD;
 
+    private static final String FILE_KEY = VariantDocument.FILES_FIELD + "." + VariantSourceEntryMongo.FILEID_FIELD;
+
     /**
      * @param studyId Can be the empty string or null, meaning to bring all non-annotated variants in the collection.
-     * If the studyId string is not empty, bring only non-annotated variants from that study.
+     *                If the studyId string is not empty, bring only non-annotated variants from that study.
+     * @param fileId  File identifier that it is checked inside a study. If the study identifier is not defined, the
+     *                file is ignored. This is mainly due to performance reasons.
+     *                Can be the empty string or null, meaning to bring all non-annotated variants in a study.
+     *                If the studyId string is not empty, bring only non-annotated variants from that study and file.
      * @param excludeAnnotated bring only non-annotated variants.
      */
     public VariantsMongoReader(MongoOperations mongoOperations, String collectionVariantsName, String vepVersion,
-                               String vepCacheVersion, String studyId, boolean excludeAnnotated) {
+                               String vepCacheVersion, String studyId, String fileId, boolean excludeAnnotated) {
         setName(ClassUtils.getShortName(VariantsMongoReader.class));
         delegateReader = new MongoDbCursorItemReader();
         delegateReader.setTemplate(mongoOperations);
         delegateReader.setCollection(collectionVariantsName);
 
         BasicDBObjectBuilder queryBuilder = BasicDBObjectBuilder.start();
+
         if (studyId != null && !studyId.isEmpty()) {
             queryBuilder.add(STUDY_KEY, studyId);
+
+            if (fileId != null && !fileId.isEmpty()) {
+                queryBuilder.add(FILE_KEY, fileId);
+            }
         }
+
         if (excludeAnnotated) {
             BasicDBObject exists = new BasicDBObject("$exists", 1);
             BasicDBObject annotationSubdocument = new BasicDBObject(VariantAnnotation.SO_ACCESSION_FIELD, exists)
