@@ -191,4 +191,8 @@ public class GenotypedVcfJobTestUtils {
     public static File getMockVep() {
         return getResource(MOCK_VEP);
     }
+
+    public static String getDefaultOpencgaHome() {
+        return System.getenv("OPENCGA_HOME") != null ? System.getenv("OPENCGA_HOME") : "./";
+    }
 }

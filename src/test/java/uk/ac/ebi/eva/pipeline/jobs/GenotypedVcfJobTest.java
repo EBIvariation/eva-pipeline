@@ -65,8 +65,7 @@ public class GenotypedVcfJobTest {
     @Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
 
-    private static String opencgaHome = System.getenv("OPENCGA_HOME") != null ? System
-            .getenv("OPENCGA_HOME") : "/opt/opencga";
+    private static String opencgaHome = GenotypedVcfJobTestUtils.getDefaultOpencgaHome();
 
     @Test
     public void fullGenotypedVcfJob() throws Exception {

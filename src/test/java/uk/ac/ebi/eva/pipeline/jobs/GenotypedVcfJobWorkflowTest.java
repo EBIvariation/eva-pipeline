@@ -20,7 +20,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.opencb.opencga.lib.common.Config;
-import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.StepExecution;
@@ -37,6 +36,7 @@ import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
+import uk.ac.ebi.eva.test.utils.GenotypedVcfJobTestUtils;
 import uk.ac.ebi.eva.utils.EvaJobParameterBuilder;
 
 import java.io.File;
@@ -79,8 +79,7 @@ public class GenotypedVcfJobWorkflowTest {
     @Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
 
-    private static String opencgaHome = System.getenv("OPENCGA_HOME") != null ? System
-            .getenv("OPENCGA_HOME") : "/opt/opencga";
+    private static String opencgaHome = GenotypedVcfJobTestUtils.getDefaultOpencgaHome();
 
     @Autowired
     private JobOptions jobOptions;  // we need this for stats.skip and annot.skip

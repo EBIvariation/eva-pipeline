@@ -19,6 +19,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.opencb.datastore.core.QueryOptions;
+import org.opencb.opencga.lib.common.Config;
 import org.opencb.opencga.storage.core.StorageManagerFactory;
 import org.opencb.opencga.storage.core.variant.VariantStorageManager;
 import org.opencb.opencga.storage.core.variant.adaptors.VariantDBAdaptor;
@@ -36,6 +37,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
+import uk.ac.ebi.eva.test.utils.GenotypedVcfJobTestUtils;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
 import uk.ac.ebi.eva.utils.EvaJobParameterBuilder;
 import uk.ac.ebi.eva.utils.URLHelper;
@@ -68,8 +70,11 @@ public class PopulationStatisticsJobTest {
     @Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
 
+    private static String opencgaHome = GenotypedVcfJobTestUtils.getDefaultOpencgaHome();
+
     @Test
     public void fullPopulationStatisticsJob() throws Exception {
+        Config.setOpenCGAHome(opencgaHome);
         //Given a valid VCF input file
         String input = SMALL_VCF_FILE;
         String statsDir = temporaryFolderRule.getRoot().getPath();

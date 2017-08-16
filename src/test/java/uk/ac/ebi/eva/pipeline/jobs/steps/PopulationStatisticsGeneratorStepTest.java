@@ -15,9 +15,11 @@
  */
 package uk.ac.ebi.eva.pipeline.jobs.steps;
 
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.opencb.opencga.lib.common.Config;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.test.JobLauncherTestUtils;
@@ -32,6 +34,7 @@ import uk.ac.ebi.eva.pipeline.jobs.steps.tasklets.PopulationStatisticsGeneratorS
 import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
+import uk.ac.ebi.eva.test.utils.GenotypedVcfJobTestUtils;
 import uk.ac.ebi.eva.utils.EvaJobParameterBuilder;
 import uk.ac.ebi.eva.utils.URLHelper;
 
@@ -64,6 +67,11 @@ public class PopulationStatisticsGeneratorStepTest {
 
     @Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
+
+    @Before
+    public void setUp() throws Exception {
+        Config.setOpenCGAHome(GenotypedVcfJobTestUtils.getDefaultOpencgaHome());
+    }
 
     @Test
     public void statisticsGeneratorStepShouldCalculateStats() throws IOException, InterruptedException, URISyntaxException {

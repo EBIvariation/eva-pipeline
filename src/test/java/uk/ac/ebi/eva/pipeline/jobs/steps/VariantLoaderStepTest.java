@@ -39,6 +39,7 @@ import uk.ac.ebi.eva.pipeline.configuration.BeanNames;
 import uk.ac.ebi.eva.pipeline.jobs.GenotypedVcfJob;
 import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
+import uk.ac.ebi.eva.test.utils.GenotypedVcfJobTestUtils;
 import uk.ac.ebi.eva.utils.EvaJobParameterBuilder;
 
 import static org.junit.Assert.assertEquals;
@@ -67,8 +68,7 @@ public class VariantLoaderStepTest {
 
     private String input;
 
-    private static String opencgaHome = System.getenv("OPENCGA_HOME") != null ? System.getenv(
-            "OPENCGA_HOME") : "/opt/opencga";
+    private static String opencgaHome = GenotypedVcfJobTestUtils.getDefaultOpencgaHome();
 
     @Test
     public void loaderStepShouldLoadAllVariants() throws Exception {

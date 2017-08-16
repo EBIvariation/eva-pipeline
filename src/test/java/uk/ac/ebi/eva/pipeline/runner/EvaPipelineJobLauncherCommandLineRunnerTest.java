@@ -15,9 +15,11 @@
  */
 package uk.ac.ebi.eva.pipeline.runner;
 
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.opencb.opencga.lib.common.Config;
 import org.opencb.opencga.storage.core.StorageManagerException;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobExecutionException;
@@ -82,6 +84,11 @@ public class EvaPipelineJobLauncherCommandLineRunnerTest {
 
     @Rule
     public PipelineTemporaryFolderRule temporaryFolderRule = new PipelineTemporaryFolderRule();
+
+    @Before
+    public void setUp() throws Exception {
+        Config.setOpenCGAHome(GenotypedVcfJobTestUtils.getDefaultOpencgaHome());
+    }
 
     @Test
     public void noJobParametersHaveBeenProvided() throws JobExecutionException {
