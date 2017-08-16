@@ -193,6 +193,8 @@ public class GenotypedVcfJobTestUtils {
     }
 
     public static String getDefaultOpencgaHome() {
-        return System.getenv("OPENCGA_HOME") != null ? System.getenv("OPENCGA_HOME") : "./";
+        return System.getenv("OPENCGA_HOME") != null ?
+                System.getenv("OPENCGA_HOME") : "./src/main/resources/opencga/";
     }
+
 }
