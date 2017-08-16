@@ -48,6 +48,7 @@ public class VariantsMongoReaderConfiguration {
                 annotationParameters.getVepVersion(),
                 annotationParameters.getVepCacheVersion(),
                 inputParameters.getStudyId(),
+                inputParameters.getVcfId(),
                 excludeAnnotated);
         variantsMongoReader.setSaveState(false);
         return variantsMongoReader;
