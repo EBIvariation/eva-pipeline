@@ -18,16 +18,6 @@ In order to run, the pipeline needs access to a MongoDB 3.x database instance. T
 
 If you want to generate and store variant annotations you will also need to [download Ensembl VEP](http://www.ensembl.org/info/docs/tools/vep/script/vep_download.html). Please note this software requires Perl to be installed.
 
-Finally, before compiling the pipeline itself, you will need to clone and build its dependencies running these commands from a folder of your choice:
-
-```
-git clone https://github.com/EBIvariation/biodata.git
-cd biodata && mvn clean install -DskipTests
-cd ..
-git clone https://github.com/EBIvariation/opencga.git
-cd opencga && mvn clean install -DskipTests
-```
-
 ## Build
 
 The latest stable version can be found in the [master](https://github.com/EBIvariation/eva-pipeline/tree/master) branch. [develop](https://github.com/EBIvariation/eva-pipeline/tree/develop) contains work in progress, which is fully tested but could be more unstable.
@@ -46,7 +36,7 @@ If more convenient for your use case, the global configuration and job parameter
 
 It is likely that you will need to edit some parameters to match your environment and/or configure your job. For instance, connection details to MongoDB databases, OpenCGA/VEP installation directories, the folder containing the input files, the type of job to run, etc.
 
-**Note:** Most of the environment configuration can be provided directly to the application, but MongoDB connection details also need to be filled in the OpenCGA configuration file. The installation folder is by default located in `<OpenCGA root folder>/opencga-app/build`, but can be moved to any destination of your choice. The configuration is located in `<OpenCGA installation folder>/conf/storage-mongodb.properties`.
+**Note:** Most of the environment configuration can be provided directly to the application, but MongoDB connection details also need to be filled in the OpenCGA configuration file. This configuration file must be located in `<OpenCGA configuration folder>/conf/storage-mongodb.properties`. The folder `eva-pipeline/src/main/resources/opencga/` is an example of OpenCGA configuration folder, you can copy that folder and put the new location in the variable `app.opencga.path=/path/to/opencga` in your `application.properties`.
 
 By using these properties files, a job can be launched with a single command like:
 
@@ -67,7 +57,7 @@ The contents from the configuration files can be also provided directly as comma
 ### Environment
 
 * `spring.profiles.active`: "production" to keep track of half-executed jobs using a job repository database, "test" to use an in-memory database that will record a single run
-* `app.opencga.path`: Path to the OpenCGA installation folder. An `ls` in that path should show the conf, analysis, bin and libs folders.
+* `app.opencga.path`: Path to the OpenCGA configuration folder. `eva-pipeline/src/main/resources/opencga/` is a valid path. Remember to configure there your connection in the file `conf/storage-mongodb.properties`.
 
 Database credentials used to connect to a MongoDB instance. See [MongoDB options documentation](https://docs.mongodb.com/manual/reference/program/mongo/#options). The database and collection names are listed below in the "Database parameters" section.
 
