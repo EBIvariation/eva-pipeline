@@ -39,6 +39,7 @@ import uk.ac.ebi.eva.pipeline.configuration.BeanNames;
 import uk.ac.ebi.eva.pipeline.jobs.GenotypedVcfJob;
 import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
+import uk.ac.ebi.eva.test.utils.GenotypedVcfJobTestUtils;
 import uk.ac.ebi.eva.utils.EvaJobParameterBuilder;
 
 import static org.junit.Assert.assertEquals;
@@ -67,12 +68,14 @@ public class VariantLoaderStepTest {
 
     private String input;
 
-    private static String opencgaHome = System.getenv("OPENCGA_HOME") != null ? System.getenv(
-            "OPENCGA_HOME") : "/opt/opencga";
+    @Before
+    public void setUp() throws Exception {
+        input = getResource(SMALL_VCF_FILE).getAbsolutePath();
+        Config.setOpenCGAHome(GenotypedVcfJobTestUtils.getDefaultOpencgaHome());
+    }
 
     @Test
     public void loaderStepShouldLoadAllVariants() throws Exception {
-        Config.setOpenCGAHome(opencgaHome);
         String databaseName = mongoRule.getRandomTemporaryDatabaseName();
 
         // When the execute method in variantsLoad is executed
@@ -97,10 +100,4 @@ public class VariantLoaderStepTest {
 
         assertEquals(EXPECTED_VARIANTS, count(iterator));
     }
-
-    @Before
-    public void setUp() throws Exception {
-        input = getResource(SMALL_VCF_FILE).getAbsolutePath();
-    }
-
 }

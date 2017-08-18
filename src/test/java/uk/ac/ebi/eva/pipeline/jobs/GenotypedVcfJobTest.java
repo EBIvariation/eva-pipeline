@@ -16,6 +16,7 @@
 
 package uk.ac.ebi.eva.pipeline.jobs;
 
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -65,12 +66,13 @@ public class GenotypedVcfJobTest {
     @Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
 
-    private static String opencgaHome = System.getenv("OPENCGA_HOME") != null ? System
-            .getenv("OPENCGA_HOME") : "/opt/opencga";
+    @Before
+    public void setUp() throws Exception {
+        Config.setOpenCGAHome(GenotypedVcfJobTestUtils.getDefaultOpencgaHome());
+    }
 
     @Test
     public void fullGenotypedVcfJob() throws Exception {
-        Config.setOpenCGAHome(opencgaHome);
         File inputFile = GenotypedVcfJobTestUtils.getInputFile();
         File mockVep = GenotypedVcfJobTestUtils.getMockVep();
         String databaseName = mongoRule.getRandomTemporaryDatabaseName();
@@ -134,7 +136,6 @@ public class GenotypedVcfJobTest {
     public void aggregationIsNotAllowed() throws Exception {
         String databaseName = mongoRule.getRandomTemporaryDatabaseName();
         mongoRule.getTemporaryDatabase(databaseName);
-        Config.setOpenCGAHome(opencgaHome);
         File mockVep = GenotypedVcfJobTestUtils.getMockVep();
         String outputDirStats = temporaryFolderRule.newFolder().getAbsolutePath();
         String outputDirAnnotation = temporaryFolderRule.newFolder().getAbsolutePath();

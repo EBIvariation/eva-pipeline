@@ -15,16 +15,16 @@
  */
 package uk.ac.ebi.eva.pipeline.jobs;
 
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.opencb.datastore.core.QueryOptions;
+import org.opencb.opencga.lib.common.Config;
 import org.opencb.opencga.storage.core.StorageManagerFactory;
 import org.opencb.opencga.storage.core.variant.VariantStorageManager;
 import org.opencb.opencga.storage.core.variant.adaptors.VariantDBAdaptor;
 import org.opencb.opencga.storage.core.variant.adaptors.VariantDBIterator;
-import org.springframework.batch.core.BatchStatus;
-import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.test.JobLauncherTestUtils;
@@ -36,7 +36,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
-import uk.ac.ebi.eva.test.utils.JobTestUtils;
+import uk.ac.ebi.eva.test.utils.GenotypedVcfJobTestUtils;
 import uk.ac.ebi.eva.utils.EvaJobParameterBuilder;
 import uk.ac.ebi.eva.utils.URLHelper;
 
@@ -67,6 +67,11 @@ public class PopulationStatisticsJobTest {
 
     @Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
+
+    @Before
+    public void setUp() throws Exception {
+        Config.setOpenCGAHome(GenotypedVcfJobTestUtils.getDefaultOpencgaHome());
+    }
 
     @Test
     public void fullPopulationStatisticsJob() throws Exception {

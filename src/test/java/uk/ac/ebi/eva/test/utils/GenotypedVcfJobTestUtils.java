@@ -11,6 +11,7 @@ import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.StepExecution;
 
 import uk.ac.ebi.eva.pipeline.configuration.BeanNames;
+import uk.ac.ebi.eva.utils.FileUtils;
 import uk.ac.ebi.eva.utils.URLHelper;
 
 import java.io.BufferedReader;
@@ -19,6 +20,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -190,5 +192,11 @@ public class GenotypedVcfJobTestUtils {
 
     public static File getMockVep() {
         return getResource(MOCK_VEP);
+    }
+
+    public static String getDefaultOpencgaHome() {
+        return System.getenv("OPENCGA_HOME") != null ?
+                System.getenv("OPENCGA_HOME") :
+                GenotypedVcfJobTestUtils.class.getResource("/opencga/").getFile();
     }
 }

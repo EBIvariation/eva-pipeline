@@ -16,11 +16,11 @@
 
 package uk.ac.ebi.eva.pipeline.jobs;
 
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.opencb.opencga.lib.common.Config;
-import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.StepExecution;
@@ -37,6 +37,7 @@ import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
+import uk.ac.ebi.eva.test.utils.GenotypedVcfJobTestUtils;
 import uk.ac.ebi.eva.utils.EvaJobParameterBuilder;
 
 import java.io.File;
@@ -79,9 +80,6 @@ public class GenotypedVcfJobWorkflowTest {
     @Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
 
-    private static String opencgaHome = System.getenv("OPENCGA_HOME") != null ? System
-            .getenv("OPENCGA_HOME") : "/opt/opencga";
-
     @Autowired
     private JobOptions jobOptions;  // we need this for stats.skip and annot.skip
 
@@ -95,6 +93,11 @@ public class GenotypedVcfJobWorkflowTest {
                     BeanNames.GENERATE_VEP_ANNOTATION_STEP,
                     BeanNames.LOAD_VEP_ANNOTATION_STEP,
                     BeanNames.LOAD_ANNOTATION_METADATA_STEP));
+
+    @Before
+    public void setUp() throws Exception {
+        Config.setOpenCGAHome(GenotypedVcfJobTestUtils.getDefaultOpencgaHome());
+    }
 
     @Test
     public void allStepsShouldBeExecuted() throws Exception {
@@ -209,7 +212,6 @@ public class GenotypedVcfJobWorkflowTest {
     }
 
     private EvaJobParameterBuilder initVariantConfigurationJob() throws IOException {
-        Config.setOpenCGAHome(opencgaHome);
         File inputFile = getResource(INPUT_FILE);
         String dbName = mongoRule.getRandomTemporaryDatabaseName();
         String outputDirStats = temporaryFolderRule.newFolder().getAbsolutePath();

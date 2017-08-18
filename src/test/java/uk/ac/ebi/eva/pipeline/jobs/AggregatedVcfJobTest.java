@@ -16,6 +16,7 @@
 package uk.ac.ebi.eva.pipeline.jobs;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
@@ -44,6 +45,7 @@ import uk.ac.ebi.eva.pipeline.configuration.BeanNames;
 import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
+import uk.ac.ebi.eva.test.utils.GenotypedVcfJobTestUtils;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
 import uk.ac.ebi.eva.utils.EvaJobParameterBuilder;
 
@@ -87,15 +89,16 @@ public class AggregatedVcfJobTest {
     @Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
 
-    private static String opencgaHome = System.getenv("OPENCGA_HOME") != null ? System
-            .getenv("OPENCGA_HOME") : "/opt/opencga";
-
     public static final Set<String> EXPECTED_REQUIRED_STEP_NAMES = new TreeSet<>(
             Arrays.asList(BeanNames.LOAD_VARIANTS_STEP, BeanNames.LOAD_FILE_STEP));
 
+    @Before
+    public void setUp() throws Exception {
+        Config.setOpenCGAHome(GenotypedVcfJobTestUtils.getDefaultOpencgaHome());
+    }
+
     @Test
     public void aggregatedTransformAndLoadShouldBeExecuted() throws Exception {
-        Config.setOpenCGAHome(opencgaHome);
         String dbName = mongoRule.getRandomTemporaryDatabaseName();
 
         JobParameters jobParameters = new EvaJobParameterBuilder()
@@ -146,7 +149,6 @@ public class AggregatedVcfJobTest {
     public void aggregationNoneIsNotAllowed() throws Exception {
         String dbName = mongoRule.getRandomTemporaryDatabaseName();
         mongoRule.getTemporaryDatabase(dbName);
-        Config.setOpenCGAHome(opencgaHome);
 
         JobParameters jobParameters = new EvaJobParameterBuilder()
                 .collectionFilesName(COLLECTION_FILES_NAME)
