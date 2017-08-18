@@ -36,7 +36,7 @@ If more convenient for your use case, the global configuration and job parameter
 
 It is likely that you will need to edit some parameters to match your environment and/or configure your job. For instance, connection details to MongoDB databases, OpenCGA/VEP installation directories, the folder containing the input files, the type of job to run, etc.
 
-**Note:** Most of the environment configuration can be provided directly to the application, but MongoDB connection details also need to be filled in the OpenCGA configuration file. This configuration file must be located in `<OpenCGA configuration folder>/conf/storage-mongodb.properties`. The folder `eva-pipeline/src/main/resources/opencga/` is an example of OpenCGA configuration folder, you can copy that folder and put the new location in the variable `app.opencga.path=/path/to/opencga` in your `application.properties`.
+**Note:** Most of the environment configuration can be provided directly to the application, but MongoDB connection details also need to be filled in the OpenCGA configuration file. This configuration file must be located in `<OpenCGA configuration folder>/conf/storage-mongodb.properties`, and the OpenCGA configuration folder must be specified in the variable `app.opencga.path=/path/to/opencga` in your `application.properties`. The root directory of the eva-pipeline repository can be used as OpenCGA configuration folder (as it contains the `conf` folder with the configuration files), but you can use any folder that contains the `conf` directory with the same files.
 
 By using these properties files, a job can be launched with a single command like:
 
@@ -57,7 +57,7 @@ The contents from the configuration files can be also provided directly as comma
 ### Environment
 
 * `spring.profiles.active`: "production" to keep track of half-executed jobs using a job repository database, "test" to use an in-memory database that will record a single run
-* `app.opencga.path`: Path to the OpenCGA configuration folder. `eva-pipeline/src/main/resources/opencga/` is a valid path. Remember to configure there your connection in the file `conf/storage-mongodb.properties`.
+* `app.opencga.path`: Path to the OpenCGA configuration folder. The eva-pipeline root folder is a valid path. Remember to configure there your database connection in the file `conf/storage-mongodb.properties`.
 
 Database credentials used to connect to a MongoDB instance. See [MongoDB options documentation](https://docs.mongodb.com/manual/reference/program/mongo/#options). The database and collection names are listed below in the "Database parameters" section.
 

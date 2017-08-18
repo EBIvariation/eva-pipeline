@@ -16,6 +16,7 @@
 
 package uk.ac.ebi.eva.pipeline.jobs;
 
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -94,6 +95,11 @@ public class GenotypedVcfJobWorkflowTest {
                     BeanNames.GENERATE_VEP_ANNOTATION_STEP,
                     BeanNames.LOAD_VEP_ANNOTATION_STEP,
                     BeanNames.LOAD_ANNOTATION_METADATA_STEP));
+
+    @Before
+    public void setUp() throws Exception {
+        Config.setOpenCGAHome(GenotypedVcfJobTestUtils.getDefaultOpencgaHome());
+    }
 
     @Test
     public void allStepsShouldBeExecuted() throws Exception {
@@ -208,7 +214,6 @@ public class GenotypedVcfJobWorkflowTest {
     }
 
     private EvaJobParameterBuilder initVariantConfigurationJob() throws IOException {
-        Config.setOpenCGAHome(opencgaHome);
         File inputFile = getResource(INPUT_FILE);
         String dbName = mongoRule.getRandomTemporaryDatabaseName();
         String outputDirStats = temporaryFolderRule.newFolder().getAbsolutePath();
