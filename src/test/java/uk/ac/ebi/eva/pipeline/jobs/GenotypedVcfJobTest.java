@@ -66,8 +66,6 @@ public class GenotypedVcfJobTest {
     @Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
 
-    private static String opencgaHome = GenotypedVcfJobTestUtils.getDefaultOpencgaHome();
-
     @Before
     public void setUp() throws Exception {
         Config.setOpenCGAHome(GenotypedVcfJobTestUtils.getDefaultOpencgaHome());

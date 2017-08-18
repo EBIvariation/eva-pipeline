@@ -89,8 +89,6 @@ public class AggregatedVcfJobTest {
     @Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
 
-    private static String opencgaHome = GenotypedVcfJobTestUtils.getDefaultOpencgaHome();
-
     public static final Set<String> EXPECTED_REQUIRED_STEP_NAMES = new TreeSet<>(
             Arrays.asList(BeanNames.LOAD_VARIANTS_STEP, BeanNames.LOAD_FILE_STEP));
 

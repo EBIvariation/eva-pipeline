@@ -80,8 +80,6 @@ public class GenotypedVcfJobWorkflowTest {
     @Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
 
-    private static String opencgaHome = GenotypedVcfJobTestUtils.getDefaultOpencgaHome();
-
     @Autowired
     private JobOptions jobOptions;  // we need this for stats.skip and annot.skip
 
