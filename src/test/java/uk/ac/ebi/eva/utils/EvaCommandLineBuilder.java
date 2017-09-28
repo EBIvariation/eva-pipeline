@@ -179,4 +179,8 @@ public class EvaCommandLineBuilder {
     public EvaCommandLineBuilder chunksize(String chunksize) {
         return addString(JobParametersNames.CONFIG_CHUNK_SIZE, chunksize);
     }
+
+    public EvaCommandLineBuilder dbCollectionsAnnotationsName(String name) {
+        return addString(JobParametersNames.DB_COLLECTIONS_ANNOTATIONS_NAME, name);
+    }
 }

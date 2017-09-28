@@ -34,27 +34,45 @@ import java.util.Map;
 public class VariantSourceEntity {
 
     public final static String FILEID_FIELD = "fid";
+
     public final static String FILENAME_FIELD = "fname";
+
     public final static String STUDYID_FIELD = "sid";
+
     public final static String STUDYNAME_FIELD = "sname";
+
     public final static String STUDYTYPE_FIELD = "stype";
+
     public final static String AGGREGATION_FIELD = "aggregation";
+
     public final static String DATE_FIELD = "date";
+
     public final static String SAMPLES_FIELD = "samp";
 
     public final static String STATISTICS_FIELD = "st";
+
     public final static String STATISTICS_NUMSAMPLES_FIELD = "nSamp";
+
     public final static String STATISTICS_NUMVARIANTS_FIELD = "nVar";
+
     public final static String STATISTICS_NUMSNPS_FIELD = "nSnp";
+
     public final static String STATISTICS_NUMINDELS_FIELD = "nIndel";
+
     public final static String STATISTICS_NUMSTRUCTURAL_FIELD = "nSv";
+
     public final static String STATISTICS_NUMPASSFILTERS_FIELD = "nPass";
+
     public final static String STATISTICS_NUMTRANSITIONS_FIELD = "nTi";
+
     public final static String STATISTICS_NUMTRANSVERSIONS_FIELD = "nTv";
+
     public final static String STATISTICS_MEANQUALITY_FIELD = "meanQ";
 
     public final static String METADATA_FIELD = "meta";
+
     public final static String METADATA_FILEFORMAT_FIELD = "fileformat";
+
     public final static String METADATA_HEADER_FIELD = "header";
 
 

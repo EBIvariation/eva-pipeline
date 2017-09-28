@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2017 EMBL - European Bioinformatics Institute
+ * Copyright 2015-2017 EMBL - European Bioinformatics Institute
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package uk.ac.ebi.eva.pipeline.io.writers;
 
 import com.mongodb.BasicDBList;
@@ -77,7 +78,7 @@ public class VariantMongoWriterTest {
     public void noVariantsNothingShouldBeWritten() throws UnknownHostException {
         String dbName = mongoRule.getRandomTemporaryDatabaseName();
         MongoOperations mongoOperations = MongoConfiguration.getMongoOperations(dbName, mongoConnection,
-                mongoMappingContext);
+                                                                                mongoMappingContext);
         DBCollection dbCollection = mongoOperations.getCollection(collectionName);
 
         VariantMongoWriter variantMongoWriter = new VariantMongoWriter(collectionName, mongoOperations, false, false);
@@ -93,7 +94,7 @@ public class VariantMongoWriterTest {
 
         String dbName = mongoRule.getRandomTemporaryDatabaseName();
         MongoOperations mongoOperations = MongoConfiguration.getMongoOperations(dbName, mongoConnection,
-                mongoMappingContext);
+                                                                                mongoMappingContext);
         DBCollection dbCollection = mongoOperations.getCollection(collectionName);
 
         BasicDBObject dbObject = new BasicDBObject();
@@ -109,7 +110,7 @@ public class VariantMongoWriterTest {
     public void indexesShouldBeCreatedInBackground() throws UnknownHostException {
         String dbName = mongoRule.getRandomTemporaryDatabaseName();
         MongoOperations mongoOperations = MongoConfiguration.getMongoOperations(dbName, mongoConnection,
-                mongoMappingContext);
+                                                                                mongoMappingContext);
         DBCollection dbCollection = mongoOperations.getCollection(collectionName);
 
         VariantMongoWriter variantMongoWriter = new VariantMongoWriter(collectionName, mongoOperations, false, false);
@@ -119,13 +120,13 @@ public class VariantMongoWriterTest {
         Set<String> createdIndexes = indexInfo.stream().map(index -> index.get("name").toString())
                 .collect(Collectors.toSet());
         Set<String> expectedIndexes = new HashSet<>();
-        expectedIndexes.addAll(Arrays.asList("annot.ct.so_1", "annot.xrefs.id_1", "chr_1_start_1_end_1",
-                "files.sid_1_files.fid_1", "_id_", "ids_1"));
+        expectedIndexes.addAll(Arrays.asList("annot.xrefs_1", "files.sid_1_files.fid_1", "chr_1_start_1_end_1",
+                "annot.so_1", "_id_", "ids_1"));
         assertEquals(expectedIndexes, createdIndexes);
 
         indexInfo.stream().filter(index -> !("_id_".equals(index.get("name").toString())))
-                .forEach(index -> assertEquals("true",
-                        index.get(MongoDBHelper.BACKGROUND_INDEX).toString()));
+                .forEach(index -> assertEquals("true", index.get(MongoDBHelper.BACKGROUND_INDEX).toString()));
+
     }
 
     @Test
@@ -135,7 +136,7 @@ public class VariantMongoWriterTest {
 
         String dbName = mongoRule.getRandomTemporaryDatabaseName();
         MongoOperations mongoOperations = MongoConfiguration.getMongoOperations(dbName, mongoConnection,
-                mongoMappingContext);
+                                                                                mongoMappingContext);
 
         VariantMongoWriter variantMongoWriter = new VariantMongoWriter(collectionName, mongoOperations, false, false);
         variantMongoWriter.write(Collections.singletonList(variant1));

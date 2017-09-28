@@ -17,20 +17,23 @@
 package uk.ac.ebi.eva.pipeline.io.mappers;
 
 import org.apache.commons.lang.ArrayUtils;
-import org.opencb.biodata.models.variant.annotation.ConsequenceType;
-import org.opencb.biodata.models.variant.annotation.Score;
+import org.opencb.biodata.models.variant.annotation.ConsequenceTypeMappings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.item.file.LineMapper;
 
-import uk.ac.ebi.eva.commons.models.data.VariantAnnotation;
+import uk.ac.ebi.eva.commons.models.mongo.entity.Annotation;
+import uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.ConsequenceType;
+import uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.Score;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
- * Map a line in VEP output file to {@link VariantAnnotation}
+ * Map a line in VEP output file to {@link Annotation}
  *
  * Example of VEP output line
  * 20_60343_G/A	20:60343	A	-	-	-	intergenic_variant	-	-	-	-	-	-
@@ -42,19 +45,27 @@ import java.util.Map;
  * public methods in VepFormatReader can't be reused because there is a reference to the previous line (currentVariantString)
  * that prevent each line to be independent
  *
- * Here each line is mapped to {@link VariantAnnotation}; in case of two annotations for the same variant, a new
- * {@link VariantAnnotation} object is created containing only the fields that will be appended:
+ * Here each line is mapped to {@link Annotation}; in case of two annotations for the same variant, a new
+ * {@link Annotation} object is created containing only the fields that will be appended:
  *  - ConsequenceTypes
  *  - Hgvs
  */
-public class AnnotationLineMapper implements LineMapper<VariantAnnotation> {
+public class AnnotationLineMapper implements LineMapper<Annotation> {
     private static final Logger logger = LoggerFactory.getLogger(AnnotationLineMapper.class);
 
+    private final String vepVersion;
+    private final String vepCacheVersion;
+
+    public AnnotationLineMapper(String vepVersion, String vepCacheVersion) {
+        this.vepVersion = vepVersion;
+        this.vepCacheVersion = vepCacheVersion;
+    }
+
     /**
-     * Map a line in VEP output file to {@link VariantAnnotation}
+     * Map a line in VEP output file to {@link Annotation}
      * @param line in VEP output
      * @param lineNumber
-     * @return a {@link VariantAnnotation}
+     * @return a {@link Annotation}
      *
      * Most of the code is from org.opencb.biodata.formats.annotation.io.VepFormatReader#read() with few differences:
      *  - An empty array is initialized for Hgvs (like ConsequenceTypes);
@@ -62,24 +73,25 @@ public class AnnotationLineMapper implements LineMapper<VariantAnnotation> {
      *  - The logic to move around the file (read line) and reference to previous line (currentVariantString) are removed;
      */
     @Override
-    public VariantAnnotation mapLine(String line, int lineNumber) {
-        //logger.debug("Mapping line {} to VariantAnnotation", line);
+    public Annotation mapLine(String line, int lineNumber) {
         ConsequenceType consequenceType = new ConsequenceType();
         String[] lineFields = line.split("\t");
 
         Map<String,String> variantMap = parseVariant(lineFields[0], lineFields[1]);  // coordinates and alternative are only parsed once
-        VariantAnnotation currentAnnotation = new VariantAnnotation(
+        Annotation currentAnnotation = new Annotation(
                 variantMap.get("chromosome"),
                 Integer.valueOf(variantMap.get("start")),
                 Integer.valueOf(variantMap.get("end")), variantMap.get("reference"),
-                variantMap.get("alternative"));
+                variantMap.get("alternative"),
+                vepVersion,
+                vepCacheVersion);
 
         /**
          * parses extra column and populates fields as required.
          * Some lines do not have extra field and end with a \t: the split function above does not return that field
          */
         if(lineFields.length == 14) {
-            parseExtraField(consequenceType, lineFields[13], currentAnnotation);
+            parseExtraField(consequenceType, lineFields[13]);
         }
 
         // Remaining fields only of interest if the feature is a transcript
@@ -87,9 +99,9 @@ public class AnnotationLineMapper implements LineMapper<VariantAnnotation> {
             parseTranscriptFields(consequenceType, lineFields);
             // Otherwise just set SO terms
         } else {
-            consequenceType.setSoTermsFromSoNames(Arrays.asList(lineFields[6].split(",")));   // fill so terms
+            consequenceType.setSoAccessions(mapSoTermsToSoAccessions(lineFields[6].split(",")));
         }
-        currentAnnotation.getConsequenceTypes().add(consequenceType);
+        currentAnnotation.addConsequenceType(consequenceType);
         
         return currentAnnotation;
     }
@@ -99,22 +111,26 @@ public class AnnotationLineMapper implements LineMapper<VariantAnnotation> {
      * #parseRemainingFields(org.opencb.biodata.models.variant.annotation.ConsequenceType, java.lang.String[])
      */
     private void parseTranscriptFields(ConsequenceType consequenceType, String[] lineFields) {
-        consequenceType.setEnsemblGeneId(lineFields[3]);    // fill Ensembl gene id
-        consequenceType.setEnsemblTranscriptId(lineFields[4]);  // fill Ensembl transcript id
+        consequenceType.setEnsemblGeneId(lineFields[3]);
+        consequenceType.setEnsemblTranscriptId(lineFields[4]);
         if(!lineFields[6].equals("") && !lineFields[6].equals("-")) {  // VEP may leave this field empty
-            consequenceType.setSoTermsFromSoNames(Arrays.asList(lineFields[6].split(",")));    // fill so terms
+            consequenceType.setSoAccessions(mapSoTermsToSoAccessions(lineFields[6].split(",")));
         }
         if(!lineFields[7].equals("-")) {
-            consequenceType.setcDnaPosition(parseStringInterval(lineFields[7]));    // fill cdna position
+            consequenceType.setcDnaPosition(parseStringInterval(lineFields[7]));
         }
         if(!lineFields[8].equals("-")) {
-            consequenceType.setCdsPosition(parseStringInterval(lineFields[8]));  // fill cds position
+            consequenceType.setCdsPosition(parseStringInterval(lineFields[8]));
         }
         if(!lineFields[9].equals("-")) {
-            consequenceType.setAaPosition(parseStringInterval(lineFields[9]));    // fill aa position
+            consequenceType.setAaPosition(parseStringInterval(lineFields[9]));
         }
-        consequenceType.setAaChange(lineFields[10]);  // fill aa change
-        consequenceType.setCodon(lineFields[11]); // fill codon change
+        consequenceType.setAaChange(lineFields[10]);
+        consequenceType.setCodon(lineFields[11]);
+    }
+
+    private Set<Integer> mapSoTermsToSoAccessions(String[] soTerms){
+        return Arrays.stream(soTerms).map(ConsequenceTypeMappings.termToAccession::get).collect(Collectors.toSet());
     }
 
     /**
@@ -182,8 +198,7 @@ public class AnnotationLineMapper implements LineMapper<VariantAnnotation> {
      *
      * The parseFrequencies option has been removed
      */
-    private void parseExtraField(ConsequenceType consequenceType, String extraField, VariantAnnotation currentAnnotation) {
-
+    private void parseExtraField(ConsequenceType consequenceType, String extraField) {
         for (String field : extraField.split(";")) {
             String[] keyValue = field.split("=");
 
@@ -191,17 +206,11 @@ public class AnnotationLineMapper implements LineMapper<VariantAnnotation> {
                 case "biotype":
                     consequenceType.setBiotype(keyValue[1]);
                     break;
-                case "hgvsc":
-                    currentAnnotation.getHgvs().add(keyValue[1]);
-                    break;
-                case "hgvsp":
-                    currentAnnotation.getHgvs().add(keyValue[1]);
-                    break;
                 case "polyphen": // Format is PolyPhen=possibly_damaging(0.859)
-                    consequenceType.addProteinSubstitutionScore(parseProteinSubstitutionScore("Polyphen", keyValue[1]));
+                    consequenceType.setPolyphen(parseProteinSubstitutionScore(keyValue[1]));
                     break;
                 case "sift": // Format is SIFT=tolerated(0.07)
-                    consequenceType.addProteinSubstitutionScore(parseProteinSubstitutionScore("Sift", keyValue[1]));
+                    consequenceType.setSift(parseProteinSubstitutionScore(keyValue[1]));
                     break;
                 case "strand":
                     consequenceType.setStrand(keyValue[1].equals("1")?"+":"-");
@@ -220,8 +229,8 @@ public class AnnotationLineMapper implements LineMapper<VariantAnnotation> {
      * From org.opencb.biodata.formats.annotation.io.VepFormatReader
      * #parseProteinSubstitutionScore(java.lang.String, java.lang.String)
      */
-    private Score parseProteinSubstitutionScore(String predictorName, String scoreString) {
+    private Score parseProteinSubstitutionScore(String scoreString) {
         String[] scoreFields = scoreString.split("[\\(\\)]");
-        return new Score(Double.valueOf(scoreFields[1]), predictorName, scoreFields[0]);
+        return new Score(Double.valueOf(scoreFields[1]), scoreFields[0]);
     }
 }

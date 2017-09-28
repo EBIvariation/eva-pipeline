@@ -21,15 +21,16 @@ import org.springframework.batch.core.JobParametersValidator;
 import org.springframework.batch.core.job.CompositeJobParametersValidator;
 import org.springframework.batch.core.job.DefaultJobParametersValidator;
 
-import uk.ac.ebi.eva.pipeline.parameters.validation.step.DropFilesByStudyStepValidator;
-import uk.ac.ebi.eva.pipeline.parameters.validation.step.DropSingleStudyVariantsStepValidator;
-import uk.ac.ebi.eva.pipeline.parameters.validation.step.PullFilesAndStatisticsByStudyStepValidator;
+import uk.ac.ebi.eva.pipeline.configuration.jobs.DropStudyJobConfiguration;
+import uk.ac.ebi.eva.pipeline.parameters.validation.step.DropFilesByStudyStepParametersValidator;
+import uk.ac.ebi.eva.pipeline.parameters.validation.step.DropVariantsByStudyStepParametersValidator;
+import uk.ac.ebi.eva.pipeline.parameters.validation.step.PullFilesAndStatisticsByStudyStepParametersValidator;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Validates the job parameters necessary to execute an {@link uk.ac.ebi.eva.pipeline.jobs.DropStudyJob}
+ * Validates the job parameters necessary to execute an {@link DropStudyJobConfiguration}
  */
 public class DropStudyJobParametersValidator extends DefaultJobParametersValidator {
 
@@ -41,9 +42,9 @@ public class DropStudyJobParametersValidator extends DefaultJobParametersValidat
     private CompositeJobParametersValidator compositeJobParametersValidator() {
         List<JobParametersValidator> jobParametersValidators = new ArrayList<>();
 
-        jobParametersValidators.add(new DropSingleStudyVariantsStepValidator());
-        jobParametersValidators.add(new PullFilesAndStatisticsByStudyStepValidator());
-        jobParametersValidators.add(new DropFilesByStudyStepValidator());
+        jobParametersValidators.add(new DropVariantsByStudyStepParametersValidator());
+        jobParametersValidators.add(new PullFilesAndStatisticsByStudyStepParametersValidator());
+        jobParametersValidators.add(new DropFilesByStudyStepParametersValidator());
 
         CompositeJobParametersValidator compositeJobParametersValidator = new CompositeJobParametersValidator();
         compositeJobParametersValidator.setValidators(jobParametersValidators);

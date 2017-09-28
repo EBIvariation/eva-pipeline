@@ -17,27 +17,31 @@
 package uk.ac.ebi.eva.commons.models.metadata;
 
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
+import org.springframework.util.Assert;
+
+import uk.ac.ebi.eva.commons.models.mongo.entity.Annotation;
 
 @Document
 public class AnnotationMetadata {
 
     private String id;
 
+    @Field(Annotation.VEP_VERSION_FIELD)
     private String vepVersion;
 
+    @Field(Annotation.VEP_CACHE_VERSION_FIELD)
     private String cacheVersion;
 
     AnnotationMetadata() {
+        // Empty document constructor for spring-data
     }
 
     public AnnotationMetadata(String vepVersion, String cacheVersion) {
-        this.id = vepVersion + "_" + cacheVersion;
-        this.vepVersion = vepVersion;
-        this.cacheVersion = cacheVersion;
-    }
+        Assert.hasText(vepVersion, "A non empty vepVerion is required");
+        Assert.hasText(vepVersion, "A non empty cacheVersion is required");
 
-    public AnnotationMetadata(String id, String vepVersion, String cacheVersion) {
-        this.id = id;
+        this.id = vepVersion + "_" + cacheVersion;
         this.vepVersion = vepVersion;
         this.cacheVersion = cacheVersion;
     }
@@ -46,15 +50,8 @@ public class AnnotationMetadata {
         return vepVersion;
     }
 
-    public void setVepVersion(String vepVersion) {
-        this.vepVersion = vepVersion;
-    }
-
     public String getCacheVersion() {
         return cacheVersion;
     }
 
-    public void setCacheVersion(String cacheVersion) {
-        this.cacheVersion = cacheVersion;
-    }
 }

@@ -20,9 +20,10 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
 
 import static org.junit.Assert.assertEquals;
-import static uk.ac.ebi.eva.commons.models.converters.data.VariantToDBObjectConverter.FILES_FIELD;
-import static uk.ac.ebi.eva.commons.models.converters.data.VariantToDBObjectConverter.STATS_FIELD;
+
 import static uk.ac.ebi.eva.commons.models.data.VariantSourceEntity.STUDYID_FIELD;
+import static uk.ac.ebi.eva.commons.models.mongo.entity.VariantDocument.FILES_FIELD;
+import static uk.ac.ebi.eva.commons.models.mongo.entity.VariantDocument.STATS_FIELD;
 
 public class DropStudyJobTestUtils {
 
@@ -30,8 +31,8 @@ public class DropStudyJobTestUtils {
 
     private static final String STATS_STUDY_ID_FIELD = String.format("%s.%s", STATS_FIELD, STUDYID_FIELD);
 
-    public static void assertDropSingleStudy(DBCollection variantsCollection, String studyId,
-            long expectedVariantsAfterDropStudy) {
+    public static void assertDropVariantsByStudy(DBCollection variantsCollection, String studyId,
+                                                 long expectedVariantsAfterDropStudy) {
 
         assertEquals(expectedVariantsAfterDropStudy, variantsCollection.count());
 

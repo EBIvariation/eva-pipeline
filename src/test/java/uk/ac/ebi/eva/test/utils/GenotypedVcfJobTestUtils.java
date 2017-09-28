@@ -1,35 +1,29 @@
 package uk.ac.ebi.eva.test.utils;
 
-import org.opencb.biodata.models.variant.Variant;
-import org.opencb.datastore.core.QueryOptions;
+import com.mongodb.BasicDBList;
+import com.mongodb.DBCursor;
+import com.mongodb.DBObject;
 import org.opencb.opencga.storage.core.StorageManagerException;
-import org.opencb.opencga.storage.core.StorageManagerFactory;
-import org.opencb.opencga.storage.core.variant.VariantStorageManager;
-import org.opencb.opencga.storage.core.variant.adaptors.VariantDBAdaptor;
-import org.opencb.opencga.storage.core.variant.adaptors.VariantDBIterator;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.StepExecution;
 
 import uk.ac.ebi.eva.pipeline.configuration.BeanNames;
-import uk.ac.ebi.eva.utils.FileUtils;
+import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 import uk.ac.ebi.eva.utils.URLHelper;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.URISyntaxException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static uk.ac.ebi.eva.commons.models.mongo.entity.Annotation.CONSEQUENCE_TYPE_FIELD;
 import static uk.ac.ebi.eva.test.utils.JobTestUtils.count;
 import static uk.ac.ebi.eva.test.utils.JobTestUtils.getLines;
 import static uk.ac.ebi.eva.utils.FileUtils.getResource;
@@ -51,6 +45,8 @@ public class GenotypedVcfJobTestUtils {
 
     public static final String COLLECTION_VARIANTS_NAME = "variants";
 
+    public static final String COLLECTION_ANNOTATIONS_NAME = "annotations";
+
     public static final String COLLECTION_ANNOTATION_METADATA_NAME = "annotationMetadata";
 
     private static final int EXPECTED_ANNOTATIONS = 537;
@@ -59,67 +55,32 @@ public class GenotypedVcfJobTestUtils {
 
     private static final int EXPECTED_VALID_ANNOTATIONS = 536;
 
-    public static VariantDBIterator getVariantDBIterator(String dbName) throws IllegalAccessException,
-            ClassNotFoundException, InstantiationException, StorageManagerException {
-        VariantStorageManager variantStorageManager = StorageManagerFactory.getVariantStorageManager();
-        VariantDBAdaptor variantDBAdaptor = variantStorageManager.getDBAdaptor(dbName, null);
-        return variantDBAdaptor.iterator(new QueryOptions());
+    public static DBCursor getVariantDBCursor(TemporaryMongoRule mongoRule, String databaseName) {
+        return mongoRule.getCollection(databaseName, COLLECTION_VARIANTS_NAME).find();
     }
 
-    /**
-     * 4 annotation flow annotation input vep generate step
-     *
-     * @param vepInputFile
-     * @throws IOException
-     */
-    public static void checkAnnotationInput(File vepInputFile) throws IOException {
-        BufferedReader testReader = new BufferedReader(new InputStreamReader(new FileInputStream(
-                getResource("/expected-output/preannot.sorted"))));
-        BufferedReader actualReader = new BufferedReader(new InputStreamReader(new FileInputStream(
-                vepInputFile.toString())));
-
-        ArrayList<String> rows = new ArrayList<>();
-
-        String s;
-        while ((s = actualReader.readLine()) != null) {
-            rows.add(s);
-        }
-        Collections.sort(rows);
-
-        String testLine = testReader.readLine();
-        for (String row : rows) {
-            assertEquals(testLine, row);
-            testLine = testReader.readLine();
-        }
-        assertNull(testLine); // if both files have the same length testReader should be after the last line
+    public static DBCursor getAnnotationDBCursor(TemporaryMongoRule mongoRule, String databaseName) {
+        return mongoRule.getCollection(databaseName, COLLECTION_ANNOTATIONS_NAME).find();
     }
-
 
     /**
      * Annotation load step: check documents in DB have annotation (only consequence type)
-     *
-     * @param dbName
-     * @throws IllegalAccessException
-     * @throws ClassNotFoundException
-     * @throws InstantiationException
-     * @throws StorageManagerException
      */
-    public static void checkLoadedAnnotation(String dbName) throws IllegalAccessException, ClassNotFoundException,
-            InstantiationException, StorageManagerException {
-        VariantDBIterator iterator;
-        iterator = getVariantDBIterator(dbName);
+    public static void checkLoadedAnnotation(TemporaryMongoRule mongoRule, String databaseName) {
+        DBCursor cursor = getAnnotationDBCursor(mongoRule, databaseName);
 
         int count = 0;
         int consequenceTypeCount = 0;
-        while (iterator.hasNext()) {
+        while (cursor.hasNext()) {
             count++;
-            Variant next = iterator.next();
-            if (next.getAnnotation().getConsequenceTypes() != null) {
-                consequenceTypeCount += next.getAnnotation().getConsequenceTypes().size();
-            }
+            DBObject annotation = cursor.next();
+            BasicDBList consequenceTypes = (BasicDBList) annotation.get(CONSEQUENCE_TYPE_FIELD);
+            assertNotNull(consequenceTypes);
+            consequenceTypeCount += consequenceTypes.size();
         }
+        cursor.close();
 
-        assertEquals(EXPECTED_VARIANTS, count);
+        assertTrue(count > 0);
         assertEquals(EXPECTED_VALID_ANNOTATIONS, consequenceTypeCount);
     }
 
@@ -133,26 +94,28 @@ public class GenotypedVcfJobTestUtils {
 
     /**
      * load stats step: check the DB docs have the field "st"
-     *
-     * @param dbName
      */
-    public static void checkLoadStatsStep(String dbName) throws ClassNotFoundException, StorageManagerException,
-            InstantiationException, IllegalAccessException {
-        VariantDBIterator iterator = GenotypedVcfJobTestUtils.getVariantDBIterator(dbName);
-        assertEquals(1, iterator.next().getSourceEntries().values().iterator().next().getCohortStats().size());
+    public static void checkLoadStatsStep(TemporaryMongoRule mongoRule,
+                                          String databaseName) throws ClassNotFoundException, StorageManagerException, InstantiationException, IllegalAccessException {
+        DBCursor iterator = getVariantDBCursor(mongoRule, databaseName);
+        DBObject stField = ((DBObject) iterator.next().get("st"));
+
+        assertNotNull(stField);
+        iterator.close();
     }
 
     /**
      * 1 load step: check ((documents in DB) == (lines in transformed file))
      * variantStorageManager = StorageManagerFactory.getVariantStorageManager();
      * variantDBAdaptor = variantStorageManager.getDBAdaptor(dbName, null);
-     *
-     * @param dbName
      */
-    public static void checkLoadStep(String dbName) throws ClassNotFoundException, StorageManagerException,
+    public static void checkLoadStep(TemporaryMongoRule mongoRule,
+                                     String databaseName) throws ClassNotFoundException, StorageManagerException,
             InstantiationException, IllegalAccessException {
-        VariantDBIterator iterator = GenotypedVcfJobTestUtils.getVariantDBIterator(dbName);
+        DBCursor iterator = getVariantDBCursor(mongoRule, databaseName);
+
         assertEquals(EXPECTED_VARIANTS, count(iterator));
+        iterator.close();
     }
 
     /**
@@ -168,10 +131,10 @@ public class GenotypedVcfJobTestUtils {
 
     public static void checkSkippedOneMalformedLine(JobExecution jobExecution) {
         //check that one line is skipped because malformed
-        List<StepExecution> variantAnnotationLoadStepExecution = jobExecution.getStepExecutions().stream()
+        List<StepExecution> annotationLoadStepExecution = jobExecution.getStepExecutions().stream()
                 .filter(stepExecution -> stepExecution.getStepName().equals(BeanNames.LOAD_VEP_ANNOTATION_STEP))
                 .collect(Collectors.toList());
-        assertEquals(1, variantAnnotationLoadStepExecution.get(0).getReadSkipCount());
+        assertEquals(1, annotationLoadStepExecution.get(0).getReadSkipCount());
     }
 
     public static File getVariantsStatsFile(String outputDirStats) throws URISyntaxException {

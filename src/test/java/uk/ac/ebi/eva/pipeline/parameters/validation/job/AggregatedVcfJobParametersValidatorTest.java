@@ -22,6 +22,7 @@ import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersInvalidException;
 
+import uk.ac.ebi.eva.pipeline.configuration.jobs.AggregatedVcfJobConfiguration;
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 
@@ -29,7 +30,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 /**
- * Tests that the arguments necessary to run a {@link uk.ac.ebi.eva.pipeline.jobs.AggregatedVcfJob} are
+ * Tests that the arguments necessary to run a {@link AggregatedVcfJobConfiguration} are
  * correctly validated
  */
 public class AggregatedVcfJobParametersValidatorTest {
@@ -59,7 +60,7 @@ public class AggregatedVcfJobParametersValidatorTest {
         requiredParameters.put(JobParametersNames.INPUT_VCF_ID, new JobParameter("inputVcfId"));
         requiredParameters.put(JobParametersNames.INPUT_VCF_AGGREGATION, new JobParameter("NONE"));
         requiredParameters.put(JobParametersNames.INPUT_VCF,
-                new JobParameter(temporaryFolder.newFile().getCanonicalPath()));
+                               new JobParameter(temporaryFolder.newFile().getCanonicalPath()));
 
         // file load step
         requiredParameters.put(JobParametersNames.DB_COLLECTIONS_FILES_NAME, new JobParameter("collectionsFilesName"));
@@ -77,14 +78,15 @@ public class AggregatedVcfJobParametersValidatorTest {
         annotationParameters.put(JobParametersNames.APP_VEP_NUMFORKS, new JobParameter("6"));
         annotationParameters.put(JobParametersNames.APP_VEP_TIMEOUT, new JobParameter("600"));
         annotationParameters.put(JobParametersNames.ANNOTATION_OVERWRITE, new JobParameter("false"));
+        annotationParameters.put(JobParametersNames.DB_COLLECTIONS_ANNOTATIONS_NAME, new JobParameter("annotations"));
         annotationParameters.put(JobParametersNames.DB_COLLECTIONS_ANNOTATION_METADATA_NAME,
-                new JobParameter("annotationMetadata"));
+                                 new JobParameter("annotationMetadata"));
         annotationParameters.put(JobParametersNames.APP_VEP_CACHE_PATH,
-                new JobParameter(temporaryFolder.getRoot().getCanonicalPath()));
+                                 new JobParameter(temporaryFolder.getRoot().getCanonicalPath()));
         annotationParameters.put(JobParametersNames.APP_VEP_PATH,
-                new JobParameter(temporaryFolder.newFile().getCanonicalPath()));
+                                 new JobParameter(temporaryFolder.newFile().getCanonicalPath()));
         annotationParameters.put(JobParametersNames.INPUT_FASTA,
-                new JobParameter(temporaryFolder.newFile().getCanonicalPath()));
+                                 new JobParameter(temporaryFolder.newFile().getCanonicalPath()));
 
 
         // optionals
@@ -103,6 +105,7 @@ public class AggregatedVcfJobParametersValidatorTest {
         parameters.putAll(optionalParameters);
         validator.validate(new JobParameters(parameters));
     }
+
     @Test
     public void allRequiredJobParametersAreValid() throws JobParametersInvalidException {
         Map<String, JobParameter> parameters = new TreeMap<>();

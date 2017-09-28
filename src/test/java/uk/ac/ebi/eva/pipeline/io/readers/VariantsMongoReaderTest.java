@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2017 EMBL - European Bioinformatics Institute
+ * Copyright 2015-2017 EMBL - European Bioinformatics Institute
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,13 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package uk.ac.ebi.eva.pipeline.io.readers;
 
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.opencb.biodata.models.variant.Variant;
-import org.opencb.biodata.models.variant.annotation.VariantAnnotation;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.test.MetaDataInstanceFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,18 +31,16 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import uk.ac.ebi.eva.pipeline.Application;
 import uk.ac.ebi.eva.pipeline.configuration.MongoConfiguration;
-import uk.ac.ebi.eva.pipeline.model.VariantWrapper;
+import uk.ac.ebi.eva.pipeline.model.EnsemblVariant;
 import uk.ac.ebi.eva.pipeline.parameters.MongoConnection;
 import uk.ac.ebi.eva.test.data.VariantData;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 
-import java.lang.reflect.Field;
 import java.util.Arrays;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNull;
 
 /**
  * {@link VariantsMongoReader}
@@ -58,6 +55,8 @@ public class VariantsMongoReaderTest {
 
     private static final String COLLECTION_VARIANTS_NAME = "variants";
 
+    private static final int EXPECTED_NO_VARIANTS = 0;
+
     private static final int EXPECTED_NON_ANNOTATED_VARIANTS_IN_STUDY = 1;
 
     private static final int EXPECTED_NON_ANNOTATED_VARIANTS_IN_DB = 2;
@@ -68,7 +67,13 @@ public class VariantsMongoReaderTest {
 
     private static final String STUDY_ID = "7";
 
-    private static final String ALL_STUDIES = "";
+    private static final String FILE_ID = "5";
+
+    private static final String ALL_IDS = "";
+
+    private static final String VEP_VERSION = "78";
+
+    private static final String VEP_CACHE_VERSION = "78";
 
     @Autowired
     private MongoConnection mongoConnection;
@@ -81,71 +86,53 @@ public class VariantsMongoReaderTest {
 
     @Test
     public void shouldReadVariantsWithoutAnnotationFieldInAStudy() throws Exception {
-        checkNonAnnotatedVariantsRead(EXPECTED_NON_ANNOTATED_VARIANTS_IN_STUDY, STUDY_ID);
+        checkVariantsRead(EXPECTED_NON_ANNOTATED_VARIANTS_IN_STUDY, STUDY_ID, FILE_ID, true);
     }
 
     @Test
     public void shouldReadVariantsWithoutAnnotationFieldInAllStudies() throws Exception {
-        checkNonAnnotatedVariantsRead(EXPECTED_NON_ANNOTATED_VARIANTS_IN_DB, ALL_STUDIES);
+        checkVariantsRead(EXPECTED_NON_ANNOTATED_VARIANTS_IN_DB, ALL_IDS, ALL_IDS, true);
     }
 
     @Test
     public void shouldReadVariantsWithoutAnnotationFieldInAllStudiesWhenNoStudySpecified() throws Exception {
-        checkNonAnnotatedVariantsRead(EXPECTED_NON_ANNOTATED_VARIANTS_IN_DB, null);
-    }
-
-    private void checkNonAnnotatedVariantsRead(int expectedNonAnnotatedVariants, String study) throws Exception {
-        ExecutionContext executionContext = MetaDataInstanceFactory.createStepExecution().getExecutionContext();
-        String databaseName = mongoRule.createDBAndInsertDocuments(COLLECTION_VARIANTS_NAME, Arrays.asList(
-                VariantData.getVariantWithAnnotation(),
-                VariantData.getVariantWithoutAnnotation(),
-                VariantData.getVariantWithoutAnnotationOtherStudy()));
-
-        MongoOperations mongoOperations = MongoConfiguration.getMongoOperations(databaseName, mongoConnection,
-                mongoMappingContext);
-
-        boolean excludeAnnotated = true;
-        VariantsMongoReader mongoItemReader = new VariantsMongoReader(
-                mongoOperations, COLLECTION_VARIANTS_NAME, study, excludeAnnotated);
-        mongoItemReader.open(executionContext);
-
-        int itemCount = 0;
-        VariantWrapper variantWrapper;
-        while ((variantWrapper = mongoItemReader.read()) != null) {
-            itemCount++;
-            assertFalse(variantWrapper.getChr().isEmpty());
-            assertNotEquals(0, variantWrapper.getStart());
-
-            assertDoesNotHaveVariantAnnotation(variantWrapper);
-        }
-        assertEquals(expectedNonAnnotatedVariants, itemCount);
-        mongoItemReader.close();
-    }
-
-    private void assertDoesNotHaveVariantAnnotation(VariantWrapper variantWrapper)
-            throws NoSuchFieldException, IllegalAccessException {
-        Field privateVariantField = VariantWrapper.class.getDeclaredField("variant");
-        privateVariantField.setAccessible(true);
-        VariantAnnotation annotation = ((Variant) privateVariantField.get(variantWrapper)).getAnnotation();
-        assertNull(annotation.getConsequenceTypes());
+        checkVariantsRead(EXPECTED_NON_ANNOTATED_VARIANTS_IN_DB, null, null, true);
     }
 
     @Test
     public void shouldReadVariantsInAStudy() throws Exception {
-        checkAllVariantsRead(EXPECTED_VARIANTS_IN_STUDY, STUDY_ID);
+        checkVariantsRead(EXPECTED_VARIANTS_IN_STUDY, STUDY_ID, FILE_ID, false);
+    }
+
+    @Test
+    public void shouldReadVariantsInAStudyWhenNoFileSpecified() throws Exception {
+        checkVariantsRead(EXPECTED_VARIANTS_IN_STUDY, STUDY_ID, null, false);
     }
 
     @Test
     public void shouldReadVariantsInAllStudies() throws Exception {
-        checkAllVariantsRead(EXPECTED_VARIANTS_IN_DB, ALL_STUDIES);
+        checkVariantsRead(EXPECTED_VARIANTS_IN_DB, ALL_IDS, ALL_IDS, false);
     }
 
     @Test
     public void shouldReadVariantsInAllStudiesWhenNoStudySpecified() throws Exception {
-        checkAllVariantsRead(EXPECTED_VARIANTS_IN_DB, null);
+        checkVariantsRead(EXPECTED_VARIANTS_IN_DB, null, null, false);
+        checkVariantsRead(EXPECTED_VARIANTS_IN_DB, null, FILE_ID, false);
     }
 
-    private void checkAllVariantsRead(int expectedVariants, String study) throws Exception {
+    @Test
+    public void shouldNotReadVariantsWhenStudyDoesNotExist() throws Exception {
+        checkVariantsRead(EXPECTED_NO_VARIANTS, "nonExistingStudy", null, false);
+    }
+
+    @Test
+    public void shouldNotReadVariantsInAStudyWhenFileDoesNotExist() throws Exception {
+        checkVariantsRead(EXPECTED_NO_VARIANTS, STUDY_ID, "nonExistingFile", false);
+    }
+
+
+    private void checkVariantsRead(int expectedVariants, String study, String file, boolean excludeAnnotated)
+            throws Exception {
         ExecutionContext executionContext = MetaDataInstanceFactory.createStepExecution().getExecutionContext();
         String databaseName = mongoRule.createDBAndInsertDocuments(COLLECTION_VARIANTS_NAME, Arrays.asList(
                 VariantData.getVariantWithAnnotation(),
@@ -153,21 +140,22 @@ public class VariantsMongoReaderTest {
                 VariantData.getVariantWithoutAnnotationOtherStudy()));
 
         MongoOperations mongoOperations = MongoConfiguration.getMongoOperations(databaseName, mongoConnection,
-                mongoMappingContext);
+                                                                                mongoMappingContext);
 
-        boolean excludeAnnotated = false;
         VariantsMongoReader mongoItemReader = new VariantsMongoReader(
-                mongoOperations, COLLECTION_VARIANTS_NAME, study, excludeAnnotated);
+                mongoOperations, COLLECTION_VARIANTS_NAME, VEP_VERSION, VEP_CACHE_VERSION, study, file,
+                excludeAnnotated);
         mongoItemReader.open(executionContext);
 
         int itemCount = 0;
-        VariantWrapper variantWrapper;
-        while ((variantWrapper = mongoItemReader.read()) != null) {
+        EnsemblVariant ensemblVariant;
+        while ((ensemblVariant = mongoItemReader.read()) != null) {
             itemCount++;
-            assertFalse(variantWrapper.getChr().isEmpty());
-            assertNotEquals(0, variantWrapper.getStart());
+            assertFalse(ensemblVariant.getChr().isEmpty());
+            assertNotEquals(0, ensemblVariant.getStart());
         }
         assertEquals(expectedVariants, itemCount);
         mongoItemReader.close();
     }
+
 }
