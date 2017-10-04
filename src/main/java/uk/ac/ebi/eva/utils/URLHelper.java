@@ -55,6 +55,12 @@ public class URLHelper {
     }
 
     public static String resolveVepOutput(String outputDirAnnotation, String studyId, String vcfId) {
+        if (studyId == null) {
+            studyId = new String();
+        }
+        if (vcfId == null) {
+            vcfId = new String();
+        }
         return outputDirAnnotation + "/" + studyId + "_" + vcfId + ANNOTATED_VARIANTS_SUFFIX;
     }
 }

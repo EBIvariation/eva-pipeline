@@ -17,8 +17,8 @@ package uk.ac.ebi.eva.utils;
 
 import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParametersBuilder;
-
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
+import uk.ac.ebi.eva.t2d.parameters.T2dJobParametersNames;
 
 import java.sql.Timestamp;
 import java.util.Date;
@@ -69,6 +69,7 @@ public class EvaJobParameterBuilder extends JobParametersBuilder {
         addParameter(JobParametersNames.DB_NAME, new JobParameter(databaseName));
         return this;
     }
+
     public EvaJobParameterBuilder collectionVariantsName(String collectionVariantsName) {
         addParameter(JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME, new JobParameter(collectionVariantsName));
         return this;
@@ -158,6 +159,51 @@ public class EvaJobParameterBuilder extends JobParametersBuilder {
 
     public EvaJobParameterBuilder chunkSize(String chunkSize) {
         addParameter(JobParametersNames.CONFIG_CHUNK_SIZE, new JobParameter(chunkSize));
+        return this;
+    }
+
+    public EvaJobParameterBuilder t2dInputStudyType(String type) {
+        addParameter(T2dJobParametersNames.INPUT_STUDY_TYPE, new JobParameter(type));
+        return this;
+    }
+
+    public EvaJobParameterBuilder t2dInputStudyGenerator(String generator) {
+        addParameter(T2dJobParametersNames.INPUT_STUDY_GENERATOR, new JobParameter(generator));
+        return this;
+    }
+
+    public EvaJobParameterBuilder t2dInputStudyVersion(int version) {
+        addParameter(T2dJobParametersNames.INPUT_STUDY_VERSION, new JobParameter(String.valueOf(version)));
+        return this;
+    }
+
+    public EvaJobParameterBuilder t2dInputStudyRelease(int version) {
+        addParameter(T2dJobParametersNames.INPUT_STUDY_RELEASE, new JobParameter(String.valueOf(version)));
+        return this;
+    }
+
+    public EvaJobParameterBuilder t2dInputSamples(String version) {
+        addParameter(T2dJobParametersNames.INPUT_SAMPLES, new JobParameter(version));
+        return this;
+    }
+
+    public EvaJobParameterBuilder t2dInputSamplesDefinition(String version) {
+        addParameter(T2dJobParametersNames.INPUT_SAMPLES_DEFINITION, new JobParameter(version));
+        return this;
+    }
+
+    public EvaJobParameterBuilder t2dInputStatistics(String path) {
+        addParameter(T2dJobParametersNames.INPUT_STATISTICS, new JobParameter(path));
+        return this;
+    }
+
+    public EvaJobParameterBuilder t2dInputStatisticsDefinition(String path) {
+        addParameter(T2dJobParametersNames.INPUT_STATISTICS_DEFINITION, new JobParameter(path));
+        return this;
+    }
+
+    public EvaJobParameterBuilder t2dInputStatisticsPhenotype(String phenotype) {
+        addParameter(T2dJobParametersNames.INPUT_STATISTICS_PHENOTYPE, new JobParameter(phenotype));
         return this;
     }
 }

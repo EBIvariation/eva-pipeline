@@ -88,4 +88,12 @@ public class EnsemblVariant {
             alternate = "-";
         }
     }
+
+    public String getReference() {
+        return reference;
+    }
+
+    public String getAlternate() {
+        return alternate;
+    }
 }

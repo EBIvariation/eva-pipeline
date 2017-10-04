@@ -1,0 +1,5 @@
+col-string	STRING
+col-boolean	BOOLEAN
+col-integer	INTEGER
+col-float	FLOAT
+col-double	DOUBLE

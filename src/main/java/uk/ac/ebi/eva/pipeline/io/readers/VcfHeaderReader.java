@@ -53,7 +53,7 @@ import java.io.IOException;
 public class VcfHeaderReader implements ResourceAwareItemReaderItemStream<VariantSourceEntity> {
 
     /**
-     * The header of the VCF can be retrieved using `source.getMetadata().get(VARIANT_FILE_HEADER_KEY)`.
+     * The header of the VCF can be retrieved using `source.getSamplesMetadata().get(VARIANT_FILE_HEADER_KEY)`.
      */
     public static final String VARIANT_FILE_HEADER_KEY = "header";
 

@@ -263,6 +263,11 @@ public class EvaPipelineJobLauncherCommandLineRunnerTest {
                 .appVepPath(GenotypedVcfJobTestUtils.getMockVep().getPath())
                 .appVepTimeout("60")
                 .inputFasta(fasta.getAbsolutePath())
+                .dbCollectionsVariantsName("variants")
+                .dbCollectionsFilesName("files")
+                .dbCollectionsFeaturesName("features")
+                .dbCollectionsStatisticsName("populationStatistics")
+                .dbCollectionsAnnotationMetadataName("annotationMetadata")
                 .build()
         );
 

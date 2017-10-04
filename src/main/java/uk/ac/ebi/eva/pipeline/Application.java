@@ -31,7 +31,7 @@ import org.springframework.context.ConfigurableApplicationContext;
  * Append any parameter as needed.
  * TODO document all parameters
  */
-@SpringBootApplication(exclude = {MongoDataAutoConfiguration.class, JobLauncherCommandLineRunner.class})
+@SpringBootApplication(exclude = {MongoDataAutoConfiguration.class})
 public class Application {
 
     public static final String VARIANT_WRITER_MONGO_PROFILE = "variant-writer-mongo";
@@ -46,6 +46,11 @@ public class Application {
      * Profile for experimental features that shall not be active unless explicitly requested.
      */
     public static final String MONGO_EXPERIMENTAL_PROFILE = "experimental";
+
+    /**
+     * profile for the t2d-configuration
+     */
+    public static final String T2D_PROFILE = "t2d";
 
     public static void main(String[] args) throws Exception {
         ConfigurableApplicationContext context = SpringApplication.run(Application.class, args);

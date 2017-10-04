@@ -1,0 +1,18 @@
+package uk.ac.ebi.eva.t2d.parameters.validation.job;
+
+import org.springframework.batch.core.JobParametersValidator;
+import org.springframework.batch.core.job.CompositeJobParametersValidator;
+import uk.ac.ebi.eva.t2d.parameters.validation.job.steps.ReleaseDatasetStepValidator;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class ReleaseDatasetJobValidator extends CompositeJobParametersValidator {
+
+    public ReleaseDatasetJobValidator() {
+        super();
+        List<JobParametersValidator> jobParametersValidators = new ArrayList<>();
+        jobParametersValidators.add(new ReleaseDatasetStepValidator());
+        setValidators(jobParametersValidators);
+    }
+}
