@@ -556,10 +556,10 @@ public class VariantVcfFactoryTest {
         // test that an ID is properly handled
         String line = "1\t1000\trs123\tC\tT\t.\t.\t.";
         List<Variant> expResult = new LinkedList<>();
-        //EVA-942 - Since we ignore IDs submitted through VCF, they are no longer part of the expected result
         expResult.add(new Variant("1", 1000, 1000, "C", "T"));
         List<Variant> result = factory.create(FILE_ID, STUDY_ID, line);
         assertEquals(expResult, result);
+        //EVA-942 - Since we ignore IDs submitted through VCF, they are no longer part of the expected result
         assertEquals(emptySet, result.get(0).getIds());
 
         // test that the ';' is used as the ID separator (as of VCF 4.2)
@@ -577,6 +577,5 @@ public class VariantVcfFactoryTest {
         result = factory.create(FILE_ID, STUDY_ID, line);
         assertEquals(expResult, result);
         assertEquals(emptySet, result.get(0).getIds());
-        assertEquals(emptySet.size(), result.get(0).getIds().size());
     }
 }
