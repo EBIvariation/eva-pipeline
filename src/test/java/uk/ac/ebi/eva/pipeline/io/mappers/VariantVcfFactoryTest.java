@@ -560,7 +560,7 @@ public class VariantVcfFactoryTest {
         expResult.add(new Variant("1", 1000, 1000, "C", "T"));
         List<Variant> result = factory.create(FILE_ID, STUDY_ID, line);
         assertEquals(expResult, result);
-        assertEquals(result.get(0).getIds(), emptySet);
+        assertEquals(emptySet, result.get(0).getIds());
 
         // test that the ';' is used as the ID separator (as of VCF 4.2)
         line = "1\t1000\trs123;rs456\tC\tT\t.\t.\t.";
@@ -568,7 +568,7 @@ public class VariantVcfFactoryTest {
         expResult.add(new Variant("1", 1000, 1000, "C", "T"));
         result = factory.create(FILE_ID, STUDY_ID, line);
         assertEquals(expResult, result);
-        assertEquals(result.get(0).getIds(), emptySet);
+        assertEquals(emptySet, result.get(0).getIds());
 
         // test that a missing ID ('.') is not added to the IDs set
         line = "1\t1000\t.\tC\tT\t.\t.\t.";
@@ -576,7 +576,7 @@ public class VariantVcfFactoryTest {
         expResult.add(new Variant("1", 1000, 1000, "C", "T"));
         result = factory.create(FILE_ID, STUDY_ID, line);
         assertEquals(expResult, result);
-        assertEquals(result.get(0).getIds(), emptySet);
-        assertEquals(result.get(0).getIds().size(), emptySet.size());
+        assertEquals(emptySet, result.get(0).getIds());
+        assertEquals(emptySet.size(), result.get(0).getIds().size());
     }
 }
