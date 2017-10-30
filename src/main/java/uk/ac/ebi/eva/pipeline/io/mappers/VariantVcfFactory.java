@@ -66,7 +66,7 @@ public class VariantVcfFactory {
 
         String chromosome = getChromosomeWithoutPrefix(fields);
         int position = getPosition(fields);
-        Set<String> ids = getIds(fields);
+        Set<String> ids = new HashSet<>(); //EVA-942 - Ignore IDs submitted through VCF
         String reference = getReference(fields);
         String[] alternateAlleles = getAlternateAlleles(fields, chromosome, position, reference);
         float quality = getQuality(fields);

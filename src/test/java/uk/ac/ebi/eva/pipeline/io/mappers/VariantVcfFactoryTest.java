@@ -27,6 +27,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -551,32 +552,30 @@ public class VariantVcfFactoryTest {
     @Test
     public void testVariantIds() {
 
+        Set<String> emptySet = new HashSet<>();
         // test that an ID is properly handled
         String line = "1\t1000\trs123\tC\tT\t.\t.\t.";
         List<Variant> expResult = new LinkedList<>();
         expResult.add(new Variant("1", 1000, 1000, "C", "T"));
-        expResult.get(0).setIds(Collections.singleton("rs123"));
         List<Variant> result = factory.create(FILE_ID, STUDY_ID, line);
         assertEquals(expResult, result);
-        assertEquals(expResult.get(0).getIds(), result.get(0).getIds());
+        //EVA-942 - Since we ignore IDs submitted through VCF, they are no longer part of the expected result
+        assertEquals(emptySet, result.get(0).getIds());
 
         // test that the ';' is used as the ID separator (as of VCF 4.2)
         line = "1\t1000\trs123;rs456\tC\tT\t.\t.\t.";
         expResult = new LinkedList<>();
         expResult.add(new Variant("1", 1000, 1000, "C", "T"));
-        expResult.get(0).setIds(new HashSet<>(Arrays.asList("rs123", "rs456")));
         result = factory.create(FILE_ID, STUDY_ID, line);
         assertEquals(expResult, result);
-        assertEquals(expResult.get(0).getIds(), result.get(0).getIds());
+        assertEquals(emptySet, result.get(0).getIds());
 
         // test that a missing ID ('.') is not added to the IDs set
         line = "1\t1000\t.\tC\tT\t.\t.\t.";
         expResult = new LinkedList<>();
         expResult.add(new Variant("1", 1000, 1000, "C", "T"));
-        expResult.get(0).setIds(
-                Collections.<String>emptySet());    // note!: we store a "." as an empty set, not a set with an empty string
         result = factory.create(FILE_ID, STUDY_ID, line);
         assertEquals(expResult, result);
-        assertEquals(expResult.get(0).getIds().size(), result.get(0).getIds().size());
+        assertEquals(emptySet, result.get(0).getIds());
     }
 }
