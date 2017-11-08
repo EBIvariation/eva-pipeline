@@ -31,7 +31,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
+import org.springframework.context.annotation.Profile;
 import uk.ac.ebi.eva.commons.models.mongo.entity.Annotation;
+import uk.ac.ebi.eva.pipeline.Application;
 import uk.ac.ebi.eva.pipeline.configuration.ChunkSizeCompletionPolicyConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.io.readers.AnnotationReaderConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.io.writers.AnnotationCompositeWriterConfiguration;
@@ -64,6 +66,7 @@ import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VARIANT_ANNOTATION_
 
 @Configuration
 @EnableBatchProcessing
+@Profile("!"+Application.T2D_PROFILE)
 @Import({AnnotationReaderConfiguration.class, AnnotationCompositeWriterConfiguration.class,
         ChunkSizeCompletionPolicyConfiguration.class})
 public class LoadVepAnnotationStepConfiguration {

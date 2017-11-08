@@ -6,6 +6,10 @@ import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.item.ParseException;
 import org.springframework.batch.repeat.RepeatStatus;
 import uk.ac.ebi.eva.t2d.model.T2DTableStructure;
+import uk.ac.ebi.eva.t2d.model.T2dDataSourceAdaptor;
+import uk.ac.ebi.eva.t2d.model.T2dDatasourceAdaptorAppender;
+import uk.ac.ebi.eva.t2d.model.T2dDatasourceAdaptorReference;
+import uk.ac.ebi.eva.t2d.model.T2dDatasourceAdaptorStaticString;
 import uk.ac.ebi.eva.t2d.parameters.T2dMetadataParameters;
 import uk.ac.ebi.eva.t2d.parameters.T2dTsvParameters;
 import uk.ac.ebi.eva.t2d.services.T2dService;
@@ -40,8 +44,33 @@ public abstract class PrepareDatabaseTasklet implements Tasklet {
 
     protected void parseLine(T2DTableStructure dataStructure, String line) {
         String[] columns = line.split("\t");
+
         checkNumberOfColumns(line, columns);
-        dataStructure.put(columns[0], parseType(columns[1]));
+        dataStructure.put(columns[0], parseType(columns[1]), parseT2dDataSourceAdaptors(columns[2]));
+    }
+
+    private T2dDataSourceAdaptor parseT2dDataSourceAdaptors(String columns) {
+        String[] sourceAdaptors = columns.split("\\+");
+        if (sourceAdaptors.length == 1) {
+            return parseT2dDataSourceAdaptor(sourceAdaptors[0]);
+        } else {
+            return new T2dDatasourceAdaptorAppender(Stream.of(sourceAdaptors).map(this::parseT2dDataSourceAdaptor));
+        }
+
+    }
+
+    private T2dDataSourceAdaptor parseT2dDataSourceAdaptor(String sourceAdaptor) {
+        if (sourceAdaptor.startsWith("$")) {
+            return new T2dDatasourceAdaptorReference(sourceAdaptor);
+        } else {
+            if (!sourceAdaptor.startsWith("\"")) {
+                throw new RuntimeException("Error parsing '" + sourceAdaptor + "' string doesn't start with \"");
+            }
+            if (!sourceAdaptor.endsWith("\"")) {
+                throw new RuntimeException("Error parsing '" + sourceAdaptor + "' string doesn't end with \"");
+            }
+            return new T2dDatasourceAdaptorStaticString(sourceAdaptor.substring(1, sourceAdaptor.length() - 1));
+        }
     }
 
     protected Class<?> parseType(String column) {
@@ -66,7 +95,7 @@ public abstract class PrepareDatabaseTasklet implements Tasklet {
     }
 
     private void checkNumberOfColumns(String line, String[] columns) {
-        if (columns.length != 2) {
+        if (columns.length != 3) {
             throw new ParseException("Syntax error in sample data structure file, invalid total columns '" +
                     line + "'");
         }
@@ -75,7 +104,7 @@ public abstract class PrepareDatabaseTasklet implements Tasklet {
     public T2DTableStructure readT2DTableStructure(String tableName) throws IOException {
         T2DTableStructure dataStructure = new T2DTableStructure(tableName);
         try (Stream<String> stream = Files.lines(new File(getTableDefinitionFilePath(tsvParameters)).toPath())) {
-            stream.forEach(line -> parseLine(dataStructure, line));
+            stream.filter(line -> !line.isEmpty()).forEach(line -> parseLine(dataStructure, line));
         }
         return dataStructure;
     }

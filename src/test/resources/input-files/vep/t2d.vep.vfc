@@ -1,0 +1,102 @@
+## ENSEMBL VARIANT EFFECT PREDICTOR v86
+## Output produced at 2017-10-21 09:17:49
+## Using cache in /gpfs/nobackup/variation/ampt2d/vep-cache/homo_sapiens/86_GRCh37
+## Using API version 86, DB version ?
+## polyphen version 2.2.2
+## sift version sift5.2.2
+## COSMIC version 71
+## ESP version 20141103
+## gencode version GENCODE 19
+## HGMD-PUBLIC version 20152
+## genebuild version 2011-04
+## regbuild version 13
+## assembly version GRCh37.p13
+## dbSNP version 144
+## ClinVar version 201507
+## Extra column keys:
+## IMPACT : Subjective impact classification of consequence type
+## DISTANCE : Shortest distance from variant to transcript
+## STRAND : Strand of the feature (1/-1)
+## FLAGS : Transcript quality flags
+## VARIANT_CLASS : SO variant class
+## SYMBOL : Gene symbol (e.g. HGNC)
+## SYMBOL_SOURCE : Source of gene symbol
+## HGNC_ID : Stable identifer of HGNC gene symbol
+## BIOTYPE : Biotype of transcript or regulatory feature
+## CANONICAL : Indicates if transcript is canonical for this gene
+## TSL : Transcript support level
+## APPRIS : Annotates alternatively spliced transcripts as primary or alternate based on a range of computational methods
+## CCDS : Indicates if transcript is a CCDS transcript
+## ENSP : Protein identifer
+## SWISSPROT : Best match UniProtKB/Swiss-Prot accession
+## TREMBL : Best match UniProtKB/TrEMBL accession
+## UNIPARC : Best match UniParc accession
+## GENE_PHENO : Indicates if gene is associated with a phenotype, disease or trait
+## SIFT : SIFT prediction and/or score
+## PolyPhen : PolyPhen prediction and/or score
+## EXON : Exon number(s) / total
+## INTRON : Intron number(s) / total
+## DOMAINS : The source and identifer of any overlapping protein domains
+## HGVSc : HGVS coding sequence name
+## HGVSp : HGVS protein sequence name
+## HGVS_OFFSET : Indicates by how many bases the HGVS notations for this variant have been shifted
+## GMAF : Minor allele and frequency of existing variant in 1000 Genomes combined population
+## AFR_MAF : Frequency of existing variant in 1000 Genomes combined African population
+## AMR_MAF : Frequency of existing variant in 1000 Genomes combined American population
+## EAS_MAF : Frequency of existing variant in 1000 Genomes combined East Asian population
+## EUR_MAF : Frequency of existing variant in 1000 Genomes combined European population
+## SAS_MAF : Frequency of existing variant in 1000 Genomes combined South Asian population
+## AA_MAF : Frequency of existing variant in NHLBI-ESP African American population
+## EA_MAF : Frequency of existing variant in NHLBI-ESP European American population
+## ExAC_MAF : Frequency of existing variant in ExAC combined population
+## ExAC_Adj_MAF : Adjusted frequency of existing variant in ExAC combined population
+## ExAC_AFR_MAF : Frequency of existing variant in ExAC African/American population
+## ExAC_AMR_MAF : Frequency of existing variant in ExAC American population
+## ExAC_EAS_MAF : Frequency of existing variant in ExAC East Asian population
+## ExAC_FIN_MAF : Frequency of existing variant in ExAC Finnish population
+## ExAC_NFE_MAF : Frequency of existing variant in ExAC Non-Finnish European population
+## ExAC_OTH_MAF : Frequency of existing variant in ExAC combined other combined populations
+## ExAC_SAS_MAF : Frequency of existing variant in ExAC South Asian population
+## CLIN_SIG : ClinVar clinical significance of the dbSNP variant
+## SOMATIC : Somatic status of existing variant
+## PHENO : Indicates if existing variant(s) is associated with a phenotype, disease or trait; multiple values correspond to multiple variants
+## PUBMED : Pubmed ID(s) of publications that cite existing variant
+## MOTIF_NAME : The source and identifier of a transcription factor binding profile (TFBP) aligned at this position
+## MOTIF_POS : The relative position of the variation in the aligned TFBP
+## HIGH_INF_POS : A flag indicating if the variant falls in a high information position of the TFBP
+## MOTIF_SCORE_CHANGE : The difference in motif score of the reference and variant sequences for the TFBP
+#Uploaded_variation	Location	Allele	Gene	Feature	Feature_type	Consequence	cDNA_position	CDS_position	Protein_position	Amino_acids	Codons	Existing_variation	Extra
+2_6790508_T/C	2:6790508	C	ENSG00000236172	ENST00000431336	Transcript	non_coding_transcript_exon_variant,non_coding_transcript_variant	144	-	-	-	-	rs142878284	IMPACT=MODIFIER;STRAND=-1;VARIANT_CLASS=SNV;SYMBOL=hsa-mir-7515;SYMBOL_SOURCE=miRBase;BIOTYPE=lincRNA;EXON=1/2;HGVSc=ENST00000431336.1:n.144A>G;GMAF=C:0.0014;AFR_MAF=C:0;AMR_MAF=C:0.0014;EAS_MAF=C:0;EUR_MAF=C:0.005;SAS_MAF=C:0.001;ExAC_MAF=C:6.078e-04;ExAC_Adj_MAF=C:0;ExAC_AFR_MAF=C:0;ExAC_AMR_MAF=;ExAC_EAS_MAF=;ExAC_FIN_MAF=;ExAC_NFE_MAF=C:0
+2_6790508_T/C	2:6790508	C	ENSG00000236172	ENST00000590971	Transcript	upstream_gene_variant	-	-	-	-	-	rs142878284	IMPACT=MODIFIER;DISTANCE=129;STRAND=-1;VARIANT_CLASS=SNV;SYMBOL=hsa-mir-7515;SYMBOL_SOURCE=miRBase;BIOTYPE=lincRNA;GMAF=C:0.0014;AFR_MAF=C:0;AMR_MAF=C:0.0014;EAS_MAF=C:0;EUR_MAF=C:0.005;SAS_MAF=C:0.001;ExAC_MAF=C:6.078e-04;ExAC_Adj_MAF=C:0;ExAC_AFR_MAF=C:0;ExAC_AMR_MAF=;ExAC_EAS_MAF=;ExAC_FIN_MAF=;ExAC_NFE_MAF=C:0
+2_10597_A/C	2:10597	C	-	-	-	intergenic_variant	-	-	-	-	-	rs549439067	IMPACT=MODIFIER;VARIANT_CLASS=SNV;GMAF=C:0.0120;AFR_MAF=C:0.0008;AMR_MAF=C:0.0058;EAS_MAF=C:0.0218;EUR_MAF=C:0.0099;SAS_MAF=C:0.0235
+2_10614_G/A	2:10614	A	-	-	-	intergenic_variant	-	-	-	-	-	rs537899787	IMPACT=MODIFIER;VARIANT_CLASS=SNV;GMAF=A:0.0002;AFR_MAF=A:0;AMR_MAF=A:0;EAS_MAF=A:0;EUR_MAF=A:0.001;SAS_MAF=A:0
+2_10630_T/G	2:10630	G	-	-	-	intergenic_variant	-	-	-	-	-	rs539212020	IMPACT=MODIFIER;VARIANT_CLASS=SNV;GMAF=G:0.0008;AFR_MAF=G:0.0008;AMR_MAF=G:0;EAS_MAF=G:0;EUR_MAF=G:0.003;SAS_MAF=G:0
+2_10655_C/T	2:10655	T	-	-	-	intergenic_variant	-	-	-	-	-	rs534075287	IMPACT=MODIFIER;VARIANT_CLASS=SNV;GMAF=T:0.0082;AFR_MAF=T:0.0295;AMR_MAF=T:0.0029;EAS_MAF=T:0;EUR_MAF=T:0;SAS_MAF=T:0
+2_10659_G/A	2:10659	A	-	-	-	intergenic_variant	-	-	-	-	-	rs555419020	IMPACT=MODIFIER;VARIANT_CLASS=SNV;GMAF=A:0.0026;AFR_MAF=A:0;AMR_MAF=A:0;EAS_MAF=A:0.001;EUR_MAF=A:0.003;SAS_MAF=A:0.0092
+2_10797_C/T	2:10797	T	-	-	-	intergenic_variant	-	-	-	-	-	rs28888107	IMPACT=MODIFIER;VARIANT_CLASS=SNV;GMAF=T:0.0403;AFR_MAF=T:0.1051;AMR_MAF=T:0.0389;EAS_MAF=T:0;EUR_MAF=T:0.0169;SAS_MAF=T:0.0194
+2_11305_G/C	2:11305	C	-	ENSR00001696023	RegulatoryFeature	regulatory_region_variant	-	-	-	-	-	rs548689519	IMPACT=MODIFIER;VARIANT_CLASS=SNV;BIOTYPE=TF_binding_site;GMAF=C:0.0024;AFR_MAF=C:0.0015;AMR_MAF=C:0.0043;EAS_MAF=C:0;EUR_MAF=C:0.005;SAS_MAF=C:0.002
+2_11305_G/C	2:11305	C	-	-	-	intergenic_variant	-	-	-	-	-	rs548689519	IMPACT=MODIFIER;VARIANT_CLASS=SNV;GMAF=C:0.0024;AFR_MAF=C:0.0015;AMR_MAF=C:0.0043;EAS_MAF=C:0;EUR_MAF=C:0.005;SAS_MAF=C:0.002
+2_11336_C/G	2:11336	G	-	ENSR00001696023	RegulatoryFeature	regulatory_region_variant	-	-	-	-	-	rs113656530	IMPACT=MODIFIER;VARIANT_CLASS=SNV;BIOTYPE=TF_binding_site;GMAF=G:0.1562;AFR_MAF=G:0.4569;AMR_MAF=G:0.0749;EAS_MAF=G:0.0387;EUR_MAF=G:0.0358;SAS_MAF=G:0.0521
+2_11336_C/G	2:11336	G	-	-	-	intergenic_variant	-	-	-	-	-	rs113656530	IMPACT=MODIFIER;VARIANT_CLASS=SNV;GMAF=G:0.1562;AFR_MAF=G:0.4569;AMR_MAF=G:0.0749;EAS_MAF=G:0.0387;EUR_MAF=G:0.0358;SAS_MAF=G:0.0521
+2_11357_A/G	2:11357	G	-	ENSR00001696023	RegulatoryFeature	regulatory_region_variant	-	-	-	-	-	rs111385029	IMPACT=MODIFIER;VARIANT_CLASS=SNV;BIOTYPE=TF_binding_site;GMAF=G:0.1560;AFR_MAF=G:0.4561;AMR_MAF=G:0.0749;EAS_MAF=G:0.0387;EUR_MAF=G:0.0358;SAS_MAF=G:0.0521
+2_11357_A/G	2:11357	G	-	-	-	intergenic_variant	-	-	-	-	-	rs111385029	IMPACT=MODIFIER;VARIANT_CLASS=SNV;GMAF=G:0.1560;AFR_MAF=G:0.4561;AMR_MAF=G:0.0749;EAS_MAF=G:0.0387;EUR_MAF=G:0.0358;SAS_MAF=G:0.0521
+2_11453_G/C	2:11453	C	-	ENSR00001696023	RegulatoryFeature	regulatory_region_variant	-	-	-	-	-	-	IMPACT=MODIFIER;VARIANT_CLASS=SNV;BIOTYPE=TF_binding_site
+2_11453_G/C	2:11453	C	-	ENSR00001696024	RegulatoryFeature	regulatory_region_variant	-	-	-	-	-	-	IMPACT=MODIFIER;VARIANT_CLASS=SNV;BIOTYPE=CTCF_binding_site
+2_11453_G/C	2:11453	C	-	-	-	intergenic_variant	-	-	-	-	-	-	IMPACT=MODIFIER;VARIANT_CLASS=SNV
+2_11486_A/G	2:11486	G	-	ENSR00001696023	RegulatoryFeature	regulatory_region_variant	-	-	-	-	-	rs73138514	IMPACT=MODIFIER;VARIANT_CLASS=SNV;BIOTYPE=TF_binding_site;GMAF=G:0.1585;AFR_MAF=G:0.466;AMR_MAF=G:0.0749;EAS_MAF=G:0.0387;EUR_MAF=G:0.0358;SAS_MAF=G:0.0521
+2_11486_A/G	2:11486	G	-	ENSR00001696024	RegulatoryFeature	regulatory_region_variant	-	-	-	-	-	rs73138514	IMPACT=MODIFIER;VARIANT_CLASS=SNV;BIOTYPE=CTCF_binding_site;GMAF=G:0.1585;AFR_MAF=G:0.466;AMR_MAF=G:0.0749;EAS_MAF=G:0.0387;EUR_MAF=G:0.0358;SAS_MAF=G:0.0521
+2_11486_A/G	2:11486	G	-	-	-	intergenic_variant	-	-	-	-	-	rs73138514	IMPACT=MODIFIER;VARIANT_CLASS=SNV;GMAF=G:0.1585;AFR_MAF=G:0.466;AMR_MAF=G:0.0749;EAS_MAF=G:0.0387;EUR_MAF=G:0.0358;SAS_MAF=G:0.0521
+2_11556_G/A	2:11556	A	-	ENSR00001696023	RegulatoryFeature	regulatory_region_variant	-	-	-	-	-	rs79388895	IMPACT=MODIFIER;VARIANT_CLASS=SNV;BIOTYPE=TF_binding_site;GMAF=A:0.0134;AFR_MAF=A:0.0477;AMR_MAF=A:0.0014;EAS_MAF=A:0;EUR_MAF=A:0.002;SAS_MAF=A:0.001
+2_11556_G/A	2:11556	A	-	ENSR00001696024	RegulatoryFeature	regulatory_region_variant	-	-	-	-	-	rs79388895	IMPACT=MODIFIER;VARIANT_CLASS=SNV;BIOTYPE=CTCF_binding_site;GMAF=A:0.0134;AFR_MAF=A:0.0477;AMR_MAF=A:0.0014;EAS_MAF=A:0;EUR_MAF=A:0.002;SAS_MAF=A:0.001
+2_11556_G/A	2:11556	A	-	MA0139.1	MotifFeature	TF_binding_site_variant	-	-	-	-	-	rs79388895	IMPACT=MODIFIER;STRAND=-1;VARIANT_CLASS=SNV;GMAF=A:0.0134;AFR_MAF=A:0.0477;AMR_MAF=A:0.0014;EAS_MAF=A:0;EUR_MAF=A:0.002;SAS_MAF=A:0.001;MOTIF_NAME=CTCF:MA0139.1;MOTIF_POS=4;HIGH_INF_POS=N;MOTIF_SCORE_CHANGE=-0.039
+2_11556_G/A	2:11556	A	-	-	-	intergenic_variant	-	-	-	-	-	rs79388895	IMPACT=MODIFIER;VARIANT_CLASS=SNV;GMAF=A:0.0134;AFR_MAF=A:0.0477;AMR_MAF=A:0.0014;EAS_MAF=A:0;EUR_MAF=A:0.002;SAS_MAF=A:0.001
+2_11573_A/C	2:11573	C	-	ENSR00001696023	RegulatoryFeature	regulatory_region_variant	-	-	-	-	-	rs191904047	IMPACT=MODIFIER;VARIANT_CLASS=SNV;BIOTYPE=TF_binding_site;GMAF=C:0.0002;AFR_MAF=C:0;AMR_MAF=C:0;EAS_MAF=C:0;EUR_MAF=C:0.001;SAS_MAF=C:0
+2_11573_A/C	2:11573	C	-	ENSR00001696024	RegulatoryFeature	regulatory_region_variant	-	-	-	-	-	rs191904047	IMPACT=MODIFIER;VARIANT_CLASS=SNV;BIOTYPE=CTCF_binding_site;GMAF=C:0.0002;AFR_MAF=C:0;AMR_MAF=C:0;EAS_MAF=C:0;EUR_MAF=C:0.001;SAS_MAF=C:0
+2_11573_A/C	2:11573	C	-	-	-	intergenic_variant	-	-	-	-	-	rs191904047	IMPACT=MODIFIER;VARIANT_CLASS=SNV;GMAF=C:0.0002;AFR_MAF=C:0;AMR_MAF=C:0;EAS_MAF=C:0;EUR_MAF=C:0.001;SAS_MAF=C:0
+2_11594_G/T	2:11594	T	-	ENSR00001696023	RegulatoryFeature	regulatory_region_variant	-	-	-	-	-	rs114792740	IMPACT=MODIFIER;VARIANT_CLASS=SNV;BIOTYPE=TF_binding_site;GMAF=T:0.0200;AFR_MAF=T:0.0129;AMR_MAF=T:0.0173;EAS_MAF=T:0.0069;EUR_MAF=T:0.0199;SAS_MAF=T:0.045
+2_11594_G/T	2:11594	T	-	ENSR00001696024	RegulatoryFeature	regulatory_region_variant	-	-	-	-	-	rs114792740	IMPACT=MODIFIER;VARIANT_CLASS=SNV;BIOTYPE=CTCF_binding_site;GMAF=T:0.0200;AFR_MAF=T:0.0129;AMR_MAF=T:0.0173;EAS_MAF=T:0.0069;EUR_MAF=T:0.0199;SAS_MAF=T:0.045
+2_11594_G/T	2:11594	T	-	-	-	intergenic_variant	-	-	-	-	-	rs114792740	IMPACT=MODIFIER;VARIANT_CLASS=SNV;GMAF=T:0.0200;AFR_MAF=T:0.0129;AMR_MAF=T:0.0173;EAS_MAF=T:0.0069;EUR_MAF=T:0.0199;SAS_MAF=T:0.045
+2_11607_T/C	2:11607	C	-	ENSR00001696023	RegulatoryFeature	regulatory_region_variant	-	-	-	-	-	rs73138516	IMPACT=MODIFIER;VARIANT_CLASS=SNV;BIOTYPE=TF_binding_site;GMAF=C:0.1641;AFR_MAF=C:0.4871;AMR_MAF=C:0.0749;EAS_MAF=C:0.0387;EUR_MAF=C:0.0358;SAS_MAF=C:0.0521
+2_11607_T/C	2:11607	C	-	ENSR00001696024	RegulatoryFeature	regulatory_region_variant	-	-	-	-	-	rs73138516	IMPACT=MODIFIER;VARIANT_CLASS=SNV;BIOTYPE=CTCF_binding_site;GMAF=C:0.1641;AFR_MAF=C:0.4871;AMR_MAF=C:0.0749;EAS_MAF=C:0.0387;EUR_MAF=C:0.0358;SAS_MAF=C:0.0521
+2_11607_T/C	2:11607	C	-	MA0139.1	MotifFeature	TF_binding_site_variant	-	-	-	-	-	rs73138516	IMPACT=MODIFIER;STRAND=-1;VARIANT_CLASS=SNV;GMAF=C:0.1641;AFR_MAF=C:0.4871;AMR_MAF=C:0.0749;EAS_MAF=C:0.0387;EUR_MAF=C:0.0358;SAS_MAF=C:0.0521;MOTIF_NAME=CTCF:MA0139.1;MOTIF_POS=11;HIGH_INF_POS=N;MOTIF_SCORE_CHANGE=0.007
+2_11607_T/C	2:11607	C	-	-	-	intergenic_variant	-	-	-	-	-	rs73138516	IMPACT=MODIFIER;VARIANT_CLASS=SNV;GMAF=C:0.1641;AFR_MAF=C:0.4871;AMR_MAF=C:0.0749;EAS_MAF=C:0.0387;EUR_MAF=C:0.0358;SAS_MAF=C:0.0521

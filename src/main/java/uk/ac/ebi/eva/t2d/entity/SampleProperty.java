@@ -1,6 +1,7 @@
 package uk.ac.ebi.eva.t2d.entity;
 
 import uk.ac.ebi.eva.t2d.model.T2DTableStructure;
+import uk.ac.ebi.eva.t2d.model.T2dColumnDefinition;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -82,11 +83,13 @@ public class SampleProperty implements EntityWithId<String> {
     }
 
     public static List<SampleProperty> generate(T2DTableStructure structure) {
-        return structure.getFields().stream().map(SampleProperty::generate).collect(Collectors.toList());
+        return structure.getOrderedColumnIdAndDefinition().stream()
+                .map(SampleProperty::generate)
+                .collect(Collectors.toList());
     }
 
-    private static SampleProperty generate(Map.Entry<String, Class<?>> fieldDefinition) {
-        return new SampleProperty(fieldDefinition.getKey(), translations.get(fieldDefinition.getValue()));
+    private static SampleProperty generate(Map.Entry<String, T2dColumnDefinition> entry) {
+        return new SampleProperty(entry.getKey(), translations.get(entry.getValue().getType()));
     }
 
     public String getType() {

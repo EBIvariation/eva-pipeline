@@ -36,9 +36,6 @@ public class SamplesDatasetMetadata {
     @Column(name = "SG")
     public String scientificGenerator;
 
-    @Column(name = "EXPTYPE")
-    public String expType;
-
     @Column(name = "VER")
     public String ver;
 
@@ -72,9 +69,11 @@ public class SamplesDatasetMetadata {
     public SamplesDatasetMetadata(String scientificGenerator, String expType, int version, String ancestry,
                                   int release) {
         this.scientificGenerator = scientificGenerator;
-        this.expType = expType;
+        experimentName = expType + "_" + scientificGenerator;
+        id = "SAMPLES_" + experimentName + "_" + versionTag(version);
+        tableName = id.toUpperCase();
+        tech = expType;
         setVersion(release);
-        generateCalculatedFields(version);
         this.ancestry = ancestry;
         this.cases = -1;
         this.controls = -1;
@@ -85,13 +84,6 @@ public class SamplesDatasetMetadata {
 
     public String getId() {
         return id;
-    }
-
-    private void generateCalculatedFields(int version) {
-        experimentName = expType + "_" + scientificGenerator;
-        id = "SAMPLES_" + experimentName + "_" + versionTag(version);
-        tableName = id.toUpperCase();
-        tech = expType;
     }
 
     private String versionTag(int version) {

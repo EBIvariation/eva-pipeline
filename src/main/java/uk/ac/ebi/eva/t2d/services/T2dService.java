@@ -24,10 +24,9 @@ import uk.ac.ebi.eva.t2d.entity.SamplesDatasetMetadata;
 import uk.ac.ebi.eva.t2d.model.T2DTableStructure;
 import uk.ac.ebi.eva.t2d.model.T2dAnnotation;
 
-import java.util.LinkedHashSet;
 import java.util.List;
 
-import static uk.ac.ebi.eva.t2d.configuration.T2dDataSourceConfiguration.T2D_TRANSACTION_MANAGER;
+import static uk.ac.ebi.eva.test.t2d.configuration.T2dDataSourceConfiguration.T2D_TRANSACTION_MANAGER;
 
 public interface T2dService {
 
@@ -49,7 +48,7 @@ public interface T2dService {
 
     @Modifying
     @Transactional(T2D_TRANSACTION_MANAGER)
-    void insertData(T2DTableStructure tableName, LinkedHashSet<String> fieldNames, List<? extends List<String>> data);
+    void insertData(T2DTableStructure tableName, List<? extends List<String>> data);
 
     boolean exists(Variant variant);
 

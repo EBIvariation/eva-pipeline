@@ -1,4 +1,4 @@
-package uk.ac.ebi.eva.t2d.configuration;
+package uk.ac.ebi.eva.test.t2d.configuration;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

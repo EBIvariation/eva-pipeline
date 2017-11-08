@@ -70,7 +70,6 @@ import java.util.Properties;
  * -Job parameters can be passed from a properties file by the user.
  * -The user can restart a job that has been run previously marking the previous execution as failed.
  */
-@Component
 public class EvaPipelineJobLauncherCommandLineRunner extends JobLauncherCommandLineRunner implements
         ApplicationEventPublisherAware, ExitCodeGenerator {
 

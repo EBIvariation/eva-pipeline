@@ -6,7 +6,6 @@ import com.mongodb.DBObject;
 import org.opencb.opencga.storage.core.StorageManagerException;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.StepExecution;
-
 import uk.ac.ebi.eva.pipeline.configuration.BeanNames;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 import uk.ac.ebi.eva.utils.URLHelper;
@@ -21,7 +20,6 @@ import java.util.zip.GZIPInputStream;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static uk.ac.ebi.eva.commons.models.mongo.entity.Annotation.CONSEQUENCE_TYPE_FIELD;
 import static uk.ac.ebi.eva.test.utils.JobTestUtils.count;
@@ -34,6 +32,8 @@ import static uk.ac.ebi.eva.utils.FileUtils.getResource;
 public class GenotypedVcfJobTestUtils {
 
     private static final String MOCK_VEP = "/mockvep.pl";
+
+    private static final String MOCK_VEP_NO_ERRORS = "/mockvep_no_errors.pl";
 
     public static final String INPUT_VCF_ID = "1";
 
@@ -54,6 +54,7 @@ public class GenotypedVcfJobTestUtils {
     private static final int EXPECTED_VARIANTS = 300;
 
     private static final int EXPECTED_VALID_ANNOTATIONS = 536;
+    private static File mockVepNoErrors;
 
     public static DBCursor getVariantDBCursor(TemporaryMongoRule mongoRule, String databaseName) {
         return mongoRule.getCollection(databaseName, COLLECTION_VARIANTS_NAME).find();
@@ -161,5 +162,9 @@ public class GenotypedVcfJobTestUtils {
         return System.getenv("OPENCGA_HOME") != null ?
                 System.getenv("OPENCGA_HOME") :
                 GenotypedVcfJobTestUtils.class.getResource("/opencga/").getFile();
+    }
+
+    public static File getMockVepNoErrors() {
+        return getResource(MOCK_VEP_NO_ERRORS);
     }
 }

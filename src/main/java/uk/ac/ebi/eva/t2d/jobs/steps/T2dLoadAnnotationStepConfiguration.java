@@ -14,16 +14,13 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Profile;
-import uk.ac.ebi.eva.commons.models.mongo.entity.Annotation;
 import uk.ac.ebi.eva.pipeline.Application;
 import uk.ac.ebi.eva.pipeline.configuration.ChunkSizeCompletionPolicyConfiguration;
-import uk.ac.ebi.eva.pipeline.configuration.io.readers.VcfReaderConfiguration;
-import uk.ac.ebi.eva.pipeline.listeners.AnnotationLoaderStepStatisticsListener;
 import uk.ac.ebi.eva.pipeline.listeners.SkippedItemListener;
 import uk.ac.ebi.eva.pipeline.listeners.StepProgressListener;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
-import uk.ac.ebi.eva.t2d.configuration.readers.T2dVariantAnnotationReaderConfiguration;
-import uk.ac.ebi.eva.t2d.configuration.writers.T2dAnnotationLoadWriterConfiguration;
+import uk.ac.ebi.eva.test.t2d.configuration.readers.T2dVariantAnnotationReaderConfiguration;
+import uk.ac.ebi.eva.test.t2d.configuration.writers.T2dAnnotationLoadWriterConfiguration;
 import uk.ac.ebi.eva.t2d.model.T2dAnnotation;
 
 import static uk.ac.ebi.eva.t2d.BeanNames.T2D_VARIANT_ANNOTATION_READER;
@@ -52,11 +49,10 @@ public class T2dLoadAnnotationStepConfiguration {
                 .<T2dAnnotation, T2dAnnotation>chunk(chunkSizeCompletionPolicy)
                 .reader(annotationReader)
                 .writer(t2dAnnotationLoadWriter)
-                .faultTolerant().skipLimit(50).skip(FlatFileParseException.class)
+                .faultTolerant().skipLimit(0).skip(FlatFileParseException.class)
                 .allowStartIfComplete(jobOptions.isAllowStartIfComplete())
                 .listener(new SkippedItemListener())
                 .listener(new StepProgressListener())
-                .listener(new AnnotationLoaderStepStatisticsListener())
                 .build();
     }
 

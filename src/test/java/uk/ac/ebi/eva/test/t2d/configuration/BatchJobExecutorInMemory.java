@@ -1,9 +1,10 @@
-package uk.ac.ebi.eva.t2d.configuration;
+package uk.ac.ebi.eva.test.t2d.configuration;
 
 import org.springframework.batch.core.launch.support.SimpleJobLauncher;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.repository.support.MapJobRepositoryFactoryBean;
 import org.springframework.batch.support.transaction.ResourcelessTransactionManager;
+import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -11,7 +12,7 @@ import org.springframework.context.annotation.Import;
 import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
 
 @Configuration
-@ComponentScan({"uk.ac.ebi.eva.t2d.parameters"})
+@ComponentScan({"uk.ac.ebi.eva.t2d.parameters", "uk.ac.ebi.eva.pipeline.parameters"})
 @Import(BatchTestConfiguration.class)
 public class BatchJobExecutorInMemory {
 
@@ -32,6 +33,11 @@ public class BatchJobExecutorInMemory {
         SimpleJobLauncher simpleJobLauncher = new SimpleJobLauncher();
         simpleJobLauncher.setJobRepository(jobRepository);
         return simpleJobLauncher;
+    }
+
+    @Bean
+    public JobLauncherTestUtils jobLauncherTestUtils(){
+        return new JobLauncherTestUtils();
     }
 
 }

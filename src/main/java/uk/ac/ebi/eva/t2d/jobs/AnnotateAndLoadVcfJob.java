@@ -19,25 +19,25 @@ import uk.ac.ebi.eva.t2d.jobs.steps.T2dVepAnnotationStepConfiguration;
 import uk.ac.ebi.eva.t2d.parameters.validation.job.T2dLoadVariantsParametersValidator;
 
 import static uk.ac.ebi.eva.t2d.BeanNames.T2D_LOAD_ANNOTATION_STEP;
-import static uk.ac.ebi.eva.t2d.BeanNames.T2D_LOAD_VARIANTS_JOB;
+import static uk.ac.ebi.eva.t2d.BeanNames.T2D_ANNOTATE_AND_LOAD_VCF_JOB;
 import static uk.ac.ebi.eva.t2d.BeanNames.T2D_VEP_ANNOTATION_STEP;
 
 @Configuration
 @Profile(Application.T2D_PROFILE)
 @EnableBatchProcessing
 @Import({T2dVepAnnotationStepConfiguration.class, T2dLoadAnnotationStepConfiguration.class})
-public class LoadVariants {
+public class AnnotateAndLoadVcfJob {
 
     private static Logger logger = LoggerFactory.getLogger(LoadSamplesDataJob.class);
 
-    @Bean(T2D_LOAD_VARIANTS_JOB)
+    @Bean(T2D_ANNOTATE_AND_LOAD_VCF_JOB)
     public Job loadSampleDataJob(JobBuilderFactory jobBuilderFactory,
                                  @Qualifier(T2D_VEP_ANNOTATION_STEP) Step vepAnnotation,
                                  @Qualifier(T2D_LOAD_ANNOTATION_STEP) Step loadAnnotation) {
-        logger.debug("Building '" + T2D_LOAD_VARIANTS_JOB+"'");
+        logger.debug("Building '" + T2D_ANNOTATE_AND_LOAD_VCF_JOB +"'");
 
         JobBuilder jobBuilder = jobBuilderFactory
-                .get(T2D_LOAD_VARIANTS_JOB)
+                .get(T2D_ANNOTATE_AND_LOAD_VCF_JOB)
                 .incrementer(new RunIdIncrementer())
                 .validator(new T2dLoadVariantsParametersValidator());
 

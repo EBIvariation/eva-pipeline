@@ -4,6 +4,7 @@ import org.apache.commons.lang.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -41,14 +42,19 @@ public class T2dAnnotation {
     private String sift;
 
     public T2dAnnotation(String[] vepFields) {
-        transcriptFields = new HashMap<>();
-        extraFields = new HashMap<>();
-        parseFirstColumn(vepFields);
-        parseTranscriptFields(vepFields);
-        parseEnd(vepFields);
-        parseSoAccessions(vepFields);
-        parseRsAccessions(vepFields);
-        parseExtraFieldIfExists(vepFields);
+        try {
+            transcriptFields = new HashMap<>();
+            extraFields = new HashMap<>();
+            parseFirstColumn(vepFields);
+            parseTranscriptFields(vepFields);
+            parseEnd(vepFields);
+            parseSoAccessions(vepFields);
+            parseRsAccessions(vepFields);
+            parseExtraFieldIfExists(vepFields);
+        }catch (Exception e){
+            logger.error("kiwi", e);
+            throw e;
+        }
     }
 
     private void parseFirstColumn(String[] fields) {
@@ -89,7 +95,7 @@ public class T2dAnnotation {
     }
 
     private void parseTranscriptFields(String[] lineFields) {
-        if (lineFields[2].contains("Transcript")) {
+        if (lineFields[5].contains("Transcript")) {
             gene = lineFields[3];
             transcript = lineFields[4];
 
@@ -115,7 +121,7 @@ public class T2dAnnotation {
 
     private void parseRsAccessions(String[] lineFields) {
         if (!lineFields[12].equals("-")) {
-            dbsnpId = lineFields[7];
+            dbsnpId = lineFields[12];
         }
     }
 
@@ -140,7 +146,7 @@ public class T2dAnnotation {
                     break;
                 default:
                     // ALLELE_NUM, FREQS, IND, ZYG
-                    extraFields.put(keyValue[0], keyValue[1]);
+                    extraFields.put(keyValue[0], keyValue[0]);
                     break;
             }
         }

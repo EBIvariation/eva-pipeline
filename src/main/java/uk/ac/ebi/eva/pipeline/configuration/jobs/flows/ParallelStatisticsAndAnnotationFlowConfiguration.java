@@ -23,7 +23,9 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Profile;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
+import uk.ac.ebi.eva.pipeline.Application;
 
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.CALCULATE_STATISTICS_OPTIONAL_FLOW;
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.PARALLEL_STATISTICS_AND_ANNOTATION;
@@ -34,6 +36,7 @@ import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VEP_ANNOTATION_OPTI
  */
 @Configuration
 @EnableBatchProcessing
+@Profile("!"+ Application.T2D_PROFILE)
 @Import({AnnotationFlowOptionalConfiguration.class, PopulationStatisticsOptionalFlowConfiguration.class})
 public class ParallelStatisticsAndAnnotationFlowConfiguration {
 

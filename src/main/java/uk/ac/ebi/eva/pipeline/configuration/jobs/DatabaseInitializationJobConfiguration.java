@@ -27,8 +27,10 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Profile;
 import org.springframework.context.annotation.Scope;
 
+import uk.ac.ebi.eva.pipeline.Application;
 import uk.ac.ebi.eva.pipeline.configuration.jobs.steps.CreateDatabaseIndexesStepConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.jobs.steps.LoadGenesStepConfiguration;
 import uk.ac.ebi.eva.pipeline.parameters.NewJobIncrementer;
@@ -47,6 +49,7 @@ import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.LOAD_GENES_STEP;
  */
 @Configuration
 @EnableBatchProcessing
+@Profile("!"+ Application.T2D_PROFILE)
 @Import({LoadGenesStepConfiguration.class, CreateDatabaseIndexesStepConfiguration.class})
 public class DatabaseInitializationJobConfiguration {
 

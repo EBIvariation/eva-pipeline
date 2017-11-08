@@ -16,10 +16,12 @@
 package uk.ac.ebi.eva.utils;
 
 import org.springframework.batch.core.JobParameter;
+import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 import uk.ac.ebi.eva.t2d.parameters.T2dJobParametersNames;
 
+import java.io.File;
 import java.sql.Timestamp;
 import java.util.Date;
 
@@ -204,6 +206,11 @@ public class EvaJobParameterBuilder extends JobParametersBuilder {
 
     public EvaJobParameterBuilder t2dInputStatisticsPhenotype(String phenotype) {
         addParameter(T2dJobParametersNames.INPUT_STATISTICS_PHENOTYPE, new JobParameter(phenotype));
+        return this;
+    }
+
+    public EvaJobParameterBuilder manualVepFile(File resource) {
+        addParameter(T2dJobParametersNames.MANUAL_VEP_FILE, new JobParameter(resource.getAbsolutePath()));
         return this;
     }
 }

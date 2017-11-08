@@ -4,17 +4,19 @@ import uk.ac.ebi.eva.t2d.model.exceptions.FieldDoesNotExistException;
 import uk.ac.ebi.eva.t2d.model.exceptions.FieldTypeIsNotValidAsPrimaryKeyException;
 
 import java.io.Serializable;
-import java.util.HashMap;
+import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Stream;
+import java.util.stream.Collectors;
 
 public class T2DTableStructure implements Serializable {
 
     private final String tableName;
 
-    private final Map<String, Class<?>> fieldMap;
+    private final LinkedHashMap<String, T2dColumnDefinition> fieldMap;
 
     private final Set<String> primaryKeys;
 
@@ -22,30 +24,30 @@ public class T2DTableStructure implements Serializable {
 
     public T2DTableStructure(String tableName) {
         this.tableName = tableName;
-        fieldMap = new HashMap<>();
+        fieldMap = new LinkedHashMap<>();
         primaryKeys = new HashSet<>();
         indexes = new HashSet<>();
     }
 
-    public void put(String fieldName, Class<?> aClass) {
-        fieldMap.put(fieldName, aClass);
+    public void put(String fieldName, Class<?> aClass, T2dDataSourceAdaptor adaptor) {
+        fieldMap.put(fieldName, new T2dColumnDefinition(aClass, adaptor));
     }
 
     public void setPrimaryKeys(String fieldName) throws FieldDoesNotExistException,
             FieldTypeIsNotValidAsPrimaryKeyException {
-        Class<?> clazz = checkedGetField(fieldName);
+        Class<?> clazz = checkedGetField(fieldName).getType();
         if (clazz != Integer.class && clazz != String.class) {
             throw new FieldTypeIsNotValidAsPrimaryKeyException();
         }
         primaryKeys.add(fieldName);
     }
 
-    private Class<?> checkedGetField(String fieldName) throws FieldDoesNotExistException {
-        Class<?> clazz = fieldMap.get(fieldName);
-        if (clazz == null) {
+    private T2dColumnDefinition checkedGetField(String fieldName) throws FieldDoesNotExistException {
+        T2dColumnDefinition definition = fieldMap.get(fieldName);
+        if (definition == null) {
             throw new FieldDoesNotExistException();
         }
-        return clazz;
+        return definition;
     }
 
     public void addIndex(String fieldName) throws FieldDoesNotExistException {
@@ -53,10 +55,6 @@ public class T2DTableStructure implements Serializable {
         if (!primaryKeys.contains(fieldName)) {
             indexes.add(fieldName);
         }
-    }
-
-    public Stream<Map.Entry<String, Class<?>>> streamFields() {
-        return fieldMap.entrySet().stream();
     }
 
     public Set<String> getPrimaryKeys() {
@@ -71,11 +69,23 @@ public class T2DTableStructure implements Serializable {
         return tableName;
     }
 
-    public Set<Map.Entry<String, Class<?>>> getFields() {
+    public Set<String> getOrderedFieldIdSet() {
+        return fieldMap.keySet();
+    }
+
+    public Set<Map.Entry<String, T2dColumnDefinition>> getOrderedColumnIdAndDefinition() {
         return fieldMap.entrySet();
     }
 
-    public Class<?> getFieldType(String name){
-        return fieldMap.get(name);
+    public Collection<T2dColumnDefinition> getOrderedDefinitions() {
+        return fieldMap.values();
+    }
+
+    public Class<?> getFieldType(String columnId) {
+        return fieldMap.get(columnId).getType();
+    }
+
+    public List<Class<?>> getFieldTypes() {
+        return fieldMap.values().stream().map(T2dColumnDefinition::getType).collect(Collectors.toList());
     }
 }

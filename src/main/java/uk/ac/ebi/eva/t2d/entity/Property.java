@@ -16,6 +16,7 @@
 package uk.ac.ebi.eva.t2d.entity;
 
 import uk.ac.ebi.eva.t2d.model.T2DTableStructure;
+import uk.ac.ebi.eva.t2d.model.T2dColumnDefinition;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -97,11 +98,11 @@ public class Property implements EntityWithId<String> {
     }
 
     public static List<Property> generate(T2DTableStructure structure) {
-        return structure.getFields().stream().map(Property::generate).collect(Collectors.toList());
+        return structure.getOrderedColumnIdAndDefinition().stream().map(Property::generate).collect(Collectors.toList());
     }
 
-    private static Property generate(Map.Entry<String, Class<?>> fieldDefinition) {
-        return new Property(fieldDefinition.getKey(), translations.get(fieldDefinition.getValue()));
+    private static Property generate(Map.Entry<String, T2dColumnDefinition> entry) {
+        return new Property(entry.getKey(), translations.get(entry.getValue().getType()));
     }
 
     public String getType() {

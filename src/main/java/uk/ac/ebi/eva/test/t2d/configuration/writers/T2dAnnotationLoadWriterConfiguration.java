@@ -1,10 +1,9 @@
-package uk.ac.ebi.eva.t2d.configuration.writers;
+package uk.ac.ebi.eva.test.t2d.configuration.writers;
 
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import uk.ac.ebi.eva.commons.models.mongo.entity.Annotation;
 import uk.ac.ebi.eva.t2d.jobs.writers.T2dVepAnnotationFileWriter;
 import uk.ac.ebi.eva.t2d.model.T2dAnnotation;
 

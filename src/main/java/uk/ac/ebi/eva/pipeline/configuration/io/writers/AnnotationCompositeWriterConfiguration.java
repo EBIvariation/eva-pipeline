@@ -35,6 +35,7 @@ import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.ANNOTATION_IN_VARIA
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.ANNOTATION_WRITER;
 
 @Configuration
+@Profile(Application.VARIANT_ANNOTATION_MONGO_PROFILE)
 @Import({AnnotationWriterConfiguration.class, AnnotationInVariantWriterConfiguration.class})
 public class AnnotationCompositeWriterConfiguration {
 

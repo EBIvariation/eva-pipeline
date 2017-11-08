@@ -20,8 +20,8 @@ public interface PropertyToDatasetAndPhenotypeRepository extends CrudRepository<
     // TODO promove to private on java 9
     default Iterable<PropertyToDatasetAndPhenotype> generate(String datasetId, T2DTableStructure structure,
                                                              Phenotype phenotype) {
-        return structure.getFields().stream()
-                .map(field -> new PropertyToDatasetAndPhenotype(field.getKey(), datasetId, phenotype.getId()))
+        return structure.getOrderedFieldIdSet().stream()
+                .map(field -> new PropertyToDatasetAndPhenotype(field, datasetId, phenotype.getId()))
                 ::iterator;
     }
 

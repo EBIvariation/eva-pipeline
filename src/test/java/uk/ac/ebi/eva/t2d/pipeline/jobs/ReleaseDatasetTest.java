@@ -12,9 +12,9 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.ac.ebi.eva.pipeline.Application;
-import uk.ac.ebi.eva.t2d.configuration.BatchJobExecutorInMemory;
-import uk.ac.ebi.eva.t2d.configuration.T2dDataSourceConfiguration;
-import uk.ac.ebi.eva.t2d.configuration.TestJpaConfiguration;
+import uk.ac.ebi.eva.test.t2d.configuration.BatchJobExecutorInMemory;
+import uk.ac.ebi.eva.test.t2d.configuration.T2dDataSourceConfiguration;
+import uk.ac.ebi.eva.test.t2d.configuration.TestJpaConfiguration;
 import uk.ac.ebi.eva.t2d.entity.DatasetMetadata;
 import uk.ac.ebi.eva.t2d.entity.SamplesDatasetMetadata;
 import uk.ac.ebi.eva.t2d.jobs.ReleaseDataset;
@@ -30,7 +30,7 @@ import static uk.ac.ebi.eva.test.utils.JobTestUtils.assertCompleted;
 @ContextConfiguration(classes = {T2dDataSourceConfiguration.class, TestJpaConfiguration.class,
         BatchJobExecutorInMemory.class, ReleaseDataset.class})
 @TestPropertySource({"classpath:application-t2d.properties"})
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS, methodMode = DirtiesContext.MethodMode.BEFORE_METHOD)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class ReleaseDatasetTest {
 
     @Autowired

@@ -30,8 +30,10 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Profile;
 import org.springframework.context.annotation.Scope;
 
+import uk.ac.ebi.eva.pipeline.Application;
 import uk.ac.ebi.eva.pipeline.configuration.jobs.flows.ParallelStatisticsAndAnnotationFlowConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.jobs.steps.LoadFileStepConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.jobs.steps.LoadVariantsStepConfiguration;
@@ -54,6 +56,7 @@ import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.PARALLEL_STATISTICS
  */
 @Configuration
 @EnableBatchProcessing
+@Profile("!"+ Application.T2D_PROFILE)
 @Import({LoadVariantsStepConfiguration.class, LoadFileStepConfiguration.class, ParallelStatisticsAndAnnotationFlowConfiguration.class})
 public class GenotypedVcfJobConfiguration {
 

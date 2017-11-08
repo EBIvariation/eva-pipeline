@@ -27,6 +27,9 @@ public class T2dTsvParameters {
     @Value(PARAMETER + T2dJobParametersNames.INPUT_STATISTICS_PHENOTYPE + END)
     private String summaryStatisticsPhenotype;
 
+    @Value(PARAMETER + T2dJobParametersNames.MANUAL_VEP_FILE + END)
+    private String manualVepFile;
+
     public String getSummaryStatisticsFile() {
         return summaryStatisticsFile;
     }
@@ -48,5 +51,9 @@ public class T2dTsvParameters {
 
     public String getSamplesDefinitionFile() {
         return samplesDefinitionFile;
+    }
+
+    public String getManualVepFile() {
+        return manualVepFile;
     }
 }

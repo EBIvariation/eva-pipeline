@@ -17,6 +17,6 @@ public class T2dJobParametersNames {
 
 
     public static final String CONTEXT_TSV_DEFINITION = "t2d.context.tsv.definition";
-    public static final String CONTEXT_TSV_HEADER = "t2d.context.tsv.header";
 
+    public static final String MANUAL_VEP_FILE = "t2d.manual.vep.file";
 }

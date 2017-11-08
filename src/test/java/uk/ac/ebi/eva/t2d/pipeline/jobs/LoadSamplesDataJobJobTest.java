@@ -12,9 +12,9 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.ac.ebi.eva.pipeline.Application;
-import uk.ac.ebi.eva.t2d.configuration.BatchJobExecutorInMemory;
-import uk.ac.ebi.eva.t2d.configuration.T2dDataSourceConfiguration;
-import uk.ac.ebi.eva.t2d.configuration.TestJpaConfiguration;
+import uk.ac.ebi.eva.test.t2d.configuration.BatchJobExecutorInMemory;
+import uk.ac.ebi.eva.test.t2d.configuration.T2dDataSourceConfiguration;
+import uk.ac.ebi.eva.test.t2d.configuration.TestJpaConfiguration;
 import uk.ac.ebi.eva.t2d.jobs.LoadSamplesDataJob;
 import uk.ac.ebi.eva.t2d.repository.SamplePropertyRepository;
 import uk.ac.ebi.eva.t2d.repository.SamplePropertyToDatasetRepository;
@@ -34,7 +34,7 @@ import static uk.ac.ebi.eva.utils.FileUtils.getResource;
 @ContextConfiguration(classes = {T2dDataSourceConfiguration.class, TestJpaConfiguration.class,
         BatchJobExecutorInMemory.class, LoadSamplesDataJob.class})
 @TestPropertySource({"classpath:application-t2d.properties"})
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS, methodMode = DirtiesContext.MethodMode.BEFORE_METHOD)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class LoadSamplesDataJobJobTest {
 
     private static final String INPUT_SAMPLES_FILE = "/t2d/short.tsv";
@@ -56,7 +56,7 @@ public class LoadSamplesDataJobJobTest {
     private SamplePropertyToDatasetRepository samplePropertyToDatasetRepository;
 
     @Test
-    public void testLoadSamples(){
+    public void testLoadSamples() {
         //Force refresh of the context
     }
 

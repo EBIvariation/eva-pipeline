@@ -28,8 +28,10 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Profile;
 import org.springframework.context.annotation.Scope;
 
+import uk.ac.ebi.eva.pipeline.Application;
 import uk.ac.ebi.eva.pipeline.configuration.jobs.flows.AnnotationFlowConfiguration;
 import uk.ac.ebi.eva.pipeline.parameters.NewJobIncrementer;
 import uk.ac.ebi.eva.pipeline.parameters.validation.job.AnnotationJobParametersValidator;
@@ -51,6 +53,7 @@ import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VEP_ANNOTATION_FLOW
 
 @Configuration
 @EnableBatchProcessing
+@Profile("!"+ Application.T2D_PROFILE)
 @Import({AnnotationFlowConfiguration.class})
 public class AnnotationJobConfiguration {
 

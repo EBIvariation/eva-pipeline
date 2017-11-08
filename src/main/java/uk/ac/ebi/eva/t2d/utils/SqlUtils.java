@@ -4,12 +4,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
 import uk.ac.ebi.eva.t2d.model.T2DTableStructure;
+import uk.ac.ebi.eva.t2d.model.T2dColumnDefinition;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -32,8 +32,8 @@ public class SqlUtils {
         parseTypeMap = Collections.unmodifiableMap(temp);
     }
 
-    private static String toSqlFieldDeclaration(Map.Entry<String, Class<?>> entry) {
-        return toSqlField(entry.getKey()) + parseTypeMap.get(entry.getValue());
+    private static String t2dColumnDefinitionToSqlType(T2dColumnDefinition definition) {
+        return parseTypeMap.get(definition.getType());
     }
 
     private static String toSqlField(String field) {
@@ -43,7 +43,7 @@ public class SqlUtils {
     public static String sqlCreateTable(T2DTableStructure tableStructure) {
         String query = "CREATE TABLE IF NOT EXISTS " + toSqlField(tableStructure.getTableName()) + " ";
         query += par(sqlTableDefinition(tableStructure));
-        logger.debug(query);
+        logger.trace(query);
         return query;
     }
 
@@ -52,15 +52,19 @@ public class SqlUtils {
     }
 
     private static String sqlTableDefinition(T2DTableStructure dataStructure) {
-        String fields = toSqlFieldDeclarations(dataStructure.streamFields());
+        String fields = toSqlFieldDeclarations(dataStructure.getOrderedColumnIdAndDefinition().stream());
         if (!dataStructure.getPrimaryKeys().isEmpty()) {
             fields += SqlUtils.sqlPrimaryKeyDeclaration(dataStructure.getPrimaryKeys());
         }
         return fields;
     }
 
-    private static String toSqlFieldDeclarations(Stream<Map.Entry<String, Class<?>>> entryStream) {
+    private static String toSqlFieldDeclarations(Stream<Map.Entry<String, T2dColumnDefinition>> entryStream) {
         return entryStream.map(SqlUtils::toSqlFieldDeclaration).collect(Collectors.joining(", "));
+    }
+
+    private static String toSqlFieldDeclaration(Map.Entry<String, T2dColumnDefinition> entry) {
+        return toSqlField(entry.getKey()) + t2dColumnDefinitionToSqlType(entry.getValue());
     }
 
     private static String sqlPrimaryKeyDeclaration(Collection<String> primaryKeys) {
@@ -71,19 +75,13 @@ public class SqlUtils {
         return keys.stream().map(SqlUtils::toSqlField).collect(Collectors.joining(", "));
     }
 
-    public static String sqlInsert(T2DTableStructure tableStructure, LinkedHashSet<String> fieldNames,
-                                   List<? extends List<String>> data) {
-        List<Class<?>> typesForFields = getFieldTypes(tableStructure, fieldNames);
+    public static String sqlInsert(T2DTableStructure tableStructure, List<? extends List<String>> data) {
         String query = "INSERT INTO " + toSqlField(tableStructure.getTableName()) + " ";
-        query += par(toSqlFieldList(fieldNames));
+        query += par(toSqlFieldList(tableStructure.getOrderedFieldIdSet()));
         query += " VALUES ";
-        query += toValuesArray(typesForFields, data);
-        logger.debug(query);
+        query += toValuesArray(tableStructure.getFieldTypes(), data);
+        logger.trace(query);
         return query;
-    }
-
-    private static List<Class<?>> getFieldTypes(T2DTableStructure tableStructure, LinkedHashSet<String> fieldNames) {
-        return fieldNames.stream().map(tableStructure::getFieldType).collect(Collectors.toList());
     }
 
     private static String toValuesArray(List<Class<?>> typesForFields, List<? extends List<String>> data) {
@@ -107,13 +105,14 @@ public class SqlUtils {
             return "NULL";
         }
         String trimmedValue = value.trim();
-        if (trimmedValue.isEmpty()) {
+        if (trimmedValue.isEmpty() || trimmedValue.equals("nan") || trimmedValue.equals("NaN") ||
+                trimmedValue.equals("NAN")) {
             return "NULL";
         }
         if (Objects.equals(String.class, aClass)) {
             return "'" + trimmedValue + "'";
         } else {
-            return value;
+                return value;
         }
     }
 }

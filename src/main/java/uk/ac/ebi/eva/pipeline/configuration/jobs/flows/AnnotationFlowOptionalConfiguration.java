@@ -25,6 +25,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
+import org.springframework.context.annotation.Profile;
+import uk.ac.ebi.eva.pipeline.Application;
 import uk.ac.ebi.eva.pipeline.configuration.JobExecutionDeciderConfiguration;
 import uk.ac.ebi.eva.pipeline.jobs.deciders.SkipStepDecider;
 
@@ -40,6 +42,7 @@ import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VEP_ANNOTATION_OPTI
  */
 @Configuration
 @EnableBatchProcessing
+@Profile("!"+ Application.T2D_PROFILE)
 @Import({AnnotationFlowConfiguration.class, JobExecutionDeciderConfiguration.class})
 public class AnnotationFlowOptionalConfiguration {
 

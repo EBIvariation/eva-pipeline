@@ -26,6 +26,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
+import org.springframework.context.annotation.Profile;
+import uk.ac.ebi.eva.pipeline.Application;
 import uk.ac.ebi.eva.pipeline.jobs.deciders.EmptyVepOutputDecider;
 import uk.ac.ebi.eva.pipeline.configuration.jobs.steps.LoadVepAnnotationStepConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.jobs.steps.AnnotationMetadataStepConfiguration;
@@ -44,6 +46,7 @@ import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VEP_ANNOTATION_FLOW
  */
 @Configuration
 @EnableBatchProcessing
+@Profile("!"+ Application.T2D_PROFILE)
 @Import({GenerateVepAnnotationStepConfiguration.class, LoadVepAnnotationStepConfiguration.class, AnnotationMetadataStepConfiguration.class})
 public class AnnotationFlowConfiguration {
 

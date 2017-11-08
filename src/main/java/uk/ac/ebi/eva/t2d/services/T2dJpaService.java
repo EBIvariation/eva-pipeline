@@ -28,13 +28,12 @@ import uk.ac.ebi.eva.t2d.utils.VariantUtils;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import java.util.LinkedHashSet;
 import java.util.List;
 
 import static org.apache.commons.codec.digest.DigestUtils.sha256;
 import static uk.ac.ebi.eva.pipeline.Application.T2D_PROFILE;
-import static uk.ac.ebi.eva.t2d.configuration.T2dDataSourceConfiguration.T2D_PERSISTENCE_UNIT;
-import static uk.ac.ebi.eva.t2d.configuration.T2dDataSourceConfiguration.T2D_TRANSACTION_MANAGER;
+import static uk.ac.ebi.eva.test.t2d.configuration.T2dDataSourceConfiguration.T2D_PERSISTENCE_UNIT;
+import static uk.ac.ebi.eva.test.t2d.configuration.T2dDataSourceConfiguration.T2D_TRANSACTION_MANAGER;
 import static uk.ac.ebi.eva.t2d.utils.SqlUtils.sqlCreateTable;
 import static uk.ac.ebi.eva.t2d.utils.SqlUtils.sqlInsert;
 
@@ -131,8 +130,15 @@ public class T2dJpaService implements T2dService {
     @Override
     @Modifying
     @Transactional(T2D_TRANSACTION_MANAGER)
-    public void insertData(T2DTableStructure tableStructure, LinkedHashSet<String> fieldNames, List<? extends List<String>> data) {
-        entityManager.createNativeQuery(sqlInsert(tableStructure, fieldNames, data)).executeUpdate();
+    public void insertData(T2DTableStructure tableStructure, List<? extends List<String>> data) {
+        String query = sqlInsert(tableStructure, data);
+        try {
+            entityManager.createNativeQuery(query).executeUpdate();
+        }catch (Exception ex){
+            logger.error("Original values: "+ data);
+            logger.error("SQL query: "+ query);
+            throw ex;
+        }
     }
 
     @Override

@@ -29,7 +29,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
+import org.springframework.context.annotation.Profile;
 import uk.ac.ebi.eva.commons.models.data.Variant;
+import uk.ac.ebi.eva.pipeline.Application;
 import uk.ac.ebi.eva.pipeline.configuration.ChunkSizeCompletionPolicyConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.io.readers.VcfReaderConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.io.writers.VariantWriterConfiguration;
@@ -51,6 +53,7 @@ import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VARIANT_WRITER;
  */
 @Configuration
 @EnableBatchProcessing
+@Profile("!"+ Application.T2D_PROFILE)
 @Import({VcfReaderConfiguration.class, VariantWriterConfiguration.class, ChunkSizeCompletionPolicyConfiguration.class})
 public class LoadVariantsStepConfiguration {
 

@@ -114,7 +114,8 @@ public class VepProcess {
                 "--format", "ensembl"
         );
 
-        logger.trace("Starting VEP annotation with parameters = {}", Arrays.toString(processBuilder.command().toArray()));
+        logger.debug("Starting VEP annotation with parameters = {}", Arrays.toString(processBuilder.command().toArray
+                ()));
 
         try {
             process = processBuilder.start();
