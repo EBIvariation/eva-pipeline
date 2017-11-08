@@ -1,4 +1,4 @@
-package uk.ac.ebi.eva.test.t2d.configuration.processors;
+package uk.ac.ebi.eva.t2d.configuration.processors;
 
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.context.annotation.Bean;

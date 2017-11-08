@@ -26,7 +26,7 @@ import uk.ac.ebi.eva.t2d.model.T2dAnnotation;
 
 import java.util.List;
 
-import static uk.ac.ebi.eva.test.t2d.configuration.T2dDataSourceConfiguration.T2D_TRANSACTION_MANAGER;
+import static uk.ac.ebi.eva.t2d.configuration.T2dDataSourceConfiguration.T2D_TRANSACTION_MANAGER;
 
 public interface T2dService {
 

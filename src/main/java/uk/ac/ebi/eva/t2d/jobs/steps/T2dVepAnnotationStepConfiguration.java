@@ -22,7 +22,7 @@ import uk.ac.ebi.eva.pipeline.configuration.io.writers.VepAnnotationFileWriterCo
 import uk.ac.ebi.eva.pipeline.listeners.StepProgressListener;
 import uk.ac.ebi.eva.pipeline.model.EnsemblVariant;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
-import uk.ac.ebi.eva.test.t2d.configuration.processors.ExistingVariantFilterConfiguration;
+import uk.ac.ebi.eva.t2d.configuration.processors.ExistingVariantFilterConfiguration;
 
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VARIANT_READER;
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VEP_ANNOTATION_WRITER;

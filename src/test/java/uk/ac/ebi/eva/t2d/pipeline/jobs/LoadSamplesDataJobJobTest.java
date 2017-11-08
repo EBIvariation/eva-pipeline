@@ -43,7 +43,29 @@ public class LoadSamplesDataJobJobTest {
             "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME='SAMPLES_GWAS_OXBB_MDV1'";
     private static final String QUERY_COUNT_SAMPLES = "SELECT COUNT(*) FROM SAMPLES_GWAS_OXBB_MDV1";
 
-    @Autowired
+    @Autowired//    @Bean
+//    public ResourcelessTransactionManager transactionManager() {
+//        return new ResourcelessTransactionManager();
+//    }
+//
+//    @Bean
+//    public JobRepository jobRepository(ResourcelessTransactionManager transactionManager) throws Exception {
+//        MapJobRepositoryFactoryBean mapJobRepositoryFactoryBean = new MapJobRepositoryFactoryBean(transactionManager);
+//        mapJobRepositoryFactoryBean.setTransactionManager(transactionManager);
+//        return mapJobRepositoryFactoryBean.getObject();
+//    }
+//
+//    @Bean
+//    public SimpleJobLauncher jobLauncher(JobRepository jobRepository) {
+//        SimpleJobLauncher simpleJobLauncher = new SimpleJobLauncher();
+//        simpleJobLauncher.setJobRepository(jobRepository);
+//        return simpleJobLauncher;
+//    }
+//
+//    @Bean
+//    public JobLauncherTestUtils jobLauncherTestUtils(){
+//        return new JobLauncherTestUtils();
+//    }
     private JobLauncherTestUtils jobLauncherTestUtils;
 
     @Autowired

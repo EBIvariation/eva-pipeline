@@ -1,4 +1,4 @@
-package uk.ac.ebi.eva.test.t2d.configuration.readers;
+package uk.ac.ebi.eva.t2d.configuration.readers;
 
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.item.ItemStreamReader;

@@ -32,8 +32,8 @@ import java.util.List;
 
 import static org.apache.commons.codec.digest.DigestUtils.sha256;
 import static uk.ac.ebi.eva.pipeline.Application.T2D_PROFILE;
-import static uk.ac.ebi.eva.test.t2d.configuration.T2dDataSourceConfiguration.T2D_PERSISTENCE_UNIT;
-import static uk.ac.ebi.eva.test.t2d.configuration.T2dDataSourceConfiguration.T2D_TRANSACTION_MANAGER;
+import static uk.ac.ebi.eva.t2d.configuration.T2dDataSourceConfiguration.T2D_PERSISTENCE_UNIT;
+import static uk.ac.ebi.eva.t2d.configuration.T2dDataSourceConfiguration.T2D_TRANSACTION_MANAGER;
 import static uk.ac.ebi.eva.t2d.utils.SqlUtils.sqlCreateTable;
 import static uk.ac.ebi.eva.t2d.utils.SqlUtils.sqlInsert;
 

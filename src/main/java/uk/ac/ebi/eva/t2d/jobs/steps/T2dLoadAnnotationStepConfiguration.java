@@ -19,8 +19,8 @@ import uk.ac.ebi.eva.pipeline.configuration.ChunkSizeCompletionPolicyConfigurati
 import uk.ac.ebi.eva.pipeline.listeners.SkippedItemListener;
 import uk.ac.ebi.eva.pipeline.listeners.StepProgressListener;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
-import uk.ac.ebi.eva.test.t2d.configuration.readers.T2dVariantAnnotationReaderConfiguration;
-import uk.ac.ebi.eva.test.t2d.configuration.writers.T2dAnnotationLoadWriterConfiguration;
+import uk.ac.ebi.eva.t2d.configuration.readers.T2dVariantAnnotationReaderConfiguration;
+import uk.ac.ebi.eva.t2d.configuration.writers.T2dAnnotationLoadWriterConfiguration;
 import uk.ac.ebi.eva.t2d.model.T2dAnnotation;
 
 import static uk.ac.ebi.eva.t2d.BeanNames.T2D_VARIANT_ANNOTATION_READER;

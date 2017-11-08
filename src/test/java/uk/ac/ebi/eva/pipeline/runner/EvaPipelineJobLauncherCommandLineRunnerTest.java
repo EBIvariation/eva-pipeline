@@ -25,13 +25,18 @@ import org.opencb.opencga.storage.core.StorageManagerException;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobExecutionException;
 import org.springframework.batch.core.JobInstance;
+import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.rule.OutputCapture;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
+import uk.ac.ebi.eva.pipeline.Application;
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
@@ -60,9 +65,11 @@ import static uk.ac.ebi.eva.utils.FileUtils.getResource;
  * genotype vcf test.
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest()
-@ActiveProfiles({"test,mongo"})
+//@ComponentScan(basePackages = "uk.ac.ebi.eva.pipeline.configuration")
+@ContextConfiguration(classes=Application.class)
+@ActiveProfiles({"test","mongo","variant-writer-mongo","variant-annotation-mongo"})
 @TestPropertySource(value = {"classpath:test-mongo.properties"}, properties = "debug=true")
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class EvaPipelineJobLauncherCommandLineRunnerTest {
 
     private static final String GENOTYPED_PROPERTIES_FILE = "/genotype-test.properties";

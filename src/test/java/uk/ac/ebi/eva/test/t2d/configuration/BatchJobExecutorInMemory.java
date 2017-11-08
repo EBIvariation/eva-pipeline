@@ -5,6 +5,8 @@ import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.repository.support.MapJobRepositoryFactoryBean;
 import org.springframework.batch.support.transaction.ResourcelessTransactionManager;
 import org.springframework.batch.test.JobLauncherTestUtils;
+import org.springframework.boot.autoconfigure.batch.BatchProperties;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -14,6 +16,7 @@ import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
 @Configuration
 @ComponentScan({"uk.ac.ebi.eva.t2d.parameters", "uk.ac.ebi.eva.pipeline.parameters"})
 @Import(BatchTestConfiguration.class)
+@EnableConfigurationProperties(value=BatchProperties.class)
 public class BatchJobExecutorInMemory {
 
     @Bean
@@ -36,7 +39,7 @@ public class BatchJobExecutorInMemory {
     }
 
     @Bean
-    public JobLauncherTestUtils jobLauncherTestUtils(){
+    public JobLauncherTestUtils jobLauncherTestUtils() {
         return new JobLauncherTestUtils();
     }
 
