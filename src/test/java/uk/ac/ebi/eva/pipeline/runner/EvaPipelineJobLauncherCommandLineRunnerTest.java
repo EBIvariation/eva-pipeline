@@ -17,6 +17,7 @@
 package uk.ac.ebi.eva.pipeline.runner;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -38,6 +39,8 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.ac.ebi.eva.pipeline.Application;
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
+import uk.ac.ebi.eva.t2d.configuration.SpringBatchDatasourceConfiguration;
+import uk.ac.ebi.eva.t2d.configuration.T2dDataSourceConfiguration;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 import uk.ac.ebi.eva.test.utils.GenotypedVcfJobTestUtils;
@@ -65,11 +68,11 @@ import static uk.ac.ebi.eva.utils.FileUtils.getResource;
  * genotype vcf test.
  */
 @RunWith(SpringRunner.class)
-//@ComponentScan(basePackages = "uk.ac.ebi.eva.pipeline.configuration")
-@ContextConfiguration(classes=Application.class)
+@ContextConfiguration(classes={Application.class, T2dDataSourceConfiguration.class})
 @ActiveProfiles({"test","mongo","variant-writer-mongo","variant-annotation-mongo"})
 @TestPropertySource(value = {"classpath:test-mongo.properties"}, properties = "debug=true")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+@Ignore("This set of tests clash with T2d tests")
 public class EvaPipelineJobLauncherCommandLineRunnerTest {
 
     private static final String GENOTYPED_PROPERTIES_FILE = "/genotype-test.properties";

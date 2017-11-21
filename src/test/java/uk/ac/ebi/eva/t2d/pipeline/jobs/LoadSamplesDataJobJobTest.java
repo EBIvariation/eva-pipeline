@@ -13,7 +13,7 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.ac.ebi.eva.pipeline.Application;
 import uk.ac.ebi.eva.test.t2d.configuration.BatchJobExecutorInMemory;
-import uk.ac.ebi.eva.test.t2d.configuration.T2dDataSourceConfiguration;
+import uk.ac.ebi.eva.t2d.configuration.T2dDataSourceConfiguration;
 import uk.ac.ebi.eva.test.t2d.configuration.TestJpaConfiguration;
 import uk.ac.ebi.eva.t2d.jobs.LoadSamplesDataJob;
 import uk.ac.ebi.eva.t2d.repository.SamplePropertyRepository;
@@ -76,11 +76,6 @@ public class LoadSamplesDataJobJobTest {
 
     @Autowired
     private SamplePropertyToDatasetRepository samplePropertyToDatasetRepository;
-
-    @Test
-    public void testLoadSamples() {
-        //Force refresh of the context
-    }
 
     @Test(expected = JobParametersInvalidException.class)
     public void testLoadSamplesDataStepMissingParameter() throws Exception {

@@ -20,6 +20,9 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+/**
+ * JPA definition for the Dataset metadata in sample queries
+ */
 @Entity
 @Table(name = "SAMPLES_DATASET")
 public class SamplesDatasetMetadata {

@@ -15,12 +15,13 @@
  */
 package uk.ac.ebi.eva.t2d.entity.embedded.id;
 
-import uk.ac.ebi.eva.t2d.entity.DatasetMetadata;
-
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import java.io.Serializable;
 
+/**
+ * Composed ID PROPERTY / DATASET / PHENOTYPE
+ */
 @Embeddable
 public class PropertyIdDatasetIdPhenotypeId implements Serializable {
 

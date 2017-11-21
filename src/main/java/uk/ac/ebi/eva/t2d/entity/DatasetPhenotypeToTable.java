@@ -22,6 +22,9 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+/**
+ * JPA definition for the table with the relationship between DATASET, PHENOTYPES and the table where they are used
+ */
 @Entity
 @Table(name = "ID_PH")
 public class DatasetPhenotypeToTable {

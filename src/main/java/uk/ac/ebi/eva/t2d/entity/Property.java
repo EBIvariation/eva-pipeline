@@ -28,6 +28,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * JPA definition for the Property table.
+ */
 @Entity
 @Table(name = "PROP")
 public class Property implements EntityWithId<String> {

@@ -21,6 +21,9 @@ import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
+/**
+ * JPA definition for the relationship between properties and datasets
+ */
 @Entity
 @Table(name = "PROP_ID")
 public class PropertyToDataset {

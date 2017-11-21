@@ -24,6 +24,9 @@ import javax.persistence.Id;
 import javax.persistence.Lob;
 import javax.persistence.Table;
 
+/**
+ * JPA definition for the Variant Info table
+ */
 @Entity
 @Table(name = "common_dv1")
 public class VariantInfo {

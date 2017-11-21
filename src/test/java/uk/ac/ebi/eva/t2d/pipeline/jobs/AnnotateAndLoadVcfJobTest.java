@@ -14,7 +14,7 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.ac.ebi.eva.pipeline.Application;
 import uk.ac.ebi.eva.test.t2d.configuration.BatchJobExecutorInMemory;
-import uk.ac.ebi.eva.test.t2d.configuration.T2dDataSourceConfiguration;
+import uk.ac.ebi.eva.t2d.configuration.T2dDataSourceConfiguration;
 import uk.ac.ebi.eva.test.t2d.configuration.TestJpaConfiguration;
 import uk.ac.ebi.eva.t2d.jobs.AnnotateAndLoadVcfJob;
 import uk.ac.ebi.eva.t2d.repository.VariantInfoRepository;

@@ -20,6 +20,9 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+/**
+ * JPA definition for the Phenotype table.
+ */
 @Entity
 @Table(name = "PH")
 public class Phenotype implements EntityWithId<String> {

@@ -22,6 +22,9 @@ import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
+/**
+ * JPA definition for the table with the relationship between Datasets and Phenotypes
+ */
 @Entity
 @Table(name = "PROP_ID_PH")
 public class PropertyToDatasetAndPhenotype {
