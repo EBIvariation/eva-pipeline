@@ -12,12 +12,12 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.ac.ebi.eva.pipeline.Application;
-import uk.ac.ebi.eva.test.t2d.configuration.BatchJobExecutorInMemory;
 import uk.ac.ebi.eva.t2d.configuration.T2dDataSourceConfiguration;
-import uk.ac.ebi.eva.test.t2d.configuration.TestJpaConfiguration;
 import uk.ac.ebi.eva.t2d.jobs.LoadSamplesDataJob;
 import uk.ac.ebi.eva.t2d.repository.SamplePropertyRepository;
 import uk.ac.ebi.eva.t2d.repository.SamplePropertyToDatasetRepository;
+import uk.ac.ebi.eva.test.t2d.configuration.BatchJobExecutorInMemory;
+import uk.ac.ebi.eva.test.t2d.configuration.TestJpaConfiguration;
 import uk.ac.ebi.eva.utils.EvaJobParameterBuilder;
 
 import javax.sql.DataSource;
@@ -43,29 +43,7 @@ public class LoadSamplesDataJobJobTest {
             "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME='SAMPLES_GWAS_OXBB_MDV1'";
     private static final String QUERY_COUNT_SAMPLES = "SELECT COUNT(*) FROM SAMPLES_GWAS_OXBB_MDV1";
 
-    @Autowired//    @Bean
-//    public ResourcelessTransactionManager transactionManager() {
-//        return new ResourcelessTransactionManager();
-//    }
-//
-//    @Bean
-//    public JobRepository jobRepository(ResourcelessTransactionManager transactionManager) throws Exception {
-//        MapJobRepositoryFactoryBean mapJobRepositoryFactoryBean = new MapJobRepositoryFactoryBean(transactionManager);
-//        mapJobRepositoryFactoryBean.setTransactionManager(transactionManager);
-//        return mapJobRepositoryFactoryBean.getObject();
-//    }
-//
-//    @Bean
-//    public SimpleJobLauncher jobLauncher(JobRepository jobRepository) {
-//        SimpleJobLauncher simpleJobLauncher = new SimpleJobLauncher();
-//        simpleJobLauncher.setJobRepository(jobRepository);
-//        return simpleJobLauncher;
-//    }
-//
-//    @Bean
-//    public JobLauncherTestUtils jobLauncherTestUtils(){
-//        return new JobLauncherTestUtils();
-//    }
+    @Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
 
     @Autowired

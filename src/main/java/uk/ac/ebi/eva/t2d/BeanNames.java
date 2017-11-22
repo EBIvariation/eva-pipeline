@@ -23,7 +23,11 @@ public class BeanNames {
     public static final String T2D_RELEASE_DATASET_GAIT_JOB = "release-dataset-gait-job";
     public static final String T2D_ANNOTATE_AND_LOAD_VCF_JOB = "annotate-and-load-vcf-job";
     public static final String T2D_LOAD_VEP_ANNOTATION_JOB = "load-vep-annotation-job";
+    public static final String T2D_GENERATE_PED_JOB = "generate-ped-job";
 
+
+    public static final String T2D_GENERATE_PED_STEP = "generate-ped-step";
+    public static final String T2D_READ_SAMPLE_DEFINITION = "read-sample-definition";
     public static final String T2D_PREPARE_DATABASE_SAMPLES_STEP = "prepare-database-samples-step";
     public static final String T2D_LOAD_SAMPLES_DATA_STEP = "load-samples-data-step";
     public static final String T2D_PREPARE_DATABASE_SUMMARY_STATISTICS_STEP =
@@ -42,6 +46,7 @@ public class BeanNames {
     public static final String T2D_VARIANT_ANNOTATION_READER = "t2d-variant-annotation-reader";
     public static final String T2D_MANUAL_VARIANT_ANNOTATION_READER = "t2d-manual-variant-annotation-reader";
     public static final String T2D_TSV_WRITER = "t2d-tsv-writer";
+    public static final String T2D_PED_WRITER = "t2d-ped-writer";
     public static final String T2D_ANNOTATION_LOAD_WRITER = "t2d-annotation-load-writer";
 
     public static final String T2D_TSV_PROCESSOR = "t2d-tsv-processor";

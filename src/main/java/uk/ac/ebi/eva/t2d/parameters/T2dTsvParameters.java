@@ -45,6 +45,9 @@ public class T2dTsvParameters {
     @Value(PARAMETER + T2dJobParametersNames.MANUAL_VEP_FILE + END)
     private String manualVepFile;
 
+    @Value(PARAMETER + T2dJobParametersNames.PED_FILE_OUTPUT +END)
+    private String pedFileOutput;
+
     public String getSummaryStatisticsFile() {
         return summaryStatisticsFile;
     }
@@ -70,5 +73,9 @@ public class T2dTsvParameters {
 
     public String getManualVepFile() {
         return manualVepFile;
+    }
+
+    public String getPedFileOutput() {
+        return pedFileOutput;
     }
 }
