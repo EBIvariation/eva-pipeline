@@ -55,4 +55,8 @@ public interface T2dService {
     @Modifying
     @Transactional(T2D_TRANSACTION_MANAGER)
     void saveAnnotations(List<? extends T2dAnnotation> annotations);
+
+    @Modifying
+    @Transactional(T2D_TRANSACTION_MANAGER)
+    void insertSample(T2DTableStructure tableStructure, List<? extends List<String>> items);
 }

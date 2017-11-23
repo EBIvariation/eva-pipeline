@@ -29,22 +29,19 @@ import java.util.List;
 
 import static uk.ac.ebi.eva.t2d.parameters.T2dJobParametersNames.CONTEXT_TSV_DEFINITION;
 
-/**
- * Writer that takes the mapping information and the transformed data and inserts the record on the database
- */
-public class TsvWriter implements ItemStreamWriter<List<String>> {
+public class SampleWriter implements ItemStreamWriter<List<String>> {
 
     private final T2dService service;
 
     private T2DTableStructure tableStructure;
 
-    public TsvWriter(T2dService service) {
+    public SampleWriter(T2dService service) {
         this.service = service;
     }
 
     @Override
     public void write(List<? extends List<String>> items) throws Exception {
-        service.insertData(tableStructure, items);
+        service.insertSample(tableStructure, items);
     }
 
     @Override

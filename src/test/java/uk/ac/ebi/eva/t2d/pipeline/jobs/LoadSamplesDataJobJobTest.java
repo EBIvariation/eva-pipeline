@@ -14,6 +14,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import uk.ac.ebi.eva.pipeline.Application;
 import uk.ac.ebi.eva.t2d.configuration.T2dDataSourceConfiguration;
 import uk.ac.ebi.eva.t2d.jobs.LoadSamplesDataJob;
+import uk.ac.ebi.eva.t2d.repository.CommonSampleRepository;
 import uk.ac.ebi.eva.t2d.repository.SamplePropertyRepository;
 import uk.ac.ebi.eva.t2d.repository.SamplePropertyToDatasetRepository;
 import uk.ac.ebi.eva.test.t2d.configuration.BatchJobExecutorInMemory;
@@ -25,6 +26,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static uk.ac.ebi.eva.test.utils.JobTestUtils.assertCompleted;
 import static uk.ac.ebi.eva.utils.FileUtils.getResource;
@@ -51,6 +53,9 @@ public class LoadSamplesDataJobJobTest {
 
     @Autowired
     private SamplePropertyRepository samplePropertyRepository;
+
+    @Autowired
+    private CommonSampleRepository commonSampleRepository;
 
     @Autowired
     private SamplePropertyToDatasetRepository samplePropertyToDatasetRepository;
@@ -105,6 +110,8 @@ public class LoadSamplesDataJobJobTest {
                 .prepareStatement(QUERY_CHECK_SAMPLES_TABLE_EXISTS)
                 .executeQuery();
         assertTrue(resultTableExists.next());
+        assertEquals(9, commonSampleRepository.count());
+        assertNotNull(commonSampleRepository.findOne("blah1"));
     }
 
 }
