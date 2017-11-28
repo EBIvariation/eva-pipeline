@@ -22,6 +22,7 @@ import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 import uk.ac.ebi.eva.t2d.parameters.T2dJobParametersNames;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.sql.Timestamp;
 import java.util.Date;
 
@@ -211,6 +212,11 @@ public class EvaJobParameterBuilder extends JobParametersBuilder {
 
     public EvaJobParameterBuilder manualVepFile(File resource) {
         addParameter(T2dJobParametersNames.MANUAL_VEP_FILE, new JobParameter(resource.getAbsolutePath()));
+        return this;
+    }
+
+    public EvaJobParameterBuilder t2dPedFileOutput(Path path) {
+        addParameter(T2dJobParametersNames.PED_FILE_OUTPUT, new JobParameter(path.toAbsolutePath().toString()));
         return this;
     }
 }

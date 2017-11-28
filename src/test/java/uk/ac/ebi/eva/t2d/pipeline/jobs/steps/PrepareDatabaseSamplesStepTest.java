@@ -30,7 +30,7 @@ import static uk.ac.ebi.eva.utils.FileUtils.getResource;
 @ContextConfiguration(classes = {T2dDataSourceConfiguration.class, TestJpaConfiguration.class,
         BatchJobExecutorInMemory.class, LoadSamplesDataJob.class})
 @TestPropertySource({"classpath:application-t2d.properties"})
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class PrepareDatabaseSamplesStepTest {
 
     private static final String INPUT_SAMPLES_FILE = "/t2d/short.tsv";

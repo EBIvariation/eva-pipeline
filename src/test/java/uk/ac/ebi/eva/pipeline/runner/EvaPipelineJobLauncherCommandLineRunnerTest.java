@@ -71,7 +71,7 @@ import static uk.ac.ebi.eva.utils.FileUtils.getResource;
 @ContextConfiguration(classes={Application.class, T2dDataSourceConfiguration.class})
 @ActiveProfiles({"test","mongo","variant-writer-mongo","variant-annotation-mongo"})
 @TestPropertySource(value = {"classpath:test-mongo.properties"}, properties = "debug=true")
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @Ignore("This set of tests clash with T2d tests")
 public class EvaPipelineJobLauncherCommandLineRunnerTest {
 
