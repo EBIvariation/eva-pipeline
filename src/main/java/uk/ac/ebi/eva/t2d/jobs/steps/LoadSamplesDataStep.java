@@ -29,9 +29,10 @@ import uk.ac.ebi.eva.pipeline.Application;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 import uk.ac.ebi.eva.t2d.configuration.processors.TsvProcessorConfiguration;
 import uk.ac.ebi.eva.t2d.configuration.readers.SamplesReaderConfiguration;
-import uk.ac.ebi.eva.t2d.configuration.writers.TsvWriterConfiguration;
+import uk.ac.ebi.eva.t2d.configuration.writers.SampleWriterConfiguration;
 import uk.ac.ebi.eva.t2d.jobs.processors.TsvProcessor;
 import uk.ac.ebi.eva.t2d.jobs.readers.TsvReader;
+import uk.ac.ebi.eva.t2d.jobs.writers.SampleWriter;
 import uk.ac.ebi.eva.t2d.jobs.writers.TsvWriter;
 
 import java.util.List;
@@ -39,8 +40,8 @@ import java.util.Map;
 
 import static uk.ac.ebi.eva.t2d.BeanNames.T2D_LOAD_SAMPLES_DATA_STEP;
 import static uk.ac.ebi.eva.t2d.BeanNames.T2D_SAMPLES_READER;
+import static uk.ac.ebi.eva.t2d.BeanNames.T2D_SAMPLE_WRITER;
 import static uk.ac.ebi.eva.t2d.BeanNames.T2D_TSV_PROCESSOR;
-import static uk.ac.ebi.eva.t2d.BeanNames.T2D_TSV_WRITER;
 
 /**
  * Step that reads a tsv with all the sample phenotypical information and writes it to the database
@@ -48,7 +49,7 @@ import static uk.ac.ebi.eva.t2d.BeanNames.T2D_TSV_WRITER;
 @Configuration
 @Profile(Application.T2D_PROFILE)
 @EnableBatchProcessing
-@Import({SamplesReaderConfiguration.class, TsvProcessorConfiguration.class, TsvWriterConfiguration.class})
+@Import({SamplesReaderConfiguration.class, TsvProcessorConfiguration.class, SampleWriterConfiguration.class})
 public class LoadSamplesDataStep {
 
     private static final Logger logger = LoggerFactory.getLogger(LoadSamplesDataStep.class);
@@ -57,13 +58,13 @@ public class LoadSamplesDataStep {
     public Step prepareDatabaseT2d(StepBuilderFactory stepBuilderFactory, JobOptions jobOptions,
                                    @Qualifier(T2D_SAMPLES_READER) TsvReader loadSamplesFileReader,
                                    @Qualifier(T2D_TSV_PROCESSOR) TsvProcessor tsvProcessor,
-                                   @Qualifier(T2D_TSV_WRITER) TsvWriter tsvWriter) {
+                                   @Qualifier(T2D_SAMPLE_WRITER) SampleWriter sampleWriter) {
         logger.debug("Building '" + T2D_LOAD_SAMPLES_DATA_STEP + "'");
         return stepBuilderFactory.get(T2D_LOAD_SAMPLES_DATA_STEP)
-                .<Map<String,String>, List<String>>chunk(100)
+                .<Map<String, String>, List<String>>chunk(100)
                 .reader(loadSamplesFileReader)
                 .processor(tsvProcessor)
-                .writer(tsvWriter)
+                .writer(sampleWriter)
                 .allowStartIfComplete(jobOptions.isAllowStartIfComplete())
                 .build();
     }

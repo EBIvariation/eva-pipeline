@@ -234,7 +234,7 @@ public class VariantVcfFactory {
             // Fill map of a sample
             String[] sampleFields = fields[i].split(":");
 
-            // Samples may remove the trailing fields (only GT is mandatory),
+            // Sample may remove the trailing fields (only GT is mandatory),
             // so the loop iterates to sampleFields.length, not formatFields.length
             for (int j = 0; j < sampleFields.length; j++) {
                 String formatField = formatFields[j];

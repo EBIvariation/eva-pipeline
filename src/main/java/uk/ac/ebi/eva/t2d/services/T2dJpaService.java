@@ -25,11 +25,13 @@ import uk.ac.ebi.eva.commons.models.data.Variant;
 import uk.ac.ebi.eva.t2d.entity.DatasetMetadata;
 import uk.ac.ebi.eva.t2d.entity.Phenotype;
 import uk.ac.ebi.eva.t2d.entity.Property;
+import uk.ac.ebi.eva.t2d.entity.Sample;
 import uk.ac.ebi.eva.t2d.entity.SampleProperty;
 import uk.ac.ebi.eva.t2d.entity.SamplesDatasetMetadata;
 import uk.ac.ebi.eva.t2d.entity.VariantInfo;
 import uk.ac.ebi.eva.t2d.model.T2DTableStructure;
 import uk.ac.ebi.eva.t2d.model.T2dAnnotation;
+import uk.ac.ebi.eva.t2d.repository.CommonSampleRepository;
 import uk.ac.ebi.eva.t2d.repository.DatasetMetadataRepository;
 import uk.ac.ebi.eva.t2d.repository.PhenotypeRepository;
 import uk.ac.ebi.eva.t2d.repository.PropertyRepository;
@@ -43,9 +45,9 @@ import uk.ac.ebi.eva.t2d.utils.VariantUtils;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import java.util.ArrayList;
 import java.util.List;
 
-import static org.apache.commons.codec.digest.DigestUtils.sha256;
 import static uk.ac.ebi.eva.pipeline.Application.T2D_PROFILE;
 import static uk.ac.ebi.eva.t2d.configuration.T2dDataSourceConfiguration.T2D_PERSISTENCE_UNIT;
 import static uk.ac.ebi.eva.t2d.configuration.T2dDataSourceConfiguration.T2D_TRANSACTION_MANAGER;
@@ -71,6 +73,8 @@ public class T2dJpaService implements T2dService {
 
     private final PropertyToDatasetAndPhenotypeRepository propertyToDatasetAndPhenotypeRepository;
 
+    private final CommonSampleRepository commonSampleRepository;
+
     private final SamplesDatasetMetadataRepository samplesDatasetMetadataRepository;
 
     private final SamplePropertyRepository samplePropertyRepository;
@@ -84,6 +88,7 @@ public class T2dJpaService implements T2dService {
                          PropertyToDatasetRepository propertyToDatasetRepository,
                          PhenotypeRepository phenotypeRepository,
                          PropertyToDatasetAndPhenotypeRepository propertyToDatasetAndPhenotypeRepository,
+                         CommonSampleRepository commonSampleRepository,
                          SamplesDatasetMetadataRepository samplesDatasetMetadataRepository,
                          SamplePropertyRepository samplePropertyRepository,
                          SamplePropertyToDatasetRepository samplePropertyToDatasetRepository,
@@ -94,6 +99,7 @@ public class T2dJpaService implements T2dService {
         this.propertyToDatasetRepository = propertyToDatasetRepository;
         this.phenotypeRepository = phenotypeRepository;
         this.propertyToDatasetAndPhenotypeRepository = propertyToDatasetAndPhenotypeRepository;
+        this.commonSampleRepository = commonSampleRepository;
         this.samplesDatasetMetadataRepository = samplesDatasetMetadataRepository;
         this.samplePropertyRepository = samplePropertyRepository;
         this.samplePropertyToDatasetRepository = samplePropertyToDatasetRepository;
@@ -149,9 +155,9 @@ public class T2dJpaService implements T2dService {
         String query = sqlInsert(tableStructure, data);
         try {
             entityManager.createNativeQuery(query).executeUpdate();
-        }catch (Exception ex){
-            logger.error("Original values: "+ data);
-            logger.error("SQL query: "+ query);
+        } catch (Exception ex) {
+            logger.error("Original values: " + data);
+            logger.error("SQL query: " + query);
             throw ex;
         }
     }
@@ -162,8 +168,21 @@ public class T2dJpaService implements T2dService {
     }
 
     @Override
+    @Modifying
+    @Transactional(T2D_TRANSACTION_MANAGER)
     public void saveAnnotations(List<? extends T2dAnnotation> annotations) {
         variantInfoRepository.save((Iterable<VariantInfo>) annotations.stream().map(VariantInfo::new)::iterator);
+    }
+
+    @Override
+    @Modifying
+    @Transactional(T2D_TRANSACTION_MANAGER)
+    public void insertSample(T2DTableStructure tableStructure, List<? extends List<String>> items) {
+        List<String> fields = new ArrayList<>(tableStructure.getOrderedFieldIdSet());
+        int idColumn = fields.indexOf("ID");
+        Iterable<Sample> sampleIterable = items.stream().map(item -> new Sample(item.get(idColumn)))::iterator;
+        commonSampleRepository.save(sampleIterable);
+        insertData(tableStructure, items);
     }
 
 }

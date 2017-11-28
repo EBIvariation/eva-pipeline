@@ -46,6 +46,7 @@ public class BeanNames {
     public static final String T2D_VARIANT_ANNOTATION_READER = "t2d-variant-annotation-reader";
     public static final String T2D_MANUAL_VARIANT_ANNOTATION_READER = "t2d-manual-variant-annotation-reader";
     public static final String T2D_TSV_WRITER = "t2d-tsv-writer";
+    public static final String T2D_SAMPLE_WRITER = "t2d-sample-writer";
     public static final String T2D_PED_WRITER = "t2d-ped-writer";
     public static final String T2D_ANNOTATION_LOAD_WRITER = "t2d-annotation-load-writer";
 

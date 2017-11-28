@@ -2,6 +2,7 @@ package uk.ac.ebi.eva.test.t2d.configuration;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import uk.ac.ebi.eva.t2d.repository.CommonSampleRepository;
 import uk.ac.ebi.eva.t2d.repository.DatasetMetadataRepository;
 import uk.ac.ebi.eva.t2d.repository.PhenotypeRepository;
 import uk.ac.ebi.eva.t2d.repository.PropertyRepository;
@@ -24,6 +25,7 @@ public class TestJpaConfiguration {
                                  PropertyToDatasetRepository propertyToDatasetRepository,
                                  PhenotypeRepository phenotypeRepository,
                                  PropertyToDatasetAndPhenotypeRepository propertyToDatasetAndPhenotypeRepository,
+                                 CommonSampleRepository commonSampleRepository,
                                  SamplesDatasetMetadataRepository samplesDatasetMetadataRepository,
                                  SamplePropertyRepository samplePropertyRepository,
                                  SamplePropertyToDatasetRepository samplePropertyToDatasetRepository,
@@ -33,6 +35,7 @@ public class TestJpaConfiguration {
                 propertyToDatasetRepository,
                 phenotypeRepository,
                 propertyToDatasetAndPhenotypeRepository,
+                commonSampleRepository,
                 samplesDatasetMetadataRepository,
                 samplePropertyRepository,
                 samplePropertyToDatasetRepository,
