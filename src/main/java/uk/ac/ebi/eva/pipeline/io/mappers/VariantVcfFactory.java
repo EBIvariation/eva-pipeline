@@ -237,15 +237,33 @@ public class VariantVcfFactory {
             // Samples may remove the trailing fields (only GT is mandatory),
             // so the loop iterates to sampleFields.length, not formatFields.length
             for (int j = 0; j < sampleFields.length; j++) {
+                if(formatFields[j].equals("GT"))
+                {
+                	if(sampleFields[j].equals("0|0") || sampleFields[j].equals("0/0") || sampleFields[j].equals("./."))
+            			{
+            				ctr++;
+            			}
+                
+                }
+               
                 String formatField = formatFields[j];
                 String sampleField = processSampleField(alternateAlleleIdx, formatField, sampleFields[j]);
 
                 map.put(formatField, sampleField);
             }
 
-            // Add sample to the variant entry in the source file
-            variant.getSourceEntry(fileId, studyId).addSampleData(map);
-        }
+			 if(ctr==sampleFields.length)
+            	{
+            		throw new NotAVariantException;
+            		
+            	}
+            	else
+            	{
+            		// Add sample to the variant entry in the source file
+            		variant.getSourceEntry(fileId, studyId).addSampleData(map);
+        		}
+        		
+         }
     }
 
     /**
@@ -314,7 +332,7 @@ public class VariantVcfFactory {
         variant.getSourceEntry(fileId, studyId).addAttribute("src", line);
     }
 
-    protected void parseInfo(Variant variant, String fileId, String studyId, String info, int numAllele) {
+    protected void parseInfo(Variant variant, String fileId, String studyId, String info, int numAllele)throws NotAVariantException {
         VariantSourceEntry file = variant.getSourceEntry(fileId, studyId);
 
         for (String var : info.split(";")) {
@@ -333,10 +351,21 @@ public class VariantVcfFactory {
                         break;
                     case "AF":
                         // TODO For now, only one alternate is supported
+                        if(splits[1].eqals("0"))
+                        {
+                        	throw new NotAVariantException;
+                        }
+                        else
+                        {
                         String[] frequencies = splits[1].split(",");
                         file.addAttribute(splits[0], frequencies[numAllele]);
+                        }
                         break;
-//                    case "AN":
+                    case "AN":
+                    		 if(splits[1].eqals("0"))
+                        	{
+                        		throw new NotAVariantException;
+                        	}
 //                        // TODO For now, only two alleles (reference and one alternate) are supported, but this should be changed
 //                        file.addAttribute(splits[0], "2");
 //                        break;
