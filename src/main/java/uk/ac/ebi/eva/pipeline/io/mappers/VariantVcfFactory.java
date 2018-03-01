@@ -243,7 +243,7 @@ public class VariantVcfFactory {
                 map.put(formatField, sampleField);
                 if (formatField.equals("GT")) {
                     if (sampleField.equals("0|0") || sampleField.equals("0/0") || sampleField.equals("./.")) {
-                        numReferenceGenotypes
+                        numReferenceGenotypes++;
             	    }
                 }
             }
