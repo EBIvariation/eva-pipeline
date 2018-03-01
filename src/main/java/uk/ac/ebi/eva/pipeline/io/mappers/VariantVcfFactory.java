@@ -238,12 +238,10 @@ public class VariantVcfFactory {
             // Samples may remove the trailing fields (only GT is mandatory),
             // so the loop iterates to sampleFields.length, not formatFields.length
             for (int j = 0; j < sampleFields.length; j++) {
-                if (formatFields[j].equals("GT")) {
-                    if (sampleFields[j].equals("0|0") || sampleFields[j].equals("0/0") || sampleFields[j].equals("./.")) {
-                        numReferenceGenotypes++;
-            	    }
-                }
                 String formatField = formatFields[j];
+                if ((sampleFields[j].equals("0|0") || sampleFields[j].equals("0/0") || sampleFields[j].equals("./.")) && formatField.equals("GT")) {
+                    numReferenceGenotypes++;
+                }
                 String sampleField = processSampleField(alternateAlleleIdx, formatField, sampleFields[j]);
                 map.put(formatField, sampleField);
                 
@@ -351,9 +349,9 @@ public class VariantVcfFactory {
                         }
                         break;
                     case "AN":
-                    		 if (splits[1].equals("0")) {
-                        		throw new NotAVariantException("The value of the AN INFO field can't be zero");
-                        	 }
+                        if (splits[1].equals("0")) {
+                            throw new NotAVariantException("The value of the AN INFO field can't be zero");
+                        }
 //                        // TODO For now, only two alleles (reference and one alternate) are supported, but this should be changed
 //                        file.addAttribute(splits[0], "2");
 //                        break;
