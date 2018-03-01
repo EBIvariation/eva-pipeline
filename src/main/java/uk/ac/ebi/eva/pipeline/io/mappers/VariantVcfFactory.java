@@ -240,7 +240,7 @@ public class VariantVcfFactory {
             for (int j = 0; j < sampleFields.length; j++) {
                 if (formatFields[j].equals("GT")) {
                     if (sampleFields[j].equals("0|0") || sampleFields[j].equals("0/0") || sampleFields[j].equals("./.")) {
-            				ctr++;
+                        ctr++;
             	    }
                 }
                
@@ -248,14 +248,13 @@ public class VariantVcfFactory {
                 String sampleField = processSampleField(alternateAlleleIdx, formatField, sampleFields[j]);
                 map.put(formatField, sampleField);
             }
-
-			if (ctr==sampleFields.length) {
-            	    throw new NotAVariantException("All the sample genotypes are non-variant");
+            if (ctr==sampleFields.length) {
+                throw new NotAVariantException("All the sample genotypes are non-variant");
             	}
-            	else {
-            		// Add sample to the variant entry in the source file
-            	    variant.getSourceEntry(fileId, studyId).addSampleData(map);
-        		}
+            else {
+                // Add sample to the variant entry in the source file
+                variant.getSourceEntry(fileId, studyId).addSampleData(map);
+            }
          }
     }
 
