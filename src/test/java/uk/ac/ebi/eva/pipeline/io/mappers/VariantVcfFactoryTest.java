@@ -411,24 +411,28 @@ public class VariantVcfFactoryTest {
         na001.put("DP", ".");
         na001.put("GQ", ".");
         na001.put("PL", ".");
+        na001.put("GT", "./.");
         Map<String, String> na002 = new HashMap<>();
         na002.put("GT", "1/1");
         na002.put("AD", "0,2");
         na002.put("DP", "2");
         na002.put("GQ", "6");
         na002.put("PL", "71,6,0");
+        na002.put("GT", "0/0");
         Map<String, String> na003 = new HashMap<>();
         na003.put("GT", "./.");
         na003.put("AD", ".");
         na003.put("DP", ".");
         na003.put("GQ", ".");
         na003.put("PL", ".");
+        na003.put("GT", "./.");
         Map<String, String> na004 = new HashMap<>();
         na004.put("GT", "./.");
         na004.put("AD", ".");
         na004.put("DP", ".");
         na004.put("GQ", ".");
         na004.put("PL", ".");
+        na004.put("GT", "./.");
 
         var0.getSourceEntry(FILE_ID, STUDY_ID).addSampleData(na001);
         var0.getSourceEntry(FILE_ID, STUDY_ID).addSampleData(na002);
@@ -506,6 +510,7 @@ public class VariantVcfFactoryTest {
         na003.put("DP", "18");
         na003.put("GQ", ".");
         na003.put("PL", ".");
+        na003.put("PL", "222,0,43");
         Map<String, String> na004 = new HashMap<>();
         na004.put("GT", "0/1");
         na004.put("AD", "7,6");
@@ -531,9 +536,10 @@ public class VariantVcfFactoryTest {
         Variant getVar0 = result.get(0);
         VariantSourceEntry getFile0 = getVar0.getSourceEntry(FILE_ID, STUDY_ID);
         assertEquals(4, Integer.parseInt(getFile0.getAttribute("NS")));
-//        assertEquals(2, Integer.parseInt(getFile0.getAttribute("AN")));
+        assertEquals(0, Integer.parseInt(getFile0.getAttribute("AN")));
         assertEquals(1, Integer.parseInt(getFile0.getAttribute("AC")));
         assertEquals(0.125, Double.parseDouble(getFile0.getAttribute("AF")), 1e-8);
+        assertEquals(0, Double.parseDouble(getFile0.getAttribute("AF")));
         assertEquals(63, Integer.parseInt(getFile0.getAttribute("DP")));
         assertEquals(10685, Integer.parseInt(getFile0.getAttribute("MQ")));
         assertEquals(1, Integer.parseInt(getFile0.getAttribute("MQ0")));

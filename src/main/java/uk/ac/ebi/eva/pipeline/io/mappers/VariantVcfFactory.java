@@ -225,11 +225,11 @@ public class VariantVcfFactory {
 
     protected void parseSplitSampleData(Variant variant, String fileId, String studyId, String[] fields,
                                         String[] alternateAlleles, String[] secondaryAlternates,
-                                        int alternateAlleleIdx) throws NonStandardCompliantSampleField,NotAVariantException {
+                                        int alternateAlleleIdx) throws NonStandardCompliantSampleField, NotAVariantException {
         String[] formatFields = variant.getSourceEntry(fileId, studyId).getFormat().split(":");
 
         for (int i = 9; i < fields.length; i++) {
-        	int ctr=0;
+            int numReferenceGenotypes=0;
             Map<String, String> map = new TreeMap<>();
 
             // Fill map of a sample
@@ -249,8 +249,7 @@ public class VariantVcfFactory {
             }
             if (ctr==sampleFields.length) {
                 throw new NotAVariantException("All the sample genotypes are non-variant");
-            	}
-            else {
+            } else {
                 // Add sample to the variant entry in the source file
                 variant.getSourceEntry(fileId, studyId).addSampleData(map);
             }
@@ -323,7 +322,7 @@ public class VariantVcfFactory {
         variant.getSourceEntry(fileId, studyId).addAttribute("src", line);
     }
 
-    protected void parseInfo(Variant variant, String fileId, String studyId, String info, int numAllele)throws NotAVariantException {
+    protected void parseInfo(Variant variant, String fileId, String studyId, String info, int numAllele) throws NotAVariantException {
         VariantSourceEntry file = variant.getSourceEntry(fileId, studyId);
 
         for (String var : info.split(";")) {
@@ -343,7 +342,7 @@ public class VariantVcfFactory {
                     case "AF":
                         // TODO For now, only one alternate is supported
                         if (splits[1].equals("0")) {
-                            throw new NotAVariantException("This can't be zero");
+                            throw new NotAVariantException("The value of the AF INFO field can't be zero");
                         }
                         else{
                             String[] frequencies = splits[1].split(",");
@@ -352,7 +351,7 @@ public class VariantVcfFactory {
                         break;
                     case "AN":
                     		 if (splits[1].equals("0")) {
-                        		throw new NotAVariantException("This can't be zero");
+                        		throw new NotAVariantException("The value of the AF INFO field can't be zero");
                         	 }
 //                        // TODO For now, only two alleles (reference and one alternate) are supported, but this should be changed
 //                        file.addAttribute(splits[0], "2");
