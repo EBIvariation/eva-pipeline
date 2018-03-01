@@ -411,24 +411,28 @@ public class VariantVcfFactoryTest {
         na001.put("DP", ".");
         na001.put("GQ", ".");
         na001.put("PL", ".");
+        na001.put("GT", "0|0");
         Map<String, String> na002 = new HashMap<>();
         na002.put("GT", "1/1");
         na002.put("AD", "0,2");
         na002.put("DP", "2");
         na002.put("GQ", "6");
         na002.put("PL", "71,6,0");
+        na002.put("GT", "./.");
         Map<String, String> na003 = new HashMap<>();
         na003.put("GT", "./.");
         na003.put("AD", ".");
         na003.put("DP", ".");
         na003.put("GQ", ".");
         na003.put("PL", ".");
+        na003.put("GT", "0/0");
         Map<String, String> na004 = new HashMap<>();
         na004.put("GT", "./.");
         na004.put("AD", ".");
         na004.put("DP", ".");
         na004.put("GQ", ".");
         na004.put("PL", ".");
+        na004.put("GT", "./.");
 
         var0.getSourceEntry(FILE_ID, STUDY_ID).addSampleData(na001);
         var0.getSourceEntry(FILE_ID, STUDY_ID).addSampleData(na002);
@@ -449,6 +453,7 @@ public class VariantVcfFactoryTest {
         assertEquals(".", na001Data.get("DP"));
         assertEquals(".", na001Data.get("GQ"));
         assertEquals(".", na001Data.get("PL"));
+        assertEquals("0|0", na001Data.get("GT"));
 
         Map<String, String> na002Data = getFile0.getSampleData(1);
         assertEquals("1/1", na002Data.get("GT"));
@@ -456,6 +461,7 @@ public class VariantVcfFactoryTest {
         assertEquals("2", na002Data.get("DP"));
         assertEquals("6", na002Data.get("GQ"));
         assertEquals("71,6,0", na002Data.get("PL"));
+        assertEquals("./.", na001Data.get("GT"));
 
         Map<String, String> na003Data = getFile0.getSampleData(2);
         assertEquals("./.", na003Data.get("GT"));
@@ -463,6 +469,7 @@ public class VariantVcfFactoryTest {
         assertEquals(".", na003Data.get("DP"));
         assertEquals(".", na003Data.get("GQ"));
         assertEquals(".", na003Data.get("PL"));
+        assertEquals("0/0", na001Data.get("GT"));
 
         Map<String, String> na004Data = getFile0.getSampleData(3);
         assertEquals("./.", na004Data.get("GT"));
@@ -470,6 +477,7 @@ public class VariantVcfFactoryTest {
         assertEquals(".", na004Data.get("DP"));
         assertEquals(".", na004Data.get("GQ"));
         assertEquals(".", na004Data.get("PL"));
+        assertEquals("./.", na001Data.get("GT"));
     }
 
     @Test
@@ -494,24 +502,28 @@ public class VariantVcfFactoryTest {
         na001.put("DP", "17");
         na001.put("GQ", "94");
         na001.put("PL", "94,0,286");
+        na001.put("AF", "0");
         Map<String, String> na002 = new HashMap<>();
         na002.put("GT", "0/1");
         na002.put("AD", "3,8");
         na002.put("DP", "15");
         na002.put("GQ", "43");
         na002.put("PL", "222,0,43");
+        na001.put("AN", "0");
         Map<String, String> na003 = new HashMap<>();
         na003.put("GT", "0/0");
         na003.put("AD", ".");
         na003.put("DP", "18");
         na003.put("GQ", ".");
         na003.put("PL", ".");
+        na001.put("AF", "0");
         Map<String, String> na004 = new HashMap<>();
         na004.put("GT", "0/1");
         na004.put("AD", "7,6");
         na004.put("DP", "13");
         na004.put("GQ", "0");
         na004.put("PL", "162,0,180");
+        na001.put("AN", "0");
 
         var0.getSourceEntry(FILE_ID, STUDY_ID).addSampleData(na001);
         var0.getSourceEntry(FILE_ID, STUDY_ID).addSampleData(na002);
@@ -531,22 +543,24 @@ public class VariantVcfFactoryTest {
         Variant getVar0 = result.get(0);
         VariantSourceEntry getFile0 = getVar0.getSourceEntry(FILE_ID, STUDY_ID);
         assertEquals(4, Integer.parseInt(getFile0.getAttribute("NS")));
-//        assertEquals(2, Integer.parseInt(getFile0.getAttribute("AN")));
+        assertEquals(0, Integer.parseInt(getFile0.getAttribute("AN")));
         assertEquals(1, Integer.parseInt(getFile0.getAttribute("AC")));
         assertEquals(0.125, Double.parseDouble(getFile0.getAttribute("AF")), 1e-8);
         assertEquals(63, Integer.parseInt(getFile0.getAttribute("DP")));
         assertEquals(10685, Integer.parseInt(getFile0.getAttribute("MQ")));
         assertEquals(1, Integer.parseInt(getFile0.getAttribute("MQ0")));
+        assertEquals(0, Double.parseDouble(getFile1.getAttribute("AF")));
 
         Variant getVar1 = result.get(1);
         VariantSourceEntry getFile1 = getVar1.getSourceEntry(FILE_ID, STUDY_ID);
         assertEquals(4, Integer.parseInt(getFile1.getAttribute("NS")));
-//        assertEquals(2, Integer.parseInt(getFile1.getAttribute("AN")));
+        assertEquals(0, Integer.parseInt(getFile1.getAttribute("AN")));
         assertEquals(2, Integer.parseInt(getFile1.getAttribute("AC")));
         assertEquals(0.25, Double.parseDouble(getFile1.getAttribute("AF")), 1e-8);
         assertEquals(63, Integer.parseInt(getFile1.getAttribute("DP")));
         assertEquals(10685, Integer.parseInt(getFile1.getAttribute("MQ")));
         assertEquals(1, Integer.parseInt(getFile1.getAttribute("MQ0")));
+        assertEquals(0, Double.parseDouble(getFile1.getAttribute("AF")));
     }
 
     @Test
