@@ -238,15 +238,14 @@ public class VariantVcfFactory {
             // Samples may remove the trailing fields (only GT is mandatory),
             // so the loop iterates to sampleFields.length, not formatFields.length
             for (int j = 0; j < sampleFields.length; j++) {
-                if (formatFields[j].equals("GT")) {
-                    if (sampleFields[j].equals("0|0") || sampleFields[j].equals("0/0") || sampleFields[j].equals("./.")) {
-                        ctr++;
-            	    }
-                }
-               
                 String formatField = formatFields[j];
                 String sampleField = processSampleField(alternateAlleleIdx, formatField, sampleFields[j]);
                 map.put(formatField, sampleField);
+                if (formatField.equals("GT")) {
+                    if (sampleField.equals("0|0") || sampleField.equals("0/0") || sampleField.equals("./.")) {
+                        ctr++;
+            	    }
+                }
             }
             if (ctr==sampleFields.length) {
                 throw new NotAVariantException("All the sample genotypes are non-variant");
@@ -344,7 +343,7 @@ public class VariantVcfFactory {
                     case "AF":
                         // TODO For now, only one alternate is supported
                         if (splits[1].equals("0")) {
-                            throw new NotAVariantException();
+                            throw new NotAVariantException("This can't be zero");
                         }
                         else{
                             String[] frequencies = splits[1].split(",");
@@ -353,7 +352,7 @@ public class VariantVcfFactory {
                         break;
                     case "AN":
                     		 if (splits[1].equals("0")) {
-                        		throw new NotAVariantException();
+                        		throw new NotAVariantException("This can't be zero");
                         	 }
 //                        // TODO For now, only two alleles (reference and one alternate) are supported, but this should be changed
 //                        file.addAttribute(splits[0], "2");
