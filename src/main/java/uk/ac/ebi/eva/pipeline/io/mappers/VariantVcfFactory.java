@@ -243,11 +243,11 @@ public class VariantVcfFactory {
                 map.put(formatField, sampleField);
                 if (formatField.equals("GT")) {
                     if (sampleField.equals("0|0") || sampleField.equals("0/0") || sampleField.equals("./.")) {
-                        ctr++;
+                        numReferenceGenotypes
             	    }
                 }
             }
-            if (ctr==sampleFields.length) {
+            if (numReferenceGenotypes==sampleFields.length) {
                 throw new NotAVariantException("All the sample genotypes are non-variant");
             } else {
                 // Add sample to the variant entry in the source file
