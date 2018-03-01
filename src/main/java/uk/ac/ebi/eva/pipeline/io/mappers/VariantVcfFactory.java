@@ -351,7 +351,7 @@ public class VariantVcfFactory {
                         break;
                     case "AN":
                     		 if (splits[1].equals("0")) {
-                        		throw new NotAVariantException("The value of the AF INFO field can't be zero");
+                        		throw new NotAVariantException("The value of the AN INFO field can't be zero");
                         	 }
 //                        // TODO For now, only two alleles (reference and one alternate) are supported, but this should be changed
 //                        file.addAttribute(splits[0], "2");
