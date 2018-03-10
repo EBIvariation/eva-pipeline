@@ -180,7 +180,7 @@ public class VariantVcfFactoryTest {
 
     @Test
     public void testCreateVariantFromVcfCoLocatedVariants_MainFields() {
-        String line = "1\t10040\trs123\tTGACGTAACGATT\tT,TGACGTAACGGTT,TGACGTAATAC\t.\t.\t.\tGT\t0/0\t0/1\t0/2\t1/2"; // 4 samples
+        String line = "1\t10040\trs123\tTGACGTAACGATT\tT,TGACGTAACGGTT,TGACGTAATAC\t.\t.\t.\tGT\t1/1\t0/1\t0/2\t1/2"; // 4 samples
 
         // Check proper conversion of main fields
         List<Variant> expResult = new LinkedList<>();
@@ -194,7 +194,7 @@ public class VariantVcfFactoryTest {
 
     @Test
     public void testCreateVariant_Samples() {
-        String line = "1\t10040\trs123\tT\tC\t.\t.\t.\tGT\t0/0\t0/1\t0/.\t./1\t1/1"; // 5 samples
+        String line = "1\t10040\trs123\tT\tC\t.\t.\t.\tGT\t1/1\t0/1\t0/.\t./1\t1/1"; // 5 samples
 
         // Initialize expected variants
         Variant var0 = new Variant("1", 10041, 10041 + "C".length() - 1, "T", "C");
@@ -203,7 +203,7 @@ public class VariantVcfFactoryTest {
 
         // Initialize expected samples
         Map<String, String> na001 = new HashMap<>();
-        na001.put("GT", "0/0");
+        na001.put("GT", "1/1");
         Map<String, String> na002 = new HashMap<>();
         na002.put("GT", "0/1");
         Map<String, String> na003 = new HashMap<>();
@@ -230,7 +230,7 @@ public class VariantVcfFactoryTest {
 
     @Test
     public void testCreateVariantFromVcfMultiallelicVariants_Samples() {
-        String line = "1\t123456\t.\tT\tC,G\t110\tPASS\t.\tGT:AD:DP:GQ:PL\t0/1:10,5:17:94:94,0,286\t0/2:3,8:15:43:222,0,43\t0/0:.:18:.:.\t1/2:7,6:13:99:162,0,180"; // 4 samples
+        String line = "1\t123456\t.\tT\tC,G\t110\tPASS\t.\tGT:AD:DP:GQ:PL\t0/1:10,5:17:94:94,0,286\t0/2:3,8:15:43:222,0,43\t1/1:.:18:.:.\t1/2:7,6:13:99:162,0,180"; // 4 samples
 
         // Initialize expected variants
         Variant var0 = new Variant("1", 123456, 123456, "T", "C");
@@ -256,7 +256,7 @@ public class VariantVcfFactoryTest {
         na002_C.put("GQ", "43");
         na002_C.put("PL", "222,0,43");
         Map<String, String> na003_C = new HashMap<>();
-        na003_C.put("GT", "0/0");
+        na003_C.put("GT", "1/1");
         na003_C.put("AD", ".");
         na003_C.put("DP", "18");
         na003_C.put("GQ", ".");
@@ -287,7 +287,7 @@ public class VariantVcfFactoryTest {
         na002_G.put("GQ", "43");
         na002_G.put("PL", "222,0,43");
         Map<String, String> na003_G = new HashMap<>();
-        na003_G.put("GT", "0/0");
+        na003_G.put("GT", "2/2");
         na003_G.put("AD", ".");
         na003_G.put("DP", "18");
         na003_G.put("GQ", ".");
@@ -323,7 +323,7 @@ public class VariantVcfFactoryTest {
 
     @Test
     public void testCreateVariantFromVcfCoLocatedVariants_Samples() {
-        String line = "1\t10040\trs123\tT\tC,GC\t.\t.\t.\tGT\t0/0\t0/1\t0/2\t1/1\t1/2\t2/2"; // 6 samples
+        String line = "1\t10040\trs123\tT\tC,GC\t.\t.\t.\tGT\t1/1\t0/1\t0/2\t1/1\t1/2\t2/2"; // 6 samples
 
         // Initialize expected variants
         Variant var0 = new Variant("1", 10041, 10041 + "C".length() - 1, "T", "C");
@@ -336,7 +336,7 @@ public class VariantVcfFactoryTest {
 
         // Initialize expected samples in variant 1 (alt allele C)
         Map<String, String> na001_C = new HashMap<>();
-        na001_C.put("GT", "0/0");
+        na001_C.put("GT", "1/1");
         Map<String, String> na002_C = new HashMap<>();
         na002_C.put("GT", "0/1");
         Map<String, String> na003_C = new HashMap<>();
@@ -357,7 +357,7 @@ public class VariantVcfFactoryTest {
 
         // TODO Initialize expected samples in variant 2 (alt allele GC)
         Map<String, String> na001_GC = new HashMap<>();
-        na001_GC.put("GT", "0/0");
+        na001_GC.put("GT", "2/2");
         Map<String, String> na002_GC = new HashMap<>();
         na002_GC.put("GT", "0/2");
         Map<String, String> na003_GC = new HashMap<>();
@@ -397,7 +397,7 @@ public class VariantVcfFactoryTest {
 
     @Test
     public void testCreateVariantWithMissingGenotypes() {
-        String line = "1\t1407616\t.\tC\tG\t43.74\tPASS\t.\tGT:AD:DP:GQ:PL\t./.:.:.:.:.\t1/1:0,2:2:6:71,6,0\t./.:.:.:.:.\t./.:.:.:.:.";
+        String line = "1\t1407616\t.\tC\tG\t43.74\tPASS\t.\tGT:AD:DP:GQ:PL\t1/1:.:.:.:.\t1/1:0,2:2:6:71,6,0\t1/1:.:.:.:.\t1/1:.:.:.:.";
 
         // Initialize expected variants
         Variant var0 = new Variant("1", 1407616, 1407616, "C", "G");
@@ -406,7 +406,7 @@ public class VariantVcfFactoryTest {
 
         // Initialize expected samples
         Map<String, String> na001 = new HashMap<>();
-        na001.put("GT", "./.");
+        na001.put("GT", "1/1");
         na001.put("AD", ".");
         na001.put("DP", ".");
         na001.put("GQ", ".");
@@ -418,13 +418,13 @@ public class VariantVcfFactoryTest {
         na002.put("GQ", "6");
         na002.put("PL", "71,6,0");
         Map<String, String> na003 = new HashMap<>();
-        na003.put("GT", "./.");
+        na003.put("GT", "1/1");
         na003.put("AD", ".");
         na003.put("DP", ".");
         na003.put("GQ", ".");
         na003.put("PL", ".");
         Map<String, String> na004 = new HashMap<>();
-        na004.put("GT", "./.");
+        na004.put("GT", "1/1");
         na004.put("AD", ".");
         na004.put("DP", ".");
         na004.put("GQ", ".");
@@ -444,7 +444,7 @@ public class VariantVcfFactoryTest {
         VariantSourceEntry getFile0 = getVar0.getSourceEntry(FILE_ID, STUDY_ID);
 
         Map<String, String> na001Data = getFile0.getSampleData(0);
-        assertEquals("./.", na001Data.get("GT"));
+        assertEquals("1/1", na001Data.get("GT"));
         assertEquals(".", na001Data.get("AD"));
         assertEquals(".", na001Data.get("DP"));
         assertEquals(".", na001Data.get("GQ"));
@@ -458,14 +458,14 @@ public class VariantVcfFactoryTest {
         assertEquals("71,6,0", na002Data.get("PL"));
 
         Map<String, String> na003Data = getFile0.getSampleData(2);
-        assertEquals("./.", na003Data.get("GT"));
+        assertEquals("1/1", na003Data.get("GT"));
         assertEquals(".", na003Data.get("AD"));
         assertEquals(".", na003Data.get("DP"));
         assertEquals(".", na003Data.get("GQ"));
         assertEquals(".", na003Data.get("PL"));
 
         Map<String, String> na004Data = getFile0.getSampleData(3);
-        assertEquals("./.", na004Data.get("GT"));
+        assertEquals("1/1", na004Data.get("GT"));
         assertEquals(".", na004Data.get("AD"));
         assertEquals(".", na004Data.get("DP"));
         assertEquals(".", na004Data.get("GQ"));
@@ -475,7 +475,7 @@ public class VariantVcfFactoryTest {
     @Test
     public void testParseInfo() {
         String line = "1\t123456\t.\tT\tC,G\t110\tPASS\tAN=3;AC=1,2;AF=0.125,0.25;DP=63;NS=4;MQ=10685\tGT:AD:DP:GQ:PL\t"
-                + "0/1:10,5:17:94:94,0,286\t0/2:3,8:15:43:222,0,43\t0/0:.:18:.:.\t0/2:7,6:13:0:162,0,180"; // 4 samples
+                + "0/1:10,5:17:94:94,0,286\t0/2:3,8:15:43:222,0,43\t1/1:.:18:.:.\t0/2:7,6:13:0:162,0,180"; // 4 samples
 
         // Initialize expected variants
         Variant var0 = new Variant("1", 123456, 123456, "T", "C");
@@ -501,7 +501,7 @@ public class VariantVcfFactoryTest {
         na002.put("GQ", "43");
         na002.put("PL", "222,0,43");
         Map<String, String> na003 = new HashMap<>();
-        na003.put("GT", "0/0");
+        na003.put("GT", "1/1");
         na003.put("AD", ".");
         na003.put("DP", "18");
         na003.put("GQ", ".");
@@ -577,5 +577,14 @@ public class VariantVcfFactoryTest {
         result = factory.create(FILE_ID, STUDY_ID, line);
         assertEquals(expResult, result);
         assertEquals(emptySet, result.get(0).getIds());
+    }
+
+    @Test
+    public void testIgnoreRecordsWithNonVariantGenotypes() {
+        String line = "1\t10040\trs123\tT\tC\t.\t.\t.\tGT\t0/0\t0/1\t0/.\t./1\t1/1"; // 5 samples, 1 with non-variant genotype
+
+        // Should ignore the record, so the expected result has 0 size
+        List<Variant> result = factory.create(FILE_ID, STUDY_ID, line);
+        assertEquals(0, result.size());
     }
 }

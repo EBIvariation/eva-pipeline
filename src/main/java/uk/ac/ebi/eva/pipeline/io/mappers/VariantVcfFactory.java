@@ -24,6 +24,7 @@ import org.opencb.biodata.models.variant.exceptions.NotAVariantException;
 
 import uk.ac.ebi.eva.commons.models.data.Variant;
 import uk.ac.ebi.eva.commons.models.data.VariantSourceEntry;
+import uk.ac.ebi.eva.pipeline.io.mappers.exceptions.VCFRecordWithNonVariantSites;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -92,12 +93,19 @@ public class VariantVcfFactory {
                 // Fill the rest of fields (after samples because INFO depends on them)
                 setOtherFields(variant, fileId, studyId, ids, quality, filter, info, format, keyFields.getNumAllele(),
                                alternateAlleles, line);
+                // Ignore VCF records that report non-variant sites
+                checkForNonVariantSites(variant, fileId, studyId);
                 variants.add(variant);
             } catch (NonStandardCompliantSampleField ex) {
                 Logger.getLogger(VariantFactory.class.getName())
                       .log(Level.SEVERE,
                            String.format("Variant %s:%d:%s>%s will not be saved\n%s", chromosome, position, reference,
                                          alternateAlleles[altAlleleIdx], ex.getMessage()));
+            } catch (VCFRecordWithNonVariantSites ex) {
+                Logger.getLogger(VariantFactory.class.getName())
+                        .log(Level.SEVERE,
+                                String.format("Variant %s:%d:%s>%s will not be saved\n%s", chromosome, position, reference,
+                                        alternateAlleles[altAlleleIdx], ex.getMessage()));
             }
         }
 
@@ -294,6 +302,29 @@ public class VariantVcfFactory {
         }
 
         return genotype.intern();
+    }
+
+    protected void checkForNonVariantSites(Variant variant, String fileId, String studyId) throws VCFRecordWithNonVariantSites {
+
+        //All the sample genotypes are non-variant (./., 0/0, 0|0)
+        List<Map<String,String>> samplesData = variant.getSourceEntry(fileId, studyId).getSamplesData();
+        for(Map<String,String> sample : samplesData) {
+            if(sample.get("GT") == "./." || sample.get("GT") == "0/0" || sample.get("GT") == "0|0") {
+                // The genotype of this sample was non-variant
+                System.out.println(sample);
+                throw new VCFRecordWithNonVariantSites();
+            }
+        }
+
+        // The value of the INFO field AF is 0
+        if(variant.getSourceEntry(fileId, studyId).getAttribute("AF") == "0") {
+            throw new VCFRecordWithNonVariantSites();
+        }
+
+        // The value of the INFO field AN is 0
+        if(variant.getSourceEntry(fileId, studyId).getAttribute("AN") == "0") {
+            throw new VCFRecordWithNonVariantSites();
+        }
     }
 
     protected void setOtherFields(Variant variant, String fileId, String studyId, Set<String> ids, float quality, String filter,
