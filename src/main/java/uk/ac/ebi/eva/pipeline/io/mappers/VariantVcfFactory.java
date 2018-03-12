@@ -230,21 +230,23 @@ public class VariantVcfFactory {
 
         for (int i = 9; i < fields.length; i++) {
             Map<String, String> map = new TreeMap<>();
-            int countreferencegenotypes=0;
+            int countReferenceGenotypes = 0;
             // Fill map of a sample
             String[] sampleFields = fields[i].split(":");
 
             // Samples may remove the trailing fields (only GT is mandatory),
             // so the loop iterates to sampleFields.length, not formatFields.length
             for (int j = 0; j < sampleFields.length; j++) {
-            	if(sampleFields[j].equals("./.") || sampleFields.equals("0/0") || sampleFields.equals("0|0")){
-            		countreferencegenotypes++;
+            	if(formatFields[0] == "GT"){
+            		if(sampleFields[j].equals("./.") || sampleFields.equals("0/0") || sampleFields.equals("0|0")){
+            			countReferenceGenotypes++;
+            		}
             	}
                 String formatField = formatFields[j];
                 String sampleField = processSampleField(alternateAlleleIdx, formatField, sampleFields[j]);
 
                 map.put(formatField, sampleField);
-                if(countreferencegenotypes == sampleFields.length){
+                if(countReferenceGenotypes == sampleFields.length){
                 	throw new NotAVariantException("all the sample genotypes are non-variant");
                 }else{
                 	// Add sample to the variant entry in the source file
