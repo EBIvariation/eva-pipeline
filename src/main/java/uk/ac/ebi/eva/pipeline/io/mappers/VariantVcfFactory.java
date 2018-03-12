@@ -342,18 +342,18 @@ public class VariantVcfFactory {
                         break;
                     case "AF":
                         // TODO For now, only one alternate is supported
-                        if(splits[1].equals("0"){
+                        if(splits[1].equals("0")) {
                         	throw new NotAVariantException("this is not a variant because the value of AF=0");
-                        }else{
+                        } else {
                         	String[] frequencies = splits[1].split(",");
                         	file.addAttribute(splits[0], frequencies[numAllele]);
                         }
                         break;
                     case "AN":
                     	// // TODO For now, only two alleles (reference and one alternative) are supported, but this should be changed
-                    	if(splits[1].equals("0")){
+                    	if(splits[1].equals("0")) {
                     		throw new NotAVariantException("this is not a variant because the value of AN=0");
-                    	}else{
+                    	} else {
                     		file.addAttribute(splits[0], "2");
                     	}
                         break;
