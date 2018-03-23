@@ -237,8 +237,8 @@ public class VariantVcfFactory {
             // Samples may remove the trailing fields (only GT is mandatory),
             // so the loop iterates to sampleFields.length, not formatFields.length
             for (int j = 0; j < sampleFields.length; j++) {
-            	if(formatFields[0] == "GT"){
-            		if(sampleFields[j].equals("./.") || sampleFields.equals("0/0") || sampleFields.equals("0|0")){
+            	if(formatFields[0].equals("GT")){
+            		if(sampleFields[j].equals("./.") || sampleFields[j].equals("0/0") || sampleFields[j].equals("0|0")){
             			countReferenceGenotypes++;
             		}
             	}
