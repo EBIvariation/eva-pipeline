@@ -19,6 +19,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.transaction.annotation.Transactional;
 import uk.ac.ebi.eva.commons.models.data.Variant;
 import uk.ac.ebi.eva.t2d.entity.DatasetMetadata;
+import uk.ac.ebi.eva.t2d.entity.DatasetVersionMetadata;
 import uk.ac.ebi.eva.t2d.entity.Phenotype;
 import uk.ac.ebi.eva.t2d.entity.SamplesDatasetMetadata;
 import uk.ac.ebi.eva.t2d.model.T2DTableStructure;
@@ -32,7 +33,7 @@ public interface T2dService {
 
     @Modifying
     @Transactional(T2D_TRANSACTION_MANAGER)
-    void publishDataset(DatasetMetadata datasetMetadata, SamplesDatasetMetadata metadata);
+    void publishDataset(DatasetMetadata datasetMetadata, SamplesDatasetMetadata metadata, DatasetVersionMetadata datasetVersionMetadata);
 
     @Modifying
     @Transactional(T2D_TRANSACTION_MANAGER)

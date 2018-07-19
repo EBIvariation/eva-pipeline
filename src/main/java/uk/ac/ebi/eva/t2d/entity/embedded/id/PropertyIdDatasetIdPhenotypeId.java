@@ -28,7 +28,7 @@ public class PropertyIdDatasetIdPhenotypeId implements Serializable {
     @Column(name = "PROP")
     private String propertyId;
 
-    @Column(name = "ID")
+    @Column(name = "DATASET")
     private String datasetId;
 
     @Column(name = "PH")

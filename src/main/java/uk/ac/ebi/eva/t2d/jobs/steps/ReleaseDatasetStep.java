@@ -28,7 +28,6 @@ import uk.ac.ebi.eva.t2d.jobs.tasklet.ReleaseDatasetTasklet;
 import uk.ac.ebi.eva.t2d.parameters.T2dMetadataParameters;
 import uk.ac.ebi.eva.t2d.services.T2dService;
 
-import static uk.ac.ebi.eva.t2d.BeanNames.T2D_PREPARE_DATABASE_SUMMARY_STATISTICS_STEP;
 import static uk.ac.ebi.eva.t2d.BeanNames.T2D_RELEASE_DATASET_STEP;
 
 /**

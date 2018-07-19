@@ -13,39 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.ac.ebi.eva.t2d.entity;
+package uk.ac.ebi.eva.t2d.repository;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import org.springframework.data.repository.CrudRepository;
+import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
+import uk.ac.ebi.eva.t2d.entity.DatasetVersionMetadata;
 
-/**
- * JPA definition for the Phenotype table.
- */
-@Entity
-@Table(name = "META_PH")
-public class Phenotype implements EntityWithId<String> {
+@Repository
+@Transactional
+public interface DatasetVersionMetadataRepository extends CrudRepository<DatasetVersionMetadata, String> {
 
-    @Id
-    @Column(name = "PH")
-    private String id;
-
-    @Column(name = "GRP")
-    private String group;
-
-    @Column(name = "SORT")
-    private Double sort;
-
-    Phenotype() {
-    }
-
-    public Phenotype(String phenotypeId) {
-        id = phenotypeId;
-    }
-
-    @Override
-    public String getId() {
-        return id;
-    }
 }

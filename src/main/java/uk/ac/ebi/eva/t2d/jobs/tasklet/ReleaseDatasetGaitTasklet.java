@@ -38,7 +38,8 @@ public class ReleaseDatasetGaitTasklet implements Tasklet {
 
     @Override
     public RepeatStatus execute(StepContribution stepContribution, ChunkContext chunkContext) throws Exception {
-        service.publishDataset(metadataParameters.getDatasetMetadata(), metadataParameters.getSamplesMetadata());
+        service.publishDataset(metadataParameters.getDatasetMetadata(), metadataParameters.getSamplesMetadata(),
+                metadataParameters.getDatasetVersionMetadata());
         return RepeatStatus.FINISHED;
     }
 }

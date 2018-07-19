@@ -20,45 +20,43 @@ import javax.persistence.Embeddable;
 import java.io.Serializable;
 
 /**
- * Composed ID PROPERTY / DATASETs
+ * Composed ID DATASET / PHENOTYPE
  */
 @Embeddable
-public class PropertyIdDatasetId implements Serializable {
+public class DatasetIdToPhenotypeId implements Serializable {
 
-    @Column(name = "PROP")
-    private String propertyId;
-
-    @Column(name = "DATASET")
+    @Column(name = "ID")
     private String datasetId;
 
-    PropertyIdDatasetId() {
-    }
+    @Column(name = "PH")
+    private String phenotypeId;
 
-    public PropertyIdDatasetId(String propertyId, String datasetId) {
-        this.propertyId = propertyId;
-        this.datasetId = datasetId;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof PropertyIdDatasetId)) return false;
-
-        PropertyIdDatasetId that = (PropertyIdDatasetId) o;
-
-        if (!propertyId.equals(that.propertyId)) return false;
-        return datasetId.equals(that.datasetId);
-
+    DatasetIdToPhenotypeId() {
     }
 
     public String getDatasetId() {
         return datasetId;
     }
 
+    public String getPhenotypeId() {
+        return phenotypeId;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        DatasetIdToPhenotypeId that = (DatasetIdToPhenotypeId) o;
+
+        if (!getDatasetId().equals(that.getDatasetId())) return false;
+        return getPhenotypeId().equals(that.getPhenotypeId());
+    }
+
     @Override
     public int hashCode() {
-        int result = propertyId.hashCode();
-        result = 31 * result + datasetId.hashCode();
+        int result = getDatasetId().hashCode();
+        result = 31 * result + getPhenotypeId().hashCode();
         return result;
     }
 }

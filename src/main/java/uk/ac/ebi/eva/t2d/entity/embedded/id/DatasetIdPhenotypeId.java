@@ -22,12 +22,12 @@ import javax.persistence.Embeddable;
 import java.io.Serializable;
 
 /**
- * Composed ID DATASET / PHENOTYPE
+ * Composed DATASET / PHENOTYPE
  */
 @Embeddable
 public class DatasetIdPhenotypeId implements Serializable {
 
-    @Column(name = "ID")
+    @Column(name = "DATASET")
     private String datasetId;
 
     @Column(name = "PH")

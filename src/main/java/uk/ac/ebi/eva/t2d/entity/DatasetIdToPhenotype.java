@@ -15,30 +15,26 @@
  */
 package uk.ac.ebi.eva.t2d.entity;
 
-import uk.ac.ebi.eva.t2d.entity.embedded.id.PropertyIdDatasetId;
+import uk.ac.ebi.eva.t2d.entity.embedded.id.DatasetIdToPhenotypeId;
 
-import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
+import javax.persistence.Id;
 import javax.persistence.Table;
 
 /**
- * JPA definition for the relationship between properties and datasets
+ * JPA definition for the table with the relationship between DATASET ID and PHENOTYPES
  */
 @Entity
-@Table(name = "META_PROP_DATASET")
-public class PropertyToDataset {
+@Table(name = "META_ID_PH")
+public class DatasetIdToPhenotype {
 
-    @EmbeddedId
-    private PropertyIdDatasetId id;
+    @Id
+    private DatasetIdToPhenotypeId datasetIdToPhenotypeId;
 
-    PropertyToDataset() {
+    DatasetIdToPhenotype() {
     }
 
-    public PropertyToDataset(String propertyId, String datasetId) {
-        id = new PropertyIdDatasetId(propertyId, datasetId);
-    }
-
-    public String getDatasetId() {
-        return id.getDatasetId();
+    public DatasetIdToPhenotypeId getDatasetIdToPhenotypeId() {
+        return datasetIdToPhenotypeId;
     }
 }
