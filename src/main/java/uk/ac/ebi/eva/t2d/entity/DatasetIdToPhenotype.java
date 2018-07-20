@@ -34,7 +34,18 @@ public class DatasetIdToPhenotype {
     DatasetIdToPhenotype() {
     }
 
+    public DatasetIdToPhenotype(String datasetId, String phenotypeId) {
+        this.datasetIdToPhenotypeId = new DatasetIdToPhenotypeId(datasetId,phenotypeId);
+    }
+
     public DatasetIdToPhenotypeId getDatasetIdToPhenotypeId() {
         return datasetIdToPhenotypeId;
+    }
+
+    @Override
+    public String toString() {
+        return "DatasetIdToPhenotype{" +
+                "datasetIdToPhenotypeId=" + datasetIdToPhenotypeId +
+                '}';
     }
 }

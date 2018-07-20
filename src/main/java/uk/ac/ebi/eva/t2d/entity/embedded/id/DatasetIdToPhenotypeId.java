@@ -34,6 +34,11 @@ public class DatasetIdToPhenotypeId implements Serializable {
     DatasetIdToPhenotypeId() {
     }
 
+    public DatasetIdToPhenotypeId(String datasetId, String phenotypeId) {
+        this.datasetId = datasetId;
+        this.phenotypeId = phenotypeId;
+    }
+
     public String getDatasetId() {
         return datasetId;
     }
@@ -58,5 +63,13 @@ public class DatasetIdToPhenotypeId implements Serializable {
         int result = getDatasetId().hashCode();
         result = 31 * result + getPhenotypeId().hashCode();
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return "DatasetIdToPhenotypeId{" +
+                "datasetId='" + datasetId + '\'' +
+                ", phenotypeId='" + phenotypeId + '\'' +
+                '}';
     }
 }

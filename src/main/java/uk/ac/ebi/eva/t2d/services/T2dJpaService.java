@@ -33,7 +33,9 @@ import uk.ac.ebi.eva.t2d.entity.VariantInfo;
 import uk.ac.ebi.eva.t2d.model.T2DTableStructure;
 import uk.ac.ebi.eva.t2d.model.T2dAnnotation;
 import uk.ac.ebi.eva.t2d.repository.CommonSampleRepository;
+import uk.ac.ebi.eva.t2d.repository.DatasetIdToPhenotypeRepository;
 import uk.ac.ebi.eva.t2d.repository.DatasetMetadataRepository;
+import uk.ac.ebi.eva.t2d.repository.DatasetPhenotypeToTableRepository;
 import uk.ac.ebi.eva.t2d.repository.DatasetVersionMetadataRepository;
 import uk.ac.ebi.eva.t2d.repository.PhenotypeRepository;
 import uk.ac.ebi.eva.t2d.repository.PropertyRepository;
@@ -69,6 +71,10 @@ public class T2dJpaService implements T2dService {
 
     private final DatasetVersionMetadataRepository datasetVersionMetadataRepository;
 
+    private final DatasetPhenotypeToTableRepository datasetPhenotypeToTableRepository;
+
+    private final DatasetIdToPhenotypeRepository datasetIdToPhenotypeRepository;
+
     private final PropertyRepository propertyRepository;
 
     private final PropertyToDatasetRepository propertyToDatasetRepository;
@@ -89,6 +95,8 @@ public class T2dJpaService implements T2dService {
 
     public T2dJpaService(DatasetMetadataRepository datasetMetadataRepository,
                          DatasetVersionMetadataRepository datasetVersionMetadataRepository,
+                         DatasetPhenotypeToTableRepository datasetPhenotypeToTableRepository,
+                         DatasetIdToPhenotypeRepository datasetIdToPhenotypeRepository,
                          PropertyRepository propertyRepository,
                          PropertyToDatasetRepository propertyToDatasetRepository,
                          PhenotypeRepository phenotypeRepository,
@@ -101,6 +109,8 @@ public class T2dJpaService implements T2dService {
     ) {
         this.datasetMetadataRepository = datasetMetadataRepository;
         this.datasetVersionMetadataRepository = datasetVersionMetadataRepository;
+        this.datasetPhenotypeToTableRepository = datasetPhenotypeToTableRepository;
+        this.datasetIdToPhenotypeRepository = datasetIdToPhenotypeRepository;
         this.propertyRepository = propertyRepository;
         this.propertyToDatasetRepository = propertyToDatasetRepository;
         this.phenotypeRepository = phenotypeRepository;
@@ -151,6 +161,8 @@ public class T2dJpaService implements T2dService {
             propertyToDatasetRepository.save(datasetId, structure);
         } else {
             phenotypeRepository.insertIfNotExists(phenotype);
+            datasetPhenotypeToTableRepository.save(datasetId,phenotype);
+            datasetIdToPhenotypeRepository.save(datasetId,phenotype);
             propertyToDatasetAndPhenotypeRepository.save(datasetId, structure, phenotype);
         }
     }
