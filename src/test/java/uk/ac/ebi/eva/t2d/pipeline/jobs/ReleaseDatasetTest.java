@@ -77,7 +77,7 @@ public class ReleaseDatasetTest {
         final DatasetVersionMetadata  datasetVersionMetadata = datasetVersionMetadataRepository.findAll().iterator().next();
         final SamplesDatasetMetadata samplesDatasetMetadata = samplesDatasetMetadataRepository.findAll().iterator()
                 .next();
-        assertEquals("GWAS_OxBB_mdv1", datasetMetadata.getId());
+        assertEquals("GWAS_OxBB_mdv1", datasetMetadata.getDatsetId());
         assertEquals("GWAS_OXBB_MDV1", datasetMetadata.getTableName());
         assertEquals("GWAS_OxBB_mdv1", datasetVersionMetadata.getId());
         assertEquals("GWAS_OxBB_mdv1", datasetVersionMetadata.getDatasetName());

@@ -64,7 +64,7 @@ public class PrepareDatabaseSummaryStatisticsStep {
 
             @Override
             protected String getDatasetId(T2dMetadataParameters metadataParameters) {
-                return metadataParameters.getDatasetMetadata().getId();
+                return metadataParameters.getDatasetMetadata().getDatsetId();
             }
 
             @Override

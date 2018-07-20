@@ -31,7 +31,7 @@ public class DatasetMetadata {
     private static final String NULL = "NULL";
     @Id
     @Column(name = "DATASET")
-    public String id;
+    public String datsetId;
 
     @Column(name = "EXPTYPE")
     public String expType;
@@ -66,13 +66,13 @@ public class DatasetMetadata {
         this.subjects = -1;
     }
 
-    public String getId() {
-        return id;
+    public String getDatsetId() {
+        return datsetId;
     }
 
     private void generateCalculatedFields(int version,String scientificGenerator) {
-        id = expType + "_" +scientificGenerator + "_" + versionTag(version);
-        tableName = id.toUpperCase();
+        datsetId = expType + "_" +scientificGenerator + "_" + versionTag(version);
+        tableName = datsetId.toUpperCase();
         tech = expType;
     }
 
