@@ -26,12 +26,13 @@ import javax.persistence.Table;
  * JPA definition for the table with the relationship between Datasets and Phenotypes
  */
 @Entity
-@Table(name = "PROP_ID_PH")
+@Table(name = "META_PROP_DATASET_PH")
 public class PropertyToDatasetAndPhenotype {
 
-    private static final String NULL = "NULL";
     @EmbeddedId
     private PropertyIdDatasetIdPhenotypeId id;
+
+    private static final String NULL = "NULL";
 
     @Column(name = "TRUST_COL")
     private String trustColumn;

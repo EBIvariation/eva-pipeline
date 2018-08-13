@@ -25,7 +25,7 @@ import javax.persistence.Table;
  * JPA definition for the relationship between properties and datasets
  */
 @Entity
-@Table(name = "PROP_ID")
+@Table(name = "META_PROP_DATASET")
 public class PropertyToDataset {
 
     @EmbeddedId

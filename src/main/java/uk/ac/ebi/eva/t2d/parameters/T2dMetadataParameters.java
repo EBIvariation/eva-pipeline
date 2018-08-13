@@ -19,6 +19,7 @@ import org.springframework.batch.core.configuration.annotation.JobScope;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.ac.ebi.eva.t2d.entity.DatasetMetadata;
+import uk.ac.ebi.eva.t2d.entity.DatasetVersionMetadata;
 import uk.ac.ebi.eva.t2d.entity.SamplesDatasetMetadata;
 
 @Service
@@ -72,7 +73,11 @@ public class T2dMetadataParameters {
 
     public DatasetMetadata getDatasetMetadata() {
         return new DatasetMetadata(getStudyGenerator(), getStudyType(),
-                Integer.parseInt(getStudyVersion()), getStudyAncestry(),
-                Integer.parseInt(getStudyRelease()));
+                Integer.parseInt(getStudyVersion()), getStudyAncestry());
+    }
+
+    public DatasetVersionMetadata getDatasetVersionMetadata() {
+        return new DatasetVersionMetadata(getStudyGenerator(), getStudyType(),
+                Integer.parseInt(getStudyVersion()), Integer.parseInt(getStudyRelease()));
     }
 }

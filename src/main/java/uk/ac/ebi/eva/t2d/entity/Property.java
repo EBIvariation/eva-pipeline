@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
  * JPA definition for the Property table.
  */
 @Entity
-@Table(name = "PROP")
+@Table(name = "META_PROP")
 public class Property implements EntityWithId<String> {
 
     private static final Map<Class<?>, String> translations;

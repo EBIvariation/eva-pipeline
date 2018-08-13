@@ -18,15 +18,15 @@ package uk.ac.ebi.eva.t2d.repository;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
-import uk.ac.ebi.eva.t2d.entity.DatasetPhenotypeToTable;
+import uk.ac.ebi.eva.t2d.entity.DatasetIdToPhenotype;
 import uk.ac.ebi.eva.t2d.entity.Phenotype;
-import uk.ac.ebi.eva.t2d.entity.embedded.id.DatasetIdPhenotypeId;
+import uk.ac.ebi.eva.t2d.entity.embedded.id.DatasetIdToPhenotypeId;
 
 @Repository
 @Transactional
-public interface DatasetPhenotypeToTableRepository extends CrudRepository<DatasetPhenotypeToTable, DatasetIdPhenotypeId> {
+public interface DatasetIdToPhenotypeRepository extends CrudRepository<DatasetIdToPhenotype, DatasetIdToPhenotypeId> {
 
     default void save(String datasetId, Phenotype phenotype) {
-        save(new DatasetPhenotypeToTable(datasetId, phenotype.getId()));
+        save(new DatasetIdToPhenotype(datasetId, phenotype.getId()));
     }
 }

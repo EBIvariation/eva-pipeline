@@ -12,6 +12,8 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.ac.ebi.eva.pipeline.Application;
+import uk.ac.ebi.eva.t2d.entity.DatasetVersionMetadata;
+import uk.ac.ebi.eva.t2d.repository.DatasetVersionMetadataRepository;
 import uk.ac.ebi.eva.test.t2d.configuration.BatchJobExecutorInMemory;
 import uk.ac.ebi.eva.t2d.configuration.T2dDataSourceConfiguration;
 import uk.ac.ebi.eva.test.t2d.configuration.TestJpaConfiguration;
@@ -40,6 +42,9 @@ public class ReleaseDatasetTest {
     private DatasetMetadataRepository datasetMetadataRepository;
 
     @Autowired
+    private DatasetVersionMetadataRepository datasetVersionMetadataRepository;
+
+    @Autowired
     private SamplesDatasetMetadataRepository samplesDatasetMetadataRepository;
 
     @Test(expected = JobParametersInvalidException.class)
@@ -65,16 +70,20 @@ public class ReleaseDatasetTest {
         assertCompleted(jobLauncherTestUtils.launchJob(jobParameters));
 
         assertEquals(1, datasetMetadataRepository.count());
+        assertEquals(1,datasetVersionMetadataRepository.count());
         assertEquals(1, samplesDatasetMetadataRepository.count());
 
         final DatasetMetadata datasetMetadata = datasetMetadataRepository.findAll().iterator().next();
+        final DatasetVersionMetadata  datasetVersionMetadata = datasetVersionMetadataRepository.findAll().iterator().next();
         final SamplesDatasetMetadata samplesDatasetMetadata = samplesDatasetMetadataRepository.findAll().iterator()
                 .next();
-        assertEquals("GWAS_OxBB_mdv1", datasetMetadata.getId());
+        assertEquals("GWAS_OxBB_mdv1", datasetMetadata.getDatasetId());
         assertEquals("GWAS_OXBB_MDV1", datasetMetadata.getTableName());
+        assertEquals("GWAS_OxBB_mdv1", datasetVersionMetadata.getId());
+        assertEquals("GWAS_OxBB_mdv1", datasetVersionMetadata.getDatasetName());
+        assertEquals("mdv2", datasetVersionMetadata.getVer());
         assertEquals("SAMPLES_GWAS_OxBB_mdv1", samplesDatasetMetadata.getId());
         assertEquals("SAMPLES_GWAS_OXBB_MDV1", samplesDatasetMetadata.getTableName());
-        assertEquals("mdv2", datasetMetadata.getVer());
         assertEquals("mdv2", samplesDatasetMetadata.getVer());
     }
 

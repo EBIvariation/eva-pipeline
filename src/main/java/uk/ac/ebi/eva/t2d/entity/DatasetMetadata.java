@@ -24,29 +24,17 @@ import javax.persistence.Table;
  * JPA definition for Dataset table
  */
 @Entity
-@Table(name = "DATASET")
+@Table(name = "META_DATASET")
 public class DatasetMetadata {
 
     private static final int DEFAULT_VERSION = 1;
     private static final String NULL = "NULL";
     @Id
-    @Column(name = "ID")
-    public String id;
-
-    @Column(name = "EXP")
-    public String experimentName;
-
-    @Column(name = "SG")
-    public String scientificGenerator;
+    @Column(name = "DATASET")
+    public String datasetId;
 
     @Column(name = "EXPTYPE")
     public String expType;
-
-    @Column(name = "VER")
-    public String ver;
-
-    @Column(name = "PARENT")
-    public String parent;
 
     @Column(name = "ANCESTRY")
     public String ancestry;
@@ -56,9 +44,6 @@ public class DatasetMetadata {
 
     @Column(name = "TBL")
     public String tableName;
-
-    @Column(name = "SORT")
-    public Double sort;
 
     @Column(name = "CASES")
     public Integer cases;
@@ -72,27 +57,22 @@ public class DatasetMetadata {
     DatasetMetadata() {
     }
 
-    public DatasetMetadata(String scientificGenerator, String expType, int version, String ancestry, int release) {
-        this.scientificGenerator = scientificGenerator;
+    public DatasetMetadata(String scientificGenerator, String expType, int version, String ancestry) {
         this.expType = expType;
-        setVersion(release);
-        generateCalculatedFields(version);
+        generateCalculatedFields(version,scientificGenerator);
         this.ancestry = ancestry;
         this.cases = -1;
         this.controls = -1;
-        this.parent = "Root";
-        this.sort = Double.valueOf(0);
         this.subjects = -1;
     }
 
-    public String getId() {
-        return id;
+    public String getDatasetId() {
+        return datasetId;
     }
 
-    private void generateCalculatedFields(int version) {
-        experimentName = expType + "_" + scientificGenerator;
-        id = experimentName + "_" + versionTag(version);
-        tableName = id.toUpperCase();
+    private void generateCalculatedFields(int version,String scientificGenerator) {
+        datasetId = expType + "_" +scientificGenerator + "_" + versionTag(version);
+        tableName = datasetId.toUpperCase();
         tech = expType;
     }
 
@@ -100,15 +80,7 @@ public class DatasetMetadata {
         return "mdv" + version;
     }
 
-    private void setVersion(int version) {
-        this.ver = versionTag(version);
-    }
-
     public String getTableName() {
         return tableName;
-    }
-
-    public String getVer() {
-        return ver;
     }
 }

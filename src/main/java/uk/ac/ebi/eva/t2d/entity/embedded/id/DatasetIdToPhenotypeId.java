@@ -20,52 +20,56 @@ import javax.persistence.Embeddable;
 import java.io.Serializable;
 
 /**
- * Composed ID PROPERTY / DATASET / PHENOTYPE
+ * Composed ID DATASET / PHENOTYPE
  */
 @Embeddable
-public class PropertyIdDatasetIdPhenotypeId implements Serializable {
+public class DatasetIdToPhenotypeId implements Serializable {
 
-    @Column(name = "PROP")
-    private String propertyId;
-
-    @Column(name = "DATASET")
+    @Column(name = "ID")
     private String datasetId;
 
     @Column(name = "PH")
     private String phenotypeId;
 
-    PropertyIdDatasetIdPhenotypeId() {
+    DatasetIdToPhenotypeId() {
     }
 
-    public PropertyIdDatasetIdPhenotypeId(String propertyId, String datasetId, String phenotypeId) {
-        this.propertyId = propertyId;
+    public DatasetIdToPhenotypeId(String datasetId, String phenotypeId) {
         this.datasetId = datasetId;
         this.phenotypeId = phenotypeId;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof PropertyIdDatasetIdPhenotypeId)) return false;
-
-        PropertyIdDatasetIdPhenotypeId that = (PropertyIdDatasetIdPhenotypeId) o;
-
-        if (!propertyId.equals(that.propertyId)) return false;
-        if (!datasetId.equals(that.datasetId)) return false;
-        return phenotypeId.equals(that.phenotypeId);
-
-    }
-
-    @Override
-    public int hashCode() {
-        int result = propertyId.hashCode();
-        result = 31 * result + datasetId.hashCode();
-        result = 31 * result + phenotypeId.hashCode();
-        return result;
     }
 
     public String getDatasetId() {
         return datasetId;
     }
 
+    public String getPhenotypeId() {
+        return phenotypeId;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        DatasetIdToPhenotypeId that = (DatasetIdToPhenotypeId) o;
+
+        if (!getDatasetId().equals(that.getDatasetId())) return false;
+        return getPhenotypeId().equals(that.getPhenotypeId());
+    }
+
+    @Override
+    public int hashCode() {
+        int result = getDatasetId().hashCode();
+        result = 31 * result + getPhenotypeId().hashCode();
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return "DatasetIdToPhenotypeId{" +
+                "datasetId='" + datasetId + '\'' +
+                ", phenotypeId='" + phenotypeId + '\'' +
+                '}';
+    }
 }

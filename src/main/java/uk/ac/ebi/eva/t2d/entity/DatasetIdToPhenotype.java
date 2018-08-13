@@ -15,37 +15,37 @@
  */
 package uk.ac.ebi.eva.t2d.entity;
 
-import javax.persistence.Column;
+import uk.ac.ebi.eva.t2d.entity.embedded.id.DatasetIdToPhenotypeId;
+
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
 /**
- * JPA definition for the Phenotype table.
+ * JPA definition for the table with the relationship between DATASET ID and PHENOTYPES
  */
 @Entity
-@Table(name = "META_PH")
-public class Phenotype implements EntityWithId<String> {
+@Table(name = "META_ID_PH")
+public class DatasetIdToPhenotype {
 
     @Id
-    @Column(name = "PH")
-    private String id;
+    private DatasetIdToPhenotypeId datasetIdToPhenotypeId;
 
-    @Column(name = "GRP")
-    private String group;
-
-    @Column(name = "SORT")
-    private Double sort;
-
-    Phenotype() {
+    DatasetIdToPhenotype() {
     }
 
-    public Phenotype(String phenotypeId) {
-        id = phenotypeId;
+    public DatasetIdToPhenotype(String datasetId, String phenotypeId) {
+        this.datasetIdToPhenotypeId = new DatasetIdToPhenotypeId(datasetId,phenotypeId);
+    }
+
+    public DatasetIdToPhenotypeId getDatasetIdToPhenotypeId() {
+        return datasetIdToPhenotypeId;
     }
 
     @Override
-    public String getId() {
-        return id;
+    public String toString() {
+        return "DatasetIdToPhenotype{" +
+                "datasetIdToPhenotypeId=" + datasetIdToPhenotypeId +
+                '}';
     }
 }

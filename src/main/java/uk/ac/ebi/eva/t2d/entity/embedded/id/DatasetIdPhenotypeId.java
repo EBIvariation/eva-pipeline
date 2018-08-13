@@ -22,12 +22,12 @@ import javax.persistence.Embeddable;
 import java.io.Serializable;
 
 /**
- * Composed ID DATASET / PHENOTYPE
+ * Composed DATASET / PHENOTYPE
  */
 @Embeddable
 public class DatasetIdPhenotypeId implements Serializable {
 
-    @Column(name = "ID")
+    @Column(name = "DATASET")
     private String datasetId;
 
     @Column(name = "PH")
@@ -36,8 +36,8 @@ public class DatasetIdPhenotypeId implements Serializable {
     DatasetIdPhenotypeId() {
     }
 
-    public DatasetIdPhenotypeId(DatasetMetadata datasetMetadata, String phenotypeId) {
-        this.datasetId = datasetMetadata.getId();
+    public DatasetIdPhenotypeId(String datasetId, String phenotypeId) {
+        this.datasetId = datasetId;
         this.phenotypeId = phenotypeId;
     }
 
@@ -66,5 +66,13 @@ public class DatasetIdPhenotypeId implements Serializable {
 
     public String getPhenotypeId() {
         return phenotypeId;
+    }
+
+    @Override
+    public String toString() {
+        return "DatasetIdPhenotypeId{" +
+                "datasetId='" + datasetId + '\'' +
+                ", phenotypeId='" + phenotypeId + '\'' +
+                '}';
     }
 }

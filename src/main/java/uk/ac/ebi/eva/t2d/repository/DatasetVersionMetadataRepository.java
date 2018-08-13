@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 EMBL - European Bioinformatics Institute
+ * Copyright 2016-2017 EMBL - European Bioinformatics Institute
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,15 +18,10 @@ package uk.ac.ebi.eva.t2d.repository;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
-import uk.ac.ebi.eva.t2d.entity.DatasetPhenotypeToTable;
-import uk.ac.ebi.eva.t2d.entity.Phenotype;
-import uk.ac.ebi.eva.t2d.entity.embedded.id.DatasetIdPhenotypeId;
+import uk.ac.ebi.eva.t2d.entity.DatasetVersionMetadata;
 
 @Repository
 @Transactional
-public interface DatasetPhenotypeToTableRepository extends CrudRepository<DatasetPhenotypeToTable, DatasetIdPhenotypeId> {
+public interface DatasetVersionMetadataRepository extends CrudRepository<DatasetVersionMetadata, String> {
 
-    default void save(String datasetId, Phenotype phenotype) {
-        save(new DatasetPhenotypeToTable(datasetId, phenotype.getId()));
-    }
 }

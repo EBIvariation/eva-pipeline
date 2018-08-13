@@ -26,7 +26,7 @@ import javax.persistence.Table;
  * JPA definition for the table with the relationship between DATASET, PHENOTYPES and the table where they are used
  */
 @Entity
-@Table(name = "ID_PH")
+@Table(name = "META_DATASET_PH")
 public class DatasetPhenotypeToTable {
 
     @Id
@@ -38,8 +38,8 @@ public class DatasetPhenotypeToTable {
     protected DatasetPhenotypeToTable() {
     }
 
-    public DatasetPhenotypeToTable(DatasetMetadata datasetMetadata, String phenotype) {
-        datasetIdPhenotypeId = new DatasetIdPhenotypeId(datasetMetadata, phenotype);
+    public DatasetPhenotypeToTable(String datasetId, String phenotype) {
+        datasetIdPhenotypeId = new DatasetIdPhenotypeId(datasetId, phenotype);
         generateTableName();
     }
 
@@ -53,5 +53,13 @@ public class DatasetPhenotypeToTable {
 
     public DatasetIdPhenotypeId getDatasetIdPhenotypeId() {
         return datasetIdPhenotypeId;
+    }
+
+    @Override
+    public String toString() {
+        return "DatasetPhenotypeToTable{" +
+                "datasetIdPhenotypeId=" + datasetIdPhenotypeId +
+                ", tableName='" + tableName + '\'' +
+                '}';
     }
 }

@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.ac.ebi.eva.commons.models.data.Variant;
 import uk.ac.ebi.eva.t2d.entity.DatasetMetadata;
+import uk.ac.ebi.eva.t2d.entity.DatasetVersionMetadata;
 import uk.ac.ebi.eva.t2d.entity.Phenotype;
 import uk.ac.ebi.eva.t2d.entity.Property;
 import uk.ac.ebi.eva.t2d.entity.Sample;
@@ -32,7 +33,10 @@ import uk.ac.ebi.eva.t2d.entity.VariantInfo;
 import uk.ac.ebi.eva.t2d.model.T2DTableStructure;
 import uk.ac.ebi.eva.t2d.model.T2dAnnotation;
 import uk.ac.ebi.eva.t2d.repository.CommonSampleRepository;
+import uk.ac.ebi.eva.t2d.repository.DatasetIdToPhenotypeRepository;
 import uk.ac.ebi.eva.t2d.repository.DatasetMetadataRepository;
+import uk.ac.ebi.eva.t2d.repository.DatasetPhenotypeToTableRepository;
+import uk.ac.ebi.eva.t2d.repository.DatasetVersionMetadataRepository;
 import uk.ac.ebi.eva.t2d.repository.PhenotypeRepository;
 import uk.ac.ebi.eva.t2d.repository.PropertyRepository;
 import uk.ac.ebi.eva.t2d.repository.PropertyToDatasetAndPhenotypeRepository;
@@ -65,6 +69,12 @@ public class T2dJpaService implements T2dService {
 
     private final DatasetMetadataRepository datasetMetadataRepository;
 
+    private final DatasetVersionMetadataRepository datasetVersionMetadataRepository;
+
+    private final DatasetPhenotypeToTableRepository datasetPhenotypeToTableRepository;
+
+    private final DatasetIdToPhenotypeRepository datasetIdToPhenotypeRepository;
+
     private final PropertyRepository propertyRepository;
 
     private final PropertyToDatasetRepository propertyToDatasetRepository;
@@ -84,6 +94,9 @@ public class T2dJpaService implements T2dService {
     private final VariantInfoRepository variantInfoRepository;
 
     public T2dJpaService(DatasetMetadataRepository datasetMetadataRepository,
+                         DatasetVersionMetadataRepository datasetVersionMetadataRepository,
+                         DatasetPhenotypeToTableRepository datasetPhenotypeToTableRepository,
+                         DatasetIdToPhenotypeRepository datasetIdToPhenotypeRepository,
                          PropertyRepository propertyRepository,
                          PropertyToDatasetRepository propertyToDatasetRepository,
                          PhenotypeRepository phenotypeRepository,
@@ -95,6 +108,9 @@ public class T2dJpaService implements T2dService {
                          VariantInfoRepository variantInfoRepository
     ) {
         this.datasetMetadataRepository = datasetMetadataRepository;
+        this.datasetVersionMetadataRepository = datasetVersionMetadataRepository;
+        this.datasetPhenotypeToTableRepository = datasetPhenotypeToTableRepository;
+        this.datasetIdToPhenotypeRepository = datasetIdToPhenotypeRepository;
         this.propertyRepository = propertyRepository;
         this.propertyToDatasetRepository = propertyToDatasetRepository;
         this.phenotypeRepository = phenotypeRepository;
@@ -108,15 +124,16 @@ public class T2dJpaService implements T2dService {
 
     /**
      * TODO modify later to unify release of both metadata tables.
-     *
-     * @param datasetMetadata
+     *  @param datasetMetadata
      * @param metadata
+     * @param datasetVersionMetadata
      */
     @Override
     @Modifying
     @Transactional(T2D_TRANSACTION_MANAGER)
-    public void publishDataset(DatasetMetadata datasetMetadata, SamplesDatasetMetadata metadata) {
+    public void publishDataset(DatasetMetadata datasetMetadata, SamplesDatasetMetadata metadata, DatasetVersionMetadata datasetVersionMetadata) {
         datasetMetadataRepository.save(datasetMetadata);
+        datasetVersionMetadataRepository.save(datasetVersionMetadata);
         samplesDatasetMetadataRepository.save(metadata);
     }
 
@@ -144,6 +161,8 @@ public class T2dJpaService implements T2dService {
             propertyToDatasetRepository.save(datasetId, structure);
         } else {
             phenotypeRepository.insertIfNotExists(phenotype);
+            datasetPhenotypeToTableRepository.save(datasetId,phenotype);
+            datasetIdToPhenotypeRepository.save(datasetId,phenotype);
             propertyToDatasetAndPhenotypeRepository.save(datasetId, structure, phenotype);
         }
     }
