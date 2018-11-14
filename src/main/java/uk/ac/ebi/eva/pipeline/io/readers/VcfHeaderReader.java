@@ -25,7 +25,9 @@ import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 
 import uk.ac.ebi.eva.commons.models.data.VariantSourceEntity;
-
+import java.util.*;
+import java.util.Arrays;
+import java.util.List;
 import java.io.File;
 import java.io.IOException;
 
@@ -98,19 +100,33 @@ public class VcfHeaderReader implements ResourceAwareItemReaderItemStream<Varian
             readAlreadyDone = true;
             return doRead();
         }
+
     }
 
-    private VariantSourceEntity doRead() {
+    private VariantSourceEntity doRead() throws IOException {
         if (variantReader == null) {
             throw new IllegalStateException("The method VcfHeaderReader.open() should be called before reading");
         }
         variantReader.pre();
         source.addMetadata(VARIANT_FILE_HEADER_KEY, variantReader.getHeader());
+        
+        List<String> sampleNames = variantReader.getSampleNames();
+
+        Set<String> uniformSamples = new HashSet<String>();
+
+        for (String sample : sampleNames) {
+            if ((uniformSamples.contains(sample))) {
+                throw new IOException("Duplicate samples given:");
+            }
+            uniformSamples.add(sample);
+        }
         return new VariantSourceEntity(source);
+
     }
 
     @Override
     public void open(ExecutionContext executionContext) throws ItemStreamException {
+
         readAlreadyDone = false;
         checkResourceIsProvided();
         String resourcePath = getResourcePath();
@@ -122,12 +138,14 @@ public class VcfHeaderReader implements ResourceAwareItemReaderItemStream<Varian
         if (resource == null) {
             throw new ItemStreamException("Resource was not provided.");
         }
+
     }
 
     private String getResourcePath() {
         try {
             return resource.getFile().getAbsolutePath();
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             throw new ItemStreamException(e);
         }
     }
@@ -140,6 +158,7 @@ public class VcfHeaderReader implements ResourceAwareItemReaderItemStream<Varian
 
     @Override
     public void update(ExecutionContext executionContext) throws ItemStreamException {
+
     }
 
     @Override

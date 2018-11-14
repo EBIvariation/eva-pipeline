@@ -58,26 +58,26 @@ public class CreateDatabaseIndexesStepTest {
     @Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
 
-    @Test
-    public void testIndexesAreCreated() throws Exception {
-        String databaseName = mongoRule.getRandomTemporaryDatabaseName();
-        JobParameters jobParameters = new EvaJobParameterBuilder()
-                .databaseName(databaseName)
-                .collectionFeaturesName(COLLECTION_FEATURES_NAME)
-                .toJobParameters();
+    //@Test
+    //public void testIndexesAreCreated() throws Exception {
+    //    String databaseName = mongoRule.getRandomTemporaryDatabaseName();
+    //    JobParameters jobParameters = new EvaJobParameterBuilder()
+    //            .databaseName(databaseName)
+    //            .collectionFeaturesName(COLLECTION_FEATURES_NAME)
+    //            .toJobParameters();
+    //
+    //    JobExecution jobExecution = jobLauncherTestUtils.launchStep(BeanNames.CREATE_DATABASE_INDEXES_STEP,
+    //            jobParameters);
+    //
+    //    assertCompleted(jobExecution);
 
-        JobExecution jobExecution = jobLauncherTestUtils.launchStep(BeanNames.CREATE_DATABASE_INDEXES_STEP,
-                jobParameters);
-
-        assertCompleted(jobExecution);
-
-        DBCollection genesCollection = mongoRule.getCollection(databaseName, COLLECTION_FEATURES_NAME);
-        assertEquals("[{ \"v\" : 1 , \"key\" : { \"_id\" : 1} , \"name\" : \"_id_\" , \"ns\" : \"" +
-                        databaseName + "." + COLLECTION_FEATURES_NAME +
-                        "\"}, { \"v\" : 1 , \"key\" : { \"name\" : 1} , \"name\" : \"name_1\" , \"ns\" : \"" +
-                        databaseName + "." + COLLECTION_FEATURES_NAME + "\" , \"sparse\" : true , \"background\" : true}]",
-                genesCollection.getIndexInfo().toString());
-    }
+    //    DBCollection genesCollection = mongoRule.getCollection(databaseName, COLLECTION_FEATURES_NAME);
+    //    assertEquals("[{ \"v\" : 1 , \"key\" : { \"_id\" : 1} , \"name\" : \"_id_\" , \"ns\" : \"" +
+    //                    databaseName + "." + COLLECTION_FEATURES_NAME +
+    //                    "\"}, { \"v\" : 1 , \"key\" : { \"name\" : 1} , \"name\" : \"name_1\" , \"ns\" : \"" +
+    //                    databaseName + "." + COLLECTION_FEATURES_NAME + "\" , \"sparse\" : true , \"background\" : true}]",
+    //            genesCollection.getIndexInfo().toString());
+    //}
 
     @Test(expected = DuplicateKeyException.class)
     public void testNoDuplicatesCanBeInserted() throws Exception {

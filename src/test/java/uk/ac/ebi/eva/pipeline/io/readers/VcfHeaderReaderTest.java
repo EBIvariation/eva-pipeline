@@ -9,6 +9,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.opencb.biodata.models.variant.VariantSource;
 import org.opencb.biodata.models.variant.VariantStudy;
+import java.io.IOException;
 
 import uk.ac.ebi.eva.commons.models.data.VariantSourceEntity;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
@@ -37,6 +38,8 @@ public class VcfHeaderReaderTest {
 
     private static final String INPUT_FILE_PATH = "/input-files/vcf/genotyped.vcf.gz";
 
+    private static final String INPUT_FILE_PATH_DUPLICATES = "/input-files/vcf/same_sample_names.vcf.gz";
+
     private static final String FILE_ID = "5";
 
     private static final String STUDY_ID = "7";
@@ -47,6 +50,20 @@ public class VcfHeaderReaderTest {
 
     @Rule
     public PipelineTemporaryFolderRule temporaryFolderRule = new PipelineTemporaryFolderRule();
+
+    @Test(expected = IOException.class)
+    public void testDuplicates() throws Exception {
+      File input = getResource(INPUT_FILE_PATH_DUPLICATES);
+
+      VariantStudy.StudyType studyType = VariantStudy.StudyType.COLLECTION;
+      VariantSource.Aggregation aggregation = VariantSource.Aggregation.NONE;
+
+      VcfHeaderReader headerReader = new VcfHeaderReader(input, FILE_ID, STUDY_ID, STUDY_NAME,
+              studyType, aggregation);
+      headerReader.open(null);
+      VariantSourceEntity source = headerReader.read();
+    }
+
 
     @Test
     public void testRead() throws Exception {
