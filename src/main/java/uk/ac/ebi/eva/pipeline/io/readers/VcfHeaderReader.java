@@ -26,8 +26,6 @@ import org.springframework.core.io.Resource;
 
 import uk.ac.ebi.eva.commons.models.data.VariantSourceEntity;
 import java.util.*;
-import java.util.Arrays;
-import java.util.List;
 import java.io.File;
 import java.io.IOException;
 
@@ -109,14 +107,14 @@ public class VcfHeaderReader implements ResourceAwareItemReaderItemStream<Varian
         }
         variantReader.pre();
         source.addMetadata(VARIANT_FILE_HEADER_KEY, variantReader.getHeader());
-        
+
         List<String> sampleNames = variantReader.getSampleNames();
 
         Set<String> uniformSamples = new HashSet<String>();
 
         for (String sample : sampleNames) {
             if ((uniformSamples.contains(sample))) {
-                throw new IOException("Duplicate samples given:");
+                throw new IOException("Duplicate sample name given: " + sample);
             }
             uniformSamples.add(sample);
         }
@@ -144,8 +142,7 @@ public class VcfHeaderReader implements ResourceAwareItemReaderItemStream<Varian
     private String getResourcePath() {
         try {
             return resource.getFile().getAbsolutePath();
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             throw new ItemStreamException(e);
         }
     }
