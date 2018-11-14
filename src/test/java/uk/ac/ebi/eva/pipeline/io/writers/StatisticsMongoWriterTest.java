@@ -135,7 +135,7 @@ public class StatisticsMongoWriterTest {
                 .append("ns", databaseName + ".populationStatistics")
         );
 
-    //    assertEquals(indexes, statsCollection.getIndexInfo());
+        assertEquals(indexes, statsCollection.getIndexInfo());
     }
 
     @Test(expected = org.springframework.dao.DuplicateKeyException.class)
