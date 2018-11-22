@@ -23,10 +23,12 @@ import org.springframework.batch.item.ItemStreamException;
 import org.springframework.batch.item.file.ResourceAwareItemReaderItemStream;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
-
 import uk.ac.ebi.eva.commons.models.data.VariantSourceEntity;
-import java.util.*;
+
+import java.util.List;
+import java.util.HashSet;
 import java.io.File;
+import uk.ac.ebi.eva.pipeline.runner.exceptions.DuplicateSamplesFoundException;
 import java.io.IOException;
 
 /**
@@ -98,33 +100,34 @@ public class VcfHeaderReader implements ResourceAwareItemReaderItemStream<Varian
             readAlreadyDone = true;
             return doRead();
         }
-
     }
 
-    private VariantSourceEntity doRead() throws IOException {
+    private VariantSourceEntity doRead() throws DuplicateSamplesFoundException {
         if (variantReader == null) {
             throw new IllegalStateException("The method VcfHeaderReader.open() should be called before reading");
         }
         variantReader.pre();
         source.addMetadata(VARIANT_FILE_HEADER_KEY, variantReader.getHeader());
 
-        List<String> sampleNames = variantReader.getSampleNames();
+        List<String> sampleNames = new ArrayList<String> ( variantReader.getSampleNames());
 
-        Set<String> uniformSamples = new HashSet<String>();
+        HashSet<String> uniqueSamples = new HashSet<String>(sampleNames);
 
-        for (String sample : sampleNames) {
-            if ((uniformSamples.contains(sample))) {
-                throw new IOException("Duplicate sample name given: " + sample);
+
+        if (sampleNames.size() != uniqueSamples.size()){
+
+
+            for (String str : uniqueSamples) {
+              sampleNames.remove(str);
             }
-            uniformSamples.add(sample);
+            // sampleNames.removeAll(uniqueSamples);
+            throw new DuplicateSamplesFoundException(sampleNames);
         }
         return new VariantSourceEntity(source);
-
     }
 
     @Override
     public void open(ExecutionContext executionContext) throws ItemStreamException {
-
         readAlreadyDone = false;
         checkResourceIsProvided();
         String resourcePath = getResourcePath();
@@ -136,7 +139,6 @@ public class VcfHeaderReader implements ResourceAwareItemReaderItemStream<Varian
         if (resource == null) {
             throw new ItemStreamException("Resource was not provided.");
         }
-
     }
 
     private String getResourcePath() {
@@ -155,7 +157,6 @@ public class VcfHeaderReader implements ResourceAwareItemReaderItemStream<Varian
 
     @Override
     public void update(ExecutionContext executionContext) throws ItemStreamException {
-
     }
 
     @Override

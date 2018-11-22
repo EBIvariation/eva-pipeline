@@ -27,6 +27,7 @@ import static uk.ac.ebi.eva.test.utils.JobTestUtils.checkFieldsInsideList;
 import static uk.ac.ebi.eva.test.utils.JobTestUtils.checkStringInsideList;
 import static uk.ac.ebi.eva.utils.FileUtils.getResource;
 
+import uk.ac.ebi.eva.pipeline.runner.exceptions.DuplicateSamplesFoundException;
 /**
  * {@link VcfHeaderReader}
  * <p>
@@ -51,17 +52,21 @@ public class VcfHeaderReaderTest {
     @Rule
     public PipelineTemporaryFolderRule temporaryFolderRule = new PipelineTemporaryFolderRule();
 
-    @Test(expected = IOException.class)
-    public void testDuplicates() throws Exception {
-      File input = getResource(INPUT_FILE_PATH_DUPLICATES);
+    @Test(expected = DuplicateSamplesFoundException.class)
+    public void testDuplicateSamples() throws Exception {
+      try {
+        File input = getResource(INPUT_FILE_PATH_DUPLICATES);
 
-      VariantStudy.StudyType studyType = VariantStudy.StudyType.COLLECTION;
-      VariantSource.Aggregation aggregation = VariantSource.Aggregation.NONE;
+        VariantStudy.StudyType studyType = VariantStudy.StudyType.COLLECTION;
+        VariantSource.Aggregation aggregation = VariantSource.Aggregation.NONE;
 
-      VcfHeaderReader headerReader = new VcfHeaderReader(input, FILE_ID, STUDY_ID, STUDY_NAME,
-              studyType, aggregation);
-      headerReader.open(null);
-      VariantSourceEntity source = headerReader.read();
+        VcfHeaderReader headerReader = new VcfHeaderReader(input, FILE_ID, STUDY_ID, STUDY_NAME,
+                studyType, aggregation);
+        headerReader.open(null);
+        VariantSourceEntity source = headerReader.read();
+      } catch (DuplicateSamplesFoundException e) {
+          System.out.println(e.toString());
+      }
     }
 
 
