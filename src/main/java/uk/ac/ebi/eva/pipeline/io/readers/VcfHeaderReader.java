@@ -23,13 +23,15 @@ import org.springframework.batch.item.ItemStreamException;
 import org.springframework.batch.item.file.ResourceAwareItemReaderItemStream;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
-import uk.ac.ebi.eva.commons.models.data.VariantSourceEntity;
 
-import java.util.List;
-import java.util.HashSet;
-import java.io.File;
+import uk.ac.ebi.eva.commons.models.data.VariantSourceEntity;
 import uk.ac.ebi.eva.pipeline.runner.exceptions.DuplicateSamplesFoundException;
+
+import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 
 /**
  * Before providing the VariantSource as argument to a VcfReader (that uses the VariantVcfFactory inside
@@ -110,17 +112,12 @@ public class VcfHeaderReader implements ResourceAwareItemReaderItemStream<Varian
         source.addMetadata(VARIANT_FILE_HEADER_KEY, variantReader.getHeader());
 
         List<String> sampleNames = new ArrayList<String> ( variantReader.getSampleNames());
+        HashSet<String> uniqueSampleNames = new HashSet<String>(sampleNames);
 
-        HashSet<String> uniqueSamples = new HashSet<String>(sampleNames);
-
-
-        if (sampleNames.size() != uniqueSamples.size()){
-
-
-            for (String str : uniqueSamples) {
+        if (sampleNames.size() != uniqueSampleNames.size()){
+            for (String str : uniqueSampleNames) {
               sampleNames.remove(str);
             }
-            // sampleNames.removeAll(uniqueSamples);
             throw new DuplicateSamplesFoundException(sampleNames);
         }
         return new VariantSourceEntity(source);
