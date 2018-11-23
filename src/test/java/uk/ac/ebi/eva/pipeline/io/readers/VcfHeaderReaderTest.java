@@ -53,7 +53,6 @@ public class VcfHeaderReaderTest {
 
     @Test(expected = DuplicateSamplesFoundException.class)
     public void testDuplicateSamples() throws Exception {
-      try {
         File input = getResource(INPUT_FILE_PATH_DUPLICATES);
 
         VariantStudy.StudyType studyType = VariantStudy.StudyType.COLLECTION;
@@ -63,11 +62,7 @@ public class VcfHeaderReaderTest {
                 studyType, aggregation);
         headerReader.open(null);
         VariantSourceEntity source = headerReader.read();
-      } catch (DuplicateSamplesFoundException e) {
-          System.out.println(e.toString());
-      }
     }
-
 
     @Test
     public void testRead() throws Exception {

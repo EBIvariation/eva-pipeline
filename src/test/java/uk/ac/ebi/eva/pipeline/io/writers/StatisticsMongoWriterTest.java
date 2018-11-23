@@ -167,7 +167,7 @@ public class StatisticsMongoWriterTest {
                 (Integer) map.get("missAl"),
                 (Integer) map.get("missGt"),
                 (Map<String, Integer>) map.get("numGt"));
-       return Arrays.asList(populationStatistics);
+        return Arrays.asList(populationStatistics);
     }
 
     public StatisticsMongoWriter getStatisticsMongoWriter(String databaseName) throws UnknownHostException {
