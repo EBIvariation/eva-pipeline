@@ -59,7 +59,8 @@ public class VcfHeaderReaderTest {
         VariantSource.Aggregation aggregation = VariantSource.Aggregation.NONE;
 
         VcfHeaderReader headerReader = new VcfHeaderReader(input, FILE_ID, STUDY_ID, STUDY_NAME,
-                studyType, aggregation);
+                VariantStudy.StudyType.COLLECTION,
+                VariantSource.Aggregation.NONE);
         headerReader.open(null);
         VariantSourceEntity source = headerReader.read();
     }
@@ -72,7 +73,8 @@ public class VcfHeaderReaderTest {
         VariantSource.Aggregation aggregation = VariantSource.Aggregation.NONE;
 
         VcfHeaderReader headerReader = new VcfHeaderReader(input, FILE_ID, STUDY_ID, STUDY_NAME,
-                studyType, aggregation);
+                VariantStudy.StudyType.COLLECTION,
+                VariantSource.Aggregation.NONE);
         headerReader.open(null);
         VariantSourceEntity source = headerReader.read();
 

@@ -114,7 +114,7 @@ public class VcfHeaderReader implements ResourceAwareItemReaderItemStream<Varian
         List<String> sampleNames = new ArrayList<String> ( variantReader.getSampleNames());
         HashSet<String> uniqueSampleNames = new HashSet<String>(sampleNames);
 
-        if (sampleNames.size() != uniqueSampleNames.size()){
+        if (sampleNames.size() != uniqueSampleNames.size()) {
             for (String str : uniqueSampleNames) {
               sampleNames.remove(str);
             }
