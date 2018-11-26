@@ -73,8 +73,7 @@ public class VcfHeaderReaderTest {
         VariantSource.Aggregation aggregation = VariantSource.Aggregation.NONE;
 
         VcfHeaderReader headerReader = new VcfHeaderReader(input, FILE_ID, STUDY_ID, STUDY_NAME,
-                VariantStudy.StudyType.COLLECTION,
-                VariantSource.Aggregation.NONE);
+                studyType, aggregation);
         headerReader.open(null);
         VariantSourceEntity source = headerReader.read();
 
@@ -108,8 +107,7 @@ public class VcfHeaderReaderTest {
         File input = getResource(INPUT_FILE_PATH);
 
         VcfHeaderReader headerReader = new VcfHeaderReader(input, FILE_ID, STUDY_ID, STUDY_NAME,
-                VariantStudy.StudyType.COLLECTION,
-                VariantSource.Aggregation.NONE);
+                studyType, aggregation);
         headerReader.open(null);
         VariantSourceEntity source = headerReader.read();
 
