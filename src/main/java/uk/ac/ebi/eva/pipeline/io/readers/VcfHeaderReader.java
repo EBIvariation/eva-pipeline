@@ -111,14 +111,18 @@ public class VcfHeaderReader implements ResourceAwareItemReaderItemStream<Varian
         variantReader.pre();
         source.addMetadata(VARIANT_FILE_HEADER_KEY, variantReader.getHeader());
 
-        List<String> sampleNames = new ArrayList<String> ( variantReader.getSampleNames());
-        HashSet<String> uniqueSampleNames = new HashSet<String>(sampleNames);
+        List<String> sampleNames = new ArrayList<String>(variantReader.getSampleNames());
+        HashSet<String> uniqueSampleNames = new HashSet<String>(sampleNames.size());
+        List<String> duplicateSampleNames = new ArrayList<String>();
 
-        if (sampleNames.size() != uniqueSampleNames.size()) {
-            for (String str : uniqueSampleNames) {
-              sampleNames.remove(str);
+        for (String sample : sampleNames) {
+            boolean isDuplicate = !uniqueSampleNames.add(sample);
+            if (isDuplicate) {
+                duplicateSampleNames.add(sample);
             }
-            throw new DuplicateSamplesFoundException(sampleNames);
+        }
+        if (!duplicateSampleNames.isEmpty()) {
+            throw new DuplicateSamplesFoundException(duplicateSampleNames);
         }
         return new VariantSourceEntity(source);
     }

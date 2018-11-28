@@ -17,7 +17,7 @@ package uk.ac.ebi.eva.pipeline.runner.exceptions;
 import java.util.List;
 
 /**
- * Exception thrown where a string value argument is not recognized or valid in a function.
+ * Exception thrown by the runner when duplicate samples are provided.
  */
 public class DuplicateSamplesFoundException extends Exception {
 
