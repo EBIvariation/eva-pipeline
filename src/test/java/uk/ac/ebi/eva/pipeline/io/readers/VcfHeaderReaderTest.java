@@ -26,6 +26,7 @@ import static uk.ac.ebi.eva.test.utils.JobTestUtils.checkFieldsInsideList;
 import static uk.ac.ebi.eva.test.utils.JobTestUtils.checkStringInsideList;
 import static uk.ac.ebi.eva.utils.FileUtils.getResource;
 
+import uk.ac.ebi.eva.pipeline.runner.exceptions.DuplicateSamplesFoundException;
 /**
  * {@link VcfHeaderReader}
  * <p>
@@ -37,6 +38,8 @@ public class VcfHeaderReaderTest {
 
     private static final String INPUT_FILE_PATH = "/input-files/vcf/genotyped.vcf.gz";
 
+    private static final String INPUT_FILE_PATH_DUPLICATES = "/input-files/vcf/same_sample_names.vcf.gz";
+
     private static final String FILE_ID = "5";
 
     private static final String STUDY_ID = "7";
@@ -47,6 +50,19 @@ public class VcfHeaderReaderTest {
 
     @Rule
     public PipelineTemporaryFolderRule temporaryFolderRule = new PipelineTemporaryFolderRule();
+
+    @Test(expected = DuplicateSamplesFoundException.class)
+    public void testDuplicateSamples() throws Exception {
+        File input = getResource(INPUT_FILE_PATH_DUPLICATES);
+
+        VariantStudy.StudyType studyType = VariantStudy.StudyType.COLLECTION;
+        VariantSource.Aggregation aggregation = VariantSource.Aggregation.NONE;
+
+        VcfHeaderReader headerReader = new VcfHeaderReader(input, FILE_ID, STUDY_ID, STUDY_NAME,
+                studyType, aggregation);
+        headerReader.open(null);
+        VariantSourceEntity source = headerReader.read();
+    }
 
     @Test
     public void testRead() throws Exception {
