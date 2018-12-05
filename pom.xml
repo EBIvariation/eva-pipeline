@@ -116,6 +116,7 @@
     </dependencies>
 
     <build>
+        <finalName>${project.artifactId}-${project.version}-${git.commit.id.abbrev}</finalName>
         <sourceDirectory>src/main/java</sourceDirectory>
         <testSourceDirectory>src/test/java</testSourceDirectory>
 
@@ -152,6 +153,11 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>pl.project13.maven</groupId>
+                <artifactId>git-commit-id-plugin</artifactId>
             </plugin>
         </plugins>
     </build>
