@@ -36,6 +36,9 @@ import uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantSourceEntry
 import uk.ac.ebi.eva.pipeline.model.EnsemblVariant;
 
 import javax.annotation.PostConstruct;
+import java.time.LocalTime;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -63,6 +66,8 @@ public class VariantsMongoReader
     private MongoConverter converter;
 
     private Integer chunkSize;
+
+    private ZonedDateTime lastRead;
 
     /**
      *
@@ -115,6 +120,7 @@ public class VariantsMongoReader
 
         this.converter = mongoOperations.getConverter();
         this.chunkSize = chunkSize;
+        this.lastRead = ZonedDateTime.now();
     }
 
     @PostConstruct
@@ -141,7 +147,7 @@ public class VariantsMongoReader
     private List<EnsemblVariant> readBatch(Integer chunkSize) throws Exception {
         List<EnsemblVariant> variants = new ArrayList<>();
         DBObject dbObject;
-        while ((dbObject = delegateReader.doRead()) != null) {
+        while ((dbObject = delegateDoRead()) != null) {
             SimplifiedVariant variant = converter.read(SimplifiedVariant.class, dbObject);
             variants.add(buildVariantWrapper(variant));
             if (variants.size() == chunkSize) {
@@ -149,6 +155,11 @@ public class VariantsMongoReader
             }
         }
         return variants;
+    }
+
+    private DBObject delegateDoRead() throws Exception {
+        lastRead = ZonedDateTime.now();
+        return delegateReader.doRead();
     }
 
     private EnsemblVariant buildVariantWrapper(SimplifiedVariant variant) {
@@ -162,5 +173,13 @@ public class VariantsMongoReader
     @Override
     public void close() {
         delegateReader.close();
+    }
+
+    @Override
+    public void update(ExecutionContext executionContext) {
+        super.update(executionContext);
+
+        // to debug EVA-781: mongo timeouts
+        executionContext.put("last_read_timestamp", lastRead.format(DateTimeFormatter.ISO_DATE_TIME));
     }
 }
