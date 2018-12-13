@@ -41,7 +41,7 @@ It is likely that you will need to edit some parameters to match your environmen
 By using these properties files, a job can be launched with a single command like:
 
     java -jar target/eva-pipeline-2.0-beta2-SNAPSHOT.jar \
-        --spring.config.location=file:examples/application.properties --parameters.path=file:examples/load-genotyped-vcf.properties
+        --spring.config.location=file:examples/application.properties --parameters.path=examples/load-genotyped-vcf.properties
 
 The contents from the configuration files can be also provided directly as command-line arguments, like the following:
 
