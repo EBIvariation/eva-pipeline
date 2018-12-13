@@ -61,6 +61,8 @@ public class VariantsMongoReader
 
     private static final String FILE_KEY = VariantDocument.FILES_FIELD + "." + VariantSourceEntryMongo.FILEID_FIELD;
 
+    private static final String LAST_READ_TIMESTAMP_KEY = "last_read_timestamp";
+
     private MongoDbCursorItemReader delegateReader;
 
     private MongoConverter converter;
@@ -180,6 +182,6 @@ public class VariantsMongoReader
         super.update(executionContext);
 
         // to debug EVA-781: mongo timeouts
-        executionContext.put("last_read_timestamp", lastRead.format(DateTimeFormatter.ISO_DATE_TIME));
+        executionContext.put(LAST_READ_TIMESTAMP_KEY, lastRead.format(DateTimeFormatter.ISO_DATE_TIME));
     }
 }
