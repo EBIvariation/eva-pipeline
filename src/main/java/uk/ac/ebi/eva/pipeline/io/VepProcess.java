@@ -88,7 +88,7 @@ public class VepProcess {
     private boolean skipComments;
 
     public VepProcess(AnnotationParameters annotationParameters, int chunkSize, Long timeoutInSeconds,
-                      Writer AnnotationWriter, boolean skipComments) {
+                      Writer annotationWriter, boolean skipComments) {
         if (timeoutInSeconds <= 0) {
             throw new IllegalArgumentException(
                     "timeout (" + timeoutInSeconds + " seconds) must be strictly greater than 0");
@@ -96,7 +96,7 @@ public class VepProcess {
         this.annotationParameters = annotationParameters;
         this.chunkSize = chunkSize;
         this.timeoutInSeconds = timeoutInSeconds;
-        this.writer = AnnotationWriter;
+        this.writer = annotationWriter;
         this.skipComments = skipComments;
         this.outputIdleSince = new AtomicLong(System.currentTimeMillis());
     }

@@ -68,7 +68,7 @@ public class VepAnnotationProcessor implements ItemProcessor<List<EnsemblVariant
         vepProcess.close();
         writer.close();
 
-        String[] lines = writer.getBuffer().toString().split("\n");
+        String[] lines = writer.getBuffer().toString().split("\n"); // TODO is it possible to refactor this?
         return Arrays.asList(lines);
     }
 

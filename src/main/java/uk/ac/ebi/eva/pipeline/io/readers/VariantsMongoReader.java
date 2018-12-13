@@ -94,6 +94,8 @@ public class VariantsMongoReader
         delegateReader = new MongoDbCursorItemReader();
         delegateReader.setTemplate(mongoOperations);
         delegateReader.setCollection(collectionVariantsName);
+        
+        // the query excludes processed variants automatically, so a new query has to start from the beginning
         delegateReader.setSaveState(false);
 
         BasicDBObjectBuilder queryBuilder = BasicDBObjectBuilder.start();
