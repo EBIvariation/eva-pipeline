@@ -15,8 +15,11 @@
  */
 package uk.ac.ebi.eva.pipeline.configuration.jobs.steps;
 
+import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
+import com.mongodb.DBCursor;
+import com.mongodb.DBObject;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -29,29 +32,38 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import uk.ac.ebi.eva.commons.models.mongo.entity.VariantDocument;
 import uk.ac.ebi.eva.pipeline.Application;
 import uk.ac.ebi.eva.pipeline.configuration.BeanNames;
 import uk.ac.ebi.eva.pipeline.configuration.jobs.AnnotationJobConfiguration;
 import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
-import uk.ac.ebi.eva.test.utils.JobTestUtils;
 import uk.ac.ebi.eva.utils.EvaJobParameterBuilder;
 import uk.ac.ebi.eva.utils.URLHelper;
 
 import java.io.File;
-import java.io.FileInputStream;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.zip.GZIPInputStream;
 
+import static junit.framework.TestCase.assertFalse;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantAnnotation.POLYPHEN_FIELD;
+import static uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantAnnotation.SIFT_FIELD;
+import static uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantAnnotation.SO_ACCESSION_FIELD;
+import static uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantAnnotation.XREFS_FIELD;
+import static uk.ac.ebi.eva.test.utils.GenotypedVcfJobTestUtils.COLLECTION_ANNOTATIONS_NAME;
+import static uk.ac.ebi.eva.test.utils.GenotypedVcfJobTestUtils.COLLECTION_VARIANTS_NAME;
+import static uk.ac.ebi.eva.test.utils.GenotypedVcfJobTestUtils.checkLoadedAnnotation;
 import static uk.ac.ebi.eva.test.utils.JobTestUtils.assertCompleted;
 import static uk.ac.ebi.eva.test.utils.JobTestUtils.assertFailed;
+import static uk.ac.ebi.eva.test.utils.JobTestUtils.count;
 import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResourceUrl;
 import static uk.ac.ebi.eva.utils.FileUtils.getResource;
 
@@ -65,7 +77,7 @@ import static uk.ac.ebi.eva.utils.FileUtils.getResource;
 public class GenerateVepAnnotationStepTest {
     private static final String MONGO_DUMP = "/dump/VariantStatsConfigurationTest_vl";
 
-    private static final String MOCKVEP = "/mockvep_writeToFile.pl";
+    private static final String MOCKVEP = "/mockvep.pl";
 
     private static final String FAILING_MOCKVEP = "/mockvep_writeToFile_error.pl";
 
@@ -88,10 +100,10 @@ public class GenerateVepAnnotationStepTest {
     public void shouldGenerateVepAnnotations() throws Exception {
         String databaseName = mongoRule.restoreDumpInTemporaryDatabase(getResourceUrl(MONGO_DUMP));
         String outputDirAnnot = temporaryFolderRule.getRoot().getAbsolutePath();
-        File vepOutput = new File(URLHelper.resolveVepOutput(outputDirAnnot, STUDY_ID, FILE_ID));
 
         JobParameters jobParameters = new EvaJobParameterBuilder()
-                .collectionVariantsName("variants")
+                .collectionAnnotationsName(COLLECTION_ANNOTATIONS_NAME)
+                .collectionVariantsName(COLLECTION_VARIANTS_NAME)
                 .databaseName(databaseName)
                 .inputFasta("")
                 .inputStudyId(STUDY_ID)
@@ -100,9 +112,10 @@ public class GenerateVepAnnotationStepTest {
                 .annotationOverwrite("false")
                 .vepCachePath("")
                 .vepCacheSpecies("")
-                .vepCacheVersion("")
+                .vepCacheVersion("80")
                 .vepNumForks("4")
                 .vepPath(getResource(MOCKVEP).getPath())
+                .vepVersion("80")
                 .vepTimeout("60")
                 .toJobParameters();
 
@@ -113,23 +126,36 @@ public class GenerateVepAnnotationStepTest {
         //Then variantsAnnotCreate step should complete correctly
         assertCompleted(jobExecution);
 
-        // And VEP output should exist and annotations should be in the file
-        assertTrue(vepOutput.exists());
-        assertEquals(300 + EXTRA_ANNOTATIONS,
-                JobTestUtils.getLines(new GZIPInputStream(new FileInputStream(vepOutput))));
+        //check that the annotation collection has been populated properly
+        checkLoadedAnnotation(mongoRule, databaseName);
+
+        //check that the annotation fields are present in the variant
+        DBCursor variantCursor = mongoRule.getCollection(databaseName, COLLECTION_VARIANTS_NAME).find();
+        while (variantCursor.hasNext()) {
+            DBObject variant = variantCursor.next();
+            if (variant.get("_id").equals("20_68363_A_T")) {
+                BasicDBObject annotationField = (BasicDBObject) ((BasicDBList) variant.get(
+                        VariantDocument.ANNOTATION_FIELD)).get(0);
+                assertNotNull(annotationField.get(SIFT_FIELD));
+                assertNotNull(annotationField.get(SO_ACCESSION_FIELD));
+                assertNotNull(annotationField.get(POLYPHEN_FIELD));
+                assertNotNull(annotationField.get(XREFS_FIELD));
+            }
+        }
+        variantCursor.close();
     }
 
     @Test
     public void shouldResumeJob() throws Exception {
         String databaseName = mongoRule.restoreDumpInTemporaryDatabase(getResourceUrl(MONGO_DUMP));
-        String collectionVariantsName = "variants";
         String outputDirAnnot = temporaryFolderRule.getRoot().getAbsolutePath();
         File vepOutput = new File(URLHelper.resolveVepOutput(outputDirAnnot, STUDY_ID, FILE_ID));
         int chunkSize = 100;
 
         JobParameters jobParameters = new EvaJobParameterBuilder()
                 .annotationOverwrite("false")
-                .collectionVariantsName(collectionVariantsName)
+                .collectionAnnotationsName(COLLECTION_ANNOTATIONS_NAME)
+                .collectionVariantsName(COLLECTION_VARIANTS_NAME)
                 .chunkSize(Integer.toString(chunkSize))
                 .databaseName(databaseName)
                 .inputFasta("")
@@ -138,8 +164,9 @@ public class GenerateVepAnnotationStepTest {
                 .outputDirAnnotation(outputDirAnnot)
                 .vepCachePath("")
                 .vepCacheSpecies("")
-                .vepCacheVersion("")
+                .vepCacheVersion("80")
                 .vepNumForks("4")
+                .vepVersion("80")
                 .vepPath(getResource(FAILING_MOCKVEP).getPath())
                 .vepTimeout("10").toJobParameters();
 
@@ -147,27 +174,19 @@ public class GenerateVepAnnotationStepTest {
                 .launchStep(BeanNames.GENERATE_VEP_ANNOTATION_STEP, jobParameters);
 
         assertFailed(jobExecution);
+        assertVepErrorFileExists(outputDirAnnot);
+        assertAnnotationsCount(databaseName, chunkSize);
 
-        assertTrue(!vepOutput.exists());
-        List<Path> files = Files.list(Paths.get(outputDirAnnot))
-                .filter(path -> !path.getFileName().toString().contains("error"))
-                .collect(Collectors.toList());
-        assertEquals(1, files.size());
-        assertEquals(chunkSize + EXTRA_ANNOTATIONS,
-                JobTestUtils.getLines(new GZIPInputStream(new FileInputStream(files.get(0).toFile()))));
-
-        simulateFix(databaseName, collectionVariantsName);
+        simulateFix(databaseName, COLLECTION_VARIANTS_NAME);
 
         JobExecution secondJobExecution = jobLauncherTestUtils
                 .launchStep(BeanNames.GENERATE_VEP_ANNOTATION_STEP, jobParameters);
 
         assertCompleted(secondJobExecution);
 
-        assertTrue(vepOutput.exists());
         int chunks = 3;
-        int expectedTotalAnnotations = (chunkSize + EXTRA_ANNOTATIONS) * chunks;
-        assertEquals(expectedTotalAnnotations,
-                JobTestUtils.getLines(new GZIPInputStream(new FileInputStream(vepOutput))));
+        int expectedTotalAnnotations = chunkSize * chunks;
+        assertAnnotationsCount(databaseName, expectedTotalAnnotations);
     }
 
     /**
@@ -178,10 +197,33 @@ public class GenerateVepAnnotationStepTest {
         int startThatProvokesError = 65900;
         BasicDBObject query = new BasicDBObject("start", startThatProvokesError);
 
-        int fixedStart = startThatProvokesError - 1;
-        BasicDBObject update = new BasicDBObject("$set", new BasicDBObject("start", fixedStart));
+        assertEquals(1, collection.count(query));
+        DBCursor dbObjects = collection.find(query);
+        DBObject variant = dbObjects.next();
 
-        collection.update(query, update);
+        int fixedStart = startThatProvokesError - 1;
+        variant.put("start", fixedStart);
+        variant.put("_id", "20_65899_G_A");
+        variant.put("end", fixedStart);
+        collection.insert(variant);
+
+        collection.remove(query);
+    }
+
+    private void assertAnnotationsCount(String databaseName, int expectedCount) {
+        BasicDBObject queryNonAnnotated = new BasicDBObject("annot", new BasicDBObject("$exists", true));
+        long count = mongoRule.getCollection(databaseName, COLLECTION_VARIANTS_NAME).count(queryNonAnnotated);
+        assertEquals(expectedCount, count);
+
+        long cursorAnnotations = mongoRule.getCollection(databaseName, COLLECTION_ANNOTATIONS_NAME).count();
+        assertEquals(expectedCount, cursorAnnotations);
+    }
+
+    private void assertVepErrorFileExists(String outputDirAnnot) throws IOException {
+        List<Path> files = Files.list(Paths.get(outputDirAnnot))
+                                .filter(path -> path.getFileName().toString().contains("error"))
+                                .collect(Collectors.toList());
+        assertEquals(1, files.size());
     }
 
 }

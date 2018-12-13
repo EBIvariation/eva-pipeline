@@ -128,6 +128,10 @@ public class AnnotationParameters {
         this.vepPath = vepPath;
     }
 
+    public void setVepVersion(String vepCacheVersion) {
+        this.vepCacheVersion = vepCacheVersion;
+    }
+
     public void setVepCacheVersion(String vepCacheVersion) {
         this.vepCacheVersion = vepCacheVersion;
     }

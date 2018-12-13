@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.ac.ebi.eva.pipeline.io.writers;
+package uk.ac.ebi.eva.pipeline.jobs.steps.processors;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -26,23 +26,16 @@ import uk.ac.ebi.eva.pipeline.model.EnsemblVariant;
 import uk.ac.ebi.eva.pipeline.parameters.AnnotationParameters;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.zip.GZIPInputStream;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static uk.ac.ebi.eva.test.utils.JobTestUtils.getLines;
 import static uk.ac.ebi.eva.utils.FileUtils.getResource;
 
-public class VepAnnotationFileWriterTest {
+public class VepAnnotationProcessorTest {
 
     private static final long TIMEOUT_IN_SECONDS = 5L;
 
@@ -86,15 +79,11 @@ public class VepAnnotationFileWriterTest {
         List<EnsemblVariant> ensemblVariants = Collections.singletonList(VARIANT_WRAPPER);
         int chunkSize = ensemblVariants.size();
 
-        VepAnnotationFileWriter vepAnnotationFileWriter = new VepAnnotationFileWriter(annotationParameters, chunkSize,
-                TIMEOUT_IN_SECONDS);
+        VepAnnotationProcessor vepAnnotationProcessor = new VepAnnotationProcessor(annotationParameters, chunkSize,
+                                                                                   TIMEOUT_IN_SECONDS);
 
-        vepAnnotationFileWriter.write(ensemblVariants);
-
-        File vepOutputFile = new File(annotationParameters.getVepOutput());
-        assertTrue(vepOutputFile.exists());
-        assertEquals(ensemblVariants.size() + EXTRA_ANNOTATIONS,
-                     getLines(new GZIPInputStream(new FileInputStream(vepOutputFile))));
+        List<String> annotations = vepAnnotationProcessor.process(ensemblVariants);
+        assertEquals(ensemblVariants.size() + EXTRA_ANNOTATIONS, annotations.size());
     }
 
     @Test
@@ -105,15 +94,11 @@ public class VepAnnotationFileWriterTest {
         }
         int chunkSize = 5;
 
-        VepAnnotationFileWriter vepAnnotationFileWriter = new VepAnnotationFileWriter(annotationParameters, chunkSize,
-                TIMEOUT_IN_SECONDS);
+        VepAnnotationProcessor vepAnnotationProcessor = new VepAnnotationProcessor(annotationParameters, chunkSize,
+                                                                                   TIMEOUT_IN_SECONDS);
 
-        vepAnnotationFileWriter.write(ensemblVariants);
-
-        File vepOutputFile = new File(annotationParameters.getVepOutput());
-        assertTrue(vepOutputFile.exists());
-        assertEquals(ensemblVariants.size() + EXTRA_ANNOTATIONS,
-                     getLines(new GZIPInputStream(new FileInputStream(vepOutputFile))));
+        List<String> annotations = vepAnnotationProcessor.process(ensemblVariants);
+        assertEquals(ensemblVariants.size() + EXTRA_ANNOTATIONS, annotations.size());
     }
 
     @Test
@@ -121,57 +106,30 @@ public class VepAnnotationFileWriterTest {
         List<EnsemblVariant> ensemblVariants = Collections.singletonList(VARIANT_WRAPPER);
         int chunkSizeGreaterThanActualVariants = ensemblVariants.size() * 10;
 
-        VepAnnotationFileWriter vepAnnotationFileWriter = new VepAnnotationFileWriter(annotationParameters,
-                chunkSizeGreaterThanActualVariants, TIMEOUT_IN_SECONDS);
+        VepAnnotationProcessor vepAnnotationProcessor = new VepAnnotationProcessor(annotationParameters,
+                                                                                   chunkSizeGreaterThanActualVariants,
+                                                                                   TIMEOUT_IN_SECONDS);
 
-        vepAnnotationFileWriter.write(ensemblVariants);
-
-        File vepOutputFile = new File(annotationParameters.getVepOutput());
-        assertTrue(vepOutputFile.exists());
-        assertEquals(ensemblVariants.size() + EXTRA_ANNOTATIONS,
-                     getLines(new GZIPInputStream(new FileInputStream(vepOutputFile))));
+        List<String> annotations = vepAnnotationProcessor.process(ensemblVariants);
+        assertEquals(ensemblVariants.size() + EXTRA_ANNOTATIONS, annotations.size());
     }
 
     @Test
-    public void testHeaderIsWrittenOnlyOnce() throws Exception {
+    public void testHeaderIsNotWritten() throws Exception {
         List<EnsemblVariant> ensemblVariants = Collections.singletonList(VARIANT_WRAPPER);
         int chunkSize = ensemblVariants.size();
 
-        VepAnnotationFileWriter vepAnnotationFileWriter = new VepAnnotationFileWriter(annotationParameters,
-                chunkSize, TIMEOUT_IN_SECONDS);
+        VepAnnotationProcessor vepAnnotationProcessor = new VepAnnotationProcessor(annotationParameters,
+                                                                                   chunkSize, TIMEOUT_IN_SECONDS);
 
         long chunks = 3;
+        List<String> annotations = new ArrayList<>();
         for (int i = 0; i < chunks; i++) {
-            vepAnnotationFileWriter.write(ensemblVariants);
+            annotations.addAll(vepAnnotationProcessor.process(ensemblVariants));
         }
 
-        File vepOutputFile = new File(annotationParameters.getVepOutput());
-        assertTrue(vepOutputFile.exists());
-        assertEquals((ensemblVariants.size() + EXTRA_ANNOTATIONS)*chunks,
-                getLines(new GZIPInputStream(new FileInputStream(vepOutputFile))));
-
-        assertEquals(HEADER_LINES, getCommentLines(new GZIPInputStream(new FileInputStream(vepOutputFile))));
-        BufferedReader reader = new BufferedReader(new InputStreamReader(new GZIPInputStream(
-                new FileInputStream(vepOutputFile))));
-        for (int i = 0; i < HEADER_LINES; i++) {
-            assertEquals('#', reader.readLine().charAt(0));
-        }
-    }
-
-    /**
-     * counts non-comment lines in an InputStream
-     */
-    public static long getCommentLines(InputStream in) throws IOException {
-        BufferedReader file = new BufferedReader(new InputStreamReader(in));
-        long lines = 0;
-        String line;
-        while ((line = file.readLine()) != null) {
-            if (line.charAt(0) == '#') {
-                lines++;
-            }
-        }
-        file.close();
-        return lines;
+        assertEquals((ensemblVariants.size() + EXTRA_ANNOTATIONS)*chunks, annotations.size());
+        assertTrue(annotations.stream().noneMatch(line -> line.startsWith("#")));
     }
 
     @Test
@@ -181,11 +139,12 @@ public class VepAnnotationFileWriterTest {
         annotationParameters.setVepPath(getResource("/mockvep_writeToFile_delayed.pl").getAbsolutePath());
 
         long vepTimeouts = 1;
-        VepAnnotationFileWriter vepAnnotationFileWriter = new VepAnnotationFileWriter(annotationParameters,
-                chunkSizeGreaterThanActualVariants, vepTimeouts);
+        VepAnnotationProcessor vepAnnotationProcessor = new VepAnnotationProcessor(annotationParameters,
+                                                                                   chunkSizeGreaterThanActualVariants,
+                                                                                   vepTimeouts);
 
         exception.expect(ItemStreamException.class);
-        vepAnnotationFileWriter.write(ensemblVariants);
+        vepAnnotationProcessor.process(ensemblVariants);
     }
 
 }

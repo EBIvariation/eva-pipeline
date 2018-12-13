@@ -37,6 +37,7 @@ import uk.ac.ebi.eva.test.data.VariantData;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 
 import java.util.Arrays;
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -86,53 +87,32 @@ public class VariantsMongoReaderTest {
 
     @Test
     public void shouldReadVariantsWithoutAnnotationFieldInAStudy() throws Exception {
-        checkVariantsRead(EXPECTED_NON_ANNOTATED_VARIANTS_IN_STUDY, STUDY_ID, FILE_ID, true);
+        checkNonAnnotatedVariantsRead(EXPECTED_NON_ANNOTATED_VARIANTS_IN_STUDY, STUDY_ID, FILE_ID);
     }
 
     @Test
     public void shouldReadVariantsWithoutAnnotationFieldInAllStudies() throws Exception {
-        checkVariantsRead(EXPECTED_NON_ANNOTATED_VARIANTS_IN_DB, ALL_IDS, ALL_IDS, true);
+        checkNonAnnotatedVariantsRead(EXPECTED_NON_ANNOTATED_VARIANTS_IN_DB, ALL_IDS, ALL_IDS);
     }
 
     @Test
     public void shouldReadVariantsWithoutAnnotationFieldInAllStudiesWhenNoStudySpecified() throws Exception {
-        checkVariantsRead(EXPECTED_NON_ANNOTATED_VARIANTS_IN_DB, null, null, true);
+        checkNonAnnotatedVariantsRead(EXPECTED_NON_ANNOTATED_VARIANTS_IN_DB, null, null);
     }
 
     @Test
     public void shouldReadVariantsInAStudy() throws Exception {
-        checkVariantsRead(EXPECTED_VARIANTS_IN_STUDY, STUDY_ID, FILE_ID, false);
+        checkAllVariantsRead(EXPECTED_VARIANTS_IN_STUDY, STUDY_ID, FILE_ID);
     }
 
-    @Test
-    public void shouldReadVariantsInAStudyWhenNoFileSpecified() throws Exception {
-        checkVariantsRead(EXPECTED_VARIANTS_IN_STUDY, STUDY_ID, null, false);
+    private void checkNonAnnotatedVariantsRead(int expectedNonAnnotatedVariants, String study, String file) throws Exception {
+        boolean excludeAnnotated = true;
+        int chunkSize = 1;
+        checkVariantsRead(expectedNonAnnotatedVariants, study, file, excludeAnnotated, chunkSize);
     }
 
-    @Test
-    public void shouldReadVariantsInAllStudies() throws Exception {
-        checkVariantsRead(EXPECTED_VARIANTS_IN_DB, ALL_IDS, ALL_IDS, false);
-    }
-
-    @Test
-    public void shouldReadVariantsInAllStudiesWhenNoStudySpecified() throws Exception {
-        checkVariantsRead(EXPECTED_VARIANTS_IN_DB, null, null, false);
-        checkVariantsRead(EXPECTED_VARIANTS_IN_DB, null, FILE_ID, false);
-    }
-
-    @Test
-    public void shouldNotReadVariantsWhenStudyDoesNotExist() throws Exception {
-        checkVariantsRead(EXPECTED_NO_VARIANTS, "nonExistingStudy", null, false);
-    }
-
-    @Test
-    public void shouldNotReadVariantsInAStudyWhenFileDoesNotExist() throws Exception {
-        checkVariantsRead(EXPECTED_NO_VARIANTS, STUDY_ID, "nonExistingFile", false);
-    }
-
-
-    private void checkVariantsRead(int expectedVariants, String study, String file, boolean excludeAnnotated)
-            throws Exception {
+    private void checkVariantsRead(int expectedNonAnnotatedVariants, String study, String file,
+                                   boolean excludeAnnotated, int chunkSize) throws Exception {
         ExecutionContext executionContext = MetaDataInstanceFactory.createStepExecution().getExecutionContext();
         String databaseName = mongoRule.createDBAndInsertDocuments(COLLECTION_VARIANTS_NAME, Arrays.asList(
                 VariantData.getVariantWithAnnotation(),
@@ -142,20 +122,77 @@ public class VariantsMongoReaderTest {
         MongoOperations mongoOperations = MongoConfiguration.getMongoOperations(databaseName, mongoConnection,
                                                                                 mongoMappingContext);
 
-        VariantsMongoReader mongoItemReader = new VariantsMongoReader(
-                mongoOperations, COLLECTION_VARIANTS_NAME, VEP_VERSION, VEP_CACHE_VERSION, study, file,
-                excludeAnnotated);
+        VariantsMongoReader mongoItemReader = new VariantsMongoReader(mongoOperations, COLLECTION_VARIANTS_NAME,
+                                                                      VEP_VERSION, VEP_CACHE_VERSION, study, file,
+                                                                      excludeAnnotated, chunkSize);
         mongoItemReader.open(executionContext);
 
         int itemCount = 0;
-        EnsemblVariant ensemblVariant;
+        List<EnsemblVariant> ensemblVariant;
         while ((ensemblVariant = mongoItemReader.read()) != null) {
-            itemCount++;
-            assertFalse(ensemblVariant.getChr().isEmpty());
-            assertNotEquals(0, ensemblVariant.getStart());
+            for (EnsemblVariant variant : ensemblVariant) {
+                itemCount++;
+                assertFalse(variant.getChr().isEmpty());
+                assertNotEquals(0, variant.getStart());
+            }
         }
-        assertEquals(expectedVariants, itemCount);
+        assertEquals(expectedNonAnnotatedVariants, itemCount);
         mongoItemReader.close();
+    }
+
+    @Test
+    public void shouldReadVariantsInAStudyWhenNoFileSpecified() throws Exception {
+        checkAllVariantsRead(EXPECTED_VARIANTS_IN_STUDY, STUDY_ID, null);
+    }
+
+    @Test
+    public void shouldReadVariantsInAllStudies() throws Exception {
+        checkAllVariantsRead(EXPECTED_VARIANTS_IN_DB, ALL_IDS, ALL_IDS);
+    }
+
+    @Test
+    public void shouldReadVariantsInAllStudiesWhenNoStudySpecified() throws Exception {
+        checkAllVariantsRead(EXPECTED_VARIANTS_IN_DB, null, null);
+        checkAllVariantsRead(EXPECTED_VARIANTS_IN_DB, null, FILE_ID);
+    }
+
+    @Test
+    public void shouldNotReadVariantsWhenStudyDoesNotExist() throws Exception {
+        checkAllVariantsRead(EXPECTED_NO_VARIANTS, "nonExistingStudy", null);
+    }
+
+    @Test
+    public void shouldNotReadVariantsInAStudyWhenFileDoesNotExist() throws Exception {
+        checkAllVariantsRead(EXPECTED_NO_VARIANTS, STUDY_ID, "nonExistingFile");
+    }
+
+    private void checkAllVariantsRead(int expectedVariants, String study, String file) throws Exception {
+        boolean excludeAnnotated = false;
+        int chunkSize = 1;
+        checkVariantsRead(expectedVariants, study, file, excludeAnnotated, chunkSize);
+    }
+
+    @Test
+    public void shouldReadEveryVariantWithChunksizeOne() throws Exception {
+        int chunkSize = 1;
+        checkVariantsRead(EXPECTED_VARIANTS_IN_DB, null, null, false, chunkSize);
+    }
+
+    @Test
+    public void shouldReadEveryVariantWithFullAndNonFullChunks() throws Exception {
+        int chunkSize = 2;
+        checkVariantsRead(EXPECTED_VARIANTS_IN_DB, null, null, false, chunkSize);
+    }
+
+    @Test
+    public void shouldReadEveryVariantWithExactChunksize() throws Exception {
+        checkVariantsRead(EXPECTED_VARIANTS_IN_DB, null, null, false, EXPECTED_VARIANTS_IN_DB);
+    }
+
+    @Test
+    public void shouldReadEveryVariantWithNonFullChunk() throws Exception {
+        int chunkSize = 4;
+        checkVariantsRead(EXPECTED_VARIANTS_IN_DB, null, null, false, chunkSize);
     }
 
 }

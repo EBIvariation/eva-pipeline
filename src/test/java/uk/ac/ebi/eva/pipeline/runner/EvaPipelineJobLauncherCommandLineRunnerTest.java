@@ -166,12 +166,7 @@ public class EvaPipelineJobLauncherCommandLineRunnerTest {
 
         GenotypedVcfJobTestUtils.checkLoadStatsStep(mongoRule, databaseName);
 
-        GenotypedVcfJobTestUtils.checkAnnotationCreateStep(vepOutputFile);
-        GenotypedVcfJobTestUtils.checkOutputFileLength(vepOutputFile);
-
         GenotypedVcfJobTestUtils.checkLoadedAnnotation(mongoRule, databaseName);
-
-        GenotypedVcfJobTestUtils.checkSkippedOneMalformedLine(jobExecution);
     }
 
     private JobExecution getLastJobExecution(String jobName) {
@@ -277,12 +272,7 @@ public class EvaPipelineJobLauncherCommandLineRunnerTest {
 
         GenotypedVcfJobTestUtils.checkLoadStatsStep(mongoRule, databaseName);
 
-        GenotypedVcfJobTestUtils.checkAnnotationCreateStep(vepOutputFile);
-        GenotypedVcfJobTestUtils.checkOutputFileLength(vepOutputFile);
-
         GenotypedVcfJobTestUtils.checkLoadedAnnotation(mongoRule, databaseName);
-
-        GenotypedVcfJobTestUtils.checkSkippedOneMalformedLine(jobExecution);
     }
 
     @Test

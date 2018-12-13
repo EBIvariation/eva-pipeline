@@ -81,7 +81,7 @@ public class GenotypedVcfJobTestUtils {
         cursor.close();
 
         assertTrue(count > 0);
-        assertEquals(EXPECTED_VALID_ANNOTATIONS, consequenceTypeCount);
+        assertEquals(EXPECTED_ANNOTATIONS, consequenceTypeCount);
     }
 
     public static void checkOutputFileLength(File vepOutputFile) throws IOException {

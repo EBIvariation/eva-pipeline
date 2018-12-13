@@ -26,6 +26,9 @@ import uk.ac.ebi.eva.pipeline.parameters.AnnotationParameters;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
+import java.io.StringWriter;
 
 import static uk.ac.ebi.eva.utils.FileUtils.getResource;
 
@@ -63,10 +66,12 @@ public class VepProcessTest {
 
     @Test
     public void testWorkflowWriteWithoutOpening() throws Exception {
-        VepProcess vepAnnotationFileWriter = new VepProcess(annotationParameters, CHUNK_SIZE, VEP_TIMEOUT);
+        StringWriter writer = new StringWriter();
+        boolean skipComments = true;
+        VepProcess vepProcess = new VepProcess(annotationParameters, CHUNK_SIZE, VEP_TIMEOUT, writer, skipComments);
 
         exception.expect(IllegalStateException.class);
-        vepAnnotationFileWriter.write(getVariantInVepInputFormat(VARIANT_WRAPPER).getBytes());
+        vepProcess.write(getVariantInVepInputFormat(VARIANT_WRAPPER).getBytes());
     }
 
     private String getVariantInVepInputFormat(EnsemblVariant ensemblVariant) {
@@ -80,26 +85,32 @@ public class VepProcessTest {
 
     @Test
     public void testWorkflowFlushWithoutOpening() throws Exception {
-        VepProcess vepAnnotationFileWriter = new VepProcess(annotationParameters, CHUNK_SIZE, VEP_TIMEOUT);
+        StringWriter writer = new StringWriter();
+        boolean skipComments = true;
+        VepProcess vepProcess = new VepProcess(annotationParameters, CHUNK_SIZE, VEP_TIMEOUT, writer, skipComments);
 
         exception.expect(IllegalStateException.class);
-        vepAnnotationFileWriter.flush();
+        vepProcess.flush();
     }
 
     @Test
     public void testWorkflowFlushAfterClosing() throws Exception {
-        VepProcess vepAnnotationFileWriter = new VepProcess(annotationParameters, CHUNK_SIZE, VEP_TIMEOUT);
+        StringWriter writer = new StringWriter();
+        boolean skipComments = true;
+        VepProcess vepProcess = new VepProcess(annotationParameters, CHUNK_SIZE, VEP_TIMEOUT, writer, skipComments);
 
-        vepAnnotationFileWriter.open();
-        vepAnnotationFileWriter.close();
+        vepProcess.open();
+        vepProcess.close();
 
         exception.expect(IllegalStateException.class);
-        vepAnnotationFileWriter.flush();
+        vepProcess.flush();
     }
 
     @Test
     public void testWorkflowCloseWithoutOpening() throws Exception {
-        VepProcess vepAnnotationFileWriter = new VepProcess(annotationParameters, CHUNK_SIZE, VEP_TIMEOUT);
-        vepAnnotationFileWriter.close();
+        StringWriter writer = new StringWriter();
+        boolean skipComments = true;
+        VepProcess vepProcess = new VepProcess(annotationParameters, CHUNK_SIZE, VEP_TIMEOUT, writer, skipComments);
+        vepProcess.close();
     }
 }

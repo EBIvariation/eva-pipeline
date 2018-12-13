@@ -50,7 +50,7 @@ my $annot = "## ENSEMBL VARIANT EFFECT PREDICTOR v78
 ## MOTIF_SCORE_CHANGE : The difference in motif score of the reference and variant sequences for the TFBP
 #Uploaded_variation	Location	Allele	Gene	Feature	Feature_type	Consequence	cDNA_position	CDS_position	Protein_position	Amino_acids	Codons	Existing_variation	Extra
 20_60343_G/A	20:60343	A	-	-	-	intergenic_variant	-	-	-	-	-	-
-20_60419_AG	20:60419	G	-	-	-	intergenic_variant	-	-	-	-	-	-
+20_60419_A/G	20:60419	G	-	-	-	intergenic_variant	-	-	-	-	-	-
 20_60479_C/T	20:60479	T	-	-	-	intergenic_variant	-	-	-	-	-	rs149529999	GMAF=T:0.0018;AFR_MAF=T:0.01;AMR_MAF=T:0.0028
 20_60523_-/C	20:60522-60523	C	-	-	-	intergenic_variant	-	-	-	-	-	rs150241001	GMAF=C:0.0115;AFR_MAF=C:0.05;AMR_MAF=C:0.0028
 20_60568_A/C	20:60568	C	-	-	-	intergenic_variant	-	-	-	-	-	-
