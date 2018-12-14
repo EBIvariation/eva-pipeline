@@ -20,7 +20,7 @@ If you want to generate and store variant annotations you will also need to [dow
 
 ## Build
 
-The latest stable version can be found in the [master](https://github.com/EBIvariation/eva-pipeline/tree/master) branch. [develop](https://github.com/EBIvariation/eva-pipeline/tree/develop) contains work in progress, which is fully tested but could be more unstable.
+The latest stable version can be found downloading or cloning the [latest tag](https://github.com/EBIvariation/eva-pipeline/tags/). The [master](https://github.com/EBIvariation/eva-pipeline/tree/master) contains work in progress, which is fully tested but could be more unstable.
 
 If a MongoDB instance is available in the machine where you are running the build, you can test and build the application with `mvn test package`, otherwise please run `mvn package -DskipTests`.
 
