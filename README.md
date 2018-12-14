@@ -1,4 +1,4 @@
-# European Variation Archive (EVA) Pipeline v2 [![Build Status](https://travis-ci.org/EBIvariation/eva-pipeline.svg)](https://travis-ci.org/EBIvariation/eva-pipeline)
+# European Variation Archive (EVA) Pipeline v2 [![Build Status](https://travis-ci.com/EBIvariation/eva-pipeline.svg?branch=master)](https://travis-ci.com/EBIvariation/eva-pipeline)
 
 The European Variation Archive pipeline processes Variant Call Format (VCF) files and stores the variants contained within them in a database, in a format that supports efficient searching. The EVA pipeline produces and stores the following information:
 
