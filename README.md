@@ -1,4 +1,4 @@
-# European Variation Archive (EVA) Pipeline v2 [![Build Status](https://travis-ci.org/EBIvariation/eva-pipeline.svg)](https://travis-ci.org/EBIvariation/eva-pipeline)
+# European Variation Archive (EVA) Pipeline v2 [![Build Status](https://travis-ci.com/EBIvariation/eva-pipeline.svg?branch=master)](https://travis-ci.com/EBIvariation/eva-pipeline)
 
 The European Variation Archive pipeline processes Variant Call Format (VCF) files and stores the variants contained within them in a database, in a format that supports efficient searching. The EVA pipeline produces and stores the following information:
 
@@ -20,7 +20,7 @@ If you want to generate and store variant annotations you will also need to [dow
 
 ## Build
 
-The latest stable version can be found in the [master](https://github.com/EBIvariation/eva-pipeline/tree/master) branch. [develop](https://github.com/EBIvariation/eva-pipeline/tree/develop) contains work in progress, which is fully tested but could be more unstable.
+The latest stable version can be found downloading or cloning the [latest tag](https://github.com/EBIvariation/eva-pipeline/tags/). The [master](https://github.com/EBIvariation/eva-pipeline/tree/master) branch contains work in progress, which is fully tested but could be more unstable.
 
 If a MongoDB instance is available in the machine where you are running the build, you can test and build the application with `mvn test package`, otherwise please run `mvn package -DskipTests`.
 
@@ -41,7 +41,7 @@ It is likely that you will need to edit some parameters to match your environmen
 By using these properties files, a job can be launched with a single command like:
 
     java -jar target/eva-pipeline-2.0-beta2-SNAPSHOT.jar \
-        --spring.config.location=file:examples/application.properties --parameters.path=file:examples/load-genotyped-vcf.properties
+        --spring.config.location=file:examples/application.properties --parameters.path=examples/load-genotyped-vcf.properties
 
 The contents from the configuration files can be also provided directly as command-line arguments, like the following:
 
