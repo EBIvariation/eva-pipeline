@@ -15,7 +15,7 @@
  */
 package uk.ac.ebi.eva.t2d.entity;
 
-import uk.ac.ebi.eva.t2d.entity.embedded.id.PropertyIdDatasetId;
+import uk.ac.ebi.eva.t2d.entity.embedded.id.SamplePropertyIdDatasetId;
 
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
@@ -30,13 +30,13 @@ public class SamplePropertyToDataset {
 
 
     @EmbeddedId
-    private PropertyIdDatasetId id;
+    private SamplePropertyIdDatasetId id;
 
     SamplePropertyToDataset() {
     }
 
     public SamplePropertyToDataset(String datasetId, String propertyId) {
-        id = new PropertyIdDatasetId(propertyId, datasetId);
+        id = new SamplePropertyIdDatasetId(propertyId, datasetId);
     }
 
     public String getDatasetId() {
