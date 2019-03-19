@@ -92,7 +92,7 @@ public class MongoDbCursorItemReader extends AbstractItemCountingItemStreamItemR
 
     /**
      * {@link Map} of property names/
-     * {@link org.springframework.data.domain.Sort.Direction} values to sort the
+     * {@link Sort.Direction} values to sort the
      * input by.
      *
      * @param sorts Map of properties and direction to sort each.

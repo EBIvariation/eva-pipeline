@@ -22,7 +22,7 @@ import org.springframework.stereotype.Service;
 import uk.ac.ebi.eva.utils.URLHelper;
 
 /**
- * Service that holds access to the values for annotatation steps like VEP etc.
+ * Service that holds access to the values for annotation steps like VEP etc.
  *
  * NOTE the @StepScope this is probably because the Step/Tasklet in this case the
  * {@link uk.ac.ebi.eva.pipeline.configuration.jobs.flows.AnnotationFlowConfiguration} is executed in parallel with statistics
@@ -126,10 +126,6 @@ public class AnnotationParameters {
 
     public void setVepPath(String vepPath) {
         this.vepPath = vepPath;
-    }
-
-    public void setVepVersion(String vepCacheVersion) {
-        this.vepCacheVersion = vepCacheVersion;
     }
 
     public void setVepCacheVersion(String vepCacheVersion) {

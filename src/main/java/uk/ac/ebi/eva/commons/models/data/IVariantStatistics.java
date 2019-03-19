@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 EMBL - European Bioinformatics Institute
+ * Copyright 2017 EMBL - European Bioinformatics Institute
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,15 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.ac.ebi.eva.pipeline.runner.exceptions;
-import java.util.List;
+package uk.ac.ebi.eva.commons.models.data;
+
+import uk.ac.ebi.eva.commons.models.data.genotype.Genotype;
+
+import java.util.Map;
 
 /**
- * Exception thrown by the runner when duplicate samples are provided.
+ * Interface that describes the basic common information of the variant stats model
  */
-public class DuplicateSamplesFoundException extends Exception {
+public interface IVariantStatistics {
 
-    public DuplicateSamplesFoundException(List<String> sampleNames) {
-        super("Duplicate samples found:  '" + sampleNames.toString() + "'");
-    }
+    String getMafAllele();
+
+    String getMgfGenotype();
+
+    Map<Genotype, Integer> getGenotypesCount();
+
+    float getMaf();
+
+    float getMgf();
+
+    int getMissingAlleles();
+
+    int getMissingGenotypes();
+
 }

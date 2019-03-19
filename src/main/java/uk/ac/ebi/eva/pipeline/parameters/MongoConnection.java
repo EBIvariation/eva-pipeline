@@ -22,7 +22,7 @@ import org.springframework.stereotype.Service;
 /**
  * Container of credentials for a connection to mongo.
  *
- * The values are injected directly from environment, not from JobParameters.
+ * The values are injected directly from environment, not from JobParameters
  */
 @Service
 public class MongoConnection {

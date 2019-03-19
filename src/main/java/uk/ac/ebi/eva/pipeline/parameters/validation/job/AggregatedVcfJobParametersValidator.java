@@ -23,9 +23,10 @@ import org.springframework.batch.core.job.DefaultJobParametersValidator;
 
 import uk.ac.ebi.eva.pipeline.configuration.jobs.AggregatedVcfJobConfiguration;
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
+import uk.ac.ebi.eva.pipeline.parameters.validation.step.LoadVepAnnotationStepParametersValidator;
 import uk.ac.ebi.eva.pipeline.parameters.validation.step.AnnotationMetadataStepParametersValidator;
-import uk.ac.ebi.eva.pipeline.parameters.validation.step.GenerateVepAnnotationStepParametersValidator;
 import uk.ac.ebi.eva.pipeline.parameters.validation.step.LoadFileStepParametersValidator;
+import uk.ac.ebi.eva.pipeline.parameters.validation.step.GenerateVepAnnotationStepParametersValidator;
 import uk.ac.ebi.eva.pipeline.parameters.validation.step.LoadVariantsStepParametersValidator;
 
 import java.util.ArrayList;
@@ -52,6 +53,7 @@ public class AggregatedVcfJobParametersValidator extends DefaultJobParametersVal
             boolean studyIdRequired = true;
 
             jobParametersValidators.add(new GenerateVepAnnotationStepParametersValidator(studyIdRequired));
+            jobParametersValidators.add(new LoadVepAnnotationStepParametersValidator(studyIdRequired));
             jobParametersValidators.add(new AnnotationMetadataStepParametersValidator());
         }
 

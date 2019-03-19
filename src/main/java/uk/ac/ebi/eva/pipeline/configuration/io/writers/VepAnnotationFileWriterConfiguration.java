@@ -13,38 +13,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.ac.ebi.eva.pipeline.configuration.jobs.steps.processors;
+
+package uk.ac.ebi.eva.pipeline.configuration.io.writers;
 
 import org.springframework.batch.core.configuration.annotation.StepScope;
-import org.springframework.batch.item.ItemProcessor;
+import org.springframework.batch.item.ItemWriter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import uk.ac.ebi.eva.pipeline.jobs.steps.processors.VepAnnotationProcessor;
+import uk.ac.ebi.eva.pipeline.io.writers.VepAnnotationFileWriter;
 import uk.ac.ebi.eva.pipeline.model.EnsemblVariant;
 import uk.ac.ebi.eva.pipeline.parameters.AnnotationParameters;
 import uk.ac.ebi.eva.pipeline.parameters.ChunkSizeParameters;
 
-import java.util.List;
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VEP_ANNOTATION_WRITER;
 
-import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VEP_ANNOTATION_PROCESSOR;
-
-/**
- * Step that annotates a list of variant coordinates (EnsemblVariant)
- * <p>
- * Input: List of EnsemblVariant
- * Output: List of Strings, each string is an output line from VEP
- */
 @Configuration
-public class VepAnnotationProcessorConfiguration {
+public class VepAnnotationFileWriterConfiguration {
 
-    @Bean(VEP_ANNOTATION_PROCESSOR)
+    @Bean(VEP_ANNOTATION_WRITER)
     @StepScope
-    public ItemProcessor<List<EnsemblVariant>, List<String>> vepAnnotationProcessor(
-            AnnotationParameters annotationParameters,
-            ChunkSizeParameters chunkSizeParameters) {
-        return new VepAnnotationProcessor(annotationParameters, chunkSizeParameters.getChunkSize(),
-                                          annotationParameters.getTimeout());
+    public ItemWriter<EnsemblVariant> vepAnnotationFileWriter(AnnotationParameters annotationParameters,
+                                                              ChunkSizeParameters chunkSizeParameters) {
+        return new VepAnnotationFileWriter(annotationParameters, chunkSizeParameters.getChunkSize(),
+                annotationParameters.getTimeout());
     }
 
 }

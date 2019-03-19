@@ -23,6 +23,7 @@ import org.springframework.batch.core.job.DefaultJobParametersValidator;
 
 import uk.ac.ebi.eva.pipeline.parameters.validation.step.AnnotationMetadataStepParametersValidator;
 import uk.ac.ebi.eva.pipeline.parameters.validation.step.GenerateVepAnnotationStepParametersValidator;
+import uk.ac.ebi.eva.pipeline.parameters.validation.step.LoadVepAnnotationStepParametersValidator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,6 +45,7 @@ public class AnnotationJobParametersValidator extends DefaultJobParametersValida
         boolean studyIdRequired = false;
 
         jobParametersValidators.add(new GenerateVepAnnotationStepParametersValidator(studyIdRequired));
+        jobParametersValidators.add(new LoadVepAnnotationStepParametersValidator(studyIdRequired));
         jobParametersValidators.add(new AnnotationMetadataStepParametersValidator());
 
         CompositeJobParametersValidator compositeJobParametersValidator = new CompositeJobParametersValidator();

@@ -80,8 +80,8 @@ public class AnnotationLineMapper implements LineMapper<Annotation> {
         Map<String,String> variantMap = parseVariant(lineFields[0], lineFields[1]);  // coordinates and alternative are only parsed once
         Annotation currentAnnotation = new Annotation(
                 variantMap.get("chromosome"),
-                Integer.valueOf(variantMap.get("start")),
-                Integer.valueOf(variantMap.get("end")), variantMap.get("reference"),
+                Long.valueOf(variantMap.get("start")),
+                Long.valueOf(variantMap.get("end")), variantMap.get("reference"),
                 variantMap.get("alternative"),
                 vepVersion,
                 vepCacheVersion);

@@ -26,8 +26,6 @@ import uk.ac.ebi.eva.pipeline.Application;
 import uk.ac.ebi.eva.pipeline.io.writers.AnnotationMongoWriter;
 import uk.ac.ebi.eva.pipeline.parameters.DatabaseParameters;
 
-import java.util.List;
-
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.ANNOTATION_WRITER;
 
 @Configuration
@@ -36,8 +34,8 @@ public class AnnotationWriterConfiguration {
     @Bean(ANNOTATION_WRITER)
     @StepScope
     @Profile(Application.VARIANT_ANNOTATION_MONGO_PROFILE)
-    public ItemWriter<List<Annotation>> annotationItemWriter(MongoOperations mongoOperations,
-                                                             DatabaseParameters databaseParameters) {
+    public ItemWriter<Annotation> annotationItemWriter(MongoOperations mongoOperations,
+                                                       DatabaseParameters databaseParameters) {
         return new AnnotationMongoWriter(mongoOperations, databaseParameters.getCollectionAnnotationsName());
     }
 }

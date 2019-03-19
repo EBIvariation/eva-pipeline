@@ -23,10 +23,11 @@ import org.springframework.batch.core.job.DefaultJobParametersValidator;
 
 import uk.ac.ebi.eva.pipeline.configuration.jobs.GenotypedVcfJobConfiguration;
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
+import uk.ac.ebi.eva.pipeline.parameters.validation.step.LoadVepAnnotationStepParametersValidator;
 import uk.ac.ebi.eva.pipeline.parameters.validation.step.AnnotationMetadataStepParametersValidator;
-import uk.ac.ebi.eva.pipeline.parameters.validation.step.CalculateStatisticsStepParametersValidator;
-import uk.ac.ebi.eva.pipeline.parameters.validation.step.GenerateVepAnnotationStepParametersValidator;
 import uk.ac.ebi.eva.pipeline.parameters.validation.step.LoadFileStepParametersValidator;
+import uk.ac.ebi.eva.pipeline.parameters.validation.step.GenerateVepAnnotationStepParametersValidator;
+import uk.ac.ebi.eva.pipeline.parameters.validation.step.CalculateStatisticsStepParametersValidator;
 import uk.ac.ebi.eva.pipeline.parameters.validation.step.LoadStatisticsStepParametersValidator;
 import uk.ac.ebi.eva.pipeline.parameters.validation.step.LoadVariantsStepParametersValidator;
 
@@ -54,6 +55,7 @@ public class GenotypedVcfJobParametersValidator extends DefaultJobParametersVali
             boolean studyIdRequired = true;
 
             jobParametersValidators.add(new GenerateVepAnnotationStepParametersValidator(studyIdRequired));
+            jobParametersValidators.add(new LoadVepAnnotationStepParametersValidator(studyIdRequired));
             jobParametersValidators.add(new AnnotationMetadataStepParametersValidator());
         }
 

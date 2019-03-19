@@ -45,7 +45,7 @@ public class AnnotationFlowOptionalConfiguration {
 
     @Bean(VEP_ANNOTATION_OPTIONAL_FLOW)
     public Flow vepAnnotationOptionalFlow(@Qualifier(VEP_ANNOTATION_FLOW) Flow vepAnnotationFlow,
-                                          @Qualifier(ANNOTATION_SKIP_STEP_DECIDER) JobExecutionDecider decider) {
+                                   @Qualifier(ANNOTATION_SKIP_STEP_DECIDER) JobExecutionDecider decider) {
         return new FlowBuilder<Flow>(VEP_ANNOTATION_OPTIONAL_FLOW)
                 .start(decider).on(SkipStepDecider.DO_STEP)
                 .to(vepAnnotationFlow)

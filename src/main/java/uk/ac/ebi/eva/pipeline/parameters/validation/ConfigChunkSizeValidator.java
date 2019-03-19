@@ -21,6 +21,9 @@ import org.springframework.batch.core.JobParametersValidator;
 
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 
+/**
+ * check if the chunk size is positive
+ */
 public class ConfigChunkSizeValidator implements JobParametersValidator {
 
     @Override

@@ -63,7 +63,7 @@ import static uk.ac.ebi.eva.commons.models.mongo.entity.Annotation.XREFS_FIELD;
  * { "id" : "ENST00000608838", "src" : "ensemblTranscript" },
  * { "id" : "ENSG00000178591", "src" : "ensemblGene"
  */
-public class AnnotationMongoWriter implements ItemWriter<List<Annotation>> {
+public class AnnotationMongoWriter implements ItemWriter<Annotation> {
 
     private static final String ANNOTATION_XREF_ID_FIELD = Annotation.XREFS_FIELD + "." + Xref.XREF_ID_FIELD;
 
@@ -86,12 +86,10 @@ public class AnnotationMongoWriter implements ItemWriter<List<Annotation>> {
     }
 
     @Override
-    public void write(List<? extends List<Annotation>> annotations) throws Exception {
-        for (List<Annotation> annotationList : annotations) {
-            BulkOperations bulk = mongoOperations.bulkOps(BulkOperations.BulkMode.UNORDERED, collection);
-            prepareBulk(annotationList, bulk);
-            bulk.execute();
-        }
+    public void write(List<? extends Annotation> annotations) throws Exception {
+        BulkOperations bulk = mongoOperations.bulkOps(BulkOperations.BulkMode.UNORDERED, collection);
+        prepareBulk(annotations, bulk);
+        bulk.execute();
     }
 
     private void prepareBulk(List<? extends Annotation> annotations, BulkOperations bulk) {

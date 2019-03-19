@@ -19,7 +19,6 @@ import com.google.common.base.Strings;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
-import uk.ac.ebi.eva.commons.models.data.Variant;
 import uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.ConsequenceType;
 import uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.Xref;
 
@@ -54,10 +53,10 @@ public class Annotation {
     private String chromosome;
 
     @Field(value = START_FIELD)
-    private int start;
+    private Long start;
 
     @Field(value = END_FIELD)
-    private int end;
+    private Long end;
 
     @Field(value = VEP_VERSION_FIELD)
     private String vepVersion;
@@ -75,7 +74,7 @@ public class Annotation {
         // Empty document constructor for spring-data
     }
 
-    public Annotation(String chromosome, int start, int end, String referenceAllele, String alternativeAllele,
+    public Annotation(String chromosome, Long start, Long end, String referenceAllele, String alternativeAllele,
                       String vepVersion, String vepCacheVersion) {
         this.chromosome = chromosome;
         this.start = start;
@@ -112,11 +111,11 @@ public class Annotation {
         return chromosome;
     }
 
-    public int getStart() {
+    public Long getStart() {
         return start;
     }
 
-    public int getEnd() {
+    public Long getEnd() {
         return end;
     }
 
@@ -163,7 +162,7 @@ public class Annotation {
         }
     }
 
-    public static String buildAnnotationId(String chromosome, int start, String reference, String alternate,
+    public static String buildAnnotationId(String chromosome, Long start, String reference, String alternate,
                                            String vepVersion, String vepCacheVersion) {
         StringBuilder builder = new StringBuilder(VariantDocument.buildVariantId(
                 chromosome, start,

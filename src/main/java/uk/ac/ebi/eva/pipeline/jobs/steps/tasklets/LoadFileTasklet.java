@@ -33,7 +33,7 @@ import java.util.Collections;
 
 /**
  * Tasklet that writes the metadata of a file into mongo. Uses
- * {@link uk.ac.ebi.eva.commons.models.data.VariantSourceEntity} as the collection schema.
+ * {@link VariantSourceEntity} as the collection schema.
  * <p>
  * Input: VCF file
  * <p>

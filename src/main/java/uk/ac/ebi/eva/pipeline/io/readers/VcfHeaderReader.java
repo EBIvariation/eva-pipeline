@@ -25,13 +25,9 @@ import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 
 import uk.ac.ebi.eva.commons.models.data.VariantSourceEntity;
-import uk.ac.ebi.eva.pipeline.runner.exceptions.DuplicateSamplesFoundException;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
 
 /**
  * Before providing the VariantSource as argument to a VcfReader (that uses the VariantVcfFactory inside
@@ -104,26 +100,12 @@ public class VcfHeaderReader implements ResourceAwareItemReaderItemStream<Varian
         }
     }
 
-    private VariantSourceEntity doRead() throws DuplicateSamplesFoundException {
+    private VariantSourceEntity doRead() {
         if (variantReader == null) {
             throw new IllegalStateException("The method VcfHeaderReader.open() should be called before reading");
         }
         variantReader.pre();
         source.addMetadata(VARIANT_FILE_HEADER_KEY, variantReader.getHeader());
-
-        List<String> sampleNames = new ArrayList<String>(variantReader.getSampleNames());
-        HashSet<String> uniqueSampleNames = new HashSet<String>(sampleNames.size());
-        List<String> duplicateSampleNames = new ArrayList<String>();
-
-        for (String sample : sampleNames) {
-            boolean isDuplicate = !uniqueSampleNames.add(sample);
-            if (isDuplicate) {
-                duplicateSampleNames.add(sample);
-            }
-        }
-        if (!duplicateSampleNames.isEmpty()) {
-            throw new DuplicateSamplesFoundException(duplicateSampleNames);
-        }
         return new VariantSourceEntity(source);
     }
 

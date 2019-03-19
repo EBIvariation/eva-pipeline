@@ -13,29 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.ac.ebi.eva.pipeline.jobs.steps.processors;
+package uk.ac.ebi.eva.pipeline.io.writers;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.batch.item.ItemProcessor;
+import org.springframework.batch.item.ItemWriter;
 
 import uk.ac.ebi.eva.pipeline.io.VepProcess;
 import uk.ac.ebi.eva.pipeline.model.EnsemblVariant;
 import uk.ac.ebi.eva.pipeline.parameters.AnnotationParameters;
 
-import java.io.StringWriter;
-import java.util.Arrays;
 import java.util.List;
 
 /**
  * ItemStreamWriter that takes VariantWrappers and serialize them into a {@link VepProcess}, which will be responsible
  * for annotating the variants and writing them to a file.
  */
-public class VepAnnotationProcessor implements ItemProcessor<List<EnsemblVariant>, List<String>> {
+public class VepAnnotationFileWriter implements ItemWriter<EnsemblVariant> {
 
-    private static final Logger logger = LoggerFactory.getLogger(VepAnnotationProcessor.class);
-
-    private static final boolean SKIP_COMMENTS = true;
+    private static final Logger logger = LoggerFactory.getLogger(VepAnnotationFileWriter.class);
 
     private final AnnotationParameters annotationParameters;
 
@@ -43,50 +39,41 @@ public class VepAnnotationProcessor implements ItemProcessor<List<EnsemblVariant
 
     private final Long timeoutInSeconds;
 
-    public VepAnnotationProcessor(AnnotationParameters annotationParameters, Integer chunkSize, Long timeoutInSeconds) {
+    public VepAnnotationFileWriter(AnnotationParameters annotationParameters, Integer chunkSize, Long timeoutInSeconds) {
         this.annotationParameters = annotationParameters;
         this.chunkSize = chunkSize;
         this.timeoutInSeconds = timeoutInSeconds;
     }
 
     @Override
-    public List<String> process(List<EnsemblVariant> ensemblVariants) throws Exception {
-        StringWriter writer = new StringWriter();
-
-        VepProcess vepProcess = new VepProcess(annotationParameters, chunkSize, timeoutInSeconds, writer, SKIP_COMMENTS);
+    public void write(List<? extends EnsemblVariant> variantWrappers) throws Exception {
+        VepProcess vepProcess = new VepProcess(annotationParameters, chunkSize, timeoutInSeconds);
         vepProcess.open();
 
-        for (EnsemblVariant ensemblVariant : ensemblVariants) {
+        for (EnsemblVariant ensemblVariant : variantWrappers) {
             String line = getVariantInVepInputFormat(ensemblVariant);
             vepProcess.write(line.getBytes());
             vepProcess.write(System.lineSeparator().getBytes());
         }
 
-        logBatch(ensemblVariants);
+        if (variantWrappers.size() > 0) {
+            EnsemblVariant first = variantWrappers.get(0);
+            EnsemblVariant last = variantWrappers.get(variantWrappers.size() - 1);
+            logger.trace("VEP has received {} variants from {}:{} to {}:{}", variantWrappers.size(),
+                    first.getChr(), first.getStart(), last.getChr(), last.getStart());
+        }
 
         vepProcess.flush();
         vepProcess.close();
-        writer.close();
-
-        String[] lines = writer.getBuffer().toString().split("\n"); // TODO is it possible to refactor this?
-        return Arrays.asList(lines);
-    }
-
-    private void logBatch(List<EnsemblVariant> ensemblVariants) {
-        if (ensemblVariants.size() > 0) {
-            EnsemblVariant first = ensemblVariants.get(0);
-            EnsemblVariant last = ensemblVariants.get(ensemblVariants.size() - 1);
-            logger.trace("VEP has received {} variants from {}:{} to {}:{}", ensemblVariants.size(),
-                    first.getChr(), first.getStart(), last.getChr(), last.getStart());
-        }
     }
 
     private String getVariantInVepInputFormat(EnsemblVariant ensemblVariant) {
         return String.join("\t",
                            ensemblVariant.getChr(),
-                           Integer.toString(ensemblVariant.getStart()),
-                           Integer.toString(ensemblVariant.getEnd()),
+                           Long.toString(ensemblVariant.getStart()),
+                           Long.toString(ensemblVariant.getEnd()),
                            ensemblVariant.getRefAlt(),
                            ensemblVariant.getStrand());
     }
+
 }

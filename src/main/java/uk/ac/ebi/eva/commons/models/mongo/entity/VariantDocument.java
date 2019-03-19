@@ -20,7 +20,7 @@ import org.opencb.opencga.storage.mongodb.variant.VariantMongoDBWriter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
-import uk.ac.ebi.eva.commons.models.data.Variant;
+import uk.ac.ebi.eva.commons.models.data.VariantType;
 import uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.HgvsMongo;
 import uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantAnnotation;
 import uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantAt;
@@ -71,16 +71,16 @@ public class VariantDocument {
     private String id;
 
     @Field(TYPE_FIELD)
-    private Variant.VariantType variantType;
+    private VariantType variantType;
 
     @Field(CHROMOSOME_FIELD)
     private String chromosome;
 
     @Field(START_FIELD)
-    private int start;
+    private Long start;
 
     @Field(END_FIELD)
-    private int end;
+    private Long end;
 
     @Field(LENGTH_FIELD)
     private int length;
@@ -113,7 +113,7 @@ public class VariantDocument {
         //Empty constructor for spring
     }
 
-    public VariantDocument(Variant.VariantType variantType, String chromosome, int start, int end, int length,
+    public VariantDocument(VariantType variantType, String chromosome, Long start, Long end, int length,
                            String reference, String alternate, Map<String, Set<String>> hgvs, Set<String> ids,
                            Set<VariantSourceEntryMongo> variantSources) {
         this.id = buildVariantId(chromosome, start, reference, alternate);
@@ -136,7 +136,7 @@ public class VariantDocument {
         }
     }
 
-    public VariantDocument(Variant.VariantType variantType, String chromosome, int start, int end, int length,
+    public VariantDocument(VariantType variantType, String chromosome, Long start, Long end, int length,
                            String reference, String alternate, Set<HgvsMongo> hgvs, Set<String> ids,
                            Set<VariantSourceEntryMongo> variantSources) {
         this.id = buildVariantId(chromosome, start, reference, alternate);
@@ -159,7 +159,7 @@ public class VariantDocument {
         }
     }
 
-    public static String buildVariantId(String chromosome, int start, String reference, String alternate) {
+    public static String buildVariantId(String chromosome, Long start, String reference, String alternate) {
         StringBuilder builder = new StringBuilder(chromosome);
         builder.append("_");
         builder.append(start);
@@ -184,9 +184,9 @@ public class VariantDocument {
         return builder.toString();
     }
 
-    public static VariantAt generateAtField(String chromosome, int start) {
-        int smallChunkId = start / VariantMongoDBWriter.CHUNK_SIZE_SMALL;
-        int bigChunkId = start / VariantMongoDBWriter.CHUNK_SIZE_BIG;
+    public static VariantAt generateAtField(String chromosome, Long start) {
+        Long smallChunkId = start / VariantMongoDBWriter.CHUNK_SIZE_SMALL;
+        Long bigChunkId = start / VariantMongoDBWriter.CHUNK_SIZE_BIG;
         String chunkSmall = chromosome + "_" + smallChunkId + "_" + ONE_THOUSAND_STRING;
         String chunkBig = chromosome + "_" + bigChunkId + "_" + TEN_THOUSAND_STRING;
 
@@ -208,7 +208,7 @@ public class VariantDocument {
         return id;
     }
 
-    public Variant.VariantType getVariantType() {
+    public VariantType getVariantType() {
         return variantType;
     }
 
@@ -216,11 +216,11 @@ public class VariantDocument {
         return chromosome;
     }
 
-    public int getStart() {
+    public Long getStart() {
         return start;
     }
 
-    public int getEnd() {
+    public Long getEnd() {
         return end;
     }
 

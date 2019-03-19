@@ -21,6 +21,7 @@ public class JobParametersNames {
 
     /*
      * Input
+     * JobParameter keys for the job
      */
 
     public static final String INPUT_VCF = "input.vcf";

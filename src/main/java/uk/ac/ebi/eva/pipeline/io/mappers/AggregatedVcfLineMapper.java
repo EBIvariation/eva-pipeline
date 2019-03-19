@@ -19,7 +19,7 @@ import org.opencb.biodata.models.variant.VariantSource;
 import org.springframework.batch.item.file.LineMapper;
 import org.springframework.util.Assert;
 
-import uk.ac.ebi.eva.commons.models.data.Variant;
+import uk.ac.ebi.eva.commons.models.data.pipeline.Variant;
 import uk.ac.ebi.eva.utils.FileUtils;
 
 import java.io.FileInputStream;
