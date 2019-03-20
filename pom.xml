@@ -25,6 +25,12 @@
     </properties>
 
     <dependencies>
+        <!-- variation-commons -->
+        <dependency>
+            <groupId>uk.ac.ebi.eva</groupId>
+            <artifactId>variation-commons</artifactId>
+            <version>0.6</version>
+        </dependency>
         <!-- Spring -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

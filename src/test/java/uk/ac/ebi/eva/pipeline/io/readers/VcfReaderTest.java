@@ -99,7 +99,7 @@ public class VcfReaderTest {
         while ((variants = vcfReader.read()) != null) {
             assertTrue(variants.size() > 0);
             assertTrue(variants.get(0).getSourceEntries().size() > 0);
-            VariantSourceEntry sourceEntry = variants.get(0).getSourceEntries().entrySet().iterator().next().getValue();
+            VariantSourceEntry sourceEntry = variants.get(0).getSourceEntries().iterator().next();
             assertTrue(sourceEntry.getSamplesData().size() > 0);
 
             count++;

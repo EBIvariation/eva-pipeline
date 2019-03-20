@@ -33,7 +33,7 @@ import java.util.Objects;
  * <p>
  * TODO Mendelian errors must be calculated
  */
-public class VariantStats {
+public class VariantStats implements IVariantStatistics{
 
     private String refAllele;
 
@@ -185,6 +185,7 @@ public class VariantStats {
         this.altAlleleFreq = altAlleleFreq;
     }
 
+    @Override
     public String getMafAllele() {
         return mafAllele;
     }
@@ -193,6 +194,7 @@ public class VariantStats {
         this.mafAllele = mafAllele;
     }
 
+    @Override
     public String getMgfGenotype() {
         return mgfGenotype;
     }
@@ -201,6 +203,7 @@ public class VariantStats {
         this.mgfGenotype = mgfGenotype;
     }
 
+    @Override
     public Map<Genotype, Integer> getGenotypesCount() {
         return genotypesCount;
     }
@@ -251,6 +254,7 @@ public class VariantStats {
         this.genotypesFreq = genotypesFreq;
     }
 
+    @Override
     public float getMaf() {
         return maf;
     }
@@ -259,6 +263,7 @@ public class VariantStats {
         this.maf = maf;
     }
 
+    @Override
     public float getMgf() {
         return mgf;
     }
@@ -267,6 +272,7 @@ public class VariantStats {
         this.mgf = mgf;
     }
 
+    @Override
     public int getMissingAlleles() {
         return missingAlleles;
     }
@@ -275,6 +281,7 @@ public class VariantStats {
         this.missingAlleles = missingAlleles;
     }
 
+    @Override
     public int getMissingGenotypes() {
         return missingGenotypes;
     }
@@ -518,7 +525,7 @@ public class VariantStats {
      */
     public static void calculateStatsForVariantsList(List<Variant> variants, Pedigree ped) {
         for (Variant variant : variants) {
-            for (VariantSourceEntry file : variant.getSourceEntries().values()) {
+            for (VariantSourceEntry file : variant.getSourceEntries()) {
                 VariantStats stats = new VariantStats(variant)
                         .calculate(file.getSamplesData(), file.getAttributes(), ped);
                 file.setStats(stats); // TODO Correct?

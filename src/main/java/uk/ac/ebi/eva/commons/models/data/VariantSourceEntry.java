@@ -27,7 +27,7 @@ import java.util.Objects;
  * Entry that associates a variant and a file in a variant archive. It contains
  * information related to samples, statistics and specifics of the file format.
  */
-public class VariantSourceEntry {
+public class VariantSourceEntry implements IVariantSourceEntry{
 
     /**
      * Unique identifier of the archived file.
@@ -90,6 +90,7 @@ public class VariantSourceEntry {
         this.cohortStats = new LinkedHashMap<>();
     }
 
+    @Override
     public String getFileId() {
         return fileId;
     }
@@ -98,6 +99,7 @@ public class VariantSourceEntry {
         this.fileId = fileId;
     }
 
+    @Override
     public String getStudyId() {
         return studyId;
     }
@@ -106,6 +108,7 @@ public class VariantSourceEntry {
         this.studyId = studyId;
     }
 
+    @Override
     public String[] getSecondaryAlternates() {
         return secondaryAlternates;
     }
@@ -122,6 +125,7 @@ public class VariantSourceEntry {
         this.format = format;
     }
 
+    @Override
     public List<Map<String, String>> getSamplesData() {
         return samplesData;
     }
@@ -145,10 +149,12 @@ public class VariantSourceEntry {
         return this.samplesData.size() - 1;
     }
 
+    @Override
     public VariantStats getStats() {
         return cohortStats.get(DEFAULT_COHORT);
     }
 
+    @Override
     public void setStats(VariantStats stats) {
         this.cohortStats = new LinkedHashMap<>(1);
         this.cohortStats.put(DEFAULT_COHORT, stats);
@@ -162,6 +168,7 @@ public class VariantSourceEntry {
         this.cohortStats.put(cohortName, stats);
     }
 
+    @Override
     public Map<String, VariantStats> getCohortStats() {
         return cohortStats;
     }
@@ -170,6 +177,7 @@ public class VariantSourceEntry {
         this.cohortStats = cohortStats;
     }
 
+    @Override
     public Map<String, String> getAttributes() {
         return attributes;
     }

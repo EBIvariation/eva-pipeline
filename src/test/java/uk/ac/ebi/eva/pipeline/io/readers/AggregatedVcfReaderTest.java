@@ -97,7 +97,7 @@ public class AggregatedVcfReaderTest {
         while ((variants = vcfReader.read()) != null) {
             assertTrue(variants.size() > 0);
             assertTrue(variants.get(0).getSourceEntries().size() > 0);
-            VariantSourceEntry sourceEntry = variants.get(0).getSourceEntries().entrySet().iterator().next().getValue();
+            VariantSourceEntry sourceEntry = variants.get(0).getSourceEntries().iterator().next();
             assertTrue(sourceEntry.getSamplesData().isEmpty()); // by definition, aggregated VCFs don't have sample data
             assertFalse(sourceEntry.getCohortStats(VariantSourceEntry.DEFAULT_COHORT).getGenotypesCount().isEmpty());
 

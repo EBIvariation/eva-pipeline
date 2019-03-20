@@ -54,10 +54,10 @@ public class SimplifiedVariant {
     private String chromosome;
 
     @Field(START_FIELD)
-    private int start;
+    private long start;
 
     @Field(END_FIELD)
-    private int end;
+    private long end;
 
     @Field(LENGTH_FIELD)
     private int length;
@@ -78,7 +78,7 @@ public class SimplifiedVariant {
         //Empty constructor for spring
     }
 
-    public SimplifiedVariant(VariantType variantType, String chromosome, int start, int end, int length,
+    public SimplifiedVariant(VariantType variantType, String chromosome, long start, long end, int length,
                              String reference, String alternate, Map<String, Set<String>> hgvs) {
         this.id = buildVariantId(chromosome, start, reference, alternate);
         this.variantType = variantType;
@@ -104,11 +104,11 @@ public class SimplifiedVariant {
         return chromosome;
     }
 
-    public int getStart() {
+    public long getStart() {
         return start;
     }
 
-    public int getEnd() {
+    public long getEnd() {
         return end;
     }
 

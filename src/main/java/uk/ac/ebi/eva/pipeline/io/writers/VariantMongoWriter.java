@@ -129,7 +129,7 @@ public class VariantMongoWriter extends MongoItemWriter<Variant> {
         BasicDBObject addToSet = new BasicDBObject();
 
         if (!variant.getSourceEntries().isEmpty()) {
-            VariantSourceEntry variantSourceEntry = variant.getSourceEntries().values().iterator().next();
+            VariantSourceEntry variantSourceEntry = variant.getSourceEntries().iterator().next();
 
             addToSet.put(VariantDocument.FILES_FIELD, convert(variantSourceEntry));
 

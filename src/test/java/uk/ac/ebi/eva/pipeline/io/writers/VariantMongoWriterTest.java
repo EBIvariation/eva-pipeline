@@ -152,8 +152,8 @@ public class VariantMongoWriterTest {
     @Test
     public void allFieldsOfVariantShouldBeStored() throws Exception {
         final String chromosome = "12";
-        final int start = 3;
-        final int end = 4;
+        final long start = 3;
+        final long end = 4;
         final String reference = "A";
         final String alternate = "T";
         final String fileId = "fileId";
@@ -252,16 +252,16 @@ public class VariantMongoWriterTest {
         assertNull(storedVariant.get("ids"));
     }
 
-    private Variant buildVariant(String chromosome, int start, int end, String reference, String alternate,
+    private Variant buildVariant(String chromosome, long start, long end, String reference, String alternate,
                                  String fileId, String studyId) {
         Variant variant = new Variant(chromosome, start, end, reference, alternate);
 
-        Map<String, VariantSourceEntry> sourceEntries = new LinkedHashMap<>();
+//        Map<String, VariantSourceEntry> sourceEntries = new LinkedHashMap<>();
         VariantSourceEntry variantSourceEntry = new VariantSourceEntry(fileId, studyId);
         variantSourceEntry.setCohortStats("cohortStats",
                 new VariantStats(reference, alternate, VariantType.SNV));
-        sourceEntries.put("variant", variantSourceEntry);
-        variant.setSourceEntries(sourceEntries);
+//        sourceEntries.put("variant", variantSourceEntry);
+        variant.addSourceEntry(variantSourceEntry);
 
         return variant;
     }
