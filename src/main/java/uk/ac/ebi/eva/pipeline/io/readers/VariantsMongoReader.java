@@ -18,7 +18,11 @@ package uk.ac.ebi.eva.pipeline.io.readers;
 import com.mongodb.BasicDBObject;
 import com.mongodb.BasicDBObjectBuilder;
 import com.mongodb.DBObject;
-import org.springframework.batch.item.support.AbstractItemCountingItemStreamItemReader;
+import org.springframework.batch.item.ExecutionContext;
+import org.springframework.batch.item.NonTransientResourceException;
+import org.springframework.batch.item.ParseException;
+import org.springframework.batch.item.UnexpectedInputException;
+import org.springframework.batch.item.support.AbstractItemStreamItemReader;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.data.mongodb.core.convert.MongoConverter;
@@ -32,6 +36,11 @@ import uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantSourceEntry
 import uk.ac.ebi.eva.pipeline.model.EnsemblVariant;
 
 import javax.annotation.PostConstruct;
+import java.time.LocalTime;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 
 import static uk.ac.ebi.eva.commons.models.mongo.entity.VariantDocument.ALTERNATE_FIELD;
 import static uk.ac.ebi.eva.commons.models.mongo.entity.VariantDocument.CHROMOSOME_FIELD;
@@ -46,31 +55,48 @@ import static uk.ac.ebi.eva.commons.models.mongo.entity.VariantDocument.START_FI
  * pagination and it is slow with large collections
  */
 public class VariantsMongoReader
-        extends AbstractItemCountingItemStreamItemReader<EnsemblVariant> implements InitializingBean {
-
-    private MongoDbCursorItemReader delegateReader;
-
-    private MongoConverter converter;
+        extends AbstractItemStreamItemReader<List<EnsemblVariant>> implements InitializingBean {
 
     private static final String STUDY_KEY = VariantDocument.FILES_FIELD + "." + VariantSourceEntryMongo.STUDYID_FIELD;
 
     private static final String FILE_KEY = VariantDocument.FILES_FIELD + "." + VariantSourceEntryMongo.FILEID_FIELD;
 
+    private static final String LAST_READ_TIMESTAMP_KEY = "last_read_timestamp";
+
+    private MongoDbCursorItemReader delegateReader;
+
+    private MongoConverter converter;
+
+    private Integer chunkSize;
+
+    private ZonedDateTime lastRead;
+
     /**
+     *
+     * @param vepVersion Only bring variants whose annotation does not contain this VEP version.
+     *                   This option is ignored if excludeAnnotated is false.
+     * @param vepCacheVersion Only bring variants whose annotation does not contain this cache version.
+     *                        This option is ignored if excludeAnnotated is false.
      * @param studyId Can be the empty string or null, meaning to bring all non-annotated variants in the collection.
      *                If the studyId string is not empty, bring only non-annotated variants from that study.
      * @param fileId  File identifier that it is checked inside a study. If the study identifier is not defined, the
      *                file is ignored. This is mainly due to performance reasons.
      *                Can be the empty string or null, meaning to bring all non-annotated variants in a study.
      *                If the studyId string is not empty, bring only non-annotated variants from that study and file.
-     * @param excludeAnnotated bring only non-annotated variants.
+     * @param excludeAnnotated If true, bring only non-annotated variants. If false, bring all variants (ignoring the
+     *                         vepVersion and vepCacheVersion parameters)
+     * @param chunkSize size of the list returned by the "read" method.
      */
     public VariantsMongoReader(MongoOperations mongoOperations, String collectionVariantsName, String vepVersion,
-                               String vepCacheVersion, String studyId, String fileId, boolean excludeAnnotated) {
+                               String vepCacheVersion, String studyId, String fileId, boolean excludeAnnotated,
+                               Integer chunkSize) {
         setName(ClassUtils.getShortName(VariantsMongoReader.class));
         delegateReader = new MongoDbCursorItemReader();
         delegateReader.setTemplate(mongoOperations);
         delegateReader.setCollection(collectionVariantsName);
+        
+        // the query excludes processed variants automatically, so a new query has to start from the beginning
+        delegateReader.setSaveState(false);
 
         BasicDBObjectBuilder queryBuilder = BasicDBObjectBuilder.start();
 
@@ -96,7 +122,9 @@ public class VariantsMongoReader
         String[] fields = {CHROMOSOME_FIELD, START_FIELD, END_FIELD, REFERENCE_FIELD, ALTERNATE_FIELD};
         delegateReader.setFields(fields);
 
-        converter = mongoOperations.getConverter();
+        this.converter = mongoOperations.getConverter();
+        this.chunkSize = chunkSize;
+        this.lastRead = ZonedDateTime.now();
     }
 
     @PostConstruct
@@ -106,19 +134,36 @@ public class VariantsMongoReader
     }
 
     @Override
-    protected void doOpen() throws Exception {
-        delegateReader.doOpen();
+    public void open(ExecutionContext executionContext) {
+        delegateReader.open(executionContext);
     }
 
     @Override
-    protected EnsemblVariant doRead() throws Exception {
-        DBObject dbObject = delegateReader.doRead();
-        if (dbObject != null) {
-            SimplifiedVariant variant = converter.read(SimplifiedVariant.class, dbObject);
-            return buildVariantWrapper(variant);
-        } else {
+    public List<EnsemblVariant> read() throws Exception, UnexpectedInputException, ParseException, NonTransientResourceException {
+        List<EnsemblVariant> variants = readBatch(chunkSize);
+        if (variants.size() == 0) {
             return null;
+        } else {
+            return variants;
         }
+    }
+
+    private List<EnsemblVariant> readBatch(Integer chunkSize) throws Exception {
+        List<EnsemblVariant> variants = new ArrayList<>();
+        DBObject dbObject;
+        while ((dbObject = delegateDoRead()) != null) {
+            SimplifiedVariant variant = converter.read(SimplifiedVariant.class, dbObject);
+            variants.add(buildVariantWrapper(variant));
+            if (variants.size() == chunkSize) {
+                break;
+            }
+        }
+        return variants;
+    }
+
+    private DBObject delegateDoRead() throws Exception {
+        lastRead = ZonedDateTime.now();
+        return delegateReader.doRead();
     }
 
     private EnsemblVariant buildVariantWrapper(SimplifiedVariant variant) {
@@ -130,8 +175,15 @@ public class VariantsMongoReader
     }
 
     @Override
-    protected void doClose() throws Exception {
-        delegateReader.doClose();
+    public void close() {
+        delegateReader.close();
     }
 
+    @Override
+    public void update(ExecutionContext executionContext) {
+        super.update(executionContext);
+
+        // to debug EVA-781: mongo timeouts
+        executionContext.put(LAST_READ_TIMESTAMP_KEY, lastRead.format(DateTimeFormatter.ISO_DATE_TIME));
+    }
 }

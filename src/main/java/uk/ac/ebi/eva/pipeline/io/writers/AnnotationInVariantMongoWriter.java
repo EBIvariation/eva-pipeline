@@ -24,12 +24,12 @@ import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.data.mongodb.core.query.BasicQuery;
 import org.springframework.data.mongodb.core.query.BasicUpdate;
 import org.springframework.util.Assert;
+
 import uk.ac.ebi.eva.commons.models.mongo.entity.Annotation;
 import uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantAnnotation;
 
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -47,7 +47,7 @@ import static uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantAnno
  * - soAccessions
  * - Xref Ids
  */
-public class AnnotationInVariantMongoWriter implements ItemWriter<Annotation> {
+public class AnnotationInVariantMongoWriter implements ItemWriter<List<Annotation>> {
 
     public static final String ID = "_id";
     public static final String SET = "$set";
@@ -80,12 +80,14 @@ public class AnnotationInVariantMongoWriter implements ItemWriter<Annotation> {
     }
 
     @Override
-    public void write(List<? extends Annotation> annotations) throws Exception {
-        Map<String, VariantAnnotation> variantAnnotations = generateVariantAnnotations(annotations);
+    public void write(List<? extends List<Annotation>> annotations) throws Exception {
+        for (List<Annotation> annotationList : annotations) {
+            Map<String, VariantAnnotation> variantAnnotations = generateVariantAnnotations(annotationList);
 
-        BulkOperations bulkOperations = mongoOperations.bulkOps(BulkOperations.BulkMode.UNORDERED, collection);
-        bulkPrepare(bulkOperations, variantAnnotations);
-        bulkOperations.execute();
+            BulkOperations bulkOperations = mongoOperations.bulkOps(BulkOperations.BulkMode.UNORDERED, collection);
+            bulkPrepare(bulkOperations, variantAnnotations);
+            bulkOperations.execute();
+        }
     }
 
     private Map<String, VariantAnnotation> generateVariantAnnotations(List<? extends Annotation> annotations) {

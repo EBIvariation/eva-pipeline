@@ -16,11 +16,11 @@
  */
 package uk.ac.ebi.eva.pipeline.io.mappers;
 
+import org.opencb.biodata.models.feature.Genotype;
 
-import uk.ac.ebi.eva.commons.models.data.genotype.Genotype;
-import uk.ac.ebi.eva.commons.models.data.pipeline.Variant;
-import uk.ac.ebi.eva.commons.models.data.pipeline.VariantSourceEntry;
-import uk.ac.ebi.eva.commons.models.data.VariantStatistics;
+import uk.ac.ebi.eva.commons.models.data.Variant;
+import uk.ac.ebi.eva.commons.models.data.VariantSourceEntry;
+import uk.ac.ebi.eva.commons.models.data.VariantStats;
 import uk.ac.ebi.eva.utils.FileUtils;
 
 import java.io.IOException;
@@ -88,7 +88,7 @@ public class VariantVcfExacFactory extends VariantAggregatedVcfFactory {
     protected void parseStats(Variant variant, String fileId, String studyId, int numAllele, String[] alternateAlleles,
                               String info) {
         VariantSourceEntry sourceEntry = variant.getSourceEntry(fileId, studyId);
-        VariantStatistics stats = new VariantStatistics(variant);
+        VariantStats stats = new VariantStats(variant);
 
         if (sourceEntry.hasAttribute(AC_HET)) {   // heterozygous genotype count
             String[] hetCounts = sourceEntry.getAttribute(AC_HET).split(COMMA);
@@ -144,9 +144,9 @@ public class VariantVcfExacFactory extends VariantAggregatedVcfFactory {
                 if (mappedTag != null) {
                     String[] opencgaTagSplit = mappedTag.split("\\.");   // a literal dot
                     String cohortName = opencgaTagSplit[0];
-                    VariantStatistics cohortStats = sourceEntry.getCohortStats(cohortName);
+                    VariantStats cohortStats = sourceEntry.getCohortStats(cohortName);
                     if (cohortStats == null) {
-                        cohortStats = new VariantStatistics(variant);
+                        cohortStats = new VariantStats(variant);
                         sourceEntry.setCohortStats(cohortName, cohortStats);
                     }
                     switch (opencgaTagSplit[1]) {
@@ -169,7 +169,7 @@ public class VariantVcfExacFactory extends VariantAggregatedVcfFactory {
         }
         for (String cohortName : sourceEntry.getCohortStats().keySet()) {
             if (ans.containsKey(cohortName)) {
-                VariantStatistics cohortStats = sourceEntry.getCohortStats(cohortName);
+                VariantStats cohortStats = sourceEntry.getCohortStats(cohortName);
                 Integer alleleNumber = ans.get(cohortName);
                 addReferenceGenotype(variant, cohortStats, alleleNumber);
                 setRefAlleleCount(cohortStats, alleleNumber, acs.get(cohortName));
@@ -178,7 +178,7 @@ public class VariantVcfExacFactory extends VariantAggregatedVcfFactory {
         }
     }
 
-    private static void setRefAlleleCount(VariantStatistics stats, Integer alleleNumber, String alleleCounts[]) {
+    private static void setRefAlleleCount(VariantStats stats, Integer alleleNumber, String alleleCounts[]) {
         int sum = 0;
         for (String ac : alleleCounts) {
             sum += Integer.parseInt(ac);
@@ -195,7 +195,7 @@ public class VariantVcfExacFactory extends VariantAggregatedVcfFactory {
      * @param stats where to add the 0/0 genotype count
      * @param alleleNumber total sum of alleles.
      */
-    private static void addReferenceGenotype(Variant variant, VariantStatistics stats, int alleleNumber) {
+    private static void addReferenceGenotype(Variant variant, VariantStats stats, int alleleNumber) {
         int gtSum = 0;
         for (Integer gtCounts : stats.getGenotypesCount().values()) {
             gtSum += gtCounts;
@@ -216,7 +216,7 @@ public class VariantVcfExacFactory extends VariantAggregatedVcfFactory {
      * @param hetCounts parsed string
      */
     private static void addHeterozygousGenotypes(Variant variant, int numAllele, String[] alternateAlleles,
-                                                 VariantStatistics stats, String[] hetCounts) {
+                                                 VariantStats stats, String[] hetCounts) {
         if (hetCounts.length == alternateAlleles.length * (alternateAlleles.length + 1) / 2) {
             for (int i = 0; i < hetCounts.length; i++) {
                 Integer alleles[] = new Integer[2];
@@ -239,7 +239,7 @@ public class VariantVcfExacFactory extends VariantAggregatedVcfFactory {
      * @param stats
      * @param homCounts parsed string
      */
-    private void addHomozygousGenotype(Variant variant, int numAllele, String[] alternateAlleles, VariantStatistics stats,
+    private void addHomozygousGenotype(Variant variant, int numAllele, String[] alternateAlleles, VariantStats stats,
                                        String[] homCounts) {
         if (homCounts.length == alternateAlleles.length) {
             for (int i = 0; i < homCounts.length; i++) {
@@ -253,7 +253,7 @@ public class VariantVcfExacFactory extends VariantAggregatedVcfFactory {
         }
     }
 
-    private void setMaf(int totalAlleleCount, String alleleCounts[], String alternateAlleles[], VariantStatistics stats) {
+    private void setMaf(int totalAlleleCount, String alleleCounts[], String alternateAlleles[], VariantStats stats) {
         if (stats.getMaf() == -1) {
 
             int referenceCount = stats.getRefAlleleCount();

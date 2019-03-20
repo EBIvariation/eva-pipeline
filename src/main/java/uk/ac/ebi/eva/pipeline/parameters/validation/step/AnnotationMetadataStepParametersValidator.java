@@ -21,7 +21,7 @@ import org.springframework.batch.core.JobParametersValidator;
 import org.springframework.batch.core.job.CompositeJobParametersValidator;
 import org.springframework.batch.core.job.DefaultJobParametersValidator;
 
-import uk.ac.ebi.eva.pipeline.configuration.jobs.steps.LoadVepAnnotationStepConfiguration;
+import uk.ac.ebi.eva.pipeline.configuration.jobs.steps.AnnotationMetadataStepConfiguration;
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 import uk.ac.ebi.eva.pipeline.parameters.validation.DbCollectionsAnnotationMetadataNameValidator;
 import uk.ac.ebi.eva.pipeline.parameters.validation.VepCacheVersionValidator;
@@ -31,7 +31,7 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Validates the job parameters necessary to execute an {@link LoadVepAnnotationStepConfiguration}
+ * Validates the job parameters necessary to execute an {@link AnnotationMetadataStepConfiguration}
  */
 public class AnnotationMetadataStepParametersValidator extends DefaultJobParametersValidator {
 

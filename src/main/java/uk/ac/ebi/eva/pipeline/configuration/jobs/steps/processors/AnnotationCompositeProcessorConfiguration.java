@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.ac.ebi.eva.pipeline.configuration.io.writers;
+package uk.ac.ebi.eva.pipeline.configuration.jobs.steps.processors;
 
 import org.springframework.batch.core.configuration.annotation.StepScope;
-import org.springframework.batch.item.ItemWriter;
-import org.springframework.batch.item.support.CompositeItemWriter;
+import org.springframework.batch.item.ItemProcessor;
+import org.springframework.batch.item.support.CompositeItemProcessor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -27,32 +27,33 @@ import org.springframework.context.annotation.Profile;
 
 import uk.ac.ebi.eva.commons.models.mongo.entity.Annotation;
 import uk.ac.ebi.eva.pipeline.Application;
+import uk.ac.ebi.eva.pipeline.model.EnsemblVariant;
 
 import java.util.Arrays;
 import java.util.List;
 
-import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.COMPOSITE_ANNOTATION_VARIANT_WRITER;
-import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.ANNOTATION_IN_VARIANT_WRITER;
-import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.ANNOTATION_WRITER;
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.ANNOTATION_PARSER_PROCESSOR;
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.ANNOTATION_COMPOSITE_PROCESSOR;
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VEP_ANNOTATION_PROCESSOR;
 
 @Configuration
-@Import({AnnotationWriterConfiguration.class, AnnotationInVariantWriterConfiguration.class})
-public class AnnotationCompositeWriterConfiguration {
+@Import({VepAnnotationProcessorConfiguration.class, AnnotationParserProcessorConfiguration.class})
+public class AnnotationCompositeProcessorConfiguration {
 
     @Autowired
-    @Qualifier(ANNOTATION_WRITER)
-    private ItemWriter<List<Annotation>> annotationItemWriter;
+    @Qualifier(VEP_ANNOTATION_PROCESSOR)
+    private ItemProcessor<List<EnsemblVariant>, List<String>> vepAnnotationProcessor;
 
     @Autowired
-    @Qualifier(ANNOTATION_IN_VARIANT_WRITER)
-    private ItemWriter<List<Annotation>> variantAnnotationItemWriter;
+    @Qualifier(ANNOTATION_PARSER_PROCESSOR)
+    private ItemProcessor<List<String>, List<Annotation>> annotationParserProcessor;
 
-    @Bean(COMPOSITE_ANNOTATION_VARIANT_WRITER)
+    @Bean(ANNOTATION_COMPOSITE_PROCESSOR)
     @StepScope
     @Profile(Application.VARIANT_ANNOTATION_MONGO_PROFILE)
-    public CompositeItemWriter<List<Annotation>> compositeAnnotationItemWriter(){
-        CompositeItemWriter<List<Annotation>> writer = new CompositeItemWriter<>();
-        writer.setDelegates(Arrays.asList(annotationItemWriter, variantAnnotationItemWriter));
-        return writer;
+    public CompositeItemProcessor<List<EnsemblVariant>, List<Annotation>> compositeAnnotationItemWriter(){
+        CompositeItemProcessor<List<EnsemblVariant>, List<Annotation>> processor = new CompositeItemProcessor<>();
+        processor.setDelegates(Arrays.asList(vepAnnotationProcessor, annotationParserProcessor));
+        return processor;
     }
 }

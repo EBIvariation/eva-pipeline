@@ -24,9 +24,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.batch.item.data.MongoItemWriter;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.util.Assert;
-import uk.ac.ebi.eva.commons.models.data.pipeline.Variant;
-import uk.ac.ebi.eva.commons.models.data.pipeline.VariantSourceEntry;
-import uk.ac.ebi.eva.commons.models.data.VariantStatistics;
+import uk.ac.ebi.eva.commons.models.data.Variant;
+import uk.ac.ebi.eva.commons.models.data.VariantSourceEntry;
+import uk.ac.ebi.eva.commons.models.data.VariantStats;
 import uk.ac.ebi.eva.commons.models.mongo.entity.VariantDocument;
 import uk.ac.ebi.eva.commons.models.mongo.entity.projections.SimplifiedVariant;
 import uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantSourceEntryMongo;
@@ -129,7 +129,7 @@ public class VariantMongoWriter extends MongoItemWriter<Variant> {
         BasicDBObject addToSet = new BasicDBObject();
 
         if (!variant.getSourceEntries().isEmpty()) {
-            VariantSourceEntry variantSourceEntry = variant.getSourceEntries().iterator().next();
+            VariantSourceEntry variantSourceEntry = variant.getSourceEntries().values().iterator().next();
 
             addToSet.put(VariantDocument.FILES_FIELD, convert(variantSourceEntry));
 
@@ -154,7 +154,7 @@ public class VariantMongoWriter extends MongoItemWriter<Variant> {
 
     private BasicDBList convertStatistics(VariantSourceEntry variantSourceEntry) {
         List<VariantStatsMongo> variantStats = new ArrayList<>();
-        for (Map.Entry<String, VariantStatistics> variantStatsEntry : variantSourceEntry.getCohortStats().entrySet()) {
+        for (Map.Entry<String, VariantStats> variantStatsEntry : variantSourceEntry.getCohortStats().entrySet()) {
             variantStats.add(new VariantStatsMongo(
                     variantSourceEntry.getStudyId(),
                     variantSourceEntry.getFileId(),

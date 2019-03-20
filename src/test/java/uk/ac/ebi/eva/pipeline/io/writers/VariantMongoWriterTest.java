@@ -32,6 +32,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import uk.ac.ebi.eva.commons.models.data.Variant;
 import uk.ac.ebi.eva.commons.models.data.VariantSourceEntry;
 import uk.ac.ebi.eva.commons.models.data.VariantStats;
+import uk.ac.ebi.eva.commons.models.data.VariantType;
 import uk.ac.ebi.eva.pipeline.configuration.MongoConfiguration;
 import uk.ac.ebi.eva.pipeline.parameters.MongoConnection;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
@@ -258,7 +259,7 @@ public class VariantMongoWriterTest {
         Map<String, VariantSourceEntry> sourceEntries = new LinkedHashMap<>();
         VariantSourceEntry variantSourceEntry = new VariantSourceEntry(fileId, studyId);
         variantSourceEntry.setCohortStats("cohortStats",
-                new VariantStats(reference, alternate, Variant.VariantType.SNV));
+                new VariantStats(reference, alternate, VariantType.SNV));
         sourceEntries.put("variant", variantSourceEntry);
         variant.setSourceEntries(sourceEntries);
 

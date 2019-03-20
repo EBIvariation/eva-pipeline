@@ -15,7 +15,6 @@
  */
 package uk.ac.ebi.eva.pipeline.configuration.jobs.flows;
 
-import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.job.builder.FlowBuilder;
@@ -26,14 +25,11 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
-import uk.ac.ebi.eva.pipeline.jobs.deciders.EmptyVepOutputDecider;
-import uk.ac.ebi.eva.pipeline.configuration.jobs.steps.LoadVepAnnotationStepConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.jobs.steps.AnnotationMetadataStepConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.jobs.steps.GenerateVepAnnotationStepConfiguration;
 
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.GENERATE_VEP_ANNOTATION_STEP;
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.LOAD_ANNOTATION_METADATA_STEP;
-import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.LOAD_VEP_ANNOTATION_STEP;
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VEP_ANNOTATION_FLOW;
 
 /**
@@ -44,7 +40,7 @@ import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VEP_ANNOTATION_FLOW
  */
 @Configuration
 @EnableBatchProcessing
-@Import({GenerateVepAnnotationStepConfiguration.class, LoadVepAnnotationStepConfiguration.class, AnnotationMetadataStepConfiguration.class})
+@Import({GenerateVepAnnotationStepConfiguration.class, AnnotationMetadataStepConfiguration.class})
 public class AnnotationFlowConfiguration {
 
     @Autowired
@@ -52,24 +48,14 @@ public class AnnotationFlowConfiguration {
     private Step generateVepAnnotationStep;
 
     @Autowired
-    @Qualifier(LOAD_VEP_ANNOTATION_STEP)
-    private Step annotationLoadStep;
-
-    @Autowired
     @Qualifier(LOAD_ANNOTATION_METADATA_STEP)
     private Step annotationMetadataStep;
 
     @Bean(VEP_ANNOTATION_FLOW)
     public Flow vepAnnotationFlow() {
-        EmptyVepOutputDecider emptyVepOutputDecider = new EmptyVepOutputDecider();
-
         return new FlowBuilder<Flow>(VEP_ANNOTATION_FLOW)
                 .start(generateVepAnnotationStep)
-                .next(emptyVepOutputDecider).on(EmptyVepOutputDecider.CONTINUE_FLOW)
-                .to(annotationLoadStep)
                 .next(annotationMetadataStep)
-                .from(emptyVepOutputDecider).on(EmptyVepOutputDecider.STOP_FLOW)
-                .end(BatchStatus.COMPLETED.toString())
                 .build();
     }
 

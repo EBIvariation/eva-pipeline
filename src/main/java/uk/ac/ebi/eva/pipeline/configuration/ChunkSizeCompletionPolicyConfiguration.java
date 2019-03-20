@@ -24,7 +24,7 @@ import uk.ac.ebi.eva.pipeline.parameters.ChunkSizeParameters;
 
 /**
  * Spring configuration to inject a SimplecompletionPolicy that modifies the chunk size with the configured
- * JobParameters chunk size, if had reached the configured chunk size, it would terminate.
+ * JobParameters chunk size.
  */
 @Configuration
 public class ChunkSizeCompletionPolicyConfiguration {

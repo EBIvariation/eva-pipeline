@@ -26,8 +26,11 @@ public class BeanNames {
     public static final String VARIANT_ANNOTATION_READER = "variant-annotation-reader";
     public static final String VARIANT_READER = "variant-reader";
 
+    public static final String VEP_ANNOTATION_PROCESSOR = "vep-annotation-processor";
+    public static final String ANNOTATION_PARSER_PROCESSOR = "annotation-parser-processor";
+    public static final String ANNOTATION_COMPOSITE_PROCESSOR = "annotation-composite-processor";
+
     public static final String GENE_WRITER = "gene-writer";
-    public static final String VEP_ANNOTATION_WRITER = "vep-annotation-writer";
     public static final String ANNOTATION_WRITER = "annotation-writer";
     public static final String ANNOTATION_IN_VARIANT_WRITER = "annotation-in-variant-writer";
     public static final String COMPOSITE_ANNOTATION_VARIANT_WRITER = "composite-annotation-variant-writer";

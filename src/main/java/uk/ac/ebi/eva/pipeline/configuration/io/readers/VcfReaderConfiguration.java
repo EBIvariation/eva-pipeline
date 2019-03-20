@@ -22,7 +22,7 @@ import org.springframework.batch.item.ItemStreamReader;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import uk.ac.ebi.eva.commons.models.data.pipeline.Variant;
+import uk.ac.ebi.eva.commons.models.data.Variant;
 import uk.ac.ebi.eva.pipeline.io.readers.AggregatedVcfReader;
 import uk.ac.ebi.eva.pipeline.io.readers.UnwindingItemStreamReader;
 import uk.ac.ebi.eva.pipeline.io.readers.VcfReader;

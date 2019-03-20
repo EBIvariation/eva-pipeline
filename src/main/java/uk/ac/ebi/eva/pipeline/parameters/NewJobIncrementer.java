@@ -20,8 +20,7 @@ import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.JobParametersIncrementer;
 
 /**
- * Incrementer that does not reuse parameters from previous completed executions
- * If the previous custom job id is 123, the next job's is 123+1
+ * Incrementer that does not reuse parameters from previous completed executions.
  */
 public class NewJobIncrementer implements JobParametersIncrementer {
 

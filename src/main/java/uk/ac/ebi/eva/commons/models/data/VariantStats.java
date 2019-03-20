@@ -12,25 +12,28 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * 11limitations under the License.
+ * limitations under the License.
  */
 package uk.ac.ebi.eva.commons.models.data;
 
+import org.opencb.biodata.models.feature.AllelesCode;
+import org.opencb.biodata.models.feature.Genotype;
+import org.opencb.biodata.models.pedigree.Pedigree;
+import org.opencb.biodata.models.variant.stats.VariantHardyWeinbergStats;
 
-import uk.ac.ebi.eva.commons.models.data.genotype.AllelesCode;
-import uk.ac.ebi.eva.commons.models.data.genotype.Genotype;
-import uk.ac.ebi.eva.commons.models.data.pedigree.Pedigree;
-import uk.ac.ebi.eva.commons.models.data.stats.VariantHardyWeinbergStats;
-import uk.ac.ebi.eva.commons.models.data.ws.VariantWithSamplesAndAnnotation;
-
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * Bean to represent statistics related to a set of samples for a given variant
  * <p>
  * TODO Mendelian errors must be calculated
  */
-public class VariantStatistics implements IVariantStatistics {
+public class VariantStats {
 
     private String refAllele;
 
@@ -81,33 +84,26 @@ public class VariantStatistics implements IVariantStatistics {
     private VariantHardyWeinbergStats hw;
 
 
-    public VariantStatistics() {
-        this(null, null, VariantType.SNV, -1, -1, null, null, -1, -1, -1, -1, -1, -1, -1);
+    public VariantStats() {
+        this(null, -1, null, null, VariantType.SNV, -1, -1, null, null, -1, -1, -1, -1, -1, -1, -1);
     }
 
-    public VariantStatistics(IVariant variant) {
-        this(
-                variant != null ? variant.getReference() : null,
-                variant != null ? variant.getAlternate() : null,
-                variant != null ? variant.getType() : VariantType.SNV,
-                -1, -1, null, null, -1, -1, -1, -1, -1, -1, -1);
+    public VariantStats(Variant variant) {
+        this(null, -1,
+             variant != null ? variant.getReference() : null,
+             variant != null ? variant.getAlternate() : null,
+             variant != null ? variant.getType() : VariantType.SNV,
+             -1, -1, null, null, -1, -1, -1, -1, -1, -1, -1);
     }
 
-    public VariantStatistics(String referenceAllele, String alternateAllele, VariantType type) {
-        this(referenceAllele, alternateAllele, type, -1, -1, null, null, -1, -1, -1, -1, -1, -1, -1);
+    public VariantStats(String referenceAllele, String alternateAllele, VariantType type) {
+        this(null, -1, referenceAllele, alternateAllele, type, -1, -1, null, null, -1, -1, -1, -1, -1, -1, -1);
     }
 
-    public VariantStatistics(IVariantStatistics iVariantStatistics, String referenceAllele, String alternateAlleles,
-                             VariantType variantType) {
-        this(referenceAllele, alternateAlleles, variantType, iVariantStatistics.getMaf(), iVariantStatistics.getMgf(), iVariantStatistics.getMafAllele(), iVariantStatistics.getMgfGenotype(), iVariantStatistics.getMissingAlleles(),
-             iVariantStatistics.getMissingGenotypes(), -1, -1, -1, -1, -1);
-    }
-
-    public VariantStatistics(String referenceAllele, String alternateAlleles,
-                             VariantType variantType, float maf, float mgf, String mafAllele, String mgfGenotype,
-                             int numMissingAlleles, int numMissingGenotypes, int numMendelErrors,
-                             float percentCasesDominant,
-                             float percentControlsDominant, float percentCasesRecessive, float percentControlsRecessive) {
+    public VariantStats(String chromosome, int position, String referenceAllele, String alternateAlleles,
+                        VariantType variantType, float maf, float mgf, String mafAllele, String mgfGenotype,
+                        int numMissingAlleles, int numMissingGenotypes, int numMendelErrors, float percentCasesDominant,
+                        float percentControlsDominant, float percentCasesRecessive, float percentControlsRecessive) {
         this.refAllele = referenceAllele;
         this.altAllele = alternateAlleles;
         this.variantType = variantType;
@@ -189,7 +185,6 @@ public class VariantStatistics implements IVariantStatistics {
         this.altAlleleFreq = altAlleleFreq;
     }
 
-    @Override
     public String getMafAllele() {
         return mafAllele;
     }
@@ -198,7 +193,6 @@ public class VariantStatistics implements IVariantStatistics {
         this.mafAllele = mafAllele;
     }
 
-    @Override
     public String getMgfGenotype() {
         return mgfGenotype;
     }
@@ -207,7 +201,6 @@ public class VariantStatistics implements IVariantStatistics {
         this.mgfGenotype = mgfGenotype;
     }
 
-    @Override
     public Map<Genotype, Integer> getGenotypesCount() {
         return genotypesCount;
     }
@@ -258,7 +251,6 @@ public class VariantStatistics implements IVariantStatistics {
         this.genotypesFreq = genotypesFreq;
     }
 
-    @Override
     public float getMaf() {
         return maf;
     }
@@ -267,7 +259,6 @@ public class VariantStatistics implements IVariantStatistics {
         this.maf = maf;
     }
 
-    @Override
     public float getMgf() {
         return mgf;
     }
@@ -276,7 +267,6 @@ public class VariantStatistics implements IVariantStatistics {
         this.mgf = mgf;
     }
 
-    @Override
     public int getMissingAlleles() {
         return missingAlleles;
     }
@@ -285,7 +275,6 @@ public class VariantStatistics implements IVariantStatistics {
         this.missingAlleles = missingAlleles;
     }
 
-    @Override
     public int getMissingGenotypes() {
         return missingGenotypes;
     }
@@ -394,7 +383,7 @@ public class VariantStatistics implements IVariantStatistics {
 
     @Override
     public String toString() {
-        return "VariantStatistics{"
+        return "VariantStats{"
                 + "refAllele='" + refAllele + '\''
                 + ", altAllele='" + altAllele + '\''
                 + ", mafAllele='" + mafAllele + '\''
@@ -411,16 +400,13 @@ public class VariantStatistics implements IVariantStatistics {
                 + '}';
     }
 
-    public VariantStatistics calculate(List<Map<String, String>> samplesData, Map<String, String> attributes,
-                                       Pedigree pedigree) {
+    public VariantStats calculate(List<Map<String, String>> samplesData, Map<String, String> attributes,
+                                  Pedigree pedigree) {
         int[] allelesCount = new int[2];
-        int totalAllelesCount = 0;
-        int totalGenotypesCount = 0;
+        int totalAllelesCount = 0, totalGenotypesCount = 0;
 
-        float controlsDominant = 0;
-        int casesDominant = 0;
-        float controlsRecessive = 0;
-        int casesRecessive = 0;
+        float controlsDominant = 0, casesDominant = 0;
+        float controlsRecessive = 0, casesRecessive = 0;
 
         this.setNumSamples(samplesData.size());
         this.setMissingAlleles(0);
@@ -528,17 +514,12 @@ public class VariantStatistics implements IVariantStatistics {
      * patterns can only be calculated if pedigree information is provided.
      *
      * @param variants The variants whose statistics will be calculated
-     * @param ped      Optional pedigree information to calculate some statistics
+     * @param ped Optional pedigree information to calculate some statistics
      */
-    public static void calculateStatsForVariantsList(List<VariantWithSamplesAndAnnotation> variants, Pedigree ped) {
-        for (VariantWithSamplesAndAnnotation variant : variants) {
-            for (IVariantSourceEntry file : variant.getSourceEntries()) {
-                if (!file.getCohortStats().isEmpty()) {
-                    // If statistics are already available there is no need to calculate them
-                    continue;
-                }
-
-                VariantStatistics stats = new VariantStatistics(variant)
+    public static void calculateStatsForVariantsList(List<Variant> variants, Pedigree ped) {
+        for (Variant variant : variants) {
+            for (VariantSourceEntry file : variant.getSourceEntries().values()) {
+                VariantStats stats = new VariantStats(variant)
                         .calculate(file.getSamplesData(), file.getAttributes(), ped);
                 file.setStats(stats); // TODO Correct?
             }
@@ -651,7 +632,7 @@ public class VariantStatistics implements IVariantStatistics {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final VariantStatistics other = (VariantStatistics) obj;
+        final VariantStats other = (VariantStats) obj;
         if (!Objects.equals(this.refAllele, other.refAllele)) {
             return false;
         }
@@ -709,7 +690,7 @@ public class VariantStatistics implements IVariantStatistics {
         if (Float.floatToIntBits(this.casesPercentRecessive) != Float.floatToIntBits(other.casesPercentRecessive)) {
             return false;
         }
-        if (Float.floatToIntBits(this.controlsPercentRecessive)
+        if (Float.floatToIntBits(this.controlsPercentRecessive) 
                 != Float.floatToIntBits(other.controlsPercentRecessive)) {
             return false;
         }

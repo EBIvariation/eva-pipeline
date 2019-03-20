@@ -22,7 +22,7 @@ import org.springframework.stereotype.Service;
 
 /**
  * Service that holds access to the values for database. This include the configuration
- * values for database connection that are got as values not parameters
+ * values for database connection that are got as values not parameters.
  */
 @Service
 @StepScope

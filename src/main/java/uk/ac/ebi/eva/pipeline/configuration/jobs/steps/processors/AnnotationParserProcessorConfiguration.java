@@ -13,31 +13,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.ac.ebi.eva.pipeline.configuration.io.writers;
+package uk.ac.ebi.eva.pipeline.configuration.jobs.steps.processors;
 
 import org.springframework.batch.core.configuration.annotation.StepScope;
-import org.springframework.batch.item.ItemWriter;
+import org.springframework.batch.item.ItemProcessor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
-import org.springframework.data.mongodb.core.MongoOperations;
+
 import uk.ac.ebi.eva.commons.models.mongo.entity.Annotation;
-import uk.ac.ebi.eva.pipeline.Application;
-import uk.ac.ebi.eva.pipeline.io.writers.AnnotationMongoWriter;
-import uk.ac.ebi.eva.pipeline.parameters.DatabaseParameters;
+import uk.ac.ebi.eva.pipeline.jobs.steps.processors.AnnotationParserProcessor;
+import uk.ac.ebi.eva.pipeline.parameters.AnnotationParameters;
 
 import java.util.List;
 
-import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.ANNOTATION_WRITER;
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.ANNOTATION_PARSER_PROCESSOR;
 
+/**
+ * Step that annotates a list of variant coordinates (EnsemblVariant)
+ * <p>
+ * Input: List of EnsemblVariant
+ * Output: List of Strings, each string is an output line from VEP
+ */
 @Configuration
-public class AnnotationWriterConfiguration {
+public class AnnotationParserProcessorConfiguration {
 
-    @Bean(ANNOTATION_WRITER)
+    @Bean(ANNOTATION_PARSER_PROCESSOR)
     @StepScope
-    @Profile(Application.VARIANT_ANNOTATION_MONGO_PROFILE)
-    public ItemWriter<List<Annotation>> annotationItemWriter(MongoOperations mongoOperations,
-                                                             DatabaseParameters databaseParameters) {
-        return new AnnotationMongoWriter(mongoOperations, databaseParameters.getCollectionAnnotationsName());
+    public ItemProcessor<List<String>, List<Annotation>> annotationParserProcessor(
+            AnnotationParameters annotationParameters) {
+        return new AnnotationParserProcessor(annotationParameters);
     }
+
 }

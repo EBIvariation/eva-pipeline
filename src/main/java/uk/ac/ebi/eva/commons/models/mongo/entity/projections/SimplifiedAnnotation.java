@@ -37,10 +37,10 @@ public class SimplifiedAnnotation {
     private String chromosome;
 
     @Field(value = START_FIELD)
-    private Long start;
+    private int start;
 
     @Field(value = END_FIELD)
-    private Long end;
+    private int end;
 
     @Field(value = VEP_VERSION_FIELD)
     private String vepVersion;

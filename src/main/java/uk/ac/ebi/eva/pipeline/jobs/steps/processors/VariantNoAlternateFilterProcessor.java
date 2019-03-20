@@ -19,8 +19,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.item.ItemProcessor;
 
+import uk.ac.ebi.eva.commons.models.data.Variant;
 import uk.ac.ebi.eva.commons.models.data.VariantType;
-import uk.ac.ebi.eva.commons.models.data.pipeline.Variant;
 
 /**
  * Filters out variants reporting no alternate allele.

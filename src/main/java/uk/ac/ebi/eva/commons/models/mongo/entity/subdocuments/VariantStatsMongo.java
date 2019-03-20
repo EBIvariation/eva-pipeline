@@ -15,9 +15,9 @@
  */
 package uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments;
 
+import org.opencb.biodata.models.feature.Genotype;
 import org.springframework.data.mongodb.core.mapping.Field;
-import uk.ac.ebi.eva.commons.models.data.genotype.Genotype;
-import uk.ac.ebi.eva.commons.models.data.VariantStatistics;
+import uk.ac.ebi.eva.commons.models.data.VariantStats;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -81,7 +81,7 @@ public class VariantStatsMongo {
         //Empty constructor for spring
     }
 
-    public VariantStatsMongo(String studyId, String fileId, String cohortId, VariantStatistics stats) {
+    public VariantStatsMongo(String studyId, String fileId, String cohortId, VariantStats stats) {
         this.studyId = studyId;
         this.fileId = fileId;
         this.cohortId = cohortId;

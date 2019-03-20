@@ -17,7 +17,7 @@ package uk.ac.ebi.eva.commons.models.mongo.entity.projections;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Field;
-import uk.ac.ebi.eva.commons.models.data.pipeline.Variant;
+import uk.ac.ebi.eva.commons.models.data.Variant;
 import uk.ac.ebi.eva.commons.models.data.VariantType;
 import uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.HgvsMongo;
 import uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantAt;
@@ -54,10 +54,10 @@ public class SimplifiedVariant {
     private String chromosome;
 
     @Field(START_FIELD)
-    private Long start;
+    private int start;
 
     @Field(END_FIELD)
-    private Long end;
+    private int end;
 
     @Field(LENGTH_FIELD)
     private int length;
@@ -78,7 +78,7 @@ public class SimplifiedVariant {
         //Empty constructor for spring
     }
 
-    public SimplifiedVariant(VariantType variantType, String chromosome, Long start, Long end, int length,
+    public SimplifiedVariant(VariantType variantType, String chromosome, int start, int end, int length,
                              String reference, String alternate, Map<String, Set<String>> hgvs) {
         this.id = buildVariantId(chromosome, start, reference, alternate);
         this.variantType = variantType;
@@ -104,11 +104,11 @@ public class SimplifiedVariant {
         return chromosome;
     }
 
-    public Long getStart() {
+    public int getStart() {
         return start;
     }
 
-    public Long getEnd() {
+    public int getEnd() {
         return end;
     }
 

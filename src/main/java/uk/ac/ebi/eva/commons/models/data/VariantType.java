@@ -21,7 +21,8 @@ package uk.ac.ebi.eva.commons.models.data;
  * <a href="http://www.sequenceontology.org/browser/current_release/term/SO:0001537">Structural variant</a>
  * and <a href="http://www.sequenceontology.org/browser/current_release/term/SO:0001019">Copy number variation</a>.
  */
-public enum VariantType {
+public enum VariantType
+{
 
     /**
      * SO:0001483 - SNVs involve a single nucleotide, without changes in length
