@@ -24,3 +24,8 @@ UnknownJobException - UnknownJobException
 VariantSourceEntityMongoWriter - VariantSourceMongoWriter
 VariantMongoWriter - VariantMongoWriter
 JobExecutionApplicationListener - JobExecutionApplicationListener
+VariantAggregatedVcfFactory - VariantAggregatedVcfFactory
+VariantVcfFactory - VariantVcfFactory
+VariantVcfExacFactory - VariantVcfExacFactory
+VariantVcfEVSFactory - VariantVcfEVSFactory
+

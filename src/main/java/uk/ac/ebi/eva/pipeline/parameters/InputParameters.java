@@ -15,11 +15,11 @@
  */
 package uk.ac.ebi.eva.pipeline.parameters;
 
-import org.opencb.biodata.models.variant.VariantSource;
-import org.opencb.biodata.models.variant.VariantStudy;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import uk.ac.ebi.eva.commons.core.models.Aggregation;
+import uk.ac.ebi.eva.commons.core.models.StudyType;
 
 /**
  * Service that holds access to Job input parameters.
@@ -55,7 +55,7 @@ public class InputParameters {
     private String studyName;
 
     @Value(PARAMETER + JobParametersNames.INPUT_STUDY_TYPE + END)
-    private VariantStudy.StudyType studyType;
+    private StudyType studyType;
 
     @Value(PARAMETER + JobParametersNames.INPUT_VCF_AGGREGATION_MAPPING_PATH + OR_NULL)
     private String aggregatedMappingFile;
@@ -64,8 +64,8 @@ public class InputParameters {
         return vcf;
     }
 
-    public VariantSource.Aggregation getVcfAggregation() {
-        return VariantSource.Aggregation.valueOf(vcfAggregation);
+    public Aggregation getVcfAggregation() {
+        return Aggregation.valueOf(vcfAggregation);
     }
 
     public String getStudyId() {
@@ -80,7 +80,7 @@ public class InputParameters {
         return studyName;
     }
 
-    public VariantStudy.StudyType getStudyType() {
+    public StudyType getStudyType() {
         return studyType;
     }
 
