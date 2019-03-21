@@ -18,7 +18,6 @@ package uk.ac.ebi.eva.pipeline.model;
 
 import org.junit.Test;
 
-import uk.ac.ebi.eva.commons.models.data.Variant;
 import uk.ac.ebi.eva.pipeline.io.mappers.VariantVcfFactory;
 
 import java.util.List;

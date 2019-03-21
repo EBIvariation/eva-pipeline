@@ -16,8 +16,6 @@
  */
 package uk.ac.ebi.eva.pipeline.io.mappers;
 
-import uk.ac.ebi.eva.commons.models.data.Variant;
-import uk.ac.ebi.eva.commons.models.data.VariantSourceEntry;
 import uk.ac.ebi.eva.commons.models.data.VariantStats;
 import uk.ac.ebi.eva.utils.FileUtils;
 

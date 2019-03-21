@@ -17,8 +17,6 @@ package uk.ac.ebi.eva.pipeline.io.mappers;
 
 import org.springframework.batch.item.file.LineMapper;
 
-import uk.ac.ebi.eva.commons.models.data.Variant;
-
 import java.util.List;
 
 /**

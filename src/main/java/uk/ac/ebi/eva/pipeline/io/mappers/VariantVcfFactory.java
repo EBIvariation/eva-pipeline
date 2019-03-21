@@ -22,9 +22,6 @@ import org.opencb.biodata.models.variant.VariantFactory;
 import org.opencb.biodata.models.variant.exceptions.NonStandardCompliantSampleField;
 import org.opencb.biodata.models.variant.exceptions.NotAVariantException;
 
-import uk.ac.ebi.eva.commons.models.data.Variant;
-import uk.ac.ebi.eva.commons.models.data.VariantSourceEntry;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;

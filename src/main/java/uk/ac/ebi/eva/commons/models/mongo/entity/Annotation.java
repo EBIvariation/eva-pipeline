@@ -19,7 +19,6 @@ import com.google.common.base.Strings;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
-import uk.ac.ebi.eva.commons.models.data.Variant;
 import uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.ConsequenceType;
 import uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.Xref;
 

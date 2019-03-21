@@ -17,11 +17,6 @@ package uk.ac.ebi.eva.pipeline.io.mappers;
 
 import org.junit.Test;
 
-import uk.ac.ebi.eva.commons.models.data.Variant;
-import uk.ac.ebi.eva.commons.models.data.VariantSourceEntry;
-
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;

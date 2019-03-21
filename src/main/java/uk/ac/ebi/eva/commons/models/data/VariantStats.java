@@ -19,7 +19,10 @@ package uk.ac.ebi.eva.commons.models.data;
 import org.opencb.biodata.models.feature.AllelesCode;
 import org.opencb.biodata.models.feature.Genotype;
 import org.opencb.biodata.models.pedigree.Pedigree;
+import org.opencb.biodata.models.variant.Variant;
 import org.opencb.biodata.models.variant.stats.VariantHardyWeinbergStats;
+import uk.ac.ebi.eva.commons.core.models.IVariantStatistics;
+import uk.ac.ebi.eva.commons.core.models.pipeline.VariantSourceEntry;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -33,13 +36,14 @@ import java.util.Objects;
  * <p>
  * TODO Mendelian errors must be calculated
  */
-public class VariantStats implements IVariantStatistics{
+public class VariantStats implements IVariantStatistics
+{
 
     private String refAllele;
 
     private String altAllele;
 
-    private VariantType variantType;
+    private Variant.VariantType variantType;
 
     private int refAlleleCount;
 
