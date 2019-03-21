@@ -29,6 +29,8 @@ import org.springframework.data.mongodb.core.mapping.MongoMappingContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
+import uk.ac.ebi.eva.commons.models.data.Variant;
+import uk.ac.ebi.eva.commons.models.data.VariantSourceEntry;
 import uk.ac.ebi.eva.commons.models.data.VariantStats;
 import uk.ac.ebi.eva.pipeline.configuration.MongoConfiguration;
 import uk.ac.ebi.eva.pipeline.parameters.MongoConnection;
@@ -40,7 +42,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -147,8 +151,8 @@ public class VariantMongoWriterTest {
     @Test
     public void allFieldsOfVariantShouldBeStored() throws Exception {
         final String chromosome = "12";
-        final long start = 3;
-        final long end = 4;
+        final int start = 3;
+        final int end = 4;
         final String reference = "A";
         final String alternate = "T";
         final String fileId = "fileId";
@@ -247,16 +251,16 @@ public class VariantMongoWriterTest {
         assertNull(storedVariant.get("ids"));
     }
 
-    private Variant buildVariant(String chromosome, long start, long end, String reference, String alternate,
+    private Variant buildVariant(String chromosome, int start, int end, String reference, String alternate,
                                  String fileId, String studyId) {
         Variant variant = new Variant(chromosome, start, end, reference, alternate);
 
-//        Map<String, VariantSourceEntry> sourceEntries = new LinkedHashMap<>();
+        Map<String, VariantSourceEntry> sourceEntries = new LinkedHashMap<>();
         VariantSourceEntry variantSourceEntry = new VariantSourceEntry(fileId, studyId);
         variantSourceEntry.setCohortStats("cohortStats",
-                new VariantStats(reference, alternate, VariantType.SNV));
-//        sourceEntries.put("variant", variantSourceEntry);
-        variant.addSourceEntry(variantSourceEntry);
+                new VariantStats(reference, alternate, Variant.VariantType.SNV));
+        sourceEntries.put("variant", variantSourceEntry);
+        variant.setSourceEntries(sourceEntries);
 
         return variant;
     }

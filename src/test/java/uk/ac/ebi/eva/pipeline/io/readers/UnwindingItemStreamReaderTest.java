@@ -23,6 +23,8 @@ import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.file.FlatFileParseException;
 import org.springframework.batch.test.MetaDataInstanceFactory;
 
+import uk.ac.ebi.eva.commons.models.data.Variant;
+import uk.ac.ebi.eva.commons.models.data.VariantSourceEntry;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
 
@@ -111,7 +113,7 @@ public class UnwindingItemStreamReaderTest {
         // consume the reader and check that the variants and the VariantSource have meaningful data
         while ((variant = reader.read()) != null) {
             assertTrue(variant.getSourceEntries().size() > 0);
-            VariantSourceEntry sourceEntry = variant.getSourceEntries().iterator().next();
+            VariantSourceEntry sourceEntry = variant.getSourceEntries().entrySet().iterator().next().getValue();
             assertTrue(sourceEntry.getSamplesData().size() > 0);
 
             count++;

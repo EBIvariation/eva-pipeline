@@ -19,6 +19,9 @@ import org.junit.Test;
 import org.opencb.biodata.models.feature.Genotype;
 import org.opencb.commons.test.GenericTest;
 
+import uk.ac.ebi.eva.commons.models.data.Variant;
+import uk.ac.ebi.eva.commons.models.data.VariantSourceEntry;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;

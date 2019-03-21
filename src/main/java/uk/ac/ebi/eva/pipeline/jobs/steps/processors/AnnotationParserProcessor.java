@@ -17,7 +17,7 @@ package uk.ac.ebi.eva.pipeline.jobs.steps.processors;
 
 import org.springframework.batch.item.ItemProcessor;
 
-import uk.ac.ebi.eva.commons.core.models.Annotation;
+import uk.ac.ebi.eva.commons.models.mongo.entity.Annotation;
 import uk.ac.ebi.eva.pipeline.io.VepProcess;
 import uk.ac.ebi.eva.pipeline.io.mappers.AnnotationLineMapper;
 import uk.ac.ebi.eva.pipeline.parameters.AnnotationParameters;

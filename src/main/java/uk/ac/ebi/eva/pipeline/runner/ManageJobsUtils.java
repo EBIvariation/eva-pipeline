@@ -20,7 +20,8 @@ import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.repository.JobRepository;
-import uk.ac.ebi.eva.commons.batch.exception.NoPreviousJobExecutionException;
+
+import uk.ac.ebi.eva.pipeline.runner.exceptions.NoPreviousJobExecutionException;
 
 import java.util.Date;
 
@@ -30,8 +31,7 @@ import java.util.Date;
 public class ManageJobsUtils {
 
     public static void markLastJobAsFailed(JobRepository jobRepository, String jobName, JobParameters
-            jobParameters) throws NoPreviousJobExecutionException
-    {
+            jobParameters) throws NoPreviousJobExecutionException {
         JobExecution lastJobExecution = jobRepository.getLastJobExecution(jobName, jobParameters);
         if (lastJobExecution == null) {
             throw new NoPreviousJobExecutionException(jobName, jobParameters);

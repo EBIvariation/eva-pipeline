@@ -18,6 +18,8 @@ package uk.ac.ebi.eva.pipeline.jobs.steps.processors;
 import org.junit.Before;
 import org.junit.Test;
 
+import uk.ac.ebi.eva.commons.models.data.Variant;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -36,7 +38,7 @@ public class VariantNoAlternateFilterProcessorTest {
     public void shouldAcceptSnv() throws Exception {
         Variant input = new Variant("1", 1000, 1000, "A", "C");
         Variant output = processor.process(input);
-        assertEquals(VariantType.SNV, input.getType());
+        assertEquals(Variant.VariantType.SNV, input.getType());
         assertNotNull(output);
         assertEquals(input, output);
     }
@@ -45,7 +47,7 @@ public class VariantNoAlternateFilterProcessorTest {
     public void shouldAcceptMnv() throws Exception {
         Variant input = new Variant("1", 1000, 1002, "ATG", "CGT");
         Variant output = processor.process(input);
-        assertEquals(VariantType.MNV, input.getType());
+        assertEquals(Variant.VariantType.MNV, input.getType());
         assertNotNull(output);
         assertEquals(input, output);
     }
@@ -54,7 +56,7 @@ public class VariantNoAlternateFilterProcessorTest {
     public void shouldAcceptIndel() throws Exception {
         Variant input = new Variant("1", 1000, 1001, "AT", "T");
         Variant output = processor.process(input);
-        assertEquals(VariantType.INDEL, input.getType());
+        assertEquals(Variant.VariantType.INDEL, input.getType());
         assertNotNull(output);
         assertEquals(input, output);
     }
@@ -64,7 +66,7 @@ public class VariantNoAlternateFilterProcessorTest {
         Variant input = new Variant("1", 1000, 1059,
                                     "ATATATATATATATATATATATATATATATATATATATATATATATATATATATATATAT", "T");
         Variant output = processor.process(input);
-        assertEquals(VariantType.SV, input.getType());
+        assertEquals(Variant.VariantType.SV, input.getType());
         assertNotNull(output);
         assertEquals(input, output);
     }
@@ -73,7 +75,7 @@ public class VariantNoAlternateFilterProcessorTest {
     public void shouldRejectNoAlternateVariants() throws Exception {
         Variant input = new Variant("1", 1000, 1000, "A", ".");
         Variant output = processor.process(input);
-        assertEquals(VariantType.NO_ALTERNATE, input.getType());
+        assertEquals(Variant.VariantType.NO_ALTERNATE, input.getType());
         assertNull(output);
     }
 

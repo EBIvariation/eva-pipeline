@@ -25,6 +25,8 @@ import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
+import uk.ac.ebi.eva.commons.models.data.Variant;
+import uk.ac.ebi.eva.commons.models.data.VariantSourceEntry;
 import uk.ac.ebi.eva.commons.models.mongo.entity.VariantDocument;
 import uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.HgvsMongo;
 import uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantSourceEntryMongo;
@@ -54,7 +56,7 @@ public class VariantToDBObjectConverterTest {
         Set<VariantSourceEntryMongo> variantSources = variantSource == null ? null :
                 Collections.singleton(variantSource);
         return new VariantDocument(
-                VariantType.SNV,
+                Variant.VariantType.SNV,
                 "1",
                 1000,
                 1000,

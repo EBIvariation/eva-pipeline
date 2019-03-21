@@ -16,16 +16,15 @@
 package uk.ac.ebi.eva.pipeline.io.readers;
 
 import org.opencb.biodata.formats.variant.vcf4.io.VariantVcfReader;
+import org.opencb.biodata.models.variant.VariantSource;
+import org.opencb.biodata.models.variant.VariantStudy;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.item.ItemStreamException;
 import org.springframework.batch.item.file.ResourceAwareItemReaderItemStream;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 
-import uk.ac.ebi.eva.commons.core.models.Aggregation;
-import uk.ac.ebi.eva.commons.core.models.StudyType;
-import uk.ac.ebi.eva.commons.core.models.VariantSource;
-import uk.ac.ebi.eva.commons.mongodb.entities.VariantSourceMongo;
+import uk.ac.ebi.eva.commons.models.data.VariantSourceEntity;
 import uk.ac.ebi.eva.pipeline.runner.exceptions.DuplicateSamplesFoundException;
 
 import java.io.File;
@@ -55,7 +54,7 @@ import java.util.List;
  * <p>
  * Look at the test to see how is this checked.
  */
-public class VcfHeaderReader implements ResourceAwareItemReaderItemStream<VariantSourceMongo> {
+public class VcfHeaderReader implements ResourceAwareItemReaderItemStream<VariantSourceEntity> {
 
     /**
      * The header of the VCF can be retrieved using `source.getMetadata().get(VARIANT_FILE_HEADER_KEY)`.
@@ -74,9 +73,9 @@ public class VcfHeaderReader implements ResourceAwareItemReaderItemStream<Varian
                            String fileId,
                            String studyId,
                            String studyName,
-                           StudyType type,
-                           Aggregation aggregation) {
-        this(file, new VariantSource(fileId, file.getName(), studyId, studyName, type, aggregation, null, null, null, null));
+                           VariantStudy.StudyType type,
+                           VariantSource.Aggregation aggregation) {
+        this(file, new VariantSource(file.getName(), fileId, studyId, studyName, type, aggregation));
     }
 
     public VcfHeaderReader(File file, VariantSource source) {
@@ -96,7 +95,7 @@ public class VcfHeaderReader implements ResourceAwareItemReaderItemStream<Varian
      * read one VariantSourceEntity from a VCF
      */
     @Override
-    public VariantSourceMongo read() throws Exception {
+    public VariantSourceEntity read() throws Exception {
         if (readAlreadyDone) {
             return null;
         } else {
@@ -105,7 +104,7 @@ public class VcfHeaderReader implements ResourceAwareItemReaderItemStream<Varian
         }
     }
 
-    private VariantSourceMongo doRead() throws DuplicateSamplesFoundException {
+    private VariantSourceEntity doRead() throws DuplicateSamplesFoundException {
         if (variantReader == null) {
             throw new IllegalStateException("The method VcfHeaderReader.open() should be called before reading");
         }
@@ -125,7 +124,7 @@ public class VcfHeaderReader implements ResourceAwareItemReaderItemStream<Varian
         if (!duplicateSampleNames.isEmpty()) {
             throw new DuplicateSamplesFoundException(duplicateSampleNames);
         }
-        return new VariantSourceMongo(source);
+        return new VariantSourceEntity(source);
     }
 
     @Override

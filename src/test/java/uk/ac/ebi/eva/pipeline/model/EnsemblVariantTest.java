@@ -18,6 +18,7 @@ package uk.ac.ebi.eva.pipeline.model;
 
 import org.junit.Test;
 
+import uk.ac.ebi.eva.commons.models.data.Variant;
 import uk.ac.ebi.eva.pipeline.io.mappers.VariantVcfFactory;
 
 import java.util.List;
@@ -78,7 +79,7 @@ public class EnsemblVariantTest {
         List<Variant> result = factory.create(FILE_ID, STUDY_ID, line);
         assertEquals(1, result.size());
 
-        long start = result.get(0).getStart();
+        int start = result.get(0).getStart();
         String reference = result.get(0).getReference();
         String alternate = result.get(0).getAlternate();
 
@@ -99,7 +100,7 @@ public class EnsemblVariantTest {
         List<Variant> result = factory.create(FILE_ID, STUDY_ID, line);
         assertEquals(1, result.size());
 
-        long start = result.get(0).getStart();
+        int start = result.get(0).getStart();
         String reference = result.get(0).getReference();
         String alternate = result.get(0).getAlternate();
 
