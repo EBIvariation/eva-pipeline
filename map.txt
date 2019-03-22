@@ -18,9 +18,6 @@ UnwindingItemReader - UnwindingItemReader
 UnwindingItemStreamReader - UnwindingItemStreamReader
 AggregatedVcfLineMapper - AggregatedVcfLineMapper
 FeatureCoordinates - FeatureCoordinates
-NoJobToExecuteException - NoJobToExecuteException
-NoPreviousJobExecutionException - NoPreviousJobExecutionException
-UnknownJobException - UnknownJobException
 VariantSourceEntityMongoWriter - VariantSourceMongoWriter
 VariantMongoWriter - VariantMongoWriter
 JobExecutionApplicationListener - JobExecutionApplicationListener
@@ -29,3 +26,6 @@ VariantVcfFactory - VariantVcfFactory
 VariantVcfExacFactory - VariantVcfExacFactory
 VariantVcfEVSFactory - VariantVcfEVSFactory
 
+NoJobToExecuteException - NoJobToExecuteException
+UnknownJobException - UnknownJobException
+NoPreviousJobExecutionException - NoPreviousJobExecutionException
