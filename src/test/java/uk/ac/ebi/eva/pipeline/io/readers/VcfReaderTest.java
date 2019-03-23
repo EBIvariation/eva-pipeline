@@ -7,8 +7,6 @@ import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.item.file.FlatFileParseException;
 import org.springframework.batch.test.MetaDataInstanceFactory;
 
-import uk.ac.ebi.eva.commons.models.data.Variant;
-import uk.ac.ebi.eva.commons.models.data.VariantSourceEntry;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
 
@@ -99,7 +97,7 @@ public class VcfReaderTest {
         while ((variants = vcfReader.read()) != null) {
             assertTrue(variants.size() > 0);
             assertTrue(variants.get(0).getSourceEntries().size() > 0);
-            VariantSourceEntry sourceEntry = variants.get(0).getSourceEntries().entrySet().iterator().next().getValue();
+            VariantSourceEntry sourceEntry = variants.get(0).getSourceEntries().iterator().next();
             assertTrue(sourceEntry.getSamplesData().size() > 0);
 
             count++;

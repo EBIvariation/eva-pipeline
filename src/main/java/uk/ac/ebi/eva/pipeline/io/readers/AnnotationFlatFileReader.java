@@ -18,7 +18,7 @@ package uk.ac.ebi.eva.pipeline.io.readers;
 import org.springframework.batch.item.file.FlatFileItemReader;
 import org.springframework.core.io.Resource;
 
-import uk.ac.ebi.eva.commons.models.mongo.entity.Annotation;
+import uk.ac.ebi.eva.commons.core.models.Annotation;
 import uk.ac.ebi.eva.pipeline.io.GzipLazyResource;
 import uk.ac.ebi.eva.pipeline.io.mappers.AnnotationLineMapper;
 

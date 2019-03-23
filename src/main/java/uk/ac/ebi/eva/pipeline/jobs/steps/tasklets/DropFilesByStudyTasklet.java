@@ -31,7 +31,7 @@ import org.springframework.data.mongodb.core.query.Query;
 import uk.ac.ebi.eva.pipeline.parameters.DatabaseParameters;
 import uk.ac.ebi.eva.pipeline.parameters.InputParameters;
 
-import static uk.ac.ebi.eva.commons.models.data.VariantSourceEntity.STUDYID_FIELD;
+import static uk.ac.ebi.eva.commons.mongodb.entities.VariantSourceMongo.STUDYID_FIELD;
 
 /**
  * Tasklet that removes from mongo all the files that belong to a given study to delete.

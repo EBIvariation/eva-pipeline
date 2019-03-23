@@ -21,10 +21,9 @@ import org.opencb.biodata.models.variant.annotation.ConsequenceTypeMappings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.item.file.LineMapper;
+import uk.ac.ebi.eva.commons.core.models.Annotation;
+import uk.ac.ebi.eva.commons.core.models.ConsequenceType;
 
-import uk.ac.ebi.eva.commons.models.mongo.entity.Annotation;
-import uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.ConsequenceType;
-import uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.Score;
 
 import java.util.Arrays;
 import java.util.HashMap;

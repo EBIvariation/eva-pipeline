@@ -26,8 +26,6 @@ import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-import uk.ac.ebi.eva.commons.models.data.Variant;
-import uk.ac.ebi.eva.commons.models.data.VariantSourceEntry;
 import uk.ac.ebi.eva.commons.models.data.VariantStats;
 import uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantStatsMongo;
 import uk.ac.ebi.eva.test.configuration.MongoOperationConfiguration;
@@ -64,7 +62,7 @@ public class VariantStatsToDBObjectConverterTest {
         genotypes.append("1/1", 10);
         mongoStats.append(VariantStatsMongo.NUMGT_FIELD, genotypes);
 
-        VariantStats stats = new VariantStats(null, -1, null, null, Variant.VariantType.SNV, 0.1f, 0.01f, "A", "A/A",
+        VariantStats stats = new VariantStats(null, -1, null, null, VariantType.SNV, 0.1f, 0.01f, "A", "A/A",
                 10, 5, -1, -1, -1, -1, -1);
         stats.addGenotype(new Genotype("0/0"), 100);
         stats.addGenotype(new Genotype("0/1"), 50);

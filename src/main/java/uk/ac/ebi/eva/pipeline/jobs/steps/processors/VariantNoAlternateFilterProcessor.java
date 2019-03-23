@@ -19,8 +19,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.item.ItemProcessor;
 
-import uk.ac.ebi.eva.commons.models.data.Variant;
-
 /**
  * Filters out variants reporting no alternate allele.
  */
@@ -30,7 +28,7 @@ public class VariantNoAlternateFilterProcessor implements ItemProcessor<Variant,
 
     @Override
     public Variant process(Variant item) throws Exception {
-        if (item.getType() != Variant.VariantType.NO_ALTERNATE) {
+        if (item.getType() != VariantType.NO_ALTERNATE) {
             return item;
         } else {
             logger.warn("Variant {}:{}:{}>{} ignored due to no alternate allele reported",

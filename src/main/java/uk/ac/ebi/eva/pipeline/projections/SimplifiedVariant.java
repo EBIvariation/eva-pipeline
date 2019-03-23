@@ -13,30 +13,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.ac.ebi.eva.commons.models.mongo.entity.projections;
+package uk.ac.ebi.eva.pipeline.projections;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Field;
-import uk.ac.ebi.eva.commons.models.data.Variant;
-import uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.HgvsMongo;
-import uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantAt;
+import uk.ac.ebi.eva.commons.core.models.VariantType;
+import uk.ac.ebi.eva.commons.mongodb.entities.subdocuments.HgvsMongo;
+import uk.ac.ebi.eva.commons.mongodb.entities.subdocuments.VariantAtMongo;
 
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import static uk.ac.ebi.eva.commons.models.mongo.entity.VariantDocument.ALTERNATE_FIELD;
-import static uk.ac.ebi.eva.commons.models.mongo.entity.VariantDocument.AT_FIELD;
-import static uk.ac.ebi.eva.commons.models.mongo.entity.VariantDocument.CHROMOSOME_FIELD;
-import static uk.ac.ebi.eva.commons.models.mongo.entity.VariantDocument.END_FIELD;
-import static uk.ac.ebi.eva.commons.models.mongo.entity.VariantDocument.HGVS_FIELD;
-import static uk.ac.ebi.eva.commons.models.mongo.entity.VariantDocument.LENGTH_FIELD;
-import static uk.ac.ebi.eva.commons.models.mongo.entity.VariantDocument.REFERENCE_FIELD;
-import static uk.ac.ebi.eva.commons.models.mongo.entity.VariantDocument.START_FIELD;
-import static uk.ac.ebi.eva.commons.models.mongo.entity.VariantDocument.TYPE_FIELD;
-import static uk.ac.ebi.eva.commons.models.mongo.entity.VariantDocument.buildVariantId;
-import static uk.ac.ebi.eva.commons.models.mongo.entity.VariantDocument.createHgvsMongo;
-import static uk.ac.ebi.eva.commons.models.mongo.entity.VariantDocument.generateAtField;
+import static uk.ac.ebi.eva.commons.mongodb.entities.VariantMongo.ALTERNATE_FIELD;
+import static uk.ac.ebi.eva.commons.mongodb.entities.VariantMongo.AT_FIELD;
+import static uk.ac.ebi.eva.commons.mongodb.entities.VariantMongo.CHROMOSOME_FIELD;
+import static uk.ac.ebi.eva.commons.mongodb.entities.VariantMongo.END_FIELD;
+import static uk.ac.ebi.eva.commons.mongodb.entities.VariantMongo.HGVS_FIELD;
+import static uk.ac.ebi.eva.commons.mongodb.entities.VariantMongo.LENGTH_FIELD;
+import static uk.ac.ebi.eva.commons.mongodb.entities.VariantMongo.REFERENCE_FIELD;
+import static uk.ac.ebi.eva.commons.mongodb.entities.VariantMongo.START_FIELD;
+import static uk.ac.ebi.eva.commons.mongodb.entities.VariantMongo.TYPE_FIELD;
+import static uk.ac.ebi.eva.commons.mongodb.entities.VariantMongo.buildVariantId;
+import static uk.ac.ebi.eva.commons.mongodb.entities.VariantMongo.generateAtField;
+import static uk.ac.ebi.eva.commons.mongodb.entities.subdocuments.HgvsMongo.createHgvsMongo;
 
 /**
  * Simplified representation of variant to be used when inserting or updating a variant
@@ -47,16 +47,16 @@ public class SimplifiedVariant {
     private String id;
 
     @Field(TYPE_FIELD)
-    private Variant.VariantType variantType;
+    private VariantType variantType;
 
     @Field(CHROMOSOME_FIELD)
     private String chromosome;
 
     @Field(START_FIELD)
-    private int start;
+    private long start;
 
     @Field(END_FIELD)
-    private int end;
+    private long end;
 
     @Field(LENGTH_FIELD)
     private int length;
@@ -68,16 +68,16 @@ public class SimplifiedVariant {
     private String alternate;
 
     @Field(AT_FIELD)
-    private VariantAt at;
+    private VariantAtMongo at;
 
     @Field(HGVS_FIELD)
     private Set<HgvsMongo> hgvs;
 
-    SimplifiedVariant(){
-        //Empty constructor for spring
+    SimplifiedVariant() {
+        this(null, null, -1, -1, -1, null, null, null);
     }
 
-    public SimplifiedVariant(Variant.VariantType variantType, String chromosome, int start, int end, int length,
+    public SimplifiedVariant(VariantType variantType, String chromosome, long start, long end, int length,
                              String reference, String alternate, Map<String, Set<String>> hgvs) {
         this.id = buildVariantId(chromosome, start, reference, alternate);
         this.variantType = variantType;
@@ -88,14 +88,13 @@ public class SimplifiedVariant {
         this.reference = reference;
         this.alternate = alternate;
         this.at = generateAtField(chromosome, start);
-        this.hgvs = createHgvsMongo(hgvs);
+        this.hgvs = new HashSet<>();
+        if (hgvs != null && !hgvs.isEmpty()) {
+            this.hgvs.addAll(createHgvsMongo(hgvs));
+        }
     }
 
-    public String getId() {
-        return id;
-    }
-
-    public Variant.VariantType getVariantType() {
+    public VariantType getVariantType() {
         return variantType;
     }
 
@@ -103,11 +102,11 @@ public class SimplifiedVariant {
         return chromosome;
     }
 
-    public int getStart() {
+    public long getStart() {
         return start;
     }
 
-    public int getEnd() {
+    public long getEnd() {
         return end;
     }
 
@@ -123,7 +122,7 @@ public class SimplifiedVariant {
         return alternate;
     }
 
-    public VariantAt getAt() {
+    public VariantAtMongo getAt() {
         return at;
     }
 

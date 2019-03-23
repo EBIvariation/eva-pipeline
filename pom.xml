@@ -24,6 +24,27 @@
     </properties>
 
     <dependencies>
+        <!-- variation-commons -->
+        <dependency>
+            <groupId>uk.ac.ebi.eva</groupId>
+            <artifactId>variation-commons-batch</artifactId>
+            <version>0.6</version>
+        </dependency>
+        <dependency>
+            <groupId>uk.ac.ebi.eva</groupId>
+            <artifactId>variation-commons-core</artifactId>
+            <version>0.6</version>
+        </dependency>
+        <dependency>
+            <groupId>uk.ac.ebi.eva</groupId>
+            <artifactId>variation-commons-jpa</artifactId>
+            <version>0.6</version>
+        </dependency>
+        <dependency>
+            <groupId>uk.ac.ebi.eva</groupId>
+            <artifactId>variation-commons-mongodb</artifactId>
+            <version>0.6</version>
+        </dependency>
         <!-- Spring -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

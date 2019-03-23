@@ -84,8 +84,8 @@ public class VepAnnotationProcessor implements ItemProcessor<List<EnsemblVariant
     private String getVariantInVepInputFormat(EnsemblVariant ensemblVariant) {
         return String.join("\t",
                            ensemblVariant.getChr(),
-                           Integer.toString(ensemblVariant.getStart()),
-                           Integer.toString(ensemblVariant.getEnd()),
+                           Long.toString(ensemblVariant.getStart()),
+                           Long.toString(ensemblVariant.getEnd()),
                            ensemblVariant.getRefAlt(),
                            ensemblVariant.getStrand());
     }
