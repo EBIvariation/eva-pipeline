@@ -15,6 +15,8 @@
  */
 package uk.ac.ebi.eva.pipeline.io.readers;
 
+import com.google.common.base.Splitter;
+import org.opencb.biodata.formats.variant.vcf4.*;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.item.ItemStreamException;
 import org.springframework.batch.item.file.ResourceAwareItemReaderItemStream;
@@ -26,10 +28,15 @@ import uk.ac.ebi.eva.commons.core.models.StudyType;
 import uk.ac.ebi.eva.commons.core.models.VariantSource;
 import uk.ac.ebi.eva.commons.mongodb.entities.VariantSourceMongo;
 import uk.ac.ebi.eva.pipeline.runner.exceptions.DuplicateSamplesFoundException;
+import uk.ac.ebi.eva.pipeline.runner.exceptions.FileFormatException;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.zip.GZIPInputStream;
 
 /**
  * Before providing the VariantSource as argument to a VcfReader (that uses the VariantVcfFactory inside
@@ -61,11 +68,9 @@ public class VcfHeaderReader implements ResourceAwareItemReaderItemStream<Varian
 
     private boolean readAlreadyDone;
 
-    private VariantVcfReader variantReader;
-
-    private Resource resource;
-
     private String fileId;
+
+    private String fileName;
 
     private String studyId;
 
@@ -75,7 +80,17 @@ public class VcfHeaderReader implements ResourceAwareItemReaderItemStream<Varian
 
     private Aggregation aggregation;
 
-    private final VariantSource source;
+    private Date date;
+
+    private Map<String, Integer> samplesPosition;
+
+    private Map<String, Object> metadata;
+
+    private Resource resource;
+
+    private BufferedReader reader;
+
+    private Vcf4 vcf4;
 
     public VcfHeaderReader(File file,
                            String fileId,
@@ -83,21 +98,22 @@ public class VcfHeaderReader implements ResourceAwareItemReaderItemStream<Varian
                            String studyName,
                            StudyType type,
                            Aggregation aggregation) {
-        this.readAlreadyDone = false;
         this.resource = new FileSystemResource(file);
-        this.fileId=fileId;
-        this.
-
-//      initialise variantReader
-        String resourcePath = getResourcePath();
-        variantReader = new VariantVcfReader(source, resourcePath);
-        this(file, new VariantSource(fileId, file.getName(), studyId, studyName, type, aggregation, null, null, null, null));
+        this.fileName = file.getName();
+        this.fileId = fileId;
+        this.studyId = studyId;
+        this.studyName = studyName;
+        this.type = type;
+        this.aggregation = aggregation;
+        this.readAlreadyDone = false;
+        metadata = new HashMap<>();
+        samplesPosition = new HashMap<>();
     }
 
     @Override
     public void setResource(Resource resource) {
         this.resource = resource;
-//        source.setFileName(resource.getFilename());
+        this.fileName = resource.getFilename();
     }
 
     /**
@@ -115,15 +131,21 @@ public class VcfHeaderReader implements ResourceAwareItemReaderItemStream<Varian
     }
 
     private VariantSourceMongo doRead() throws DuplicateSamplesFoundException {
-        if (variantReader == null) {
-            throw new IllegalStateException("The method VcfHeaderReader.open() should be called before reading");
+        if (reader == null) {
+            throw new IllegalStateException("The BufferedReader should be opened before reading");
         }
-        variantReader.pre();
-        source.addMetadata(VARIANT_FILE_HEADER_KEY, variantReader.getHeader());
 
-        List<String> sampleNames = new ArrayList<String>(variantReader.getSampleNames());
-        HashSet<String> uniqueSampleNames = new HashSet<String>(sampleNames.size());
-        List<String> duplicateSampleNames = new ArrayList<String>();
+        try {
+            processHeader();
+        }
+        catch (Exception ex) {
+            Logger.getLogger(uk.ac.ebi.eva.pipeline.io.readers.VcfHeaderReader.class.getName()).log(Level.SEVERE, null, ex);
+
+        }
+
+        List<String> sampleNames = new ArrayList<>(vcf4.getSampleNames());
+        HashSet<String> uniqueSampleNames = new HashSet<>(sampleNames.size());
+        List<String> duplicateSampleNames = new ArrayList<>();
 
         for (String sample : sampleNames) {
             boolean isDuplicate = !uniqueSampleNames.add(sample);
@@ -134,44 +156,93 @@ public class VcfHeaderReader implements ResourceAwareItemReaderItemStream<Varian
         if (!duplicateSampleNames.isEmpty()) {
             throw new DuplicateSamplesFoundException(duplicateSampleNames);
         }
+        VariantSource source = new VariantSource(fileId, fileName, studyId, studyName, type, aggregation, null, samplesPosition, metadata, null);
         return new VariantSourceMongo(source);
     }
 
+    private void processHeader() throws IOException, FileFormatException {
+        boolean header = false;
+        String line;
+        vcf4 = new Vcf4();
+        while ((line = reader.readLine()) != null && line.startsWith("#")) {
+            if (line.startsWith("##fileformat")) {
+                if (line.split("=").length > 1) {
+                    vcf4.setFileFormat(line.split("=")[1].trim());
+                } else {
+                    throw new FileFormatException("");
+                }
+
+            } else if (line.startsWith("##INFO")) {
+                VcfInfoHeader vcfInfo = new VcfInfoHeader(line);
+                vcf4.getInfo().put(vcfInfo.getId(), vcfInfo);
+
+            } else if (line.startsWith("##FILTER")) {
+                VcfFilterHeader vcfFilter = new VcfFilterHeader(line);
+                vcf4.getFilter().put(vcfFilter.getId(), vcfFilter);
+
+            } else if (line.startsWith("##FORMAT")) {
+                VcfFormatHeader vcfFormat = new VcfFormatHeader(line);
+                vcf4.getFormat().put(vcfFormat.getId(), vcfFormat);
+
+            } else if (line.startsWith("##ALT")) {
+                VcfAlternateHeader vcfAlternateHeader = new VcfAlternateHeader(line);
+                vcf4.getAlternate().put(vcfAlternateHeader.getId(), vcfAlternateHeader);
+
+            } else if (line.startsWith("#CHROM")) {
+//               List<String>  headerLine = StringUtils.toList(line.replace("#", ""), "\t");
+                List<String> headerLine = Splitter.on("\t").splitToList(line.replace("#", ""));
+                vcf4.setHeaderLine(headerLine);
+                header = true;
+
+            } else {
+                String[] fields = line.replace("#", "").split("=", 2);
+                vcf4.addMetaInformation(fields[0], fields[1]);
+            }
+        }
+        if (!header) {
+            throw new IOException("VCF lacks a header line (the one starting with \"#CHROM\")");
+        }
+        metadata.put(VARIANT_FILE_HEADER_KEY, vcf4.buildHeader().toString());
+        metadata.put("fileformat", vcf4.getFileFormat());
+        metadata.put("INFO", vcf4.getInfo().values());
+        metadata.put("FILTER", vcf4.getFilter().values());
+        metadata.put("FORMAT", vcf4.getFormat().values());
+        metadata.put("ALT", vcf4.getAlternate().values());
+        for (Map.Entry<String, List<String>> otherMeta : vcf4.getMetaInformation().entrySet()) {
+            metadata.put(otherMeta.getKey(), otherMeta.getValue());
+        }
+        samplesPosition.putAll(vcf4.getSamples());
+    }
+
     @Override
-    public void open(ExecutionContext executionContext) throws ItemStreamException {
+    public void open(ExecutionContext executionContext) throws ItemStreamException{
         readAlreadyDone = false;
-        checkResourceIsProvided();
-
-        doOpen(resourcePath);
-    }
-
-    private void checkResourceIsProvided() {
-        if (resource == null) {
-            throw new ItemStreamException("Resource was not provided.");
+        if(resource == null){
+            throw new ItemStreamException("Resource is not provided");
         }
-    }
 
-    private String getResourcePath() {
         try {
-            return resource.getFile().getAbsolutePath();
-        } catch (IOException e) {
-            throw new ItemStreamException(e);
+            File file = resource.getFile();
+            if (file.getName().endsWith(".gz")) {
+                this.reader = new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(file))));
+            } else {
+                this.reader = Files.newBufferedReader(file.toPath(), Charset.defaultCharset());
+            }
         }
-    }
-
-    private void doOpen(String path) {
-        if (!variantReader.open()) {
-            throw new ItemStreamException("Couldn't open file " + path);
+        catch (IOException e) {
+            throw new ItemStreamException("Invalid Resource, File does not exist");
         }
     }
 
     @Override
-    public void update(ExecutionContext executionContext) throws ItemStreamException {
-    }
+    public void update(ExecutionContext executionContext) throws ItemStreamException {}
 
     @Override
-    public void close() throws ItemStreamException {
-        variantReader.post();
-        variantReader.close();
+    public void close() {
+        try {
+            reader.close();
+        } catch (IOException ex) {
+            Logger.getLogger(uk.ac.ebi.eva.pipeline.io.readers.VcfHeaderReader.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 }
