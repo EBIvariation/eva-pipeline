@@ -18,7 +18,6 @@ package uk.ac.ebi.eva.pipeline.jobs.steps.tasklets;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.opencb.biodata.models.variant.VariantSource;
 import org.opencb.biodata.models.variant.stats.VariantSourceStats;
 import org.opencb.biodata.models.variant.stats.VariantStats;
 import org.opencb.datastore.core.ObjectMap;
@@ -40,6 +39,7 @@ import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import uk.ac.ebi.eva.commons.core.models.VariantSource;
 import uk.ac.ebi.eva.pipeline.parameters.DatabaseParameters;
 import uk.ac.ebi.eva.pipeline.parameters.InputParameters;
 import uk.ac.ebi.eva.pipeline.parameters.MongoConnection;
@@ -141,12 +141,13 @@ public class LoadStatisticsTasklet implements Tasklet {
 
     private VariantSource getVariantSource() {
         return new VariantSource(
-                    Paths.get(inputParameters.getVcf()).getFileName().toString(),
                     inputParameters.getVcfId(),
+                    Paths.get(inputParameters.getVcf()).getFileName().toString(),
                     inputParameters.getStudyId(),
                     inputParameters.getStudyName(),
                     inputParameters.getStudyType(),
-                    inputParameters.getVcfAggregation());
+                    inputParameters.getVcfAggregation(),
+                null, null, null, null);
     }
     private VariantDBAdaptor getDbAdaptor() throws UnknownHostException, IllegalOpenCGACredentialsException {
         MongoCredentials credentials = getMongoCredentials();
