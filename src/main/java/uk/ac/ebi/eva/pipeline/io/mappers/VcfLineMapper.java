@@ -16,6 +16,8 @@
 package uk.ac.ebi.eva.pipeline.io.mappers;
 
 import org.springframework.batch.item.file.LineMapper;
+import uk.ac.ebi.eva.commons.core.models.factories.VariantGenotypedVcfFactory;
+import uk.ac.ebi.eva.commons.core.models.factories.VariantVcfFactory;
 import uk.ac.ebi.eva.commons.core.models.pipeline.Variant;
 
 import java.util.List;
@@ -35,7 +37,7 @@ public class VcfLineMapper implements LineMapper<List<Variant>> {
     public VcfLineMapper(String fileId, String studyId) {
         this.fileId = fileId;
         this.studyId = studyId;
-        this.factory = new VariantVcfFactory();
+        this.factory = new VariantGenotypedVcfFactory();
     }
 
     @Override
