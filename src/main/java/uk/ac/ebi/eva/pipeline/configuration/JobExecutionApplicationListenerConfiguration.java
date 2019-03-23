@@ -17,8 +17,7 @@ package uk.ac.ebi.eva.pipeline.configuration;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import uk.ac.ebi.eva.pipeline.runner.JobExecutionApplicationListener;
+import uk.ac.ebi.eva.commons.batch.job.JobExecutionApplicationListener;
 
 /**
  * This configuration adds to the application context a JobExecutionApplicationListener that holds the state of the
