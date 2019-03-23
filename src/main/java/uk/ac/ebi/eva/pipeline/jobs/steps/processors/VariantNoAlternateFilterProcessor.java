@@ -18,6 +18,8 @@ package uk.ac.ebi.eva.pipeline.jobs.steps.processors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.item.ItemProcessor;
+import uk.ac.ebi.eva.commons.core.models.VariantType;
+import uk.ac.ebi.eva.commons.core.models.pipeline.Variant;
 
 /**
  * Filters out variants reporting no alternate allele.

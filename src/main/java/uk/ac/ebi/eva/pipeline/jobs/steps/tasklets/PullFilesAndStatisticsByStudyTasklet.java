@@ -33,9 +33,9 @@ import org.springframework.data.mongodb.core.query.Update;
 import uk.ac.ebi.eva.pipeline.parameters.DatabaseParameters;
 import uk.ac.ebi.eva.pipeline.parameters.InputParameters;
 
-import static uk.ac.ebi.eva.commons.models.data.VariantSourceEntity.STUDYID_FIELD;
-import static uk.ac.ebi.eva.commons.models.mongo.entity.VariantDocument.FILES_FIELD;
-import static uk.ac.ebi.eva.commons.models.mongo.entity.VariantDocument.STATS_FIELD;
+import static uk.ac.ebi.eva.commons.mongodb.entities.VariantMongo.FILES_FIELD;
+import static uk.ac.ebi.eva.commons.mongodb.entities.VariantMongo.STATISTICS_FIELD;
+import static uk.ac.ebi.eva.commons.mongodb.entities.VariantSourceMongo.STUDYID_FIELD;
 
 /**
  * Tasklet that removes the files and statistics in a variant given a studyId. The id is readed from the jobParameter
@@ -68,7 +68,7 @@ public class PullFilesAndStatisticsByStudyTasklet implements Tasklet {
         Query query = Query.query(Criteria.where(filesStudyIdField).is(studyId));
 
         DBObject containsStudyId = new BasicDBObject(STUDYID_FIELD, studyId);
-        Update update = new Update().pull(FILES_FIELD, containsStudyId).pull(STATS_FIELD, containsStudyId);
+        Update update = new Update().pull(FILES_FIELD, containsStudyId).pull(STATISTICS_FIELD, containsStudyId);
 
         logger.trace("Update operation with Query : {} and Update: {}", query, update);
         WriteResult writeResult = mongoOperations.updateMulti(query, update, dbParameters.getCollectionVariantsName());
