@@ -15,11 +15,11 @@
  */
 package uk.ac.ebi.eva.pipeline.parameters.validation;
 
-import org.opencb.biodata.models.variant.VariantStudy;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersInvalidException;
 import org.springframework.batch.core.JobParametersValidator;
 
+import uk.ac.ebi.eva.commons.core.models.StudyType;
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 
 /**
@@ -34,7 +34,7 @@ public class InputStudyTypeValidator implements JobParametersValidator {
                                                    JobParametersNames.INPUT_STUDY_TYPE);
 
         try {
-            VariantStudy.StudyType.valueOf(parameters.getString(JobParametersNames.INPUT_STUDY_TYPE));
+            StudyType.valueOf(parameters.getString(JobParametersNames.INPUT_STUDY_TYPE));
         } catch (IllegalArgumentException e) {
             throw new JobParametersInvalidException(e.getMessage());
         }

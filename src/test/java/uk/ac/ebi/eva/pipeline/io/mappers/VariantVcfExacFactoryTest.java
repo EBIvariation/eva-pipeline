@@ -16,12 +16,12 @@
 package uk.ac.ebi.eva.pipeline.io.mappers;
 
 import org.junit.Test;
-import org.opencb.biodata.models.feature.Genotype;
+import uk.ac.ebi.eva.commons.core.models.genotype.Genotype;
 import org.opencb.commons.test.GenericTest;
 
-import uk.ac.ebi.eva.commons.models.data.Variant;
-import uk.ac.ebi.eva.commons.models.data.VariantSourceEntry;
-import uk.ac.ebi.eva.commons.models.data.VariantStats;
+import uk.ac.ebi.eva.commons.core.models.pipeline.Variant;
+import uk.ac.ebi.eva.commons.core.models.pipeline.VariantSourceEntry;
+import uk.ac.ebi.eva.commons.core.models.VariantStatistics;
 
 import java.util.HashMap;
 import java.util.List;
@@ -77,7 +77,7 @@ public class VariantVcfExacFactoryTest extends GenericTest {
         genotypes.put(new Genotype("0/1", "G", "T"), 22);
         genotypes.put(new Genotype("1/1", "G", "T"), 0);
 
-        VariantStats stats = sourceEntry.getStats();
+        VariantStatistics stats = sourceEntry.getStats();
         assertEquals(genotypes, stats.getGenotypesCount());
         assertEquals(22, stats.getAltAlleleCount());
         assertEquals(10890 - 22, stats.getRefAlleleCount());

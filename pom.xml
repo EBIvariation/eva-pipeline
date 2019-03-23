@@ -113,6 +113,21 @@
                 </exclusion>
             </exclusions>
         </dependency>
+        <dependency>
+            <groupId>uk.ac.ebi.eva</groupId>
+            <artifactId>variation-commons-mongodb</artifactId>
+            <version>0.7-SNAPSHOT</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/src/test/resources/variation-commons-mongodb-0.7-SNAPSHOT.jar</systemPath>
+
+        </dependency>
+        <dependency>
+            <groupId>uk.ac.ebi.eva</groupId>
+            <artifactId>variation-commons-core</artifactId>
+            <version>0.7-SNAPSHOT</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/src/test/resources/variation-commons-core-0.7-SNAPSHOT.jar</systemPath>
+        </dependency>
     </dependencies>
 
     <build>

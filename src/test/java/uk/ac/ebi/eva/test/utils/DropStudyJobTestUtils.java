@@ -21,9 +21,9 @@ import com.mongodb.DBCollection;
 
 import static org.junit.Assert.assertEquals;
 
-import static uk.ac.ebi.eva.commons.models.data.VariantSourceEntity.STUDYID_FIELD;
-import static uk.ac.ebi.eva.commons.models.mongo.entity.VariantDocument.FILES_FIELD;
-import static uk.ac.ebi.eva.commons.models.mongo.entity.VariantDocument.STATS_FIELD;
+import static org.opencb.opencga.storage.mongodb.variant.DBObjectToVariantConverter.STATS_FIELD;
+import static uk.ac.ebi.eva.commons.mongodb.entities.VariantMongo.FILES_FIELD;
+import static uk.ac.ebi.eva.commons.mongodb.entities.VariantSourceMongo.STUDYID_FIELD;
 
 public class DropStudyJobTestUtils {
 

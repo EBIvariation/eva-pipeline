@@ -20,13 +20,13 @@ import org.springframework.batch.item.data.MongoItemWriter;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.util.Assert;
 
-import uk.ac.ebi.eva.commons.models.data.VariantSourceEntity;
+import uk.ac.ebi.eva.commons.mongodb.entities.VariantSourceMongo;
 import uk.ac.ebi.eva.utils.MongoDBHelper;
 
 /**
- * Write a list of {@link VariantSourceEntity} into MongoDB
+ * Write a list of {@link VariantSourceMongo} into MongoDB
  */
-public class VariantSourceEntityMongoWriter extends MongoItemWriter<VariantSourceEntity> {
+public class VariantSourceEntityMongoWriter extends MongoItemWriter<VariantSourceMongo> {
 
     public static final String UNIQUE_FILE_INDEX_NAME = "unique_file";
 
@@ -49,8 +49,8 @@ public class VariantSourceEntityMongoWriter extends MongoItemWriter<VariantSourc
 
     private void createIndexes() {
         mongoOperations.getCollection(collection).createIndex(
-                new BasicDBObject(VariantSourceEntity.STUDYID_FIELD, 1).append(VariantSourceEntity.FILEID_FIELD, 1)
-                    .append(VariantSourceEntity.FILENAME_FIELD, 1),
+                new BasicDBObject(VariantSourceMongo.STUDYID_FIELD, 1).append(VariantSourceMongo.FILEID_FIELD, 1)
+                    .append(VariantSourceMongo.FILENAME_FIELD, 1),
                 new BasicDBObject(MongoDBHelper.BACKGROUND_INDEX, true).append(MongoDBHelper.UNIQUE_INDEX, true)
                     .append(MongoDBHelper.INDEX_NAME, UNIQUE_FILE_INDEX_NAME));
     }

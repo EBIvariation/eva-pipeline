@@ -16,14 +16,14 @@
 
 package uk.ac.ebi.eva.pipeline.configuration.io.writers;
 
-import org.opencb.biodata.models.variant.VariantSource;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.mongodb.core.MongoOperations;
-import uk.ac.ebi.eva.commons.models.data.Variant;
+import uk.ac.ebi.eva.commons.core.models.Aggregation;
+import uk.ac.ebi.eva.commons.core.models.pipeline.Variant;
 import uk.ac.ebi.eva.pipeline.Application;
 import uk.ac.ebi.eva.pipeline.io.writers.VariantMongoWriter;
 import uk.ac.ebi.eva.pipeline.parameters.DatabaseParameters;
@@ -40,7 +40,7 @@ public class VariantWriterConfiguration {
     public ItemWriter<Variant> variantMongoWriter(InputParameters inputParameters, MongoOperations mongoOperations,
                                                   DatabaseParameters databaseParameters) {
         boolean includeSamples, includeStats;
-        if (VariantSource.Aggregation.NONE.equals(inputParameters.getVcfAggregation())) {
+        if (Aggregation.NONE.equals(inputParameters.getVcfAggregation())) {
             includeSamples = true;
             includeStats = false;
         } else {

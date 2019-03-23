@@ -28,11 +28,11 @@ import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.data.mongodb.core.convert.MongoConverter;
 import org.springframework.util.ClassUtils;
 
-import uk.ac.ebi.eva.commons.models.mongo.entity.Annotation;
-import uk.ac.ebi.eva.commons.models.mongo.entity.VariantDocument;
-import uk.ac.ebi.eva.commons.models.mongo.entity.projections.SimplifiedVariant;
-import uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantAnnotation;
-import uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantSourceEntryMongo;
+import uk.ac.ebi.eva.commons.mongodb.entities.AnnotationMongo;
+import uk.ac.ebi.eva.commons.mongodb.entities.VariantMongo;
+import uk.ac.ebi.eva.commons.mongodb.entities.projections.SimplifiedVariant;
+import uk.ac.ebi.eva.commons.mongodb.entities.subdocuments.AnnotationIndexMongo;
+import uk.ac.ebi.eva.commons.mongodb.entities.subdocuments.VariantSourceEntryMongo;
 import uk.ac.ebi.eva.pipeline.model.EnsemblVariant;
 
 import javax.annotation.PostConstruct;
@@ -42,11 +42,12 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
-import static uk.ac.ebi.eva.commons.models.mongo.entity.VariantDocument.ALTERNATE_FIELD;
-import static uk.ac.ebi.eva.commons.models.mongo.entity.VariantDocument.CHROMOSOME_FIELD;
-import static uk.ac.ebi.eva.commons.models.mongo.entity.VariantDocument.END_FIELD;
-import static uk.ac.ebi.eva.commons.models.mongo.entity.VariantDocument.REFERENCE_FIELD;
-import static uk.ac.ebi.eva.commons.models.mongo.entity.VariantDocument.START_FIELD;
+import static uk.ac.ebi.eva.commons.mongodb.entities.VariantMongo.ALTERNATE_FIELD;
+import static uk.ac.ebi.eva.commons.mongodb.entities.VariantMongo.CHROMOSOME_FIELD;
+import static uk.ac.ebi.eva.commons.mongodb.entities.VariantMongo.END_FIELD;
+import static uk.ac.ebi.eva.commons.mongodb.entities.VariantMongo.FILES_FIELD;
+import static uk.ac.ebi.eva.commons.mongodb.entities.VariantMongo.REFERENCE_FIELD;
+import static uk.ac.ebi.eva.commons.mongodb.entities.VariantMongo.START_FIELD;
 
 /**
  * Mongo variant reader using an ItemReader cursor based. This is speeding up
@@ -57,9 +58,9 @@ import static uk.ac.ebi.eva.commons.models.mongo.entity.VariantDocument.START_FI
 public class VariantsMongoReader
         extends AbstractItemStreamItemReader<List<EnsemblVariant>> implements InitializingBean {
 
-    private static final String STUDY_KEY = VariantDocument.FILES_FIELD + "." + VariantSourceEntryMongo.STUDYID_FIELD;
+    private static final String STUDY_KEY = FILES_FIELD + "." + VariantSourceEntryMongo.STUDYID_FIELD;
 
-    private static final String FILE_KEY = VariantDocument.FILES_FIELD + "." + VariantSourceEntryMongo.FILEID_FIELD;
+    private static final String FILE_KEY = FILES_FIELD + "." + VariantSourceEntryMongo.FILEID_FIELD;
 
     private static final String LAST_READ_TIMESTAMP_KEY = "last_read_timestamp";
 
@@ -110,12 +111,12 @@ public class VariantsMongoReader
 
         if (excludeAnnotated) {
             BasicDBObject exists = new BasicDBObject("$exists", 1);
-            BasicDBObject annotationSubdocument = new BasicDBObject(VariantAnnotation.SO_ACCESSION_FIELD, exists)
-                    .append(Annotation.VEP_VERSION_FIELD, vepVersion)
-                    .append(Annotation.VEP_CACHE_VERSION_FIELD, vepCacheVersion);
+            BasicDBObject annotationSubdocument = new BasicDBObject(AnnotationIndexMongo.SO_ACCESSION_FIELD, exists)
+                    .append(AnnotationMongo.VEP_VERSION_FIELD, vepVersion)
+                    .append(AnnotationMongo.VEP_CACHE_VERSION_FIELD, vepCacheVersion);
             BasicDBObject noElementMatchesOurVersion =
                     new BasicDBObject("$not", new BasicDBObject("$elemMatch", annotationSubdocument));
-            queryBuilder.add(VariantDocument.ANNOTATION_FIELD, noElementMatchesOurVersion);
+            queryBuilder.add(VariantMongo.ANNOTATION_FIELD, noElementMatchesOurVersion);
         }
         delegateReader.setQuery(queryBuilder.get());
 

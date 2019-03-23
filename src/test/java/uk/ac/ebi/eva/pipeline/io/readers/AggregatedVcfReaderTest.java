@@ -2,12 +2,12 @@ package uk.ac.ebi.eva.pipeline.io.readers;
 
 import org.junit.Rule;
 import org.junit.Test;
-import org.opencb.biodata.models.variant.VariantSource;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.test.MetaDataInstanceFactory;
 
-import uk.ac.ebi.eva.commons.models.data.Variant;
-import uk.ac.ebi.eva.commons.models.data.VariantSourceEntry;
+import uk.ac.ebi.eva.commons.core.models.Aggregation;
+import uk.ac.ebi.eva.commons.core.models.pipeline.Variant;
+import uk.ac.ebi.eva.commons.core.models.pipeline.VariantSourceEntry;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
 
@@ -43,20 +43,20 @@ public class AggregatedVcfReaderTest {
 
     @Test
     public void shouldReadAllLines() throws Exception {
-        shouldReadAllLinesHelper(VariantSource.Aggregation.BASIC, INPUT_FILE_PATH);
+        shouldReadAllLinesHelper(Aggregation.BASIC, INPUT_FILE_PATH);
     }
 
     @Test
     public void shouldReadAllLinesInExac() throws Exception {
-        shouldReadAllLinesHelper(VariantSource.Aggregation.EXAC, INPUT_FILE_PATH_EXAC);
+        shouldReadAllLinesHelper(Aggregation.EXAC, INPUT_FILE_PATH_EXAC);
     }
 
     @Test
     public void shouldReadAllLinesInEvs() throws Exception {
-        shouldReadAllLinesHelper(VariantSource.Aggregation.EVS, INPUT_FILE_PATH_EVS);
+        shouldReadAllLinesHelper(Aggregation.EVS, INPUT_FILE_PATH_EVS);
     }
 
-    private void shouldReadAllLinesHelper(VariantSource.Aggregation aggregationType,
+    private void shouldReadAllLinesHelper(Aggregation aggregationType,
                                           String inputFilePath) throws Exception {
 
         ExecutionContext executionContext = MetaDataInstanceFactory.createStepExecution().getExecutionContext();
@@ -81,7 +81,7 @@ public class AggregatedVcfReaderTest {
         File tempFile = temporaryFolderRule.newFile();
         JobTestUtils.uncompress(input.getAbsolutePath(), tempFile);
 
-        AggregatedVcfReader vcfReader = new AggregatedVcfReader(FILE_ID, STUDY_ID, VariantSource.Aggregation.BASIC,
+        AggregatedVcfReader vcfReader = new AggregatedVcfReader(FILE_ID, STUDY_ID, Aggregation.BASIC,
                 null, tempFile);
         vcfReader.setSaveState(false);
         vcfReader.open(executionContext);
@@ -97,7 +97,7 @@ public class AggregatedVcfReaderTest {
         while ((variants = vcfReader.read()) != null) {
             assertTrue(variants.size() > 0);
             assertTrue(variants.get(0).getSourceEntries().size() > 0);
-            VariantSourceEntry sourceEntry = variants.get(0).getSourceEntries().entrySet().iterator().next().getValue();
+            VariantSourceEntry sourceEntry = variants.get(0).getSourceEntries().iterator().next();
             assertTrue(sourceEntry.getSamplesData().isEmpty()); // by definition, aggregated VCFs don't have sample data
             assertFalse(sourceEntry.getCohortStats(VariantSourceEntry.DEFAULT_COHORT).getGenotypesCount().isEmpty());
 

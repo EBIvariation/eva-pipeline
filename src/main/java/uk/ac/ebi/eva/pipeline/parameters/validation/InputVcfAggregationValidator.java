@@ -15,11 +15,11 @@
  */
 package uk.ac.ebi.eva.pipeline.parameters.validation;
 
-import org.opencb.biodata.models.variant.VariantSource;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersInvalidException;
 import org.springframework.batch.core.JobParametersValidator;
 
+import uk.ac.ebi.eva.commons.core.models.Aggregation;
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 
 public class InputVcfAggregationValidator implements JobParametersValidator {
@@ -30,7 +30,7 @@ public class InputVcfAggregationValidator implements JobParametersValidator {
                 parameters.getString(JobParametersNames.INPUT_VCF_AGGREGATION),
                 JobParametersNames.INPUT_VCF_AGGREGATION);
         try {
-            VariantSource.Aggregation.valueOf(parameters.getString(JobParametersNames.INPUT_VCF_AGGREGATION));
+            Aggregation.valueOf(parameters.getString(JobParametersNames.INPUT_VCF_AGGREGATION));
         } catch (IllegalArgumentException e) {
             throw new JobParametersInvalidException(e.getMessage());
         }

@@ -15,11 +15,11 @@
  */
 package uk.ac.ebi.eva.pipeline.io.mappers;
 
-import org.opencb.biodata.models.variant.VariantSource;
 import org.springframework.batch.item.file.LineMapper;
 import org.springframework.util.Assert;
 
-import uk.ac.ebi.eva.commons.models.data.Variant;
+import uk.ac.ebi.eva.commons.core.models.Aggregation;
+import uk.ac.ebi.eva.commons.core.models.pipeline.Variant;
 import uk.ac.ebi.eva.utils.FileUtils;
 
 import java.io.FileInputStream;
@@ -40,7 +40,7 @@ public class AggregatedVcfLineMapper implements LineMapper<List<Variant>> {
     private final String studyId;
     private VariantVcfFactory factory;
 
-    public AggregatedVcfLineMapper(String fileId, String studyId, VariantSource.Aggregation aggregation,
+    public AggregatedVcfLineMapper(String fileId, String studyId, Aggregation aggregation,
                                    String mappingFilePath) throws IOException {
         Assert.notNull(fileId);
         Assert.notNull(studyId);
@@ -67,14 +67,14 @@ public class AggregatedVcfLineMapper implements LineMapper<List<Variant>> {
             case NONE:
                 throw new IllegalArgumentException(
                         this.getClass().getSimpleName() + " should be used to read aggregated VCFs only, " +
-                                "but the VariantSource.Aggregation is set to NONE");
+                                "but the Aggregation is set to NONE");
         }
     }
 
     @Override
     public List<Variant> mapLine(String line, int lineNumber) throws Exception {
         assertNotNull(this.getClass().getSimpleName() + " should be used to read aggregated VCFs only " +
-                "(hint: do not set VariantSource.Aggregation to NONE)", factory);
+                "(hint: do not set Aggregation to NONE)", factory);
         return factory.create(fileId, studyId, line);
     }
 }

@@ -25,11 +25,12 @@ import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-import uk.ac.ebi.eva.commons.models.data.Variant;
-import uk.ac.ebi.eva.commons.models.data.VariantSourceEntry;
-import uk.ac.ebi.eva.commons.models.mongo.entity.VariantDocument;
-import uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.HgvsMongo;
-import uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantSourceEntryMongo;
+import uk.ac.ebi.eva.commons.core.models.VariantType;
+import uk.ac.ebi.eva.commons.core.models.pipeline.Variant;
+import uk.ac.ebi.eva.commons.core.models.pipeline.VariantSourceEntry;
+import uk.ac.ebi.eva.commons.mongodb.entities.VariantMongo;
+import uk.ac.ebi.eva.commons.mongodb.entities.subdocuments.HgvsMongo;
+import uk.ac.ebi.eva.commons.mongodb.entities.subdocuments.VariantSourceEntryMongo;
 import uk.ac.ebi.eva.test.configuration.MongoOperationConfiguration;
 
 import java.util.ArrayList;
@@ -42,7 +43,7 @@ import java.util.Set;
 import static org.junit.Assert.assertEquals;
 
 /**
- * Tests the automatic conversion of {@link VariantDocument} to {@link DBObject}
+ * Tests the automatic conversion of {@link VariantMongo} to {@link DBObject}
  */
 @RunWith(SpringRunner.class)
 @TestPropertySource({"classpath:test-mongo.properties"})
@@ -52,21 +53,13 @@ public class VariantToDBObjectConverterTest {
     @Autowired
     private MongoOperations mongoOperations;
 
-    private VariantDocument buildVariantDocument(VariantSourceEntryMongo variantSource, boolean withIds) {
+    private VariantMongo buildVariantMongo(VariantSourceEntryMongo variantSource, boolean withIds) {
         Set<VariantSourceEntryMongo> variantSources = variantSource == null ? null :
                 Collections.singleton(variantSource);
-        return new VariantDocument(
-                Variant.VariantType.SNV,
-                "1",
-                1000,
-                1000,
-                1,
-                "A",
-                "C",
-                Collections.singleton(new HgvsMongo("genomic", "1:g.1000A>C")),
-                withIds == true ? Collections.singleton("rs666") : null,
-                variantSources
-        );
+        return new VariantMongo("rs666", VariantType.SNV, "1", 1000, 1000, 1,
+            "A", "C", null,
+            Collections.singleton(new HgvsMongo("genomic", "1:g.1000A>C")),
+            Collections.singleton("rs666"), "rs666", variantSources, null, null);
     }
 
     private VariantSourceEntryMongo buildVariantSourceEntryWithSamples() {
@@ -139,14 +132,14 @@ public class VariantToDBObjectConverterTest {
 
         //Setup mongoVariant
         BasicDBObject mongoVariant = new BasicDBObject("_id", "1_1000_A_C")
-                .append(VariantDocument.IDS_FIELD, variant.getIds())
-                .append(VariantDocument.TYPE_FIELD, variant.getType().name())
-                .append(VariantDocument.CHROMOSOME_FIELD, variant.getChromosome())
-                .append(VariantDocument.START_FIELD, variant.getStart())
-                .append(VariantDocument.END_FIELD, variant.getStart())
-                .append(VariantDocument.LENGTH_FIELD, variant.getLength())
-                .append(VariantDocument.REFERENCE_FIELD, variant.getReference())
-                .append(VariantDocument.ALTERNATE_FIELD, variant.getAlternate());
+                .append(VariantMongo.IDS_FIELD, variant.getIds())
+                .append(VariantMongo.TYPE_FIELD, variant.getType().name())
+                .append(VariantMongo.CHROMOSOME_FIELD, variant.getChromosome())
+                .append(VariantMongo.START_FIELD, variant.getStart())
+                .append(VariantMongo.END_FIELD, variant.getStart())
+                .append(VariantMongo.LENGTH_FIELD, variant.getLength())
+                .append(VariantMongo.REFERENCE_FIELD, variant.getReference())
+                .append(VariantMongo.ALTERNATE_FIELD, variant.getAlternate());
 
         BasicDBList chunkIds = new BasicDBList();
         chunkIds.add("1_0_10k");
@@ -181,7 +174,7 @@ public class VariantToDBObjectConverterTest {
     @Test
     public void testConvertToStorageTypeWithFiles() {
         DBObject converted = (DBObject) mongoOperations.getConverter().convertToMongoType(
-                buildVariantDocument(buildVariantSourceEntryWithSamples(), true)
+                buildVariantMongo(buildVariantSourceEntryWithSamples(), true)
         );
 
         assertEquals(buildMongoVariant(true), converted);
@@ -190,7 +183,7 @@ public class VariantToDBObjectConverterTest {
     @Test
     public void testConvertToStorageTypeWithoutFiles() {
         DBObject converted = (DBObject) mongoOperations.getConverter().convertToMongoType(
-                buildVariantDocument(null, true)
+                buildVariantMongo(null, true)
         );
 
         assertEquals(buildMongoVariant(false), converted);
@@ -199,22 +192,22 @@ public class VariantToDBObjectConverterTest {
     @Test
     public void testConvertToStorageTypeNullIds() {
         DBObject converted = (DBObject) mongoOperations.getConverter().convertToMongoType(
-                buildVariantDocument(null, false)
+                buildVariantMongo(null, false)
         );
 
         BasicDBObject mongoVariant = buildMongoVariant(false);
-        mongoVariant.remove(VariantDocument.IDS_FIELD);
+        mongoVariant.remove(VariantMongo.IDS_FIELD);
         assertEquals(mongoVariant, converted);
     }
 
     @Test
     public void testConvertToStorageTypeEmptyIds() {
         DBObject converted = (DBObject) mongoOperations.getConverter().convertToMongoType(
-                buildVariantDocument(null, false)
+                buildVariantMongo(null, false)
         );
 
         BasicDBObject mongoVariant = buildMongoVariant(false);
-        mongoVariant.remove(VariantDocument.IDS_FIELD);
+        mongoVariant.remove(VariantMongo.IDS_FIELD);
         assertEquals(mongoVariant, converted);
     }
 

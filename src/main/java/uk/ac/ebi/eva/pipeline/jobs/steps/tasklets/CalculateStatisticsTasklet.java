@@ -15,7 +15,6 @@
  */
 package uk.ac.ebi.eva.pipeline.jobs.steps.tasklets;
 
-import org.opencb.biodata.models.variant.VariantSource;
 import org.opencb.datastore.core.ObjectMap;
 import org.opencb.datastore.core.QueryOptions;
 import org.opencb.opencga.storage.core.StorageManagerFactory;
@@ -31,6 +30,7 @@ import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import uk.ac.ebi.eva.commons.core.models.VariantSource;
 import uk.ac.ebi.eva.pipeline.parameters.ChunkSizeParameters;
 import uk.ac.ebi.eva.pipeline.parameters.DatabaseParameters;
 import uk.ac.ebi.eva.pipeline.parameters.InputParameters;
@@ -128,6 +128,7 @@ public class CalculateStatisticsTasklet implements Tasklet {
                     inputParameters.getStudyId(),
                     inputParameters.getStudyName(),
                     inputParameters.getStudyType(),
-                    inputParameters.getVcfAggregation());
+                    inputParameters.getVcfAggregation(),
+                    null, null, null, null);
     }
 }

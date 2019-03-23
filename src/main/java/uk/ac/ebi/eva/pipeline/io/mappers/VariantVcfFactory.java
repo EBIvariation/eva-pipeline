@@ -17,13 +17,13 @@
 package uk.ac.ebi.eva.pipeline.io.mappers;
 
 import org.apache.commons.lang3.StringUtils;
-import org.opencb.biodata.models.feature.Genotype;
+import uk.ac.ebi.eva.commons.core.models.genotype.Genotype;
 import org.opencb.biodata.models.variant.VariantFactory;
 import org.opencb.biodata.models.variant.exceptions.NonStandardCompliantSampleField;
 import org.opencb.biodata.models.variant.exceptions.NotAVariantException;
 
-import uk.ac.ebi.eva.commons.models.data.Variant;
-import uk.ac.ebi.eva.commons.models.data.VariantSourceEntry;
+import uk.ac.ebi.eva.commons.core.models.pipeline.Variant;
+import uk.ac.ebi.eva.commons.core.models.pipeline.VariantSourceEntry;
 
 import java.util.ArrayList;
 import java.util.Arrays;

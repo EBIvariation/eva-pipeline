@@ -25,8 +25,8 @@ import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-import uk.ac.ebi.eva.commons.models.data.VariantSourceEntry;
-import uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantSourceEntryMongo;
+import uk.ac.ebi.eva.commons.core.models.pipeline.VariantSourceEntry;
+import uk.ac.ebi.eva.commons.mongodb.entities.subdocuments.VariantSourceEntryMongo;
 import uk.ac.ebi.eva.test.configuration.MongoOperationConfiguration;
 
 import java.util.Arrays;
@@ -34,10 +34,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
-import static uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantSourceEntryMongo.ATTRIBUTES_FIELD;
-import static uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantSourceEntryMongo.CHARACTER_TO_REPLACE_DOTS;
-import static uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantSourceEntryMongo.FILEID_FIELD;
-import static uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantSourceEntryMongo.STUDYID_FIELD;
+import static uk.ac.ebi.eva.commons.mongodb.entities.VariantSourceMongo.FILEID_FIELD;
+import static uk.ac.ebi.eva.commons.mongodb.entities.subdocuments.VariantSourceEntryMongo.ATTRIBUTES_FIELD;
+import static uk.ac.ebi.eva.commons.mongodb.entities.subdocuments.VariantSourceEntryMongo.CHARACTER_TO_REPLACE_DOTS;
+import static uk.ac.ebi.eva.commons.mongodb.entities.subdocuments.VariantSourceEntryMongo.STUDYID_FIELD;
 
 /**
  * Tests automatic conversion from {@link VariantSourceEntryMongo} to {@link DBObject}

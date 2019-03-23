@@ -20,22 +20,22 @@ import com.mongodb.DBObject;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.opencb.biodata.models.feature.Genotype;
+import uk.ac.ebi.eva.commons.core.models.VariantType;
+import uk.ac.ebi.eva.commons.core.models.genotype.Genotype;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-import uk.ac.ebi.eva.commons.models.data.Variant;
-import uk.ac.ebi.eva.commons.models.data.VariantSourceEntry;
-import uk.ac.ebi.eva.commons.models.data.VariantStats;
-import uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantStatsMongo;
+import uk.ac.ebi.eva.commons.core.models.pipeline.VariantSourceEntry;
+import uk.ac.ebi.eva.commons.core.models.VariantStatistics;
+import uk.ac.ebi.eva.commons.mongodb.entities.subdocuments.VariantStatisticsMongo;
 import uk.ac.ebi.eva.test.configuration.MongoOperationConfiguration;
 
 import static org.junit.Assert.assertEquals;
 
 /**
- * Tests automatic conversion of {@link VariantStatsMongo} to a {@link DBObject}
+ * Tests automatic conversion of {@link VariantStatisticsMongo} to a {@link DBObject}
  */
 @RunWith(SpringRunner.class)
 @TestPropertySource({"classpath:test-mongo.properties"})
@@ -51,21 +51,22 @@ public class VariantStatsToDBObjectConverterTest {
 
     @BeforeClass
     public static void setUpClass() {
-        mongoStats = new BasicDBObject(VariantStatsMongo.MAF_FIELD, 0.1);
-        mongoStats.append(VariantStatsMongo.MGF_FIELD, 0.01);
-        mongoStats.append(VariantStatsMongo.MAFALLELE_FIELD, "A");
-        mongoStats.append(VariantStatsMongo.MGFGENOTYPE_FIELD, "A/A");
-        mongoStats.append(VariantStatsMongo.MISSALLELE_FIELD, 10);
-        mongoStats.append(VariantStatsMongo.MISSGENOTYPE_FIELD, 5);
+        mongoStats = new BasicDBObject(VariantStatisticsMongo.MAF_FIELD, 0.1);
+        mongoStats.append(VariantStatisticsMongo.MGF_FIELD, 0.01);
+        mongoStats.append(VariantStatisticsMongo.MAFALLELE_FIELD, "A");
+        mongoStats.append(VariantStatisticsMongo.MGFGENOTYPE_FIELD, "A/A");
+        mongoStats.append(VariantStatisticsMongo.MISSALLELE_FIELD, 10);
+        mongoStats.append(VariantStatisticsMongo.MISSGENOTYPE_FIELD, 5);
 
         BasicDBObject genotypes = new BasicDBObject();
         genotypes.append("0/0", 100);
         genotypes.append("0/1", 50);
         genotypes.append("1/1", 10);
-        mongoStats.append(VariantStatsMongo.NUMGT_FIELD, genotypes);
+        mongoStats.append(VariantStatisticsMongo.NUMGT_FIELD, genotypes);
 
-        VariantStats stats = new VariantStats(null, -1, null, null, Variant.VariantType.SNV, 0.1f, 0.01f, "A", "A/A",
-                10, 5, -1, -1, -1, -1, -1);
+        VariantStatistics stats = new VariantStatistics(null, null, VariantType.SNV,
+            0.1f, 0.1f, "A", "A/A", 10, 5,
+            -1, -1, -1, -1, -1);
         stats.addGenotype(new Genotype("0/0"), 100);
         stats.addGenotype(new Genotype("0/1"), 50);
         stats.addGenotype(new Genotype("1/1"), 10);
@@ -77,9 +78,9 @@ public class VariantStatsToDBObjectConverterTest {
 
     @Test
     public void testConvertToStorageType() {
-        VariantStats stats = sourceEntry.getCohortStats("ALL");
+        VariantStatistics stats = sourceEntry.getCohortStats("ALL");
         DBObject converted = (DBObject) mongoOperations.getConverter().convertToMongoType(
-                new VariantStatsMongo(
+                new VariantStatisticsMongo(
                         sourceEntry.getStudyId(),
                         sourceEntry.getFileId(),
                         "ALL",
@@ -89,16 +90,16 @@ public class VariantStatsToDBObjectConverterTest {
 
         //DBObject converted = convertedSourceEntry.get(0);
 
-        assertEquals(stats.getMaf(), (float) converted.get(VariantStatsMongo.MAF_FIELD), 1e-6);
-        assertEquals(stats.getMgf(), (float) converted.get(VariantStatsMongo.MGF_FIELD), 1e-6);
-        assertEquals(stats.getMafAllele(), converted.get(VariantStatsMongo.MAFALLELE_FIELD));
-        assertEquals(stats.getMgfGenotype(), converted.get(VariantStatsMongo.MGFGENOTYPE_FIELD));
+        assertEquals(stats.getMaf(), (float) converted.get(VariantStatisticsMongo.MAF_FIELD), 1e-6);
+        assertEquals(stats.getMgf(), (float) converted.get(VariantStatisticsMongo.MGF_FIELD), 1e-6);
+        assertEquals(stats.getMafAllele(), converted.get(VariantStatisticsMongo.MAFALLELE_FIELD));
+        assertEquals(stats.getMgfGenotype(), converted.get(VariantStatisticsMongo.MGFGENOTYPE_FIELD));
 
-        assertEquals(stats.getMissingAlleles(), converted.get(VariantStatsMongo.MISSALLELE_FIELD));
-        assertEquals(stats.getMissingGenotypes(), converted.get(VariantStatsMongo.MISSGENOTYPE_FIELD));
+        assertEquals(stats.getMissingAlleles(), converted.get(VariantStatisticsMongo.MISSALLELE_FIELD));
+        assertEquals(stats.getMissingGenotypes(), converted.get(VariantStatisticsMongo.MISSGENOTYPE_FIELD));
 
-        assertEquals(100, ((DBObject) converted.get(VariantStatsMongo.NUMGT_FIELD)).get("0/0"));
-        assertEquals(50, ((DBObject) converted.get(VariantStatsMongo.NUMGT_FIELD)).get("0/1"));
-        assertEquals(10, ((DBObject) converted.get(VariantStatsMongo.NUMGT_FIELD)).get("1/1"));
+        assertEquals(100, ((DBObject) converted.get(VariantStatisticsMongo.NUMGT_FIELD)).get("0/0"));
+        assertEquals(50, ((DBObject) converted.get(VariantStatisticsMongo.NUMGT_FIELD)).get("0/1"));
+        assertEquals(10, ((DBObject) converted.get(VariantStatisticsMongo.NUMGT_FIELD)).get("1/1"));
     }
 }

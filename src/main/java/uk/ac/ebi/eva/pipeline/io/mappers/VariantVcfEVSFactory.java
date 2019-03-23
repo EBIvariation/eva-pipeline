@@ -16,9 +16,9 @@
  */
 package uk.ac.ebi.eva.pipeline.io.mappers;
 
-import uk.ac.ebi.eva.commons.models.data.Variant;
-import uk.ac.ebi.eva.commons.models.data.VariantSourceEntry;
-import uk.ac.ebi.eva.commons.models.data.VariantStats;
+import uk.ac.ebi.eva.commons.core.models.pipeline.Variant;
+import uk.ac.ebi.eva.commons.core.models.pipeline.VariantSourceEntry;
+import uk.ac.ebi.eva.commons.core.models.VariantStatistics;
 import uk.ac.ebi.eva.utils.FileUtils;
 
 import java.io.IOException;
@@ -100,7 +100,7 @@ public class VariantVcfEVSFactory extends VariantAggregatedVcfFactory {
 
     private void parseEVSAttributes(Variant variant, String fileId, String studyId, int numAllele, String[] alternateAlleles) {
         VariantSourceEntry file = variant.getSourceEntry(fileId, studyId);
-        VariantStats stats = new VariantStats(variant);
+        VariantStatistics stats = new VariantStatistics(variant);
         if (file.hasAttribute("MAF")) {
             String splitsMAF[] = file.getAttribute("MAF").split(",");
             if (splitsMAF.length == 3) {
@@ -127,9 +127,9 @@ public class VariantVcfEVSFactory extends VariantAggregatedVcfFactory {
                     String[] opencgaTagSplit = opencgaTag.split("\\."); // a literal point
                     if (opencgaTagSplit.length == 2) {
                         String cohort = opencgaTagSplit[0];
-                        VariantStats cohortStats = sourceEntry.getCohortStats(cohort);
+                        VariantStatistics cohortStats = sourceEntry.getCohortStats(cohort);
                         if (cohortStats == null) {
-                            cohortStats = new VariantStats(variant);
+                            cohortStats = new VariantStatistics(variant);
                             sourceEntry.setCohortStats(cohort, cohortStats);
                         }
                         switch (opencgaTagSplit[1]) {
@@ -160,9 +160,9 @@ public class VariantVcfEVSFactory extends VariantAggregatedVcfFactory {
                         if (populations.length == values.length) {
                             for (int i = 0; i < values.length; i++) {   // each value has the maf of each population
                                 float maf = Float.parseFloat(values[i]) / 100;  // from [0, 100] (%) to [0, 1]
-                                VariantStats cohortStats = sourceEntry.getCohortStats(populations[i]);
+                                VariantStatistics cohortStats = sourceEntry.getCohortStats(populations[i]);
                                 if (cohortStats == null) {
-                                    cohortStats = new VariantStats(variant);
+                                    cohortStats = new VariantStatistics(variant);
                                     sourceEntry.setCohortStats(populations[i], cohortStats);
                                 }
                                 cohortStats.setMaf(maf);

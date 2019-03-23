@@ -10,7 +10,9 @@ import org.junit.Test;
 import org.opencb.biodata.models.variant.VariantSource;
 import org.opencb.biodata.models.variant.VariantStudy;
 
-import uk.ac.ebi.eva.commons.models.data.VariantSourceEntity;
+import uk.ac.ebi.eva.commons.core.models.StudyType;
+import uk.ac.ebi.eva.commons.core.models.Aggregation;
+import uk.ac.ebi.eva.commons.mongodb.entities.VariantSourceMongo;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
 
@@ -55,26 +57,26 @@ public class VcfHeaderReaderTest {
     public void testDuplicateSamples() throws Exception {
         File input = getResource(INPUT_FILE_PATH_DUPLICATES);
 
-        VariantStudy.StudyType studyType = VariantStudy.StudyType.COLLECTION;
-        VariantSource.Aggregation aggregation = VariantSource.Aggregation.NONE;
+        StudyType studyType = StudyType.COLLECTION;
+        Aggregation aggregation = Aggregation.NONE;
 
         VcfHeaderReader headerReader = new VcfHeaderReader(input, FILE_ID, STUDY_ID, STUDY_NAME,
                 studyType, aggregation);
         headerReader.open(null);
-        VariantSourceEntity source = headerReader.read();
+        VariantSourceMongo source = headerReader.read();
     }
 
     @Test
     public void testRead() throws Exception {
         File input = getResource(INPUT_FILE_PATH);
 
-        VariantStudy.StudyType studyType = VariantStudy.StudyType.COLLECTION;
-        VariantSource.Aggregation aggregation = VariantSource.Aggregation.NONE;
+        StudyType studyType = StudyType.COLLECTION;
+        Aggregation aggregation = Aggregation.NONE;
 
         VcfHeaderReader headerReader = new VcfHeaderReader(input, FILE_ID, STUDY_ID, STUDY_NAME,
                 studyType, aggregation);
         headerReader.open(null);
-        VariantSourceEntity source = headerReader.read();
+        VariantSourceMongo source = headerReader.read();
 
         assertEquals(FILE_ID, source.getFileId());
         assertEquals(STUDY_ID, source.getStudyId());
@@ -106,10 +108,10 @@ public class VcfHeaderReaderTest {
         File input = getResource(INPUT_FILE_PATH);
 
         VcfHeaderReader headerReader = new VcfHeaderReader(input, FILE_ID, STUDY_ID, STUDY_NAME,
-                VariantStudy.StudyType.COLLECTION,
-                VariantSource.Aggregation.NONE);
+                StudyType.COLLECTION,
+                Aggregation.NONE);
         headerReader.open(null);
-        VariantSourceEntity source = headerReader.read();
+        VariantSourceMongo source = headerReader.read();
 
         Map<String, Object> meta = source.getMetadata();
         BasicDBObject metadataMongo = mapMetadataToDBObject(meta);
@@ -129,10 +131,10 @@ public class VcfHeaderReaderTest {
         JobTestUtils.uncompress(input.getAbsolutePath(), tempFile);
 
         VcfHeaderReader headerReader = new VcfHeaderReader(input, FILE_ID, STUDY_ID, STUDY_NAME,
-                VariantStudy.StudyType.COLLECTION,
-                VariantSource.Aggregation.NONE);
+                StudyType.COLLECTION,
+                Aggregation.NONE);
         headerReader.open(null);
-        VariantSourceEntity source = headerReader.read();
+        VariantSourceMongo source = headerReader.read();
 
         Map<String, Object> meta = source.getMetadata();
         BasicDBObject metadataMongo = mapMetadataToDBObject(meta);

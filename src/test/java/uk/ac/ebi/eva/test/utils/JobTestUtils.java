@@ -20,8 +20,6 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.mongodb.util.JSON;
-import org.opencb.biodata.models.variant.Variant;
-import org.opencb.biodata.models.variant.stats.VariantStats;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.BatchStatus;
@@ -31,8 +29,10 @@ import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.data.mongodb.core.MongoOperations;
 
-import uk.ac.ebi.eva.commons.models.mongo.entity.VariantDocument;
-import uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantStatsMongo;
+import uk.ac.ebi.eva.commons.core.models.VariantStatistics;
+import uk.ac.ebi.eva.commons.core.models.VariantType;
+import uk.ac.ebi.eva.commons.mongodb.entities.VariantMongo;
+import uk.ac.ebi.eva.commons.mongodb.entities.subdocuments.VariantStatisticsMongo;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -53,8 +53,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static uk.ac.ebi.eva.commons.models.data.VariantSourceEntity.FILEID_FIELD;
-import static uk.ac.ebi.eva.commons.models.data.VariantSourceEntity.STUDYID_FIELD;
+import static uk.ac.ebi.eva.commons.mongodb.entities.VariantSourceMongo.FILEID_FIELD;
+import static uk.ac.ebi.eva.commons.mongodb.entities.VariantSourceMongo.STUDYID_FIELD;
 
 public abstract class JobTestUtils {
     private static final Logger logger = LoggerFactory.getLogger(JobTestUtils.class);
@@ -174,30 +174,17 @@ public abstract class JobTestUtils {
         assertEquals(BatchStatus.FAILED, jobExecution.getStatus());
     }
 
-    public static VariantStats buildVariantStats(VariantStatsMongo variantStatsMongo) {
-        return new VariantStats("",
-                                0,
-                                "",
-                                "",
-                                Variant.VariantType.SNV,
-                                variantStatsMongo.getMaf(),
-                                variantStatsMongo.getMgf(),
-                                variantStatsMongo.getMafAllele(),
-                                variantStatsMongo.getMgfGenotype(),
-                                variantStatsMongo.getMissingAlleles(),
-                                variantStatsMongo.getMissingGenotypes(),
-                                0,
-                                0,
-                                0,
-                                0,
-                                0);
-    }
+    public static VariantStatistics buildVariantStats(VariantStatisticsMongo variantStatsMongo) {
+        return new VariantStatistics("", "", VariantType.SNV, variantStatsMongo.getMaf(),
+            variantStatsMongo.getMgf(), variantStatsMongo.getMafAllele(), variantStatsMongo.getMgfGenotype(),
+            variantStatsMongo.getMissingAlleles(), variantStatsMongo.getMissingGenotypes(), 0, 0, 0, 0, 0);
+        }
 
-    public static List<VariantStats> getCohortStatsFromFirstVariant(DBCursor cursor, MongoOperations mongoOperations) {
+    public static List<VariantStatistics> getCohortStatsFromFirstVariant(DBCursor cursor, MongoOperations mongoOperations) {
         assertTrue(cursor.hasNext());
 
         DBObject dbObject = cursor.iterator().next();
-        VariantDocument variantDocument = mongoOperations.getConverter().read(VariantDocument.class, dbObject);
+        VariantMongo variantDocument = mongoOperations.getConverter().read(VariantMongo.class, dbObject);
         return variantDocument.getVariantStatsMongo().stream()
                               .map(JobTestUtils::buildVariantStats)
                               .collect(toList());

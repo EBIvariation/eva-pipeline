@@ -21,7 +21,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.mongodb.core.MongoOperations;
-import uk.ac.ebi.eva.commons.models.mongo.entity.Annotation;
+import uk.ac.ebi.eva.commons.mongodb.entities.AnnotationMongo;
 import uk.ac.ebi.eva.pipeline.Application;
 import uk.ac.ebi.eva.pipeline.io.writers.AnnotationMongoWriter;
 import uk.ac.ebi.eva.pipeline.parameters.DatabaseParameters;
@@ -36,7 +36,7 @@ public class AnnotationWriterConfiguration {
     @Bean(ANNOTATION_WRITER)
     @StepScope
     @Profile(Application.VARIANT_ANNOTATION_MONGO_PROFILE)
-    public ItemWriter<List<Annotation>> annotationItemWriter(MongoOperations mongoOperations,
+    public ItemWriter<List<AnnotationMongo>> annotationItemWriter(MongoOperations mongoOperations,
                                                              DatabaseParameters databaseParameters) {
         return new AnnotationMongoWriter(mongoOperations, databaseParameters.getCollectionAnnotationsName());
     }

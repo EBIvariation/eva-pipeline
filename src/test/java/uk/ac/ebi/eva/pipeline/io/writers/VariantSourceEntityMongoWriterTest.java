@@ -23,8 +23,6 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.opencb.biodata.models.variant.VariantSource;
-import org.opencb.biodata.models.variant.VariantStudy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.data.mongodb.core.mapping.MongoMappingContext;
@@ -32,7 +30,9 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import uk.ac.ebi.eva.commons.models.data.VariantSourceEntity;
+import uk.ac.ebi.eva.commons.core.models.StudyType;
+import uk.ac.ebi.eva.commons.core.models.Aggregation;
+import uk.ac.ebi.eva.commons.mongodb.entities.VariantSourceMongo;
 import uk.ac.ebi.eva.pipeline.configuration.MongoConfiguration;
 import uk.ac.ebi.eva.pipeline.io.readers.VcfHeaderReader;
 import uk.ac.ebi.eva.pipeline.configuration.jobs.steps.LoadFileStepConfiguration;
@@ -77,9 +77,9 @@ public class VariantSourceEntityMongoWriterTest {
 
     private static final String STUDY_NAME = "small";
 
-    private static final VariantStudy.StudyType STUDY_TYPE = VariantStudy.StudyType.COLLECTION;
+    private static final StudyType STUDY_TYPE = StudyType.COLLECTION;
 
-    private static final VariantSource.Aggregation AGGREGATION = VariantSource.Aggregation.NONE;
+    private static final Aggregation AGGREGATION = Aggregation.NONE;
 
     @Autowired
     private MongoConnection mongoConnection;
@@ -102,7 +102,7 @@ public class VariantSourceEntityMongoWriterTest {
         VariantSourceEntityMongoWriter filesWriter = new VariantSourceEntityMongoWriter(
                 mongoOperations, COLLECTION_FILES_NAME);
 
-        VariantSourceEntity variantSourceEntity = getVariantSourceEntity();
+        VariantSourceMongo variantSourceEntity = getVariantSourceEntity();
         filesWriter.write(Collections.singletonList(variantSourceEntity));
 
         DBCursor cursor = fileCollection.find();
@@ -111,19 +111,17 @@ public class VariantSourceEntityMongoWriterTest {
         while (cursor.hasNext()) {
             count++;
             DBObject next = cursor.next();
-            assertNotNull(next.get(VariantSourceEntity.FILEID_FIELD));
-            assertNotNull(next.get(VariantSourceEntity.FILENAME_FIELD));
-            assertNotNull(next.get(VariantSourceEntity.STUDYID_FIELD));
-            assertNotNull(next.get(VariantSourceEntity.STUDYNAME_FIELD));
-            assertNotNull(next.get(VariantSourceEntity.STUDYTYPE_FIELD));
-            assertNotNull(next.get(VariantSourceEntity.AGGREGATION_FIELD));
-            assertNotNull(next.get(VariantSourceEntity.SAMPLES_FIELD));
-            assertNotNull(next.get(VariantSourceEntity.DATE_FIELD));
+            assertNotNull(next.get(VariantSourceMongo.FILEID_FIELD));
+            assertNotNull(next.get(VariantSourceMongo.FILENAME_FIELD));
+            assertNotNull(next.get(VariantSourceMongo.STUDYID_FIELD));
+            assertNotNull(next.get(VariantSourceMongo.STUDYNAME_FIELD));
+            assertNotNull(next.get(VariantSourceMongo.STUDYTYPE_FIELD));
+            assertNotNull(next.get(VariantSourceMongo.AGGREGATION_FIELD));
+            assertNotNull(next.get(VariantSourceMongo.SAMPLES_FIELD));
+            assertNotNull(next.get(VariantSourceMongo.DATE_FIELD));
 
-            DBObject meta = (DBObject) next.get(VariantSourceEntity.METADATA_FIELD);
+            DBObject meta = (DBObject) next.get(VariantSourceMongo.METADATA_FIELD);
             assertNotNull(meta);
-            assertNotNull(meta.get(VariantSourceEntity.METADATA_FILEFORMAT_FIELD));
-            assertNotNull(meta.get(VariantSourceEntity.METADATA_HEADER_FIELD));
             assertNotNull(meta.get("ALT"));
             assertNotNull(meta.get("FILTER"));
             assertNotNull(meta.get("INFO"));
@@ -142,7 +140,7 @@ public class VariantSourceEntityMongoWriterTest {
         VariantSourceEntityMongoWriter filesWriter = new VariantSourceEntityMongoWriter(
                 mongoOperations, COLLECTION_FILES_NAME);
 
-        VariantSourceEntity variantSourceEntity = getVariantSourceEntity();
+        VariantSourceMongo variantSourceEntity = getVariantSourceEntity();
         Map<String, Integer> samplesPosition = new HashMap<>();
         samplesPosition.put("EUnothing", 1);
         samplesPosition.put("NA.dot", 2);
@@ -155,7 +153,7 @@ public class VariantSourceEntityMongoWriterTest {
 
         while (cursor.hasNext()) {
             DBObject next = cursor.next();
-            DBObject samples = (DBObject) next.get(VariantSourceEntity.SAMPLES_FIELD);
+            DBObject samples = (DBObject) next.get(VariantSourceMongo.SAMPLES_FIELD);
             Set<String> keySet = samples.keySet();
 
             Set<String> expectedKeySet = new TreeSet<>(Arrays.asList("EUnothing", "NA£dot", "JP-dash"));
@@ -173,7 +171,7 @@ public class VariantSourceEntityMongoWriterTest {
         VariantSourceEntityMongoWriter filesWriter = new VariantSourceEntityMongoWriter( mongoOperations,
                 COLLECTION_FILES_NAME);
 
-        VariantSourceEntity variantSourceEntity = getVariantSourceEntity();
+        VariantSourceMongo variantSourceEntity = getVariantSourceEntity();
         filesWriter.write(Collections.singletonList(variantSourceEntity));
 
         List<DBObject> indexInfo = fileCollection.getIndexInfo();
@@ -192,7 +190,7 @@ public class VariantSourceEntityMongoWriterTest {
         assertEquals("true", uniqueIndex.get(MongoDBHelper.BACKGROUND_INDEX).toString());
     }
 
-    private VariantSourceEntity getVariantSourceEntity() throws Exception {
+    private VariantSourceMongo getVariantSourceEntity() throws Exception {
         VcfHeaderReader headerReader = new VcfHeaderReader(new File(input), FILE_ID, STUDY_ID, STUDY_NAME,
                                                            STUDY_TYPE, AGGREGATION);
         headerReader.open(null);

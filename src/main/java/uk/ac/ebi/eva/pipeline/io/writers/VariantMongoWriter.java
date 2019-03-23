@@ -24,23 +24,23 @@ import org.slf4j.LoggerFactory;
 import org.springframework.batch.item.data.MongoItemWriter;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.util.Assert;
-import uk.ac.ebi.eva.commons.models.data.Variant;
-import uk.ac.ebi.eva.commons.models.data.VariantSourceEntry;
-import uk.ac.ebi.eva.commons.models.data.VariantStats;
-import uk.ac.ebi.eva.commons.models.mongo.entity.VariantDocument;
-import uk.ac.ebi.eva.commons.models.mongo.entity.projections.SimplifiedVariant;
-import uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantSourceEntryMongo;
-import uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantStatsMongo;
+import uk.ac.ebi.eva.commons.core.models.pipeline.Variant;
+import uk.ac.ebi.eva.commons.core.models.pipeline.VariantSourceEntry;
+import uk.ac.ebi.eva.commons.core.models.VariantStatistics;
+import uk.ac.ebi.eva.commons.mongodb.entities.VariantMongo;
+import uk.ac.ebi.eva.commons.mongodb.entities.projections.SimplifiedVariant;
+import uk.ac.ebi.eva.commons.mongodb.entities.subdocuments.VariantSourceEntryMongo;
+import uk.ac.ebi.eva.commons.mongodb.entities.subdocuments.VariantStatisticsMongo;
 import uk.ac.ebi.eva.utils.MongoDBHelper;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static uk.ac.ebi.eva.commons.models.mongo.entity.VariantDocument.ANNOTATION_FIELD;
-import static uk.ac.ebi.eva.commons.models.mongo.entity.VariantDocument.IDS_FIELD;
-import static uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantAnnotation.SO_ACCESSION_FIELD;
-import static uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantAnnotation.XREFS_FIELD;
+import static uk.ac.ebi.eva.commons.mongodb.entities.VariantMongo.ANNOTATION_FIELD;
+import static uk.ac.ebi.eva.commons.mongodb.entities.VariantMongo.IDS_FIELD;
+import static uk.ac.ebi.eva.commons.mongodb.entities.subdocuments.AnnotationIndexMongo.SO_ACCESSION_FIELD;
+import static uk.ac.ebi.eva.commons.mongodb.entities.subdocuments.AnnotationIndexMongo.XREFS_FIELD;
 
 /**
  * Write a list of {@link Variant} into MongoDB
@@ -74,13 +74,13 @@ public class VariantMongoWriter extends MongoItemWriter<Variant> {
     protected void doWrite(List<? extends Variant> variants) {
         BulkWriteOperation bulk = mongoOperations.getCollection(collection).initializeUnorderedBulkOperation();
         for (Variant variant : variants) {
-            String id = VariantDocument.buildVariantId(variant.getChromosome(), variant.getStart(),
+            String id = VariantMongo.buildVariantId(variant.getChromosome(), variant.getStart(),
                     variant.getReference(), variant.getAlternate());
 
             // the chromosome and start appear just as shard keys, in an unsharded cluster they wouldn't be needed
             BasicDBObject query = new BasicDBObject("_id", id)
-                    .append(VariantDocument.CHROMOSOME_FIELD, variant.getChromosome())
-                    .append(VariantDocument.START_FIELD, variant.getStart());
+                    .append(VariantMongo.CHROMOSOME_FIELD, variant.getChromosome())
+                    .append(VariantMongo.START_FIELD, variant.getStart());
 
             bulk.find(query).upsert().updateOne(generateUpdate(variant));
 
@@ -98,17 +98,17 @@ public class VariantMongoWriter extends MongoItemWriter<Variant> {
 
     private void createIndexes() {
         mongoOperations.getCollection(collection).createIndex(
-                new BasicDBObject(VariantDocument.CHROMOSOME_FIELD, 1)
-                        .append(VariantDocument.START_FIELD, 1).append(VariantDocument.END_FIELD, 1),
+                new BasicDBObject(VariantMongo.CHROMOSOME_FIELD, 1)
+                        .append(VariantMongo.START_FIELD, 1).append(VariantMongo.END_FIELD, 1),
                 new BasicDBObject(MongoDBHelper.BACKGROUND_INDEX, true));
 
         mongoOperations.getCollection(collection).createIndex(
-                new BasicDBObject(VariantDocument.IDS_FIELD, 1),
+                new BasicDBObject(IDS_FIELD, 1),
                 new BasicDBObject(MongoDBHelper.BACKGROUND_INDEX, true));
 
-        String filesStudyIdField = String.format("%s.%s", VariantDocument.FILES_FIELD,
+        String filesStudyIdField = String.format("%s.%s", VariantMongo.FILES_FIELD,
                 VariantSourceEntryMongo.STUDYID_FIELD);
-        String filesFileIdField = String.format("%s.%s", VariantDocument.FILES_FIELD,
+        String filesFileIdField = String.format("%s.%s", VariantMongo.FILES_FIELD,
                 VariantSourceEntryMongo.FILEID_FIELD);
         mongoOperations.getCollection(collection).createIndex(
                 new BasicDBObject(filesStudyIdField, 1).append(filesFileIdField, 1),
@@ -129,13 +129,13 @@ public class VariantMongoWriter extends MongoItemWriter<Variant> {
         BasicDBObject addToSet = new BasicDBObject();
 
         if (!variant.getSourceEntries().isEmpty()) {
-            VariantSourceEntry variantSourceEntry = variant.getSourceEntries().values().iterator().next();
+            VariantSourceEntry variantSourceEntry = variant.getSourceEntries().iterator().next();
 
-            addToSet.put(VariantDocument.FILES_FIELD, convert(variantSourceEntry));
+            addToSet.put(VariantMongo.FILES_FIELD, convert(variantSourceEntry));
 
             if (includeStats) {
                 BasicDBList basicDBList = convertStatistics(variantSourceEntry);
-                addToSet.put(VariantDocument.STATS_FIELD, new BasicDBObject("$each", basicDBList));
+                addToSet.put("st", new BasicDBObject("$each", basicDBList));
             }
         }
 
@@ -153,9 +153,9 @@ public class VariantMongoWriter extends MongoItemWriter<Variant> {
     }
 
     private BasicDBList convertStatistics(VariantSourceEntry variantSourceEntry) {
-        List<VariantStatsMongo> variantStats = new ArrayList<>();
-        for (Map.Entry<String, VariantStats> variantStatsEntry : variantSourceEntry.getCohortStats().entrySet()) {
-            variantStats.add(new VariantStatsMongo(
+        List<VariantStatisticsMongo> variantStats = new ArrayList<>();
+        for (Map.Entry<String, VariantStatistics> variantStatsEntry : variantSourceEntry.getCohortStats().entrySet()) {
+            variantStats.add(new VariantStatisticsMongo(
                     variantSourceEntry.getStudyId(),
                     variantSourceEntry.getFileId(),
                     variantStatsEntry.getKey(),
