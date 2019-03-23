@@ -29,6 +29,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
+import uk.ac.ebi.eva.commons.core.models.IVariant;
 import uk.ac.ebi.eva.commons.core.models.pipeline.Variant;
 import uk.ac.ebi.eva.pipeline.configuration.ChunkSizeCompletionPolicyConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.io.readers.VcfReaderConfiguration;
@@ -62,7 +63,7 @@ public class LoadVariantsStepConfiguration {
 
     @Autowired
     @Qualifier(VARIANT_WRITER)
-    private ItemWriter<Variant> variantWriter;
+    private ItemWriter<IVariant> variantWriter;
 
     @Bean(LOAD_VARIANTS_STEP)
     public Step loadVariantsStep(StepBuilderFactory stepBuilderFactory, JobOptions jobOptions,

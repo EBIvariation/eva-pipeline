@@ -38,7 +38,7 @@ public class VariantWriterConfiguration {
     @StepScope
     @Profile(Application.VARIANT_WRITER_MONGO_PROFILE)
     public MongoItemWriter<IVariant> variantMongoWriter(InputParameters inputParameters, MongoOperations mongoOperations,
-                                                        DatabaseParameters databaseParameters) {
+                                                       DatabaseParameters databaseParameters) {
         boolean includeSamples, includeStats;
         if (Aggregation.NONE.equals(inputParameters.getVcfAggregation())) {
             includeSamples = true;
