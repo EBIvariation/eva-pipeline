@@ -17,6 +17,8 @@ package uk.ac.ebi.eva.pipeline.jobs.steps.processors;
 
 import org.junit.Before;
 import org.junit.Test;
+import uk.ac.ebi.eva.commons.core.models.VariantType;
+import uk.ac.ebi.eva.commons.core.models.pipeline.Variant;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
