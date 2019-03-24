@@ -18,7 +18,7 @@ package uk.ac.ebi.eva.commons.models.mongo.entity.projections;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Field;
 import uk.ac.ebi.eva.commons.models.data.Variant;
-import uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.HgvsMongo;
+import uk.ac.ebi.eva.commons.mongodb.entities.subdocuments.HgvsMongo;
 import uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantAt;
 
 import java.util.List;

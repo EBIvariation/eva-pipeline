@@ -21,7 +21,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 import uk.ac.ebi.eva.commons.models.data.Variant;
-import uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.HgvsMongo;
+import uk.ac.ebi.eva.commons.mongodb.entities.subdocuments.HgvsMongo;
 import uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantAnnotation;
 import uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantAt;
 import uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantSourceEntryMongo;
