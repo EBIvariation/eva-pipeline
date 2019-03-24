@@ -21,7 +21,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 import uk.ac.ebi.eva.commons.models.data.Variant;
 import uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.ConsequenceType;
-import uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.Xref;
+import uk.ac.ebi.eva.commons.mongodb.entities.subdocuments.XrefMongo;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -69,7 +69,7 @@ public class Annotation {
     private Set<ConsequenceType> consequenceTypes;
 
     @Field(value = XREFS_FIELD)
-    private Set<Xref> xrefs;
+    private Set<XrefMongo> xrefs;
 
     Annotation() {
         // Empty document constructor for spring-data
@@ -124,7 +124,7 @@ public class Annotation {
         return id;
     }
 
-    public Set<Xref> getXrefs() {
+    public Set<XrefMongo> getXrefs() {
         return xrefs;
     }
 
@@ -153,13 +153,13 @@ public class Annotation {
 
     private void generateXrefsFromConsequenceType(ConsequenceType consequenceType) {
         if (!Strings.isNullOrEmpty(consequenceType.getGeneName())) {
-            xrefs.add(new Xref(consequenceType.getGeneName(), "HGNC"));
+            xrefs.add(new XrefMongo(consequenceType.getGeneName(), "HGNC"));
         }
         if (!Strings.isNullOrEmpty(consequenceType.getEnsemblGeneId())) {
-            xrefs.add(new Xref(consequenceType.getEnsemblGeneId(), "ensemblGene"));
+            xrefs.add(new XrefMongo(consequenceType.getEnsemblGeneId(), "ensemblGene"));
         }
         if (!Strings.isNullOrEmpty(consequenceType.getEnsemblTranscriptId())) {
-            xrefs.add(new Xref(consequenceType.getEnsemblTranscriptId(), "ensemblTranscript"));
+            xrefs.add(new XrefMongo(consequenceType.getEnsemblTranscriptId(), "ensemblTranscript"));
         }
     }
 

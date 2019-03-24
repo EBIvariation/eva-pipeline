@@ -18,6 +18,7 @@ package uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments;
 import org.springframework.data.mongodb.core.mapping.Field;
 import org.springframework.util.Assert;
 import uk.ac.ebi.eva.commons.models.mongo.entity.Annotation;
+import uk.ac.ebi.eva.commons.mongodb.entities.subdocuments.XrefMongo;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -114,7 +115,7 @@ public class VariantAnnotation {
     }
 
     private void doConcatenate(Annotation annotation) {
-        for (Xref xref : annotation.getXrefs()) {
+        for (XrefMongo xref : annotation.getXrefs()) {
             addXrefId(xref.getId());
         }
         for (ConsequenceType consequenceType : annotation.getConsequenceTypes()) {

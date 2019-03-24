@@ -30,7 +30,7 @@ import org.springframework.util.Assert;
 import uk.ac.ebi.eva.commons.models.mongo.entity.Annotation;
 import uk.ac.ebi.eva.commons.models.mongo.entity.projections.SimplifiedAnnotation;
 import uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.ConsequenceType;
-import uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.Xref;
+import uk.ac.ebi.eva.commons.mongodb.entities.subdocuments.XrefMongo;
 import uk.ac.ebi.eva.utils.MongoDBHelper;
 
 import java.util.Collection;
@@ -65,7 +65,7 @@ import static uk.ac.ebi.eva.commons.models.mongo.entity.Annotation.XREFS_FIELD;
  */
 public class AnnotationMongoWriter implements ItemWriter<List<Annotation>> {
 
-    private static final String ANNOTATION_XREF_ID_FIELD = Annotation.XREFS_FIELD + "." + Xref.XREF_ID_FIELD;
+    private static final String ANNOTATION_XREF_ID_FIELD = Annotation.XREFS_FIELD + "." + XrefMongo.XREF_ID_FIELD;
 
     private static final String ANNOTATION_CT_SO_FIELD = Annotation.CONSEQUENCE_TYPE_FIELD + "."
             + ConsequenceType.SO_ACCESSION_FIELD;
