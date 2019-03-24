@@ -17,7 +17,7 @@ package uk.ac.ebi.eva.pipeline.io.mappers;
 
 import org.junit.Test;
 
-import uk.ac.ebi.eva.pipeline.model.FeatureCoordinates;
+import uk.ac.ebi.eva.commons.core.models.FeatureCoordinates;
 import uk.ac.ebi.eva.test.data.GtfStaticTestData;
 
 import static org.junit.Assert.assertNotNull;

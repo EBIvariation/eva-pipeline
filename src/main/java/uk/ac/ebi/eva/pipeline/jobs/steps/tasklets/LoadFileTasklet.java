@@ -65,6 +65,7 @@ public class LoadFileTasklet implements Tasklet {
 
         VariantSourceMongoWriter variantSourceEntityMongoWriter = new VariantSourceMongoWriter(
                 mongoOperations, dbParameters.getCollectionFilesName());
+
         variantSourceEntityMongoWriter.write(Collections.singletonList(variantSourceEntity));
 
         return RepeatStatus.FINISHED;

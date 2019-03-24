@@ -17,8 +17,10 @@
 package uk.ac.ebi.eva.pipeline.model;
 
 import org.junit.Test;
+import uk.ac.ebi.eva.commons.core.models.factories.VariantGenotypedVcfFactory;
+import uk.ac.ebi.eva.commons.core.models.factories.VariantVcfFactory;
+import uk.ac.ebi.eva.commons.core.models.pipeline.Variant;
 
-import uk.ac.ebi.eva.pipeline.io.mappers.VariantVcfFactory;
 
 import java.util.List;
 
@@ -34,7 +36,7 @@ public class EnsemblVariantTest {
 
     private static final String STUDY_ID = "sid";
 
-    private VariantVcfFactory factory = new VariantVcfFactory();
+    private VariantVcfFactory factory = new VariantGenotypedVcfFactory();
 
     @Test
     public void transformInsertionsToEnsembleCoordinates() throws Exception {
