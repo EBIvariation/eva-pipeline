@@ -17,7 +17,9 @@ package uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments;
 
 import org.springframework.data.mongodb.core.mapping.Field;
 import org.springframework.util.Assert;
-import uk.ac.ebi.eva.commons.models.mongo.entity.Annotation;
+import uk.ac.ebi.eva.commons.mongodb.entities.AnnotationMongo;
+import uk.ac.ebi.eva.commons.mongodb.entities.subdocuments.ConsequenceTypeMongo;
+import uk.ac.ebi.eva.commons.mongodb.entities.subdocuments.ScoreMongo;
 import uk.ac.ebi.eva.commons.mongodb.entities.subdocuments.XrefMongo;
 
 import java.util.ArrayList;
@@ -90,7 +92,7 @@ public class VariantAnnotation {
         doConcatenate(variantAnnotation);
     }
 
-    public VariantAnnotation(Annotation annotation) {
+    public VariantAnnotation(AnnotationMongo annotation) {
         this(annotation.getVepVersion(), annotation.getVepCacheVersion());
         doConcatenate(annotation);
     }
@@ -114,16 +116,16 @@ public class VariantAnnotation {
         }
     }
 
-    private void doConcatenate(Annotation annotation) {
+    private void doConcatenate(AnnotationMongo annotation) {
         for (XrefMongo xref : annotation.getXrefs()) {
             addXrefId(xref.getId());
         }
-        for (ConsequenceType consequenceType : annotation.getConsequenceTypes()) {
-            final Score sift = consequenceType.getSift();
+        for (ConsequenceTypeMongo consequenceType : annotation.getConsequenceTypes()) {
+            final ScoreMongo sift = consequenceType.getSift();
             if (sift != null) {
                 concatenateSiftRange(sift.getScore());
             }
-            final Score polyphen = consequenceType.getPolyphen();
+            final ScoreMongo polyphen = consequenceType.getPolyphen();
             if (polyphen != null) {
                 concatenatePolyphenRange(polyphen.getScore());
             }
@@ -225,7 +227,7 @@ public class VariantAnnotation {
         return vepCacheVersion;
     }
 
-    public VariantAnnotation concatenate(Annotation annotation) {
+    public VariantAnnotation concatenate(AnnotationMongo annotation) {
         VariantAnnotation temp = new VariantAnnotation(this);
         temp.doConcatenate(annotation);
         return temp;

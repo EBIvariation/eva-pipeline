@@ -28,7 +28,7 @@ import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.data.mongodb.core.convert.MongoConverter;
 import org.springframework.util.ClassUtils;
 
-import uk.ac.ebi.eva.commons.models.mongo.entity.Annotation;
+import uk.ac.ebi.eva.commons.mongodb.entities.AnnotationMongo;
 import uk.ac.ebi.eva.commons.models.mongo.entity.VariantDocument;
 import uk.ac.ebi.eva.commons.models.mongo.entity.projections.SimplifiedVariant;
 import uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantAnnotation;
@@ -111,8 +111,8 @@ public class VariantsMongoReader
         if (excludeAnnotated) {
             BasicDBObject exists = new BasicDBObject("$exists", 1);
             BasicDBObject annotationSubdocument = new BasicDBObject(VariantAnnotation.SO_ACCESSION_FIELD, exists)
-                    .append(Annotation.VEP_VERSION_FIELD, vepVersion)
-                    .append(Annotation.VEP_CACHE_VERSION_FIELD, vepCacheVersion);
+                    .append(AnnotationMongo.VEP_VERSION_FIELD, vepVersion)
+                    .append(AnnotationMongo.VEP_CACHE_VERSION_FIELD, vepCacheVersion);
             BasicDBObject noElementMatchesOurVersion =
                     new BasicDBObject("$not", new BasicDBObject("$elemMatch", annotationSubdocument));
             queryBuilder.add(VariantDocument.ANNOTATION_FIELD, noElementMatchesOurVersion);

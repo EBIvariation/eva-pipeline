@@ -17,7 +17,7 @@
 package uk.ac.ebi.eva.commons.models.data;
 
 import org.opencb.commons.utils.CryptoUtils;
-import uk.ac.ebi.eva.commons.models.mongo.entity.Annotation;
+import uk.ac.ebi.eva.commons.mongodb.entities.AnnotationMongo;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -120,7 +120,7 @@ public class Variant {
     /**
      * Annotations of the genomic variation.
      */
-    private Set<Annotation> annotations;
+    private Set<AnnotationMongo> annotations;
 
 
     public Variant() {
