@@ -6,7 +6,7 @@ The European Variation Archive pipeline processes Variant Call Format (VCF) file
 * Variant annotation: consequence type, SIFT and Polyphen scores, etc
 * Statistics: allele and genotype counts and frequencies
 
-You can find a more detailed description of these operations in the [project wiki](https://github.com/EBIvariation/eva-pipeline/wiki/Jobs). Please visit the [EVA website](http://www.ebi.ac.uk/eva/?Variant Browser) to see a public service depending on this pipeline, and the [EVA web services repository](https://github.com/EBIvariation/eva-ws) for more information on the API.
+You can find a more detailed description of these operations in the [project wiki](https://github.com/EBIvariation/eva-pipeline/wiki/Jobs). Please visit the [EVA website](http://www.ebi.ac.uk/eva/?Variant%20Browser) to see a public service depending on this pipeline, and the [EVA web services repository](https://github.com/EBIvariation/eva-ws) for more information on the API.
 
 The pipeline automatically tracks the job status, and avoids waste of computation by resuming a job in the exact point where it failed; successful steps already executed are automatically skipped.
 
