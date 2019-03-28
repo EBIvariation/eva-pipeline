@@ -28,7 +28,7 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.util.Assert;
 import uk.ac.ebi.eva.commons.mongodb.entities.AnnotationMongo;
-import uk.ac.ebi.eva.commons.models.mongo.entity.projections.SimplifiedAnnotation;
+import uk.ac.ebi.eva.commons.mongodb.entities.projections.SimplifiedAnnotation;
 import uk.ac.ebi.eva.commons.mongodb.entities.subdocuments.ConsequenceTypeMongo;
 import uk.ac.ebi.eva.commons.mongodb.entities.subdocuments.XrefMongo;
 import uk.ac.ebi.eva.utils.MongoDBHelper;
