@@ -35,9 +35,9 @@ public class EnsemblVariant {
 
     private String chromosome;
 
-    private int start;
+    private long start;
 
-    private int end;
+    private long end;
 
     private String reference;
 
@@ -45,7 +45,7 @@ public class EnsemblVariant {
 
     private String strand = "+";
 
-    public EnsemblVariant(String chromosome, int start, int end, String reference, String alternate) {
+    public EnsemblVariant(String chromosome, long start, long end, String reference, String alternate) {
         Assert.hasText(chromosome);
         Assert.notNull(reference);
         Assert.notNull(alternate);
@@ -61,11 +61,11 @@ public class EnsemblVariant {
         return chromosome;
     }
 
-    public int getStart() {
+    public long getStart() {
         return start;
     }
 
-    public int getEnd() {
+    public long getEnd() {
         return end;
     }
 

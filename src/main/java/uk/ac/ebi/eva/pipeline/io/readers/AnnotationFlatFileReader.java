@@ -18,7 +18,7 @@ package uk.ac.ebi.eva.pipeline.io.readers;
 import org.springframework.batch.item.file.FlatFileItemReader;
 import org.springframework.core.io.Resource;
 
-import uk.ac.ebi.eva.commons.models.mongo.entity.Annotation;
+import uk.ac.ebi.eva.commons.mongodb.entities.AnnotationMongo;
 import uk.ac.ebi.eva.pipeline.io.GzipLazyResource;
 import uk.ac.ebi.eva.pipeline.io.mappers.AnnotationLineMapper;
 
@@ -34,7 +34,7 @@ import java.io.File;
  * 20_60479_C/T	20:60479	T	-	-	-	intergenic_variant	-	-	-	-	-	rs149529999	GMAF=T:0.0018;AFR_MAF=T:0.01;AMR_MAF=T:0.0028
  * ...
  */
-public class AnnotationFlatFileReader extends FlatFileItemReader<Annotation> {
+public class AnnotationFlatFileReader extends FlatFileItemReader<AnnotationMongo> {
 
     public AnnotationFlatFileReader(File file, String vepVersion, String vepCacheVersion) {
         Resource resource = new GzipLazyResource(file);

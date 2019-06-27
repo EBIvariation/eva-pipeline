@@ -31,8 +31,8 @@ import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.data.mongodb.core.MongoOperations;
 
-import uk.ac.ebi.eva.commons.models.mongo.entity.VariantDocument;
-import uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantStatsMongo;
+import uk.ac.ebi.eva.commons.mongodb.entities.VariantMongo;
+import uk.ac.ebi.eva.commons.mongodb.entities.subdocuments.VariantStatisticsMongo;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -53,8 +53,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static uk.ac.ebi.eva.commons.models.data.VariantSourceEntity.FILEID_FIELD;
-import static uk.ac.ebi.eva.commons.models.data.VariantSourceEntity.STUDYID_FIELD;
+import static uk.ac.ebi.eva.commons.mongodb.entities.VariantSourceMongo.FILEID_FIELD;
+import static uk.ac.ebi.eva.commons.mongodb.entities.VariantSourceMongo.STUDYID_FIELD;
 
 public abstract class JobTestUtils {
     private static final Logger logger = LoggerFactory.getLogger(JobTestUtils.class);
@@ -174,7 +174,7 @@ public abstract class JobTestUtils {
         assertEquals(BatchStatus.FAILED, jobExecution.getStatus());
     }
 
-    public static VariantStats buildVariantStats(VariantStatsMongo variantStatsMongo) {
+    public static VariantStats buildVariantStats(VariantStatisticsMongo variantStatsMongo) {
         return new VariantStats("",
                                 0,
                                 "",
@@ -197,7 +197,7 @@ public abstract class JobTestUtils {
         assertTrue(cursor.hasNext());
 
         DBObject dbObject = cursor.iterator().next();
-        VariantDocument variantDocument = mongoOperations.getConverter().read(VariantDocument.class, dbObject);
+        VariantMongo variantDocument = mongoOperations.getConverter().read(VariantMongo.class, dbObject);
         return variantDocument.getVariantStatsMongo().stream()
                               .map(JobTestUtils::buildVariantStats)
                               .collect(toList());

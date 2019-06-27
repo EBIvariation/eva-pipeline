@@ -17,9 +17,10 @@
 package uk.ac.ebi.eva.pipeline.model;
 
 import org.junit.Test;
+import uk.ac.ebi.eva.commons.core.models.factories.VariantGenotypedVcfFactory;
+import uk.ac.ebi.eva.commons.core.models.factories.VariantVcfFactory;
+import uk.ac.ebi.eva.commons.core.models.pipeline.Variant;
 
-import uk.ac.ebi.eva.commons.models.data.Variant;
-import uk.ac.ebi.eva.pipeline.io.mappers.VariantVcfFactory;
 
 import java.util.List;
 
@@ -35,7 +36,7 @@ public class EnsemblVariantTest {
 
     private static final String STUDY_ID = "sid";
 
-    private VariantVcfFactory factory = new VariantVcfFactory();
+    private VariantVcfFactory factory = new VariantGenotypedVcfFactory();
 
     @Test
     public void transformInsertionsToEnsembleCoordinates() throws Exception {
@@ -79,7 +80,7 @@ public class EnsemblVariantTest {
         List<Variant> result = factory.create(FILE_ID, STUDY_ID, line);
         assertEquals(1, result.size());
 
-        int start = result.get(0).getStart();
+        long start = result.get(0).getStart();
         String reference = result.get(0).getReference();
         String alternate = result.get(0).getAlternate();
 
@@ -100,7 +101,7 @@ public class EnsemblVariantTest {
         List<Variant> result = factory.create(FILE_ID, STUDY_ID, line);
         assertEquals(1, result.size());
 
-        int start = result.get(0).getStart();
+        long start = result.get(0).getStart();
         String reference = result.get(0).getReference();
         String alternate = result.get(0).getAlternate();
 

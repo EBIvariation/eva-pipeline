@@ -16,12 +16,11 @@
 package uk.ac.ebi.eva.pipeline.io.mappers;
 
 import org.junit.Test;
+import uk.ac.ebi.eva.commons.core.models.factories.VariantGenotypedVcfFactory;
+import uk.ac.ebi.eva.commons.core.models.factories.VariantVcfFactory;
+import uk.ac.ebi.eva.commons.core.models.pipeline.Variant;
+import uk.ac.ebi.eva.commons.core.models.pipeline.VariantSourceEntry;
 
-import uk.ac.ebi.eva.commons.models.data.Variant;
-import uk.ac.ebi.eva.commons.models.data.VariantSourceEntry;
-
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -43,7 +42,7 @@ public class VariantVcfFactoryTest {
 
     private static final String STUDY_ID = "studyId";
 
-    private VariantVcfFactory factory = new VariantVcfFactory();
+    private VariantVcfFactory factory = new VariantGenotypedVcfFactory();
 
     @Test
     public void testRemoveChrPrefixInAnyCase() {

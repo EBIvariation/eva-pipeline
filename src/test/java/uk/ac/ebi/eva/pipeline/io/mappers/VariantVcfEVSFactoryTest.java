@@ -16,11 +16,13 @@
 package uk.ac.ebi.eva.pipeline.io.mappers;
 
 import org.junit.Test;
-import org.opencb.biodata.models.feature.Genotype;
 import org.opencb.commons.test.GenericTest;
-
-import uk.ac.ebi.eva.commons.models.data.Variant;
-import uk.ac.ebi.eva.commons.models.data.VariantSourceEntry;
+import uk.ac.ebi.eva.commons.core.models.factories.VariantGenotypedVcfFactory;
+import uk.ac.ebi.eva.commons.core.models.factories.VariantVcfEVSFactory;
+import uk.ac.ebi.eva.commons.core.models.factories.VariantVcfFactory;
+import uk.ac.ebi.eva.commons.core.models.genotype.Genotype;
+import uk.ac.ebi.eva.commons.core.models.pipeline.Variant;
+import uk.ac.ebi.eva.commons.core.models.pipeline.VariantSourceEntry;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -44,7 +46,7 @@ public class VariantVcfEVSFactoryTest extends GenericTest {
     private static final String FILE_ID = "EVS";
     private static final String STUDY_ID = "EVS";
 
-    private VariantVcfFactory factory = new VariantVcfEVSFactory();
+    private VariantVcfFactory factory = new VariantGenotypedVcfFactory();
 
     @Test
     public void testCreate_AA_AC_TT_GT() throws Exception { // AA,AC,TT,GT,...

@@ -31,9 +31,9 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-import uk.ac.ebi.eva.commons.models.mongo.entity.Annotation;
-import uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.ConsequenceType;
-import uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.Score;
+import uk.ac.ebi.eva.commons.mongodb.entities.AnnotationMongo;
+import uk.ac.ebi.eva.commons.mongodb.entities.subdocuments.ConsequenceTypeMongo;
+import uk.ac.ebi.eva.commons.mongodb.entities.subdocuments.ScoreMongo;
 import uk.ac.ebi.eva.pipeline.Application;
 import uk.ac.ebi.eva.pipeline.configuration.MongoConfiguration;
 import uk.ac.ebi.eva.pipeline.io.mappers.AnnotationLineMapper;
@@ -55,12 +55,12 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import static uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantAnnotation.POLYPHEN_FIELD;
-import static uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantAnnotation.SIFT_FIELD;
-import static uk.ac.ebi.eva.commons.models.mongo.entity.Annotation.CONSEQUENCE_TYPE_FIELD;
-import static uk.ac.ebi.eva.commons.models.mongo.entity.Annotation.XREFS_FIELD;
-import static uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.Score.SCORE_DESCRIPTION_FIELD;
-import static uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.Score.SCORE_SCORE_FIELD;
+import static uk.ac.ebi.eva.commons.mongodb.entities.AnnotationMongo.CONSEQUENCE_TYPE_FIELD;
+import static uk.ac.ebi.eva.commons.mongodb.entities.AnnotationMongo.XREFS_FIELD;
+import static uk.ac.ebi.eva.commons.mongodb.entities.subdocuments.ConsequenceTypeMongo.POLYPHEN_FIELD;
+import static uk.ac.ebi.eva.commons.mongodb.entities.subdocuments.ConsequenceTypeMongo.SIFT_FIELD;
+import static uk.ac.ebi.eva.commons.mongodb.entities.subdocuments.ScoreMongo.SCORE_DESCRIPTION_FIELD;
+import static uk.ac.ebi.eva.commons.mongodb.entities.subdocuments.ScoreMongo.SCORE_SCORE_FIELD;
 import static uk.ac.ebi.eva.test.data.VepOutputContent.vepOutputContent;
 import static uk.ac.ebi.eva.test.utils.JobTestUtils.count;
 
@@ -104,7 +104,7 @@ public class AnnotationMongoWriterTest {
     public void shouldWriteAllFieldsIntoMongoDb() throws Exception {
         String databaseName = mongoRule.getRandomTemporaryDatabaseName();
 
-        List<Annotation> annotations = new ArrayList<>();
+        List<AnnotationMongo> annotations = new ArrayList<>();
         for (String annotLine : vepOutputContent.split("\n")) {
             annotations.add(annotationLineMapper.mapLine(annotLine, 0));
         }
@@ -143,9 +143,9 @@ public class AnnotationMongoWriterTest {
         String databaseName = mongoRule.getRandomTemporaryDatabaseName();
 
         //prepare annotation sets
-        List<Annotation> annotationSet1 = new ArrayList<>();
-        List<Annotation> annotationSet2 = new ArrayList<>();
-        List<Annotation> annotationSet3 = new ArrayList<>();
+        List<AnnotationMongo> annotationSet1 = new ArrayList<>();
+        List<AnnotationMongo> annotationSet2 = new ArrayList<>();
+        List<AnnotationMongo> annotationSet3 = new ArrayList<>();
 
         String[] vepOutputLines = vepOutputContent.split("\n");
 
@@ -188,17 +188,18 @@ public class AnnotationMongoWriterTest {
     public void shouldWriteSubstitutionScoresIntoMongoDb() throws Exception {
         String databaseName = mongoRule.getRandomTemporaryDatabaseName();
 
-        Annotation annotation = new Annotation("X", 1, 10, "A", "T",
+        AnnotationMongo annotation = new AnnotationMongo("X", 1, 10, "A", "T",
                 VEP_VERSION, VEP_CACHE_VERSION);
 
-        Score siftScore = new Score(0.02, "deleterious");
-        Score polyphenScore = new Score(0.846, "possibly_damaging");
+        ScoreMongo siftScore = new ScoreMongo(0.02, "deleterious");
+        ScoreMongo polyphenScore = new ScoreMongo(0.846, "possibly_damaging");
 
-        ConsequenceType consequenceType = new ConsequenceType();
+        ConsequenceTypeMongo consequenceType = new ConsequenceTypeMongo(null, null, null, null, null, null, null, null, null, null, null, null, null, null);
         consequenceType.setSift(siftScore);
         consequenceType.setPolyphen(polyphenScore);
 
-        annotation.addConsequenceType(consequenceType);
+//        addConsequenceType is protected in variation-commons
+//        annotation.addConsequenceType(consequenceType);
 
         MongoOperations operations = MongoConfiguration.getMongoOperations(databaseName, mongoConnection,
                                                                            mongoMappingContext);
@@ -250,7 +251,7 @@ public class AnnotationMongoWriterTest {
     public void shouldUpdateFieldsOfExistingAnnotationVersion() throws Exception {
         String databaseName = mongoRule.getRandomTemporaryDatabaseName();
 
-        List<Annotation> annotations = new ArrayList<>();
+        List<AnnotationMongo> annotations = new ArrayList<>();
         for (String annotLine : vepOutputContent.split("\n")) {
             annotations.add(annotationLineMapper.mapLine(annotLine, 0));
         }
@@ -283,9 +284,9 @@ public class AnnotationMongoWriterTest {
         String databaseName = mongoRule.getRandomTemporaryDatabaseName();
 
         String annotLine = vepOutputContent.split("\n")[1];
-        List<List<Annotation>> firstVersionAnnotation = Collections.singletonList(Collections.singletonList(
+        List<List<AnnotationMongo>> firstVersionAnnotation = Collections.singletonList(Collections.singletonList(
                 annotationLineMapper.mapLine(annotLine, 0)));
-        List<List<Annotation>> secondVersionAnnotation = Collections.singletonList((Collections.singletonList(
+        List<List<AnnotationMongo>> secondVersionAnnotation = Collections.singletonList((Collections.singletonList(
                 differentVersionAnnotationLineMapper.mapLine(annotLine, 0))));
 
         // load the annotation

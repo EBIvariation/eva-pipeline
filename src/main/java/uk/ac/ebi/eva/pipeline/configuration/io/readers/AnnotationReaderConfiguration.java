@@ -20,7 +20,7 @@ import org.springframework.batch.item.ItemStreamReader;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import uk.ac.ebi.eva.commons.models.mongo.entity.Annotation;
+import uk.ac.ebi.eva.commons.mongodb.entities.AnnotationMongo;
 import uk.ac.ebi.eva.pipeline.io.readers.AnnotationFlatFileReader;
 import uk.ac.ebi.eva.pipeline.parameters.AnnotationParameters;
 
@@ -34,7 +34,7 @@ public class AnnotationReaderConfiguration {
 
     @Bean(VARIANT_ANNOTATION_READER)
     @StepScope
-    public ItemStreamReader<Annotation> annotationReader(AnnotationParameters annotationParameters) {
+    public ItemStreamReader<AnnotationMongo> annotationReader(AnnotationParameters annotationParameters) {
         return new AnnotationFlatFileReader(annotationParameters.getVepOutput(), annotationParameters.getVepVersion(),
                 annotationParameters.getVepCacheVersion());
     }

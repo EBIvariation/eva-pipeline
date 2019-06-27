@@ -17,7 +17,7 @@ package uk.ac.ebi.eva.pipeline.jobs.steps.processors;
 
 import org.springframework.batch.item.ItemProcessor;
 
-import uk.ac.ebi.eva.commons.models.mongo.entity.Annotation;
+import uk.ac.ebi.eva.commons.mongodb.entities.AnnotationMongo;
 import uk.ac.ebi.eva.pipeline.io.VepProcess;
 import uk.ac.ebi.eva.pipeline.io.mappers.AnnotationLineMapper;
 import uk.ac.ebi.eva.pipeline.parameters.AnnotationParameters;
@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
  * ItemStreamWriter that takes VariantWrappers and serialize them into a {@link VepProcess}, which will be responsible
  * for annotating the variants and writing them to a file.
  */
-public class AnnotationParserProcessor implements ItemProcessor<List<String>, List<Annotation>> {
+public class AnnotationParserProcessor implements ItemProcessor<List<String>, List<AnnotationMongo>> {
 
     private static final int UNUSED_LINE_NUMBER = 0;
 
@@ -41,7 +41,7 @@ public class AnnotationParserProcessor implements ItemProcessor<List<String>, Li
     }
 
     @Override
-    public List<Annotation> process(List<String> ensemblVariants) throws Exception {
+    public List<AnnotationMongo> process(List<String> ensemblVariants) throws Exception {
         return ensemblVariants.stream()
                               .map(ensemblVariant -> annotationLineMapper.mapLine(ensemblVariant, UNUSED_LINE_NUMBER))
                               .collect(Collectors.toList());

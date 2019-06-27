@@ -1,0 +1,101 @@
+C:\Users\22672\Projects\ubuntu16\shared\eva-pipeline-1>mvn package -DskipTests
+[INFO] Scanning for projects...
+[INFO]
+[INFO] ---------------------< uk.ac.ebi.eva:eva-pipeline >---------------------
+[INFO] Building eva-pipeline 2.1-SNAPSHOT
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO]
+[INFO] --- git-commit-id-plugin:2.2.5:revision (default) @ eva-pipeline ---
+[INFO] dotGitDirectory C:\Users\22672\Projects\ubuntu16\shared\eva-pipeline-1\.git
+[INFO] git.build.user.name Dalio
+[INFO] git.build.user.email 2267264176@qq.com
+[INFO] git.branch master
+[INFO] --always = true
+[INFO] --dirty = -dirty
+[INFO] --abbrev = 7
+[INFO] Tag refs [[Ref[refs/tags/v1.0=e7f8e5e8d94566ccff04efd1be3baaa0bca06992], Ref[refs/tags/v1.1=eb95c4329b41b22837a3f3bd8ace70af07362a50], Ref[refs/tags/v2.0=5e00d9d62931bf3066b1e9e0b83d5ca92cebc190], Ref[refs/tags/v2.0-beta1=7daefab0f2dc4c4e119301794d8fb389693b574d], Ref[refs/tags/v2.0-beta2=f64d6b87649cf1eb7cd979382e274c528312fd34], Ref[refs/tags/v2.0-beta3=8595df6e3cb92dc9261402527729468a5043257c], Ref[refs/tags/v2.0-beta4=bbce134e1eef5d7e609afd30b5fff981ee03f218], Ref[refs/tags/v2.0-beta5=f5e9162a69da428d6c6ebda827020eaefb1d1f13], Ref[refs/tags/v2.0.1=fc968d4d05326c2c809db4206bd32dc92ab119e3]]]
+[INFO] Created map: [{}]
+[INFO] evalCommit is [376f687832b3dac626ee4c1bc07cccfae3ac6368]
+[INFO] git.commit.id.describe 376f687-dirty
+[INFO] git.commit.id 376f687832b3dac626ee4c1bc07cccfae3ac6368
+[INFO] git.commit.id.abbrev 376f687
+[INFO] git.dirty true
+[INFO] git.commit.user.name Dalio
+[INFO] git.commit.user.email 2267264176@qq.com
+[INFO] git.commit.message.full make test use classes of variation-commons
+[INFO] git.commit.message.short make test use classes of variation-commons
+[INFO] git.commit.time 2019-03-24T14:31:35+0800
+[INFO] git.remote.origin.url https://github.com/JDalio/eva-pipeline-1
+[INFO] git.tags
+[INFO] evalCommit is [376f687832b3dac626ee4c1bc07cccfae3ac6368]
+[INFO] Tag refs [[Ref[refs/tags/v1.0=e7f8e5e8d94566ccff04efd1be3baaa0bca06992], Ref[refs/tags/v1.1=eb95c4329b41b22837a3f3bd8ace70af07362a50], Ref[refs/tags/v2.0=5e00d9d62931bf3066b1e9e0b83d5ca92cebc190], Ref[refs/tags/v2.0-beta1=7daefab0f2dc4c4e119301794d8fb389693b574d], Ref[refs/tags/v2.0-beta2=f64d6b87649cf1eb7cd979382e274c528312fd34], Ref[refs/tags/v2.0-beta3=8595df6e3cb92dc9261402527729468a5043257c], Ref[refs/tags/v2.0-beta4=bbce134e1eef5d7e609afd30b5fff981ee03f218], Ref[refs/tags/v2.0-beta5=f5e9162a69da428d6c6ebda827020eaefb1d1f13], Ref[refs/tags/v2.0.1=fc968d4d05326c2c809db4206bd32dc92ab119e3]]]
+[INFO] Created map: [{}]
+[INFO] git.closest.tag.name
+[INFO] evalCommit is [376f687832b3dac626ee4c1bc07cccfae3ac6368]
+[INFO] Tag refs [[Ref[refs/tags/v1.0=e7f8e5e8d94566ccff04efd1be3baaa0bca06992], Ref[refs/tags/v1.1=eb95c4329b41b22837a3f3bd8ace70af07362a50], Ref[refs/tags/v2.0=5e00d9d62931bf3066b1e9e0b83d5ca92cebc190], Ref[refs/tags/v2.0-beta1=7daefab0f2dc4c4e119301794d8fb389693b574d], Ref[refs/tags/v2.0-beta2=f64d6b87649cf1eb7cd979382e274c528312fd34], Ref[refs/tags/v2.0-beta3=8595df6e3cb92dc9261402527729468a5043257c], Ref[refs/tags/v2.0-beta4=bbce134e1eef5d7e609afd30b5fff981ee03f218], Ref[refs/tags/v2.0-beta5=f5e9162a69da428d6c6ebda827020eaefb1d1f13], Ref[refs/tags/v2.0.1=fc968d4d05326c2c809db4206bd32dc92ab119e3]]]
+[INFO] Created map: [{}]
+[INFO] git.closest.tag.commit.count
+[INFO] git.total.commit.count 1034
+[INFO] git.build.time 2019-03-24T16:29:58+0800
+[INFO] git.build.version 2.1-SNAPSHOT
+[INFO] git.build.host Dalio
+[INFO] git.commit.id.describe-short 376f687-dirty
+[INFO] found property git.build.user.email
+[INFO] found property git.build.host
+[INFO] found property git.dirty
+[INFO] found property git.remote.origin.url
+[INFO] found property git.closest.tag.name
+[INFO] found property git.total.commit.count
+[INFO] found property git.commit.id.describe-short
+[INFO] found property git.commit.user.email
+[INFO] found property git.commit.time
+[INFO] found property git.commit.message.full
+[INFO] found property git.build.version
+[INFO] found property git.commit.message.short
+[INFO] found property git.commit.id.abbrev
+[INFO] found property git.branch
+[INFO] found property git.build.user.name
+[INFO] found property git.closest.tag.commit.count
+[INFO] found property git.commit.id.describe
+[INFO] found property git.commit.id
+[INFO] found property git.tags
+[INFO] found property git.build.time
+[INFO] found property git.commit.user.name
+[INFO] Writing properties file to [C:\Users\22672\Projects\ubuntu16\shared\eva-pipeline-1\target\classes\git.properties] (for module eva-pipeline)...
+[INFO]
+[INFO] --- maven-resources-plugin:2.6:resources (default-resources) @ eva-pipeline ---
+[INFO] Using 'UTF-8' encoding to copy filtered resources.
+[INFO] Copying 2 resources
+[INFO] Copying 3 resources
+[INFO]
+[INFO] --- maven-compiler-plugin:3.2:compile (default-compile) @ eva-pipeline ---
+[INFO] Changes detected - recompiling the module!
+[INFO] Compiling 147 source files to C:\Users\22672\Projects\ubuntu16\shared\eva-pipeline-1\target\classes
+[WARNING] /C:/Users/22672/Projects/ubuntu16/shared/eva-pipeline-1/src/main/java/uk/ac/ebi/eva/pipeline/jobs/steps/processors/VariantNoAlternateFilterProcessor.java:[33,42] uk.ac.ebi.eva.commons.core.models.VariantType中的NO_ALTERNATE已过时
+[INFO]
+[INFO] --- maven-resources-plugin:2.6:testResources (default-testResources) @ eva-pipeline ---
+[INFO] Using 'UTF-8' encoding to copy filtered resources.
+[INFO] Copying 39 resources
+[INFO]
+[INFO] --- maven-compiler-plugin:3.2:testCompile (default-testCompile) @ eva-pipeline ---
+[INFO] Changes detected - recompiling the module!
+[INFO] Compiling 110 source files to C:\Users\22672\Projects\ubuntu16\shared\eva-pipeline-1\target\test-classes
+[WARNING] /C:/Users/22672/Projects/ubuntu16/shared/eva-pipeline-1/src/test/java/uk/ac/ebi/eva/test/rules/TemporaryMongoRule.java:[78,27] com.mongodb.Mongo中的getDB(java.lang.String)已过时
+[WARNING] /C:/Users/22672/Projects/ubuntu16/shared/eva-pipeline-1/src/test/java/uk/ac/ebi/eva/test/rules/TemporaryMongoRule.java:[84,38] com.mongodb.Mongo中的getDB(java.lang.String)已过时
+[WARNING] /C:/Users/22672/Projects/ubuntu16/shared/eva-pipeline-1/src/test/java/uk/ac/ebi/eva/pipeline/jobs/steps/processors/VariantNoAlternateFilterProcessorTest.java:[78,33] uk.ac.ebi.eva.commons.core.models.VariantType中的NO_ALTERNATE已 过时
+[INFO] /C:/Users/22672/Projects/ubuntu16/shared/eva-pipeline-1/src/test/java/uk/ac/ebi/eva/commons/models/converters/data/VariantToDBObjectConverterTest.java: 某些输入文件使用了未经检查或不安全的操作。
+[INFO] /C:/Users/22672/Projects/ubuntu16/shared/eva-pipeline-1/src/test/java/uk/ac/ebi/eva/commons/models/converters/data/VariantToDBObjectConverterTest.java: 有关详细信息, 请使用 -Xlint:unchecked 重新编译。
+[INFO]
+[INFO] --- maven-surefire-plugin:2.18.1:test (default-test) @ eva-pipeline ---
+[INFO] Tests are skipped.
+[INFO]
+[INFO] --- maven-jar-plugin:2.6:jar (default-jar) @ eva-pipeline ---
+[INFO] Building jar: C:\Users\22672\Projects\ubuntu16\shared\eva-pipeline-1\target\eva-pipeline-2.1-SNAPSHOT-376f687.jar
+[INFO]
+[INFO] --- spring-boot-maven-plugin:1.4.2.RELEASE:repackage (default) @ eva-pipeline ---
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  36.263 s
+[INFO] Finished at: 2019-03-24T16:30:22+08:00
+[INFO] ------------------------------------------------------------------------
