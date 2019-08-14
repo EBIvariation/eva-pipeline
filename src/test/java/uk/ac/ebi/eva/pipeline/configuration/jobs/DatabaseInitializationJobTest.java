@@ -29,10 +29,8 @@ public class DatabaseInitializationJobTest {
     private static final String COLLECTION_FEATURES_NAME = "features";
 
     private static final String DATABASE_NAME = "databaseInitializationTestDb";
-    private static final String INPUT_FILE = "/input-files/gtf/small_sample.gtf.gz";
 
-    @Rule
-    public PipelineTemporaryFolderRule temporaryFolderRule = new PipelineTemporaryFolderRule();
+    private static final String INPUT_FILE = "/input-files/gtf/small_sample.gtf.gz";
 
     @Rule
     public TemporaryMongoRule mongoRule = new TemporaryMongoRule();
