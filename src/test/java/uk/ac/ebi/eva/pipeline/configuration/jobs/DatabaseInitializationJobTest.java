@@ -50,6 +50,6 @@ public class DatabaseInitializationJobTest {
                 .toJobParameters();
         JobExecution jobExecution = jobLauncherTestUtils.launchJob(jobParameters);
         assertCompleted(jobExecution);
-        assertEquals(252L, mongoRule.getCollection(DATABASE_NAME, "features").count());
+        assertEquals(252L, mongoRule.getCollection(DATABASE_NAME, COLLECTION_FEATURES_NAME).count());
     }
 }
