@@ -160,4 +160,9 @@ public class EvaJobParameterBuilder extends JobParametersBuilder {
         addParameter(JobParametersNames.CONFIG_CHUNK_SIZE, new JobParameter(chunkSize));
         return this;
     }
+
+    public EvaJobParameterBuilder inputGtf(String inputGtf) {
+        addParameter(JobParametersNames.INPUT_GTF, new JobParameter(inputGtf));
+        return this;
+    }
 }
