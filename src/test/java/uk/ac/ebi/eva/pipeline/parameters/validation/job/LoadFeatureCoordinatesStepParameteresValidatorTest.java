@@ -30,7 +30,7 @@ import java.util.TreeMap;
 
 import static uk.ac.ebi.eva.utils.FileUtils.getResource;
 
-public class DatabaseInitializationJobParametersValidatorTest {
+public class LoadFeatureCoordinatesStepParameteresValidatorTest {
 
     private static final String COLLECTION_FEATURES_NAME = "features";
 
@@ -41,7 +41,7 @@ public class DatabaseInitializationJobParametersValidatorTest {
     @Rule
     public PipelineTemporaryFolderRule temporaryFolder = new PipelineTemporaryFolderRule();
 
-    private DatabaseInitializationJobParametersValidator validator;
+    private LoadFeatureCoordinatesStepParameteresValidator validator;
 
     private Map<String, JobParameter> requiredParameters;
 
@@ -49,7 +49,7 @@ public class DatabaseInitializationJobParametersValidatorTest {
 
     @Before
     public void setUp() throws Exception {
-        validator = new DatabaseInitializationJobParametersValidator();
+        validator = new LoadFeatureCoordinatesStepParameteresValidator();
 
         requiredParameters = new TreeMap<>();
         requiredParameters.put(JobParametersNames.DB_NAME, new JobParameter(DATABASE_NAME));
@@ -83,6 +83,24 @@ public class DatabaseInitializationJobParametersValidatorTest {
         parameters.putAll(requiredParameters);
         parameters.putAll(optionalParameters);
         parameters.remove(JobParametersNames.DB_NAME);
+        validator.validate(new JobParameters(parameters));
+    }
+
+    @Test(expected = JobParametersInvalidException.class)
+    public void dbCollectionFeatureNameIsRequired() throws JobParametersInvalidException {
+        Map<String, JobParameter> parameters = new TreeMap<>();
+        parameters.putAll(requiredParameters);
+        parameters.putAll(optionalParameters);
+        parameters.remove(JobParametersNames.DB_COLLECTIONS_FEATURES_NAME);
+        validator.validate(new JobParameters(parameters));
+    }
+
+    @Test(expected = JobParametersInvalidException.class)
+    public void inputGTFIsRequired() throws JobParametersInvalidException {
+        Map<String, JobParameter> parameters = new TreeMap<>();
+        parameters.putAll(requiredParameters);
+        parameters.putAll(optionalParameters);
+        parameters.remove(JobParametersNames.INPUT_GTF);
         validator.validate(new JobParameters(parameters));
     }
 }

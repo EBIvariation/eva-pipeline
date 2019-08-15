@@ -27,7 +27,7 @@ import uk.ac.ebi.eva.pipeline.parameters.validation.step.LoadGenesStepParameters
 import java.util.ArrayList;
 import java.util.List;
 
-public class DatabaseInitializationJobParametersValidator extends DefaultJobParametersValidator {
+public class LoadFeatureCoordinatesStepParameteresValidator extends DefaultJobParametersValidator {
 
     @Override
     public void validate(JobParameters parameters) throws JobParametersInvalidException {
