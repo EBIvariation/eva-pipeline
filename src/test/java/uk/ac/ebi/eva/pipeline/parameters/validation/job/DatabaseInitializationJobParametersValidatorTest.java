@@ -54,7 +54,7 @@ public class DatabaseInitializationJobParametersValidatorTest {
         requiredParameters = new TreeMap<>();
         requiredParameters.put(JobParametersNames.DB_NAME, new JobParameter(DATABASE_NAME));
         requiredParameters.put(JobParametersNames.DB_COLLECTIONS_FEATURES_NAME,
-                new JobParameter(COLLECTION_FEATURES_NAME));
+                               new JobParameter(COLLECTION_FEATURES_NAME));
         requiredParameters.put(JobParametersNames.INPUT_GTF, new JobParameter(getResource(INPUT_FILE)
                 .getAbsolutePath()));
 
