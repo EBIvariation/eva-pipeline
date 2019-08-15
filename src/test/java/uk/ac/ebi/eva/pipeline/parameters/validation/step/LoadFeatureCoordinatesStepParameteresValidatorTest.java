@@ -22,7 +22,7 @@ import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersInvalidException;
 
-import uk.ac.ebi.eva.pipeline.configuration.jobs.steps.LoadGenesStepConfiguration;
+import uk.ac.ebi.eva.pipeline.configuration.jobs.steps.LoadFeatureCoordinatesStepConfiguration;
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 
@@ -31,11 +31,11 @@ import java.util.Map;
 import java.util.TreeMap;
 
 /**
- * Tests that the arguments necessary to run a {@link LoadGenesStepConfiguration} are
+ * Tests that the arguments necessary to run a {@link LoadFeatureCoordinatesStepConfiguration} are
  * correctly validated
  */
-public class LoadGenesStepParametersValidatorTest {
-    private LoadGenesStepParametersValidator validator;
+public class LoadFeatureCoordinatesStepParameteresValidatorTest {
+    private LoadFeatureCoordinatesStepParameteresValidator validator;
 
     @Rule
     public PipelineTemporaryFolderRule temporaryFolderRule = new PipelineTemporaryFolderRule();
@@ -46,7 +46,7 @@ public class LoadGenesStepParametersValidatorTest {
 
     @Before
     public void setUp() throws Exception {
-        validator = new LoadGenesStepParametersValidator();
+        validator = new LoadFeatureCoordinatesStepParameteresValidator();
 
         requiredParameters = new TreeMap<>();
         requiredParameters.put(JobParametersNames.DB_NAME, new JobParameter("dbName"));

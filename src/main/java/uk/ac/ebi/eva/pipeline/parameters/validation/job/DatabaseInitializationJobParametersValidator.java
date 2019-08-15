@@ -22,7 +22,7 @@ import org.springframework.batch.core.JobParametersValidator;
 import org.springframework.batch.core.job.CompositeJobParametersValidator;
 import org.springframework.batch.core.job.DefaultJobParametersValidator;
 import uk.ac.ebi.eva.pipeline.parameters.validation.step.CreateDatabaseIndexesStepParametersValidator;
-import uk.ac.ebi.eva.pipeline.parameters.validation.step.LoadGenesStepParametersValidator;
+import uk.ac.ebi.eva.pipeline.parameters.validation.step.LoadFeatureCoordinatesStepParameteresValidator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,7 +38,7 @@ public class DatabaseInitializationJobParametersValidator extends DefaultJobPara
         List<JobParametersValidator> jobParametersValidators = new ArrayList<>();
 
         jobParametersValidators.add(new CreateDatabaseIndexesStepParametersValidator());
-        jobParametersValidators.add(new LoadGenesStepParametersValidator());
+        jobParametersValidators.add(new LoadFeatureCoordinatesStepParameteresValidator());
 
         CompositeJobParametersValidator compositeJobParametersValidator = new CompositeJobParametersValidator();
         compositeJobParametersValidator.setValidators(jobParametersValidators);

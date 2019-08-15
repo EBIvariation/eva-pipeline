@@ -21,7 +21,7 @@ import org.springframework.batch.core.JobParametersValidator;
 import org.springframework.batch.core.job.CompositeJobParametersValidator;
 import org.springframework.batch.core.job.DefaultJobParametersValidator;
 
-import uk.ac.ebi.eva.pipeline.configuration.jobs.steps.LoadGenesStepConfiguration;
+import uk.ac.ebi.eva.pipeline.configuration.jobs.steps.LoadFeatureCoordinatesStepConfiguration;
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 import uk.ac.ebi.eva.pipeline.parameters.validation.ConfigRestartabilityAllowValidator;
 import uk.ac.ebi.eva.pipeline.parameters.validation.DbCollectionsFeaturesNameValidator;
@@ -32,7 +32,7 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Validates the job parameters necessary to execute an {@link LoadGenesStepConfiguration}
+ * Validates the job parameters necessary to execute an {@link LoadFeatureCoordinatesStepConfiguration}
  */
 public class CreateDatabaseIndexesStepParametersValidator extends DefaultJobParametersValidator {
 
