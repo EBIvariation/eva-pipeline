@@ -64,10 +64,10 @@ public class DatabaseInitializationJobParametersValidatorTest {
 
     @Test
     public void allParametersAreValid() throws JobParametersInvalidException {
-        Map<String, JobParameter> parameterMap = new TreeMap<>();
-        parameterMap.putAll(requiredParameters);
-        parameterMap.putAll(optionalParameters);
-        validator.validate(new JobParameters(parameterMap));
+        Map<String, JobParameter> parameters = new TreeMap<>();
+        parameters.putAll(requiredParameters);
+        parameters.putAll(optionalParameters);
+        validator.validate(new JobParameters(parameters));
     }
 
     @Test
