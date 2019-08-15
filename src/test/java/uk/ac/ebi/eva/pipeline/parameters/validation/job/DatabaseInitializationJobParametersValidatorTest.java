@@ -30,7 +30,7 @@ import java.util.TreeMap;
 
 import static uk.ac.ebi.eva.utils.FileUtils.getResource;
 
-public class LoadFeatureCoordinatesStepParameteresValidatorTest {
+public class DatabaseInitializationJobParametersValidatorTest {
 
     private static final String COLLECTION_FEATURES_NAME = "features";
 
@@ -41,7 +41,7 @@ public class LoadFeatureCoordinatesStepParameteresValidatorTest {
     @Rule
     public PipelineTemporaryFolderRule temporaryFolder = new PipelineTemporaryFolderRule();
 
-    private LoadFeatureCoordinatesStepParameteresValidator validator;
+    private DatabaseInitializationJobParametersValidator validator;
 
     private Map<String, JobParameter> requiredParameters;
 
@@ -49,7 +49,7 @@ public class LoadFeatureCoordinatesStepParameteresValidatorTest {
 
     @Before
     public void setUp() throws Exception {
-        validator = new LoadFeatureCoordinatesStepParameteresValidator();
+        validator = new DatabaseInitializationJobParametersValidator();
 
         requiredParameters = new TreeMap<>();
         requiredParameters.put(JobParametersNames.DB_NAME, new JobParameter(DATABASE_NAME));
