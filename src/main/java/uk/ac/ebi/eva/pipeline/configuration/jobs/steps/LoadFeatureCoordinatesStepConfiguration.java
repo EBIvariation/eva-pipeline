@@ -42,7 +42,7 @@ import uk.ac.ebi.eva.pipeline.listeners.SkippedItemListener;
 import uk.ac.ebi.eva.pipeline.model.FeatureCoordinates;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 
-import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.LOAD_GENES_STEP;
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.LOAD_FEATURE_COORDINATES_STEP;
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.GENE_READER;
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.GENE_WRITER;
 
@@ -62,9 +62,9 @@ import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.GENE_WRITER;
 @Configuration
 @EnableBatchProcessing
 @Import({GeneReaderConfiguration.class, GeneWriterConfiguration.class, ChunkSizeCompletionPolicyConfiguration.class})
-public class LoadGenesStepConfiguration {
+public class LoadFeatureCoordinatesStepConfiguration {
 
-    private static final Logger logger = LoggerFactory.getLogger(LoadGenesStepConfiguration.class);
+    private static final Logger logger = LoggerFactory.getLogger(LoadFeatureCoordinatesStepConfiguration.class);
 
     @Autowired
     @Qualifier(GENE_READER)
@@ -74,12 +74,12 @@ public class LoadGenesStepConfiguration {
     @Qualifier(GENE_WRITER)
     private ItemWriter<FeatureCoordinates> writer;
 
-    @Bean(LOAD_GENES_STEP)
-    public Step loadGenesStep(StepBuilderFactory stepBuilderFactory, JobOptions jobOptions,
+    @Bean(LOAD_FEATURE_COORDINATES_STEP)
+    public Step LoadFeatureCoordinatesStep(StepBuilderFactory stepBuilderFactory, JobOptions jobOptions,
                               SimpleCompletionPolicy chunkSizeCompletionPolicy) {
-        logger.debug("Building '" + LOAD_GENES_STEP + "'");
+        logger.debug("Building '" + LOAD_FEATURE_COORDINATES_STEP + "'");
 
-        return stepBuilderFactory.get(LOAD_GENES_STEP)
+        return stepBuilderFactory.get(LOAD_FEATURE_COORDINATES_STEP)
                 .<FeatureCoordinates, FeatureCoordinates>chunk(chunkSizeCompletionPolicy)
                 .reader(reader)
                 .processor(new GeneFilterProcessor())

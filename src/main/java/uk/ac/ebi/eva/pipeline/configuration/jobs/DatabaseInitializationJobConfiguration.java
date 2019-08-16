@@ -30,12 +30,13 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
 
 import uk.ac.ebi.eva.pipeline.configuration.jobs.steps.CreateDatabaseIndexesStepConfiguration;
-import uk.ac.ebi.eva.pipeline.configuration.jobs.steps.LoadGenesStepConfiguration;
+import uk.ac.ebi.eva.pipeline.configuration.jobs.steps.LoadFeatureCoordinatesStepConfiguration;
 import uk.ac.ebi.eva.pipeline.parameters.NewJobIncrementer;
+import uk.ac.ebi.eva.pipeline.parameters.validation.job.DatabaseInitializationJobParametersValidator;
 
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.CREATE_DATABASE_INDEXES_STEP;
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.INIT_DATABASE_JOB;
-import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.LOAD_GENES_STEP;
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.LOAD_FEATURE_COORDINATES_STEP;
 
 /**
  * Job to initialize the databases that will be used in later jobs.
@@ -47,14 +48,14 @@ import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.LOAD_GENES_STEP;
  */
 @Configuration
 @EnableBatchProcessing
-@Import({LoadGenesStepConfiguration.class, CreateDatabaseIndexesStepConfiguration.class})
+@Import({LoadFeatureCoordinatesStepConfiguration.class, CreateDatabaseIndexesStepConfiguration.class})
 public class DatabaseInitializationJobConfiguration {
 
     private static final Logger logger = LoggerFactory.getLogger(DatabaseInitializationJobConfiguration.class);
 
     @Autowired
-    @Qualifier(LOAD_GENES_STEP)
-    private Step genesLoadStep;
+    @Qualifier(LOAD_FEATURE_COORDINATES_STEP)
+    private Step featureCoordinatesLoadStep;
 
     @Autowired
     @Qualifier(CREATE_DATABASE_INDEXES_STEP)
@@ -67,11 +68,12 @@ public class DatabaseInitializationJobConfiguration {
 
         JobBuilder jobBuilder = jobBuilderFactory
                 .get(INIT_DATABASE_JOB)
-                .incrementer(new NewJobIncrementer());
+                .incrementer(new NewJobIncrementer())
+                .validator(new DatabaseInitializationJobParametersValidator());
 
         return jobBuilder
                 .start(createDatabaseIndexesStep)
-                .next(genesLoadStep)
+                .next(featureCoordinatesLoadStep)
                 .build();
     }
 

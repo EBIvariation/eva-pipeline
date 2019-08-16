@@ -41,7 +41,7 @@ import static uk.ac.ebi.eva.utils.FileUtils.getResource;
 @RunWith(SpringRunner.class)
 @TestPropertySource({"classpath:common-configuration.properties", "classpath:test-mongo.properties"})
 @ContextConfiguration(classes = {DatabaseInitializationJobConfiguration.class, BatchTestConfiguration.class})
-public class LoadGenesStepTest {
+public class LoadFeatureCoordinatesStepTest {
 
     private static final String COLLECTION_FEATURES_NAME = "features";
 
@@ -54,14 +54,15 @@ public class LoadGenesStepTest {
     private JobLauncherTestUtils jobLauncherTestUtils;
 
     @Test
-    public void testLoadGenes() {
+    public void testLoadFeatureCoordinates() {
         String databaseName = mongoRule.createDBAndInsertDocuments(COLLECTION_FEATURES_NAME, Collections.EMPTY_LIST);
         JobParameters jobParameters = new EvaJobParameterBuilder()
                 .databaseName(databaseName)
                 .inputGtf(getResource(INPUT_FILE).getAbsolutePath())
                 .collectionFeaturesName(COLLECTION_FEATURES_NAME)
                 .toJobParameters();
-        JobExecution jobExecution = jobLauncherTestUtils.launchStep(BeanNames.LOAD_GENES_STEP, jobParameters);
+        JobExecution jobExecution = jobLauncherTestUtils.launchStep(BeanNames.LOAD_FEATURE_COORDINATES_STEP,
+                jobParameters);
         assertCompleted(jobExecution);
         assertEquals(252L, mongoRule.getCollection(databaseName, COLLECTION_FEATURES_NAME).count());
     }
