@@ -25,7 +25,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Profile;
 
-import uk.ac.ebi.eva.commons.models.mongo.entity.Annotation;
+import uk.ac.ebi.eva.commons.mongodb.entities.AnnotationMongo;
 import uk.ac.ebi.eva.pipeline.Application;
 
 import java.util.Arrays;
@@ -41,17 +41,17 @@ public class AnnotationCompositeWriterConfiguration {
 
     @Autowired
     @Qualifier(ANNOTATION_WRITER)
-    private ItemWriter<List<Annotation>> annotationItemWriter;
+    private ItemWriter<List<AnnotationMongo>> annotationItemWriter;
 
     @Autowired
     @Qualifier(ANNOTATION_IN_VARIANT_WRITER)
-    private ItemWriter<List<Annotation>> variantAnnotationItemWriter;
+    private ItemWriter<List<AnnotationMongo>> variantAnnotationItemWriter;
 
     @Bean(COMPOSITE_ANNOTATION_VARIANT_WRITER)
     @StepScope
     @Profile(Application.VARIANT_ANNOTATION_MONGO_PROFILE)
-    public CompositeItemWriter<List<Annotation>> compositeAnnotationItemWriter(){
-        CompositeItemWriter<List<Annotation>> writer = new CompositeItemWriter<>();
+    public CompositeItemWriter<List<AnnotationMongo>> compositeAnnotationItemWriter(){
+        CompositeItemWriter<List<AnnotationMongo>> writer = new CompositeItemWriter<>();
         writer.setDelegates(Arrays.asList(annotationItemWriter, variantAnnotationItemWriter));
         return writer;
     }

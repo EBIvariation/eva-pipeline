@@ -22,18 +22,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.item.file.LineMapper;
 
-import uk.ac.ebi.eva.commons.models.mongo.entity.Annotation;
-import uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.ConsequenceType;
-import uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.Score;
+import uk.ac.ebi.eva.commons.mongodb.entities.AnnotationMongo;
+import uk.ac.ebi.eva.commons.mongodb.entities.subdocuments.ConsequenceTypeMongo;
+import uk.ac.ebi.eva.commons.mongodb.entities.subdocuments.ScoreMongo;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * Map a line in VEP output file to {@link Annotation}
+ * Map a line in VEP output file to {@link AnnotationMongo}
  *
  * Example of VEP output line
  * 20_60343_G/A	20:60343	A	-	-	-	intergenic_variant	-	-	-	-	-	-
@@ -45,12 +46,12 @@ import java.util.stream.Collectors;
  * public methods in VepFormatReader can't be reused because there is a reference to the previous line (currentVariantString)
  * that prevent each line to be independent
  *
- * Here each line is mapped to {@link Annotation}; in case of two annotations for the same variant, a new
- * {@link Annotation} object is created containing only the fields that will be appended:
+ * Here each line is mapped to {@link AnnotationMongo}; in case of two annotations for the same variant, a new
+ * {@link AnnotationMongo} object is created containing only the fields that will be appended:
  *  - ConsequenceTypes
  *  - Hgvs
  */
-public class AnnotationLineMapper implements LineMapper<Annotation> {
+public class AnnotationLineMapper implements LineMapper<AnnotationMongo> {
     private static final Logger logger = LoggerFactory.getLogger(AnnotationLineMapper.class);
 
     private final String vepVersion;
@@ -62,10 +63,10 @@ public class AnnotationLineMapper implements LineMapper<Annotation> {
     }
 
     /**
-     * Map a line in VEP output file to {@link Annotation}
+     * Map a line in VEP output file to {@link AnnotationMongo}
      * @param line in VEP output
      * @param lineNumber
-     * @return a {@link Annotation}
+     * @return a {@link AnnotationMongo}
      *
      * Most of the code is from org.opencb.biodata.formats.annotation.io.VepFormatReader#read() with few differences:
      *  - An empty array is initialized for Hgvs (like ConsequenceTypes);
@@ -73,18 +74,13 @@ public class AnnotationLineMapper implements LineMapper<Annotation> {
      *  - The logic to move around the file (read line) and reference to previous line (currentVariantString) are removed;
      */
     @Override
-    public Annotation mapLine(String line, int lineNumber) {
-        ConsequenceType consequenceType = new ConsequenceType();
+    public AnnotationMongo mapLine(String line, int lineNumber) {
+        ConsequenceTypeMongo consequenceType = new ConsequenceTypeMongo(null, null,
+            null, null, null, null, null, null,
+            null, null, null, null, null, null);
         String[] lineFields = line.split("\t");
 
         Map<String,String> variantMap = parseVariant(lineFields[0], lineFields[1]);  // coordinates and alternative are only parsed once
-        Annotation currentAnnotation = new Annotation(
-                variantMap.get("chromosome"),
-                Integer.valueOf(variantMap.get("start")),
-                Integer.valueOf(variantMap.get("end")), variantMap.get("reference"),
-                variantMap.get("alternative"),
-                vepVersion,
-                vepCacheVersion);
 
         /**
          * parses extra column and populates fields as required.
@@ -101,16 +97,38 @@ public class AnnotationLineMapper implements LineMapper<Annotation> {
         } else {
             consequenceType.setSoAccessions(mapSoTermsToSoAccessions(lineFields[6].split(",")));
         }
-        currentAnnotation.addConsequenceType(consequenceType);
-        
-        return currentAnnotation;
+        AnnotationMongo currentAnnotation = new AnnotationMongo(
+            AnnotationMongo.buildAnnotationId(
+                variantMap.get("chromosome"),
+                Integer.valueOf(variantMap.get("start")),
+                variantMap.get("reference"),
+                variantMap.get("alternative"),
+                vepVersion,
+                vepCacheVersion),
+            variantMap.get("chromosome"),
+            Integer.valueOf(variantMap.get("start")),
+            Integer.valueOf(variantMap.get("end")),
+            vepVersion,
+            vepCacheVersion,
+            null,
+            Collections.singleton(consequenceType));
+
+        AnnotationMongo AnnotationWithXref = new AnnotationMongo(
+            variantMap.get("chromosome"),
+            Long.valueOf(variantMap.get("start")),
+            Long.valueOf(variantMap.get("end")),
+            variantMap.get("reference"),
+            variantMap.get("alternative"),
+            vepVersion,
+            vepCacheVersion);
+        return AnnotationWithXref.concatenate(currentAnnotation);
     }
 
     /**
      * From org.opencb.biodata.formats.annotation.io.VepFormatReader
      * #parseRemainingFields(org.opencb.biodata.models.variant.annotation.ConsequenceType, java.lang.String[])
      */
-    private void parseTranscriptFields(ConsequenceType consequenceType, String[] lineFields) {
+    private void parseTranscriptFields(ConsequenceTypeMongo consequenceType, String[] lineFields) {
         consequenceType.setEnsemblGeneId(lineFields[3]);
         consequenceType.setEnsemblTranscriptId(lineFields[4]);
         if(!lineFields[6].equals("") && !lineFields[6].equals("-")) {  // VEP may leave this field empty
@@ -198,7 +216,7 @@ public class AnnotationLineMapper implements LineMapper<Annotation> {
      *
      * The parseFrequencies option has been removed
      */
-    private void parseExtraField(ConsequenceType consequenceType, String extraField) {
+    private void parseExtraField(ConsequenceTypeMongo consequenceType, String extraField) {
         for (String field : extraField.split(";")) {
             String[] keyValue = field.split("=");
 
@@ -229,8 +247,8 @@ public class AnnotationLineMapper implements LineMapper<Annotation> {
      * From org.opencb.biodata.formats.annotation.io.VepFormatReader
      * #parseProteinSubstitutionScore(java.lang.String, java.lang.String)
      */
-    private Score parseProteinSubstitutionScore(String scoreString) {
+    private ScoreMongo parseProteinSubstitutionScore(String scoreString) {
         String[] scoreFields = scoreString.split("[\\(\\)]");
-        return new Score(Double.valueOf(scoreFields[1]), scoreFields[0]);
+        return new ScoreMongo(Double.valueOf(scoreFields[1]), scoreFields[0]);
     }
 }

@@ -24,7 +24,7 @@ import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 
-import uk.ac.ebi.eva.commons.models.metadata.AnnotationMetadata;
+import uk.ac.ebi.eva.commons.core.models.AnnotationMetadata;
 import uk.ac.ebi.eva.pipeline.parameters.AnnotationParameters;
 import uk.ac.ebi.eva.pipeline.parameters.DatabaseParameters;
 

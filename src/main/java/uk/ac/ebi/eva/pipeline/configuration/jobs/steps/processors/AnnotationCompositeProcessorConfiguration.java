@@ -25,7 +25,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Profile;
 
-import uk.ac.ebi.eva.commons.models.mongo.entity.Annotation;
+import uk.ac.ebi.eva.commons.mongodb.entities.AnnotationMongo;
 import uk.ac.ebi.eva.pipeline.Application;
 import uk.ac.ebi.eva.pipeline.model.EnsemblVariant;
 
@@ -46,13 +46,13 @@ public class AnnotationCompositeProcessorConfiguration {
 
     @Autowired
     @Qualifier(ANNOTATION_PARSER_PROCESSOR)
-    private ItemProcessor<List<String>, List<Annotation>> annotationParserProcessor;
+    private ItemProcessor<List<String>, List<AnnotationMongo>> annotationParserProcessor;
 
     @Bean(ANNOTATION_COMPOSITE_PROCESSOR)
     @StepScope
     @Profile(Application.VARIANT_ANNOTATION_MONGO_PROFILE)
-    public CompositeItemProcessor<List<EnsemblVariant>, List<Annotation>> compositeAnnotationItemWriter(){
-        CompositeItemProcessor<List<EnsemblVariant>, List<Annotation>> processor = new CompositeItemProcessor<>();
+    public CompositeItemProcessor<List<EnsemblVariant>, List<AnnotationMongo>> compositeAnnotationItemWriter(){
+        CompositeItemProcessor<List<EnsemblVariant>, List<AnnotationMongo>> processor = new CompositeItemProcessor<>();
         processor.setDelegates(Arrays.asList(vepAnnotationProcessor, annotationParserProcessor));
         return processor;
     }

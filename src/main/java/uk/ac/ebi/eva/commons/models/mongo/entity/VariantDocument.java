@@ -21,10 +21,10 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 import uk.ac.ebi.eva.commons.models.data.Variant;
-import uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.HgvsMongo;
+import uk.ac.ebi.eva.commons.mongodb.entities.subdocuments.HgvsMongo;
 import uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantAnnotation;
-import uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantAt;
-import uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantSourceEntryMongo;
+import uk.ac.ebi.eva.commons.mongodb.entities.subdocuments.VariantAtMongo;
+import uk.ac.ebi.eva.commons.mongodb.entities.subdocuments.VariantSourceEntryMongo;
 import uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantStatsMongo;
 
 import java.util.HashSet;
@@ -92,7 +92,7 @@ public class VariantDocument {
     private String alternate;
 
     @Field(AT_FIELD)
-    private VariantAt at;
+    private VariantAtMongo at;
 
     @Field(HGVS_FIELD)
     private Set<HgvsMongo> hgvs;
@@ -184,13 +184,13 @@ public class VariantDocument {
         return builder.toString();
     }
 
-    public static VariantAt generateAtField(String chromosome, int start) {
+    public static VariantAtMongo generateAtField(String chromosome, int start) {
         int smallChunkId = start / VariantMongoDBWriter.CHUNK_SIZE_SMALL;
         int bigChunkId = start / VariantMongoDBWriter.CHUNK_SIZE_BIG;
         String chunkSmall = chromosome + "_" + smallChunkId + "_" + ONE_THOUSAND_STRING;
         String chunkBig = chromosome + "_" + bigChunkId + "_" + TEN_THOUSAND_STRING;
 
-        return new VariantAt(chunkSmall, chunkBig);
+        return new VariantAtMongo(chunkSmall, chunkBig);
     }
 
     public static Set<HgvsMongo> createHgvsMongo(Map<String, Set<String>> hgvs) {
@@ -236,7 +236,7 @@ public class VariantDocument {
         return alternate;
     }
 
-    public VariantAt getAt() {
+    public VariantAtMongo getAt() {
         return at;
     }
 

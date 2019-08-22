@@ -25,7 +25,7 @@ import org.springframework.data.mongodb.core.query.BasicQuery;
 import org.springframework.data.mongodb.core.query.BasicUpdate;
 import org.springframework.util.Assert;
 
-import uk.ac.ebi.eva.commons.models.mongo.entity.Annotation;
+import uk.ac.ebi.eva.commons.mongodb.entities.AnnotationMongo;
 import uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantAnnotation;
 
 import java.util.Arrays;
@@ -47,7 +47,7 @@ import static uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantAnno
  * - soAccessions
  * - Xref Ids
  */
-public class AnnotationInVariantMongoWriter implements ItemWriter<List<Annotation>> {
+public class AnnotationInVariantMongoWriter implements ItemWriter<List<AnnotationMongo>> {
 
     public static final String ID = "_id";
     public static final String SET = "$set";
@@ -80,8 +80,8 @@ public class AnnotationInVariantMongoWriter implements ItemWriter<List<Annotatio
     }
 
     @Override
-    public void write(List<? extends List<Annotation>> annotations) throws Exception {
-        for (List<Annotation> annotationList : annotations) {
+    public void write(List<? extends List<AnnotationMongo>> annotations) throws Exception {
+        for (List<AnnotationMongo> annotationList : annotations) {
             Map<String, VariantAnnotation> variantAnnotations = generateVariantAnnotations(annotationList);
 
             BulkOperations bulkOperations = mongoOperations.bulkOps(BulkOperations.BulkMode.UNORDERED, collection);
@@ -90,10 +90,10 @@ public class AnnotationInVariantMongoWriter implements ItemWriter<List<Annotatio
         }
     }
 
-    private Map<String, VariantAnnotation> generateVariantAnnotations(List<? extends Annotation> annotations) {
+    private Map<String, VariantAnnotation> generateVariantAnnotations(List<? extends AnnotationMongo> annotations) {
         HashMap<String, VariantAnnotation> variantAnnotations = new HashMap<>();
 
-        for (Annotation annotation : annotations) {
+        for (AnnotationMongo annotation : annotations) {
             String id = annotation.getId();
             variantAnnotations.putIfAbsent(id, new VariantAnnotation(annotation));
             variantAnnotations.computeIfPresent(id, (key, oldVar) -> oldVar.concatenate(annotation));

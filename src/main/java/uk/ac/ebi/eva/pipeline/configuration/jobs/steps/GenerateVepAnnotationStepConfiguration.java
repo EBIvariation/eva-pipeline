@@ -30,7 +30,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
-import uk.ac.ebi.eva.commons.models.mongo.entity.Annotation;
+import uk.ac.ebi.eva.commons.mongodb.entities.AnnotationMongo;
 import uk.ac.ebi.eva.pipeline.configuration.ChunkSizeCompletionPolicyConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.io.readers.VariantsMongoReaderConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.io.writers.AnnotationCompositeWriterConfiguration;
@@ -71,18 +71,18 @@ public class GenerateVepAnnotationStepConfiguration {
 
     @Autowired
     @Qualifier(ANNOTATION_COMPOSITE_PROCESSOR)
-    private ItemProcessor<List<EnsemblVariant>, List<Annotation>> annotationCompositeProcessor;
+    private ItemProcessor<List<EnsemblVariant>, List<AnnotationMongo>> annotationCompositeProcessor;
 
     @Autowired
     @Qualifier(COMPOSITE_ANNOTATION_VARIANT_WRITER)
-    private ItemWriter<List<Annotation>> annotationWriter;
+    private ItemWriter<List<AnnotationMongo>> annotationWriter;
 
     @Bean(GENERATE_VEP_ANNOTATION_STEP)
     public Step generateVepAnnotationStep(StepBuilderFactory stepBuilderFactory, JobOptions jobOptions) {
         logger.debug("Building '" + GENERATE_VEP_ANNOTATION_STEP + "'");
 
         return stepBuilderFactory.get(GENERATE_VEP_ANNOTATION_STEP)
-                .<List<EnsemblVariant>, List<Annotation>>chunk(1)
+                .<List<EnsemblVariant>, List<AnnotationMongo>>chunk(1)
                 .reader(nonAnnotatedVariantsReader)
                 .processor(annotationCompositeProcessor)
                 .writer(annotationWriter)

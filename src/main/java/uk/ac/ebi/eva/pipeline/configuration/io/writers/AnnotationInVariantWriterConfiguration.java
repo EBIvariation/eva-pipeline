@@ -22,7 +22,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.mongodb.core.MongoOperations;
 
-import uk.ac.ebi.eva.commons.models.mongo.entity.Annotation;
+import uk.ac.ebi.eva.commons.mongodb.entities.AnnotationMongo;
 import uk.ac.ebi.eva.pipeline.Application;
 import uk.ac.ebi.eva.pipeline.io.writers.AnnotationInVariantMongoWriter;
 import uk.ac.ebi.eva.pipeline.parameters.AnnotationParameters;
@@ -38,7 +38,7 @@ public class AnnotationInVariantWriterConfiguration {
     @Bean(ANNOTATION_IN_VARIANT_WRITER)
     @StepScope
     @Profile(Application.VARIANT_ANNOTATION_MONGO_PROFILE)
-    public ItemWriter<List<Annotation>> variantAnnotationItemWriter(MongoOperations mongoOperations,
+    public ItemWriter<List<AnnotationMongo>> variantAnnotationItemWriter(MongoOperations mongoOperations,
                                                                     DatabaseParameters databaseParameters,
                                                                     AnnotationParameters annotationParameters) {
         return new AnnotationInVariantMongoWriter(mongoOperations, databaseParameters.getCollectionVariantsName(),

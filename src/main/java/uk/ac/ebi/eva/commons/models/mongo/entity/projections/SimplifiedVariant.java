@@ -18,8 +18,8 @@ package uk.ac.ebi.eva.commons.models.mongo.entity.projections;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Field;
 import uk.ac.ebi.eva.commons.models.data.Variant;
-import uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.HgvsMongo;
-import uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantAt;
+import uk.ac.ebi.eva.commons.mongodb.entities.subdocuments.HgvsMongo;
+import uk.ac.ebi.eva.commons.mongodb.entities.subdocuments.VariantAtMongo;
 
 import java.util.List;
 import java.util.Map;
@@ -68,7 +68,7 @@ public class SimplifiedVariant {
     private String alternate;
 
     @Field(AT_FIELD)
-    private VariantAt at;
+    private VariantAtMongo at;
 
     @Field(HGVS_FIELD)
     private Set<HgvsMongo> hgvs;
@@ -123,7 +123,7 @@ public class SimplifiedVariant {
         return alternate;
     }
 
-    public VariantAt getAt() {
+    public VariantAtMongo getAt() {
         return at;
     }
 

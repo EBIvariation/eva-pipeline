@@ -18,7 +18,7 @@ package uk.ac.ebi.eva.pipeline.jobs.steps.processors;
 
 import org.junit.Test;
 
-import uk.ac.ebi.eva.commons.models.mongo.entity.Annotation;
+import uk.ac.ebi.eva.commons.mongodb.entities.AnnotationMongo;
 import uk.ac.ebi.eva.pipeline.parameters.AnnotationParameters;
 import uk.ac.ebi.eva.test.data.VepOutputContent;
 
@@ -41,7 +41,7 @@ public class AnnotationParserProcessorTest {
         AnnotationParserProcessor parser = new AnnotationParserProcessor(annotationParameters);
 
         List<String> textAnnotations = Arrays.asList(VepOutputContent.vepOutputContent.split("\n"));
-        List<Annotation> annotations = parser.process(textAnnotations);
+        List<AnnotationMongo> annotations = parser.process(textAnnotations);
 
         assertEquals(textAnnotations.size(), annotations.size());
     }
