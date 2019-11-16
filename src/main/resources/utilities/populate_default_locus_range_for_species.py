@@ -16,17 +16,18 @@
 
 import click
 import configparser
-import os
-import re
-import subprocess
 import urllib.parse
 
 from pymongo import MongoClient
 from __init__ import *
 
 DEFAULT_LOCUS_RANGE_COLLECTION_NAME = "defaultLocusRange"
+VARIANT_COLLECTION_NAME = "variants_2_0"
+VARIANT_COLLECTION_NAME_ALT = "variants_1_2"
 
-
+# This is basically the MongoDB pipeline version of
+# select top 1 from
+#  (select chr, start/1e6, count(*) as num_entries from variants_2_0 group by 1,2) counts order by num_entries desc
 pick_locus_range_query = [
         {
             "$group": {
@@ -65,10 +66,17 @@ pick_locus_range_query = [
     ]
 
 
-def get_best_locus_range_for_species (species_db_handle):
-    result = species_db_handle[DEFAULT_LOCUS_RANGE_COLLECTION_NAME].aggregate(pipeline=pick_locus_range_query,
-                                                                              allowDiskUse=True)
-    return list(result) if result else []
+def get_best_locus_range_for_species(species_db_handle):
+    result = list(species_db_handle[VARIANT_COLLECTION_NAME].aggregate(pipeline=pick_locus_range_query,
+                                                                       allowDiskUse=True))
+    result = result or list(species_db_handle[VARIANT_COLLECTION_NAME_ALT].aggregate(pipeline=pick_locus_range_query,
+                                                                                     allowDiskUse=True))
+    if result:
+        locus_range_attributes = result[0]["topChrStartPick"]
+        chromosome, start = locus_range_attributes["chr"], int(locus_range_attributes["start_1M_multiple"] * 1e6 + 1)
+        end = int(start + 1e6 - 1)
+        return {"chr": chromosome, "start": start, "end": end}
+    return {}
 
 
 def get_args_from_release_properties_file(pipeline_properties_file):
@@ -85,14 +93,14 @@ def get_args_from_release_properties_file(pipeline_properties_file):
         return config
 
 
-def default_locus_range_collection_exists (species_db_handle):
+def default_locus_range_collection_exists(species_db_handle):
     if DEFAULT_LOCUS_RANGE_COLLECTION_NAME in species_db_handle.list_collection_names():
         default_locus_range_collection_handle = species_db_handle[DEFAULT_LOCUS_RANGE_COLLECTION_NAME]
         return True if default_locus_range_collection_handle.find_one() else False
     return False
 
 
-def populate_default_locus_range (pipeline_properties_file, species_db_name):
+def populate_default_locus_range(pipeline_properties_file, species_db_name):
     properties_file_args = get_args_from_release_properties_file(pipeline_properties_file)
     mongo_host = properties_file_args["spring.data.mongodb.host"]
     mongo_port = properties_file_args["spring.data.mongodb.port"]
@@ -107,18 +115,19 @@ def populate_default_locus_range (pipeline_properties_file, species_db_name):
             logger.warn("Species {0} already has the {1} collection"
                         .format(species_db_name, DEFAULT_LOCUS_RANGE_COLLECTION_NAME))
             return
-        get_best_locus_range_for_species (species_db_handle)
-        default_locus_range_collection = species_db_handle["defaultLocusRange"]
-        unique_release_rs_ids_file = generate_unique_rs_ids_file()
-        missing_rs_ids_file = diff_release_ids_against_mongo_rs_ids(unique_release_rs_ids_file, mongo_unique_ids_file)
+        best_locus_range_for_species = get_best_locus_range_for_species(species_db_handle)
+        if best_locus_range_for_species:
+            species_db_handle[DEFAULT_LOCUS_RANGE_COLLECTION_NAME].insert_one(best_locus_range_for_species)
+        else:
+            logger.error("Could not find default locus range for species {0}".format(species_db_name))
 
-        get_missing_ids_attributions(missing_rs_ids_file)
 
 @click.option("-p", "--pipeline-properties-file", required=True)
-@click.option("-s", "--species-db-name", required=True)
+@click.argument("species-db-names", nargs=-1, required=True)
 @click.command()
-def main(pipeline_properties_file, species_db_name):
-    populate_default_locus_range(pipeline_properties_file, species_db_name)
+def main(pipeline_properties_file, species_db_names):
+    for species_db_name in species_db_names:
+        populate_default_locus_range(pipeline_properties_file, species_db_name)
 
 
 if __name__ == '__main__':
