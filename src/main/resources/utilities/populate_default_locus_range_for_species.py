@@ -52,16 +52,7 @@ pick_locus_range_query = [
             "$sort": {"num_entries": -1}
         },
         {
-            "$group": {
-                "_id": None,
-                "topChrStartPick": {"$first": "$$ROOT"}
-            }
-        },
-        {
-            "$project": {
-                "_id": 0,
-                "topChrStartPick": 1
-            }
+            "$limit": 1
         }
     ]
 
@@ -72,7 +63,7 @@ def get_best_locus_range_for_species(species_db_handle):
     result = result or list(species_db_handle[VARIANT_COLLECTION_NAME_ALT].aggregate(pipeline=pick_locus_range_query,
                                                                                      allowDiskUse=True))
     if result:
-        locus_range_attributes = result[0]["topChrStartPick"]
+        locus_range_attributes = result[0]
         chromosome, start = locus_range_attributes["chr"], int(locus_range_attributes["start_1M_multiple"] * 1e6 + 1)
         end = int(start + 1e6 - 1)
         return {"chr": chromosome, "start": start, "end": end}
