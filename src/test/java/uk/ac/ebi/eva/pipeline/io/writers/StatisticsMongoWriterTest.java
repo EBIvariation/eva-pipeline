@@ -18,9 +18,13 @@ package uk.ac.ebi.eva.pipeline.io.writers;
 
 
 import com.mongodb.BasicDBObject;
+import com.mongodb.Block;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoCursor;
+import org.bson.Document;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -84,14 +88,14 @@ public class StatisticsMongoWriterTest {
         }
 
         // do the checks
-        DBCollection statsCollection = mongoRule.getCollection(databaseName, COLLECTION_STATS_NAME);
+        MongoCollection<Document> statsCollection = mongoRule.getCollection(databaseName, COLLECTION_STATS_NAME);
         // count documents in DB and check they have at least the index fields (vid, sid, cid) and maf and genotypeCount
-        DBCursor cursor = statsCollection.find();
+        MongoCursor<Document> cursor = statsCollection.find().iterator();
 
         int count = 0;
         while (cursor.hasNext()) {
             count++;
-            DBObject next = cursor.next();
+            Document next = cursor.next();
             assertNotNull(next.get("cid"));
             assertNotNull(next.get("sid"));
             assertNotNull(next.get("vid"));
@@ -114,18 +118,18 @@ public class StatisticsMongoWriterTest {
         statisticsMongoWriter.write(populationStatisticsList);
 
         // do the checks
-        DBCollection statsCollection = mongoRule.getCollection(databaseName, COLLECTION_STATS_NAME);
+        MongoCollection statsCollection = mongoRule.getCollection(databaseName, COLLECTION_STATS_NAME);
 
         // check there is an index in chr + start + ref + alt + sid + cid
-        List<DBObject> indexes = new ArrayList<>();
-        indexes.add(new BasicDBObject("v", 1)
-                .append("key", new BasicDBObject("_id", 1))
+        List<Document> indexes = new ArrayList<>();
+        indexes.add(new Document("v", 2)
+                .append("key", new Document("_id", 1))
                 .append("name", "_id_")
                 .append("ns", databaseName + ".populationStatistics")
         );
-        indexes.add(new BasicDBObject("v", 1)
+        indexes.add(new Document("v", 2)
                 .append("unique", true)
-                .append("key", new BasicDBObject("chr", 1)
+                .append("key", new Document("chr", 1)
                         .append("start", 1)
                         .append("ref", 1)
                         .append("alt", 1)
@@ -135,7 +139,10 @@ public class StatisticsMongoWriterTest {
                 .append("ns", databaseName + ".populationStatistics")
         );
 
-        assertEquals(indexes, statsCollection.getIndexInfo());
+        List<Document> indexInfo = new ArrayList<>();
+        statsCollection.listIndexes().forEach((Block<Document>) indexInfo::add);
+
+        assertEquals(indexes, indexInfo);
     }
 
     @Test(expected = org.springframework.dao.DuplicateKeyException.class)

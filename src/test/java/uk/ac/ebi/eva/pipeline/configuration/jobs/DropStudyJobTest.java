@@ -16,7 +16,8 @@
 
 package uk.ac.ebi.eva.pipeline.configuration.jobs;
 
-import com.mongodb.DBCollection;
+import com.mongodb.client.MongoCollection;
+import org.bson.Document;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -27,7 +28,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-
 import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
 import uk.ac.ebi.eva.test.data.VariantData;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
@@ -37,7 +37,6 @@ import uk.ac.ebi.eva.utils.EvaJobParameterBuilder;
 
 import java.util.Arrays;
 
-import static org.junit.Assert.assertEquals;
 import static uk.ac.ebi.eva.test.utils.DropStudyJobTestUtils.assertDropFiles;
 import static uk.ac.ebi.eva.test.utils.DropStudyJobTestUtils.assertDropVariantsByStudy;
 import static uk.ac.ebi.eva.test.utils.DropStudyJobTestUtils.assertPullStudy;
@@ -87,8 +86,8 @@ public class DropStudyJobTest {
                 JobTestUtils.buildFilesDocumentString(STUDY_ID_TO_DROP, "fileIdTwo"),
                 JobTestUtils.buildFilesDocumentString("otherStudyId", "fileIdThree")));
 
-        DBCollection variantsCollection = mongoRule.getCollection(dbName, COLLECTION_VARIANTS_NAME);
-        DBCollection filesCollection = mongoRule.getCollection(dbName, COLLECTION_FILES_NAME);
+        MongoCollection<Document> variantsCollection = mongoRule.getCollection(dbName, COLLECTION_VARIANTS_NAME);
+        MongoCollection<Document> filesCollection = mongoRule.getCollection(dbName, COLLECTION_FILES_NAME);
 
         JobParameters jobParameters = new EvaJobParameterBuilder()
                 .collectionFilesName(COLLECTION_FILES_NAME)

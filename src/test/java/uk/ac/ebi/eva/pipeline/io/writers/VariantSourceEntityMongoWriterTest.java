@@ -16,9 +16,13 @@
 
 package uk.ac.ebi.eva.pipeline.io.writers;
 
+import com.mongodb.Block;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoCursor;
+import org.bson.Document;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -42,6 +46,7 @@ import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 import uk.ac.ebi.eva.utils.MongoDBHelper;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -97,7 +102,7 @@ public class VariantSourceEntityMongoWriterTest {
         String databaseName = mongoRule.getRandomTemporaryDatabaseName();
         MongoOperations mongoOperations = MongoConfiguration.getMongoOperations(databaseName, mongoConnection,
                 mongoMappingContext);
-        DBCollection fileCollection = mongoRule.getCollection(databaseName, COLLECTION_FILES_NAME);
+        MongoCollection<Document> fileCollection = mongoRule.getCollection(databaseName, COLLECTION_FILES_NAME);
 
         VariantSourceEntityMongoWriter filesWriter = new VariantSourceEntityMongoWriter(
                 mongoOperations, COLLECTION_FILES_NAME);
@@ -105,12 +110,12 @@ public class VariantSourceEntityMongoWriterTest {
         VariantSourceEntity variantSourceEntity = getVariantSourceEntity();
         filesWriter.write(Collections.singletonList(variantSourceEntity));
 
-        DBCursor cursor = fileCollection.find();
+        MongoCursor<Document> cursor = fileCollection.find().iterator();
         int count = 0;
 
         while (cursor.hasNext()) {
             count++;
-            DBObject next = cursor.next();
+            Document next = cursor.next();
             assertNotNull(next.get(VariantSourceEntity.FILEID_FIELD));
             assertNotNull(next.get(VariantSourceEntity.FILENAME_FIELD));
             assertNotNull(next.get(VariantSourceEntity.STUDYID_FIELD));
@@ -120,7 +125,7 @@ public class VariantSourceEntityMongoWriterTest {
             assertNotNull(next.get(VariantSourceEntity.SAMPLES_FIELD));
             assertNotNull(next.get(VariantSourceEntity.DATE_FIELD));
 
-            DBObject meta = (DBObject) next.get(VariantSourceEntity.METADATA_FIELD);
+            Document meta = (Document) next.get(VariantSourceEntity.METADATA_FIELD);
             assertNotNull(meta);
             assertNotNull(meta.get(VariantSourceEntity.METADATA_FILEFORMAT_FIELD));
             assertNotNull(meta.get(VariantSourceEntity.METADATA_HEADER_FIELD));
@@ -137,7 +142,7 @@ public class VariantSourceEntityMongoWriterTest {
         String databaseName = mongoRule.getRandomTemporaryDatabaseName();
         MongoOperations mongoOperations = MongoConfiguration.getMongoOperations(databaseName, mongoConnection,
                 mongoMappingContext);
-        DBCollection fileCollection = mongoRule.getCollection(databaseName, COLLECTION_FILES_NAME);
+        MongoCollection<Document> fileCollection = mongoRule.getCollection(databaseName, COLLECTION_FILES_NAME);
 
         VariantSourceEntityMongoWriter filesWriter = new VariantSourceEntityMongoWriter(
                 mongoOperations, COLLECTION_FILES_NAME);
@@ -151,11 +156,11 @@ public class VariantSourceEntityMongoWriterTest {
 
         filesWriter.write(Collections.singletonList(variantSourceEntity));
 
-        DBCursor cursor = fileCollection.find();
+        MongoCursor<Document> cursor = fileCollection.find().iterator();
 
         while (cursor.hasNext()) {
-            DBObject next = cursor.next();
-            DBObject samples = (DBObject) next.get(VariantSourceEntity.SAMPLES_FIELD);
+            Document next = cursor.next();
+            Document samples = (Document) next.get(VariantSourceEntity.SAMPLES_FIELD);
             Set<String> keySet = samples.keySet();
 
             Set<String> expectedKeySet = new TreeSet<>(Arrays.asList("EUnothing", "NA£dot", "JP-dash"));
@@ -168,7 +173,7 @@ public class VariantSourceEntityMongoWriterTest {
         String databaseName = mongoRule.getRandomTemporaryDatabaseName();
         MongoOperations mongoOperations = MongoConfiguration.getMongoOperations(databaseName, mongoConnection,
                 mongoMappingContext);
-        DBCollection fileCollection = mongoRule.getCollection(databaseName, COLLECTION_FILES_NAME);
+        MongoCollection<Document> fileCollection = mongoRule.getCollection(databaseName, COLLECTION_FILES_NAME);
 
         VariantSourceEntityMongoWriter filesWriter = new VariantSourceEntityMongoWriter( mongoOperations,
                 COLLECTION_FILES_NAME);
@@ -176,7 +181,8 @@ public class VariantSourceEntityMongoWriterTest {
         VariantSourceEntity variantSourceEntity = getVariantSourceEntity();
         filesWriter.write(Collections.singletonList(variantSourceEntity));
 
-        List<DBObject> indexInfo = fileCollection.getIndexInfo();
+        List<Document> indexInfo = new ArrayList<>();
+        fileCollection.listIndexes().forEach(((Block<Document>) indexInfo::add));
 
         Set<String> createdIndexes = indexInfo.stream().map(index -> index.get("name").toString())
                 .collect(Collectors.toSet());
@@ -184,7 +190,7 @@ public class VariantSourceEntityMongoWriterTest {
         expectedIndexes.addAll(Arrays.asList(VariantSourceEntityMongoWriter.UNIQUE_FILE_INDEX_NAME, "_id_"));
         assertEquals(expectedIndexes, createdIndexes);
 
-        DBObject uniqueIndex = indexInfo.stream().filter(
+        Document uniqueIndex = indexInfo.stream().filter(
                 index -> (VariantSourceEntityMongoWriter.UNIQUE_FILE_INDEX_NAME.equals(index.get("name").toString())))
                         .findFirst().get();
         assertNotNull(uniqueIndex);

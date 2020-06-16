@@ -17,6 +17,7 @@ package uk.ac.ebi.eva.commons.models.converters.data;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
+import org.bson.Document;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -78,7 +79,7 @@ public class VariantStatsToDBObjectConverterTest {
     @Test
     public void testConvertToStorageType() {
         VariantStats stats = sourceEntry.getCohortStats("ALL");
-        DBObject converted = (DBObject) mongoOperations.getConverter().convertToMongoType(
+        Document converted = (Document) mongoOperations.getConverter().convertToMongoType(
                 new VariantStatsMongo(
                         sourceEntry.getStudyId(),
                         sourceEntry.getFileId(),
@@ -97,8 +98,8 @@ public class VariantStatsToDBObjectConverterTest {
         assertEquals(stats.getMissingAlleles(), converted.get(VariantStatsMongo.MISSALLELE_FIELD));
         assertEquals(stats.getMissingGenotypes(), converted.get(VariantStatsMongo.MISSGENOTYPE_FIELD));
 
-        assertEquals(100, ((DBObject) converted.get(VariantStatsMongo.NUMGT_FIELD)).get("0/0"));
-        assertEquals(50, ((DBObject) converted.get(VariantStatsMongo.NUMGT_FIELD)).get("0/1"));
-        assertEquals(10, ((DBObject) converted.get(VariantStatsMongo.NUMGT_FIELD)).get("1/1"));
+        assertEquals(100, ((Document) converted.get(VariantStatsMongo.NUMGT_FIELD)).get("0/0"));
+        assertEquals(50, ((Document) converted.get(VariantStatsMongo.NUMGT_FIELD)).get("0/1"));
+        assertEquals(10, ((Document) converted.get(VariantStatsMongo.NUMGT_FIELD)).get("1/1"));
     }
 }

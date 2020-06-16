@@ -17,9 +17,10 @@ package uk.ac.ebi.eva.test.utils;
 
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
-import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
+import com.mongodb.client.MongoCursor;
 import com.mongodb.util.JSON;
+import org.bson.Document;
 import org.opencb.biodata.models.variant.Variant;
 import org.opencb.biodata.models.variant.stats.VariantStats;
 import org.slf4j.Logger;
@@ -30,7 +31,6 @@ import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.data.mongodb.core.MongoOperations;
-
 import uk.ac.ebi.eva.commons.models.mongo.entity.VariantDocument;
 import uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantStatsMongo;
 
@@ -193,13 +193,12 @@ public abstract class JobTestUtils {
                                 0);
     }
 
-    public static List<VariantStats> getCohortStatsFromFirstVariant(DBCursor cursor, MongoOperations mongoOperations) {
+    public static List<VariantStats> getCohortStatsFromFirstVariant(MongoCursor<Document> cursor, MongoOperations mongoOperations) {
         assertTrue(cursor.hasNext());
-
-        DBObject dbObject = cursor.iterator().next();
+        Document dbObject = cursor.next();
         VariantDocument variantDocument = mongoOperations.getConverter().read(VariantDocument.class, dbObject);
         return variantDocument.getVariantStatsMongo().stream()
-                              .map(JobTestUtils::buildVariantStats)
-                              .collect(toList());
+                .map(JobTestUtils::buildVariantStats)
+                .collect(toList());
     }
 }

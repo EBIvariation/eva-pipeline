@@ -17,9 +17,9 @@
 package uk.ac.ebi.eva.pipeline.io.writers;
 
 
-import com.mongodb.DBCollection;
-import com.mongodb.DBCursor;
-import com.mongodb.DBObject;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoCursor;
+import org.bson.Document;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -29,7 +29,6 @@ import org.springframework.data.mongodb.core.mapping.MongoMappingContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-
 import uk.ac.ebi.eva.pipeline.configuration.MongoConfiguration;
 import uk.ac.ebi.eva.pipeline.io.mappers.GeneLineMapper;
 import uk.ac.ebi.eva.pipeline.model.FeatureCoordinates;
@@ -41,7 +40,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * {@link GeneWriter}
@@ -81,18 +80,18 @@ public class GeneWriterTest {
         }
         geneWriter.write(genes);
 
-        DBCollection genesCollection = mongoRule.getCollection(databaseName, COLLECTION_FEATURES_NAME);
+        MongoCollection<Document> genesCollection = mongoRule.getCollection(databaseName, COLLECTION_FEATURES_NAME);
 
         // count documents in DB and check they have region (chr + start + end)
-        DBCursor cursor = genesCollection.find();
+        MongoCursor<Document> cursor = genesCollection.find().iterator();
 
         int count = 0;
         while (cursor.hasNext()) {
             count++;
-            DBObject next = cursor.next();
-            assertTrue(next.get("chromosome") != null);
-            assertTrue(next.get("start") != null);
-            assertTrue(next.get("end") != null);
+            Document next = cursor.next();
+            assertNotNull(next.get("chromosome"));
+            assertNotNull(next.get("start"));
+            assertNotNull(next.get("end"));
         }
         assertEquals(genes.size(), count);
     }

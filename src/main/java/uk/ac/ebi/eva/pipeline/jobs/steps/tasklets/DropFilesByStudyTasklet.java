@@ -16,7 +16,7 @@
 
 package uk.ac.ebi.eva.pipeline.jobs.steps.tasklets;
 
-import com.mongodb.WriteResult;
+import com.mongodb.client.result.DeleteResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.StepContribution;
@@ -27,7 +27,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
-
 import uk.ac.ebi.eva.pipeline.parameters.DatabaseParameters;
 import uk.ac.ebi.eva.pipeline.parameters.InputParameters;
 
@@ -60,7 +59,7 @@ public class DropFilesByStudyTasklet implements Tasklet {
         logger.info("Deleting files from study \"{}\"", inputParameters.getStudyId(),
                 dbParameters.getCollectionFilesName());
         logger.trace("Query used: {}", query);
-        WriteResult writeResult = mongoOperations.remove(query, dbParameters.getCollectionFilesName());
+        DeleteResult writeResult = mongoOperations.remove(query, dbParameters.getCollectionFilesName());
         logger.info("Result: {}", writeResult.toString());
 
         return RepeatStatus.FINISHED;

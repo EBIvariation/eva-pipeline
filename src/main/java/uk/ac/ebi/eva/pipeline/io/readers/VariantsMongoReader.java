@@ -15,9 +15,7 @@
  */
 package uk.ac.ebi.eva.pipeline.io.readers;
 
-import com.mongodb.BasicDBObject;
-import com.mongodb.BasicDBObjectBuilder;
-import com.mongodb.DBObject;
+import org.bson.Document;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.item.NonTransientResourceException;
 import org.springframework.batch.item.ParseException;
@@ -27,7 +25,6 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.data.mongodb.core.convert.MongoConverter;
 import org.springframework.util.ClassUtils;
-
 import uk.ac.ebi.eva.commons.models.mongo.entity.Annotation;
 import uk.ac.ebi.eva.commons.models.mongo.entity.VariantDocument;
 import uk.ac.ebi.eva.commons.models.mongo.entity.projections.SimplifiedVariant;
@@ -36,7 +33,6 @@ import uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantSourceEntry
 import uk.ac.ebi.eva.pipeline.model.EnsemblVariant;
 
 import javax.annotation.PostConstruct;
-import java.time.LocalTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -98,26 +94,25 @@ public class VariantsMongoReader
         // the query excludes processed variants automatically, so a new query has to start from the beginning
         delegateReader.setSaveState(false);
 
-        BasicDBObjectBuilder queryBuilder = BasicDBObjectBuilder.start();
-
+        Document query = new Document();
         if (studyId != null && !studyId.isEmpty()) {
-            queryBuilder.add(STUDY_KEY, studyId);
+            query.append(STUDY_KEY, studyId);
 
             if (fileId != null && !fileId.isEmpty()) {
-                queryBuilder.add(FILE_KEY, fileId);
+                query.append(FILE_KEY, fileId);
             }
         }
 
         if (excludeAnnotated) {
-            BasicDBObject exists = new BasicDBObject("$exists", 1);
-            BasicDBObject annotationSubdocument = new BasicDBObject(VariantAnnotation.SO_ACCESSION_FIELD, exists)
+            Document exists = new Document("$exists", 1);
+            Document annotationSubdocument = new Document(VariantAnnotation.SO_ACCESSION_FIELD, exists)
                     .append(Annotation.VEP_VERSION_FIELD, vepVersion)
                     .append(Annotation.VEP_CACHE_VERSION_FIELD, vepCacheVersion);
-            BasicDBObject noElementMatchesOurVersion =
-                    new BasicDBObject("$not", new BasicDBObject("$elemMatch", annotationSubdocument));
-            queryBuilder.add(VariantDocument.ANNOTATION_FIELD, noElementMatchesOurVersion);
+            Document noElementMatchesOurVersion =
+                    new Document("$not", new Document("$elemMatch", annotationSubdocument));
+            query.append(VariantDocument.ANNOTATION_FIELD, noElementMatchesOurVersion);
         }
-        delegateReader.setQuery(queryBuilder.get());
+        delegateReader.setQuery(query);
 
         String[] fields = {CHROMOSOME_FIELD, START_FIELD, END_FIELD, REFERENCE_FIELD, ALTERNATE_FIELD};
         delegateReader.setFields(fields);
@@ -150,9 +145,9 @@ public class VariantsMongoReader
 
     private List<EnsemblVariant> readBatch(Integer chunkSize) throws Exception {
         List<EnsemblVariant> variants = new ArrayList<>();
-        DBObject dbObject;
-        while ((dbObject = delegateDoRead()) != null) {
-            SimplifiedVariant variant = converter.read(SimplifiedVariant.class, dbObject);
+        Document document;
+        while ((document = delegateDoRead()) != null) {
+            SimplifiedVariant variant = converter.read(SimplifiedVariant.class, document);
             variants.add(buildVariantWrapper(variant));
             if (variants.size() == chunkSize) {
                 break;
@@ -161,7 +156,7 @@ public class VariantsMongoReader
         return variants;
     }
 
-    private DBObject delegateDoRead() throws Exception {
+    private Document delegateDoRead() throws Exception {
         lastRead = ZonedDateTime.now();
         return delegateReader.doRead();
     }

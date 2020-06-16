@@ -15,8 +15,7 @@
  */
 package uk.ac.ebi.eva.commons.models.converters.data;
 
-import com.mongodb.BasicDBObject;
-import com.mongodb.DBObject;
+import org.bson.Document;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -40,7 +39,7 @@ import static uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantSour
 import static uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantSourceEntryMongo.STUDYID_FIELD;
 
 /**
- * Tests automatic conversion from {@link VariantSourceEntryMongo} to {@link DBObject}
+ * Tests automatic conversion from {@link VariantSourceEntryMongo} to {@link Document}
  */
 @RunWith(SpringRunner.class)
 @TestPropertySource({"classpath:test-mongo.properties"})
@@ -52,9 +51,9 @@ public class VariantSourceEntryToDBObjectConverterTest {
 
     private VariantSourceEntry file;
 
-    private BasicDBObject mongoFile;
+    private Document mongoFile;
 
-    private DBObject mongoFileWithIds;
+    private Document mongoFileWithIds;
 
     @Before
     public void setUp() {
@@ -75,19 +74,19 @@ public class VariantSourceEntryToDBObjectConverterTest {
         int indexNa003 = file.addSampleData(na003);
 
         // MongoDB object
-        mongoFile = new BasicDBObject(FILEID_FIELD, file.getFileId())
+        mongoFile = new Document(FILEID_FIELD, file.getFileId())
                 .append(STUDYID_FIELD, file.getStudyId());
 
-        BasicDBObject attributes = new BasicDBObject("QUAL", "0.01")
+        Document attributes = new Document("QUAL", "0.01")
                 .append("AN", "2")
                 .append("MAX" + CHARACTER_TO_REPLACE_DOTS + "PROC", "2");
         mongoFile.append(ATTRIBUTES_FIELD, attributes);
 
-        mongoFileWithIds = new BasicDBObject((this.mongoFile.toMap()));
-        mongoFileWithIds.put("samp", new BasicDBObject());
-        ((DBObject) mongoFileWithIds.get("samp")).put("def", "0/0");
-        ((DBObject) mongoFileWithIds.get("samp")).put("0/1", Arrays.asList(indexNa002));
-        ((DBObject) mongoFileWithIds.get("samp")).put("1/1", Arrays.asList(indexNa003));
+        mongoFileWithIds = new Document((this.mongoFile));
+        mongoFileWithIds.put("samp", new Document());
+        ((Document) mongoFileWithIds.get("samp")).put("def", "0/0");
+        ((Document) mongoFileWithIds.get("samp")).put("0/1", Arrays.asList(indexNa002));
+        ((Document) mongoFileWithIds.get("samp")).put("1/1", Arrays.asList(indexNa003));
     }
 
     @Test

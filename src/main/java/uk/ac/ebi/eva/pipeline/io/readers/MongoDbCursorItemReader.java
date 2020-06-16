@@ -17,11 +17,9 @@
 
 package uk.ac.ebi.eva.pipeline.io.readers;
 
-import com.mongodb.BasicDBObject;
-import com.mongodb.BasicDBObjectBuilder;
-import com.mongodb.DBCollection;
-import com.mongodb.DBCursor;
-import com.mongodb.DBObject;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoCursor;
+import org.bson.Document;
 import org.springframework.batch.item.support.AbstractItemCountingItemStreamItemReader;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.data.domain.Sort;
@@ -40,17 +38,17 @@ import java.util.Map;
  * <a href="https://github.com/acogoluegnes/Spring-Batch-MongoDB/blob/master/src/main/java/com/zenika/batch/item/database/mongo/MongoDbCursorItemReader.java</a>
  * but replaces the direct access to Mongo with a {@link MongoOperations}, following the Spring Data MongoDB model.
  */
-public class MongoDbCursorItemReader extends AbstractItemCountingItemStreamItemReader<DBObject>
+public class MongoDbCursorItemReader extends AbstractItemCountingItemStreamItemReader<Document>
         implements InitializingBean {
 
     private MongoOperations template;
     private String collectionName;
 
-    private DBObject query;
-    private DBObject sort;
+    private Document query;
+    private Document sort;
     private String[] fields;
 
-    private DBCursor cursor;
+    private MongoCursor<Document> cursor;
 
     public MongoDbCursorItemReader() {
         super();
@@ -73,9 +71,9 @@ public class MongoDbCursorItemReader extends AbstractItemCountingItemStreamItemR
      *
      * @param query Mongo query to run
      */
-    public void setQuery(DBObject query) {
+    public void setQuery(Document query) {
         if (query == null) {
-            this.query = new BasicDBObject();
+            this.query = new Document();
         } else {
             this.query = query;
         }
@@ -112,15 +110,16 @@ public class MongoDbCursorItemReader extends AbstractItemCountingItemStreamItemR
 
     @Override
     protected void doOpen() throws Exception {
-        DBCollection collection = template.getCollection(collectionName);
-        cursor = collection.find(query, createDbObjectKeys());
+        MongoCollection<Document> collection = template.getCollection(collectionName);
         if (sort != null) {
-            cursor = cursor.sort(sort);
+            cursor = collection.find(query).projection(getProjectionFields()).sort(sort).iterator();
+        } else {
+            cursor = collection.find(query).projection(getProjectionFields()).iterator();
         }
     }
 
     @Override
-    protected DBObject doRead() throws Exception {
+    protected Document doRead() throws Exception {
         if (!cursor.hasNext()) {
             return null;
         } else {
@@ -145,20 +144,18 @@ public class MongoDbCursorItemReader extends AbstractItemCountingItemStreamItemR
         Assert.notNull(query, "A query is required.");
     }
 
-    private DBObject createDbObjectKeys() {
-        if (fields == null) {
-            return new BasicDBObject();
-        } else {
-            BasicDBObjectBuilder builder = BasicDBObjectBuilder.start();
+    private Document getProjectionFields() {
+        Document objectKeys = new Document();
+        if (fields != null) {
             for (String field : fields) {
-                builder.add(field, 1);
+                objectKeys.append(field, 1);
             }
-            return builder.get();
         }
+        return objectKeys;
     }
 
-    private DBObject convertToSort(Map<String, Sort.Direction> sorts) {
-        BasicDBObject sort = new BasicDBObject();
+    private Document convertToSort(Map<String, Sort.Direction> sorts) {
+        Document sort = new Document();
 
         for (Map.Entry<String, Sort.Direction> currSort : sorts.entrySet()) {
             sort.append(currSort.getKey(), currSort.getValue());

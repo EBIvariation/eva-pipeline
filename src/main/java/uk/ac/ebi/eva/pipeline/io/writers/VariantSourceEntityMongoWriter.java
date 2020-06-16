@@ -15,13 +15,12 @@
  */
 package uk.ac.ebi.eva.pipeline.io.writers;
 
-import com.mongodb.BasicDBObject;
+import com.mongodb.client.model.IndexOptions;
+import org.bson.Document;
 import org.springframework.batch.item.data.MongoItemWriter;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.util.Assert;
-
 import uk.ac.ebi.eva.commons.models.data.VariantSourceEntity;
-import uk.ac.ebi.eva.utils.MongoDBHelper;
 
 /**
  * Write a list of {@link VariantSourceEntity} into MongoDB
@@ -49,9 +48,8 @@ public class VariantSourceEntityMongoWriter extends MongoItemWriter<VariantSourc
 
     private void createIndexes() {
         mongoOperations.getCollection(collection).createIndex(
-                new BasicDBObject(VariantSourceEntity.STUDYID_FIELD, 1).append(VariantSourceEntity.FILEID_FIELD, 1)
-                    .append(VariantSourceEntity.FILENAME_FIELD, 1),
-                new BasicDBObject(MongoDBHelper.BACKGROUND_INDEX, true).append(MongoDBHelper.UNIQUE_INDEX, true)
-                    .append(MongoDBHelper.INDEX_NAME, UNIQUE_FILE_INDEX_NAME));
+                new Document(VariantSourceEntity.STUDYID_FIELD, 1).append(VariantSourceEntity.FILEID_FIELD, 1)
+                        .append(VariantSourceEntity.FILENAME_FIELD, 1), new IndexOptions().background(true)
+                        .unique(true).name(UNIQUE_FILE_INDEX_NAME));
     }
 }

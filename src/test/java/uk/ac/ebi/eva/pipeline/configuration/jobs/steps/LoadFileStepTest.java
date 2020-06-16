@@ -15,13 +15,12 @@
  */
 package uk.ac.ebi.eva.pipeline.configuration.jobs.steps;
 
-import com.mongodb.DBCollection;
-import com.mongodb.DBCursor;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoCursor;
+import org.bson.Document;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.batch.core.BatchStatus;
-import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.test.JobLauncherTestUtils;
@@ -30,13 +29,11 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-
 import uk.ac.ebi.eva.pipeline.Application;
 import uk.ac.ebi.eva.pipeline.configuration.BeanNames;
 import uk.ac.ebi.eva.pipeline.configuration.jobs.GenotypedVcfJobConfiguration;
 import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
-import uk.ac.ebi.eva.test.utils.JobTestUtils;
 import uk.ac.ebi.eva.utils.EvaJobParameterBuilder;
 
 import static org.junit.Assert.assertEquals;
@@ -87,8 +84,8 @@ public class LoadFileStepTest {
         assertCompleted(jobExecution);
 
         // And the number of documents in the DB should be equals to the number of VCF files loaded
-        DBCollection fileCollection = mongoRule.getCollection(databaseName, COLLECTION_FILES_NAME);
-        DBCursor cursor = fileCollection.find();
+        MongoCollection<Document> fileCollection = mongoRule.getCollection(databaseName, COLLECTION_FILES_NAME);
+        MongoCursor<Document> cursor = fileCollection.find().iterator();
         assertEquals(EXPECTED_FILES, count(cursor));
     }
 

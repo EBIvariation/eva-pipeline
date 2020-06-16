@@ -16,9 +16,9 @@
 
 package uk.ac.ebi.eva.pipeline.io.writers;
 
-import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
-import com.mongodb.DBObject;
+import com.mongodb.client.model.IndexOptions;
+import org.bson.Document;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.data.mongodb.core.BulkOperations;
 import org.springframework.data.mongodb.core.MongoOperations;
@@ -31,7 +31,6 @@ import uk.ac.ebi.eva.commons.models.mongo.entity.Annotation;
 import uk.ac.ebi.eva.commons.models.mongo.entity.projections.SimplifiedAnnotation;
 import uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.ConsequenceType;
 import uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.Xref;
-import uk.ac.ebi.eva.utils.MongoDBHelper;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -118,10 +117,10 @@ public class AnnotationMongoWriter implements ItemWriter<List<Annotation>> {
     }
 
     private BasicUpdate buildUpdateQuery(Annotation annotation) {
-        final BasicDBObject addToSetValue = new BasicDBObject();
+        final Document addToSetValue = new Document();
         addToSetValue.append(CONSEQUENCE_TYPE_FIELD, buildInsertConsequenceTypeQuery(annotation));
         addToSetValue.append(XREFS_FIELD, buildInsertXrefsQuery(annotation));
-        return new BasicUpdate(new BasicDBObject(ADD_TO_SET, addToSetValue));
+        return new BasicUpdate(new Document(ADD_TO_SET, addToSetValue));
     }
 
     private BasicDBObject buildInsertXrefsQuery(Annotation annotation) {
@@ -132,20 +131,18 @@ public class AnnotationMongoWriter implements ItemWriter<List<Annotation>> {
         return new BasicDBObject(EACH, convertToMongo(annotation.getConsequenceTypes()));
     }
 
-    private DBObject convertToMongo(SimplifiedAnnotation simplifiedAnnotation) {
-        return (DBObject) mongoOperations.getConverter().convertToMongoType(simplifiedAnnotation);
+    private Document convertToMongo(SimplifiedAnnotation simplifiedAnnotation) {
+        return (Document) mongoOperations.getConverter().convertToMongoType(simplifiedAnnotation);
     }
 
-    private BasicDBList convertToMongo(Collection<?> object) {
-        return (BasicDBList) mongoOperations.getConverter().convertToMongoType(object);
+    private List<Document> convertToMongo(Collection<?> object) {
+        return (List<Document>) mongoOperations.getConverter().convertToMongoType(object);
     }
 
     private void createIndexes() {
         mongoOperations.getCollection(collection).createIndex(
-                new BasicDBObject(ANNOTATION_XREF_ID_FIELD, 1),
-                new BasicDBObject(MongoDBHelper.BACKGROUND_INDEX, true));
+                new Document(ANNOTATION_XREF_ID_FIELD, 1), new IndexOptions().background(true));
         mongoOperations.getCollection(collection).createIndex(
-                new BasicDBObject(ANNOTATION_CT_SO_FIELD, 1),
-                new BasicDBObject(MongoDBHelper.BACKGROUND_INDEX, true));
+                new Document(ANNOTATION_CT_SO_FIELD, 1), new IndexOptions().background(true));
     }
 }

@@ -16,10 +16,9 @@
 
 package uk.ac.ebi.eva.pipeline.io.writers;
 
-import com.mongodb.BasicDBList;
-import com.mongodb.BasicDBObject;
-import com.mongodb.DBCollection;
-import com.mongodb.DBObject;
+import com.mongodb.Block;
+import com.mongodb.client.MongoCollection;
+import org.bson.Document;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -79,12 +78,12 @@ public class VariantMongoWriterTest {
         String dbName = mongoRule.getRandomTemporaryDatabaseName();
         MongoOperations mongoOperations = MongoConfiguration.getMongoOperations(dbName, mongoConnection,
                                                                                 mongoMappingContext);
-        DBCollection dbCollection = mongoOperations.getCollection(collectionName);
+        MongoCollection<Document> collection = mongoOperations.getCollection(collectionName);
 
         VariantMongoWriter variantMongoWriter = new VariantMongoWriter(collectionName, mongoOperations, false, false);
         variantMongoWriter.doWrite(EMPTY_LIST);
 
-        assertEquals(0, dbCollection.count());
+        assertEquals(0, collection.countDocuments());
     }
 
     @Test
@@ -95,15 +94,13 @@ public class VariantMongoWriterTest {
         String dbName = mongoRule.getRandomTemporaryDatabaseName();
         MongoOperations mongoOperations = MongoConfiguration.getMongoOperations(dbName, mongoConnection,
                                                                                 mongoMappingContext);
-        DBCollection dbCollection = mongoOperations.getCollection(collectionName);
-
-        BasicDBObject dbObject = new BasicDBObject();
+        MongoCollection<Document> collection = mongoOperations.getCollection(collectionName);
 
         VariantMongoWriter variantMongoWriter = new VariantMongoWriter(collectionName, mongoOperations, false, false);
         variantMongoWriter.write(Collections.singletonList(variant1));
         variantMongoWriter.write(Collections.singletonList(variant2));
 
-        assertEquals(2, dbCollection.count());
+        assertEquals(2, collection.countDocuments());
     }
 
     @Test
@@ -111,11 +108,12 @@ public class VariantMongoWriterTest {
         String dbName = mongoRule.getRandomTemporaryDatabaseName();
         MongoOperations mongoOperations = MongoConfiguration.getMongoOperations(dbName, mongoConnection,
                                                                                 mongoMappingContext);
-        DBCollection dbCollection = mongoOperations.getCollection(collectionName);
+        MongoCollection<Document> collection = mongoOperations.getCollection(collectionName);
 
         VariantMongoWriter variantMongoWriter = new VariantMongoWriter(collectionName, mongoOperations, false, false);
 
-        List<DBObject> indexInfo = dbCollection.getIndexInfo();
+        List<Document> indexInfo = new ArrayList<>();
+        collection.listIndexes().forEach((Block<Document>) indexInfo::add);
 
         Set<String> createdIndexes = indexInfo.stream().map(index -> index.get("name").toString())
                 .collect(Collectors.toSet());
@@ -142,10 +140,10 @@ public class VariantMongoWriterTest {
         variantMongoWriter.write(Collections.singletonList(variant1));
 
         variantMongoWriter.write(Collections.singletonList(variant1));
-        DBCollection dbCollection = mongoOperations.getCollection(collectionName);
-        assertEquals(1, dbCollection.count());
-        final DBObject storedVariant = dbCollection.findOne();
-        assertEquals(1, ((BasicDBList) storedVariant.get("files")).size());
+        MongoCollection<Document> collection = mongoOperations.getCollection(collectionName);
+        assertEquals(1, collection.countDocuments());
+        final Document storedVariant = collection.find().first();
+        assertEquals(1, ((List<Document>) storedVariant.get("files")).size());
     }
 
     @Test
@@ -166,14 +164,14 @@ public class VariantMongoWriterTest {
         VariantMongoWriter variantMongoWriter = new VariantMongoWriter(collectionName, mongoOperations, false, true);
         variantMongoWriter.write(Collections.singletonList(variant));
 
-        DBCollection dbCollection = mongoOperations.getCollection(collectionName);
-        assertEquals(1, dbCollection.count());
-        final DBObject storedVariant = dbCollection.findOne();
-        final BasicDBList variantSources = (BasicDBList) storedVariant.get("files");
+        MongoCollection<Document> collection = mongoOperations.getCollection(collectionName);
+        assertEquals(1, collection.countDocuments());
+        final Document storedVariant = collection.find().first();
+        final List<Document> variantSources = (List<Document>) storedVariant.get("files");
         assertNotNull(variantSources);
         assertFalse(variantSources.isEmpty());
-        assertEquals(fileId, ((DBObject) variantSources.get(0)).get("fid"));
-        assertEquals(studyId, ((DBObject) variantSources.get(0)).get("sid"));
+        assertEquals(fileId, variantSources.get(0).get("fid"));
+        assertEquals(studyId, variantSources.get(0).get("sid"));
         assertEquals(String.format("%s_%s_%s_%s", chromosome, start, reference, alternate), storedVariant.get("_id"));
         assertEquals(chromosome, storedVariant.get("chr"));
         assertEquals(start, storedVariant.get("start"));
@@ -193,9 +191,9 @@ public class VariantMongoWriterTest {
         VariantMongoWriter variantMongoWriter = new VariantMongoWriter(collectionName, mongoOperations, true, false);
         variantMongoWriter.write(Collections.singletonList(variant));
 
-        DBCollection dbCollection = mongoOperations.getCollection(collectionName);
-        assertEquals(1, dbCollection.count());
-        final DBObject storedVariant = dbCollection.findOne();
+        MongoCollection<Document> collection = mongoOperations.getCollection(collectionName);
+        assertEquals(1, collection.countDocuments());
+        final Document storedVariant = collection.find().first();
         assertNotNull(storedVariant.get("st"));
     }
 
@@ -210,9 +208,9 @@ public class VariantMongoWriterTest {
         VariantMongoWriter variantMongoWriter = new VariantMongoWriter(collectionName, mongoOperations, false, true);
         variantMongoWriter.write(Collections.singletonList(variant));
 
-        DBCollection dbCollection = mongoOperations.getCollection(collectionName);
-        assertEquals(1, dbCollection.count());
-        final DBObject storedVariant = dbCollection.findOne();
+        MongoCollection<Document> collection = mongoOperations.getCollection(collectionName);
+        assertEquals(1, collection.countDocuments());
+        final Document storedVariant = collection.find().first();
         assertNull(storedVariant.get("st"));
     }
 
@@ -228,9 +226,9 @@ public class VariantMongoWriterTest {
         VariantMongoWriter variantMongoWriter = new VariantMongoWriter(collectionName, mongoOperations, false, true);
         variantMongoWriter.write(Collections.singletonList(variant));
 
-        DBCollection dbCollection = mongoOperations.getCollection(collectionName);
-        assertEquals(1, dbCollection.count());
-        final DBObject storedVariant = dbCollection.findOne();
+        MongoCollection<Document> collection = mongoOperations.getCollection(collectionName);
+        assertEquals(1, collection.countDocuments());
+        final Document storedVariant = collection.find().first();
         assertNotNull(storedVariant.get("ids"));
     }
 
@@ -245,9 +243,9 @@ public class VariantMongoWriterTest {
         VariantMongoWriter variantMongoWriter = new VariantMongoWriter(collectionName, mongoOperations, false, true);
         variantMongoWriter.write(Collections.singletonList(variant));
 
-        DBCollection dbCollection = mongoOperations.getCollection(collectionName);
-        assertEquals(1, dbCollection.count());
-        final DBObject storedVariant = dbCollection.findOne();
+        MongoCollection<Document> collection = mongoOperations.getCollection(collectionName);
+        assertEquals(1, collection.countDocuments());
+        final Document storedVariant = collection.find().first();
         assertNull(storedVariant.get("ids"));
     }
 

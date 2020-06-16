@@ -16,9 +16,8 @@
 
 package uk.ac.ebi.eva.pipeline.configuration.jobs;
 
-import com.mongodb.BasicDBList;
-import com.mongodb.DBCursor;
-import com.mongodb.DBObject;
+import com.mongodb.client.MongoCursor;
+import org.bson.Document;
 import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
@@ -42,7 +41,6 @@ import uk.ac.ebi.eva.utils.URLHelper;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -120,14 +118,14 @@ public class AnnotationJobTest {
         assertEquals(BeanNames.LOAD_ANNOTATION_METADATA_STEP, loadAnnotationMetadataStep.getStepName());
 
         //check that documents have the annotation
-        DBCursor cursor = mongoRule.getCollection(dbName, COLLECTION_ANNOTATIONS_NAME).find();
+        MongoCursor<Document> cursor = mongoRule.getCollection(dbName, COLLECTION_ANNOTATIONS_NAME).find().iterator();
 
         int annotationCount = 0;
         int consequenceTypeCount = 0;
         while (cursor.hasNext()) {
             annotationCount++;
-            DBObject annotation = cursor.next();
-            BasicDBList consequenceTypes = (BasicDBList) annotation.get(CONSEQUENCE_TYPE_FIELD);
+            Document annotation = cursor.next();
+            List<Document> consequenceTypes = (List<Document>) annotation.get(CONSEQUENCE_TYPE_FIELD);
             assertNotNull(consequenceTypes);
             consequenceTypeCount += consequenceTypes.size();
         }
