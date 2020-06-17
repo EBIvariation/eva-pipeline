@@ -139,7 +139,6 @@ public class VariantToDBObjectConverterTest {
 
         //Setup mongoVariant
         Document mongoVariant = new Document("_id", "1_1000_A_C")
-//                .append(VariantDocument.IDS_FIELD, variant.getIds())
                 .append(VariantDocument.TYPE_FIELD, variant.getType().name())
                 .append(VariantDocument.CHROMOSOME_FIELD, variant.getChromosome())
                 .append(VariantDocument.START_FIELD, variant.getStart())
