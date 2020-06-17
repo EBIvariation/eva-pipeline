@@ -231,6 +231,7 @@ public class LoadStatisticsTasklet implements Tasklet {
         updateSourceStats(variantSourceStats);
     }
 
+    //TODO: Extracted from opencga repository method VariantSourceMongoDBAdaptor.updateSourceStats
     private void updateSourceStats(VariantSourceStats variantSourceStats) {
         MongoCollection<Document> collection = MongoClients.create().getDatabase(dbParameters.getDatabaseName())
                 .getCollection(dbParameters.getCollectionFilesName());

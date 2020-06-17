@@ -16,7 +16,6 @@
 
 package uk.ac.ebi.eva.pipeline.io.writers;
 
-import com.mongodb.BasicDBObject;
 import com.mongodb.client.model.IndexOptions;
 import org.bson.Document;
 import org.springframework.batch.item.ItemWriter;
@@ -123,12 +122,12 @@ public class AnnotationMongoWriter implements ItemWriter<List<Annotation>> {
         return new BasicUpdate(new Document(ADD_TO_SET, addToSetValue));
     }
 
-    private BasicDBObject buildInsertXrefsQuery(Annotation annotation) {
-        return new BasicDBObject(EACH, convertToMongo(annotation.getXrefs()));
+    private Document buildInsertXrefsQuery(Annotation annotation) {
+        return new Document(EACH, convertToMongo(annotation.getXrefs()));
     }
 
-    private BasicDBObject buildInsertConsequenceTypeQuery(Annotation annotation) {
-        return new BasicDBObject(EACH, convertToMongo(annotation.getConsequenceTypes()));
+    private Document buildInsertConsequenceTypeQuery(Annotation annotation) {
+        return new Document(EACH, convertToMongo(annotation.getConsequenceTypes()));
     }
 
     private Document convertToMongo(SimplifiedAnnotation simplifiedAnnotation) {

@@ -134,7 +134,7 @@ public class AnnotationInVariantMongoWriterTest {
             String id = (String) variant.get("_id");
 
             if (id.equals("20_63360_C_T_" + VEP_VERSION + "_" + VEP_CACHE_VERSION)) {
-                Document annotationField = (Document) ((BasicDBList) variant.get(
+                Document annotationField = ((List<Document>) variant.get(
                         VariantDocument.ANNOTATION_FIELD)).get(0);
 
                 checkAnnotationFields(annotationField,
@@ -146,7 +146,7 @@ public class AnnotationInVariantMongoWriterTest {
             }
 
             if (id.equals("20_63399_G_A_" + VEP_VERSION + "_" + VEP_CACHE_VERSION)) {
-                Document annotationField = (Document) ((BasicDBList) variant.get(
+                Document annotationField = ((List<Document>) variant.get(
                         VariantDocument.ANNOTATION_FIELD)).get(0);
 
                 checkAnnotationFields(annotationField,
