@@ -16,10 +16,10 @@
 package uk.ac.ebi.eva.pipeline.io.writers;
 
 import com.mongodb.BasicDBList;
-import com.mongodb.BasicDBObject;
-import com.mongodb.DBCollection;
-import com.mongodb.DBCursor;
-import com.mongodb.DBObject;
+import com.mongodb.Block;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoCursor;
+import org.bson.Document;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -54,13 +54,12 @@ import java.util.stream.Collectors;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-
-import static uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantAnnotation.POLYPHEN_FIELD;
-import static uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantAnnotation.SIFT_FIELD;
 import static uk.ac.ebi.eva.commons.models.mongo.entity.Annotation.CONSEQUENCE_TYPE_FIELD;
 import static uk.ac.ebi.eva.commons.models.mongo.entity.Annotation.XREFS_FIELD;
 import static uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.Score.SCORE_DESCRIPTION_FIELD;
 import static uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.Score.SCORE_SCORE_FIELD;
+import static uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantAnnotation.POLYPHEN_FIELD;
+import static uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantAnnotation.SIFT_FIELD;
 import static uk.ac.ebi.eva.test.data.VepOutputContent.vepOutputContent;
 import static uk.ac.ebi.eva.test.utils.JobTestUtils.count;
 
@@ -116,14 +115,14 @@ public class AnnotationMongoWriterTest {
         annotationWriter.write(Collections.singletonList(annotations));
 
         // and finally check that documents in annotation collection have annotations
-        DBCursor cursor = mongoRule.getCollection(databaseName, COLLECTION_ANNOTATIONS_NAME).find();
+        MongoCursor<Document> cursor = mongoRule.getCollection(databaseName, COLLECTION_ANNOTATIONS_NAME).find().iterator();
 
         int count = 0;
         int consequenceTypeCount = 0;
         while (cursor.hasNext()) {
             count++;
-            DBObject annotation = cursor.next();
-            BasicDBList consequenceTypes = (BasicDBList) annotation.get(CONSEQUENCE_TYPE_FIELD);
+            Document annotation = cursor.next();
+            List<Document> consequenceTypes = (List<Document>) annotation.get(CONSEQUENCE_TYPE_FIELD);
             assertNotNull(consequenceTypes);
             consequenceTypeCount += consequenceTypes.size();
         }
@@ -171,10 +170,11 @@ public class AnnotationMongoWriterTest {
         annotationWriter.write(Collections.singletonList(annotationSet3));
 
         // and finally check that documents in DB have the correct number of annotation
-        DBCursor cursor = mongoRule.getCollection(databaseName, COLLECTION_ANNOTATIONS_NAME).find();
+        MongoCursor<Document> cursor = mongoRule.getCollection(databaseName, COLLECTION_ANNOTATIONS_NAME).find()
+                .iterator();
 
         while (cursor.hasNext()) {
-            DBObject annotation = cursor.next();
+            Document annotation = cursor.next();
             String id = annotation.get("_id").toString();
 
             if (id.equals("20_63360_C_T") || id.equals("20_63399_G_A") || id.equals("20_63426_G_T")) {
@@ -206,17 +206,19 @@ public class AnnotationMongoWriterTest {
 
         annotationWriter.write(Collections.singletonList(Collections.singletonList(annotation)));
 
-        DBCursor cursor = mongoRule.getCollection(databaseName, COLLECTION_ANNOTATIONS_NAME).find();
+        MongoCursor<Document> cursor = mongoRule.getCollection(databaseName, COLLECTION_ANNOTATIONS_NAME).find()
+                .iterator();
         while (cursor.hasNext()) {
-            DBObject annotationField = cursor.next();
-            BasicDBList consequenceTypes = (BasicDBList) annotationField.get(CONSEQUENCE_TYPE_FIELD);
+            Document annotationField = cursor.next();
+            List<Document> consequenceTypes = (List<Document>) annotationField.get(CONSEQUENCE_TYPE_FIELD);
 
             assertNotNull(consequenceTypes);
 
-            LinkedHashMap consequenceTypeMap = (LinkedHashMap) consequenceTypes.get(0);
+            LinkedHashMap consequenceTypeMap = new LinkedHashMap();
+            consequenceTypes.get(0).forEach(consequenceTypeMap::put);
 
-            BasicDBObject sift = (BasicDBObject) consequenceTypeMap.get(SIFT_FIELD);
-            BasicDBObject polyphen = (BasicDBObject) consequenceTypeMap.get(POLYPHEN_FIELD);
+            Document sift = (Document) consequenceTypeMap.get(SIFT_FIELD);
+            Document polyphen = (Document) consequenceTypeMap.get(POLYPHEN_FIELD);
 
             assertEquals(sift.getString(SCORE_DESCRIPTION_FIELD), siftScore.getDescription());
             assertEquals(sift.get(SCORE_SCORE_FIELD), siftScore.getScore());
@@ -231,11 +233,12 @@ public class AnnotationMongoWriterTest {
     public void indexesShouldBeCreatedInBackground() throws UnknownHostException {
         String dbName = mongoRule.getRandomTemporaryDatabaseName();
         MongoOperations mongoOperations = MongoConfiguration.getMongoOperations(dbName, mongoConnection, mongoMappingContext);
-        DBCollection dbCollection = mongoOperations.getCollection(COLLECTION_ANNOTATIONS_NAME);
+        MongoCollection<Document> dbCollection = mongoOperations.getCollection(COLLECTION_ANNOTATIONS_NAME);
 
         AnnotationMongoWriter writer = new AnnotationMongoWriter(mongoOperations, COLLECTION_ANNOTATIONS_NAME);
 
-        List<DBObject> indexInfo = dbCollection.getIndexInfo();
+        List<Document> indexInfo = new ArrayList<>();
+        dbCollection.listIndexes().forEach((Block<Document>) indexInfo::add);
 
         Set<String> createdIndexes = indexInfo.stream().map(index -> index.get("name").toString()).collect(Collectors.toSet());
         Set<String> expectedIndexes = new HashSet<>();
@@ -262,16 +265,16 @@ public class AnnotationMongoWriterTest {
         annotationWriter.write(Collections.singletonList(annotations.subList(1, 2)));
 
         // check that consequence type was written in the annotation document
-        DBCollection annotCollection = mongoRule.getCollection(databaseName, COLLECTION_ANNOTATIONS_NAME);
-        assertEquals(1, count(annotCollection.find()));
-        assertEquals(1, countConsequenceType(annotCollection.find()));
-        assertEquals(3, countXref(annotCollection.find()));
+        MongoCollection<Document> annotCollection = mongoRule.getCollection(databaseName, COLLECTION_ANNOTATIONS_NAME);
+        assertEquals(1, count(annotCollection.find().iterator()));
+        assertEquals(1, countConsequenceType(annotCollection.find().iterator()));
+        assertEquals(3, countXref(annotCollection.find().iterator()));
 
         // check that consequence types were added to that document
         annotationWriter.write(Collections.singletonList(annotations.subList(2, 3)));
-        assertEquals(1, count(annotCollection.find()));
-        assertEquals(2, countConsequenceType(annotCollection.find()));
-        assertEquals(4, countXref(annotCollection.find()));
+        assertEquals(1, count(annotCollection.find().iterator()));
+        assertEquals(2, countConsequenceType(annotCollection.find().iterator()));
+        assertEquals(4, countXref(annotCollection.find().iterator()));
     }
 
     @Test
@@ -295,34 +298,34 @@ public class AnnotationMongoWriterTest {
         annotationWriter.write(firstVersionAnnotation);
 
         // check that consequence type was written in the annotation document
-        DBCollection annotCollection = mongoRule.getCollection(databaseName, COLLECTION_ANNOTATIONS_NAME);
-        assertEquals(1, annotCollection.count());
-        assertEquals(1, countConsequenceType(annotCollection.find()));
-        assertEquals(3, countXref(annotCollection.find()));
+        MongoCollection<Document> annotCollection = mongoRule.getCollection(databaseName, COLLECTION_ANNOTATIONS_NAME);
+        assertEquals(1, annotCollection.countDocuments());
+        assertEquals(1, countConsequenceType(annotCollection.find().iterator()));
+        assertEquals(3, countXref(annotCollection.find().iterator()));
 
         // check that consequence types were added to that document
         annotationWriter.write(secondVersionAnnotation);
-        assertEquals(2, annotCollection.count());
-        assertEquals(2, countConsequenceType(annotCollection.find()));
-        assertEquals(6, countXref(annotCollection.find()));
+        assertEquals(2, annotCollection.countDocuments());
+        assertEquals(2, countConsequenceType(annotCollection.find().iterator()));
+        assertEquals(6, countXref(annotCollection.find().iterator()));
     }
 
-    private int countConsequenceType(DBCursor cursor) {
+    private int countConsequenceType(MongoCursor<Document> cursor) {
         return getArrayCount(cursor, CONSEQUENCE_TYPE_FIELD);
     }
 
-    private int getArrayCount(DBCursor cursor, String field) {
+    private int getArrayCount(MongoCursor<Document> cursor, String field) {
         int count = 0;
         while (cursor.hasNext()) {
-            DBObject annotation = cursor.next();
-            BasicDBList elements = (BasicDBList) annotation.get(field);
+            Document annotation = cursor.next();
+            List<Document> elements = (List<Document>) annotation.get(field);
             assertNotNull(elements);
             count += elements.size();
         }
         return count;
     }
 
-    private int countXref(DBCursor cursor) {
+    private int countXref(MongoCursor<Document> cursor) {
         return getArrayCount(cursor, XREFS_FIELD);
     }
 }

@@ -16,7 +16,8 @@
 
 package uk.ac.ebi.eva.pipeline.configuration.jobs.steps;
 
-import com.mongodb.DBCursor;
+import com.mongodb.client.MongoCursor;
+import org.bson.Document;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -31,7 +32,6 @@ import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-
 import uk.ac.ebi.eva.pipeline.configuration.BeanNames;
 import uk.ac.ebi.eva.pipeline.configuration.jobs.PopulationStatisticsJobConfiguration;
 import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
@@ -120,7 +120,7 @@ public class LoadStatisticsStepTest {
         assertCompleted(jobExecution);
 
         // The DB docs should have the field "st"
-        DBCursor cursor = mongoRule.getCollection(dbName, COLLECTION_VARIANTS_NAME).find();
+        MongoCursor<Document> cursor = mongoRule.getCollection(dbName, COLLECTION_VARIANTS_NAME).find().iterator();
         assertEquals(1, JobTestUtils.getCohortStatsFromFirstVariant(cursor, mongoOperations).size());
     }
 

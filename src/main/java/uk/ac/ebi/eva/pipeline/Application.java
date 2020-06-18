@@ -17,7 +17,6 @@ package uk.ac.ebi.eva.pipeline;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.batch.JobLauncherCommandLineRunner;
 import org.springframework.boot.autoconfigure.data.mongo.MongoDataAutoConfiguration;
 import org.springframework.context.ConfigurableApplicationContext;
 
@@ -31,7 +30,7 @@ import org.springframework.context.ConfigurableApplicationContext;
  * Append any parameter as needed.
  * TODO document all parameters
  */
-@SpringBootApplication(exclude = {MongoDataAutoConfiguration.class, JobLauncherCommandLineRunner.class})
+@SpringBootApplication(exclude = {MongoDataAutoConfiguration.class})
 public class Application {
 
     public static final String VARIANT_WRITER_MONGO_PROFILE = "variant-writer-mongo";

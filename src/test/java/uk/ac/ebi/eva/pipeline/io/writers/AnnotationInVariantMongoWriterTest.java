@@ -19,6 +19,8 @@ import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
+import com.mongodb.client.MongoCursor;
+import org.bson.Document;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -125,14 +127,14 @@ public class AnnotationInVariantMongoWriterTest {
         annotationInVariantMongoWriter.write(Collections.singletonList(annotationSet3));
 
         // and finally check that variant documents have the annotations fields
-        DBCursor cursor = mongoRule.getCollection(databaseName, COLLECTION_VARIANTS_NAME).find();
+        MongoCursor<Document> cursor = mongoRule.getCollection(databaseName, COLLECTION_VARIANTS_NAME).find().iterator();
 
         while (cursor.hasNext()) {
-            DBObject variant = cursor.next();
+            Document variant = cursor.next();
             String id = (String) variant.get("_id");
 
             if (id.equals("20_63360_C_T_" + VEP_VERSION + "_" + VEP_CACHE_VERSION)) {
-                BasicDBObject annotationField = (BasicDBObject) ((BasicDBList) variant.get(
+                Document annotationField = ((List<Document>) variant.get(
                         VariantDocument.ANNOTATION_FIELD)).get(0);
 
                 checkAnnotationFields(annotationField,
@@ -144,7 +146,7 @@ public class AnnotationInVariantMongoWriterTest {
             }
 
             if (id.equals("20_63399_G_A_" + VEP_VERSION + "_" + VEP_CACHE_VERSION)) {
-                BasicDBObject annotationField = (BasicDBObject) ((BasicDBList) variant.get(
+                Document annotationField = ((List<Document>) variant.get(
                         VariantDocument.ANNOTATION_FIELD)).get(0);
 
                 checkAnnotationFields(annotationField,
@@ -158,19 +160,19 @@ public class AnnotationInVariantMongoWriterTest {
         cursor.close();
     }
 
-    private void checkAnnotationFields(BasicDBObject annotationField,
-                                       List<Double> expectedSifts, List<Double> expectedPolyphens,
-                                       Set<Integer> expectedSos, Set<String> expectedXrefs) {
-        BasicDBList sifts = (BasicDBList) annotationField.get(SIFT_FIELD);
+    private void checkAnnotationFields(Document annotationField, List<Double> expectedSifts,
+                                       List<Double> expectedPolyphens, Set<Integer> expectedSos,
+                                       Set<String> expectedXrefs) {
+        List<Double> sifts = (List<Double>) annotationField.get(SIFT_FIELD);
         assertEquals(expectedSifts, sifts);
 
-        BasicDBList polyphen = (BasicDBList) annotationField.get(POLYPHEN_FIELD);
+        List<Double> polyphen = (List<Double>) annotationField.get(POLYPHEN_FIELD);
         assertEquals(expectedPolyphens, polyphen);
 
-        BasicDBList so = (BasicDBList) annotationField.get(SO_ACCESSION_FIELD);
+        List<Integer> so = (List<Integer>) annotationField.get(SO_ACCESSION_FIELD);
         assertEquals(expectedSos, new TreeSet<>(so));
 
-        BasicDBList geneNames = (BasicDBList) annotationField.get(XREFS_FIELD);
+        List<String> geneNames = (List<String>) annotationField.get(XREFS_FIELD);
         assertEquals(expectedXrefs, new TreeSet<>(geneNames));
     }
 
@@ -190,18 +192,18 @@ public class AnnotationInVariantMongoWriterTest {
         annotationInVariantMongoWriter = new AnnotationInVariantMongoWriter(operations, COLLECTION_VARIANTS_NAME,
                 VEP_VERSION, VEP_CACHE_VERSION);
 
-        BasicDBList annotationField = writeAndGetAnnotation(databaseName, annotations.get(0));
+        List<Document> annotationField = writeAndGetAnnotation(databaseName, annotations.get(0));
 
-        checkAnnotationFields((BasicDBObject) annotationField.get(0),
+        checkAnnotationFields(annotationField.get(0),
                               Arrays.asList(0.1, 0.1),
                               Arrays.asList(0.1, 0.1),
                               new TreeSet<>(Arrays.asList(1631)),
                               new TreeSet<>(Arrays.asList("DEFB125", "ENSG00000178591", "ENST00000382410")));
 
         // load the second annotation and check the information is updated (not overwritten)
-        BasicDBList annotationFieldAfter = writeAndGetAnnotation(databaseName, annotations.get(1));
+        List<Document> annotationFieldAfter = writeAndGetAnnotation(databaseName, annotations.get(1));
 
-        checkAnnotationFields((BasicDBObject) annotationFieldAfter.get(0),
+        checkAnnotationFields(annotationFieldAfter.get(0),
                               Arrays.asList(0.1, 0.2),
                               Arrays.asList(0.1, 0.2),
                               new TreeSet<>(Arrays.asList(1631)),
@@ -209,17 +211,18 @@ public class AnnotationInVariantMongoWriterTest {
                                                         "ENST00000608838")));
     }
 
-    private BasicDBList writeAndGetAnnotation(String databaseName, Annotation annotation) throws Exception {
+    private List<Document> writeAndGetAnnotation(String databaseName, Annotation annotation) throws Exception {
         annotationInVariantMongoWriter.write(Collections.singletonList(Collections.singletonList(annotation)));
 
-        BasicDBObject query = new BasicDBObject(Annotation.START_FIELD, annotation.getStart());
-        DBCursor cursor = mongoRule.getCollection(databaseName, COLLECTION_VARIANTS_NAME).find(query);
+        Document query = new Document(Annotation.START_FIELD, annotation.getStart());
+        MongoCursor<Document> cursor = mongoRule.getCollection(databaseName, COLLECTION_VARIANTS_NAME).find(query)
+                .iterator();
 
         assertTrue(cursor.hasNext());
-        DBObject variant = cursor.next();
+        Document variant = cursor.next();
         assertFalse(cursor.hasNext());
 
-        return ((BasicDBList) variant.get(VariantDocument.ANNOTATION_FIELD));
+        return (List<Document>) variant.get(VariantDocument.ANNOTATION_FIELD);
     }
 
     @Test
@@ -242,10 +245,10 @@ public class AnnotationInVariantMongoWriterTest {
         annotationInVariantMongoWriter = new AnnotationInVariantMongoWriter(operations, COLLECTION_VARIANTS_NAME,
                                                                             VEP_VERSION, VEP_CACHE_VERSION);
 
-        BasicDBList annotationField = writeAndGetAnnotation(databaseName, firstAnnotation);
+        List<Document> annotationField = writeAndGetAnnotation(databaseName, firstAnnotation);
 
         assertEquals(1, annotationField.size());
-        checkAnnotationFields((BasicDBObject) annotationField.get(0),
+        checkAnnotationFields(annotationField.get(0),
                               Arrays.asList(0.1, 0.1),
                               Arrays.asList(0.1, 0.1),
                               new TreeSet<>(Arrays.asList(1631)),
@@ -255,16 +258,16 @@ public class AnnotationInVariantMongoWriterTest {
         annotationInVariantMongoWriter = new AnnotationInVariantMongoWriter(operations, COLLECTION_VARIANTS_NAME,
                                                                             differentVepVersion,
                                                                             differentVepCacheVersion);
-        BasicDBList annotationFieldAfter = writeAndGetAnnotation(databaseName, differentVersionAnnotation);
+        List<Document> annotationFieldAfter = writeAndGetAnnotation(databaseName, differentVersionAnnotation);
 
         assertEquals(2, annotationFieldAfter.size());
-        checkAnnotationFields((BasicDBObject) annotationField.get(0),
+        checkAnnotationFields(annotationField.get(0),
                               Arrays.asList(0.1, 0.1),
                               Arrays.asList(0.1, 0.1),
                               new TreeSet<>(Arrays.asList(1631)),
                               new TreeSet<>(Arrays.asList("DEFB125", "ENSG00000178591", "ENST00000382410")));
 
-        checkAnnotationFields((BasicDBObject) annotationFieldAfter.get(1),
+        checkAnnotationFields(annotationFieldAfter.get(1),
                               Arrays.asList(0.2, 0.2),
                               Arrays.asList(0.2, 0.2),
                               new TreeSet<>(Arrays.asList(1631)),

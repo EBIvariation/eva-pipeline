@@ -15,11 +15,10 @@
  */
 package uk.ac.ebi.eva.pipeline.configuration.jobs.steps;
 
-import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
-import com.mongodb.DBCollection;
-import com.mongodb.DBCursor;
-import com.mongodb.DBObject;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoCursor;
+import org.bson.Document;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -31,7 +30,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-
 import uk.ac.ebi.eva.commons.models.mongo.entity.VariantDocument;
 import uk.ac.ebi.eva.pipeline.Application;
 import uk.ac.ebi.eva.pipeline.configuration.BeanNames;
@@ -50,10 +48,8 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static junit.framework.TestCase.assertFalse;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 import static uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantAnnotation.POLYPHEN_FIELD;
 import static uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantAnnotation.SIFT_FIELD;
 import static uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantAnnotation.SO_ACCESSION_FIELD;
@@ -63,7 +59,6 @@ import static uk.ac.ebi.eva.test.utils.GenotypedVcfJobTestUtils.COLLECTION_VARIA
 import static uk.ac.ebi.eva.test.utils.GenotypedVcfJobTestUtils.checkLoadedAnnotation;
 import static uk.ac.ebi.eva.test.utils.JobTestUtils.assertCompleted;
 import static uk.ac.ebi.eva.test.utils.JobTestUtils.assertFailed;
-import static uk.ac.ebi.eva.test.utils.JobTestUtils.count;
 import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResourceUrl;
 import static uk.ac.ebi.eva.utils.FileUtils.getResource;
 
@@ -130,11 +125,12 @@ public class GenerateVepAnnotationStepTest {
         checkLoadedAnnotation(mongoRule, databaseName);
 
         //check that the annotation fields are present in the variant
-        DBCursor variantCursor = mongoRule.getCollection(databaseName, COLLECTION_VARIANTS_NAME).find();
+        MongoCursor<Document> variantCursor = mongoRule.getCollection(databaseName, COLLECTION_VARIANTS_NAME).find()
+                .iterator();
         while (variantCursor.hasNext()) {
-            DBObject variant = variantCursor.next();
+            Document variant = variantCursor.next();
             if (variant.get("_id").equals("20_68363_A_T")) {
-                BasicDBObject annotationField = (BasicDBObject) ((BasicDBList) variant.get(
+                Document annotationField = ((List<Document>) variant.get(
                         VariantDocument.ANNOTATION_FIELD)).get(0);
                 assertNotNull(annotationField.get(SIFT_FIELD));
                 assertNotNull(annotationField.get(SO_ACCESSION_FIELD));
@@ -193,21 +189,22 @@ public class GenerateVepAnnotationStepTest {
      * mockvep_writeToFile_error.pl returns 1 immediately if it finds a variant on chromosome 20 and position 65900
      */
     private void simulateFix(String databaseName, String collectionVariantsName) {
-        DBCollection collection = mongoRule.getCollection(databaseName, collectionVariantsName);
+        MongoCollection<Document> collection = mongoRule.getCollection(databaseName, collectionVariantsName);
         int startThatProvokesError = 65900;
-        BasicDBObject query = new BasicDBObject("start", startThatProvokesError);
+        Document query = new Document("start", startThatProvokesError);
 
-        assertEquals(1, collection.count(query));
-        DBCursor dbObjects = collection.find(query);
-        DBObject variant = dbObjects.next();
+        assertEquals(1, collection.countDocuments(query));
+        MongoCursor<Document> documents = collection.find(query).iterator();
+        Document variant = documents.next();
 
         int fixedStart = startThatProvokesError - 1;
         variant.put("start", fixedStart);
         variant.put("_id", "20_65899_G_A");
         variant.put("end", fixedStart);
-        collection.insert(variant);
+        collection.insertOne(variant);
 
-        collection.remove(query);
+        collection.deleteMany(query);
+
     }
 
     private void assertAnnotationsCount(String databaseName, int expectedCount) {

@@ -6,7 +6,7 @@ jdk:
   - openjdk8
 
 env:
-  - MONGODB_VERSION=3.0.4
+  - MONGODB_VERSION=4.0.18
 
 install:
   - wget http://fastdl.mongodb.org/linux/mongodb-linux-x86_64-$MONGODB_VERSION.tgz

@@ -15,14 +15,12 @@
  */
 package uk.ac.ebi.eva.pipeline.configuration.jobs.steps;
 
-import com.mongodb.BasicDBObject;
-import com.mongodb.DBCollection;
-import com.mongodb.DuplicateKeyException;
+import com.mongodb.MongoWriteException;
+import com.mongodb.client.MongoCollection;
+import org.bson.Document;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.batch.core.BatchStatus;
-import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.test.JobLauncherTestUtils;
@@ -30,13 +28,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-
 import uk.ac.ebi.eva.pipeline.configuration.BeanNames;
 import uk.ac.ebi.eva.pipeline.configuration.jobs.DatabaseInitializationJobConfiguration;
 import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
-import uk.ac.ebi.eva.test.utils.JobTestUtils;
 import uk.ac.ebi.eva.utils.EvaJobParameterBuilder;
+
+import java.util.ArrayList;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.junit.Assert.assertEquals;
 import static uk.ac.ebi.eva.test.utils.JobTestUtils.assertCompleted;
@@ -71,15 +71,21 @@ public class CreateDatabaseIndexesStepTest {
 
         assertCompleted(jobExecution);
 
-        DBCollection genesCollection = mongoRule.getCollection(databaseName, COLLECTION_FEATURES_NAME);
-        assertEquals("[{ \"v\" : 1 , \"key\" : { \"_id\" : 1} , \"name\" : \"_id_\" , \"ns\" : \"" +
-                        databaseName + "." + COLLECTION_FEATURES_NAME +
-                        "\"}, { \"v\" : 1 , \"key\" : { \"name\" : 1} , \"name\" : \"name_1\" , \"ns\" : \"" +
-                        databaseName + "." + COLLECTION_FEATURES_NAME + "\" , \"sparse\" : true , \"background\" : true}]",
-                genesCollection.getIndexInfo().toString());
+        MongoCollection<Document> genesCollection = mongoRule.getCollection(databaseName, COLLECTION_FEATURES_NAME);
+
+        Document idIndex = new Document("v", "2").append("key", new Document("_id", 1)).append("name", "_id_")
+                .append("ns", databaseName + "." + COLLECTION_FEATURES_NAME);
+        Document nameIndex = new Document("v", "2").append("key", new Document("name", 1)).append("name", "name_1")
+                .append("ns", databaseName + "." + COLLECTION_FEATURES_NAME).append("background", true)
+                .append("sparse", true);
+        String expectedIndexes = Stream.of(idIndex, nameIndex).map(Object::toString).collect(Collectors.joining());
+
+        String actualIndexes = genesCollection.listIndexes().into(new ArrayList<>()).stream().map(Object::toString)
+                .collect(Collectors.joining());
+        assertEquals(expectedIndexes, actualIndexes);
     }
 
-    @Test(expected = DuplicateKeyException.class)
+    @Test(expected = MongoWriteException.class)
     public void testNoDuplicatesCanBeInserted() throws Exception {
         String databaseName = mongoRule.getRandomTemporaryDatabaseName();
         JobParameters jobParameters = new EvaJobParameterBuilder()
@@ -92,8 +98,8 @@ public class CreateDatabaseIndexesStepTest {
 
         assertCompleted(jobExecution);
 
-        DBCollection genesCollection = mongoRule.getCollection(databaseName, COLLECTION_FEATURES_NAME);
-        genesCollection.insert(new BasicDBObject("_id", "example_id"));
-        genesCollection.insert(new BasicDBObject("_id", "example_id"));
+        MongoCollection<Document> genesCollection = mongoRule.getCollection(databaseName, COLLECTION_FEATURES_NAME);
+        genesCollection.insertOne(new Document("_id", "example_id"));
+        genesCollection.insertOne(new Document("_id", "example_id"));
     }
 }

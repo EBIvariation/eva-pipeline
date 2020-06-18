@@ -16,7 +16,8 @@
 
 package uk.ac.ebi.eva.pipeline.configuration.jobs.steps;
 
-import com.mongodb.DBCollection;
+import com.mongodb.client.MongoCollection;
+import org.bson.Document;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -28,7 +29,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-
 import uk.ac.ebi.eva.pipeline.Application;
 import uk.ac.ebi.eva.pipeline.configuration.BeanNames;
 import uk.ac.ebi.eva.pipeline.configuration.jobs.DropStudyJobConfiguration;
@@ -105,7 +105,7 @@ public class DropVariantsByStudyStepTest {
 
         assertCompleted(jobExecution);
 
-        DBCollection variantsCollection = mongoRule.getCollection(databaseName, COLLECTION_VARIANTS_NAME);
+        MongoCollection<Document> variantsCollection = mongoRule.getCollection(databaseName, COLLECTION_VARIANTS_NAME);
         assertDropVariantsByStudy(variantsCollection, STUDY_ID_TO_DROP, expectedVariantsAfterDropStudy);
     }
 

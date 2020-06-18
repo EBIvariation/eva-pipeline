@@ -17,7 +17,7 @@ package uk.ac.ebi.eva.pipeline.jobs.steps.tasklets;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
-import com.mongodb.WriteResult;
+import com.mongodb.client.result.UpdateResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.StepContribution;
@@ -29,7 +29,6 @@ import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
-
 import uk.ac.ebi.eva.pipeline.parameters.DatabaseParameters;
 import uk.ac.ebi.eva.pipeline.parameters.InputParameters;
 
@@ -71,7 +70,7 @@ public class PullFilesAndStatisticsByStudyTasklet implements Tasklet {
         Update update = new Update().pull(FILES_FIELD, containsStudyId).pull(STATS_FIELD, containsStudyId);
 
         logger.trace("Update operation with Query : {} and Update: {}", query, update);
-        WriteResult writeResult = mongoOperations.updateMulti(query, update, dbParameters.getCollectionVariantsName());
+        UpdateResult writeResult = mongoOperations.updateMulti(query, update, dbParameters.getCollectionVariantsName());
         logger.info("Result: {}", writeResult.toString());
 
     }

@@ -1,12 +1,10 @@
 package uk.ac.ebi.eva.test.utils;
 
-import com.mongodb.BasicDBList;
-import com.mongodb.DBCursor;
-import com.mongodb.DBObject;
+import com.mongodb.client.MongoCursor;
+import org.bson.Document;
 import org.opencb.opencga.storage.core.StorageManagerException;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.StepExecution;
-
 import uk.ac.ebi.eva.pipeline.configuration.BeanNames;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 import uk.ac.ebi.eva.utils.URLHelper;
@@ -21,7 +19,6 @@ import java.util.zip.GZIPInputStream;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static uk.ac.ebi.eva.commons.models.mongo.entity.Annotation.CONSEQUENCE_TYPE_FIELD;
 import static uk.ac.ebi.eva.test.utils.JobTestUtils.count;
@@ -55,26 +52,26 @@ public class GenotypedVcfJobTestUtils {
 
     private static final int EXPECTED_VALID_ANNOTATIONS = 536;
 
-    public static DBCursor getVariantDBCursor(TemporaryMongoRule mongoRule, String databaseName) {
-        return mongoRule.getCollection(databaseName, COLLECTION_VARIANTS_NAME).find();
+    public static MongoCursor<Document> getVariantDBCursor(TemporaryMongoRule mongoRule, String databaseName) {
+        return mongoRule.getCollection(databaseName, COLLECTION_VARIANTS_NAME).find().iterator();
     }
 
-    public static DBCursor getAnnotationDBCursor(TemporaryMongoRule mongoRule, String databaseName) {
-        return mongoRule.getCollection(databaseName, COLLECTION_ANNOTATIONS_NAME).find();
+    public static MongoCursor<Document> getAnnotationDBCursor(TemporaryMongoRule mongoRule, String databaseName) {
+        return mongoRule.getCollection(databaseName, COLLECTION_ANNOTATIONS_NAME).find().iterator();
     }
 
     /**
      * Annotation load step: check documents in DB have annotation (only consequence type)
      */
     public static void checkLoadedAnnotation(TemporaryMongoRule mongoRule, String databaseName) {
-        DBCursor cursor = getAnnotationDBCursor(mongoRule, databaseName);
+        MongoCursor<Document> cursor = getAnnotationDBCursor(mongoRule, databaseName);
 
         int count = 0;
         int consequenceTypeCount = 0;
         while (cursor.hasNext()) {
             count++;
-            DBObject annotation = cursor.next();
-            BasicDBList consequenceTypes = (BasicDBList) annotation.get(CONSEQUENCE_TYPE_FIELD);
+            Document annotation = cursor.next();
+            List<String> consequenceTypes = (List<String>) annotation.get(CONSEQUENCE_TYPE_FIELD);
             assertNotNull(consequenceTypes);
             consequenceTypeCount += consequenceTypes.size();
         }
@@ -97,8 +94,8 @@ public class GenotypedVcfJobTestUtils {
      */
     public static void checkLoadStatsStep(TemporaryMongoRule mongoRule,
                                           String databaseName) throws ClassNotFoundException, StorageManagerException, InstantiationException, IllegalAccessException {
-        DBCursor iterator = getVariantDBCursor(mongoRule, databaseName);
-        DBObject stField = ((DBObject) iterator.next().get("st"));
+        MongoCursor<Document> iterator = getVariantDBCursor(mongoRule, databaseName);
+        List<Document> stField = ((List<Document>) iterator.next().get("st"));
 
         assertNotNull(stField);
         iterator.close();
@@ -112,7 +109,7 @@ public class GenotypedVcfJobTestUtils {
     public static void checkLoadStep(TemporaryMongoRule mongoRule,
                                      String databaseName) throws ClassNotFoundException, StorageManagerException,
             InstantiationException, IllegalAccessException {
-        DBCursor iterator = getVariantDBCursor(mongoRule, databaseName);
+        MongoCursor<Document> iterator = getVariantDBCursor(mongoRule, databaseName);
 
         assertEquals(EXPECTED_VARIANTS, count(iterator));
         iterator.close();

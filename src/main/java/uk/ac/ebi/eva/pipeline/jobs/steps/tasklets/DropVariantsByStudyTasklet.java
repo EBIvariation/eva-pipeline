@@ -15,7 +15,7 @@
  */
 package uk.ac.ebi.eva.pipeline.jobs.steps.tasklets;
 
-import com.mongodb.WriteResult;
+import com.mongodb.client.result.DeleteResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.StepContribution;
@@ -63,7 +63,7 @@ public class DropVariantsByStudyTasklet implements Tasklet {
                         .and(FILES_FIELD).size(1));
         logger.info("Deleting variants reported only in study \"{}\"", inputParameters.getStudyId());
         logger.trace("Query used: {}", query);
-        WriteResult writeResult = mongoOperations.remove(query, dbParameters.getCollectionVariantsName());
+        DeleteResult writeResult = mongoOperations.remove(query, dbParameters.getCollectionVariantsName());
         logger.info("Result: {}", writeResult.toString());
 
         return RepeatStatus.FINISHED;

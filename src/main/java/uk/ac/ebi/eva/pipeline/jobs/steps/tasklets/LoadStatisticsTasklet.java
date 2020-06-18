@@ -18,7 +18,11 @@ package uk.ac.ebi.eva.pipeline.jobs.steps.tasklets;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mongodb.client.MongoClients;
+import com.mongodb.client.MongoCollection;
+import org.bson.Document;
 import org.opencb.biodata.models.variant.VariantSource;
+import org.opencb.biodata.models.variant.stats.VariantGlobalStats;
 import org.opencb.biodata.models.variant.stats.VariantSourceStats;
 import org.opencb.biodata.models.variant.stats.VariantStats;
 import org.opencb.datastore.core.ObjectMap;
@@ -39,7 +43,6 @@ import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
-
 import uk.ac.ebi.eva.pipeline.parameters.DatabaseParameters;
 import uk.ac.ebi.eva.pipeline.parameters.InputParameters;
 import uk.ac.ebi.eva.pipeline.parameters.MongoConnection;
@@ -225,7 +228,23 @@ public class LoadStatisticsTasklet implements Tasklet {
         VariantSourceStats variantSourceStats = sourceParser.readValueAs(VariantSourceStats.class);
 
         // Store source statistics in Mongo
-        variantDBAdaptor.getVariantSourceDBAdaptor().updateSourceStats(variantSourceStats, null);
+        updateSourceStats(variantSourceStats);
+    }
+
+    //TODO: Extracted from opencga repository method VariantSourceMongoDBAdaptor.updateSourceStats
+    private void updateSourceStats(VariantSourceStats variantSourceStats) {
+        MongoCollection<Document> collection = MongoClients.create().getDatabase(dbParameters.getDatabaseName())
+                .getCollection(dbParameters.getCollectionFilesName());
+        VariantGlobalStats global = variantSourceStats.getFileStats();
+        Document globalStats = (new Document("nSamp", global.getSamplesCount()))
+                .append("nVar", global.getVariantsCount()).append("nSnp", global.getSnpsCount())
+                .append("nIndel", global.getIndelsCount()).append("nPass", global.getPassCount())
+                .append("nTi", global.getTransitionsCount()).append("nTv", global.getTransversionsCount())
+                .append("meanQ", (double)global.getMeanQuality());
+        Document find = (new Document("fid", variantSourceStats.getFileId()))
+                .append("sid", variantSourceStats.getStudyId());
+        Document update = new Document("$set", new Document("st", globalStats));
+        collection.updateOne(find, update);
     }
 
 }

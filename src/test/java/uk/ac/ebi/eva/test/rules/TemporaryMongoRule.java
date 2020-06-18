@@ -1,10 +1,10 @@
 package uk.ac.ebi.eva.test.rules;
 
 import com.mongodb.DB;
-import com.mongodb.DBCollection;
-import com.mongodb.DBObject;
 import com.mongodb.MongoClient;
-import com.mongodb.util.JSON;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
+import org.bson.Document;
 import org.junit.rules.ExternalResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,11 +50,11 @@ public class TemporaryMongoRule extends ExternalResource {
      * @param variant string in JSON format
      * @return DBObject
      */
-    public static DBObject constructDbObject(String variant) {
-        return (DBObject) JSON.parse(variant);
+    public static Document constructDbObject(String variant) {
+        return Document.parse(variant);
     }
 
-    public DBCollection getCollection(String databaseName, String collection) {
+    public MongoCollection<Document> getCollection(String databaseName, String collection) {
         return getTemporaryDatabase(databaseName).getCollection(collection);
     }
 
@@ -63,7 +63,7 @@ public class TemporaryMongoRule extends ExternalResource {
      *
      * @return
      */
-    private DB getTemporaryDatabase() {
+    private MongoDatabase getTemporaryDatabase() {
         return getTemporaryDatabase(UUID.randomUUID().toString());
     }
 
@@ -73,9 +73,8 @@ public class TemporaryMongoRule extends ExternalResource {
      * @param databaseName
      * @return
      */
-    public DB getTemporaryDatabase(String databaseName) {
-        databaseNames.add(databaseName);
-        return mongoClient.getDB(databaseName);
+    public MongoDatabase getTemporaryDatabase(String databaseName) {
+        return mongoClient.getDatabase(databaseName);
     }
 
 
@@ -88,7 +87,7 @@ public class TemporaryMongoRule extends ExternalResource {
     }
 
     public void insert(String databaseName, String collectionName, String jsonString) {
-        getCollection(databaseName, collectionName).insert(constructDbObject(jsonString));
+        getCollection(databaseName, collectionName).insertOne(constructDbObject(jsonString));
     }
 
     public String restoreDumpInTemporaryDatabase(URL dumpLocation) throws IOException, InterruptedException {
