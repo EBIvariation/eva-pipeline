@@ -17,6 +17,13 @@ package uk.ac.ebi.eva.pipeline.configuration;
 
 import com.mongodb.MongoClient;
 import com.mongodb.MongoCredential;
+import org.opencb.datastore.core.config.DataStoreServerAddress;
+import org.opencb.opencga.lib.auth.IllegalOpenCGACredentialsException;
+import org.opencb.opencga.storage.core.variant.adaptors.VariantDBAdaptor;
+import org.opencb.opencga.storage.mongodb.utils.MongoCredentials;
+import org.opencb.opencga.storage.mongodb.variant.VariantMongoDBAdaptor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -36,12 +43,15 @@ import uk.ac.ebi.eva.utils.MongoDBHelper;
 
 import java.net.UnknownHostException;
 import java.util.Collections;
+import java.util.List;
 
 /**
  * Utility class dealing with MongoDB connections using pipeline options
  */
 @Configuration
 public class MongoConfiguration {
+
+    private static final Logger logger = LoggerFactory.getLogger(MongoConfiguration.class);
 
     @Bean
     public MongoMappingContext mongoMappingContext() {
@@ -110,6 +120,31 @@ public class MongoConfiguration {
         mongoConverter.setMapKeyDotReplacement("£");
 
         return mongoConverter;
+    }
+
+    public static VariantDBAdaptor getDbAdaptor(
+            DatabaseParameters dbParameters) throws UnknownHostException, IllegalOpenCGACredentialsException {
+        MongoCredentials credentials = getMongoCredentials(dbParameters);
+        String variantsCollectionName = dbParameters.getCollectionVariantsName();
+        String filesCollectionName = dbParameters.getCollectionFilesName();
+
+        logger.debug("Getting DBAdaptor to database '{}'", credentials.getMongoDbName());
+        return new VariantMongoDBAdaptor(credentials, variantsCollectionName, filesCollectionName);
+    }
+
+    private static MongoCredentials getMongoCredentials(
+            DatabaseParameters dbParameters) throws IllegalOpenCGACredentialsException {
+        MongoConnection mongoConnection = dbParameters.getMongoConnection();
+        String hosts = mongoConnection.getHosts();
+        List<DataStoreServerAddress> dataStoreServerAddresses = MongoCredentials.parseDataStoreServerAddresses(hosts);
+
+        String dbName = dbParameters.getDatabaseName();
+        String user = mongoConnection.getUser();
+        String pass = mongoConnection.getPassword();
+
+        MongoCredentials mongoCredentials = new MongoCredentials(dataStoreServerAddresses, dbName, user, pass);
+        mongoCredentials.setAuthenticationDatabase(mongoConnection.getAuthenticationDatabase());
+        return mongoCredentials;
     }
 
 }
