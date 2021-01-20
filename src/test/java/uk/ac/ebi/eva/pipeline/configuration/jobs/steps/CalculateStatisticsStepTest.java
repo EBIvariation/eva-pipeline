@@ -58,6 +58,10 @@ public class CalculateStatisticsStepTest {
 
     private static final String MONGO_DUMP = "/dump/VariantStatsConfigurationTest_vl";
 
+    private static final String COLLECTION_VARIANTS_NAME = "variants";
+
+    private static final String COLLECTION_FILES_NAME = "files";
+
     @Rule
     public TemporaryMongoRule mongoRule = new TemporaryMongoRule();
 
@@ -81,6 +85,8 @@ public class CalculateStatisticsStepTest {
         String fileId = "1";
 
         JobParameters jobParameters = new EvaJobParameterBuilder()
+                .collectionFilesName(COLLECTION_FILES_NAME)
+                .collectionVariantsName(COLLECTION_VARIANTS_NAME)
                 .databaseName(databaseName)
                 .inputVcf(SMALL_VCF_FILE)
                 .inputStudyId(studyId)
