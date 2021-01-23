@@ -141,9 +141,11 @@ public class MongoConfiguration {
         String dbName = dbParameters.getDatabaseName();
         String user = mongoConnection.getUser();
         String pass = mongoConnection.getPassword();
+        String authenticationMechanism = mongoConnection.getAuthenticationMechanism();
 
         MongoCredentials mongoCredentials = new MongoCredentials(dataStoreServerAddresses, dbName, user, pass);
         mongoCredentials.setAuthenticationDatabase(mongoConnection.getAuthenticationDatabase());
+        mongoCredentials.setAuthenticationMechanism(authenticationMechanism);
         return mongoCredentials;
     }
 

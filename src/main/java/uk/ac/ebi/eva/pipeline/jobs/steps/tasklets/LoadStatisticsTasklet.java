@@ -202,23 +202,6 @@ public class LoadStatisticsTasklet implements Tasklet {
         VariantSourceStats variantSourceStats = sourceParser.readValueAs(VariantSourceStats.class);
 
         // Store source statistics in Mongo
-        updateSourceStats(variantSourceStats);
+        variantDBAdaptor.getVariantSourceDBAdaptor().updateSourceStats(variantSourceStats, null);
     }
-
-    //TODO: Extracted from opencga repository method VariantSourceMongoDBAdaptor.updateSourceStats
-    private void updateSourceStats(VariantSourceStats variantSourceStats) {
-        MongoCollection<Document> collection = MongoClients.create().getDatabase(dbParameters.getDatabaseName())
-                .getCollection(dbParameters.getCollectionFilesName());
-        VariantGlobalStats global = variantSourceStats.getFileStats();
-        Document globalStats = (new Document("nSamp", global.getSamplesCount()))
-                .append("nVar", global.getVariantsCount()).append("nSnp", global.getSnpsCount())
-                .append("nIndel", global.getIndelsCount()).append("nPass", global.getPassCount())
-                .append("nTi", global.getTransitionsCount()).append("nTv", global.getTransversionsCount())
-                .append("meanQ", (double)global.getMeanQuality());
-        Document find = (new Document("fid", variantSourceStats.getFileId()))
-                .append("sid", variantSourceStats.getStudyId());
-        Document update = new Document("$set", new Document("st", globalStats));
-        collection.updateOne(find, update);
-    }
-
 }

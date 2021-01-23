@@ -33,6 +33,9 @@ public class MongoConnection {
     @Value("${" + JobParametersNames.CONFIG_DB_AUTHENTICATIONDB + ":#{null}}")
     private String authenticationDatabase;
 
+    @Value("${" + JobParametersNames.CONFIG_DB_AUTH_MECHANISM + ":#{null}}")
+    private String authenticationMechanism;
+
     @Value("${" + JobParametersNames.CONFIG_DB_USER + ":#{null}}")
     private String user;
 
@@ -48,6 +51,10 @@ public class MongoConnection {
 
     public String getAuthenticationDatabase() {
         return authenticationDatabase;
+    }
+
+    public String getAuthenticationMechanism() {
+        return authenticationMechanism;
     }
 
     public String getUser() {
