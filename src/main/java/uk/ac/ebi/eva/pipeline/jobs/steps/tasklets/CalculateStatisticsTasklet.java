@@ -31,6 +31,7 @@ import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import uk.ac.ebi.eva.pipeline.configuration.MongoConfiguration;
 import uk.ac.ebi.eva.pipeline.parameters.ChunkSizeParameters;
 import uk.ac.ebi.eva.pipeline.parameters.DatabaseParameters;
 import uk.ac.ebi.eva.pipeline.parameters.InputParameters;
@@ -71,7 +72,7 @@ public class CalculateStatisticsTasklet implements Tasklet {
 
         ObjectMap variantOptions = getVariantOptions();
         VariantStorageManager variantStorageManager = StorageManagerFactory.getVariantStorageManager();
-        VariantDBAdaptor dbAdaptor = variantStorageManager.getDBAdaptor(dbParameters.getDatabaseName(), variantOptions);
+        VariantDBAdaptor dbAdaptor = MongoConfiguration.getDbAdaptor(dbParameters);
         URI statsOutputUri = getStatsBaseUri();
 
         VariantStatisticsManager variantStatisticsManager = new VariantStatisticsManager();

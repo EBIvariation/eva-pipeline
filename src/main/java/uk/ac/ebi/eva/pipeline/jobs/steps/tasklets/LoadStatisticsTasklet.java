@@ -28,14 +28,10 @@ import org.opencb.biodata.models.variant.stats.VariantStats;
 import org.opencb.datastore.core.ObjectMap;
 import org.opencb.datastore.core.QueryOptions;
 import org.opencb.datastore.core.QueryResult;
-import org.opencb.datastore.core.config.DataStoreServerAddress;
-import org.opencb.opencga.lib.auth.IllegalOpenCGACredentialsException;
 import org.opencb.opencga.storage.core.variant.VariantStorageManager;
 import org.opencb.opencga.storage.core.variant.adaptors.VariantDBAdaptor;
 import org.opencb.opencga.storage.core.variant.io.json.VariantStatsJsonMixin;
 import org.opencb.opencga.storage.core.variant.stats.VariantStatsWrapper;
-import org.opencb.opencga.storage.mongodb.utils.MongoCredentials;
-import org.opencb.opencga.storage.mongodb.variant.VariantMongoDBAdaptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.StepContribution;
@@ -43,9 +39,10 @@ import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import uk.ac.ebi.eva.pipeline.configuration.MongoConfiguration;
 import uk.ac.ebi.eva.pipeline.parameters.DatabaseParameters;
 import uk.ac.ebi.eva.pipeline.parameters.InputParameters;
-import uk.ac.ebi.eva.pipeline.parameters.MongoConnection;
 import uk.ac.ebi.eva.pipeline.parameters.OutputParameters;
 import uk.ac.ebi.eva.utils.URLHelper;
 
@@ -53,7 +50,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
-import java.net.UnknownHostException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
@@ -121,7 +117,7 @@ public class LoadStatisticsTasklet implements Tasklet {
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
-        VariantDBAdaptor dbAdaptor = getDbAdaptor();
+        VariantDBAdaptor dbAdaptor = MongoConfiguration.getDbAdaptor(dbParameters);
         URI variantStatsOutputUri = URLHelper.getVariantsStatsUri(
                 outputParameters.getOutputDirStatistics(), inputParameters.getStudyId(), inputParameters.getVcfId());
         URI sourceStatsOutputUri = URLHelper.getSourceStatsUri(
@@ -150,28 +146,6 @@ public class LoadStatisticsTasklet implements Tasklet {
                     inputParameters.getStudyName(),
                     inputParameters.getStudyType(),
                     inputParameters.getVcfAggregation());
-    }
-    private VariantDBAdaptor getDbAdaptor() throws UnknownHostException, IllegalOpenCGACredentialsException {
-        MongoCredentials credentials = getMongoCredentials();
-        String variantsCollectionName = dbParameters.getCollectionVariantsName();
-        String filesCollectionName = dbParameters.getCollectionFilesName();
-
-        logger.debug("Getting DBAdaptor to database '{}'", credentials.getMongoDbName());
-        return new VariantMongoDBAdaptor(credentials, variantsCollectionName, filesCollectionName);
-    }
-
-    private MongoCredentials getMongoCredentials() throws IllegalOpenCGACredentialsException {
-        MongoConnection mongoConnection = dbParameters.getMongoConnection();
-        String hosts = mongoConnection.getHosts();
-        List<DataStoreServerAddress> dataStoreServerAddresses = MongoCredentials.parseDataStoreServerAddresses(hosts);
-
-        String dbName = dbParameters.getDatabaseName();
-        String user = mongoConnection.getUser();
-        String pass = mongoConnection.getPassword();
-
-        MongoCredentials mongoCredentials = new MongoCredentials(dataStoreServerAddresses, dbName, user, pass);
-        mongoCredentials.setAuthenticationDatabase(mongoConnection.getAuthenticationDatabase());
-        return mongoCredentials;
     }
 
     private void loadVariantStats(VariantDBAdaptor variantDBAdaptor, URI variantsStatsUri, QueryOptions options)
@@ -228,23 +202,6 @@ public class LoadStatisticsTasklet implements Tasklet {
         VariantSourceStats variantSourceStats = sourceParser.readValueAs(VariantSourceStats.class);
 
         // Store source statistics in Mongo
-        updateSourceStats(variantSourceStats);
+        variantDBAdaptor.getVariantSourceDBAdaptor().updateSourceStats(variantSourceStats, null);
     }
-
-    //TODO: Extracted from opencga repository method VariantSourceMongoDBAdaptor.updateSourceStats
-    private void updateSourceStats(VariantSourceStats variantSourceStats) {
-        MongoCollection<Document> collection = MongoClients.create().getDatabase(dbParameters.getDatabaseName())
-                .getCollection(dbParameters.getCollectionFilesName());
-        VariantGlobalStats global = variantSourceStats.getFileStats();
-        Document globalStats = (new Document("nSamp", global.getSamplesCount()))
-                .append("nVar", global.getVariantsCount()).append("nSnp", global.getSnpsCount())
-                .append("nIndel", global.getIndelsCount()).append("nPass", global.getPassCount())
-                .append("nTi", global.getTransitionsCount()).append("nTv", global.getTransversionsCount())
-                .append("meanQ", (double)global.getMeanQuality());
-        Document find = (new Document("fid", variantSourceStats.getFileId()))
-                .append("sid", variantSourceStats.getStudyId());
-        Document update = new Document("$set", new Document("st", globalStats));
-        collection.updateOne(find, update);
-    }
-
 }

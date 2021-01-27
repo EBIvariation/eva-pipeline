@@ -62,6 +62,8 @@ public class JobParametersNames {
 
     public static final String CONFIG_DB_AUTHENTICATIONDB = "spring.data.mongodb.authentication-database";
 
+    public static final String CONFIG_DB_AUTH_MECHANISM = "spring.data.mongodb.authentication-mechanism";
+
     public static final String CONFIG_DB_USER = "spring.data.mongodb.username";
 
     public static final String CONFIG_DB_PASSWORD = "spring.data.mongodb.password";
