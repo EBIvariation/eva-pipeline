@@ -170,6 +170,9 @@ public class CalculateStatisticsStepTest {
             VariantStatsWrapper variantStats = parser.readValueAs(VariantStatsWrapper.class);
             VariantStats stats = variantStats.getCohortStats().get("ALL");
             if (stats.getAltAllele().equals("AC")) {
+                // For variants with missing genotypes
+                // MAF should be set to -1 and MAF allele should be set to null
+                // See https://github.com/EBIvariation/biodata/blob/c495cf701d4514a4ca9e704bf65c6185cf32cba2/biodata-models/src/main/java/org/opencb/biodata/models/variant/stats/VariantStats.java#L548
                 assertEquals(-1, ((Float)stats.getMaf()).shortValue());
                 assertNull(stats.getMafAllele());
             }
