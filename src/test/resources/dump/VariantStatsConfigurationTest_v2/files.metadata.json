@@ -1,0 +1,1 @@
+{"options":{},"indexes":[{"v":2,"key":{"_id":1},"name":"_id_","ns":"eva_drerio_grcz11.files"},{"v":2,"unique":true,"key":{"sid":1,"fid":1,"fname":1},"name":"unique_file","ns":"eva_drerio_grcz11.files","background":true}],"uuid":"1bc9241ebc724277a74b29e22bba006f"}
