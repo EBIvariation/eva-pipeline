@@ -62,6 +62,8 @@ import static uk.ac.ebi.eva.utils.FileUtils.getResource;
 public class LoadStatisticsStepTest {
     private static final String SMALL_VCF_FILE = "/input-files/vcf/genotyped.vcf.gz";
 
+    private static final String VCF_FILE_WITH_MULTI_ALT = "/input-files/vcf/multialt_genotyped.vcf.gz";
+
     private static final String MONGO_DUMP = "/dump/VariantStatsConfigurationTest_vl";
 
     private static final String SOURCE_FILE_NAME = "/input-files/statistics/1_1.source.stats.json.gz";
@@ -129,6 +131,40 @@ public class LoadStatisticsStepTest {
         copyResource(VARIANTS_FILE_NAME, outputDir);
         // copy source file to load
         copyResource(SOURCE_FILE_NAME, outputDir);
+    }
+
+    @Test
+    public void statisticsLoaderStepShouldProcessMultiAltGenotypes()
+            throws JobExecutionException, IOException, InterruptedException {
+        //Given a valid VCF input file
+        String input = getResource(VCF_FILE_WITH_MULTI_ALT).getAbsolutePath();
+        String fileId = "1";
+        String studyId = "1";
+        String dbName = mongoRule.restoreDumpInTemporaryDatabase(getResourceUrl(MONGO_DUMP));
+        String statsDir = temporaryFolderRule.newFolder().getAbsolutePath();
+
+        JobParameters jobParameters = new EvaJobParameterBuilder()
+                .collectionFilesName(COLLECTION_FILES_NAME)
+                .collectionVariantsName(COLLECTION_VARIANTS_NAME)
+                .databaseName(dbName)
+                .inputStudyId(studyId)
+                .inputVcf(input)
+                .inputVcfId(fileId)
+                .outputDirStats(statsDir)
+                .toJobParameters();
+
+        //and a valid variants load and stats create steps already completed
+        copyFilesToOutpurDir(statsDir);
+
+        // When the execute method in variantsStatsLoad is executed
+        JobExecution jobExecution = jobLauncherTestUtils.launchStep(BeanNames.LOAD_STATISTICS_STEP, jobParameters);
+
+        // Then variantsStatsLoad step should complete correctly
+        assertCompleted(jobExecution);
+
+        // The DB docs should have the field "st"
+        MongoCursor<Document> cursor = mongoRule.getCollection(dbName, COLLECTION_VARIANTS_NAME).find().iterator();
+        assertEquals(1, JobTestUtils.getCohortStatsFromFirstVariant(cursor, mongoOperations).size());
     }
 
     @Test
