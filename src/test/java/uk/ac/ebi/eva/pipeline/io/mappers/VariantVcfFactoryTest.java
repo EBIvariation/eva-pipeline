@@ -47,19 +47,20 @@ public class VariantVcfFactoryTest {
 
     @Test
     public void testRemoveChrPrefixInAnyCase() {
-        List<Variant> expResult = new LinkedList<>();
-        expResult.add(new Variant("1", 1000, 1000, "T", "G"));
         String line;
 
         line = "chr1\t1000\t.\tT\tG\t.\t.\t.";
+        List<Variant> expResult = Collections.singletonList(new Variant("chr1", 1000, 1000, "T", "G"));
         List<Variant> result = factory.create(FILE_ID, STUDY_ID, line);
         assertEquals(expResult, result);
 
         line = "Chr1\t1000\t.\tT\tG\t.\t.\t.";
+        expResult = Collections.singletonList(new Variant("Chr1", 1000, 1000, "T", "G"));
         result = factory.create(FILE_ID, STUDY_ID, line);
         assertEquals(expResult, result);
 
         line = "CHR1\t1000\t.\tT\tG\t.\t.\t.";
+        expResult = Collections.singletonList(new Variant("CHR1", 1000, 1000, "T", "G"));
         result = factory.create(FILE_ID, STUDY_ID, line);
         assertEquals(expResult, result);
     }
