@@ -64,7 +64,7 @@ public class VariantVcfFactory {
             throw new IllegalArgumentException("Not enough fields provided (min 8)");
         }
 
-        String chromosome = getChromosomeWithoutPrefix(fields);
+        String chromosome = fields[0];
         int position = getPosition(fields);
         Set<String> ids = new HashSet<>(); //EVA-942 - Ignore IDs submitted through VCF
         String reference = getReference(fields);
@@ -102,21 +102,6 @@ public class VariantVcfFactory {
         }
 
         return variants;
-    }
-
-    /**
-     * Replace "chr" references only at the beginning of the chromosome name.
-     * For instance, tomato has SL2.40ch00 and that should be kept that way
-     */
-    private String getChromosomeWithoutPrefix(String[] fields) {
-        String chromosome = fields[0];
-        boolean ignoreCase = true;
-        int startOffset = 0;
-        String prefixToRemove = "chr";
-        if (chromosome.regionMatches(ignoreCase, startOffset, prefixToRemove, startOffset, prefixToRemove.length())) {
-            return chromosome.substring(prefixToRemove.length());
-        }
-        return chromosome;
     }
 
     private int getPosition(String[] fields) {
