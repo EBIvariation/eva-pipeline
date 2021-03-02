@@ -182,7 +182,7 @@
     <repositories>
         <repository>
             <id>cloudsmith</id>
-            <url>https://dl.cloudsmith.io/ebivariation/packages/</url>
+            <url>https://dl.cloudsmith.io/public/ebivariation/packages/maven/</url>
             <releases>
                 <enabled>true</enabled>
                 <updatePolicy>always</updatePolicy>
