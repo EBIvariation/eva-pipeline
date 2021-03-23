@@ -18,7 +18,6 @@ package uk.ac.ebi.eva.pipeline.io.mappers;
 
 import org.opencb.biodata.models.feature.Genotype;
 import org.opencb.biodata.models.variant.exceptions.NonStandardCompliantSampleField;
-
 import uk.ac.ebi.eva.commons.models.data.Variant;
 import uk.ac.ebi.eva.commons.models.data.VariantSourceEntry;
 import uk.ac.ebi.eva.commons.models.data.VariantStats;
@@ -67,18 +66,18 @@ public class VariantAggregatedVcfFactory extends VariantVcfFactory {
      * @param mappings Properties that contains case-sensitive tag mapping for aggregation data. A valid example
      *                 structure of this file is:
      *                 <pre>
-     *                                                                                                               {@code
+     *                 {@code
      *
-     *                                                                                                               EUR.AF=EUR_AF
-     *                                                                                                               EUR.AC=AC_EUR
-     *                                                                                                               EUR.AN=EUR_AN
-     *                                                                                                               EUR.GTC=EUR_GTC
-     *                                                                                                               ALL.AF=AF
-     *                                                                                                               ALL.AC=TAC
-     *                                                                                                               ALL.AN=AN
-     *                                                                                                               ALL.GTC=GTC
-     *                                                                                                               }
-     *                                                                                                               </pre>
+     *                 EUR.AF=EUR_AF
+     *                 EUR.AC=AC_EUR
+     *                 EUR.AN=EUR_AN
+     *                 EUR.GTC=EUR_GTC
+     *                 ALL.AF=AF
+     *                 ALL.AC=TAC
+     *                 ALL.AN=AN
+     *                 ALL.GTC=GTC
+     *                 }
+     *                 </pre>
      *                 <p>
      *                 <p>
      *                 where the right side of the '=' is how the values appear in the vcf, and left side is how it will

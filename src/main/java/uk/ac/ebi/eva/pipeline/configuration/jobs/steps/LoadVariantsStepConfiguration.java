@@ -39,7 +39,9 @@ import uk.ac.ebi.eva.pipeline.listeners.VariantLoaderStepStatisticsListener;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 import uk.ac.ebi.eva.pipeline.policies.InvalidVariantSkipPolicy;
 
-import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.*;
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.LOAD_VARIANTS_STEP;
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VARIANT_READER;
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VARIANT_WRITER;
 
 /**
  * Step that normalizes variants during the reading and loads them into MongoDB
