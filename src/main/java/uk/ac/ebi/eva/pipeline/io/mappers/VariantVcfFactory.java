@@ -21,18 +21,12 @@ import org.opencb.biodata.models.feature.Genotype;
 import org.opencb.biodata.models.variant.VariantFactory;
 import org.opencb.biodata.models.variant.exceptions.NonStandardCompliantSampleField;
 import org.opencb.biodata.models.variant.exceptions.NotAVariantException;
-
 import uk.ac.ebi.eva.commons.models.data.Variant;
 import uk.ac.ebi.eva.commons.models.data.VariantSourceEntry;
+import uk.ac.ebi.eva.pipeline.exception.IncompleteInformationException;
+import uk.ac.ebi.eva.pipeline.exception.NonVariantException;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -54,7 +48,7 @@ public class VariantVcfFactory {
      *
      * @param fileId,
      * @param studyId
-     * @param line Contents of the line in the file
+     * @param line    Contents of the line in the file
      * @return The list of Variant objects that can be created using the fields from a VCF record
      */
     public List<Variant> create(String fileId, String studyId,
@@ -82,7 +76,7 @@ public class VariantVcfFactory {
         for (int altAlleleIdx = 0; altAlleleIdx < alternateAlleles.length; altAlleleIdx++) {
             VariantKeyFields keyFields = generatedKeyFields.get(altAlleleIdx);
             Variant variant = new Variant(chromosome, keyFields.start, keyFields.end, keyFields.reference,
-                                          keyFields.alternate);
+                    keyFields.alternate);
             String[] secondaryAlternates = getSecondaryAlternates(keyFields.getNumAllele(), alternateAlleles);
             VariantSourceEntry file = new VariantSourceEntry(fileId, studyId, secondaryAlternates, format);
             variant.addSourceEntry(file);
@@ -91,13 +85,14 @@ public class VariantVcfFactory {
                 parseSplitSampleData(variant, fileId, studyId, fields, alternateAlleles, secondaryAlternates, altAlleleIdx);
                 // Fill the rest of fields (after samples because INFO depends on them)
                 setOtherFields(variant, fileId, studyId, ids, quality, filter, info, format, keyFields.getNumAllele(),
-                               alternateAlleles, line);
+                        alternateAlleles, line);
+                checkVariantInformation(variant, fileId, studyId);
                 variants.add(variant);
             } catch (NonStandardCompliantSampleField ex) {
                 Logger.getLogger(VariantFactory.class.getName())
-                      .log(Level.SEVERE,
-                           String.format("Variant %s:%d:%s>%s will not be saved\n%s", chromosome, position, reference,
-                                         alternateAlleles[altAlleleIdx], ex.getMessage()));
+                        .log(Level.SEVERE,
+                                String.format("Variant %s:%d:%s>%s will not be saved\n%s", chromosome, position, reference,
+                                        alternateAlleles[altAlleleIdx], ex.getMessage()));
             }
         }
 
@@ -141,7 +136,7 @@ public class VariantVcfFactory {
     }
 
     private List<VariantKeyFields> buildVariantKeyFields(String chromosome, int position, String reference,
-            String[] alternateAlleles) {
+                                                         String[] alternateAlleles) {
         List<VariantKeyFields> generatedKeyFields = new ArrayList<>();
 
         for (int i = 0; i < alternateAlleles.length; i++) { // This index is necessary for getting the samples where the mutated allele is present
@@ -166,17 +161,18 @@ public class VariantVcfFactory {
      * <p>
      * It is left aligned because the traling bases are removed before the leading ones, implying a normalization where
      * the position is moved the least possible from its original location.
+     *
      * @param chromosome needed for error reporting and logging
-     * @param position Input starting position
-     * @param reference Input reference allele
-     * @param alternate Input alternate allele
+     * @param position   Input starting position
+     * @param reference  Input reference allele
+     * @param alternate  Input alternate allele
      * @return The new start, end, reference and alternate alleles wrapped in a VariantKeyFields
      */
     protected VariantKeyFields normalizeLeftAlign(String chromosome, int position, String reference, String alternate)
             throws NotAVariantException {
         if (reference.equals(alternate)) {
             throw new NotAVariantException("One alternate allele is identical to the reference. Variant found as: "
-                        + chromosome + ":" + position + ":" + reference + ">" + alternate);
+                    + chromosome + ":" + position + ":" + reference + ">" + alternate);
         }
 
         // Remove the trailing bases
@@ -238,8 +234,8 @@ public class VariantVcfFactory {
      * see {@link VariantVcfFactory#processGenotypeField(int, java.lang.String)}
      *
      * @param alternateAlleleIdx current alternate being processed. 0 for first alternate, 1 or more for a secondary alternate.
-     * @param formatField as shown in the FORMAT column. most probably the GT field.
-     * @param sampleField parsed value in a column of a sample, such as a genotype, e.g. "0/0".
+     * @param formatField        as shown in the FORMAT column. most probably the GT field.
+     * @param sampleField        parsed value in a column of a sample, such as a genotype, e.g. "0/0".
      * @return processed sample field, ready to be stored.
      */
     private String processSampleField(int alternateAlleleIdx, String formatField, String sampleField) {
@@ -257,7 +253,7 @@ public class VariantVcfFactory {
      * on changing this indexes, see {@link VariantVcfFactory#mapToMultiallelicIndex(int, int)}
      *
      * @param alternateAlleleIdx current alternate being processed. 0 for first alternate, 1 or more for a secondary alternate.
-     * @param genotype first field in the samples column, e.g. "0/0"
+     * @param genotype           first field in the samples column, e.g. "0/0"
      * @return the processed genotype string, as described above (interned and changed if multiallelic).
      */
     private String processGenotypeField(int alternateAlleleIdx, String genotype) {
@@ -288,7 +284,7 @@ public class VariantVcfFactory {
 
         if (quality > -1) {
             variant.getSourceEntry(fileId, studyId)
-                   .addAttribute("QUAL", String.valueOf(quality));
+                    .addAttribute("QUAL", String.valueOf(quality));
         }
         if (!filter.isEmpty()) {
             variant.getSourceEntry(fileId, studyId).addAttribute("FILTER", filter);
@@ -400,7 +396,7 @@ public class VariantVcfFactory {
      * VariantVcfFactory.getSecondaryAlternates().
      *
      * @param parsedAllele the value of parsed alleles. e.g. 1 if genotype was "A1" (first allele).
-     * @param numAllele current variant of the alternates.
+     * @param numAllele    current variant of the alternates.
      * @return the correct allele index depending on numAllele.
      */
     protected static int mapToMultiallelicIndex(int parsedAllele, int numAllele) {
@@ -414,4 +410,41 @@ public class VariantVcfFactory {
         }
         return correctedAllele;
     }
+
+    protected void checkVariantInformation(Variant variant, String fileId, String studyId) throws NonVariantException, IncompleteInformationException {
+        if (variant.getAlternate().equalsIgnoreCase(variant.getReference())) {
+            throw new NonVariantException("The variant " + variant + " reference and alternate alleles are the same");
+        } else if (variant.getAlternate().equals(".")) {
+            throw new NonVariantException("The variant " + variant + " has no alternate allele");
+        }
+
+        if (variant.getAlternate().equalsIgnoreCase(variant.getReference())) {
+            throw new NonVariantException("The variant " + variant + " reference and alternate alleles are the same");
+        } else if (variant.getAlternate().equals(".")) {
+            throw new NonVariantException("The variant " + variant + " has no alternate allele");
+        }
+        VariantSourceEntry variantSourceEntry = variant.getSourceEntry(fileId, studyId);
+        if (!this.hasAlternateAlleleCalls(variantSourceEntry)) {
+            throw new NonVariantException("The variant " + variant + " has no alternate allele genotype calls");
+        }
+    }
+
+    private boolean hasAlternateAlleleCalls(VariantSourceEntry variantSourceEntry) {
+        boolean hasAlternateAlleleCalls = false;
+        List<Map<String, String>> samplesData = variantSourceEntry.getSamplesData();
+        if (!samplesData.isEmpty() && samplesData.stream().map((m) -> {
+            return (String) m.get("GT");
+        }).anyMatch(this::genotypeHasAlternateAllele)) {
+            hasAlternateAlleleCalls = true;
+        }
+
+        return hasAlternateAlleleCalls;
+    }
+
+    private boolean genotypeHasAlternateAllele(String sampleField) {
+        return Arrays.stream(sampleField.split("[/|]")).anyMatch((allele) -> {
+            return allele.equals("1");
+        });
+    }
+
 }

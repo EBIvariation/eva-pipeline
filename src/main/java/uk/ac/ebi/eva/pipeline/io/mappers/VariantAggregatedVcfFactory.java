@@ -22,6 +22,8 @@ import org.opencb.biodata.models.variant.exceptions.NonStandardCompliantSampleFi
 import uk.ac.ebi.eva.commons.models.data.Variant;
 import uk.ac.ebi.eva.commons.models.data.VariantSourceEntry;
 import uk.ac.ebi.eva.commons.models.data.VariantStats;
+import uk.ac.ebi.eva.pipeline.exception.IncompleteInformationException;
+import uk.ac.ebi.eva.pipeline.exception.NonVariantException;
 
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -65,18 +67,18 @@ public class VariantAggregatedVcfFactory extends VariantVcfFactory {
      * @param mappings Properties that contains case-sensitive tag mapping for aggregation data. A valid example
      *                 structure of this file is:
      *                 <pre>
-     *                               {@code
+     *                                                                                                               {@code
      *
-     *                               EUR.AF=EUR_AF
-     *                               EUR.AC=AC_EUR
-     *                               EUR.AN=EUR_AN
-     *                               EUR.GTC=EUR_GTC
-     *                               ALL.AF=AF
-     *                               ALL.AC=TAC
-     *                               ALL.AN=AN
-     *                               ALL.GTC=GTC
-     *                               }
-     *                               </pre>
+     *                                                                                                               EUR.AF=EUR_AF
+     *                                                                                                               EUR.AC=AC_EUR
+     *                                                                                                               EUR.AN=EUR_AN
+     *                                                                                                               EUR.GTC=EUR_GTC
+     *                                                                                                               ALL.AF=AF
+     *                                                                                                               ALL.AC=TAC
+     *                                                                                                               ALL.AN=AN
+     *                                                                                                               ALL.GTC=GTC
+     *                                                                                                               }
+     *                                                                                                               </pre>
      *                 <p>
      *                 <p>
      *                 where the right side of the '=' is how the values appear in the vcf, and left side is how it will
@@ -417,6 +419,42 @@ public class VariantAggregatedVcfFactory extends VariantVcfFactory {
                 }
             }
         }
+    }
+
+    protected void checkVariantInformation(Variant variant, String fileId, String studyId) throws NonVariantException, IncompleteInformationException {
+        if (variant.getAlternate().equalsIgnoreCase(variant.getReference())) {
+            throw new NonVariantException("The variant " + variant + " reference and alternate alleles are the same");
+        } else if (variant.getAlternate().equals(".")) {
+            throw new NonVariantException("The variant " + variant + " has no alternate allele");
+        }
+
+        VariantSourceEntry variantSourceEntry = variant.getSourceEntry(fileId, studyId);
+        if (!this.canAlleleFrequenciesBeCalculated(variantSourceEntry)) {
+            throw new IncompleteInformationException(variant);
+        }
+
+        if (this.variantFrequencyIsZero(variantSourceEntry)) {
+            throw new NonVariantException("The variant " + variant + " has allele frequency or counts '0'");
+        }
+    }
+
+    protected boolean canAlleleFrequenciesBeCalculated(VariantSourceEntry variantSourceEntry) {
+        boolean frequenciesCanBeCalculated = false;
+        if (variantSourceEntry.hasAttribute("AF")) {
+            frequenciesCanBeCalculated = true;
+        } else if (variantSourceEntry.hasAttribute("AN") && variantSourceEntry.hasAttribute("AC")) {
+            frequenciesCanBeCalculated = true;
+        }
+
+        return frequenciesCanBeCalculated;
+    }
+
+    protected boolean variantFrequencyIsZero(VariantSourceEntry variantSourceEntry) {
+        return this.isAttributeZeroInVariantSourceEntry(variantSourceEntry, "AF") || this.isAttributeZeroInVariantSourceEntry(variantSourceEntry, "AC") || this.isAttributeZeroInVariantSourceEntry(variantSourceEntry, "AN");
+    }
+
+    protected boolean isAttributeZeroInVariantSourceEntry(VariantSourceEntry variantSourceEntry, String attribute) {
+        return variantSourceEntry.hasAttribute(attribute) && variantSourceEntry.getAttribute(attribute).equals("0");
     }
 }
 

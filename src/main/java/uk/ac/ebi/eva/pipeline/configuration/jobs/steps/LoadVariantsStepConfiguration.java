@@ -28,7 +28,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-
 import uk.ac.ebi.eva.commons.models.data.Variant;
 import uk.ac.ebi.eva.pipeline.configuration.ChunkSizeCompletionPolicyConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.io.readers.VcfReaderConfiguration;
@@ -38,10 +37,9 @@ import uk.ac.ebi.eva.pipeline.listeners.SkippedItemListener;
 import uk.ac.ebi.eva.pipeline.listeners.StepProgressListener;
 import uk.ac.ebi.eva.pipeline.listeners.VariantLoaderStepStatisticsListener;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
+import uk.ac.ebi.eva.pipeline.policies.InvalidVariantSkipPolicy;
 
-import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.LOAD_VARIANTS_STEP;
-import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VARIANT_READER;
-import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VARIANT_WRITER;
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.*;
 
 /**
  * Step that normalizes variants during the reading and loads them into MongoDB
@@ -64,6 +62,9 @@ public class LoadVariantsStepConfiguration {
     @Qualifier(VARIANT_WRITER)
     private ItemWriter<Variant> variantWriter;
 
+    @Autowired
+    private InvalidVariantSkipPolicy invalidVariantSkipPolicy;
+
     @Bean(LOAD_VARIANTS_STEP)
     public Step loadVariantsStep(StepBuilderFactory stepBuilderFactory, JobOptions jobOptions,
                                  SimpleCompletionPolicy chunkSizeCompletionPolicy) {
@@ -74,6 +75,8 @@ public class LoadVariantsStepConfiguration {
                 .reader(reader)
                 .processor(new VariantNoAlternateFilterProcessor())
                 .writer(variantWriter)
+                .faultTolerant()
+                .skipPolicy(invalidVariantSkipPolicy)
                 .allowStartIfComplete(jobOptions.isAllowStartIfComplete())
                 .listener(new SkippedItemListener())
                 .listener(new StepProgressListener())
