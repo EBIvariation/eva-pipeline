@@ -425,11 +425,6 @@ public class VariantVcfFactory {
             throw new NonVariantException("The variant " + variant + " has no alternate allele");
         }
 
-        if (variant.getAlternate().equalsIgnoreCase(variant.getReference())) {
-            throw new NonVariantException("The variant " + variant + " reference and alternate alleles are the same");
-        } else if (variant.getAlternate().equals(".")) {
-            throw new NonVariantException("The variant " + variant + " has no alternate allele");
-        }
         VariantSourceEntry variantSourceEntry = variant.getSourceEntry(fileId, studyId);
         if (!this.hasAlternateAlleleCalls(variantSourceEntry)) {
             throw new NonVariantException("The variant " + variant + " has no alternate allele genotype calls");

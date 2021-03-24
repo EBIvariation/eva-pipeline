@@ -32,6 +32,7 @@ import uk.ac.ebi.eva.commons.models.data.Variant;
 import uk.ac.ebi.eva.pipeline.configuration.ChunkSizeCompletionPolicyConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.io.readers.VcfReaderConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.io.writers.VariantWriterConfiguration;
+import uk.ac.ebi.eva.pipeline.configuration.policies.InvalidVariantSkipPolicyConfiguration;
 import uk.ac.ebi.eva.pipeline.jobs.steps.processors.VariantNoAlternateFilterProcessor;
 import uk.ac.ebi.eva.pipeline.listeners.SkippedItemListener;
 import uk.ac.ebi.eva.pipeline.listeners.StepProgressListener;
@@ -51,7 +52,7 @@ import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VARIANT_WRITER;
  */
 @Configuration
 @EnableBatchProcessing
-@Import({VcfReaderConfiguration.class, VariantWriterConfiguration.class, ChunkSizeCompletionPolicyConfiguration.class})
+@Import({VcfReaderConfiguration.class, VariantWriterConfiguration.class, ChunkSizeCompletionPolicyConfiguration.class, InvalidVariantSkipPolicyConfiguration.class})
 public class LoadVariantsStepConfiguration {
 
     private static final Logger logger = LoggerFactory.getLogger(LoadVariantsStepConfiguration.class);
