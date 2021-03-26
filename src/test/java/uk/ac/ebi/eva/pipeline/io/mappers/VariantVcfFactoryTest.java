@@ -181,7 +181,7 @@ public class VariantVcfFactoryTest {
 
     @Test
     public void testCreateVariantFromVcfCoLocatedVariants_MainFields() {
-        String line = "1\t10040\trs123\tTGACGTAACGATT\tT,TGACGTAACGGTT,TGACGTAATAC\t.\t.\t.\tGT\t0/0\t0/1\t0/2\t1/2"; // 4 samples
+        String line = "1\t10040\trs123\tTGACGTAACGATT\tT,TGACGTAACGGTT,TGACGTAATAC\t.\t.\t.\tGT\t0/0\t0/1\t0/2\t1/3"; // 4 samples
 
         // Check proper conversion of main fields
         List<Variant> expResult = new LinkedList<>();
