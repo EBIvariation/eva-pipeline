@@ -21,6 +21,7 @@ import org.opencb.biodata.models.feature.Genotype;
 import org.opencb.biodata.models.variant.VariantFactory;
 import org.opencb.biodata.models.variant.exceptions.NonStandardCompliantSampleField;
 import org.opencb.biodata.models.variant.exceptions.NotAVariantException;
+
 import uk.ac.ebi.eva.commons.models.data.Variant;
 import uk.ac.ebi.eva.commons.models.data.VariantSourceEntry;
 import uk.ac.ebi.eva.pipeline.exception.IncompleteInformationException;
@@ -76,30 +77,31 @@ public class VariantVcfFactory {
         String format = getFormat(fields);
 
         List<VariantKeyFields> generatedKeyFields = buildVariantKeyFields(chromosome, position, reference,
-                alternateAlleles);
+                                                                          alternateAlleles);
 
         List<Variant> variants = new LinkedList<>();
         // Now create all the Variant objects read from the VCF record
         for (int altAlleleIdx = 0; altAlleleIdx < alternateAlleles.length; altAlleleIdx++) {
             VariantKeyFields keyFields = generatedKeyFields.get(altAlleleIdx);
             Variant variant = new Variant(chromosome, keyFields.start, keyFields.end, keyFields.reference,
-                    keyFields.alternate);
+                                          keyFields.alternate);
             String[] secondaryAlternates = getSecondaryAlternates(keyFields.getNumAllele(), alternateAlleles);
             VariantSourceEntry file = new VariantSourceEntry(fileId, studyId, secondaryAlternates, format);
             variant.addSourceEntry(file);
 
             try {
-                parseSplitSampleData(variant, fileId, studyId, fields, alternateAlleles, secondaryAlternates, altAlleleIdx);
+                parseSplitSampleData(variant, fileId, studyId, fields, alternateAlleles, secondaryAlternates,
+                                     altAlleleIdx);
                 // Fill the rest of fields (after samples because INFO depends on them)
                 setOtherFields(variant, fileId, studyId, ids, quality, filter, info, format, keyFields.getNumAllele(),
-                        alternateAlleles, line);
+                               alternateAlleles, line);
                 checkVariantInformation(variant, fileId, studyId);
                 variants.add(variant);
             } catch (NonStandardCompliantSampleField ex) {
                 Logger.getLogger(VariantFactory.class.getName())
-                        .log(Level.SEVERE,
-                                String.format("Variant %s:%d:%s>%s will not be saved\n%s", chromosome, position, reference,
-                                        alternateAlleles[altAlleleIdx], ex.getMessage()));
+                      .log(Level.SEVERE, String.format("Variant %s:%d:%s>%s will not be saved\n%s",
+                                                       chromosome, position, reference, alternateAlleles[altAlleleIdx],
+                                                       ex.getMessage()));
             }
         }
 
@@ -146,7 +148,8 @@ public class VariantVcfFactory {
                                                          String[] alternateAlleles) {
         List<VariantKeyFields> generatedKeyFields = new ArrayList<>();
 
-        for (int i = 0; i < alternateAlleles.length; i++) { // This index is necessary for getting the samples where the mutated allele is present
+        for (int i = 0; i < alternateAlleles.length; i++) { // This index is necessary for getting the samples where
+            // the mutated allele is present
             VariantKeyFields keyFields = normalizeLeftAlign(chromosome, position, reference, alternateAlleles[i]);
             keyFields.setNumAllele(i);
 
@@ -179,7 +182,7 @@ public class VariantVcfFactory {
             throws NotAVariantException {
         if (reference.equals(alternate)) {
             throw new NotAVariantException("One alternate allele is identical to the reference. Variant found as: "
-                    + chromosome + ":" + position + ":" + reference + ">" + alternate);
+                                                   + chromosome + ":" + position + ":" + reference + ">" + alternate);
         }
 
         // Remove the trailing bases
@@ -240,7 +243,8 @@ public class VariantVcfFactory {
      * If this is a field other than the genotype (GT), return unmodified. Otherwise,
      * see {@link VariantVcfFactory#processGenotypeField(int, java.lang.String)}
      *
-     * @param alternateAlleleIdx current alternate being processed. 0 for first alternate, 1 or more for a secondary alternate.
+     * @param alternateAlleleIdx current alternate being processed. 0 for first alternate, 1 or more for a secondary
+     *                           alternate.
      * @param formatField        as shown in the FORMAT column. most probably the GT field.
      * @param sampleField        parsed value in a column of a sample, such as a genotype, e.g. "0/0".
      * @return processed sample field, ready to be stored.
@@ -259,7 +263,8 @@ public class VariantVcfFactory {
      * in a variant like A -> C,T), change the allele codes to represent the current alternate as allele 1. For details
      * on changing this indexes, see {@link VariantVcfFactory#mapToMultiallelicIndex(int, int)}
      *
-     * @param alternateAlleleIdx current alternate being processed. 0 for first alternate, 1 or more for a secondary alternate.
+     * @param alternateAlleleIdx current alternate being processed. 0 for first alternate, 1 or more for a secondary
+     *                           alternate.
      * @param genotype           first field in the samples column, e.g. "0/0"
      * @return the processed genotype string, as described above (interned and changed if multiallelic).
      */
@@ -284,14 +289,15 @@ public class VariantVcfFactory {
         return genotype.intern();
     }
 
-    protected void setOtherFields(Variant variant, String fileId, String studyId, Set<String> ids, float quality, String filter,
+    protected void setOtherFields(Variant variant, String fileId, String studyId, Set<String> ids, float quality,
+                                  String filter,
                                   String info, String format, int numAllele, String[] alternateAlleles, String line) {
         // Fields not affected by the structure of REF and ALT fields
         variant.setIds(ids);
 
         if (quality > -1) {
             variant.getSourceEntry(fileId, studyId)
-                    .addAttribute("QUAL", String.valueOf(quality));
+                   .addAttribute("QUAL", String.valueOf(quality));
         }
         if (!filter.isEmpty()) {
             variant.getSourceEntry(fileId, studyId).addAttribute("FILTER", filter);
@@ -325,7 +331,8 @@ public class VariantVcfFactory {
                         file.addAttribute(splits[0], frequencies[numAllele]);
                         break;
 //                    case "AN":
-//                        // TODO For now, only two alleles (reference and one alternate) are supported, but this should be changed
+//                        // TODO For now, only two alleles (reference and one alternate) are supported, but this
+//                         should be changed
 //                        file.addAttribute(splits[0], "2");
 //                        break;
                     case "NS":
@@ -418,7 +425,8 @@ public class VariantVcfFactory {
         return correctedAllele;
     }
 
-    protected void checkVariantInformation(Variant variant, String fileId, String studyId) throws NonVariantException, IncompleteInformationException {
+    protected void checkVariantInformation(Variant variant, String fileId,
+                                           String studyId) throws NonVariantException, IncompleteInformationException {
         if (variant.getAlternate().equalsIgnoreCase(variant.getReference())) {
             throw new NonVariantException("The variant " + variant + " reference and alternate alleles are the same");
         } else if (variant.getAlternate().equals(".")) {
@@ -434,9 +442,8 @@ public class VariantVcfFactory {
     private boolean hasAlternateAlleleCalls(VariantSourceEntry variantSourceEntry) {
         boolean hasAlternateAlleleCalls = false;
         List<Map<String, String>> samplesData = variantSourceEntry.getSamplesData();
-        if (!samplesData.isEmpty() && samplesData.stream().map((m) -> {
-            return (String) m.get("GT");
-        }).anyMatch(this::genotypeHasAlternateAllele)) {
+        if (!samplesData.isEmpty() && samplesData.stream().map((m) -> m.get("GT"))
+                                                 .anyMatch(this::genotypeHasAlternateAllele)) {
             hasAlternateAlleleCalls = true;
         }
 
@@ -444,9 +451,7 @@ public class VariantVcfFactory {
     }
 
     private boolean genotypeHasAlternateAllele(String sampleField) {
-        return Arrays.stream(sampleField.split("[/|]")).anyMatch((allele) -> {
-            return allele.equals("1");
-        });
+        return Arrays.asList(sampleField.split("[/|]")).contains("1");
     }
 
 }

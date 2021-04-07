@@ -1,6 +1,6 @@
 /*
  *
- * Copyright 2018 EMBL - European Bioinformatics Institute
+ * Copyright 2021 EMBL - European Bioinformatics Institute
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package uk.ac.ebi.eva.pipeline.policies;
 import org.springframework.batch.core.step.skip.SkipLimitExceededException;
 import org.springframework.batch.core.step.skip.SkipPolicy;
 import org.springframework.batch.item.file.FlatFileParseException;
+
 import uk.ac.ebi.eva.pipeline.exception.IncompleteInformationException;
 import uk.ac.ebi.eva.pipeline.exception.NonVariantException;
 

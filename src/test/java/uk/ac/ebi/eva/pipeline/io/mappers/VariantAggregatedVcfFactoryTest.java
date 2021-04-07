@@ -21,6 +21,7 @@ import org.opencb.commons.test.GenericTest;
 
 import uk.ac.ebi.eva.commons.models.data.Variant;
 import uk.ac.ebi.eva.commons.models.data.VariantStats;
+import uk.ac.ebi.eva.pipeline.exception.IncompleteInformationException;
 
 import java.util.List;
 import java.util.Properties;
@@ -54,6 +55,12 @@ public class VariantAggregatedVcfFactoryTest extends GenericTest {
         assertEquals(2904, stats.getRefAlleleCount());
         assertEquals(61, stats.getAltAlleleCount());
         assertEquals(0.015827711, stats.getMaf(), 0.0001);
+    }
+
+    @Test(expected = IncompleteInformationException.class)
+    public void TestIncompleteInformationExceptionWhenNoGenotypeInfoIsPresent() {
+        String line = "1\t54722\t.\tTTC\tT,TCTC\t999\tPASS\tDP4=3122,3282,891,558;DP=22582;INDEL;IS=3,0.272727;VQSLOD=6.76;TYPE=del,ins;HWE=0;ICF=-0.155251";   // structure like uk10k
+        List<Variant> variants = factory.create(FILE_ID, STUDY_ID, line);
     }
 
     @Test

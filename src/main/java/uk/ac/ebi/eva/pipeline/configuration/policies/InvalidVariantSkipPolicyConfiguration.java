@@ -1,6 +1,6 @@
 /*
  *
- * Copyright 2018 EMBL - European Bioinformatics Institute
+ * Copyright 2021 EMBL - European Bioinformatics Institute
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package uk.ac.ebi.eva.pipeline.configuration.policies;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
 import uk.ac.ebi.eva.pipeline.policies.InvalidVariantSkipPolicy;
 
 @Configuration

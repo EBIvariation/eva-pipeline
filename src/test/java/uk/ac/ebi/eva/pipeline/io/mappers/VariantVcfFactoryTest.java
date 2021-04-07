@@ -19,8 +19,8 @@ import org.junit.Test;
 
 import uk.ac.ebi.eva.commons.models.data.Variant;
 import uk.ac.ebi.eva.commons.models.data.VariantSourceEntry;
+import uk.ac.ebi.eva.pipeline.exception.NonVariantException;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -46,7 +46,7 @@ public class VariantVcfFactoryTest {
     private VariantVcfFactory factory = new VariantVcfFactory();
 
     @Test
-    public void testRemoveChrPrefixInAnyCase() {
+    public void testDontRemoveChrPrefixInAnyCase() {
         String line;
 
         line = "chr1\t1000\t.\tT\tG\t.\t.\t.\tGT\t0/1";
@@ -193,6 +193,12 @@ public class VariantVcfFactoryTest {
         assertEquals(expResult, result);
     }
 
+    @Test(expected = NonVariantException.class)
+    public void testNonVariantExceptionThrownForNonVariant() {
+        String line = "1\t10040\trs123\tTGACGTAACGATT\tT\t.\t.\t.\tGT\t0/0"; // 4 samples
+        factory.create(FILE_ID, STUDY_ID, line);
+    }
+
     @Test
     public void testCreateVariant_Samples() {
         String line = "1\t10040\trs123\tT\tC\t.\t.\t.\tGT\t0/0\t0/1\t0/.\t./1\t1/1"; // 5 samples
@@ -231,7 +237,8 @@ public class VariantVcfFactoryTest {
 
     @Test
     public void testCreateVariantFromVcfMultiallelicVariants_Samples() {
-        String line = "1\t123456\t.\tT\tC,G\t110\tPASS\t.\tGT:AD:DP:GQ:PL\t0/1:10,5:17:94:94,0,286\t0/2:3,8:15:43:222,0,43\t0/0:.:18:.:.\t1/2:7,6:13:99:162,0,180"; // 4 samples
+        String line = "1\t123456\t.\tT\tC,G\t110\tPASS\t.\tGT:AD:DP:GQ:PL\t0/1:10,5:17:94:94,0,286\t0/2:3," +
+                "8:15:43:222,0,43\t0/0:.:18:.:.\t1/2:7,6:13:99:162,0,180"; // 4 samples
 
         // Initialize expected variants
         Variant var0 = new Variant("1", 123456, 123456, "T", "C");
@@ -398,7 +405,8 @@ public class VariantVcfFactoryTest {
 
     @Test
     public void testCreateVariantWithMissingGenotypes() {
-        String line = "1\t1407616\t.\tC\tG\t43.74\tPASS\t.\tGT:AD:DP:GQ:PL\t./.:.:.:.:.\t1/1:0,2:2:6:71,6,0\t./.:.:.:.:.\t./.:.:.:.:.";
+        String line = "1\t1407616\t.\tC\tG\t43.74\tPASS\t.\tGT:AD:DP:GQ:PL\t./.:.:.:.:.\t1/1:0,2:2:6:71,6,0\t./.:.:.:" +
+                ".:.\t./.:.:.:.:.";
 
         // Initialize expected variants
         Variant var0 = new Variant("1", 1407616, 1407616, "C", "G");
