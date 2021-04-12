@@ -49,7 +49,7 @@ public class VariantVcfEVSFactoryTest extends GenericTest {
     @Test
     public void testCreate_AA_AC_TT_GT() throws Exception { // AA,AC,TT,GT,...
 
-        String line = "1\t69428\trs140739101\tT\tG\t.\tPASS\tMAF=4.5707,0.3663,3.0647;GTS=GG,GT,TT;GTC=93,141,5101";
+        String line = "1\t69428\trs140739101\tT\tG\t.\tPASS\tAF=0.8;MAF=4.5707,0.3663,3.0647;GTS=GG,GT,TT;GTC=93,141,5101";
 
         List<Variant> res = factory.create(FILE_ID, STUDY_ID, line);
 
@@ -71,7 +71,7 @@ public class VariantVcfEVSFactoryTest extends GenericTest {
     @Test
     public void testCreate_A_C_T_G() { // A,C,T,G
 
-        String line = "Y\t25375759\trs373156833\tT\tA\t.\tPASS\tMAF=0.0,0.1751,0.0409;GTS=A,T;GTC=1,2442";
+        String line = "Y\t25375759\trs373156833\tT\tA\t.\tPASS\tAF=0.8;MAF=0.0,0.1751,0.0409;GTS=A,T;GTC=1,2442";
         List<Variant> res = factory.create(FILE_ID, STUDY_ID, line);
 
         assertTrue(res.size() == 1);
@@ -90,7 +90,7 @@ public class VariantVcfEVSFactoryTest extends GenericTest {
 
     @Test
     public void testCreate_R_RR_A1R_A1A1() { // R, RR, A1R, A1A1
-        String line = "X\t100117423\t.\tAG\tA\t.\tPASS\tMAF=0.0308,0.0269,0.0294;GTS=A1A1,A1R,RR,R;GTC=1,1,3947,2306;";
+        String line = "X\t100117423\t.\tAG\tA\t.\tPASS\tAF=0.8;MAF=0.0308,0.0269,0.0294;GTS=A1A1,A1R,RR,R;GTC=1,1,3947,2306;";
 
         List<Variant> res = factory.create(FILE_ID, STUDY_ID, line);
 
@@ -116,7 +116,7 @@ public class VariantVcfEVSFactoryTest extends GenericTest {
 
     @Test
     public void testCreate_R_RR_A1A1_A1R_A1() { // A1,A2,A3
-        String line = "X\t106362078\trs3216052\tCT\tC\t.\tPASS\tMAF=18.1215,25.2889,38.7555;GTS=A1A1,A1R,A1,RR,R;GTC=960,1298,737,1691,1570";
+        String line = "X\t106362078\trs3216052\tCT\tC\t.\tPASS\tAF=0.8;MAF=18.1215,25.2889,38.7555;GTS=A1A1,A1R,A1,RR,R;GTC=960,1298,737,1691,1570";
 
 
         List<Variant> res = factory.create(FILE_ID, STUDY_ID, line);
@@ -143,7 +143,7 @@ public class VariantVcfEVSFactoryTest extends GenericTest {
     @Test
     public void testCreate_A1A1_A1A2_A2R_A2_RR_R() {// A1A2,A1A3...
 
-        String line = "X\t14039552\t.\tCA\tCAA,C\t.\tPASS\tMAF=5.3453,4.2467,4.9459;GTS=A1A1,A1A2,A1R,A1,A2A2,A2R,A2,RR,R;GTC=0,0,134,162,4,92,107,3707,2027;";
+        String line = "X\t14039552\t.\tCA\tCAA,C\t.\tPASS\tAF=0.8,0.8;MAF=5.3453,4.2467,4.9459;GTS=A1A1,A1A2,A1R,A1,A2A2,A2R,A2,RR,R;GTC=0,0,134,162,4,92,107,3707,2027;";
 
         List<Variant> res = factory.create(FILE_ID, STUDY_ID, line);
 
@@ -197,7 +197,7 @@ public class VariantVcfEVSFactoryTest extends GenericTest {
     @Test
     public void testPopulation() {
         // ------------- INDEL
-        String line = "21\t9908404\t.\tTG\tT\t.\tPASS\tDBSNP=.;EA_AC=1,3849;AA_AC=2,2120;TAC=3,5969;MAF=0.026,0.0943,0.0502;GTS=A1A1,A1R,RR;EA_GTC=0,1,1924;AA_GTC=0,2,1059;GTC=0,3,2983;DP=17;GL=.;CP=0.1;CG=0.1;AA=.;CA=.;EXOME_CHIP=no;GWAS_PUBMED=.;FG=intergenic;HGVS_CDNA_VAR=.;HGVS_PROTEIN_VAR=.;CDS_SIZES=.;GS=.;PH=.;EA_AGE=.;AA_AGE=.";
+        String line = "21\t9908404\t.\tTG\tT\t.\tPASS\tDBSNP=.;EA_AC=1,3849;AA_AC=2,2120;TAC=3,5969;AF=0.8;MAF=0.026,0.0943,0.0502;GTS=A1A1,A1R,RR;EA_GTC=0,1,1924;AA_GTC=0,2,1059;GTC=0,3,2983;DP=17;GL=.;CP=0.1;CG=0.1;AA=.;CA=.;EXOME_CHIP=no;GWAS_PUBMED=.;FG=intergenic;HGVS_CDNA_VAR=.;HGVS_PROTEIN_VAR=.;CDS_SIZES=.;GS=.;PH=.;EA_AGE=.;AA_AGE=.";
         Properties properties = new Properties();
         properties.put("EA.AC", "EA_AC");
         properties.put("EA.GTC", "EA_GTC");
@@ -235,7 +235,7 @@ public class VariantVcfEVSFactoryTest extends GenericTest {
 
 
         // -------------- SNV, (GTS are expressed in another way)
-        line = "21\t10862547\trs373689868\tG\tA\t.\tPASS\tDBSNP=dbSNP_138;EA_AC=0,3182;AA_AC=6,1378;TAC=6,4560;MAF=0.0,0.4335,0.1314;GTS=AA,AG,GG;EA_GTC=0,0,1591;AA_GTC=0,6,686;GTC=0,6,2277;DP=93;GL=.;CP=0.0;CG=-1.5;AA=G;CA=.;EXOME_CHIP=no;GWAS_PUBMED=.;FG=intergenic;HGVS_CDNA_VAR=.;HGVS_PROTEIN_VAR=.;CDS_SIZES=.;GS=.;PH=.;EA_AGE=.;AA_AGE=.";
+        line = "21\t10862547\trs373689868\tG\tA\t.\tPASS\tDBSNP=dbSNP_138;EA_AC=0,3182;AA_AC=6,1378;TAC=6,4560;AF=0.8;MAF=0.0,0.4335,0.1314;GTS=AA,AG,GG;EA_GTC=0,0,1591;AA_GTC=0,6,686;GTC=0,6,2277;DP=93;GL=.;CP=0.0;CG=-1.5;AA=G;CA=.;EXOME_CHIP=no;GWAS_PUBMED=.;FG=intergenic;HGVS_CDNA_VAR=.;HGVS_PROTEIN_VAR=.;CDS_SIZES=.;GS=.;PH=.;EA_AGE=.;AA_AGE=.";
 
         res = evsFactory.create(FILE_ID, STUDY_ID, line);
 
@@ -255,7 +255,7 @@ public class VariantVcfEVSFactoryTest extends GenericTest {
      */
     @Test
     public void testPopulationMultiallelic() {
-        String line = "21\t47976819\t.\tCTT\tCTTT,C,CT\t.\tPASS\tDBSNP=.;EA_AC=393,35,531,6861;AA_AC=172,13,221,3174;TAC=565,48,752,10035;MAF=12.2634,11.3408,11.9737;GTS=A1A1,A1A2,A1A3,A1R,A2A2,A2A3,A2R,A3A3,A3R,RR;EA_GTC=1,2,3,4,5,6,7,8,9,10;AA_GTC=7,0,3,155,1,0,11,6,206,1401;GTC=10,0,8,537,4,0,40,15,714,4372;DP=8;GL=DIP2A;CP=0.0;CG=1.2;AA=.;CA=.;EXOME_CHIP=no;GWAS_PUBMED=.;FG=NM_015151.3:intron,NM_015151.3:intron,NM_015151.3:intron,NM_001146116.1:intron,NM_001146116.1:intron,NM_001146116.1:intron;HGVS_CDNA_VAR=NM_015151.3:c.3499-32del1,NM_015151.3:c.3499-32_3499-31del2,NM_015151.3:c.3499-33_3499-32insT,NM_001146116.1:c.3487-32del1,NM_001146116.1:c.3487-32_3487-31del2,NM_001146116.1:c.3487-33_3487-32insT;HGVS_PROTEIN_VAR=.,.,.,.,.,.;CDS_SIZES=NM_015151.3:4716,NM_015151.3:4716,NM_015151.3:4716,NM_001146116.1:4704,NM_001146116.1:4704,NM_001146116.1:4704;GS=.,.,.,.,.,.;PH=.,.,.,.,.,.;EA_AGE=.;AA_AGE=.\n";
+        String line = "21\t47976819\t.\tCTT\tCTTT,C,CT\t.\tPASS\tDBSNP=.;EA_AC=393,35,531,6861;AA_AC=172,13,221,3174;TAC=565,48,752,10035;AF=0.8,0.8,0.8;MAF=12.2634,11.3408,11.9737;GTS=A1A1,A1A2,A1A3,A1R,A2A2,A2A3,A2R,A3A3,A3R,RR;EA_GTC=1,2,3,4,5,6,7,8,9,10;AA_GTC=7,0,3,155,1,0,11,6,206,1401;GTC=10,0,8,537,4,0,40,15,714,4372;DP=8;GL=DIP2A;CP=0.0;CG=1.2;AA=.;CA=.;EXOME_CHIP=no;GWAS_PUBMED=.;FG=NM_015151.3:intron,NM_015151.3:intron,NM_015151.3:intron,NM_001146116.1:intron,NM_001146116.1:intron,NM_001146116.1:intron;HGVS_CDNA_VAR=NM_015151.3:c.3499-32del1,NM_015151.3:c.3499-32_3499-31del2,NM_015151.3:c.3499-33_3499-32insT,NM_001146116.1:c.3487-32del1,NM_001146116.1:c.3487-32_3487-31del2,NM_001146116.1:c.3487-33_3487-32insT;HGVS_PROTEIN_VAR=.,.,.,.,.,.;CDS_SIZES=NM_015151.3:4716,NM_015151.3:4716,NM_015151.3:4716,NM_001146116.1:4704,NM_001146116.1:4704,NM_001146116.1:4704;GS=.,.,.,.,.,.;PH=.,.,.,.,.,.;EA_AGE=.;AA_AGE=.\n";
         Properties properties = new Properties();
         properties.put("EA.AC", "EA_AC");
         properties.put("EA.GTC", "EA_GTC");
@@ -350,7 +350,7 @@ public class VariantVcfEVSFactoryTest extends GenericTest {
 
 
         // --------------------- testing multiallelic SNV
-        line = "9\t17579190\trs4961573\tC\tG,A\t.\tPASS\tDBSNP=dbSNP_111;EA_AC=8156,0,0;AA_AC=4110,10,0;TAC=12266,10,0;MAF=0.0,0.2427,0.0815;GTS=GG,GA,GC,AA,AC,CC;EA_GTC=1,2,3,4,5,6;AA_GTC=2050,10,0,0,0,0;GTC=6128,10,0,0,0,0;DP=6;GL=SH3GL2;CP=0.0;CG=-1.8;AA=G;CA=.;EXOME_CHIP=no;GWAS_PUBMED=.;FG=NM_003026.2:utr-5,NM_003026.2:utr-5;HGVS_CDNA_VAR=NM_003026.2:c.-51C>A,NM_003026.2:c.-51C>G;HGVS_PROTEIN_VAR=.,.;CDS_SIZES=NM_003026.2:1059,NM_003026.2:1059;GS=.,.;PH=.,.;EA_AGE=.;AA_AGE=.";
+        line = "9\t17579190\trs4961573\tC\tG,A\t.\tPASS\tDBSNP=dbSNP_111;EA_AC=8156,0,0;AA_AC=4110,10,0;TAC=12266,10,0;AF=0.8,0.8;MAF=0.0,0.2427,0.0815;GTS=GG,GA,GC,AA,AC,CC;EA_GTC=1,2,3,4,5,6;AA_GTC=2050,10,0,0,0,0;GTC=6128,10,0,0,0,0;DP=6;GL=SH3GL2;CP=0.0;CG=-1.8;AA=G;CA=.;EXOME_CHIP=no;GWAS_PUBMED=.;FG=NM_003026.2:utr-5,NM_003026.2:utr-5;HGVS_CDNA_VAR=NM_003026.2:c.-51C>A,NM_003026.2:c.-51C>G;HGVS_PROTEIN_VAR=.,.;CDS_SIZES=NM_003026.2:1059,NM_003026.2:1059;GS=.,.;PH=.,.;EA_AGE=.;AA_AGE=.";
 
         res = evsFactory.create(FILE_ID, STUDY_ID, line);
 

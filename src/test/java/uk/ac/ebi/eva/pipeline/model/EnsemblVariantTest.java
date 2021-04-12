@@ -75,7 +75,7 @@ public class EnsemblVariantTest {
 
     @Test
     public void transformInsertionFromVcfToEnsemblCoordinates() throws Exception {
-        String line = "20\t3\t.\tC\tCA\t.\t.\t.";
+        String line = "20\t3\t.\tC\tCA\t.\t.\t.\tGT\t0/1";
         List<Variant> result = factory.create(FILE_ID, STUDY_ID, line);
         assertEquals(1, result.size());
 
@@ -96,7 +96,7 @@ public class EnsemblVariantTest {
 
     @Test
     public void transformDeletionFromVcfToEnsemblCoordinates() throws Exception {
-        String line = "20\t2\t.\tTC\tT\t.\t.\t.";
+        String line = "20\t2\t.\tTC\tT\t.\t.\t.\tGT\t0/1";
         List<Variant> result = factory.create(FILE_ID, STUDY_ID, line);
         assertEquals(1, result.size());
 

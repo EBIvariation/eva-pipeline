@@ -24,6 +24,8 @@ import org.opencb.biodata.models.variant.exceptions.NotAVariantException;
 
 import uk.ac.ebi.eva.commons.models.data.Variant;
 import uk.ac.ebi.eva.commons.models.data.VariantSourceEntry;
+import uk.ac.ebi.eva.pipeline.exception.IncompleteInformationException;
+import uk.ac.ebi.eva.pipeline.exception.NonVariantException;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -54,7 +56,7 @@ public class VariantVcfFactory {
      *
      * @param fileId,
      * @param studyId
-     * @param line Contents of the line in the file
+     * @param line    Contents of the line in the file
      * @return The list of Variant objects that can be created using the fields from a VCF record
      */
     public List<Variant> create(String fileId, String studyId,
@@ -75,7 +77,7 @@ public class VariantVcfFactory {
         String format = getFormat(fields);
 
         List<VariantKeyFields> generatedKeyFields = buildVariantKeyFields(chromosome, position, reference,
-                alternateAlleles);
+                                                                          alternateAlleles);
 
         List<Variant> variants = new LinkedList<>();
         // Now create all the Variant objects read from the VCF record
@@ -88,16 +90,18 @@ public class VariantVcfFactory {
             variant.addSourceEntry(file);
 
             try {
-                parseSplitSampleData(variant, fileId, studyId, fields, alternateAlleles, secondaryAlternates, altAlleleIdx);
+                parseSplitSampleData(variant, fileId, studyId, fields, alternateAlleles, secondaryAlternates,
+                                     altAlleleIdx);
                 // Fill the rest of fields (after samples because INFO depends on them)
                 setOtherFields(variant, fileId, studyId, ids, quality, filter, info, format, keyFields.getNumAllele(),
                                alternateAlleles, line);
+                checkVariantInformation(variant, fileId, studyId);
                 variants.add(variant);
             } catch (NonStandardCompliantSampleField ex) {
                 Logger.getLogger(VariantFactory.class.getName())
-                      .log(Level.SEVERE,
-                           String.format("Variant %s:%d:%s>%s will not be saved\n%s", chromosome, position, reference,
-                                         alternateAlleles[altAlleleIdx], ex.getMessage()));
+                      .log(Level.SEVERE, String.format("Variant %s:%d:%s>%s will not be saved\n%s",
+                                                       chromosome, position, reference, alternateAlleles[altAlleleIdx],
+                                                       ex.getMessage()));
             }
         }
 
@@ -141,10 +145,11 @@ public class VariantVcfFactory {
     }
 
     private List<VariantKeyFields> buildVariantKeyFields(String chromosome, int position, String reference,
-            String[] alternateAlleles) {
+                                                         String[] alternateAlleles) {
         List<VariantKeyFields> generatedKeyFields = new ArrayList<>();
 
-        for (int i = 0; i < alternateAlleles.length; i++) { // This index is necessary for getting the samples where the mutated allele is present
+        for (int i = 0; i < alternateAlleles.length; i++) { // This index is necessary for getting the samples where
+            // the mutated allele is present
             VariantKeyFields keyFields = normalizeLeftAlign(chromosome, position, reference, alternateAlleles[i]);
             keyFields.setNumAllele(i);
 
@@ -166,17 +171,18 @@ public class VariantVcfFactory {
      * <p>
      * It is left aligned because the traling bases are removed before the leading ones, implying a normalization where
      * the position is moved the least possible from its original location.
+     *
      * @param chromosome needed for error reporting and logging
-     * @param position Input starting position
-     * @param reference Input reference allele
-     * @param alternate Input alternate allele
+     * @param position   Input starting position
+     * @param reference  Input reference allele
+     * @param alternate  Input alternate allele
      * @return The new start, end, reference and alternate alleles wrapped in a VariantKeyFields
      */
     protected VariantKeyFields normalizeLeftAlign(String chromosome, int position, String reference, String alternate)
             throws NotAVariantException {
         if (reference.equals(alternate)) {
             throw new NotAVariantException("One alternate allele is identical to the reference. Variant found as: "
-                        + chromosome + ":" + position + ":" + reference + ">" + alternate);
+                                                   + chromosome + ":" + position + ":" + reference + ">" + alternate);
         }
 
         // Remove the trailing bases
@@ -237,9 +243,10 @@ public class VariantVcfFactory {
      * If this is a field other than the genotype (GT), return unmodified. Otherwise,
      * see {@link VariantVcfFactory#processGenotypeField(int, java.lang.String)}
      *
-     * @param alternateAlleleIdx current alternate being processed. 0 for first alternate, 1 or more for a secondary alternate.
-     * @param formatField as shown in the FORMAT column. most probably the GT field.
-     * @param sampleField parsed value in a column of a sample, such as a genotype, e.g. "0/0".
+     * @param alternateAlleleIdx current alternate being processed. 0 for first alternate, 1 or more for a secondary
+     *                           alternate.
+     * @param formatField        as shown in the FORMAT column. most probably the GT field.
+     * @param sampleField        parsed value in a column of a sample, such as a genotype, e.g. "0/0".
      * @return processed sample field, ready to be stored.
      */
     private String processSampleField(int alternateAlleleIdx, String formatField, String sampleField) {
@@ -256,8 +263,9 @@ public class VariantVcfFactory {
      * in a variant like A -> C,T), change the allele codes to represent the current alternate as allele 1. For details
      * on changing this indexes, see {@link VariantVcfFactory#mapToMultiallelicIndex(int, int)}
      *
-     * @param alternateAlleleIdx current alternate being processed. 0 for first alternate, 1 or more for a secondary alternate.
-     * @param genotype first field in the samples column, e.g. "0/0"
+     * @param alternateAlleleIdx current alternate being processed. 0 for first alternate, 1 or more for a secondary
+     *                           alternate.
+     * @param genotype           first field in the samples column, e.g. "0/0"
      * @return the processed genotype string, as described above (interned and changed if multiallelic).
      */
     private String processGenotypeField(int alternateAlleleIdx, String genotype) {
@@ -281,7 +289,8 @@ public class VariantVcfFactory {
         return genotype.intern();
     }
 
-    protected void setOtherFields(Variant variant, String fileId, String studyId, Set<String> ids, float quality, String filter,
+    protected void setOtherFields(Variant variant, String fileId, String studyId, Set<String> ids, float quality,
+                                  String filter,
                                   String info, String format, int numAllele, String[] alternateAlleles, String line) {
         // Fields not affected by the structure of REF and ALT fields
         variant.setIds(ids);
@@ -322,7 +331,8 @@ public class VariantVcfFactory {
                         file.addAttribute(splits[0], frequencies[numAllele]);
                         break;
 //                    case "AN":
-//                        // TODO For now, only two alleles (reference and one alternate) are supported, but this should be changed
+//                        // TODO For now, only two alleles (reference and one alternate) are supported, but this
+//                         should be changed
 //                        file.addAttribute(splits[0], "2");
 //                        break;
                     case "NS":
@@ -400,7 +410,7 @@ public class VariantVcfFactory {
      * VariantVcfFactory.getSecondaryAlternates().
      *
      * @param parsedAllele the value of parsed alleles. e.g. 1 if genotype was "A1" (first allele).
-     * @param numAllele current variant of the alternates.
+     * @param numAllele    current variant of the alternates.
      * @return the correct allele index depending on numAllele.
      */
     protected static int mapToMultiallelicIndex(int parsedAllele, int numAllele) {
@@ -414,4 +424,34 @@ public class VariantVcfFactory {
         }
         return correctedAllele;
     }
+
+    protected void checkVariantInformation(Variant variant, String fileId,
+                                           String studyId) throws NonVariantException, IncompleteInformationException {
+        if (variant.getAlternate().equalsIgnoreCase(variant.getReference())) {
+            throw new NonVariantException("The variant " + variant + " reference and alternate alleles are the same");
+        } else if (variant.getAlternate().equals(".")) {
+            throw new NonVariantException("The variant " + variant + " has no alternate allele");
+        }
+
+        VariantSourceEntry variantSourceEntry = variant.getSourceEntry(fileId, studyId);
+        if (!this.hasAlternateAlleleCalls(variantSourceEntry)) {
+            throw new NonVariantException("The variant " + variant + " has no alternate allele genotype calls");
+        }
+    }
+
+    private boolean hasAlternateAlleleCalls(VariantSourceEntry variantSourceEntry) {
+        boolean hasAlternateAlleleCalls = false;
+        List<Map<String, String>> samplesData = variantSourceEntry.getSamplesData();
+        if (!samplesData.isEmpty() && samplesData.stream().map((m) -> m.get("GT"))
+                                                 .anyMatch(this::genotypeHasAlternateAllele)) {
+            hasAlternateAlleleCalls = true;
+        }
+
+        return hasAlternateAlleleCalls;
+    }
+
+    private boolean genotypeHasAlternateAllele(String sampleField) {
+        return Arrays.asList(sampleField.split("[/|]")).contains("1");
+    }
+
 }
