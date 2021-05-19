@@ -17,6 +17,7 @@ package uk.ac.ebi.eva.pipeline.configuration;
 
 import com.mongodb.MongoClient;
 import com.mongodb.MongoCredential;
+import com.mongodb.WriteConcern;
 import org.opencb.datastore.core.config.DataStoreServerAddress;
 import org.opencb.opencga.lib.auth.IllegalOpenCGACredentialsException;
 import org.opencb.opencga.storage.core.variant.adaptors.VariantDBAdaptor;
@@ -106,6 +107,7 @@ public class MongoConfiguration {
                             authenticationDatabase, mongoConnection.getPassword().toCharArray())));
         }
         mongoClient.setReadPreference(mongoConnection.getReadPreference());
+        mongoClient.setWriteConcern(WriteConcern.MAJORITY);
 
         return mongoClient;
     }
