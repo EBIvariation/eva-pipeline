@@ -68,8 +68,9 @@ public class VepAnnotationProcessor implements ItemProcessor<List<EnsemblVariant
         vepProcess.close();
         writer.close();
 
-        String[] lines = writer.getBuffer().toString().split("\n"); // TODO is it possible to refactor this?
-        return Arrays.asList(lines);
+        String fullVEPOutput = writer.getBuffer().toString();
+        String[] lines = fullVEPOutput.split("\n"); // TODO is it possible to refactor this?
+        return fullVEPOutput.trim().equals("")? null : Arrays.asList(lines);
     }
 
     private void logBatch(List<EnsemblVariant> ensemblVariants) {
