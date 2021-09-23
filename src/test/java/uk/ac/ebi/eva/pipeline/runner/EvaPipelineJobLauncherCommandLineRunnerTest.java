@@ -41,6 +41,7 @@ import uk.ac.ebi.eva.utils.EvaCommandLineBuilder;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.Comparator;
 import java.util.List;
 
 import static org.hamcrest.core.StringContains.containsString;
@@ -174,7 +175,8 @@ public class EvaPipelineJobLauncherCommandLineRunnerTest {
     private JobExecution getLastJobExecution(String jobName) {
         List<JobInstance> jobInstances = jobExplorer.getJobInstances(jobName, 0, 1);
         assertFalse(jobInstances.isEmpty());
-        return jobExplorer.getJobExecution(jobInstances.get(0).getInstanceId());
+        List<JobExecution> jobExecutions = jobExplorer.getJobExecutions(jobInstances.get(0));
+        return jobExecutions.stream().max(Comparator.comparing(JobExecution::getStartTime)).get();
     }
 
     @Test
@@ -352,6 +354,7 @@ public class EvaPipelineJobLauncherCommandLineRunnerTest {
         assertEquals(EXIT_WITHOUT_ERRORS, evaPipelineJobLauncherCommandLineRunner.getExitCode());
 
         JobExecution secondJobExecution = getLastJobExecution(GENOTYPED_VCF_JOB);
+        assertCompleted(secondJobExecution);
         long secondJobId = secondJobExecution.getJobId();
         assertEquals(firstJobId, secondJobId);
 
