@@ -51,8 +51,10 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.GENOTYPED_VCF_JOB;
 import static uk.ac.ebi.eva.pipeline.runner.EvaPipelineJobLauncherCommandLineRunner.EXIT_WITHOUT_ERRORS;
+import static uk.ac.ebi.eva.pipeline.runner.EvaPipelineJobLauncherCommandLineRunner.EXIT_WITH_ERRORS;
 import static uk.ac.ebi.eva.pipeline.runner.EvaPipelineJobLauncherCommandLineRunner.SPRING_BATCH_JOB_NAME_PROPERTY;
 import static uk.ac.ebi.eva.test.utils.JobTestUtils.assertCompleted;
+import static uk.ac.ebi.eva.test.utils.JobTestUtils.assertFailed;
 import static uk.ac.ebi.eva.utils.FileUtils.getResource;
 
 /**
@@ -289,5 +291,70 @@ public class EvaPipelineJobLauncherCommandLineRunnerTest {
 
         assertEquals(EvaPipelineJobLauncherCommandLineRunner.EXIT_WITH_ERRORS,
                 evaPipelineJobLauncherCommandLineRunner.getExitCode());
+    }
+
+    @Test
+    public void resumeFailingJobFromCorrectStep() throws Exception {
+        String databaseName = mongoRule.getRandomTemporaryDatabaseName();
+        File inputFile = GenotypedVcfJobTestUtils.getInputFile();
+
+        String outputDirStats = temporaryFolderRule.newFolder().getAbsolutePath();
+        String outputDirAnnotation = temporaryFolderRule.newFolder().getAbsolutePath();
+
+        File fasta = temporaryFolderRule.newFile();
+
+        // To test job resumption with an identical parameter set, we use a single path to VEP symlinked to first a
+        // failing mock VEP, then to a successful one.
+        String mockVepPath = temporaryFolderRule.newFolder().getAbsolutePath() + "/mockvep_link.pl";
+        GenotypedVcfJobTestUtils.createLinkToFailingMockVep(mockVepPath);
+
+        String[] commandLine = new EvaCommandLineBuilder()
+                .annotationOverwrite("false")
+                .appVepPath(mockVepPath)
+                .appVepTimeout("60")
+                .configDbReadPreference("secondary")
+                .databaseName(databaseName)
+                .dbCollectionsAnnotationMetadataName("annotationMetadata")
+                .dbCollectionsAnnotationsName(GenotypedVcfJobTestUtils.COLLECTION_ANNOTATIONS_NAME)
+                .dbCollectionsFeaturesName("features")
+                .dbCollectionsFilesName("files")
+                .dbCollectionsStatisticsName("populationStatistics")
+                .dbCollectionsVariantsName("variants")
+                .inputFasta(fasta.getAbsolutePath())
+                .inputStudyId(GenotypedVcfJobTestUtils.INPUT_STUDY_ID)
+                .inputStudyName("small vcf")
+                .inputStudyType("COLLECTION")
+                .inputVcf(inputFile.getAbsolutePath())
+                .inputVcfAggregation("NONE")
+                .inputVcfId(GenotypedVcfJobTestUtils.INPUT_VCF_ID)
+                .outputDirAnnotation(outputDirAnnotation)
+                .outputDirStatistics(outputDirStats)
+                .vepCachePath("")
+                .vepCacheSpecies("human")
+                .vepCacheVersion("1")
+                .vepNumForks("1")
+                .vepVersion("1")
+                .build();
+
+        evaPipelineJobLauncherCommandLineRunner.setJobNames(GENOTYPED_VCF_JOB);
+        evaPipelineJobLauncherCommandLineRunner.run(commandLine);
+
+        assertEquals(EXIT_WITH_ERRORS, evaPipelineJobLauncherCommandLineRunner.getExitCode());
+
+        JobExecution firstJobExecution = getLastJobExecution(GENOTYPED_VCF_JOB);
+        assertFailed(firstJobExecution);
+        long firstJobId = firstJobExecution.getJobId();
+
+        // Re-link to a working mock VEP to check resumption
+        GenotypedVcfJobTestUtils.createLinkToWorkingMockVep(mockVepPath);
+
+        evaPipelineJobLauncherCommandLineRunner.run(commandLine);
+        assertEquals(EXIT_WITHOUT_ERRORS, evaPipelineJobLauncherCommandLineRunner.getExitCode());
+
+        JobExecution secondJobExecution = getLastJobExecution(GENOTYPED_VCF_JOB);
+        long secondJobId = secondJobExecution.getJobId();
+        assertEquals(firstJobId, secondJobId);
+
+        // TODO do we need to check the interleaved case (as in eva-accession)?
     }
 }
