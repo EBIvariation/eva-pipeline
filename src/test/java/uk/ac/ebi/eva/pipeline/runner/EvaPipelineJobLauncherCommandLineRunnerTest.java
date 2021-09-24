@@ -22,6 +22,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.opencb.opencga.lib.common.Config;
 import org.opencb.opencga.storage.core.StorageManagerException;
+import org.springframework.batch.core.Entity;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobExecutionException;
 import org.springframework.batch.core.JobInstance;
@@ -176,7 +177,7 @@ public class EvaPipelineJobLauncherCommandLineRunnerTest {
         List<JobInstance> jobInstances = jobExplorer.getJobInstances(jobName, 0, 1);
         assertFalse(jobInstances.isEmpty());
         List<JobExecution> jobExecutions = jobExplorer.getJobExecutions(jobInstances.get(0));
-        return jobExecutions.stream().max(Comparator.comparing(JobExecution::getStartTime)).get();
+        return jobExecutions.stream().max(Comparator.comparingLong(Entity::getId)).get();
     }
 
     @Test
@@ -358,6 +359,7 @@ public class EvaPipelineJobLauncherCommandLineRunnerTest {
         long secondJobId = secondJobExecution.getJobId();
         assertEquals(firstJobId, secondJobId);
 
-        // TODO do we need to check the interleaved case (as in eva-accession)?
+        // Second job execution should only execute the steps for VEP annotation
+        assertEquals(2, secondJobExecution.getStepExecutions().size());
     }
 }

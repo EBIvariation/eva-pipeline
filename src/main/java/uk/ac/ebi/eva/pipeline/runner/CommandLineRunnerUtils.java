@@ -11,9 +11,6 @@ import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.core.launch.NoSuchJobException;
-import org.springframework.batch.core.repository.JobRepository;
-import uk.ac.ebi.eva.commons.batch.exception.NoPreviousJobExecutionException;
-import uk.ac.ebi.eva.commons.batch.job.JobStatusManager;
 
 import java.util.Comparator;
 import java.util.List;
