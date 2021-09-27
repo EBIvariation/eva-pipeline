@@ -69,12 +69,8 @@ public class CommandLineRunnerUtils {
     private static boolean areParametersEquivalentExceptRunId(JobParameters parameters1, JobParameters parameters2) {
         Map<String, JobParameter> firstJobParameterMap = parameters1.getParameters();
         Map<String, JobParameter> secondJobParameterMap = parameters2.getParameters();
-        if (parameters1.getParameters().containsKey(RUN_ID_PARAMETER_NAME)) {
-            firstJobParameterMap.remove(RUN_ID_PARAMETER_NAME);
-        }
-        if (parameters2.getParameters().containsKey(RUN_ID_PARAMETER_NAME)) {
-            secondJobParameterMap.remove(RUN_ID_PARAMETER_NAME);
-        }
+        firstJobParameterMap.remove(RUN_ID_PARAMETER_NAME);
+        secondJobParameterMap.remove(RUN_ID_PARAMETER_NAME);
         return firstJobParameterMap.equals(secondJobParameterMap);
     }
 }
