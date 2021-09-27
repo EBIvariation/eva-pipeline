@@ -6,7 +6,7 @@
 
     <groupId>uk.ac.ebi.eva</groupId>
     <artifactId>eva-pipeline</artifactId>
-    <version>2.6-SNAPSHOT</version>
+    <version>2.6</version>
 
 
     <parent>
