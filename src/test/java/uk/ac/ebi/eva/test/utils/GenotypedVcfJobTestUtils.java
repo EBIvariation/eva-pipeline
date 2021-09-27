@@ -13,6 +13,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
@@ -31,6 +34,8 @@ import static uk.ac.ebi.eva.utils.FileUtils.getResource;
 public class GenotypedVcfJobTestUtils {
 
     private static final String MOCK_VEP = "/mockvep.pl";
+
+    private static final String FAILING_MOCK_VEP = "/mockvep_writeToFile_error.pl";
 
     public static final String INPUT_VCF_ID = "1";
 
@@ -152,6 +157,22 @@ public class GenotypedVcfJobTestUtils {
 
     public static File getMockVep() {
         return getResource(MOCK_VEP);
+    }
+
+    public static File getFailingMockVep() {
+        return getResource(FAILING_MOCK_VEP);
+    }
+
+    public static Path createLinkToWorkingMockVep(String linkPathName) throws IOException {
+        Path linkPath = Paths.get(linkPathName);
+        Files.deleteIfExists(linkPath);
+        return Files.createSymbolicLink(linkPath, getMockVep().toPath());
+    }
+
+    public static Path createLinkToFailingMockVep(String linkPathName) throws IOException {
+        Path linkPath = Paths.get(linkPathName);
+        Files.deleteIfExists(linkPath);
+        return Files.createSymbolicLink(linkPath, getFailingMockVep().toPath());
     }
 
     public static String getDefaultOpencgaHome() {

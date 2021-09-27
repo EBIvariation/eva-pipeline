@@ -95,6 +95,8 @@ public class EvaPipelineJobLauncherCommandLineRunner extends JobLauncherCommandL
 
     private JobRepository jobRepository;
 
+    private final JobExplorer jobExplorer;
+
     private JobRegistry jobRegistry;
 
     private JobParametersConverter converter;
@@ -109,6 +111,7 @@ public class EvaPipelineJobLauncherCommandLineRunner extends JobLauncherCommandL
         super(jobLauncher, jobExplorer);
         jobs = Collections.emptySet();
         this.jobRepository = jobRepository;
+        this.jobExplorer = jobExplorer;
         abnormalExit = false;
         converter = new DefaultJobParametersConverter();
 
@@ -164,6 +167,8 @@ public class EvaPipelineJobLauncherCommandLineRunner extends JobLauncherCommandL
             checkIfPropertiesHaveBeenProvided(jobParameters);
             if (restartPreviousExecution) {
                 restartPreviousJobExecution(jobParameters);
+            } else {
+                jobParameters = CommandLineRunnerUtils.addRunIDToJobParameters(jobName, jobExplorer, jobParameters);
             }
             launchJob(jobParameters);
         } catch (NoJobToExecuteException | NoParametersHaveBeenPassedException | UnexpectedFileEncodingException
