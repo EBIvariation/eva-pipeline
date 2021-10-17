@@ -113,7 +113,7 @@ public class VariantMongoWriter extends MongoItemWriter<Variant> {
 
     private Document generateUpdate(Variant variant) {
         Assert.notNull(variant, "Variant should not be null. Please provide a valid Variant object");
-        logger.info("Convert variant {} into mongo object", variant);
+        logger.debug("Convert variant {} into mongo object", variant);
 
         Document addToSet = new Document();
 
