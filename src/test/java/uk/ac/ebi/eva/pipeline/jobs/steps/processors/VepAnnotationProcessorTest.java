@@ -147,4 +147,20 @@ public class VepAnnotationProcessorTest {
         vepAnnotationProcessor.process(ensemblVariants);
     }
 
+    @Test
+    public void testVepWritesToErrorStream() throws Exception {
+        List<EnsemblVariant> ensemblVariants = Collections.singletonList(VARIANT_WRAPPER);
+        int chunkSize = ensemblVariants.size();
+        annotationParameters.setVepPath(getResource("/mockvep_writeErrors.pl").getAbsolutePath());
+
+        long vepTimeouts = 1;
+        VepAnnotationProcessor vepAnnotationProcessor = new VepAnnotationProcessor(annotationParameters,
+                                                                                   chunkSize,
+                                                                                   vepTimeouts);
+
+        // Should still generate annotations after writing a lot of non-fatal error messages.
+        List<String> annotations = vepAnnotationProcessor.process(ensemblVariants);
+        assertTrue(annotations.size() > 0);
+    }
+
 }
