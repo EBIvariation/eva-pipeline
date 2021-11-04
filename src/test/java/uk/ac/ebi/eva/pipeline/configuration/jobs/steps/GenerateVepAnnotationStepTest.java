@@ -50,6 +50,7 @@ import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantAnnotation.POLYPHEN_FIELD;
 import static uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantAnnotation.SIFT_FIELD;
 import static uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantAnnotation.SO_ACCESSION_FIELD;
@@ -170,7 +171,7 @@ public class GenerateVepAnnotationStepTest {
                 .launchStep(BeanNames.GENERATE_VEP_ANNOTATION_STEP, jobParameters);
 
         assertFailed(jobExecution);
-        assertVepErrorFileExists(outputDirAnnot);
+        assertVepErrorFilesExist(outputDirAnnot);
         assertAnnotationsCount(databaseName, chunkSize);
 
         simulateFix(databaseName, COLLECTION_VARIANTS_NAME);
@@ -216,11 +217,11 @@ public class GenerateVepAnnotationStepTest {
         assertEquals(expectedCount, cursorAnnotations);
     }
 
-    private void assertVepErrorFileExists(String outputDirAnnot) throws IOException {
+    private void assertVepErrorFilesExist(String outputDirAnnot) throws IOException {
         List<Path> files = Files.list(Paths.get(outputDirAnnot))
                                 .filter(path -> path.getFileName().toString().contains("error"))
                                 .collect(Collectors.toList());
-        assertEquals(1, files.size());
+        assertTrue(files.size() > 0);
     }
 
 }
