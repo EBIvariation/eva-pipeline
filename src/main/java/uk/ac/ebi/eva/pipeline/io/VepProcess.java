@@ -25,7 +25,6 @@ import uk.ac.ebi.eva.pipeline.parameters.AnnotationParameters;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -117,6 +116,9 @@ public class VepProcess {
                 "--everything",
                 "--format", "ensembl"
         );
+
+        // Redirect error to file to ensure process doesn't block.
+        processBuilder.redirectError(new File(getErrorLogFilename()));
 
         logger.trace("Starting VEP annotation with parameters = {}", Arrays.toString(processBuilder.command().toArray()));
 
@@ -247,21 +249,22 @@ public class VepProcess {
         }
     }
 
+    private String getBackupVepOutputFilename() {
+        String timestamp = Long.toString(System.currentTimeMillis());
+        String backupVepOutput = annotationParameters.getVepOutput().replaceFirst("tsv\\.gz$",
+                                                                                  timestamp + ".tsv.gz");
+        return backupVepOutput;
+    }
+
+    private String getErrorLogFilename() {
+        return getBackupVepOutputFilename() + ".errors.txt";
+    }
+
     private void checkExitStatus() {
         int exitValue = process.exitValue();
         if (exitValue != 0) {
-            String timestamp = Long.toString(System.currentTimeMillis());
-            String backupVepOutput = annotationParameters.getVepOutput().replaceFirst("tsv\\.gz$",
-                    timestamp + ".tsv.gz");
-
-            String errorLog = backupVepOutput + ".errors.txt";
-            try {
-                connectStreams(process.getErrorStream(), new FileOutputStream(errorLog));
-            } catch (IOException e) {
-                throw new ItemStreamException("VEP exited with code " + exitValue
-                        + " but the file to dump the errors could not be created: " + errorLog,
-                        e);
-            }
+            String backupVepOutput = getBackupVepOutputFilename();
+            String errorLog = getErrorLogFilename();
             boolean renamed = new File(annotationParameters.getVepOutput()).renameTo(new File(backupVepOutput));
             if (renamed) {
                 logger.info("Failed VEP output saved to " + backupVepOutput);
