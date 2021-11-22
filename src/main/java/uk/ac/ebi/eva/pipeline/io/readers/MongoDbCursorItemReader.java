@@ -47,6 +47,7 @@ public class MongoDbCursorItemReader extends AbstractItemCountingItemStreamItemR
     private Document query;
     private Document sort;
     private String[] fields;
+    private Integer batchSize;
 
     private MongoCursor<Document> cursor;
 
@@ -89,6 +90,15 @@ public class MongoDbCursorItemReader extends AbstractItemCountingItemStreamItemR
     }
 
     /**
+     * Batch size to use for MongoDB query.
+     *
+     * @param batchSize Batch size to use
+     */
+    public void setBatchSize(Integer batchSize) {
+        this.batchSize = batchSize;
+    }
+
+    /**
      * {@link Map} of property names/
      * {@link org.springframework.data.domain.Sort.Direction} values to sort the
      * input by.
@@ -112,9 +122,9 @@ public class MongoDbCursorItemReader extends AbstractItemCountingItemStreamItemR
     protected void doOpen() throws Exception {
         MongoCollection<Document> collection = template.getCollection(collectionName);
         if (sort != null) {
-            cursor = collection.find(query).projection(getProjectionFields()).sort(sort).iterator();
+            cursor = collection.find(query).batchSize(batchSize).projection(getProjectionFields()).sort(sort).iterator();
         } else {
-            cursor = collection.find(query).projection(getProjectionFields()).iterator();
+            cursor = collection.find(query).batchSize(batchSize).projection(getProjectionFields()).iterator();
         }
     }
 

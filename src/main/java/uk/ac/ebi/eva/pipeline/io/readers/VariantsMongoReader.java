@@ -116,6 +116,7 @@ public class VariantsMongoReader
 
         String[] fields = {CHROMOSOME_FIELD, START_FIELD, END_FIELD, REFERENCE_FIELD, ALTERNATE_FIELD};
         delegateReader.setFields(fields);
+        delegateReader.setBatchSize(chunkSize);
 
         this.converter = mongoOperations.getConverter();
         this.chunkSize = chunkSize;
