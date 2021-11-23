@@ -17,6 +17,7 @@
 
 package uk.ac.ebi.eva.pipeline.io.readers;
 
+import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import org.bson.Document;
@@ -121,11 +122,14 @@ public class MongoDbCursorItemReader extends AbstractItemCountingItemStreamItemR
     @Override
     protected void doOpen() throws Exception {
         MongoCollection<Document> collection = template.getCollection(collectionName);
+        FindIterable<Document> queryResults = collection.find(query)
+                                                        .noCursorTimeout(true)
+                                                        .batchSize(batchSize)
+                                                        .projection(getProjectionFields());
         if (sort != null) {
-            cursor = collection.find(query).batchSize(batchSize).projection(getProjectionFields()).sort(sort).iterator();
-        } else {
-            cursor = collection.find(query).batchSize(batchSize).projection(getProjectionFields()).iterator();
+            queryResults = queryResults.sort(sort);
         }
+        cursor = queryResults.iterator();
     }
 
     @Override

@@ -116,7 +116,8 @@ public class VariantsMongoReader
 
         String[] fields = {CHROMOSOME_FIELD, START_FIELD, END_FIELD, REFERENCE_FIELD, ALTERNATE_FIELD};
         delegateReader.setFields(fields);
-        delegateReader.setBatchSize(chunkSize);
+        // Make batch size at least 2, as batch size of 1 is analogous to using limit
+        delegateReader.setBatchSize(Math.max(chunkSize, 2));
 
         this.converter = mongoOperations.getConverter();
         this.chunkSize = chunkSize;
