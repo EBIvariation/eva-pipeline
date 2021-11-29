@@ -17,6 +17,7 @@
 
 package uk.ac.ebi.eva.pipeline.io.readers;
 
+import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import org.bson.Document;
@@ -47,6 +48,7 @@ public class MongoDbCursorItemReader extends AbstractItemCountingItemStreamItemR
     private Document query;
     private Document sort;
     private String[] fields;
+    private Integer batchSize;
 
     private MongoCursor<Document> cursor;
 
@@ -89,6 +91,15 @@ public class MongoDbCursorItemReader extends AbstractItemCountingItemStreamItemR
     }
 
     /**
+     * Batch size to use for MongoDB query.
+     *
+     * @param batchSize Batch size to use
+     */
+    public void setBatchSize(Integer batchSize) {
+        this.batchSize = batchSize;
+    }
+
+    /**
      * {@link Map} of property names/
      * {@link org.springframework.data.domain.Sort.Direction} values to sort the
      * input by.
@@ -111,11 +122,14 @@ public class MongoDbCursorItemReader extends AbstractItemCountingItemStreamItemR
     @Override
     protected void doOpen() throws Exception {
         MongoCollection<Document> collection = template.getCollection(collectionName);
+        FindIterable<Document> queryResults = collection.find(query)
+                                                        .noCursorTimeout(true)
+                                                        .batchSize(batchSize)
+                                                        .projection(getProjectionFields());
         if (sort != null) {
-            cursor = collection.find(query).projection(getProjectionFields()).sort(sort).iterator();
-        } else {
-            cursor = collection.find(query).projection(getProjectionFields()).iterator();
+            queryResults = queryResults.sort(sort);
         }
+        cursor = queryResults.iterator();
     }
 
     @Override
