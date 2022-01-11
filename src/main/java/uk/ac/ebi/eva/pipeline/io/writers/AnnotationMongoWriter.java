@@ -37,6 +37,9 @@ import java.util.List;
 import java.util.Map;
 
 import static uk.ac.ebi.eva.commons.models.mongo.entity.Annotation.CONSEQUENCE_TYPE_FIELD;
+import static uk.ac.ebi.eva.commons.models.mongo.entity.Annotation.END_FIELD;
+import static uk.ac.ebi.eva.commons.models.mongo.entity.Annotation.VEP_CACHE_VERSION_FIELD;
+import static uk.ac.ebi.eva.commons.models.mongo.entity.Annotation.VEP_VERSION_FIELD;
 import static uk.ac.ebi.eva.commons.models.mongo.entity.Annotation.XREFS_FIELD;
 
 /**
@@ -67,8 +70,10 @@ public class AnnotationMongoWriter implements ItemWriter<List<Annotation>> {
 
     private static final String ANNOTATION_CT_SO_FIELD = Annotation.CONSEQUENCE_TYPE_FIELD + "."
             + ConsequenceType.SO_ACCESSION_FIELD;
+
     public static final String EACH = "$each";
     public static final String ADD_TO_SET = "$addToSet";
+    public static final String SET = "$set";
 
     private final MongoOperations mongoOperations;
 
@@ -116,10 +121,18 @@ public class AnnotationMongoWriter implements ItemWriter<List<Annotation>> {
     }
 
     private BasicUpdate buildUpdateQuery(Annotation annotation) {
+        final Document setValue = new Document();
+        setValue.append(END_FIELD, annotation.getEnd());
+        setValue.append(VEP_VERSION_FIELD, annotation.getVepVersion());
+        setValue.append(VEP_CACHE_VERSION_FIELD, annotation.getVepCacheVersion());
+
         final Document addToSetValue = new Document();
         addToSetValue.append(CONSEQUENCE_TYPE_FIELD, buildInsertConsequenceTypeQuery(annotation));
         addToSetValue.append(XREFS_FIELD, buildInsertXrefsQuery(annotation));
-        return new BasicUpdate(new Document(ADD_TO_SET, addToSetValue));
+
+        final Document updateDoc = new Document(ADD_TO_SET, addToSetValue);
+        updateDoc.append(SET, setValue);
+        return new BasicUpdate(updateDoc);
     }
 
     private Document buildInsertXrefsQuery(Annotation annotation) {
