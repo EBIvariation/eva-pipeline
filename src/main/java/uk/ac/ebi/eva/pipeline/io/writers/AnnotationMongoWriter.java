@@ -73,7 +73,7 @@ public class AnnotationMongoWriter implements ItemWriter<List<Annotation>> {
 
     public static final String EACH = "$each";
     public static final String ADD_TO_SET = "$addToSet";
-    public static final String SET = "$set";
+    public static final String SET_ON_INSERT = "$setOnInsert";
 
     private final MongoOperations mongoOperations;
 
@@ -121,17 +121,17 @@ public class AnnotationMongoWriter implements ItemWriter<List<Annotation>> {
     }
 
     private BasicUpdate buildUpdateQuery(Annotation annotation) {
-        final Document setValue = new Document();
-        setValue.append(END_FIELD, annotation.getEnd());
-        setValue.append(VEP_VERSION_FIELD, annotation.getVepVersion());
-        setValue.append(VEP_CACHE_VERSION_FIELD, annotation.getVepCacheVersion());
+        final Document setOnInsertValue = new Document();
+        setOnInsertValue.append(END_FIELD, annotation.getEnd());
+        setOnInsertValue.append(VEP_VERSION_FIELD, annotation.getVepVersion());
+        setOnInsertValue.append(VEP_CACHE_VERSION_FIELD, annotation.getVepCacheVersion());
 
         final Document addToSetValue = new Document();
         addToSetValue.append(CONSEQUENCE_TYPE_FIELD, buildInsertConsequenceTypeQuery(annotation));
         addToSetValue.append(XREFS_FIELD, buildInsertXrefsQuery(annotation));
 
         final Document updateDoc = new Document(ADD_TO_SET, addToSetValue);
-        updateDoc.append(SET, setValue);
+        updateDoc.append(SET_ON_INSERT, setOnInsertValue);
         return new BasicUpdate(updateDoc);
     }
 
