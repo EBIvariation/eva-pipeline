@@ -20,10 +20,7 @@ import org.springframework.data.mongodb.core.mapping.Field;
 import uk.ac.ebi.eva.commons.models.mongo.entity.Annotation;
 
 import static uk.ac.ebi.eva.commons.models.mongo.entity.Annotation.CHROMOSOME_FIELD;
-import static uk.ac.ebi.eva.commons.models.mongo.entity.Annotation.END_FIELD;
 import static uk.ac.ebi.eva.commons.models.mongo.entity.Annotation.START_FIELD;
-import static uk.ac.ebi.eva.commons.models.mongo.entity.Annotation.VEP_CACHE_VERSION_FIELD;
-import static uk.ac.ebi.eva.commons.models.mongo.entity.Annotation.VEP_VERSION_FIELD;
 
 /**
  * Simplified form of {@link Annotation} used to improve the update of annotations in mongo.
@@ -39,15 +36,6 @@ public class SimplifiedAnnotation {
     @Field(value = START_FIELD)
     private int start;
 
-    @Field(value = END_FIELD)
-    private int end;
-
-    @Field(value = VEP_VERSION_FIELD)
-    private String vepVersion;
-
-    @Field(value = VEP_CACHE_VERSION_FIELD)
-    private String vepCacheVersion;
-
     SimplifiedAnnotation(){
         //Empty constructor for spring
     }
@@ -56,8 +44,5 @@ public class SimplifiedAnnotation {
         this.id = annotation.getId();
         this.chromosome = annotation.getChromosome();
         this.start = annotation.getStart();
-        this.end = annotation.getEnd();
-        this.vepVersion = annotation.getVepVersion();
-        this.vepCacheVersion = annotation.getVepCacheVersion();
     }
 }
