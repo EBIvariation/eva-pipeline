@@ -17,9 +17,6 @@
 package uk.ac.ebi.eva.pipeline.io.writers;
 
 import com.mongodb.Block;
-import com.mongodb.DBCollection;
-import com.mongodb.DBCursor;
-import com.mongodb.DBObject;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import org.bson.Document;
@@ -135,6 +132,31 @@ public class VariantSourceEntityMongoWriterTest {
             assertNotNull(meta.get("FORMAT"));
         }
         assertEquals(1, count);
+    }
+
+    @Test
+    public void shouldUpdateWhenWriteTwice() throws Exception {
+        String databaseName = mongoRule.getRandomTemporaryDatabaseName();
+        MongoOperations mongoOperations = MongoConfiguration.getMongoOperations(databaseName, mongoConnection,
+                                                                                mongoMappingContext);
+        MongoCollection<Document> fileCollection = mongoRule.getCollection(databaseName, COLLECTION_FILES_NAME);
+
+        VariantSourceEntityMongoWriter filesWriter = new VariantSourceEntityMongoWriter(
+                mongoOperations, COLLECTION_FILES_NAME);
+        VariantSourceEntity variantSourceEntity = getVariantSourceEntity();
+
+        filesWriter.write(Collections.singletonList(variantSourceEntity));
+        assertEquals(1, fileCollection.countDocuments());
+        Document storedVariant = fileCollection.find().first();
+        assertEquals(2504, ((Document) storedVariant.get(VariantSourceEntity.SAMPLES_FIELD)).size());
+        assertEquals("genotyped.vcf.gz", storedVariant.get(VariantSourceEntity.FILENAME_FIELD));
+
+        variantSourceEntity.setSamplesPosition(Collections.emptyMap());
+        filesWriter.write(Collections.singletonList(variantSourceEntity));
+        assertEquals(1, fileCollection.countDocuments());
+        storedVariant = fileCollection.find().first();
+        assertEquals(0, ((Document) storedVariant.get(VariantSourceEntity.SAMPLES_FIELD)).size());
+        assertEquals("genotyped.vcf.gz", storedVariant.get(VariantSourceEntity.FILENAME_FIELD));
     }
 
     @Test
