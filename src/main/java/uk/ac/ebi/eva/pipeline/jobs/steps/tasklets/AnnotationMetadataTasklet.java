@@ -59,10 +59,9 @@ public class AnnotationMetadataTasklet implements Tasklet {
     private void writeUnlessAlreadyPresent(AnnotationMetadata annotationMetadata) {
         String collection = databaseParameters.getCollectionAnnotationMetadataName();
         List<AnnotationMetadata> allMetadata = mongoOperations.findAll(AnnotationMetadata.class);
-        long countAll = allMetadata.size();
         long countSameVersion = allMetadata.stream().filter(other -> other.sameVersions(annotationMetadata)).count();
         if (countSameVersion == 0) {
-            if (countAll == 0) {
+            if (allMetadata.isEmpty()) {
                 annotationMetadata.setIsDefault(true);
             }
             mongoOperations.save(annotationMetadata, collection);

@@ -109,7 +109,8 @@ public class AnnotationMetadataStepTest {
         String databaseName = mongoRule.getRandomTemporaryDatabaseName();
         MongoOperations mongoOperations = MongoConfiguration.getMongoOperations(databaseName, mongoConnection,
                 mongoMappingContext);
-        mongoOperations.save(new AnnotationMetadata("70", "72", true));
+        AnnotationMetadata defaultMetadata = new AnnotationMetadata("70", "72", true);
+        mongoOperations.save(defaultMetadata);
 
         String vepCacheVersion = "87";
         String vepVersion = "88";
@@ -121,7 +122,7 @@ public class AnnotationMetadataStepTest {
 
         assertEquals(2, annotationMetadataList.size());
         for (AnnotationMetadata metadata: annotationMetadataList) {
-            if (metadata.getVepVersion().equals("70")) {
+            if (metadata.sameVersions(defaultMetadata)) {
                 assertTrue(metadata.isDefault());
             } else {
                 assertFalse(metadata.isDefault());
