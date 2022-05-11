@@ -21,12 +21,12 @@ import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoOperations;
-import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
 
 import uk.ac.ebi.eva.commons.models.metadata.AnnotationMetadata;
 import uk.ac.ebi.eva.pipeline.parameters.AnnotationParameters;
 import uk.ac.ebi.eva.pipeline.parameters.DatabaseParameters;
+
+import java.util.List;
 
 /**
  * Tasklet that writes the annotation metadata into mongo. Uses
@@ -58,9 +58,13 @@ public class AnnotationMetadataTasklet implements Tasklet {
 
     private void writeUnlessAlreadyPresent(AnnotationMetadata annotationMetadata) {
         String collection = databaseParameters.getCollectionAnnotationMetadataName();
-        long count = mongoOperations.count(new Query(Criteria.byExample(annotationMetadata)), AnnotationMetadata.class,
-                collection);
-        if (count == 0) {
+        List<AnnotationMetadata> allMetadata = mongoOperations.findAll(AnnotationMetadata.class);
+        long countAll = allMetadata.size();
+        long countSameVersion = allMetadata.stream().filter(other -> other.sameVersions(annotationMetadata)).count();
+        if (countSameVersion == 0) {
+            if (countAll == 0) {
+                annotationMetadata.setIsDefault(true);
+            }
             mongoOperations.save(annotationMetadata, collection);
         }
     }
