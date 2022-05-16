@@ -25,6 +25,8 @@ import uk.ac.ebi.eva.commons.models.mongo.entity.Annotation;
 @Document
 public class AnnotationMetadata {
 
+    public static final String IS_DEFAULT_FIELD = "is_default";
+
     private String id;
 
     @Field(Annotation.VEP_VERSION_FIELD)
@@ -33,17 +35,25 @@ public class AnnotationMetadata {
     @Field(Annotation.VEP_CACHE_VERSION_FIELD)
     private String cacheVersion;
 
+    @Field(IS_DEFAULT_FIELD)
+    private boolean isDefault;
+
     AnnotationMetadata() {
         // Empty document constructor for spring-data
     }
 
-    public AnnotationMetadata(String vepVersion, String cacheVersion) {
+    public AnnotationMetadata(String vepVersion, String cacheVersion, boolean isDefault) {
         Assert.hasText(vepVersion, "A non empty vepVerion is required");
         Assert.hasText(vepVersion, "A non empty cacheVersion is required");
 
         this.id = vepVersion + "_" + cacheVersion;
         this.vepVersion = vepVersion;
         this.cacheVersion = cacheVersion;
+        this.isDefault = isDefault;
+    }
+
+    public AnnotationMetadata(String vepVersion, String cacheVersion) {
+        this(vepVersion, cacheVersion, false);
     }
 
     public String getVepVersion() {
@@ -52,6 +62,18 @@ public class AnnotationMetadata {
 
     public String getCacheVersion() {
         return cacheVersion;
+    }
+
+    public boolean sameVersions(AnnotationMetadata other) {
+        return other.getVepVersion().equals(vepVersion) && other.getCacheVersion().equals(cacheVersion);
+    }
+
+    public boolean isDefault() {
+        return isDefault;
+    }
+
+    public void setIsDefault(boolean value) {
+        this.isDefault = value;
     }
 
 }
