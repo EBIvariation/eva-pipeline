@@ -20,7 +20,7 @@
         <opencga.version>0.5.9-mongo4</opencga.version>
         <biodata.version>0.4.9</biodata.version>
         <cellbase.version>3.1.3</cellbase.version>
-        <postgresql.version>42.4.0</postgresql.version>
+        <postgresql.version>42.4.3</postgresql.version>
         <variation-commons-version>0.8.0</variation-commons-version>
     </properties>
 
