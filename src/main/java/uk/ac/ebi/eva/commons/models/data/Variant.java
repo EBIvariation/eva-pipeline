@@ -191,6 +191,7 @@ public class Variant {
         if (chromosome == null || chromosome.length() == 0) {
             throw new IllegalArgumentException("Chromosome must not be empty");
         }
+        this.chromosome = chromosome;
     }
 
     public int getStart() {

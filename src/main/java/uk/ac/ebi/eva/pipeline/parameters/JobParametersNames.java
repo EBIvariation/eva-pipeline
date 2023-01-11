@@ -43,6 +43,8 @@ public class JobParametersNames {
 
     public static final String INPUT_VCF_AGGREGATION_MAPPING_PATH = "input.vcf.aggregation.mapping-path";
 
+    public static final String INPUT_ACCESSION_REPORT = "input.accession.report";
+
     /*
      * Output
      */
