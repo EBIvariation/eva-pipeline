@@ -21,7 +21,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import uk.ac.ebi.eva.commons.models.data.Variant;
 import uk.ac.ebi.eva.pipeline.io.readers.AccessionReportReader;
-import uk.ac.ebi.eva.pipeline.parameters.AccessionReportParameters;
+import uk.ac.ebi.eva.pipeline.parameters.InputParameters;
 
 import java.io.File;
 import java.io.IOException;
@@ -33,8 +33,8 @@ public class AccessionReportReaderConfiguration {
 
     @Bean(ACCESSION_REPORT_READER)
     @StepScope
-    public ItemStreamReader<Variant> accessionReportReader(AccessionReportParameters accessionReportParameters) throws IOException {
-        File accessionReportFile = new File(accessionReportParameters.getAccessionReport());
+    public ItemStreamReader<Variant> accessionReportReader(InputParameters parameters) throws IOException {
+        File accessionReportFile = new File(parameters.getAccessionReport());
         return new AccessionReportReader(accessionReportFile);
     }
 

@@ -16,32 +16,32 @@ import org.springframework.context.annotation.Import;
 import uk.ac.ebi.eva.commons.models.data.Variant;
 import uk.ac.ebi.eva.pipeline.configuration.ChunkSizeCompletionPolicyConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.io.readers.AccessionReportReaderConfiguration;
-import uk.ac.ebi.eva.pipeline.configuration.io.writers.StoreSSIdWriterConfiguration;
+import uk.ac.ebi.eva.pipeline.configuration.io.writers.AccessionImporterConfiguration;
 import uk.ac.ebi.eva.pipeline.listeners.StepProgressListener;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.ACCESSION_IMPORT_STEP;
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.ACCESSION_REPORT_READER;
-import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.STORE_SS_ID_STEP;
-import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.STORE_SS_ID_WRITER;
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.ACCESSION_IMPORTER;
 
 @Configuration
 @EnableBatchProcessing
-@Import({AccessionReportReaderConfiguration.class, StoreSSIdWriterConfiguration.class, ChunkSizeCompletionPolicyConfiguration.class})
-public class StoreSSIdStepConfiguration {
-    private static final Logger logger = LoggerFactory.getLogger(StoreSSIdStepConfiguration.class);
+@Import({AccessionReportReaderConfiguration.class, AccessionImporterConfiguration.class, ChunkSizeCompletionPolicyConfiguration.class})
+public class AccessionImportStepConfiguration {
+    private static final Logger logger = LoggerFactory.getLogger(AccessionImportStepConfiguration.class);
     @Autowired
     @Qualifier(ACCESSION_REPORT_READER)
     private ItemStreamReader<Variant> reader;
     @Autowired
-    @Qualifier(STORE_SS_ID_WRITER)
+    @Qualifier(ACCESSION_IMPORTER)
     private ItemWriter<Variant> writer;
 
-    @Bean(STORE_SS_ID_STEP)
-    public Step storeSSIdStep(StepBuilderFactory stepBuilderFactory, JobOptions jobOptions,
+    @Bean(ACCESSION_IMPORT_STEP)
+    public Step accessionImportStep(StepBuilderFactory stepBuilderFactory, JobOptions jobOptions,
                               SimpleCompletionPolicy chunkSizeCompletionPolicy) {
-        logger.debug("Building '" + STORE_SS_ID_STEP + "'");
+        logger.debug("Building '" + ACCESSION_IMPORT_STEP + "'");
 
-        return stepBuilderFactory.get(STORE_SS_ID_STEP)
+        return stepBuilderFactory.get(ACCESSION_IMPORT_STEP)
                 .<Variant, Variant>chunk(chunkSizeCompletionPolicy)
                 .reader(reader)
                 .writer(writer)

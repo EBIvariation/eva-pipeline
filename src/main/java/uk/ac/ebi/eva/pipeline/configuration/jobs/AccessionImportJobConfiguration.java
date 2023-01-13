@@ -12,31 +12,31 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
-import uk.ac.ebi.eva.pipeline.configuration.jobs.steps.StoreSSIdStepConfiguration;
+import uk.ac.ebi.eva.pipeline.configuration.jobs.steps.AccessionImportStepConfiguration;
 import uk.ac.ebi.eva.pipeline.parameters.NewJobIncrementer;
 
-import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.STORE_SS_ID_JOB;
-import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.STORE_SS_ID_STEP;
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.ACCESSION_IMPORT_JOB;
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.ACCESSION_IMPORT_STEP;
 
 @Configuration
 @EnableBatchProcessing
-@Import({StoreSSIdStepConfiguration.class})
-public class StoreSSIdJobConfiguration {
-    private static final Logger logger = LoggerFactory.getLogger(StoreSSIdJobConfiguration.class);
+@Import({AccessionImportStepConfiguration.class})
+public class AccessionImportJobConfiguration {
+    private static final Logger logger = LoggerFactory.getLogger(AccessionImportJobConfiguration.class);
 
     @Autowired
-    @Qualifier(STORE_SS_ID_STEP)
-    private Step storeSSIdStep;
+    @Qualifier(ACCESSION_IMPORT_STEP)
+    private Step accessionImportStep;
 
-    @Bean(STORE_SS_ID_JOB)
+    @Bean(ACCESSION_IMPORT_JOB)
     @Scope("prototype")
-    public Job storeSSIdJob(JobBuilderFactory jobBuilderFactory) {
-        logger.debug("Building '" + STORE_SS_ID_JOB + "'");
+    public Job accessionImportJob(JobBuilderFactory jobBuilderFactory) {
+        logger.debug("Building '" + ACCESSION_IMPORT_JOB + "'");
 
         return jobBuilderFactory
-                .get(STORE_SS_ID_JOB)
+                .get(ACCESSION_IMPORT_JOB)
                 .incrementer(new NewJobIncrementer())
-                .start(storeSSIdStep)
+                .start(accessionImportStep)
                 .build();
     }
 }

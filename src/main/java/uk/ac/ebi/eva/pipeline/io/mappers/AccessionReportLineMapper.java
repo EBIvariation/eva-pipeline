@@ -22,7 +22,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-public class AccessionReportLineMapper implements LineMapper<Variant> {
+public class AccessionReportLineMapper extends VariantVcfFactory implements LineMapper<Variant> {
     public AccessionReportLineMapper() {
     }
 
@@ -35,18 +35,20 @@ public class AccessionReportLineMapper implements LineMapper<Variant> {
 
         String chromosome = fields[0];
         int position = Integer.parseInt(fields[1]);
-        Set<String> ids = getIds(fields);
-        String reference = fields[3];
-        String alternate = fields[4];
+        String reference = getReference(fields);
+        String alternateAllele = fields[4];
 
-        Variant variant = new Variant();
-        variant.setChromosome(chromosome);
-        variant.setStart(position);
-        variant.setReference(reference);
-        variant.setAlternate(alternate);
-        variant.setIds(ids);
+        VariantKeyFields keyFields = normalizeLeftAlign(chromosome, position, reference, alternateAllele);
+        Variant variant = new Variant(chromosome, keyFields.start, keyFields.end, keyFields.reference,
+                keyFields.alternate);
+
+        variant.setIds(getIds(fields));
 
         return variant;
+    }
+
+    private String getReference(String[] fields) {
+        return fields[3].equals(".") ? "" : fields[3];
     }
 
     private Set<String> getIds(String[] fields) {

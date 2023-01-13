@@ -32,12 +32,12 @@ import java.util.List;
 
 import static uk.ac.ebi.eva.commons.models.mongo.entity.VariantDocument.IDS_FIELD;
 
-public class StoreSSIdMongoWriter extends MongoItemWriter<Variant> {
-    private static final Logger logger = LoggerFactory.getLogger(StoreSSIdMongoWriter.class);
+public class AccessionImporter extends MongoItemWriter<Variant> {
+    private static final Logger logger = LoggerFactory.getLogger(AccessionImporter.class);
     private final MongoOperations mongoOperations;
     private final String collection;
 
-    public StoreSSIdMongoWriter(String collection, MongoOperations mongoOperations) {
+    public AccessionImporter(String collection, MongoOperations mongoOperations) {
         Assert.notNull(mongoOperations, "A Mongo instance is required");
         Assert.hasText(collection, "A collection name is required");
 
