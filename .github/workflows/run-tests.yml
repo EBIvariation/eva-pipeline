@@ -22,7 +22,7 @@ jobs:
         # The Java version to make available on the path. Takes a whole or semver Java version, or 1.x syntax (e.g. 1.8 => Java 8.x). Early access versions can be specified in the form of e.g. 14-ea, 14.0.0-ea, or 14.0.0-ea.28
         with:
           java-version: ${{ matrix.java-version }}
-      - name: Install and Start MongoDB and MongoTools
+      - name: Install and Start MongoDB
         run: |
           wget http://fastdl.mongodb.org/linux/mongodb-linux-x86_64-${{ matrix.mongodb-version }}.tgz
           tar xfz mongodb-linux-x86_64-${{ matrix.mongodb-version }}.tgz
@@ -30,8 +30,11 @@ jobs:
           mkdir -p data/db
           mongod --dbpath=data/db &
           mongod --version
+      - name: Install Mongo tools
+        run: |
           wget https://fastdl.mongodb.org/tools/db/mongodb-database-tools-ubuntu2204-x86_64-${{ matrix.mongo-tools-version }}.tgz
           tar xfz mongodb-database-tools-ubuntu2204-x86_64-${{ matrix.mongo-tools-version }}.tgz
           export PATH=`pwd`/mongodb-database-tools-ubuntu2204-x86_64-${{ matrix.mongo-tools-version }}/bin:$PATH
+          mongorestore --version
       - name: Run Maven tests
         run: mvn test

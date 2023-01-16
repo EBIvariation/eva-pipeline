@@ -82,7 +82,7 @@ public class AccessionImportJobTest {
             allDocInDB.add(iterator.next());
         }
 
-        assertEquals(20, allDocInDB.size());
+        assertEquals(21, allDocInDB.size());
 
         // id added to existing id
         Document docWithIdApppend = allDocInDB.stream()
@@ -119,7 +119,8 @@ public class AccessionImportJobTest {
                 "{ \"_id\" : \"chr1_3001237__TT\", \"chr\" : \"chr1\", \"start\" : 3001237, \"alt\" : \"TT\", \"ref\" : \"\" }",
                 "{ \"_id\" : \"chr1_3001237__TTT\", \"chr\" : \"chr1\", \"start\" : 3001237, \"alt\" : \"TTT\", \"ref\" : \"\" }",
                 "{ \"_id\" : \"chr1_3001237__TTTT\", \"chr\" : \"chr1\", \"start\" : 3001237, \"alt\" : \"TTTT\", \"ref\" : \"\" }",
-                "{ \"_id\" : \"chr1_3001237__TTTTT\", \"chr\" : \"chr1\", \"start\" : 3001237, \"alt\" : \"TTTTT\", \"ref\" : \"\" }"
+                "{ \"_id\" : \"chr1_3001237__TTTTT\", \"chr\" : \"chr1\", \"start\" : 3001237, \"alt\" : \"TTTTT\", \"ref\" : \"\" }",
+                "{ \"_id\" : \"1_100_CAG_\", \"chr\" : \"1\", \"start\" : 100, \"alt\" : \"\", \"ref\" : \"CAG\" }"
     };
         return Arrays.asList(data);
     }
