@@ -60,6 +60,11 @@ public class EvaJobParameterBuilder extends JobParametersBuilder {
         return this;
     }
 
+    public EvaJobParameterBuilder inputAccessionReport(String inputAccessionReport){
+        addParameter(JobParametersNames.INPUT_ACCESSION_REPORT, new JobParameter(inputAccessionReport));
+        return this;
+    }
+
     public EvaJobParameterBuilder timestamp() {
         addParameter("timestamp", new JobParameter(new Timestamp(new Date().getTime())));
         return this;

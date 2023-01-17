@@ -60,6 +60,9 @@ public class InputParameters {
     @Value(PARAMETER + JobParametersNames.INPUT_VCF_AGGREGATION_MAPPING_PATH + OR_NULL)
     private String aggregatedMappingFile;
 
+    @Value(PARAMETER + JobParametersNames.INPUT_ACCESSION_REPORT + END)
+    private String accessionReport;
+
     public String getVcf() {
         return vcf;
     }
@@ -94,5 +97,9 @@ public class InputParameters {
 
     public String getAggregatedMappingFile() {
         return aggregatedMappingFile;
+    }
+
+    public String getAccessionReport() {
+        return accessionReport;
     }
 }

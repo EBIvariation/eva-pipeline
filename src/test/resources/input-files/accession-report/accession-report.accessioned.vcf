@@ -1,0 +1,46 @@
+##fileformat=VCFv4.2
+##FILTER=<ID=PASS,Description="All filters passed">
+##contig=<ID=chr1,Description="CM000994.2">
+##contig=<ID=chr10,Description="CM001003.2">
+##contig=<ID=chr11,Description="CM001004.2">
+##contig=<ID=chr12,Description="CM001005.2">
+##contig=<ID=chr13,Description="CM001006.2">
+##contig=<ID=chr14,Description="CM001007.2">
+##contig=<ID=chr15,Description="CM001008.2">
+##contig=<ID=chr16,Description="CM001009.2">
+##contig=<ID=chr17,Description="CM001010.2">
+##contig=<ID=chr18,Description="CM001011.2">
+##contig=<ID=chr19,Description="CM001012.2">
+##contig=<ID=chr2,Description="CM000995.2">
+##contig=<ID=chr3,Description="CM000996.2">
+##contig=<ID=chr4,Description="CM000997.2">
+##contig=<ID=chr5,Description="CM000998.2">
+##contig=<ID=chr6,Description="CM000999.2">
+##contig=<ID=chr7,Description="CM001000.2">
+##contig=<ID=chr8,Description="CM001001.2">
+##contig=<ID=chr9,Description="CM001002.2">
+##contig=<ID=chrX,Description="CM001013.2">
+##contig=<ID=chrY,Description="CM001014.2">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+chr1	3000185	ss7357768480	G	T	.	.	.
+chr1	3000287	ss7357768556	A	G	.	.	.
+chr1	3000325	ss7357768516	G	T	.	.	.
+chr1	3000441	ss7357768555	T	G	.	.	.
+chr1	3001188	ss7357768498	G	A	.	.	.
+chr1	3001256	ss7357768562	G	T	.	.	.
+chr1	3001490	ss7357768560	C	A	.	.	.
+chr1	3001579	ss7357768515	A	T	.	.	.
+chr1	3001645	ss7357768570	A	C	.	.	.
+chr1	3001646	ss7357768490	A	G	.	.	.
+chr1	3001648	ss7357768542	G	C	.	.	.
+chr1	3001712	ss7357768526	C	G	.	.	.
+chr1	3001189	ss7357768512	AGGTCATCTTGG	A	.	.	.
+chr1	3001210	ss7357768505	CCTT	C	.	.	.
+chr1	3001214	ss7357768548	T	TAAA	.	.	.
+chr1	3001236	ss7357768504	A	AT	.	.	.
+chr1	3001236	ss7357768534	A	ATT	.	.	.
+chr1	3001236	ss7357768484	A	ATTT	.	.	.
+chr1	3001236	ss7357768565	A	ATTTT	.	.	.
+chr1	3001236	ss7357768492	A	ATTTTT	.	.	.
+chr1	3001236	ss7357768524	A	ATTTTTT	.	.	.
+1	99	ss9876543210	GCAG	G	.	.	.
