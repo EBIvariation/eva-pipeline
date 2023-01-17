@@ -8,12 +8,11 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu:20.04
     strategy:
       matrix:
         mongodb-version: [4.0.18]
         java-version: [1.8]
-        mongo-tools-version: [100.6.1]
 
     steps:
       - uses: actions/checkout@v2
@@ -30,11 +29,5 @@ jobs:
           mkdir -p data/db
           mongod --dbpath=data/db &
           mongod --version
-      - name: Install Mongo tools
-        run: |
-          wget https://fastdl.mongodb.org/tools/db/mongodb-database-tools-ubuntu2204-x86_64-${{ matrix.mongo-tools-version }}.tgz
-          tar xfz mongodb-database-tools-ubuntu2204-x86_64-${{ matrix.mongo-tools-version }}.tgz
-          export PATH=`pwd`/mongodb-database-tools-ubuntu2204-x86_64-${{ matrix.mongo-tools-version }}/bin:$PATH
-          mongorestore --version
       - name: Run Maven tests
         run: mvn test
