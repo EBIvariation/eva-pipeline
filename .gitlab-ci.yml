@@ -1,0 +1,103 @@
+stages:
+    - test
+    - package
+    - deploy
+
+variables:
+    PIPELINE_ARTIFACT_PATH: target/eva-pipeline-*.jar
+    PIPELINE_SYMLINK_NAME: "eva-pipeline.jar"
+    MAVEN_SETTINGS: maven-settings.xml
+    URL_MAVEN_SETTINGS: https://api.github.com/repos/EBIvariation/configuration/contents/eva-maven-settings.xml
+    MEDIA_TYPE: application/vnd.github.raw
+
+test:
+    stage: test
+    image: maven:3.6.1-jdk-8-alpine
+    services:
+        - mongo:4.0.18
+    script:
+        # Gitlab exposes services under their own hostnames. So test host should be "mongo" instead of "localhost".
+        - mvn clean test -Deva.mongo.host.test=mongo
+    environment:
+        name: test-env
+    only:
+        - master
+        - tags
+        - test_gitlab
+
+# Not executed, parent job definition for package
+.package:
+    stage: package
+    image: maven:3.6.1-jdk-8-alpine
+    environment:
+        name: $ENVIRONMENT_NAME
+    before_script:
+        - DATETIME=$(date +%Y-%m-%dT%H-%M-%S)
+        - apk add --update curl
+        - curl -u $GITHUB_USER:$GITHUB_TOKEN -H "Accept:$MEDIA_TYPE" $URL_MAVEN_SETTINGS > $MAVEN_SETTINGS
+    script:
+        - mvn package --settings $MAVEN_SETTINGS -P $MAVEN_PROFILE -DskipTests
+    after_script:
+        - rm $MAVEN_SETTINGS
+    artifacts:
+        paths:
+            - $PIPELINE_ARTIFACT_PATH
+
+package-development:
+    extends: .package
+    variables:
+        ENVIRONMENT_NAME: development
+        MAVEN_PROFILE: production_processing
+    only:
+        - master
+        - test_gitlab
+
+package-production:
+    extends: .package
+    variables:
+        ENVIRONMENT_NAME: production
+        MAVEN_PROFILE: production
+    only:
+        - tags
+
+# Not executed, parent job definition for deployments of jar files
+.deploy-jar:
+    stage: deploy
+    image: alpine:3.9.5
+    environment:
+        name: $ENVIRONMENT_NAME
+    script:
+        # Start ssh-agent and set identity then copy the Jar file and create a symlink
+        # See https://docs.gitlab.com/ee/ci/ssh_keys/
+        - apk add --update openssh-client
+        - eval "$(ssh-agent)"
+        - echo "$EVA_ETL_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+        - TMP_NAME=$(basename $(ls $ARTIFACT_PATH))
+        - ARTIFACT_NAME=${TMP_NAME%%.jar}-${ENVIRONMENT_NAME}.jar
+        - scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $ARTIFACT_PATH ${CLUSTER_USER}@${CLUSTER_LOGIN_NODE_CODON}:${EVA_SOFTWARE_PATH_CODON}/eva-pipeline/${DEPLOY_DIRECTORY}/${ARTIFACT_NAME}
+        - ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${CLUSTER_USER}@${CLUSTER_LOGIN_NODE_CODON} "ln -fns ${EVA_SOFTWARE_PATH_CODON}/eva-pipeline/${DEPLOY_DIRECTORY}/${ARTIFACT_NAME} ${EVA_SOFTWARE_PATH_CODON}/eva-pipeline/${DEPLOY_DIRECTORY}/${SYMLINK_NAME}"
+
+deploy-pipeline-jar-development:
+    extends: .deploy-jar
+    variables:
+        ENVIRONMENT_NAME: development
+        ARTIFACT_PATH: $PIPELINE_ARTIFACT_PATH
+        DEPLOY_DIRECTORY: eva_pipeline_development
+        SYMLINK_NAME: $PIPELINE_SYMLINK_NAME
+    dependencies:
+        - package-development
+    only:
+        - master
+        - test_gitlab
+
+deploy-pipeline-jar-production:
+    extends: .deploy-jar
+    variables:
+        ENVIRONMENT_NAME: production
+        ARTIFACT_PATH: $PIPELINE_ARTIFACT_PATH
+        DEPLOY_DIRECTORY: eva_pipeline_production
+        SYMLINK_NAME: $PIPELINE_SYMLINK_NAME
+    dependencies:
+        - package-production
+    only:
+        - tags
