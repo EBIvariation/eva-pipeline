@@ -31,6 +31,7 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.ac.ebi.eva.pipeline.Application;
 import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
+import uk.ac.ebi.eva.test.configuration.TemporaryRuleConfiguration;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
 import uk.ac.ebi.eva.utils.EvaJobParameterBuilder;
@@ -47,10 +48,11 @@ import static org.junit.Assert.assertTrue;
 @RunWith(SpringRunner.class)
 @ActiveProfiles({Application.VARIANT_WRITER_MONGO_PROFILE})
 @TestPropertySource({"classpath:test-mongo.properties"})
-@ContextConfiguration(classes = {AccessionImportJobConfiguration.class, BatchTestConfiguration.class})
+@ContextConfiguration(classes = {AccessionImportJobConfiguration.class, BatchTestConfiguration.class, TemporaryRuleConfiguration.class})
 public class AccessionImportJobTest {
+    @Autowired
     @Rule
-    public TemporaryMongoRule mongoRule = new TemporaryMongoRule();
+    public TemporaryMongoRule mongoRule;
     @Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
 

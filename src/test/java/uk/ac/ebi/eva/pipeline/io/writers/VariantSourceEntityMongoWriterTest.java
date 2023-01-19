@@ -39,6 +39,7 @@ import uk.ac.ebi.eva.pipeline.io.readers.VcfHeaderReader;
 import uk.ac.ebi.eva.pipeline.configuration.jobs.steps.LoadFileStepConfiguration;
 import uk.ac.ebi.eva.pipeline.parameters.MongoConnection;
 import uk.ac.ebi.eva.test.configuration.BaseTestConfiguration;
+import uk.ac.ebi.eva.test.configuration.TemporaryRuleConfiguration;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 import uk.ac.ebi.eva.utils.MongoDBHelper;
 
@@ -66,7 +67,7 @@ import static uk.ac.ebi.eva.utils.FileUtils.getResource;
  */
 @RunWith(SpringRunner.class)
 @TestPropertySource({"classpath:common-configuration.properties", "classpath:test-mongo.properties"})
-@ContextConfiguration(classes = {BaseTestConfiguration.class, LoadFileStepConfiguration.class})
+@ContextConfiguration(classes = {BaseTestConfiguration.class, LoadFileStepConfiguration.class, TemporaryRuleConfiguration.class})
 public class VariantSourceEntityMongoWriterTest {
 
     private static final String SMALL_VCF_FILE = "/input-files/vcf/genotyped.vcf.gz";
@@ -89,8 +90,9 @@ public class VariantSourceEntityMongoWriterTest {
     @Autowired
     private MongoMappingContext mongoMappingContext;
 
+    @Autowired
     @Rule
-    public TemporaryMongoRule mongoRule = new TemporaryMongoRule();
+    public TemporaryMongoRule mongoRule;
 
     private String input;
 

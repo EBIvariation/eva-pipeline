@@ -33,6 +33,7 @@ import uk.ac.ebi.eva.pipeline.Application;
 import uk.ac.ebi.eva.pipeline.configuration.BeanNames;
 import uk.ac.ebi.eva.pipeline.configuration.jobs.DropStudyJobConfiguration;
 import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
+import uk.ac.ebi.eva.test.configuration.TemporaryRuleConfiguration;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
 import uk.ac.ebi.eva.utils.EvaJobParameterBuilder;
@@ -49,7 +50,7 @@ import static uk.ac.ebi.eva.test.utils.JobTestUtils.assertCompleted;
 @RunWith(SpringRunner.class)
 @ActiveProfiles({Application.VARIANT_WRITER_MONGO_PROFILE, Application.VARIANT_ANNOTATION_MONGO_PROFILE})
 @TestPropertySource({"classpath:common-configuration.properties", "classpath:test-mongo.properties"})
-@ContextConfiguration(classes = {DropStudyJobConfiguration.class, BatchTestConfiguration.class})
+@ContextConfiguration(classes = {DropStudyJobConfiguration.class, BatchTestConfiguration.class, TemporaryRuleConfiguration.class})
 public class DropFilesByStudyStepTest {
 
     private static final String COLLECTION_FILES_NAME = "files";
@@ -68,8 +69,9 @@ public class DropFilesByStudyStepTest {
     private static final String OTHER_STUDY_FILES_DOCUMENT = JobTestUtils.buildFilesDocumentString(OTHER_STUDY_ID,
             "fileThree");
 
+    @Autowired
     @Rule
-    public TemporaryMongoRule mongoRule = new TemporaryMongoRule();
+    public TemporaryMongoRule mongoRule;
 
     @Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;

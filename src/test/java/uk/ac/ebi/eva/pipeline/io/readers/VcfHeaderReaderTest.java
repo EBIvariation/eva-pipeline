@@ -10,6 +10,8 @@ import org.junit.Test;
 import org.opencb.biodata.models.variant.VariantSource;
 import org.opencb.biodata.models.variant.VariantStudy;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.ac.ebi.eva.commons.models.data.VariantSourceEntity;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
@@ -35,6 +37,7 @@ import uk.ac.ebi.eva.pipeline.runner.exceptions.DuplicateSamplesFoundException;
  * output: a VariantSource when its `.read()` is called
  */
 public class VcfHeaderReaderTest {
+    private static final Logger logger = LoggerFactory.getLogger(VcfHeaderReaderTest.class);
 
     private static final String INPUT_FILE_PATH = "/input-files/vcf/genotyped.vcf.gz";
 
@@ -54,7 +57,7 @@ public class VcfHeaderReaderTest {
     @Test(expected = DuplicateSamplesFoundException.class)
     public void testDuplicateSamples() throws Exception {
         File input = getResource(INPUT_FILE_PATH_DUPLICATES);
-
+        logger.info("File to be read: " + input.getAbsolutePath());
         VariantStudy.StudyType studyType = VariantStudy.StudyType.COLLECTION;
         VariantSource.Aggregation aggregation = VariantSource.Aggregation.NONE;
 

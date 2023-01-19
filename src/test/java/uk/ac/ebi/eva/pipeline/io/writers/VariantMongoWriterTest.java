@@ -33,6 +33,7 @@ import uk.ac.ebi.eva.commons.models.data.VariantSourceEntry;
 import uk.ac.ebi.eva.commons.models.data.VariantStats;
 import uk.ac.ebi.eva.pipeline.configuration.MongoConfiguration;
 import uk.ac.ebi.eva.pipeline.parameters.MongoConnection;
+import uk.ac.ebi.eva.test.configuration.TemporaryRuleConfiguration;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 import uk.ac.ebi.eva.utils.MongoDBHelper;
 
@@ -57,7 +58,7 @@ import static org.junit.Assert.assertNull;
  */
 @RunWith(SpringRunner.class)
 @TestPropertySource({"classpath:test-mongo.properties"})
-@ContextConfiguration(classes = {MongoConnection.class, MongoMappingContext.class})
+@ContextConfiguration(classes = {MongoConnection.class, MongoMappingContext.class, TemporaryRuleConfiguration.class})
 public class VariantMongoWriterTest {
 
     private static final List<? extends Variant> EMPTY_LIST = new ArrayList<>();
@@ -70,8 +71,9 @@ public class VariantMongoWriterTest {
     @Autowired
     private MongoMappingContext mongoMappingContext;
 
+    @Autowired
     @Rule
-    public TemporaryMongoRule mongoRule = new TemporaryMongoRule();
+    public TemporaryMongoRule mongoRule;
 
     @Test
     public void noVariantsNothingShouldBeWritten() throws UnknownHostException {
