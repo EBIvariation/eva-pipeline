@@ -9,6 +9,7 @@ variables:
     MAVEN_SETTINGS: maven-settings.xml
     URL_MAVEN_SETTINGS: https://api.github.com/repos/EBIvariation/configuration/contents/eva-maven-settings.xml
     MEDIA_TYPE: application/vnd.github.raw
+    MONGO_HOST: mongo
 
 test:
     stage: test
