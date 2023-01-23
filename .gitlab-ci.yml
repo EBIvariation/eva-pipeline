@@ -12,14 +12,16 @@ variables:
 
 test:
     stage: test
-    image: maven:3.6.1-jdk-8-alpine
+#    image: maven:3.6.1-jdk-8-alpine
+    image: ubuntu:20.04
     services:
         - mongo:4.0.18
+#    before_script:
+#      - wget https://fastdl.mongodb.org/tools/db/mongodb-database-tools-amazon-x86_64-100.6.1.tgz
+#      - tar xfz mongodb-database-tools-amazon-x86_64-100.6.1.tgz
+#      - export PATH=`pwd`/mongodb-database-tools-amazon-x86_64-100.6.1/bin:$PATH
+#      - mongorestore --version
     script:
-        - wget https://fastdl.mongodb.org/tools/db/mongodb-database-tools-amazon-x86_64-100.6.1.tgz
-        - tar xfz mongodb-database-tools-amazon-x86_64-100.6.1.tgz
-        - export PATH=`pwd`/mongodb-database-tools-amazon-x86_64-100.6.1/bin:$PATH
-        - mongorestore --version
         # Gitlab exposes services under their own hostnames. So test host should be "mongo" instead of "localhost".
         - mvn clean test -Deva.mongo.host.test=mongo
     environment:
@@ -33,8 +35,6 @@ test:
 .package:
     stage: package
     image: maven:3.6.1-jdk-8-alpine
-    environment:
-        name: $ENVIRONMENT_NAME
     before_script:
         - DATETIME=$(date +%Y-%m-%dT%H-%M-%S)
         - apk add --update curl
@@ -50,7 +50,6 @@ test:
 package-development:
     extends: .package
     variables:
-        ENVIRONMENT_NAME: development
         MAVEN_PROFILE: production_processing
     only:
         - master
@@ -59,7 +58,6 @@ package-development:
 package-production:
     extends: .package
     variables:
-        ENVIRONMENT_NAME: production
         MAVEN_PROFILE: production
     only:
         - tags
