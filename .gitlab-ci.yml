@@ -17,7 +17,6 @@ test:
         - mongo:4.0.18
     before_script:
         - apk update && apk add mongodb-tools
-        - mongod --version
         - mongorestore --version
     script:
         # Gitlab exposes services under their own hostnames. So test host should be "mongo" instead of "localhost".
