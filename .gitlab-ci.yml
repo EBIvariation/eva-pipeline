@@ -16,7 +16,9 @@ test:
     services:
         - mongo:4.0.18
     before_script:
-        - apt-get update && apt-get install mongodb-tools
+        - apk update && apk add mongodb-tools
+        - mongod --version
+        - mongorestore --version
     script:
         # Gitlab exposes services under their own hostnames. So test host should be "mongo" instead of "localhost".
         - mvn clean test -Deva.mongo.host.test=mongo
