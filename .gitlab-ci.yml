@@ -22,6 +22,7 @@ test:
 #      - export PATH=`pwd`/mongodb-database-tools-amazon-x86_64-100.6.1/bin:$PATH
 #      - mongorestore --version
     script:
+        - mongorestore --version
         # Gitlab exposes services under their own hostnames. So test host should be "mongo" instead of "localhost".
         - mvn clean test -Deva.mongo.host.test=mongo
     environment:
