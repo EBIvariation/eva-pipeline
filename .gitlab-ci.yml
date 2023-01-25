@@ -14,14 +14,13 @@ test:
     stage: test
     image: maven:3.6.1-jdk-8-alpine
     services:
-        - name: mongo:4.0.18
-          alias: localhost
+        - mongo:4.0.18
     before_script:
         - apk update && apk add mongodb-tools
         - mongorestore --version
     script:
         # Gitlab exposes services under their own hostnames. So test host should be "mongo" instead of "localhost".
-        - mvn clean test -Deva.mongo.host.test=localhost
+        - mvn clean test -Deva.mongo.host.test=mongo
     environment:
         name: test-env
     only:
