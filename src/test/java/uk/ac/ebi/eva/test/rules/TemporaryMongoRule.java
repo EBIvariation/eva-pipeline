@@ -39,6 +39,7 @@ public class TemporaryMongoRule extends ExternalResource {
 
     @Override
     protected void before() throws Throwable {
+        logger.info("Creating MongoClient with MongoHost: " + this.mongoHost);
         mongoClient = new MongoClient(this.mongoHost);
     }
 
