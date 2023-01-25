@@ -29,6 +29,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import uk.ac.ebi.eva.pipeline.configuration.BeanNames;
 import uk.ac.ebi.eva.pipeline.configuration.jobs.DatabaseInitializationJobConfiguration;
 import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
+import uk.ac.ebi.eva.test.configuration.TemporaryRuleConfiguration;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 import uk.ac.ebi.eva.utils.EvaJobParameterBuilder;
 
@@ -40,15 +41,16 @@ import static uk.ac.ebi.eva.utils.FileUtils.getResource;
 
 @RunWith(SpringRunner.class)
 @TestPropertySource({"classpath:common-configuration.properties", "classpath:test-mongo.properties"})
-@ContextConfiguration(classes = {DatabaseInitializationJobConfiguration.class, BatchTestConfiguration.class})
+@ContextConfiguration(classes = {DatabaseInitializationJobConfiguration.class, BatchTestConfiguration.class, TemporaryRuleConfiguration.class})
 public class LoadFeatureCoordinatesStepTest {
 
     private static final String COLLECTION_FEATURES_NAME = "features";
 
     private static final String INPUT_FILE = "/input-files/gtf/small_sample.gtf.gz";
 
+    @Autowired
     @Rule
-    public TemporaryMongoRule mongoRule = new TemporaryMongoRule();
+    public TemporaryMongoRule mongoRule;
 
     @Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;

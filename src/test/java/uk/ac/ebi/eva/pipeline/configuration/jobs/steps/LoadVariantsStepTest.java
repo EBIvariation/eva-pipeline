@@ -32,6 +32,7 @@ import uk.ac.ebi.eva.pipeline.Application;
 import uk.ac.ebi.eva.pipeline.configuration.BeanNames;
 import uk.ac.ebi.eva.pipeline.configuration.jobs.GenotypedVcfJobConfiguration;
 import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
+import uk.ac.ebi.eva.test.configuration.TemporaryRuleConfiguration;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 import uk.ac.ebi.eva.test.utils.GenotypedVcfJobTestUtils;
 import uk.ac.ebi.eva.utils.EvaJobParameterBuilder;
@@ -46,7 +47,7 @@ import static uk.ac.ebi.eva.utils.FileUtils.getResource;
 @RunWith(SpringRunner.class)
 @ActiveProfiles({Application.VARIANT_WRITER_MONGO_PROFILE, Application.VARIANT_ANNOTATION_MONGO_PROFILE})
 @TestPropertySource({"classpath:common-configuration.properties", "classpath:test-mongo.properties"})
-@ContextConfiguration(classes = {GenotypedVcfJobConfiguration.class, BatchTestConfiguration.class})
+@ContextConfiguration(classes = {GenotypedVcfJobConfiguration.class, BatchTestConfiguration.class, TemporaryRuleConfiguration.class})
 public class LoadVariantsStepTest {
 
     private static final int EXPECTED_VARIANTS = 300;
@@ -55,8 +56,9 @@ public class LoadVariantsStepTest {
 
     private static final String COLLECTION_VARIANTS_NAME = "variants";
 
+    @Autowired
     @Rule
-    public TemporaryMongoRule mongoRule = new TemporaryMongoRule();
+    public TemporaryMongoRule mongoRule;
 
     @Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;

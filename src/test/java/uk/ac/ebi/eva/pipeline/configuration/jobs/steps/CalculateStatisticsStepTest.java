@@ -36,6 +36,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import uk.ac.ebi.eva.pipeline.configuration.BeanNames;
 import uk.ac.ebi.eva.pipeline.configuration.jobs.PopulationStatisticsJobConfiguration;
 import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
+import uk.ac.ebi.eva.test.configuration.TemporaryRuleConfiguration;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 import uk.ac.ebi.eva.test.utils.GenotypedVcfJobTestUtils;
@@ -62,7 +63,7 @@ import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResourceUrl;
  */
 @RunWith(SpringRunner.class)
 @TestPropertySource({"classpath:common-configuration.properties", "classpath:test-mongo.properties"})
-@ContextConfiguration(classes = {PopulationStatisticsJobConfiguration.class, BatchTestConfiguration.class})
+@ContextConfiguration(classes = {PopulationStatisticsJobConfiguration.class, BatchTestConfiguration.class, TemporaryRuleConfiguration.class})
 public class CalculateStatisticsStepTest {
     private static final String SMALL_VCF_FILE = "/input-files/vcf/genotyped.vcf.gz";
 
@@ -76,8 +77,9 @@ public class CalculateStatisticsStepTest {
 
     private static final String COLLECTION_FILES_NAME = "files";
 
+    @Autowired
     @Rule
-    public TemporaryMongoRule mongoRule = new TemporaryMongoRule();
+    public TemporaryMongoRule mongoRule;
 
     @Rule
     public PipelineTemporaryFolderRule temporaryFolderRule = new PipelineTemporaryFolderRule();

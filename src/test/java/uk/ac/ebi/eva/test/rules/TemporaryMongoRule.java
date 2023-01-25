@@ -24,9 +24,11 @@ public class TemporaryMongoRule extends ExternalResource {
 
     private final Set<String> databaseNames;
     private MongoClient mongoClient;
+    private final String mongoHost;
 
-    public TemporaryMongoRule() {
+    public TemporaryMongoRule(String mongoHost) {
         databaseNames = new HashSet<>();
+        this.mongoHost = mongoHost;
     }
 
     @Override
@@ -37,7 +39,7 @@ public class TemporaryMongoRule extends ExternalResource {
 
     @Override
     protected void before() throws Throwable {
-        mongoClient = new MongoClient();
+        mongoClient = new MongoClient(this.mongoHost);
     }
 
     public String getRandomTemporaryDatabaseName() {

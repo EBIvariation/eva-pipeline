@@ -36,6 +36,7 @@ import uk.ac.ebi.eva.pipeline.configuration.BeanNames;
 import uk.ac.ebi.eva.pipeline.configuration.jobs.PopulationStatisticsJobConfiguration;
 import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
 import uk.ac.ebi.eva.test.configuration.MongoOperationConfiguration;
+import uk.ac.ebi.eva.test.configuration.TemporaryRuleConfiguration;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
@@ -58,7 +59,7 @@ import static uk.ac.ebi.eva.utils.FileUtils.getResource;
 @RunWith(SpringRunner.class)
 @TestPropertySource({"classpath:common-configuration.properties", "classpath:test-mongo.properties"})
 @ContextConfiguration(classes = {PopulationStatisticsJobConfiguration.class, BatchTestConfiguration.class,
-        MongoOperationConfiguration.class})
+        MongoOperationConfiguration.class, TemporaryRuleConfiguration.class})
 public class LoadStatisticsStepTest {
     private static final String SMALL_VCF_FILE = "/input-files/vcf/genotyped.vcf.gz";
 
@@ -79,8 +80,9 @@ public class LoadStatisticsStepTest {
     @Rule
     public PipelineTemporaryFolderRule temporaryFolderRule = new PipelineTemporaryFolderRule();
 
+    @Autowired
     @Rule
-    public TemporaryMongoRule mongoRule = new TemporaryMongoRule();
+    public TemporaryMongoRule mongoRule;
 
     @Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;

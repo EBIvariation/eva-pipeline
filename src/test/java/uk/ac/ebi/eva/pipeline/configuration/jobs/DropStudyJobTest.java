@@ -29,6 +29,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
+import uk.ac.ebi.eva.test.configuration.TemporaryRuleConfiguration;
 import uk.ac.ebi.eva.test.data.VariantData;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
@@ -47,7 +48,7 @@ import static uk.ac.ebi.eva.test.utils.JobTestUtils.assertCompleted;
  */
 @RunWith(SpringRunner.class)
 @TestPropertySource({"classpath:common-configuration.properties", "classpath:test-mongo.properties"})
-@ContextConfiguration(classes = {DropStudyJobConfiguration.class, BatchTestConfiguration.class})
+@ContextConfiguration(classes = {DropStudyJobConfiguration.class, BatchTestConfiguration.class, TemporaryRuleConfiguration.class})
 public class DropStudyJobTest {
 
     private static final String COLLECTION_VARIANTS_NAME = "variants";
@@ -65,8 +66,9 @@ public class DropStudyJobTest {
     @Rule
     public PipelineTemporaryFolderRule temporaryFolderRule = new PipelineTemporaryFolderRule();
 
+    @Autowired
     @Rule
-    public TemporaryMongoRule mongoRule = new TemporaryMongoRule();
+    public TemporaryMongoRule mongoRule;
 
     @Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
