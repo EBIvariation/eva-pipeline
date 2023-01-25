@@ -1,4 +1,5 @@
 stages:
+    - test
     - package
     - deploy
 
@@ -8,6 +9,24 @@ variables:
     MAVEN_SETTINGS: maven-settings.xml
     URL_MAVEN_SETTINGS: https://api.github.com/repos/EBIvariation/configuration/contents/eva-maven-settings.xml
     MEDIA_TYPE: application/vnd.github.raw
+
+test:
+    stage: test
+    image: maven:3.6.1-jdk-8-alpine
+    services:
+        - mongo:4.0.18
+    before_script:
+        - apk update && apk add mongodb-tools
+        - mongorestore --version
+    script:
+        # Gitlab exposes services under their own hostnames. So test host should be "mongo" instead of "localhost".
+        - mvn clean test -Deva.mongo.host.test=mongo
+    environment:
+        name: test-env
+    only:
+        - master
+        - tags
+        - test_gitlab
 
 # Not executed, parent job definition for package
 .package:
