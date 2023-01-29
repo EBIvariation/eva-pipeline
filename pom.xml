@@ -193,6 +193,7 @@
                 <filtering>true</filtering>
                 <includes>
                     <include>test-mongo.properties</include>
+                    <include>opencga/conf/storage-mongodb.properties</include>
                 </includes>
             </testResource>
             <!-- Disable filtering for everything else.
@@ -202,6 +203,7 @@
                 <filtering>false</filtering>
                 <excludes>
                     <exclude>test-mongo.properties</exclude>
+                    <exclude>opencga/conf/storage-mongodb.properties</exclude>
                 </excludes>
             </testResource>
         </testResources>
