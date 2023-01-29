@@ -12,9 +12,12 @@ public class TemporaryRuleConfiguration {
     @Value("${spring.data.mongodb.host}")
     String mongoHost;
 
+    @Value("${spring.data.mongodb.port}")
+    int mongoPort;
+
     @Bean
     @Scope(value="prototype")
     public TemporaryMongoRule temporaryMongoRule(){
-        return new TemporaryMongoRule(mongoHost);
+        return new TemporaryMongoRule(mongoHost, mongoPort);
     }
 }
