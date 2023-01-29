@@ -34,7 +34,6 @@ test:
     only:
         - master
         - tags
-        - test_gitlab_2
 
 # Not executed, parent job definition for package
 .package:
