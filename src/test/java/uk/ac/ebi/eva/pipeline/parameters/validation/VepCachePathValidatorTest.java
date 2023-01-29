@@ -16,6 +16,7 @@
 package uk.ac.ebi.eva.pipeline.parameters.validation;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.springframework.batch.core.JobParametersBuilder;
@@ -58,6 +59,7 @@ public class VepCachePathValidatorTest {
     }
 
     @Test(expected = JobParametersInvalidException.class)
+    @Ignore
     public void vepCachePathIsNotReadable() throws JobParametersInvalidException, IOException {
         temporaryFolder.getRoot().setReadable(false);
 

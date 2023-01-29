@@ -28,7 +28,7 @@ test:
         - mongorestore --version
     script:
         # Gitlab exposes services under their own hostnames. So test host should be "mongo" instead of "localhost".
-        - su nobody -c mvn clean test -Deva.mongo.host.test=mongo
+        - mvn clean test -Deva.mongo.host.test=mongo
     environment:
         name: test-env
     only:
