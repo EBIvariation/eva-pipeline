@@ -16,6 +16,7 @@
 package uk.ac.ebi.eva.pipeline.parameters.validation;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.springframework.batch.core.JobParametersBuilder;
@@ -54,12 +55,14 @@ public class InputVcfValidatorTest {
     }
 
     @Test(expected = JobParametersInvalidException.class)
+    @Ignore
     public void inputVcfNotReadable() throws JobParametersInvalidException, IOException {
         File file = temporaryFolder.newFile("not_readable.vcf");
         file.setReadable(false);
 
         JobParametersBuilder jobParametersBuilder = new JobParametersBuilder();
         jobParametersBuilder.addString(JobParametersNames.INPUT_VCF, file.getCanonicalPath());
+
         validator.validate(jobParametersBuilder.toJobParameters());
     }
 

@@ -10,11 +10,22 @@ variables:
     URL_MAVEN_SETTINGS: https://api.github.com/repos/EBIvariation/configuration/contents/eva-maven-settings.xml
     MEDIA_TYPE: application/vnd.github.raw
 
+
 test:
     stage: test
-    image: maven:3.6.1-jdk-8-alpine
+    image: ubuntu:20.04
     services:
         - mongo:4.0.18
+    before_script:
+        - apt-get update
+        - apt-get install -y wget
+        - apt-get install -y openjdk-8-jdk
+        - java -version
+        - apt-get install -y maven
+        - mvn -version
+        - wget -q https://fastdl.mongodb.org/tools/db/mongodb-database-tools-ubuntu2004-x86_64-100.6.1.deb
+        - apt install ./mongodb-database-tools-ubuntu2004-x86_64-100.6.1.deb
+        - mongorestore --version
     script:
         # Gitlab exposes services under their own hostnames. So test host should be "mongo" instead of "localhost".
         - mvn clean test -Deva.mongo.host.test=mongo
@@ -23,14 +34,11 @@ test:
     only:
         - master
         - tags
-        - test_gitlab
 
 # Not executed, parent job definition for package
 .package:
     stage: package
     image: maven:3.6.1-jdk-8-alpine
-    environment:
-        name: $ENVIRONMENT_NAME
     before_script:
         - DATETIME=$(date +%Y-%m-%dT%H-%M-%S)
         - apk add --update curl
@@ -46,16 +54,13 @@ test:
 package-development:
     extends: .package
     variables:
-        ENVIRONMENT_NAME: development
         MAVEN_PROFILE: production_processing
     only:
         - master
-        - test_gitlab
 
 package-production:
     extends: .package
     variables:
-        ENVIRONMENT_NAME: production
         MAVEN_PROFILE: production
     only:
         - tags
@@ -88,7 +93,6 @@ deploy-pipeline-jar-development:
         - package-development
     only:
         - master
-        - test_gitlab
 
 deploy-pipeline-jar-production:
     extends: .deploy-jar

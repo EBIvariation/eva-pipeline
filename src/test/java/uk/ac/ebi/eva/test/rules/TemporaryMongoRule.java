@@ -24,9 +24,13 @@ public class TemporaryMongoRule extends ExternalResource {
 
     private final Set<String> databaseNames;
     private MongoClient mongoClient;
+    private final String mongoHost;
+    private final int mongoPort;
 
-    public TemporaryMongoRule() {
+    public TemporaryMongoRule(String mongoHost, int mongoPort) {
         databaseNames = new HashSet<>();
+        this.mongoHost = mongoHost;
+        this.mongoPort = mongoPort;
     }
 
     @Override
@@ -37,7 +41,8 @@ public class TemporaryMongoRule extends ExternalResource {
 
     @Override
     protected void before() throws Throwable {
-        mongoClient = new MongoClient();
+        logger.info("Creating MongoClient with MongoHost: " + this.mongoHost);
+        mongoClient = new MongoClient(this.mongoHost, this.mongoPort);
     }
 
     public String getRandomTemporaryDatabaseName() {
@@ -103,9 +108,9 @@ public class TemporaryMongoRule extends ExternalResource {
         assert (file != null && !file.isEmpty());
         getTemporaryDatabase(databaseName);
 
-        logger.info("restoring DB from " + file + " into database " + databaseName);
+        logger.info("restoring DB from " + file + " into database " + databaseName + "with host:port " + this.mongoHost + ":" + this.mongoPort);
 
-        Process exec = Runtime.getRuntime().exec(String.format("mongorestore -d %s %s", databaseName, file));
+        Process exec = Runtime.getRuntime().exec(String.format("mongorestore -h %s:%s -d %s %s", this.mongoHost, this.mongoPort, databaseName, file));
         exec.waitFor();
         String line;
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(exec.getInputStream()));
