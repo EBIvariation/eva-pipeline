@@ -51,9 +51,8 @@ public class MultipleMongosHostsSupportTest {
     @Test
     public void configShouldReadMultipleHosts() throws Exception {
         Set<String> addresses = mongoTemplate.getMongoDbFactory().getLegacyDb()
-                .getMongo().getAllAddress().stream().map(ServerAddress::toString).collect(Collectors.toSet());
-        addresses.forEach(System.out::println);
-        assertTrue(addresses.contains("localhost:27017"));
+                .getMongo().getAllAddress().stream().map(ServerAddress::toString).collect(Collectors.toSet());        
+        assertTrue(addresses.contains("|eva.mongo.host.test|:27017"));
         assertTrue(addresses.contains("localhost2:27017"));
     }
 }
