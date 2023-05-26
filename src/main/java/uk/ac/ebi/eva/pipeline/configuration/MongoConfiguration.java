@@ -17,6 +17,7 @@ package uk.ac.ebi.eva.pipeline.configuration;
 
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
+import com.mongodb.WriteConcern;
 import org.opencb.datastore.core.config.DataStoreServerAddress;
 import org.opencb.opencga.lib.auth.IllegalOpenCGACredentialsException;
 import org.opencb.opencga.storage.core.variant.adaptors.VariantDBAdaptor;
@@ -71,8 +72,10 @@ public class MongoConfiguration {
     @Bean
     @StepScope
     public MongoClient mongoClient(DatabaseParameters databaseParameters) throws UnsupportedEncodingException{
-        return new MongoClient(constructMongoClientURI(databaseParameters.getDatabaseName(),
+        MongoClient client = new MongoClient(constructMongoClientURI(databaseParameters.getDatabaseName(),
                 databaseParameters.getMongoConnectionDetails()));
+        client.setWriteConcern(WriteConcern.MAJORITY);
+        return client;
     }
 
     public static MongoOperations getMongoOperations(String databaseName, MongoConnectionDetails mongoConnectionDetails,
@@ -81,25 +84,31 @@ public class MongoConfiguration {
         MongoClientURI uri = constructMongoClientURI(databaseName, mongoConnectionDetails);
         MongoDbFactory mongoFactory = new SimpleMongoDbFactory(uri);
         MappingMongoConverter mappingMongoConverter = getMappingMongoConverter(mongoFactory, mongoMappingContext);
-        return new MongoTemplate(mongoFactory, mappingMongoConverter);
+        MongoTemplate mongoTemplate = new MongoTemplate(mongoFactory, mappingMongoConverter);
+        mongoTemplate.setWriteConcern(WriteConcern.MAJORITY);
+        return mongoTemplate;
     }
 
     public static MongoClientURI constructMongoClientURI(String databaseName,
                                                          MongoConnectionDetails mongoConnectionDetails)
             throws UnsupportedEncodingException {
         List<String> options = new ArrayList<>();
-        if (!mongoConnectionDetails.getAuthenticationDatabase().isEmpty()) {
+        if (Objects.nonNull(mongoConnectionDetails.getAuthenticationDatabase())) {
             options.add(String.format("authSource=%s", mongoConnectionDetails.getAuthenticationDatabase()));
         }
-        if (!mongoConnectionDetails.getAuthenticationMechanism().isEmpty()) {
+        if (Objects.nonNull(mongoConnectionDetails.getAuthenticationMechanism())) {
             options.add(String.format("authMechanism=%s", mongoConnectionDetails.getAuthenticationMechanism()));
         }
         if (Objects.nonNull(mongoConnectionDetails.getReadPreference())) {
             options.add(String.format("readPreference=%s", mongoConnectionDetails.getReadPreference().toString()));
         }
-        String uri = String.format("mongodb://%s:%s@%s/%s", mongoConnectionDetails.getUser(),
-                URLEncoder.encode(mongoConnectionDetails.getPassword(), StandardCharsets.UTF_8.toString()),
-                mongoConnectionDetails.getHosts(), databaseName);
+        String uri = "mongodb://";
+        if (Objects.nonNull(mongoConnectionDetails.getUser()) &&
+                Objects.nonNull(mongoConnectionDetails.getPassword())) {
+            uri += String.format("%s:%s@",mongoConnectionDetails.getUser(),
+                    URLEncoder.encode(mongoConnectionDetails.getPassword(), StandardCharsets.UTF_8.toString()));
+        }
+        uri += String.format("%s/%s", mongoConnectionDetails.getHosts(), databaseName);
         if(!options.isEmpty()) {
             uri += "?" + String.join("&", options);
         }
