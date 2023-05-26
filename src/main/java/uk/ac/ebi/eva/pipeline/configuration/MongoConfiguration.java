@@ -16,8 +16,7 @@
 package uk.ac.ebi.eva.pipeline.configuration;
 
 import com.mongodb.MongoClient;
-import com.mongodb.MongoCredential;
-import com.mongodb.WriteConcern;
+import com.mongodb.MongoClientURI;
 import org.opencb.datastore.core.config.DataStoreServerAddress;
 import org.opencb.opencga.lib.auth.IllegalOpenCGACredentialsException;
 import org.opencb.opencga.storage.core.variant.adaptors.VariantDBAdaptor;
@@ -37,14 +36,16 @@ import org.springframework.data.mongodb.core.convert.DefaultDbRefResolver;
 import org.springframework.data.mongodb.core.convert.DefaultMongoTypeMapper;
 import org.springframework.data.mongodb.core.convert.MappingMongoConverter;
 import org.springframework.data.mongodb.core.mapping.MongoMappingContext;
-
 import uk.ac.ebi.eva.pipeline.parameters.DatabaseParameters;
-import uk.ac.ebi.eva.pipeline.parameters.MongoConnection;
-import uk.ac.ebi.eva.utils.MongoDBHelper;
+import uk.ac.ebi.eva.pipeline.parameters.MongoConnectionDetails;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.net.UnknownHostException;
-import java.util.Collections;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Utility class dealing with MongoDB connections using pipeline options
@@ -62,54 +63,47 @@ public class MongoConfiguration {
     @Bean
     @StepScope
     public MongoOperations mongoTemplate(DatabaseParameters databaseParameters, MongoMappingContext mongoMappingContext)
-            throws UnknownHostException {
-        return getMongoOperations(databaseParameters.getDatabaseName(),databaseParameters.getMongoConnection(),
+            throws UnknownHostException, UnsupportedEncodingException {
+        return getMongoOperations(databaseParameters.getDatabaseName(), databaseParameters.getMongoConnectionDetails(),
                 mongoMappingContext);
     }
 
-    public static MongoOperations getMongoOperations(String databaseName, MongoConnection mongoConnection,
+    @Bean
+    @StepScope
+    public MongoClient mongoClient(DatabaseParameters databaseParameters) throws UnsupportedEncodingException{
+        return new MongoClient(constructMongoClientURI(databaseParameters.getDatabaseName(),
+                databaseParameters.getMongoConnectionDetails()));
+    }
+
+    public static MongoOperations getMongoOperations(String databaseName, MongoConnectionDetails mongoConnectionDetails,
                                                      MongoMappingContext mongoMappingContext)
-            throws UnknownHostException {
-        MongoClient mongoClient = getMongoClient(mongoConnection);
-        MongoDbFactory mongoFactory = getMongoDbFactory(mongoClient, databaseName);
+            throws UnknownHostException, UnsupportedEncodingException {
+        MongoClientURI uri = constructMongoClientURI(databaseName, mongoConnectionDetails);
+        MongoDbFactory mongoFactory = new SimpleMongoDbFactory(uri);
         MappingMongoConverter mappingMongoConverter = getMappingMongoConverter(mongoFactory, mongoMappingContext);
         return new MongoTemplate(mongoFactory, mappingMongoConverter);
     }
 
-    private static MongoDbFactory getMongoDbFactory(MongoClient client, String database) {
-        return new SimpleMongoDbFactory(client, database);
-    }
-
-    private static MongoClient getMongoClient(MongoConnection mongoConnection) throws UnknownHostException {
-        String authenticationDatabase = null;
-        String user = null;
-        String password = null;
-        MongoClient mongoClient;
-        
-        // The Mongo API is not happy to deal with empty strings for authentication DB, user and password
-        if (mongoConnection.getAuthenticationDatabase() != null && !mongoConnection.getAuthenticationDatabase().trim()
-                .isEmpty()) {
-            authenticationDatabase = mongoConnection.getAuthenticationDatabase();
+    public static MongoClientURI constructMongoClientURI(String databaseName,
+                                                         MongoConnectionDetails mongoConnectionDetails)
+            throws UnsupportedEncodingException {
+        List<String> options = new ArrayList<>();
+        if (!mongoConnectionDetails.getAuthenticationDatabase().isEmpty()) {
+            options.add(String.format("authSource=%s", mongoConnectionDetails.getAuthenticationDatabase()));
         }
-        if (mongoConnection.getUser() != null && !mongoConnection.getUser().trim().isEmpty()) {
-            user = mongoConnection.getUser();
+        if (!mongoConnectionDetails.getAuthenticationMechanism().isEmpty()) {
+            options.add(String.format("authMechanism=%s", mongoConnectionDetails.getAuthenticationMechanism()));
         }
-        if (mongoConnection.getPassword() != null && !mongoConnection.getPassword().trim().isEmpty()) {
-            password = mongoConnection.getPassword();
+        if (Objects.nonNull(mongoConnectionDetails.getReadPreference())) {
+            options.add(String.format("readPreference=%s", mongoConnectionDetails.getReadPreference().toString()));
         }
-        
-        if (user == null || password == null) {
-            mongoClient = new MongoClient(MongoDBHelper.parseServerAddresses(mongoConnection.getHosts()));
-        } else {
-            mongoClient = new MongoClient(
-                    MongoDBHelper.parseServerAddresses(mongoConnection.getHosts()),
-                    Collections.singletonList(MongoCredential.createCredential(mongoConnection.getUser(),
-                            authenticationDatabase, mongoConnection.getPassword().toCharArray())));
+        String uri = String.format("mongodb://%s:%s@%s/%s", mongoConnectionDetails.getUser(),
+                URLEncoder.encode(mongoConnectionDetails.getPassword(), StandardCharsets.UTF_8.toString()),
+                mongoConnectionDetails.getHosts(), databaseName);
+        if(!options.isEmpty()) {
+            uri += "?" + String.join("&", options);
         }
-        mongoClient.setReadPreference(mongoConnection.getReadPreference());
-        mongoClient.setWriteConcern(WriteConcern.MAJORITY);
-
-        return mongoClient;
+        return new MongoClientURI(uri);
     }
 
     private static MappingMongoConverter getMappingMongoConverter(MongoDbFactory mongoFactory,
@@ -124,8 +118,7 @@ public class MongoConfiguration {
         return mongoConverter;
     }
 
-    public static VariantDBAdaptor getDbAdaptor(
-            DatabaseParameters dbParameters) throws UnknownHostException, IllegalOpenCGACredentialsException {
+    public static VariantDBAdaptor getDbAdaptor(DatabaseParameters dbParameters) throws UnknownHostException, IllegalOpenCGACredentialsException {
         MongoCredentials credentials = getMongoCredentials(dbParameters);
         String variantsCollectionName = dbParameters.getCollectionVariantsName();
         String filesCollectionName = dbParameters.getCollectionFilesName();
@@ -134,9 +127,8 @@ public class MongoConfiguration {
         return new VariantMongoDBAdaptor(credentials, variantsCollectionName, filesCollectionName);
     }
 
-    private static MongoCredentials getMongoCredentials(
-            DatabaseParameters dbParameters) throws IllegalOpenCGACredentialsException {
-        MongoConnection mongoConnection = dbParameters.getMongoConnection();
+    private static MongoCredentials getMongoCredentials(DatabaseParameters dbParameters) throws IllegalOpenCGACredentialsException {
+        MongoConnectionDetails mongoConnection = dbParameters.getMongoConnectionDetails();
         String hosts = mongoConnection.getHosts();
         List<DataStoreServerAddress> dataStoreServerAddresses = MongoCredentials.parseDataStoreServerAddresses(hosts);
 

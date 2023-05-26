@@ -37,7 +37,7 @@ import uk.ac.ebi.eva.commons.models.data.VariantSourceEntity;
 import uk.ac.ebi.eva.pipeline.configuration.MongoConfiguration;
 import uk.ac.ebi.eva.pipeline.io.readers.VcfHeaderReader;
 import uk.ac.ebi.eva.pipeline.configuration.jobs.steps.LoadFileStepConfiguration;
-import uk.ac.ebi.eva.pipeline.parameters.MongoConnection;
+import uk.ac.ebi.eva.pipeline.parameters.MongoConnectionDetails;
 import uk.ac.ebi.eva.test.configuration.BaseTestConfiguration;
 import uk.ac.ebi.eva.test.configuration.TemporaryRuleConfiguration;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
@@ -85,7 +85,7 @@ public class VariantSourceEntityMongoWriterTest {
     private static final VariantSource.Aggregation AGGREGATION = VariantSource.Aggregation.NONE;
 
     @Autowired
-    private MongoConnection mongoConnection;
+    private MongoConnectionDetails mongoConnectionDetails;
 
     @Autowired
     private MongoMappingContext mongoMappingContext;
@@ -99,7 +99,7 @@ public class VariantSourceEntityMongoWriterTest {
     @Test
     public void shouldWriteAllFieldsIntoMongoDb() throws Exception {
         String databaseName = mongoRule.getRandomTemporaryDatabaseName();
-        MongoOperations mongoOperations = MongoConfiguration.getMongoOperations(databaseName, mongoConnection,
+        MongoOperations mongoOperations = MongoConfiguration.getMongoOperations(databaseName, mongoConnectionDetails,
                 mongoMappingContext);
         MongoCollection<Document> fileCollection = mongoRule.getCollection(databaseName, COLLECTION_FILES_NAME);
 
@@ -139,7 +139,7 @@ public class VariantSourceEntityMongoWriterTest {
     @Test
     public void shouldUpdateWhenWriteTwice() throws Exception {
         String databaseName = mongoRule.getRandomTemporaryDatabaseName();
-        MongoOperations mongoOperations = MongoConfiguration.getMongoOperations(databaseName, mongoConnection,
+        MongoOperations mongoOperations = MongoConfiguration.getMongoOperations(databaseName, mongoConnectionDetails,
                                                                                 mongoMappingContext);
         MongoCollection<Document> fileCollection = mongoRule.getCollection(databaseName, COLLECTION_FILES_NAME);
 
@@ -164,7 +164,7 @@ public class VariantSourceEntityMongoWriterTest {
     @Test
     public void shouldWriteSamplesWithDotsInName() throws Exception {
         String databaseName = mongoRule.getRandomTemporaryDatabaseName();
-        MongoOperations mongoOperations = MongoConfiguration.getMongoOperations(databaseName, mongoConnection,
+        MongoOperations mongoOperations = MongoConfiguration.getMongoOperations(databaseName, mongoConnectionDetails,
                 mongoMappingContext);
         MongoCollection<Document> fileCollection = mongoRule.getCollection(databaseName, COLLECTION_FILES_NAME);
 
@@ -195,7 +195,7 @@ public class VariantSourceEntityMongoWriterTest {
     @Test
     public void shouldCreateUniqueFileIndex() throws Exception {
         String databaseName = mongoRule.getRandomTemporaryDatabaseName();
-        MongoOperations mongoOperations = MongoConfiguration.getMongoOperations(databaseName, mongoConnection,
+        MongoOperations mongoOperations = MongoConfiguration.getMongoOperations(databaseName, mongoConnectionDetails,
                 mongoMappingContext);
         MongoCollection<Document> fileCollection = mongoRule.getCollection(databaseName, COLLECTION_FILES_NAME);
 

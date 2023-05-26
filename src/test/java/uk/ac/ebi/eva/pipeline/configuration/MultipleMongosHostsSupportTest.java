@@ -27,7 +27,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.ac.ebi.eva.pipeline.Application;
-import uk.ac.ebi.eva.pipeline.parameters.MongoConnection;
+import uk.ac.ebi.eva.pipeline.parameters.MongoConnectionDetails;
 import uk.ac.ebi.eva.test.configuration.MongoOperationConfiguration;
 
 import java.util.Set;
@@ -43,7 +43,7 @@ import static org.junit.Assert.assertTrue;
 @RunWith(SpringRunner.class)
 @ActiveProfiles(Application.VARIANT_ANNOTATION_MONGO_PROFILE)
 @TestPropertySource({"classpath:test-multiple-mongo-hosts.properties"})
-@ContextConfiguration(classes = {MongoConnection.class, MongoMappingContext.class, MongoOperationConfiguration.class})
+@ContextConfiguration(classes = {MongoConnectionDetails.class, MongoMappingContext.class, MongoOperationConfiguration.class})
 public class MultipleMongosHostsSupportTest {
     @Autowired
     private MongoTemplate mongoTemplate;

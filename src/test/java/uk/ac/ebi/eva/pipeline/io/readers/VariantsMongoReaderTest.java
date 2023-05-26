@@ -32,7 +32,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import uk.ac.ebi.eva.pipeline.Application;
 import uk.ac.ebi.eva.pipeline.configuration.MongoConfiguration;
 import uk.ac.ebi.eva.pipeline.model.EnsemblVariant;
-import uk.ac.ebi.eva.pipeline.parameters.MongoConnection;
+import uk.ac.ebi.eva.pipeline.parameters.MongoConnectionDetails;
 import uk.ac.ebi.eva.test.configuration.TemporaryRuleConfiguration;
 import uk.ac.ebi.eva.test.data.VariantData;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
@@ -52,7 +52,7 @@ import static org.junit.Assert.assertNotEquals;
 @RunWith(SpringRunner.class)
 @ActiveProfiles(Application.VARIANT_ANNOTATION_MONGO_PROFILE)
 @TestPropertySource({"classpath:test-mongo.properties"})
-@ContextConfiguration(classes = {MongoConnection.class, MongoMappingContext.class, TemporaryRuleConfiguration.class})
+@ContextConfiguration(classes = {MongoConnectionDetails.class, MongoMappingContext.class, TemporaryRuleConfiguration.class})
 public class VariantsMongoReaderTest {
 
     private static final String COLLECTION_VARIANTS_NAME = "variants";
@@ -78,7 +78,7 @@ public class VariantsMongoReaderTest {
     private static final String VEP_CACHE_VERSION = "78";
 
     @Autowired
-    private MongoConnection mongoConnection;
+    private MongoConnectionDetails mongoConnectionDetails;
 
     @Autowired
     private MongoMappingContext mongoMappingContext;
@@ -121,7 +121,7 @@ public class VariantsMongoReaderTest {
                 VariantData.getVariantWithoutAnnotation(),
                 VariantData.getVariantWithoutAnnotationOtherStudy()));
 
-        MongoOperations mongoOperations = MongoConfiguration.getMongoOperations(databaseName, mongoConnection,
+        MongoOperations mongoOperations = MongoConfiguration.getMongoOperations(databaseName, mongoConnectionDetails,
                                                                                 mongoMappingContext);
 
         VariantsMongoReader mongoItemReader = new VariantsMongoReader(mongoOperations, COLLECTION_VARIANTS_NAME,

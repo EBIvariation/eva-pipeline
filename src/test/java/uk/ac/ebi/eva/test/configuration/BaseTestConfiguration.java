@@ -20,7 +20,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mongodb.core.mapping.MongoMappingContext;
 
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
-import uk.ac.ebi.eva.pipeline.parameters.MongoConnection;
+import uk.ac.ebi.eva.pipeline.parameters.MongoConnectionDetails;
 
 @Configuration
 public class BaseTestConfiguration {
@@ -31,8 +31,8 @@ public class BaseTestConfiguration {
     }
 
     @Bean
-    public MongoConnection mongoConnection() {
-        return new MongoConnection();
+    public MongoConnectionDetails mongoConnection() {
+        return new MongoConnectionDetails();
     }
 
     @Bean

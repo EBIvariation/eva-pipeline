@@ -35,7 +35,7 @@ import uk.ac.ebi.eva.pipeline.configuration.MongoConfiguration;
 import uk.ac.ebi.eva.pipeline.parameters.ChunkSizeParameters;
 import uk.ac.ebi.eva.pipeline.parameters.DatabaseParameters;
 import uk.ac.ebi.eva.pipeline.parameters.InputParameters;
-import uk.ac.ebi.eva.pipeline.parameters.MongoConnection;
+import uk.ac.ebi.eva.pipeline.parameters.MongoConnectionDetails;
 import uk.ac.ebi.eva.pipeline.parameters.OutputParameters;
 import uk.ac.ebi.eva.utils.URLHelper;
 
@@ -107,17 +107,17 @@ public class CalculateStatisticsTasklet implements Tasklet {
         variantOptions.put(VariantStatisticsManager.BATCH_SIZE, chunkSizeParameters.getChunkSize());
 
         variantOptions.put(VariantStorageManager.DB_NAME, dbParameters.getDatabaseName());
-        MongoConnection mongoConnection = dbParameters.getMongoConnection();
+        MongoConnectionDetails mongoConnectionDetails = dbParameters.getMongoConnectionDetails();
         variantOptions.put(MongoDBVariantStorageManager.OPENCGA_STORAGE_MONGODB_VARIANT_DB_NAME,
                 dbParameters.getDatabaseName());
         variantOptions.put(MongoDBVariantStorageManager.OPENCGA_STORAGE_MONGODB_VARIANT_DB_HOSTS,
-                mongoConnection.getHosts());
+                mongoConnectionDetails.getHosts());
         variantOptions.put(MongoDBVariantStorageManager.OPENCGA_STORAGE_MONGODB_VARIANT_DB_AUTHENTICATION_DB,
-                mongoConnection.getAuthenticationDatabase());
+                mongoConnectionDetails.getAuthenticationDatabase());
         variantOptions.put(MongoDBVariantStorageManager.OPENCGA_STORAGE_MONGODB_VARIANT_DB_USER,
-                mongoConnection.getUser());
+                mongoConnectionDetails.getUser());
         variantOptions.put(MongoDBVariantStorageManager.OPENCGA_STORAGE_MONGODB_VARIANT_DB_PASS,
-                mongoConnection.getPassword());
+                mongoConnectionDetails.getPassword());
 
         return variantOptions;
     }

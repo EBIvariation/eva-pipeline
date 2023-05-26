@@ -15,10 +15,6 @@
  */
 package uk.ac.ebi.eva.pipeline.io.writers;
 
-import com.mongodb.BasicDBList;
-import com.mongodb.BasicDBObject;
-import com.mongodb.DBCursor;
-import com.mongodb.DBObject;
 import com.mongodb.client.MongoCursor;
 import org.bson.Document;
 import org.junit.Before;
@@ -38,7 +34,7 @@ import uk.ac.ebi.eva.commons.models.mongo.entity.VariantDocument;
 import uk.ac.ebi.eva.pipeline.Application;
 import uk.ac.ebi.eva.pipeline.configuration.MongoConfiguration;
 import uk.ac.ebi.eva.pipeline.io.mappers.AnnotationLineMapper;
-import uk.ac.ebi.eva.pipeline.parameters.MongoConnection;
+import uk.ac.ebi.eva.pipeline.parameters.MongoConnectionDetails;
 import uk.ac.ebi.eva.test.configuration.TemporaryRuleConfiguration;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 
@@ -65,7 +61,7 @@ import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResourceUrl;
 @RunWith(SpringRunner.class)
 @ActiveProfiles(Application.VARIANT_ANNOTATION_MONGO_PROFILE)
 @TestPropertySource({"classpath:test-mongo.properties"})
-@ContextConfiguration(classes = {MongoConnection.class, MongoMappingContext.class, TemporaryRuleConfiguration.class})
+@ContextConfiguration(classes = {MongoConnectionDetails.class, MongoMappingContext.class, TemporaryRuleConfiguration.class})
 public class AnnotationInVariantMongoWriterTest {
 
     private static final String MONGO_DUMP = "/dump/VariantStatsConfigurationTest_vl";
@@ -77,7 +73,7 @@ public class AnnotationInVariantMongoWriterTest {
     private static final String VEP_CACHE_VERSION = "2";
 
     @Autowired
-    private MongoConnection mongoConnection;
+    private MongoConnectionDetails mongoConnectionDetails;
 
     @Autowired
     private MongoMappingContext mongoMappingContext;
@@ -119,7 +115,7 @@ public class AnnotationInVariantMongoWriterTest {
         }
 
         // load the annotation
-        MongoOperations operations = MongoConfiguration.getMongoOperations(databaseName, mongoConnection,
+        MongoOperations operations = MongoConfiguration.getMongoOperations(databaseName, mongoConnectionDetails,
                 mongoMappingContext);
         annotationInVariantMongoWriter = new AnnotationInVariantMongoWriter(operations, COLLECTION_VARIANTS_NAME,
                 VEP_VERSION, VEP_CACHE_VERSION);
@@ -189,7 +185,7 @@ public class AnnotationInVariantMongoWriterTest {
         annotations.add(annotationLineMapper.mapLine(vepOutputLines[2], 0));
 
         // load the first annotation
-        MongoOperations operations = MongoConfiguration.getMongoOperations(databaseName, mongoConnection,
+        MongoOperations operations = MongoConfiguration.getMongoOperations(databaseName, mongoConnectionDetails,
                 mongoMappingContext);
         annotationInVariantMongoWriter = new AnnotationInVariantMongoWriter(operations, COLLECTION_VARIANTS_NAME,
                 VEP_VERSION, VEP_CACHE_VERSION);
@@ -242,7 +238,7 @@ public class AnnotationInVariantMongoWriterTest {
         Annotation differentVersionAnnotation = differentVersionAnnotationLineMapper.mapLine(vepOutputLines[2], 0);
 
         // load the first annotation
-        MongoOperations operations = MongoConfiguration.getMongoOperations(databaseName, mongoConnection,
+        MongoOperations operations = MongoConfiguration.getMongoOperations(databaseName, mongoConnectionDetails,
                                                                            mongoMappingContext);
         annotationInVariantMongoWriter = new AnnotationInVariantMongoWriter(operations, COLLECTION_VARIANTS_NAME,
                                                                             VEP_VERSION, VEP_CACHE_VERSION);
