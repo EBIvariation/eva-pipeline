@@ -37,16 +37,13 @@ import org.springframework.data.mongodb.core.convert.DefaultDbRefResolver;
 import org.springframework.data.mongodb.core.convert.DefaultMongoTypeMapper;
 import org.springframework.data.mongodb.core.convert.MappingMongoConverter;
 import org.springframework.data.mongodb.core.mapping.MongoMappingContext;
+import uk.ac.ebi.eva.commons.mongodb.utils.MongoUtils;
 import uk.ac.ebi.eva.pipeline.parameters.DatabaseParameters;
 import uk.ac.ebi.eva.pipeline.parameters.MongoConnectionDetails;
 
 import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.net.UnknownHostException;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * Utility class dealing with MongoDB connections using pipeline options
@@ -92,27 +89,12 @@ public class MongoConfiguration {
     public static MongoClientURI constructMongoClientURI(String databaseName,
                                                          MongoConnectionDetails mongoConnectionDetails)
             throws UnsupportedEncodingException {
-        List<String> options = new ArrayList<>();
-        if (Objects.nonNull(mongoConnectionDetails.getAuthenticationDatabase())) {
-            options.add(String.format("authSource=%s", mongoConnectionDetails.getAuthenticationDatabase()));
-        }
-        if (Objects.nonNull(mongoConnectionDetails.getAuthenticationMechanism())) {
-            options.add(String.format("authMechanism=%s", mongoConnectionDetails.getAuthenticationMechanism()));
-        }
-        if (Objects.nonNull(mongoConnectionDetails.getReadPreference())) {
-            options.add(String.format("readPreference=%s", mongoConnectionDetails.getReadPreference().toString()));
-        }
-        String uri = "mongodb://";
-        if (Objects.nonNull(mongoConnectionDetails.getUser()) &&
-                Objects.nonNull(mongoConnectionDetails.getPassword())) {
-            uri += String.format("%s:%s@",mongoConnectionDetails.getUser(),
-                    URLEncoder.encode(mongoConnectionDetails.getPassword(), StandardCharsets.UTF_8.toString()));
-        }
-        uri += String.format("%s/%s", mongoConnectionDetails.getHosts(), databaseName);
-        if(!options.isEmpty()) {
-            uri += "?" + String.join("&", options);
-        }
-        return new MongoClientURI(uri);
+        return MongoUtils.constructMongoClientURI(mongoConnectionDetails.getHosts(), databaseName,
+                                                  mongoConnectionDetails.getUser(),
+                                                  mongoConnectionDetails.getPassword(),
+                                                  mongoConnectionDetails.getAuthenticationDatabase(),
+                                                  mongoConnectionDetails.getAuthenticationMechanism(),
+                                                  mongoConnectionDetails.getReadPreferenceName());
     }
 
     private static MappingMongoConverter getMappingMongoConverter(MongoDbFactory mongoFactory,

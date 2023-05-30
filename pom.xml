@@ -21,7 +21,7 @@
         <biodata.version>0.4.9</biodata.version>
         <cellbase.version>3.1.3</cellbase.version>
         <postgresql.version>42.4.0</postgresql.version>
-        <variation-commons-version>0.8.0</variation-commons-version>
+        <variation-commons-version>0.8.3-SNAPSHOT</variation-commons-version>
         <eva.mongo.host.test>localhost</eva.mongo.host.test>
     </properties>
 
@@ -112,6 +112,11 @@
         <dependency>
             <groupId>uk.ac.ebi.eva</groupId>
             <artifactId>variation-commons-batch</artifactId>
+            <version>${variation-commons-version}</version>
+        </dependency>
+        <dependency>
+            <groupId>uk.ac.ebi.eva</groupId>
+            <artifactId>variation-commons-mongodb</artifactId>
             <version>${variation-commons-version}</version>
         </dependency>
         <dependency>
