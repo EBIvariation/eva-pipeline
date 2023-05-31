@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.ac.ebi.eva.pipeline.io.readers;
+package uk.ac.ebi.eva.pipeline.configuration;
 
 import com.mongodb.ServerAddress;
 import org.junit.Test;

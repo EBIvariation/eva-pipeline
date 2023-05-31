@@ -89,7 +89,9 @@ public class MongoConfiguration {
     public static MongoClientURI constructMongoClientURI(String databaseName,
                                                          MongoConnectionDetails mongoConnectionDetails)
             throws UnsupportedEncodingException {
-        return MongoUtils.constructMongoClientURI(mongoConnectionDetails.getHosts(), databaseName,
+        return MongoUtils.constructMongoClientURI(mongoConnectionDetails.getHosts(),
+                                                  null,
+                                                  databaseName,
                                                   mongoConnectionDetails.getUser(),
                                                   mongoConnectionDetails.getPassword(),
                                                   mongoConnectionDetails.getAuthenticationDatabase(),
