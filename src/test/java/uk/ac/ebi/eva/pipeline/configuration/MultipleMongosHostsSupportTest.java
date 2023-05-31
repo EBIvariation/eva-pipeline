@@ -35,11 +35,6 @@ import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertTrue;
 
-/**
- * {@link VariantsMongoReader}
- * input: a variants collection address
- * output: a DBObject each time `.read()` is called, with at least: chr, start, annot
- */
 @RunWith(SpringRunner.class)
 @ActiveProfiles(Application.VARIANT_ANNOTATION_MONGO_PROFILE)
 @TestPropertySource({"classpath:test-multiple-mongo-hosts.properties"})
