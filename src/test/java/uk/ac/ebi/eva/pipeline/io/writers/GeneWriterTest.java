@@ -32,7 +32,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import uk.ac.ebi.eva.pipeline.configuration.MongoConfiguration;
 import uk.ac.ebi.eva.pipeline.io.mappers.GeneLineMapper;
 import uk.ac.ebi.eva.pipeline.model.FeatureCoordinates;
-import uk.ac.ebi.eva.pipeline.parameters.MongoConnection;
+import uk.ac.ebi.eva.pipeline.parameters.MongoConnectionDetails;
 import uk.ac.ebi.eva.test.configuration.TemporaryRuleConfiguration;
 import uk.ac.ebi.eva.test.data.GtfStaticTestData;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
@@ -50,13 +50,13 @@ import static org.junit.Assert.assertNotNull;
  */
 @RunWith(SpringRunner.class)
 @TestPropertySource({"classpath:test-mongo.properties"})
-@ContextConfiguration(classes = {MongoConnection.class, MongoMappingContext.class, TemporaryRuleConfiguration.class})
+@ContextConfiguration(classes = {MongoConnectionDetails.class, MongoMappingContext.class, TemporaryRuleConfiguration.class})
 public class GeneWriterTest {
 
     private static final String COLLECTION_FEATURES_NAME = "features";
 
     @Autowired
-    private MongoConnection mongoConnection;
+    private MongoConnectionDetails mongoConnectionDetails;
 
     @Autowired
     private MongoMappingContext mongoMappingContext;
@@ -69,7 +69,7 @@ public class GeneWriterTest {
     public void shouldWriteAllFieldsIntoMongoDb() throws Exception {
         String databaseName = mongoRule.getRandomTemporaryDatabaseName();
 
-        MongoOperations mongoOperations = MongoConfiguration.getMongoOperations(databaseName, mongoConnection, mongoMappingContext);
+        MongoOperations mongoOperations = MongoConfiguration.getMongoOperations(databaseName, mongoConnectionDetails, mongoMappingContext);
 
         GeneWriter geneWriter = new GeneWriter(mongoOperations, COLLECTION_FEATURES_NAME);
 

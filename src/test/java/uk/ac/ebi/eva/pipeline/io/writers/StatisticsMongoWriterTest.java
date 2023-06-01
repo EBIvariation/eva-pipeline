@@ -17,11 +17,7 @@
 package uk.ac.ebi.eva.pipeline.io.writers;
 
 
-import com.mongodb.BasicDBObject;
 import com.mongodb.Block;
-import com.mongodb.DBCollection;
-import com.mongodb.DBCursor;
-import com.mongodb.DBObject;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import org.bson.Document;
@@ -38,11 +34,12 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import uk.ac.ebi.eva.pipeline.configuration.MongoConfiguration;
 import uk.ac.ebi.eva.pipeline.model.PopulationStatistics;
-import uk.ac.ebi.eva.pipeline.parameters.MongoConnection;
+import uk.ac.ebi.eva.pipeline.parameters.MongoConnectionDetails;
 import uk.ac.ebi.eva.test.configuration.TemporaryRuleConfiguration;
 import uk.ac.ebi.eva.test.data.VariantData;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 
+import java.io.UnsupportedEncodingException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -62,13 +59,13 @@ import static org.junit.Assert.assertNotNull;
  */
 @RunWith(SpringRunner.class)
 @TestPropertySource({"classpath:test-mongo.properties"})
-@ContextConfiguration(classes = {MongoConnection.class, MongoMappingContext.class, TemporaryRuleConfiguration.class})
+@ContextConfiguration(classes = {MongoConnectionDetails.class, MongoMappingContext.class, TemporaryRuleConfiguration.class})
 public class StatisticsMongoWriterTest {
 
     private static final String COLLECTION_STATS_NAME = "populationStatistics";
 
     @Autowired
-    private MongoConnection mongoConnection;
+    private MongoConnectionDetails mongoConnectionDetails;
 
     @Autowired
     private MongoMappingContext mongoMappingContext;
@@ -179,8 +176,9 @@ public class StatisticsMongoWriterTest {
         return Arrays.asList(populationStatistics);
     }
 
-    public StatisticsMongoWriter getStatisticsMongoWriter(String databaseName) throws UnknownHostException {
-        MongoOperations operations = MongoConfiguration.getMongoOperations(databaseName, mongoConnection,
+    public StatisticsMongoWriter getStatisticsMongoWriter(String databaseName) throws
+            UnknownHostException, UnsupportedEncodingException {
+        MongoOperations operations = MongoConfiguration.getMongoOperations(databaseName, mongoConnectionDetails,
                 mongoMappingContext);
         StatisticsMongoWriter statisticsMongoWriter = new StatisticsMongoWriter(operations, COLLECTION_STATS_NAME);
         return statisticsMongoWriter;

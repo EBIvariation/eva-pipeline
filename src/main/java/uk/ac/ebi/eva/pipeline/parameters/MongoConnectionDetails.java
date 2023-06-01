@@ -25,7 +25,7 @@ import org.springframework.stereotype.Service;
  * The values are injected directly from environment, not from JobParameters.
  */
 @Service
-public class MongoConnection {
+public class MongoConnectionDetails {
 
     @Value("${" + JobParametersNames.CONFIG_DB_HOSTS + ":#{null}}")
     private String hosts;

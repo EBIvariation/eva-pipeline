@@ -37,11 +37,12 @@ import uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.Score;
 import uk.ac.ebi.eva.pipeline.Application;
 import uk.ac.ebi.eva.pipeline.configuration.MongoConfiguration;
 import uk.ac.ebi.eva.pipeline.io.mappers.AnnotationLineMapper;
-import uk.ac.ebi.eva.pipeline.parameters.MongoConnection;
+import uk.ac.ebi.eva.pipeline.parameters.MongoConnectionDetails;
 import uk.ac.ebi.eva.test.configuration.TemporaryRuleConfiguration;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 import uk.ac.ebi.eva.utils.MongoDBHelper;
 
+import java.io.UnsupportedEncodingException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -73,7 +74,7 @@ import static uk.ac.ebi.eva.test.utils.JobTestUtils.count;
 @RunWith(SpringRunner.class)
 @ActiveProfiles(Application.VARIANT_ANNOTATION_MONGO_PROFILE)
 @TestPropertySource({"classpath:test-mongo.properties"})
-@ContextConfiguration(classes = {MongoConnection.class, MongoMappingContext.class, TemporaryRuleConfiguration.class})
+@ContextConfiguration(classes = {MongoConnectionDetails.class, MongoMappingContext.class, TemporaryRuleConfiguration.class})
 public class AnnotationMongoWriterTest {
 
     private static final String COLLECTION_ANNOTATIONS_NAME = "annotations";
@@ -83,7 +84,7 @@ public class AnnotationMongoWriterTest {
     private static final String VEP_CACHE_VERSION = "2";
 
     @Autowired
-    private MongoConnection mongoConnection;
+    private MongoConnectionDetails mongoConnectionDetails;
 
     @Autowired
     private MongoMappingContext mongoMappingContext;
@@ -111,7 +112,7 @@ public class AnnotationMongoWriterTest {
         }
 
         // load the annotation
-        MongoOperations operations = MongoConfiguration.getMongoOperations(databaseName, mongoConnection,
+        MongoOperations operations = MongoConfiguration.getMongoOperations(databaseName, mongoConnectionDetails,
                                                                            mongoMappingContext);
         annotationWriter = new AnnotationMongoWriter(operations, COLLECTION_ANNOTATIONS_NAME);
         annotationWriter.write(Collections.singletonList(annotations));
@@ -163,7 +164,7 @@ public class AnnotationMongoWriterTest {
         }
 
         // load the annotation
-        MongoOperations operations = MongoConfiguration.getMongoOperations(databaseName, mongoConnection,
+        MongoOperations operations = MongoConfiguration.getMongoOperations(databaseName, mongoConnectionDetails,
                                                                            mongoMappingContext);
         annotationWriter = new AnnotationMongoWriter(operations, COLLECTION_ANNOTATIONS_NAME);
 
@@ -202,7 +203,7 @@ public class AnnotationMongoWriterTest {
 
         annotation.addConsequenceType(consequenceType);
 
-        MongoOperations operations = MongoConfiguration.getMongoOperations(databaseName, mongoConnection,
+        MongoOperations operations = MongoConfiguration.getMongoOperations(databaseName, mongoConnectionDetails,
                                                                            mongoMappingContext);
         annotationWriter = new AnnotationMongoWriter(operations, COLLECTION_ANNOTATIONS_NAME);
 
@@ -232,9 +233,9 @@ public class AnnotationMongoWriterTest {
     }
 
     @Test
-    public void indexesShouldBeCreatedInBackground() throws UnknownHostException {
+    public void indexesShouldBeCreatedInBackground() throws UnknownHostException, UnsupportedEncodingException {
         String dbName = mongoRule.getRandomTemporaryDatabaseName();
-        MongoOperations mongoOperations = MongoConfiguration.getMongoOperations(dbName, mongoConnection, mongoMappingContext);
+        MongoOperations mongoOperations = MongoConfiguration.getMongoOperations(dbName, mongoConnectionDetails, mongoMappingContext);
         MongoCollection<Document> dbCollection = mongoOperations.getCollection(COLLECTION_ANNOTATIONS_NAME);
 
         AnnotationMongoWriter writer = new AnnotationMongoWriter(mongoOperations, COLLECTION_ANNOTATIONS_NAME);
@@ -261,7 +262,7 @@ public class AnnotationMongoWriterTest {
         }
 
         // load the annotation
-        MongoOperations operations = MongoConfiguration.getMongoOperations(databaseName, mongoConnection,
+        MongoOperations operations = MongoConfiguration.getMongoOperations(databaseName, mongoConnectionDetails,
                 mongoMappingContext);
         annotationWriter = new AnnotationMongoWriter(operations, COLLECTION_ANNOTATIONS_NAME);
         annotationWriter.write(Collections.singletonList(annotations.subList(1, 2)));
@@ -294,7 +295,7 @@ public class AnnotationMongoWriterTest {
                 differentVersionAnnotationLineMapper.mapLine(annotLine, 0))));
 
         // load the annotation
-        MongoOperations operations = MongoConfiguration.getMongoOperations(databaseName, mongoConnection,
+        MongoOperations operations = MongoConfiguration.getMongoOperations(databaseName, mongoConnectionDetails,
                 mongoMappingContext);
         annotationWriter = new AnnotationMongoWriter(operations, COLLECTION_ANNOTATIONS_NAME);
         annotationWriter.write(firstVersionAnnotation);
