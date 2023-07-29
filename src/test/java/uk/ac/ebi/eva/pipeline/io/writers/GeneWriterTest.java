@@ -69,7 +69,7 @@ public class GeneWriterTest {
     public void shouldWriteAllFieldsIntoMongoDb() throws Exception {
         String databaseName = mongoRule.getRandomTemporaryDatabaseName();
 
-        MongoOperations mongoOperations = MongoConfiguration.getMongoOperations(databaseName, mongoConnectionDetails, mongoMappingContext);
+        MongoOperations mongoOperations = MongoConfiguration.getMongoTemplate(databaseName, mongoConnectionDetails, mongoMappingContext);
 
         GeneWriter geneWriter = new GeneWriter(mongoOperations, COLLECTION_FEATURES_NAME);
 

@@ -115,7 +115,7 @@ public class AnnotationInVariantMongoWriterTest {
         }
 
         // load the annotation
-        MongoOperations operations = MongoConfiguration.getMongoOperations(databaseName, mongoConnectionDetails,
+        MongoOperations operations = MongoConfiguration.getMongoTemplate(databaseName, mongoConnectionDetails,
                 mongoMappingContext);
         annotationInVariantMongoWriter = new AnnotationInVariantMongoWriter(operations, COLLECTION_VARIANTS_NAME,
                 VEP_VERSION, VEP_CACHE_VERSION);
@@ -185,7 +185,7 @@ public class AnnotationInVariantMongoWriterTest {
         annotations.add(annotationLineMapper.mapLine(vepOutputLines[2], 0));
 
         // load the first annotation
-        MongoOperations operations = MongoConfiguration.getMongoOperations(databaseName, mongoConnectionDetails,
+        MongoOperations operations = MongoConfiguration.getMongoTemplate(databaseName, mongoConnectionDetails,
                 mongoMappingContext);
         annotationInVariantMongoWriter = new AnnotationInVariantMongoWriter(operations, COLLECTION_VARIANTS_NAME,
                 VEP_VERSION, VEP_CACHE_VERSION);
@@ -238,7 +238,7 @@ public class AnnotationInVariantMongoWriterTest {
         Annotation differentVersionAnnotation = differentVersionAnnotationLineMapper.mapLine(vepOutputLines[2], 0);
 
         // load the first annotation
-        MongoOperations operations = MongoConfiguration.getMongoOperations(databaseName, mongoConnectionDetails,
+        MongoOperations operations = MongoConfiguration.getMongoTemplate(databaseName, mongoConnectionDetails,
                                                                            mongoMappingContext);
         annotationInVariantMongoWriter = new AnnotationInVariantMongoWriter(operations, COLLECTION_VARIANTS_NAME,
                                                                             VEP_VERSION, VEP_CACHE_VERSION);

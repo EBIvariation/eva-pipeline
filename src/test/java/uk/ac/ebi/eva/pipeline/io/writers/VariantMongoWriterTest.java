@@ -79,7 +79,7 @@ public class VariantMongoWriterTest {
     @Test
     public void noVariantsNothingShouldBeWritten() throws UnknownHostException, UnsupportedEncodingException {
         String dbName = mongoRule.getRandomTemporaryDatabaseName();
-        MongoOperations mongoOperations = MongoConfiguration.getMongoOperations(dbName, mongoConnectionDetails,
+        MongoOperations mongoOperations = MongoConfiguration.getMongoTemplate(dbName, mongoConnectionDetails,
                                                                                 mongoMappingContext);
         MongoCollection<Document> collection = mongoOperations.getCollection(collectionName);
 
@@ -95,7 +95,7 @@ public class VariantMongoWriterTest {
         Variant variant2 = new Variant("2", 3, 4, "C", "G");
 
         String dbName = mongoRule.getRandomTemporaryDatabaseName();
-        MongoOperations mongoOperations = MongoConfiguration.getMongoOperations(dbName, mongoConnectionDetails,
+        MongoOperations mongoOperations = MongoConfiguration.getMongoTemplate(dbName, mongoConnectionDetails,
                                                                                 mongoMappingContext);
         MongoCollection<Document> collection = mongoOperations.getCollection(collectionName);
 
@@ -109,7 +109,7 @@ public class VariantMongoWriterTest {
     @Test
     public void indexesShouldBeCreatedInBackground() throws UnknownHostException, UnsupportedEncodingException {
         String dbName = mongoRule.getRandomTemporaryDatabaseName();
-        MongoOperations mongoOperations = MongoConfiguration.getMongoOperations(dbName, mongoConnectionDetails,
+        MongoOperations mongoOperations = MongoConfiguration.getMongoTemplate(dbName, mongoConnectionDetails,
                                                                                 mongoMappingContext);
         MongoCollection<Document> collection = mongoOperations.getCollection(collectionName);
 
@@ -136,7 +136,7 @@ public class VariantMongoWriterTest {
         variant1.addSourceEntry(new VariantSourceEntry("test_file", "test_study_id"));
 
         String dbName = mongoRule.getRandomTemporaryDatabaseName();
-        MongoOperations mongoOperations = MongoConfiguration.getMongoOperations(dbName, mongoConnectionDetails,
+        MongoOperations mongoOperations = MongoConfiguration.getMongoTemplate(dbName, mongoConnectionDetails,
                                                                                 mongoMappingContext);
 
         VariantMongoWriter variantMongoWriter = new VariantMongoWriter(collectionName, mongoOperations, false, false);
@@ -161,7 +161,7 @@ public class VariantMongoWriterTest {
         Variant variant = buildVariant(chromosome, start, end, reference, alternate, fileId, studyId);
 
         String dbName = mongoRule.getRandomTemporaryDatabaseName();
-        MongoOperations mongoOperations = MongoConfiguration.getMongoOperations(dbName, mongoConnectionDetails,
+        MongoOperations mongoOperations = MongoConfiguration.getMongoTemplate(dbName, mongoConnectionDetails,
                 mongoMappingContext);
 
         VariantMongoWriter variantMongoWriter = new VariantMongoWriter(collectionName, mongoOperations, false, true);
@@ -188,7 +188,7 @@ public class VariantMongoWriterTest {
         Variant variant = buildVariant("12", 3, 4, "A", "T", "fileId", "studyId");
 
         String dbName = mongoRule.getRandomTemporaryDatabaseName();
-        MongoOperations mongoOperations = MongoConfiguration.getMongoOperations(dbName, mongoConnectionDetails,
+        MongoOperations mongoOperations = MongoConfiguration.getMongoTemplate(dbName, mongoConnectionDetails,
                 mongoMappingContext);
 
         VariantMongoWriter variantMongoWriter = new VariantMongoWriter(collectionName, mongoOperations, true, false);
@@ -205,7 +205,7 @@ public class VariantMongoWriterTest {
         Variant variant = buildVariant("12", 3, 4, "A", "T", "fileId", "studyId");
 
         String dbName = mongoRule.getRandomTemporaryDatabaseName();
-        MongoOperations mongoOperations = MongoConfiguration.getMongoOperations(dbName, mongoConnectionDetails,
+        MongoOperations mongoOperations = MongoConfiguration.getMongoTemplate(dbName, mongoConnectionDetails,
                 mongoMappingContext);
 
         VariantMongoWriter variantMongoWriter = new VariantMongoWriter(collectionName, mongoOperations, false, true);
@@ -223,7 +223,7 @@ public class VariantMongoWriterTest {
         variant.setIds(new HashSet<>(Arrays.asList("a", "b", "c")));
 
         String dbName = mongoRule.getRandomTemporaryDatabaseName();
-        MongoOperations mongoOperations = MongoConfiguration.getMongoOperations(dbName, mongoConnectionDetails,
+        MongoOperations mongoOperations = MongoConfiguration.getMongoTemplate(dbName, mongoConnectionDetails,
                 mongoMappingContext);
 
         VariantMongoWriter variantMongoWriter = new VariantMongoWriter(collectionName, mongoOperations, false, true);
@@ -240,7 +240,7 @@ public class VariantMongoWriterTest {
         Variant variant = buildVariant("12", 3, 4, "A", "T", "fileId", "studyId");
 
         String dbName = mongoRule.getRandomTemporaryDatabaseName();
-        MongoOperations mongoOperations = MongoConfiguration.getMongoOperations(dbName, mongoConnectionDetails,
+        MongoOperations mongoOperations = MongoConfiguration.getMongoTemplate(dbName, mongoConnectionDetails,
                 mongoMappingContext);
 
         VariantMongoWriter variantMongoWriter = new VariantMongoWriter(collectionName, mongoOperations, false, true);

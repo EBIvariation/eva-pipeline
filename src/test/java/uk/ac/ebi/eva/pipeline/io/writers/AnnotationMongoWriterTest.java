@@ -112,7 +112,7 @@ public class AnnotationMongoWriterTest {
         }
 
         // load the annotation
-        MongoOperations operations = MongoConfiguration.getMongoOperations(databaseName, mongoConnectionDetails,
+        MongoOperations operations = MongoConfiguration.getMongoTemplate(databaseName, mongoConnectionDetails,
                                                                            mongoMappingContext);
         annotationWriter = new AnnotationMongoWriter(operations, COLLECTION_ANNOTATIONS_NAME);
         annotationWriter.write(Collections.singletonList(annotations));
@@ -164,7 +164,7 @@ public class AnnotationMongoWriterTest {
         }
 
         // load the annotation
-        MongoOperations operations = MongoConfiguration.getMongoOperations(databaseName, mongoConnectionDetails,
+        MongoOperations operations = MongoConfiguration.getMongoTemplate(databaseName, mongoConnectionDetails,
                                                                            mongoMappingContext);
         annotationWriter = new AnnotationMongoWriter(operations, COLLECTION_ANNOTATIONS_NAME);
 
@@ -203,7 +203,7 @@ public class AnnotationMongoWriterTest {
 
         annotation.addConsequenceType(consequenceType);
 
-        MongoOperations operations = MongoConfiguration.getMongoOperations(databaseName, mongoConnectionDetails,
+        MongoOperations operations = MongoConfiguration.getMongoTemplate(databaseName, mongoConnectionDetails,
                                                                            mongoMappingContext);
         annotationWriter = new AnnotationMongoWriter(operations, COLLECTION_ANNOTATIONS_NAME);
 
@@ -235,7 +235,7 @@ public class AnnotationMongoWriterTest {
     @Test
     public void indexesShouldBeCreatedInBackground() throws UnknownHostException, UnsupportedEncodingException {
         String dbName = mongoRule.getRandomTemporaryDatabaseName();
-        MongoOperations mongoOperations = MongoConfiguration.getMongoOperations(dbName, mongoConnectionDetails, mongoMappingContext);
+        MongoOperations mongoOperations = MongoConfiguration.getMongoTemplate(dbName, mongoConnectionDetails, mongoMappingContext);
         MongoCollection<Document> dbCollection = mongoOperations.getCollection(COLLECTION_ANNOTATIONS_NAME);
 
         AnnotationMongoWriter writer = new AnnotationMongoWriter(mongoOperations, COLLECTION_ANNOTATIONS_NAME);
@@ -262,7 +262,7 @@ public class AnnotationMongoWriterTest {
         }
 
         // load the annotation
-        MongoOperations operations = MongoConfiguration.getMongoOperations(databaseName, mongoConnectionDetails,
+        MongoOperations operations = MongoConfiguration.getMongoTemplate(databaseName, mongoConnectionDetails,
                 mongoMappingContext);
         annotationWriter = new AnnotationMongoWriter(operations, COLLECTION_ANNOTATIONS_NAME);
         annotationWriter.write(Collections.singletonList(annotations.subList(1, 2)));
@@ -295,7 +295,7 @@ public class AnnotationMongoWriterTest {
                 differentVersionAnnotationLineMapper.mapLine(annotLine, 0))));
 
         // load the annotation
-        MongoOperations operations = MongoConfiguration.getMongoOperations(databaseName, mongoConnectionDetails,
+        MongoOperations operations = MongoConfiguration.getMongoTemplate(databaseName, mongoConnectionDetails,
                 mongoMappingContext);
         annotationWriter = new AnnotationMongoWriter(operations, COLLECTION_ANNOTATIONS_NAME);
         annotationWriter.write(firstVersionAnnotation);

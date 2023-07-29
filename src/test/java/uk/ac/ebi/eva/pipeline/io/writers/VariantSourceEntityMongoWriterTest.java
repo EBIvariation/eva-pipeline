@@ -99,7 +99,7 @@ public class VariantSourceEntityMongoWriterTest {
     @Test
     public void shouldWriteAllFieldsIntoMongoDb() throws Exception {
         String databaseName = mongoRule.getRandomTemporaryDatabaseName();
-        MongoOperations mongoOperations = MongoConfiguration.getMongoOperations(databaseName, mongoConnectionDetails,
+        MongoOperations mongoOperations = MongoConfiguration.getMongoTemplate(databaseName, mongoConnectionDetails,
                 mongoMappingContext);
         MongoCollection<Document> fileCollection = mongoRule.getCollection(databaseName, COLLECTION_FILES_NAME);
 
@@ -139,7 +139,7 @@ public class VariantSourceEntityMongoWriterTest {
     @Test
     public void shouldUpdateWhenWriteTwice() throws Exception {
         String databaseName = mongoRule.getRandomTemporaryDatabaseName();
-        MongoOperations mongoOperations = MongoConfiguration.getMongoOperations(databaseName, mongoConnectionDetails,
+        MongoOperations mongoOperations = MongoConfiguration.getMongoTemplate(databaseName, mongoConnectionDetails,
                                                                                 mongoMappingContext);
         MongoCollection<Document> fileCollection = mongoRule.getCollection(databaseName, COLLECTION_FILES_NAME);
 
@@ -164,7 +164,7 @@ public class VariantSourceEntityMongoWriterTest {
     @Test
     public void shouldWriteSamplesWithDotsInName() throws Exception {
         String databaseName = mongoRule.getRandomTemporaryDatabaseName();
-        MongoOperations mongoOperations = MongoConfiguration.getMongoOperations(databaseName, mongoConnectionDetails,
+        MongoOperations mongoOperations = MongoConfiguration.getMongoTemplate(databaseName, mongoConnectionDetails,
                 mongoMappingContext);
         MongoCollection<Document> fileCollection = mongoRule.getCollection(databaseName, COLLECTION_FILES_NAME);
 
@@ -195,7 +195,7 @@ public class VariantSourceEntityMongoWriterTest {
     @Test
     public void shouldCreateUniqueFileIndex() throws Exception {
         String databaseName = mongoRule.getRandomTemporaryDatabaseName();
-        MongoOperations mongoOperations = MongoConfiguration.getMongoOperations(databaseName, mongoConnectionDetails,
+        MongoOperations mongoOperations = MongoConfiguration.getMongoTemplate(databaseName, mongoConnectionDetails,
                 mongoMappingContext);
         MongoCollection<Document> fileCollection = mongoRule.getCollection(databaseName, COLLECTION_FILES_NAME);
 

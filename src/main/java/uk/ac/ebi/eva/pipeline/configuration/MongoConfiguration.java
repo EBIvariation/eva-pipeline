@@ -29,7 +29,6 @@ import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mongodb.MongoDbFactory;
-import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.SimpleMongoDbFactory;
 import org.springframework.data.mongodb.core.convert.DbRefResolver;
@@ -60,9 +59,9 @@ public class MongoConfiguration {
 
     @Bean
     @StepScope
-    public MongoOperations mongoTemplate(DatabaseParameters databaseParameters, MongoMappingContext mongoMappingContext)
+    public MongoTemplate mongoTemplate(DatabaseParameters databaseParameters, MongoMappingContext mongoMappingContext)
             throws UnknownHostException, UnsupportedEncodingException {
-        return getMongoOperations(databaseParameters.getDatabaseName(), databaseParameters.getMongoConnectionDetails(),
+        return getMongoTemplate(databaseParameters.getDatabaseName(), databaseParameters.getMongoConnectionDetails(),
                 mongoMappingContext);
     }
 
@@ -75,8 +74,8 @@ public class MongoConfiguration {
         return client;
     }
 
-    public static MongoOperations getMongoOperations(String databaseName, MongoConnectionDetails mongoConnectionDetails,
-                                                     MongoMappingContext mongoMappingContext)
+    public static MongoTemplate getMongoTemplate(String databaseName, MongoConnectionDetails mongoConnectionDetails,
+                                                 MongoMappingContext mongoMappingContext)
             throws UnknownHostException, UnsupportedEncodingException {
         MongoClientURI uri = constructMongoClientURI(databaseName, mongoConnectionDetails);
         MongoDbFactory mongoFactory = new SimpleMongoDbFactory(uri);

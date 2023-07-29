@@ -21,6 +21,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mongodb.core.MongoOperations;
 
+import org.springframework.data.mongodb.core.MongoTemplate;
 import uk.ac.ebi.eva.pipeline.io.readers.VariantsMongoReader;
 import uk.ac.ebi.eva.pipeline.model.EnsemblVariant;
 import uk.ac.ebi.eva.pipeline.parameters.AnnotationParameters;
@@ -40,7 +41,7 @@ public class VariantsMongoReaderConfiguration {
 
     @Bean(VARIANTS_READER)
     @StepScope
-    public ItemStreamReader<List<EnsemblVariant>> variantsMongoReader(MongoOperations mongoOperations,
+    public ItemStreamReader<List<EnsemblVariant>> variantsMongoReader(MongoTemplate mongoTemplate,
                                                                       DatabaseParameters databaseParameters,
                                                                       InputParameters inputParameters,
                                                                       AnnotationParameters annotationParameters,
@@ -49,7 +50,7 @@ public class VariantsMongoReaderConfiguration {
         boolean excludeAnnotated = !annotationParameters.getOverwriteAnnotation();
 
         VariantsMongoReader variantsMongoReader = new VariantsMongoReader(
-                mongoOperations,
+                mongoTemplate,
                 databaseParameters.getCollectionVariantsName(),
                 annotationParameters.getVepVersion(),
                 annotationParameters.getVepCacheVersion(),

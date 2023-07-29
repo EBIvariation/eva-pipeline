@@ -76,7 +76,7 @@ public class AnnotationMetadataStepTest {
     @Test
     public void shouldWriteVersions() throws Exception {
         String databaseName = mongoRule.getRandomTemporaryDatabaseName();
-        MongoOperations mongoOperations = MongoConfiguration.getMongoOperations(databaseName, mongoConnectionDetails,
+        MongoOperations mongoOperations = MongoConfiguration.getMongoTemplate(databaseName, mongoConnectionDetails,
                 mongoMappingContext);
         String vepCacheVersion = "87";
         String vepVersion = "88";
@@ -109,7 +109,7 @@ public class AnnotationMetadataStepTest {
     @Test
     public void shouldKeepOtherVersions() throws Exception {
         String databaseName = mongoRule.getRandomTemporaryDatabaseName();
-        MongoOperations mongoOperations = MongoConfiguration.getMongoOperations(databaseName, mongoConnectionDetails,
+        MongoOperations mongoOperations = MongoConfiguration.getMongoTemplate(databaseName, mongoConnectionDetails,
                 mongoMappingContext);
         AnnotationMetadata defaultMetadata = new AnnotationMetadata("70", "72", true);
         mongoOperations.save(defaultMetadata);
@@ -135,7 +135,7 @@ public class AnnotationMetadataStepTest {
     @Test
     public void shouldNotAddRedundantVersions() throws Exception {
         String databaseName = mongoRule.getRandomTemporaryDatabaseName();
-        MongoOperations mongoOperations = MongoConfiguration.getMongoOperations(databaseName, mongoConnectionDetails,
+        MongoOperations mongoOperations = MongoConfiguration.getMongoTemplate(databaseName, mongoConnectionDetails,
                 mongoMappingContext);
         String vepCacheVersion = "87";
         String vepVersion = "88";

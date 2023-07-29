@@ -15,21 +15,23 @@
  */
 package uk.ac.ebi.eva.pipeline.io.readers;
 
-import org.bson.Document;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.item.NonTransientResourceException;
 import org.springframework.batch.item.ParseException;
 import org.springframework.batch.item.UnexpectedInputException;
 import org.springframework.batch.item.support.AbstractItemStreamItemReader;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.data.mongodb.core.MongoOperations;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.convert.MongoConverter;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Meta;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.util.ClassUtils;
 import uk.ac.ebi.eva.commons.models.mongo.entity.Annotation;
 import uk.ac.ebi.eva.commons.models.mongo.entity.VariantDocument;
-import uk.ac.ebi.eva.commons.models.mongo.entity.projections.SimplifiedVariant;
 import uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantAnnotation;
 import uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantSourceEntryMongo;
+import uk.ac.ebi.eva.commons.mongodb.readers.MongoDbCursorItemReader;
 import uk.ac.ebi.eva.pipeline.model.EnsemblVariant;
 
 import javax.annotation.PostConstruct;
@@ -38,6 +40,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.springframework.data.mongodb.core.query.Criteria.where;
 import static uk.ac.ebi.eva.commons.models.mongo.entity.VariantDocument.ALTERNATE_FIELD;
 import static uk.ac.ebi.eva.commons.models.mongo.entity.VariantDocument.CHROMOSOME_FIELD;
 import static uk.ac.ebi.eva.commons.models.mongo.entity.VariantDocument.END_FIELD;
@@ -59,7 +62,7 @@ public class VariantsMongoReader
 
     private static final String LAST_READ_TIMESTAMP_KEY = "last_read_timestamp";
 
-    private MongoDbCursorItemReader delegateReader;
+    private MongoDbCursorItemReader<VariantDocument> delegateReader;
 
     private MongoConverter converter;
 
@@ -83,43 +86,47 @@ public class VariantsMongoReader
      *                         vepVersion and vepCacheVersion parameters)
      * @param chunkSize size of the list returned by the "read" method.
      */
-    public VariantsMongoReader(MongoOperations mongoOperations, String collectionVariantsName, String vepVersion,
+    public VariantsMongoReader(MongoTemplate mongoTemplate, String collectionVariantsName, String vepVersion,
                                String vepCacheVersion, String studyId, String fileId, boolean excludeAnnotated,
                                Integer chunkSize) {
         setName(ClassUtils.getShortName(VariantsMongoReader.class));
-        delegateReader = new MongoDbCursorItemReader();
-        delegateReader.setTemplate(mongoOperations);
+        delegateReader = new MongoDbCursorItemReader<>();
+        delegateReader.setMongoTemplate(mongoTemplate);
+        delegateReader.setTargetType(VariantDocument.class);
         delegateReader.setCollection(collectionVariantsName);
         
         // the query excludes processed variants automatically, so a new query has to start from the beginning
         delegateReader.setSaveState(false);
 
-        Document query = new Document();
+        Query query = new Query();
         if (studyId != null && !studyId.isEmpty()) {
-            query.append(STUDY_KEY, studyId);
+            query.addCriteria(where(STUDY_KEY).is(studyId));
 
             if (fileId != null && !fileId.isEmpty()) {
-                query.append(FILE_KEY, fileId);
+                query.addCriteria(where(FILE_KEY).is(fileId));
             }
         }
 
         if (excludeAnnotated) {
-            Document exists = new Document("$exists", 1);
-            Document annotationSubdocument = new Document(VariantAnnotation.SO_ACCESSION_FIELD, exists)
-                    .append(Annotation.VEP_VERSION_FIELD, vepVersion)
-                    .append(Annotation.VEP_CACHE_VERSION_FIELD, vepCacheVersion);
-            Document noElementMatchesOurVersion =
-                    new Document("$not", new Document("$elemMatch", annotationSubdocument));
-            query.append(VariantDocument.ANNOTATION_FIELD, noElementMatchesOurVersion);
+            Criteria annotationCriteria =
+                    where(VariantAnnotation.SO_ACCESSION_FIELD).exists(true)
+                            .and(Annotation.VEP_VERSION_FIELD).is(vepVersion)
+                            .and(Annotation.VEP_CACHE_VERSION_FIELD).is(vepCacheVersion);
+            query.addCriteria(where(VariantDocument.ANNOTATION_FIELD).not().elemMatch(annotationCriteria));
         }
+        String[] fields = {CHROMOSOME_FIELD, START_FIELD, END_FIELD, REFERENCE_FIELD, ALTERNATE_FIELD};
+        for (String field: fields) {
+            query.fields().include(field);
+        }
+
+        Meta meta = new Meta();
+        meta.addFlag(Meta.CursorOption.NO_TIMEOUT);
+        // Make batch size at least 2, as batch size of 1 is analogous to using limit
+        meta.setCursorBatchSize(Math.max(chunkSize, 2));
+        query.setMeta(meta);
         delegateReader.setQuery(query);
 
-        String[] fields = {CHROMOSOME_FIELD, START_FIELD, END_FIELD, REFERENCE_FIELD, ALTERNATE_FIELD};
-        delegateReader.setFields(fields);
-        // Make batch size at least 2, as batch size of 1 is analogous to using limit
-        delegateReader.setBatchSize(Math.max(chunkSize, 2));
-
-        this.converter = mongoOperations.getConverter();
+        this.converter = mongoTemplate.getConverter();
         this.chunkSize = chunkSize;
         this.lastRead = ZonedDateTime.now();
     }
@@ -147,9 +154,8 @@ public class VariantsMongoReader
 
     private List<EnsemblVariant> readBatch(Integer chunkSize) throws Exception {
         List<EnsemblVariant> variants = new ArrayList<>();
-        Document document;
-        while ((document = delegateDoRead()) != null) {
-            SimplifiedVariant variant = converter.read(SimplifiedVariant.class, document);
+        VariantDocument variant;
+        while ((variant = delegateDoRead()) != null) {
             variants.add(buildVariantWrapper(variant));
             if (variants.size() == chunkSize) {
                 break;
@@ -158,12 +164,12 @@ public class VariantsMongoReader
         return variants;
     }
 
-    private Document delegateDoRead() throws Exception {
+    private VariantDocument delegateDoRead() throws Exception {
         lastRead = ZonedDateTime.now();
-        return delegateReader.doRead();
+        return delegateReader.read();
     }
 
-    private EnsemblVariant buildVariantWrapper(SimplifiedVariant variant) {
+    private EnsemblVariant buildVariantWrapper(VariantDocument variant) {
         return new EnsemblVariant(variant.getChromosome(),
                                   variant.getStart(),
                                   variant.getEnd(),
