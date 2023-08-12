@@ -9,7 +9,7 @@ import uk.ac.ebi.eva.pipeline.parameters.MongoConnectionDetails;
 import java.io.UnsupportedEncodingException;
 import java.net.UnknownHostException;
 
-import static uk.ac.ebi.eva.pipeline.configuration.MongoConfiguration.getMongoOperations;
+import static uk.ac.ebi.eva.pipeline.configuration.MongoConfiguration.getMongoTemplate;
 
 /**
  * Configuration to get a MongoOperations context tied to a specific static mongo database.
@@ -32,7 +32,7 @@ public class MongoOperationConfiguration {
     @Bean
     public MongoOperations mongoTemplate(MongoConnectionDetails mongoConnectionDetails, MongoMappingContext mongoMappingContext)
             throws UnknownHostException, UnsupportedEncodingException {
-        return getMongoOperations(DUMMY_STATIC, mongoConnectionDetails, mongoMappingContext);
+        return getMongoTemplate(DUMMY_STATIC, mongoConnectionDetails, mongoMappingContext);
     }
 
 }

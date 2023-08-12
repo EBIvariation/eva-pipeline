@@ -23,6 +23,7 @@ import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.test.MetaDataInstanceFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoOperations;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.mapping.MongoMappingContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
@@ -121,10 +122,10 @@ public class VariantsMongoReaderTest {
                 VariantData.getVariantWithoutAnnotation(),
                 VariantData.getVariantWithoutAnnotationOtherStudy()));
 
-        MongoOperations mongoOperations = MongoConfiguration.getMongoOperations(databaseName, mongoConnectionDetails,
-                                                                                mongoMappingContext);
+        MongoTemplate mongoTemplate = MongoConfiguration.getMongoTemplate(databaseName, mongoConnectionDetails,
+                mongoMappingContext);
 
-        VariantsMongoReader mongoItemReader = new VariantsMongoReader(mongoOperations, COLLECTION_VARIANTS_NAME,
+        VariantsMongoReader mongoItemReader = new VariantsMongoReader(mongoTemplate, COLLECTION_VARIANTS_NAME,
                                                                       VEP_VERSION, VEP_CACHE_VERSION, study, file,
                                                                       excludeAnnotated, chunkSize);
         mongoItemReader.open(executionContext);

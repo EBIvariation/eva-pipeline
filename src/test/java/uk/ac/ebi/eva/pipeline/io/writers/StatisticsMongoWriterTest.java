@@ -178,7 +178,7 @@ public class StatisticsMongoWriterTest {
 
     public StatisticsMongoWriter getStatisticsMongoWriter(String databaseName) throws
             UnknownHostException, UnsupportedEncodingException {
-        MongoOperations operations = MongoConfiguration.getMongoOperations(databaseName, mongoConnectionDetails,
+        MongoOperations operations = MongoConfiguration.getMongoTemplate(databaseName, mongoConnectionDetails,
                 mongoMappingContext);
         StatisticsMongoWriter statisticsMongoWriter = new StatisticsMongoWriter(operations, COLLECTION_STATS_NAME);
         return statisticsMongoWriter;
