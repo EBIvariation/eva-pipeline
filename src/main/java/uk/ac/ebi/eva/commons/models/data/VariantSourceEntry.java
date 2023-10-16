@@ -22,6 +22,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * Entry that associates a variant and a file in a variant archive. It contains
@@ -82,7 +83,10 @@ public class VariantSourceEntry {
     public VariantSourceEntry(String fileId, String studyId, String[] secondaryAlternates, String format) {
         this.fileId = fileId;
         this.studyId = studyId;
-        this.secondaryAlternates = secondaryAlternates;
+        this.secondaryAlternates = Arrays.stream(secondaryAlternates)
+                .map(a->a.toUpperCase())
+                .collect(Collectors.toList())
+                .toArray(new String[0]);
         this.format = format;
 
         this.samplesData = new ArrayList<>();
@@ -111,7 +115,10 @@ public class VariantSourceEntry {
     }
 
     public void setSecondaryAlternates(String[] secondaryAlternates) {
-        this.secondaryAlternates = secondaryAlternates;
+        this.secondaryAlternates = Arrays.stream(secondaryAlternates)
+                .map(a->a.toUpperCase())
+                .collect(Collectors.toList())
+                .toArray(new String[0]);;
     }
 
     public String getFormat() {

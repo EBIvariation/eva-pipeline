@@ -29,6 +29,7 @@ import uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantStatsMongo;
 
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -116,6 +117,8 @@ public class VariantDocument {
     public VariantDocument(Variant.VariantType variantType, String chromosome, int start, int end, int length,
                            String reference, String alternate, Map<String, Set<String>> hgvs, Set<String> ids,
                            Set<VariantSourceEntryMongo> variantSources) {
+        reference = Objects.nonNull(reference) ? reference.toUpperCase() : null;
+        alternate = Objects.nonNull(alternate) ? alternate.toUpperCase() : null;
         this.id = buildVariantId(chromosome, start, reference, alternate);
         this.variantType = variantType;
         this.chromosome = chromosome;
@@ -139,6 +142,8 @@ public class VariantDocument {
     public VariantDocument(Variant.VariantType variantType, String chromosome, int start, int end, int length,
                            String reference, String alternate, Set<HgvsMongo> hgvs, Set<String> ids,
                            Set<VariantSourceEntryMongo> variantSources) {
+        reference = Objects.nonNull(reference) ? reference.toUpperCase() : null;
+        alternate = Objects.nonNull(alternate) ? alternate.toUpperCase() : null;
         this.id = buildVariantId(chromosome, start, reference, alternate);
         this.variantType = variantType;
         this.chromosome = chromosome;
@@ -160,6 +165,8 @@ public class VariantDocument {
     }
 
     public static String buildVariantId(String chromosome, int start, String reference, String alternate) {
+        reference = reference.toUpperCase();
+        alternate = alternate.toUpperCase();
         StringBuilder builder = new StringBuilder(chromosome);
         builder.append("_");
         builder.append(start);

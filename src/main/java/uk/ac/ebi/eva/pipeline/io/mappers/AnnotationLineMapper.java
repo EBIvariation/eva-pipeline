@@ -182,8 +182,8 @@ public class AnnotationLineMapper implements LineMapper<Annotation> {
                 parsedVariant.put("chromosome", leftVariantFields[0]);
             }
             parsedVariant.put("start", leftVariantFields[leftVariantFields.length-2]);
-            parsedVariant.put("reference", leftVariantFields[leftVariantFields.length-1]);
-            parsedVariant.put("alternative", variantFields[1]);
+            parsedVariant.put("reference", leftVariantFields[leftVariantFields.length-1].toUpperCase());
+            parsedVariant.put("alternative", variantFields[1].toUpperCase());
         } catch (ArrayIndexOutOfBoundsException e) {
             logger.error("Unexpected variant format for column 1: "+variantString);
             throw e;

@@ -21,6 +21,7 @@ import uk.ac.ebi.eva.commons.models.data.Variant;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 public class AccessionReportLineMapper extends VariantVcfFactory implements LineMapper<Variant> {
@@ -37,7 +38,7 @@ public class AccessionReportLineMapper extends VariantVcfFactory implements Line
         String chromosome = fields[0];
         int position = Integer.parseInt(fields[1]);
         String reference = getReference(fields);
-        String alternateAllele = fields[4];
+        String alternateAllele = Objects.nonNull(fields[4]) ? fields[4].toUpperCase() : null ;
 
         VariantCoreFields keyFields = getVariantCoreKeyFields(chromosome, position, reference, alternateAllele);
         Variant variant = new Variant(chromosome, (int) keyFields.getStart(), (int) keyFields.getEnd(), keyFields.getReference(), keyFields.getAlternate());
@@ -48,7 +49,7 @@ public class AccessionReportLineMapper extends VariantVcfFactory implements Line
     }
 
     private String getReference(String[] fields) {
-        return fields[3].equals(".") ? "" : fields[3];
+        return fields[3].equals(".") ? "" : fields[3].toUpperCase();
     }
 
     private Set<String> getIds(String[] fields) {

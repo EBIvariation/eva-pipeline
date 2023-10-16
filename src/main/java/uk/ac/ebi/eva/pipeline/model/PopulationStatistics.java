@@ -25,6 +25,7 @@ import org.springframework.data.mongodb.core.mapping.Field;
 import uk.ac.ebi.eva.pipeline.Application;
 
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Statistics related to a set of samples for a given variant.
@@ -122,7 +123,7 @@ public class PopulationStatistics {
     }
 
     void setReference(String reference) {
-        this.reference = reference;
+        this.reference = Objects.nonNull(reference) ? reference.toUpperCase() : null;
     }
 
     public String getAlternate() {
@@ -130,7 +131,7 @@ public class PopulationStatistics {
     }
 
     void setAlternate(String alternate) {
-        this.alternate = alternate;
+        this.alternate = Objects.nonNull(alternate) ? alternate.toUpperCase() : null;
     }
 
     public String getCohortId() {
