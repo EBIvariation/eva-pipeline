@@ -83,10 +83,7 @@ public class VariantSourceEntry {
     public VariantSourceEntry(String fileId, String studyId, String[] secondaryAlternates, String format) {
         this.fileId = fileId;
         this.studyId = studyId;
-        this.secondaryAlternates = Arrays.stream(secondaryAlternates)
-                .map(a->a.toUpperCase())
-                .collect(Collectors.toList())
-                .toArray(new String[0]);
+        setSecondaryAlternates(secondaryAlternates);
         this.format = format;
 
         this.samplesData = new ArrayList<>();
@@ -115,10 +112,10 @@ public class VariantSourceEntry {
     }
 
     public void setSecondaryAlternates(String[] secondaryAlternates) {
-        this.secondaryAlternates = Arrays.stream(secondaryAlternates)
+        this.secondaryAlternates = secondaryAlternates==null ? new String[0] : Arrays.stream(secondaryAlternates)
                 .map(a->a.toUpperCase())
                 .collect(Collectors.toList())
-                .toArray(new String[0]);;
+                .toArray(new String[0]);
     }
 
     public String getFormat() {
