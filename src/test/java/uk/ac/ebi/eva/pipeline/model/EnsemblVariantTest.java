@@ -17,7 +17,6 @@
 package uk.ac.ebi.eva.pipeline.model;
 
 import org.junit.Test;
-
 import uk.ac.ebi.eva.commons.models.data.Variant;
 import uk.ac.ebi.eva.pipeline.io.mappers.VariantVcfFactory;
 
@@ -88,7 +87,7 @@ public class EnsemblVariantTest {
         assertEquals("A", alternate);
 
         EnsemblVariant insertion = new EnsemblVariant(result.get(0).getChromosome(), start, result.get(0).getEnd(),
-                                                      reference, alternate);
+                reference, alternate);
         assertEquals(4, insertion.getStart());
         assertEquals(3, insertion.getEnd());
         assertEquals("-/A", insertion.getRefAlt());
@@ -109,9 +108,15 @@ public class EnsemblVariantTest {
         assertEquals("", alternate);
 
         EnsemblVariant insertion = new EnsemblVariant(result.get(0).getChromosome(), start, result.get(0).getEnd(),
-                                                      reference, alternate);
+                reference, alternate);
         assertEquals(3, insertion.getStart());
         assertEquals(3, insertion.getEnd());
         assertEquals("C/-", insertion.getRefAlt());
+    }
+
+    @Test
+    public void testChangeRefAltToUpperCase() {
+        EnsemblVariant ensemblVariant = new EnsemblVariant("chr", 1, 2, "a", "t");
+        assertEquals("A/T", ensemblVariant.getRefAlt());
     }
 }
