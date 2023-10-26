@@ -104,8 +104,8 @@ public class VariantStats {
                         Variant.VariantType variantType, float maf, float mgf, String mafAllele, String mgfGenotype,
                         int numMissingAlleles, int numMissingGenotypes, int numMendelErrors, float percentCasesDominant,
                         float percentControlsDominant, float percentCasesRecessive, float percentControlsRecessive) {
-        this.refAllele = referenceAllele;
-        this.altAllele = alternateAlleles;
+        this.refAllele = Objects.nonNull(referenceAllele) ? referenceAllele.toUpperCase(): null;
+        this.altAllele = Objects.nonNull(alternateAlleles) ? alternateAlleles.toUpperCase(): null;
         this.variantType = variantType;
 
         this.maf = maf;
@@ -134,7 +134,7 @@ public class VariantStats {
     }
 
     public void setRefAllele(String refAllele) {
-        this.refAllele = refAllele;
+        this.refAllele = Objects.nonNull(refAllele) ? refAllele.toUpperCase() : null;
     }
 
     public String getAltAllele() {
@@ -142,7 +142,7 @@ public class VariantStats {
     }
 
     public void setAltAllele(String altAllele) {
-        this.altAllele = altAllele;
+        this.altAllele = Objects.nonNull(altAllele) ? altAllele.toUpperCase() : null;
     }
 
     public Variant.VariantType getVariantType() {

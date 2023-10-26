@@ -23,6 +23,7 @@ import uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantAt;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import static uk.ac.ebi.eva.commons.models.mongo.entity.VariantDocument.ALTERNATE_FIELD;
@@ -79,6 +80,8 @@ public class SimplifiedVariant {
 
     public SimplifiedVariant(Variant.VariantType variantType, String chromosome, int start, int end, int length,
                              String reference, String alternate, Map<String, Set<String>> hgvs) {
+        reference = Objects.nonNull(reference) ? reference.toUpperCase() : null;
+        alternate = Objects.nonNull(alternate) ? alternate.toUpperCase() : null;
         this.id = buildVariantId(chromosome, start, reference, alternate);
         this.variantType = variantType;
         this.chromosome = chromosome;

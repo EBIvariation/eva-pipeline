@@ -52,8 +52,8 @@ public class EnsemblVariant {
         this.chromosome = chromosome;
         this.start = start;
         this.end = end;
-        this.reference = reference;
-        this.alternate = alternate;
+        this.reference = reference.toUpperCase();
+        this.alternate = alternate.toUpperCase();
         transformToEnsemblFormat();
     }
 

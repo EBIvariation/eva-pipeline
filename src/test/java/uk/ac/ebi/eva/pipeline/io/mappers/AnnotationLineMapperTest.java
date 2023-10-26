@@ -22,6 +22,8 @@ import uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.ConsequenceType;
 import uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.Score;
 import uk.ac.ebi.eva.test.data.VepOutputContent;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 import static junit.framework.TestCase.assertNull;
@@ -129,5 +131,14 @@ public class AnnotationLineMapperTest {
 
         assertEquals(expectedSift, sifts);
         assertEquals(expectedPolyphen, polyphen);
+    }
+
+    @Test
+    public void testChangeRefAltToUpperCase(){
+        String vepOutputContent = "20_63351_a/g\t20:63351\tG\tENSG00000178591\tENST00000608838\tTranscript\tupstream_gene_variant\t-\t-\t-\t-\t-\trs181305519\tDISTANCE=4540;STRAND=1;SYMBOL=DEFB125;SYMBOL_SOURCE=HGNC;HGNC_ID=18105;BIOTYPE=processed_transcript;GMAF=G:0.0005;AFR_MAF=G:0.0020;polyphen=possibly_damaging(0.859);sift=tolerated(0.07)";
+        AnnotationLineMapper lineMapper = new AnnotationLineMapper(VEP_VERSION, VEP_CACHE_VERSION);
+        String annotLine = vepOutputContent.split("\n")[0];
+        Annotation annotation = lineMapper.mapLine(annotLine, 0);
+        assertEquals("20_63351_A_G", annotation.buildVariantId());
     }
 }

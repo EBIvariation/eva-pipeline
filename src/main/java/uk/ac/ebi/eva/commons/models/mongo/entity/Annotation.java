@@ -25,6 +25,7 @@ import uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.Xref;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -83,6 +84,8 @@ public class Annotation {
         this.vepVersion = vepVersion;
         this.vepCacheVersion = vepCacheVersion;
 
+        referenceAllele = Objects.nonNull(referenceAllele) ? referenceAllele.toUpperCase() : null;
+        alternativeAllele = Objects.nonNull(alternativeAllele) ? alternativeAllele.toUpperCase() : null;
         this.id = buildAnnotationId(chromosome, start, referenceAllele, alternativeAllele, vepVersion, vepCacheVersion);
         this.xrefs = new HashSet<>();
         this.consequenceTypes = new HashSet<>();

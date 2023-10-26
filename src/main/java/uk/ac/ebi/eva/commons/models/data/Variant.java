@@ -135,6 +135,8 @@ public class Variant {
         this.chromosome = chromosome;
         this.start = start;
         this.end = end;
+        reference = Objects.nonNull(reference) ? reference.toUpperCase() :  null;
+        alternate = Objects.nonNull(alternate) ? alternate.toUpperCase() : null;
         this.reference = (reference != null) ? reference : "";
         this.alternate = (alternate != null) ? alternate : "";
 
@@ -229,7 +231,7 @@ public class Variant {
     }
 
     public void setReference(String reference) {
-        this.reference = reference;
+        this.reference = reference.toUpperCase();
         this.length = Math.max(reference.length(), alternate.length());
     }
 
@@ -238,7 +240,7 @@ public class Variant {
     }
 
     public void setAlternate(String alternate) {
-        this.alternate = alternate;
+        this.alternate = alternate.toUpperCase();
         this.length = Math.max(reference.length(), alternate.length());
     }
 

@@ -22,11 +22,13 @@ import uk.ac.ebi.eva.utils.CompressionHelper;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 /**
  * Mongo database representation of Variant Source entry.
@@ -73,8 +75,10 @@ public class VariantSourceEntryMongo {
         this.fileId = fileId;
         this.studyId = studyId;
         if (alternates != null && alternates.length > 0) {
-            this.alternates = new String[alternates.length];
-            System.arraycopy(alternates, 0, this.alternates, 0, alternates.length);
+            this.alternates = Arrays.stream(alternates)
+                    .map(a->a.toUpperCase())
+                    .collect(Collectors.toList())
+                    .toArray(new String[0]);
         }
         attrs = buildAttributes(attributes);
 

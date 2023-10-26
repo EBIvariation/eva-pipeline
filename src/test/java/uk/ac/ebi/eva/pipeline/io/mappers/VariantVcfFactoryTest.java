@@ -587,4 +587,13 @@ public class VariantVcfFactoryTest {
         assertEquals(expResult, result);
         assertEquals(emptySet, result.get(0).getIds());
     }
-}
+
+    @Test
+    public void testChangeRefAltToUpperCase() {
+        String line = "chr1\t1000\t.\tt\tg\t.\t.\t.\tGT\t0/1";
+        List<Variant> expResult = Collections.singletonList(new Variant("chr1", 1000, 1000, "T", "G"));
+        List<Variant> result = factory.create(FILE_ID, STUDY_ID, line);
+        assertEquals(expResult, result);
+        }
+
+    }

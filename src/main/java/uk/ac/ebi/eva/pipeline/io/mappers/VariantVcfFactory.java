@@ -37,6 +37,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import static java.lang.Math.max;
 
@@ -121,11 +122,14 @@ public class VariantVcfFactory {
     }
 
     private String getReference(String[] fields) {
-        return fields[3].equals(".") ? "" : fields[3];
+        return fields[3].equals(".") ? "" : fields[3].toUpperCase();
     }
 
     private String[] getAlternateAlleles(String[] fields, String chromosome, int position, String reference) {
-        return fields[4].split(",");
+        return Arrays.stream(fields[4].split(","))
+                .map(a->a.toUpperCase())
+                .collect(Collectors.toList())
+                .toArray(new String[0]);
     }
 
     private float getQuality(String[] fields) {
