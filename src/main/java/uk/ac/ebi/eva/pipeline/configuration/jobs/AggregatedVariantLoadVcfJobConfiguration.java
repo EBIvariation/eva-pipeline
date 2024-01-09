@@ -35,7 +35,7 @@ import uk.ac.ebi.eva.pipeline.configuration.jobs.flows.AnnotationFlowOptionalCon
 import uk.ac.ebi.eva.pipeline.configuration.jobs.steps.LoadFileStepConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.jobs.steps.LoadVariantsStepConfiguration;
 import uk.ac.ebi.eva.pipeline.parameters.NewJobIncrementer;
-import uk.ac.ebi.eva.pipeline.parameters.validation.job.AggregatedVcfJobParametersValidator;
+import uk.ac.ebi.eva.pipeline.parameters.validation.job.VariantLoadVcfJobParametersValidator;
 
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.*;
 
@@ -74,7 +74,7 @@ public class AggregatedVariantLoadVcfJobConfiguration {
         JobBuilder jobBuilder = jobBuilderFactory
                 .get(AGGREGATED_VARIANT_LOAD_VCF_JOB)
                 .incrementer(new NewJobIncrementer())
-                .validator(new AggregatedVcfJobParametersValidator());
+                .validator(new VariantLoadVcfJobParametersValidator());
         FlowJobBuilder builder = jobBuilder
                 .flow(variantLoaderStep)
                 .next(loadFileStep)

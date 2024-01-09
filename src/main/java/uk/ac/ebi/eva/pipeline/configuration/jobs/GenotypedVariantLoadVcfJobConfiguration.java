@@ -36,6 +36,7 @@ import uk.ac.ebi.eva.pipeline.configuration.jobs.steps.LoadFileStepConfiguration
 import uk.ac.ebi.eva.pipeline.configuration.jobs.steps.LoadVariantsStepConfiguration;
 import uk.ac.ebi.eva.pipeline.parameters.NewJobIncrementer;
 import uk.ac.ebi.eva.pipeline.parameters.validation.job.GenotypedVcfJobParametersValidator;
+import uk.ac.ebi.eva.pipeline.parameters.validation.job.VariantLoadVcfJobParametersValidator;
 
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.*;
 
@@ -75,7 +76,7 @@ public class GenotypedVariantLoadVcfJobConfiguration {
         JobBuilder jobBuilder = jobBuilderFactory
                 .get(GENOTYPED_VARIANT_LOAD_VCF_JOB)
                 .incrementer(new NewJobIncrementer())
-                .validator(new GenotypedVcfJobParametersValidator());
+                .validator(new VariantLoadVcfJobParametersValidator());
         FlowJobBuilder builder = jobBuilder
                 .flow(variantLoaderStep)
                 .next(loadFileStep)
