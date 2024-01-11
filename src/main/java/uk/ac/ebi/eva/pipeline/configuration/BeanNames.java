@@ -62,7 +62,7 @@ public class BeanNames {
     public static final String ACCESSION_IMPORT_STEP = "accession-import-step";
 
     public static final String AGGREGATED_VCF_JOB = "aggregated-vcf-job";
-    public static final String AGGREGATED_VARIANT_LOAD_VCF_JOB = "aggregated-variant-load-vcf-job";
+    public static final String AGGREGATED_VCF_LOAD_JOB = "aggregated-vcf-load-job";
     public static final String ANNOTATE_VARIANTS_JOB = "annotate-variants-job";
     public static final String INIT_DATABASE_JOB = "init-database-job";
     public static final String GENOTYPED_VCF_JOB = "genotyped-vcf-job";

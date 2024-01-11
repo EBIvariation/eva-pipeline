@@ -49,14 +49,10 @@ import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.*;
  */
 @Configuration
 @EnableBatchProcessing
-@Import({LoadVariantsStepConfiguration.class, LoadFileStepConfiguration.class, AnnotationFlowOptionalConfiguration.class})
+@Import({LoadVariantsStepConfiguration.class, LoadFileStepConfiguration.class})
 public class AggregatedVariantLoadVcfJobConfiguration {
 
     private static final Logger logger = LoggerFactory.getLogger(AggregatedVariantLoadVcfJobConfiguration.class);
-
-    @Autowired
-    @Qualifier(VEP_ANNOTATION_OPTIONAL_FLOW)
-    private Flow annotationFlowOptional;
 
     @Autowired
     @Qualifier(LOAD_VARIANTS_STEP)
