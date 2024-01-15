@@ -86,7 +86,7 @@ Other parameters are:
 
 #### Job configuration
 
-* `spring.batch.job.names`: The name of the job to run. At the moment it can be `genotyped-vcf-job`, `aggregated-vcf-job`, `annotate-variants-job`, `calculate-statistics-job` or `drop-study-job`
+* `spring.batch.job.names`: The name of the job to run. At the moment it can be `load-vcf-job`, `genotyped-vcf-job`, `aggregated-vcf-job`, `annotate-variants-job`, `calculate-statistics-job` or `drop-study-job`
 
 Individual steps can be skipped using one of the following. This is not necessary unless they are irrelevant for the data to be processed, or some input data was generated in previous runs of the same job.
 
