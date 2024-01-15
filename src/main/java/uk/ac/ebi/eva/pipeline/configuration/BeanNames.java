@@ -65,6 +65,7 @@ public class BeanNames {
     public static final String ANNOTATE_VARIANTS_JOB = "annotate-variants-job";
     public static final String INIT_DATABASE_JOB = "init-database-job";
     public static final String GENOTYPED_VCF_JOB = "genotyped-vcf-job";
+    public static final String LOAD_VCF_JOB = "load-vcf-job";
     public static final String CALCULATE_STATISTICS_JOB = "calculate-statistics-job";
     public static final String DROP_STUDY_JOB = "drop-study-job";
     public static final String ACCESSION_IMPORT_JOB = "accession-import-job";
