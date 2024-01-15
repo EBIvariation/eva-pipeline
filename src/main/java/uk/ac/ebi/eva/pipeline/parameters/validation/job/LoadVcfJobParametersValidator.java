@@ -20,18 +20,16 @@ import org.springframework.batch.core.JobParametersInvalidException;
 import org.springframework.batch.core.JobParametersValidator;
 import org.springframework.batch.core.job.CompositeJobParametersValidator;
 import org.springframework.batch.core.job.DefaultJobParametersValidator;
-import uk.ac.ebi.eva.pipeline.configuration.jobs.GenotypedVariantLoadVcfJobConfiguration;
-import uk.ac.ebi.eva.pipeline.configuration.jobs.AggregatedVcfJobConfiguration;
+import uk.ac.ebi.eva.pipeline.configuration.jobs.LoadVcfJobConfiguration;
 import uk.ac.ebi.eva.pipeline.parameters.validation.step.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Validates the job parameters necessary to execute an {@link GenotypedVariantLoadVcfJobConfiguration}
- * or an {@link AggregatedVcfJobConfiguration}
+ * Validates the job parameters necessary to execute an {@link LoadVcfJobConfiguration}
  */
-public class VariantLoadVcfJobParametersValidator extends DefaultJobParametersValidator {
+public class LoadVcfJobParametersValidator extends DefaultJobParametersValidator {
 
     @Override
     public void validate(JobParameters parameters) throws JobParametersInvalidException {

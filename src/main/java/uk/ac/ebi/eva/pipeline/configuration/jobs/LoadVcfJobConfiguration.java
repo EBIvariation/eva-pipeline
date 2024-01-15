@@ -24,35 +24,34 @@ import org.springframework.batch.core.configuration.annotation.EnableBatchProces
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.job.builder.FlowJobBuilder;
 import org.springframework.batch.core.job.builder.JobBuilder;
-import org.springframework.batch.core.job.flow.Flow;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
-import uk.ac.ebi.eva.pipeline.configuration.jobs.flows.AnnotationFlowOptionalConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.jobs.steps.LoadFileStepConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.jobs.steps.LoadVariantsStepConfiguration;
 import uk.ac.ebi.eva.pipeline.parameters.NewJobIncrementer;
-import uk.ac.ebi.eva.pipeline.parameters.validation.job.VariantLoadVcfJobParametersValidator;
+import uk.ac.ebi.eva.pipeline.parameters.validation.job.LoadVcfJobParametersValidator;
 
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.*;
 
 /**
- * Complete pipeline workflow for aggregated VCF. Aggregated statistics are provided in the VCF instead of the
- * genotypes.
+ * Variant load pipeline workflow:
  * <p>
- * load --> (optionalAnnotationFlow: variantsAnnotGenerateInput --> (annotationCreate --> annotationLoad))
+ * |
+ * transform ---> load -+
+ * |
  * <p>
- * Steps in () are optional
+ *
  */
 @Configuration
 @EnableBatchProcessing
 @Import({LoadVariantsStepConfiguration.class, LoadFileStepConfiguration.class})
-public class AggregatedVariantLoadVcfJobConfiguration {
+public class LoadVcfJobConfiguration {
 
-    private static final Logger logger = LoggerFactory.getLogger(AggregatedVariantLoadVcfJobConfiguration.class);
+    private static final Logger logger = LoggerFactory.getLogger(LoadVcfJobConfiguration.class);
 
     @Autowired
     @Qualifier(LOAD_VARIANTS_STEP)
@@ -62,15 +61,15 @@ public class AggregatedVariantLoadVcfJobConfiguration {
     @Qualifier(LOAD_FILE_STEP)
     private Step loadFileStep;
 
-    @Bean(AGGREGATED_VARIANT_LOAD_VCF_JOB)
+    @Bean(LOAD_VCF_JOB)
     @Scope("prototype")
-    public Job aggregatedVcfJob(JobBuilderFactory jobBuilderFactory) {
-        logger.debug("Building '" + AGGREGATED_VARIANT_LOAD_VCF_JOB + "'");
+    public Job genotypedVcfJob(JobBuilderFactory jobBuilderFactory) {
+        logger.debug("Building '" + LOAD_VCF_JOB + "'");
 
         JobBuilder jobBuilder = jobBuilderFactory
-                .get(AGGREGATED_VARIANT_LOAD_VCF_JOB)
+                .get(LOAD_VCF_JOB)
                 .incrementer(new NewJobIncrementer())
-                .validator(new VariantLoadVcfJobParametersValidator());
+                .validator(new LoadVcfJobParametersValidator());
         FlowJobBuilder builder = jobBuilder
                 .flow(variantLoaderStep)
                 .next(loadFileStep)
@@ -78,4 +77,5 @@ public class AggregatedVariantLoadVcfJobConfiguration {
 
         return builder.build();
     }
+
 }
