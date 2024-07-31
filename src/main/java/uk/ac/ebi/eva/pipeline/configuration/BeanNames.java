@@ -26,10 +26,12 @@ public class BeanNames {
     public static final String VARIANT_ANNOTATION_READER = "variant-annotation-reader";
     public static final String VARIANT_READER = "variant-reader";
     public static final String ACCESSION_REPORT_READER = "accession-report-reader";
+    public static final String STATS_VARIANTS_READER = "stats-variants-reader";
 
     public static final String VEP_ANNOTATION_PROCESSOR = "vep-annotation-processor";
     public static final String ANNOTATION_PARSER_PROCESSOR = "annotation-parser-processor";
     public static final String ANNOTATION_COMPOSITE_PROCESSOR = "annotation-composite-processor";
+    public static final String STATS_VARIANTS_PROCESSOR = "stats-variants-processor";
 
     public static final String GENE_WRITER = "gene-writer";
     public static final String ANNOTATION_WRITER = "annotation-writer";
@@ -37,6 +39,7 @@ public class BeanNames {
     public static final String COMPOSITE_ANNOTATION_VARIANT_WRITER = "composite-annotation-variant-writer";
     public static final String VARIANT_WRITER = "variant-writer";
     public static final String ACCESSION_IMPORTER = "accession-importer";
+    public static final String STATS_VARIANTS_WRITER = "stats-variants-writer";
 
     public static final String ANNOTATION_SKIP_STEP_DECIDER = "annotation-skip-step-decider";
     public static final String STATISTICS_SKIP_STEP_DECIDER = "statistics-skip-step-decider";
@@ -60,6 +63,7 @@ public class BeanNames {
     public static final String DROP_FILES_BY_STUDY_STEP = "drop-files-by-study-step";
     public static final String LOAD_ANNOTATION_METADATA_STEP = "annotation-metadata-step";
     public static final String ACCESSION_IMPORT_STEP = "accession-import-step";
+    public static final String CALCULATE_STATISTICS_STEP_NEW = "calculate-statistics-step-new";
 
     public static final String AGGREGATED_VCF_JOB = "aggregated-vcf-job";
     public static final String ANNOTATE_VARIANTS_JOB = "annotate-variants-job";
@@ -69,4 +73,5 @@ public class BeanNames {
     public static final String CALCULATE_STATISTICS_JOB = "calculate-statistics-job";
     public static final String DROP_STUDY_JOB = "drop-study-job";
     public static final String ACCESSION_IMPORT_JOB = "accession-import-job";
+    public static final String CALCULATE_STATISTICS_JOB_NEW = "calculate-statistics-job-new";
 }

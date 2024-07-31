@@ -198,6 +198,7 @@
                 <filtering>true</filtering>
                 <includes>
                     <include>test-mongo.properties</include>
+                    <include>test-stats.properties</include>
                     <include>opencga/conf/storage-mongodb.properties</include>
                 </includes>
             </testResource>
@@ -208,6 +209,7 @@
                 <filtering>false</filtering>
                 <excludes>
                     <exclude>test-mongo.properties</exclude>
+                    <exclude>test-stats.properties</exclude>
                     <exclude>opencga/conf/storage-mongodb.properties</exclude>
                 </excludes>
             </testResource>
