@@ -186,4 +186,7 @@ public class VariantSourceEntryMongo {
         return fileId;
     }
 
+    public String[] getAlternates() {
+        return alternates;
+    }
 }

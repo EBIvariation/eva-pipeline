@@ -17,6 +17,17 @@ import uk.ac.ebi.eva.commons.models.mongo.entity.VariantDocument;
 import uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantSourceEntryMongo;
 import uk.ac.ebi.eva.pipeline.parameters.DatabaseParameters;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import static com.mongodb.client.model.Aggregates.match;
+import static com.mongodb.client.model.Aggregates.project;
+import static com.mongodb.client.model.Projections.computed;
+import static com.mongodb.client.model.Projections.fields;
+import static java.util.Arrays.asList;
+
 public class StatsVariantReader implements ItemStreamReader<VariantDocument> {
     private static final Logger logger = LoggerFactory.getLogger(StatsVariantReader.class);
 
@@ -26,6 +37,8 @@ public class StatsVariantReader implements ItemStreamReader<VariantDocument> {
     private MongoConverter converter;
     private int chunkSize;
     private String studyId;
+
+    private static Map<String, Integer> filesIdNumberOfSamplesMap = new HashMap<>();
 
     public StatsVariantReader(DatabaseParameters databaseParameters, MongoTemplate mongoTemplate, String studyId, int chunkSize) {
         this.databaseParameters = databaseParameters;
@@ -52,6 +65,9 @@ public class StatsVariantReader implements ItemStreamReader<VariantDocument> {
     public void initializeReader() {
         cursor = initializeCursor();
         converter = mongoTemplate.getConverter();
+        if (filesIdNumberOfSamplesMap.isEmpty()) {
+            populateFilesIdAndNumberOfSamplesMap();
+        }
     }
 
     private MongoCursor<Document> initializeCursor() {
@@ -67,6 +83,23 @@ public class StatsVariantReader implements ItemStreamReader<VariantDocument> {
                 .find(query)
                 .noCursorTimeout(true)
                 .batchSize(chunkSize);
+    }
+
+    private void populateFilesIdAndNumberOfSamplesMap() {
+        Bson matchStage = match(Filters.eq("sid", studyId));
+        Bson projectStage = project(fields(
+                computed("fid", "$fid"),
+                computed("numOfSamples", new Document("$size", new Document("$objectToArray", "$samp")))
+        ));
+        filesIdNumberOfSamplesMap = mongoTemplate.getCollection(databaseParameters.getCollectionFilesName())
+                .aggregate(asList(matchStage, projectStage))
+                .into(new ArrayList<>())
+                .stream()
+                .collect(Collectors.toMap(doc -> doc.getString("fid"), doc -> doc.getInteger("numOfSamples")));
+    }
+
+    public static Map<String, Integer> getFilesIdAndNumberOfSamplesMap() {
+        return filesIdNumberOfSamplesMap;
     }
 
     @Override

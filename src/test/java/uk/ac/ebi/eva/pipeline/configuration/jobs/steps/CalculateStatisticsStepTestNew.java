@@ -15,7 +15,6 @@
  */
 package uk.ac.ebi.eva.pipeline.configuration.jobs.steps;
 
-import com.mongodb.client.model.Filters;
 import org.bson.Document;
 import org.junit.After;
 import org.junit.Assert;
@@ -60,7 +59,7 @@ public class CalculateStatisticsStepTestNew {
 
     private static final String COLLECTION_FILES_NAME = "files";
 
-    private static final String DATABASE_NAME = "test_stat_db";
+    private static final String DATABASE_NAME = "calculate_stats_test_db_new";
 
     private static final String STUDY_ID = "1";
 
@@ -87,8 +86,6 @@ public class CalculateStatisticsStepTestNew {
 
     @Test
     public void statisticsGeneratorStepShouldCalculateStats() {
-        setupDatabase();
-
         JobParameters jobParameters = new EvaJobParameterBuilder()
                 .collectionFilesName(COLLECTION_FILES_NAME)
                 .collectionVariantsName(COLLECTION_VARIANTS_NAME)
@@ -103,7 +100,7 @@ public class CalculateStatisticsStepTestNew {
         assertCompleted(jobExecution);
         List<Document> documents = mongoRule.getTemporaryDatabase(DATABASE_NAME).getCollection(COLLECTION_VARIANTS_NAME)
                 .find().into(new ArrayList<>());
-        Assert.assertTrue(documents.size() == 299);
+        Assert.assertTrue(documents.size() == 300);
         // assert all statistics are calculated for all documents
         Assert.assertTrue(documents.stream().allMatch(doc -> doc.containsKey("st")));
 
@@ -113,20 +110,16 @@ public class CalculateStatisticsStepTestNew {
         assertEquals(1, variantStatsList.size());
         Document variantStats = variantStatsList.get(0);
         Document numOfGT = (Document) variantStats.get("numGt");
+        assertEquals(1290, numOfGT.get("0|0"));
         assertEquals(417, numOfGT.get("1|0"));
         assertEquals(573, numOfGT.get("0|1"));
         assertEquals(224, numOfGT.get("1|1"));
-        assertEquals(0.40774300694465637, variantStats.get("maf"));
-        assertEquals(0.18451400101184845, variantStats.get("mgf"));
-        assertEquals("C", variantStats.get("mafAl"));
-        assertEquals("1|1", variantStats.get("mgfGt"));
+        assertEquals(0.2871405780315399, variantStats.get("maf"));
+        assertEquals(0.228833869099617, variantStats.get("mgf"));
+        assertEquals("T", variantStats.get("mafAl"));
+        assertEquals("0|1", variantStats.get("mgfGt"));
         assertEquals(0, variantStats.get("missAl"));
         assertEquals(0, variantStats.get("missGt"));
     }
 
-    private void setupDatabase() {
-        // sanitize data - remove unwanted data
-        mongoRule.getTemporaryDatabase(DATABASE_NAME).getCollection(COLLECTION_VARIANTS_NAME)
-                .deleteOne(Filters.eq("_id", "20_71445_TTTG_"));
-    }
 }
