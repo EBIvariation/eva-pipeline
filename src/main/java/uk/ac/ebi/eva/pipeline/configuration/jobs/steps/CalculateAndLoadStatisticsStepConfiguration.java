@@ -29,34 +29,34 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import uk.ac.ebi.eva.commons.models.mongo.entity.VariantDocument;
 import uk.ac.ebi.eva.pipeline.configuration.ChunkSizeCompletionPolicyConfiguration;
-import uk.ac.ebi.eva.pipeline.configuration.io.readers.StatsVariantsReaderConfiguration;
-import uk.ac.ebi.eva.pipeline.configuration.io.writers.StatsVariantsWriterConfiguration;
-import uk.ac.ebi.eva.pipeline.configuration.jobs.steps.processors.StatsVariantsProcessorConfiguration;
+import uk.ac.ebi.eva.pipeline.configuration.io.readers.VariantStatsReaderConfiguration;
+import uk.ac.ebi.eva.pipeline.configuration.io.writers.VariantStatsWriterConfiguration;
+import uk.ac.ebi.eva.pipeline.configuration.jobs.steps.processors.VariantStatsProcessorConfiguration;
 
-import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.CALCULATE_STATISTICS_STEP_NEW;
-import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.STATS_VARIANTS_PROCESSOR;
-import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.STATS_VARIANTS_READER;
-import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.STATS_VARIANTS_WRITER;
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.CALCULATE_AND_LOAD_STATISTICS_STEP;
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VARIANT_STATS_PROCESSOR;
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VARIANT_STATS_READER;
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VARIANT_STATS_WRITER;
 
 
 @Configuration
 @EnableBatchProcessing
-@Import({StatsVariantsReaderConfiguration.class, StatsVariantsWriterConfiguration.class,
-        StatsVariantsProcessorConfiguration.class, ChunkSizeCompletionPolicyConfiguration.class})
-public class CalculateStatisticsStepConfigurationNew {
+@Import({VariantStatsReaderConfiguration.class, VariantStatsWriterConfiguration.class,
+        VariantStatsProcessorConfiguration.class, ChunkSizeCompletionPolicyConfiguration.class})
+public class CalculateAndLoadStatisticsStepConfiguration {
 
-    @Bean(CALCULATE_STATISTICS_STEP_NEW)
-    public Step calculateStatisticsStep(
-            @Qualifier(STATS_VARIANTS_READER) ItemStreamReader<VariantDocument> variantReader,
-            @Qualifier(STATS_VARIANTS_PROCESSOR) ItemProcessor<VariantDocument, VariantDocument> variantProcessor,
-            @Qualifier(STATS_VARIANTS_WRITER) ItemWriter<VariantDocument> variantWriter,
+    @Bean(CALCULATE_AND_LOAD_STATISTICS_STEP)
+    public Step calculateAndLoadStatisticsStep(
+            @Qualifier(VARIANT_STATS_READER) ItemStreamReader<VariantDocument> variantStatsReader,
+            @Qualifier(VARIANT_STATS_PROCESSOR) ItemProcessor<VariantDocument, VariantDocument> variantStatsProcessor,
+            @Qualifier(VARIANT_STATS_WRITER) ItemWriter<VariantDocument> variantStatsWriter,
             StepBuilderFactory stepBuilderFactory,
             SimpleCompletionPolicy chunkSizeCompletionPolicy) {
-        TaskletStep step = stepBuilderFactory.get(CALCULATE_STATISTICS_STEP_NEW)
+        TaskletStep step = stepBuilderFactory.get(CALCULATE_AND_LOAD_STATISTICS_STEP)
                 .<VariantDocument, VariantDocument>chunk(chunkSizeCompletionPolicy)
-                .reader(variantReader)
-                .processor(variantProcessor)
-                .writer(variantWriter)
+                .reader(variantStatsReader)
+                .processor(variantStatsProcessor)
+                .writer(variantStatsWriter)
                 .build();
         return step;
     }

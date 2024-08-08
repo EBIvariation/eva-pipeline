@@ -9,7 +9,7 @@ import uk.ac.ebi.eva.commons.models.data.VariantStats;
 import uk.ac.ebi.eva.commons.models.mongo.entity.VariantDocument;
 import uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantSourceEntryMongo;
 import uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantStatsMongo;
-import uk.ac.ebi.eva.pipeline.io.readers.StatsVariantReader;
+import uk.ac.ebi.eva.pipeline.io.readers.VariantStatsReader;
 
 import java.util.Arrays;
 import java.util.Comparator;
@@ -21,8 +21,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class StatsVariantProcessor implements ItemProcessor<VariantDocument, VariantDocument> {
-    private static final Logger logger = LoggerFactory.getLogger(StatsVariantProcessor.class);
+public class VariantStatsProcessor implements ItemProcessor<VariantDocument, VariantDocument> {
+    private static final Logger logger = LoggerFactory.getLogger(VariantStatsProcessor.class);
     private static final String GENOTYPE_COUNTS_MAP = "genotypeCountsMap";
     private static final String ALLELE_COUNTS_MAP = "alleleCountsMap";
     private static final String MISSING_GENOTYPE = "missingGenotype";
@@ -30,12 +30,12 @@ public class StatsVariantProcessor implements ItemProcessor<VariantDocument, Var
     private static final String DEFAULT_GENOTYPE = "def";
     private static final List<String> MISSING_GENOTYPE_ALLELE_REPRESENTATIONS = Arrays.asList(".", "-1");
 
-    public StatsVariantProcessor() {
+    public VariantStatsProcessor() {
     }
 
     @Override
     public VariantDocument process(VariantDocument variant) {
-        Map<String, Integer> filesIdNumberOfSamplesMap = StatsVariantReader.getFilesIdAndNumberOfSamplesMap();
+        Map<String, Integer> filesIdNumberOfSamplesMap = VariantStatsReader.getFilesIdAndNumberOfSamplesMap();
 
         String variantRef = variant.getReference();
         String variantAlt = variant.getAlternate();

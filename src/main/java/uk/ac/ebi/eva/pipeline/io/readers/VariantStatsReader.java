@@ -28,8 +28,8 @@ import static com.mongodb.client.model.Projections.computed;
 import static com.mongodb.client.model.Projections.fields;
 import static java.util.Arrays.asList;
 
-public class StatsVariantReader implements ItemStreamReader<VariantDocument> {
-    private static final Logger logger = LoggerFactory.getLogger(StatsVariantReader.class);
+public class VariantStatsReader implements ItemStreamReader<VariantDocument> {
+    private static final Logger logger = LoggerFactory.getLogger(VariantStatsReader.class);
 
     private DatabaseParameters databaseParameters;
     private MongoTemplate mongoTemplate;
@@ -40,7 +40,7 @@ public class StatsVariantReader implements ItemStreamReader<VariantDocument> {
 
     private static Map<String, Integer> filesIdNumberOfSamplesMap = new HashMap<>();
 
-    public StatsVariantReader(DatabaseParameters databaseParameters, MongoTemplate mongoTemplate, String studyId, int chunkSize) {
+    public VariantStatsReader(DatabaseParameters databaseParameters, MongoTemplate mongoTemplate, String studyId, int chunkSize) {
         this.databaseParameters = databaseParameters;
         this.mongoTemplate = mongoTemplate;
         this.studyId = studyId;
@@ -50,10 +50,10 @@ public class StatsVariantReader implements ItemStreamReader<VariantDocument> {
     @Override
     public VariantDocument read() {
         Document nextElement = cursor.tryNext();
-        return (nextElement != null) ? getStatsVariant(nextElement) : null;
+        return (nextElement != null) ? getVariant(nextElement) : null;
     }
 
-    private VariantDocument getStatsVariant(Document variantDocument) {
+    private VariantDocument getVariant(Document variantDocument) {
         return converter.read(VariantDocument.class, new BasicDBObject(variantDocument));
     }
 
@@ -74,11 +74,11 @@ public class StatsVariantReader implements ItemStreamReader<VariantDocument> {
         Bson query = Filters.elemMatch(VariantDocument.FILES_FIELD, Filters.eq(VariantSourceEntryMongo.STUDYID_FIELD, studyId));
         logger.info("Issuing find: {}", query);
 
-        FindIterable<Document> statsVariantDocuments = getStatsVariants(query);
+        FindIterable<Document> statsVariantDocuments = getVariants(query);
         return statsVariantDocuments.iterator();
     }
 
-    private FindIterable<Document> getStatsVariants(Bson query) {
+    private FindIterable<Document> getVariants(Bson query) {
         return mongoTemplate.getCollection(databaseParameters.getCollectionVariantsName())
                 .find(query)
                 .noCursorTimeout(true)

@@ -21,23 +21,23 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import uk.ac.ebi.eva.commons.models.mongo.entity.VariantDocument;
-import uk.ac.ebi.eva.pipeline.io.readers.StatsVariantReader;
+import uk.ac.ebi.eva.pipeline.io.readers.VariantStatsReader;
 import uk.ac.ebi.eva.pipeline.parameters.ChunkSizeParameters;
 import uk.ac.ebi.eva.pipeline.parameters.DatabaseParameters;
 import uk.ac.ebi.eva.pipeline.parameters.InputParameters;
 
-import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.STATS_VARIANTS_READER;
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VARIANT_STATS_READER;
 
 @Configuration
-public class StatsVariantsReaderConfiguration {
+public class VariantStatsReaderConfiguration {
 
-    @Bean(STATS_VARIANTS_READER)
+    @Bean(VARIANT_STATS_READER)
     @StepScope
-    public ItemStreamReader<VariantDocument> statsVariantsReader(DatabaseParameters databaseParameters,
-                                                                 MongoTemplate mongoTemplate,
-                                                                 InputParameters inputParameters,
-                                                                 ChunkSizeParameters chunkSizeParameters) {
+    public ItemStreamReader<VariantDocument> variantStatsReader(DatabaseParameters databaseParameters,
+                                                                MongoTemplate mongoTemplate,
+                                                                InputParameters inputParameters,
+                                                                ChunkSizeParameters chunkSizeParameters) {
 
-        return new StatsVariantReader(databaseParameters, mongoTemplate, inputParameters.getStudyId(), chunkSizeParameters.getChunkSize());
+        return new VariantStatsReader(databaseParameters, mongoTemplate, inputParameters.getStudyId(), chunkSizeParameters.getChunkSize());
     }
 }

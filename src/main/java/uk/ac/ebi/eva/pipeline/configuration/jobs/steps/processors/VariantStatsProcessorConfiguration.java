@@ -20,16 +20,16 @@ import org.springframework.batch.item.ItemProcessor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import uk.ac.ebi.eva.commons.models.mongo.entity.VariantDocument;
-import uk.ac.ebi.eva.pipeline.io.processors.StatsVariantProcessor;
+import uk.ac.ebi.eva.pipeline.io.processors.VariantStatsProcessor;
 
-import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.STATS_VARIANTS_PROCESSOR;
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VARIANT_STATS_PROCESSOR;
 
 @Configuration
-public class StatsVariantsProcessorConfiguration {
+public class VariantStatsProcessorConfiguration {
 
-    @Bean(STATS_VARIANTS_PROCESSOR)
+    @Bean(VARIANT_STATS_PROCESSOR)
     @StepScope
-    public ItemProcessor<VariantDocument, VariantDocument> statsVariantsReader() {
-        return new StatsVariantProcessor();
+    public ItemProcessor<VariantDocument, VariantDocument> variantStatsProcessor() {
+        return new VariantStatsProcessor();
     }
 }

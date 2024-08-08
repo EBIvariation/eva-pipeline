@@ -13,12 +13,12 @@ import uk.ac.ebi.eva.pipeline.parameters.DatabaseParameters;
 
 import java.util.List;
 
-public class StatsVariantWriter implements ItemWriter<VariantDocument> {
-    private static final Logger logger = LoggerFactory.getLogger(StatsVariantWriter.class);
+public class VariantStatsWriter implements ItemWriter<VariantDocument> {
+    private static final Logger logger = LoggerFactory.getLogger(VariantStatsWriter.class);
     private DatabaseParameters databaseParameters;
     private MongoTemplate mongoTemplate;
 
-    public StatsVariantWriter(DatabaseParameters databaseParameters, MongoTemplate mongoTemplate) {
+    public VariantStatsWriter(DatabaseParameters databaseParameters, MongoTemplate mongoTemplate) {
         this.databaseParameters = databaseParameters;
         this.mongoTemplate = mongoTemplate;
     }

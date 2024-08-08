@@ -27,11 +27,11 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
-import uk.ac.ebi.eva.pipeline.configuration.jobs.steps.CalculateStatisticsStepConfigurationNew;
+import uk.ac.ebi.eva.pipeline.configuration.jobs.steps.CalculateAndLoadStatisticsStepConfiguration;
 import uk.ac.ebi.eva.pipeline.parameters.NewJobIncrementer;
 
-import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.CALCULATE_STATISTICS_JOB_NEW;
-import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.CALCULATE_STATISTICS_STEP_NEW;
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.CALCULATE_AND_LOAD_STATISTICS_JOB;
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.CALCULATE_AND_LOAD_STATISTICS_STEP;
 
 /**
  * Configuration to run a full Statistics job: variantStatsFlow: statsCreate --> statsLoad
@@ -40,24 +40,24 @@ import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.CALCULATE_STATISTIC
  */
 @Configuration
 @EnableBatchProcessing
-@Import({CalculateStatisticsStepConfigurationNew.class})
-public class PopulationStatisticsJobConfigurationNew {
+@Import({CalculateAndLoadStatisticsStepConfiguration.class})
+public class CalculateAndLoadStatisticsJobConfiguration {
 
-    private static final Logger logger = LoggerFactory.getLogger(PopulationStatisticsJobConfigurationNew.class);
+    private static final Logger logger = LoggerFactory.getLogger(CalculateAndLoadStatisticsJobConfiguration.class);
 
     @Autowired
-    @Qualifier(CALCULATE_STATISTICS_STEP_NEW)
-    private Step calculateStatisticsStepNew;
+    @Qualifier(CALCULATE_AND_LOAD_STATISTICS_STEP)
+    private Step calculateAndLoadStatisticsStep;
 
-    @Bean(CALCULATE_STATISTICS_JOB_NEW)
+    @Bean(CALCULATE_AND_LOAD_STATISTICS_JOB)
     @Scope("prototype")
-    public Job calculateStatisticsJob(JobBuilderFactory jobBuilderFactory) {
-        logger.debug("Building '" + CALCULATE_STATISTICS_JOB_NEW + "'");
+    public Job calculateAndLoadStatisticsJob(JobBuilderFactory jobBuilderFactory) {
+        logger.debug("Building '" + CALCULATE_AND_LOAD_STATISTICS_JOB + "'");
 
         return jobBuilderFactory
-                .get(CALCULATE_STATISTICS_JOB_NEW)
+                .get(CALCULATE_AND_LOAD_STATISTICS_JOB)
                 .incrementer(new NewJobIncrementer())
-                .start(calculateStatisticsStepNew)
+                .start(calculateAndLoadStatisticsStep)
                 .build();
     }
 

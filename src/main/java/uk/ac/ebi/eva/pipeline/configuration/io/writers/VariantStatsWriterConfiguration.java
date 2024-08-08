@@ -21,17 +21,17 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import uk.ac.ebi.eva.commons.models.mongo.entity.VariantDocument;
-import uk.ac.ebi.eva.pipeline.io.writers.StatsVariantWriter;
+import uk.ac.ebi.eva.pipeline.io.writers.VariantStatsWriter;
 import uk.ac.ebi.eva.pipeline.parameters.DatabaseParameters;
 
-import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.STATS_VARIANTS_WRITER;
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VARIANT_STATS_WRITER;
 
 @Configuration
-public class StatsVariantsWriterConfiguration {
+public class VariantStatsWriterConfiguration {
 
-    @Bean(STATS_VARIANTS_WRITER)
+    @Bean(VARIANT_STATS_WRITER)
     @StepScope
-    public ItemWriter<VariantDocument> statsVariantsWriter(DatabaseParameters databaseParameters, MongoTemplate mongoTemplate) {
-        return new StatsVariantWriter(databaseParameters, mongoTemplate);
+    public ItemWriter<VariantDocument> variantStatsWriter(DatabaseParameters databaseParameters, MongoTemplate mongoTemplate) {
+        return new VariantStatsWriter(databaseParameters, mongoTemplate);
     }
 }
