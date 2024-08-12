@@ -38,6 +38,7 @@ public class VariantStatsReader implements ItemStreamReader<VariantDocument> {
     private int chunkSize;
     private String studyId;
 
+    // Store the map of files to number of sample from the file_2_0 collection
     private static Map<String, Integer> filesIdNumberOfSamplesMap = new HashMap<>();
 
     public VariantStatsReader(DatabaseParameters databaseParameters, MongoTemplate mongoTemplate, String studyId, int chunkSize) {
