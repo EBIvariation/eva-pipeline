@@ -174,4 +174,19 @@ public class VariantSourceEntryMongo {
         return attrs;
     }
 
+    public BasicDBObject getSampleData() {
+        return samp;
+    }
+
+    public String getStudyId() {
+        return studyId;
+    }
+
+    public String getFileId() {
+        return fileId;
+    }
+
+    public String[] getAlternates() {
+        return alternates;
+    }
 }

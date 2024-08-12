@@ -15,6 +15,7 @@
  */
 package uk.ac.ebi.eva.pipeline.configuration.jobs;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -32,7 +33,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-
 import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
 import uk.ac.ebi.eva.test.configuration.TemporaryRuleConfiguration;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
@@ -60,6 +60,8 @@ public class PopulationStatisticsJobTest {
 
     private static final String MONGO_DUMP = "/dump/VariantStatsConfigurationTest_vl";
 
+    private static final String DATABASE_NAME = "calculate_stats_test_db";
+
     @Rule
     public PipelineTemporaryFolderRule temporaryFolderRule = new PipelineTemporaryFolderRule();
 
@@ -73,6 +75,12 @@ public class PopulationStatisticsJobTest {
     @Before
     public void setUp() throws Exception {
         Config.setOpenCGAHome(GenotypedVcfJobTestUtils.getDefaultOpencgaHome());
+        mongoRule.restoreDump(getResourceUrl(MONGO_DUMP), DATABASE_NAME);
+    }
+
+    @After
+    public void cleanUp() {
+        mongoRule.getTemporaryDatabase(DATABASE_NAME).drop();
     }
 
     @Test
@@ -80,14 +88,13 @@ public class PopulationStatisticsJobTest {
         //Given a valid VCF input file
         String input = SMALL_VCF_FILE;
         String statsDir = temporaryFolderRule.getRoot().getPath();
-        String dbName = mongoRule.restoreDumpInTemporaryDatabase(getResourceUrl(MONGO_DUMP));
         String fileId = "1";
         String studyId = "1";
 
         JobParameters jobParameters = new EvaJobParameterBuilder()
                 .collectionFilesName("files")
                 .collectionVariantsName("variants")
-                .databaseName(dbName)
+                .databaseName(DATABASE_NAME)
                 .inputStudyId(studyId)
                 .inputVcf(getResource(input).getAbsolutePath())
                 .inputVcfAggregation("BASIC")
@@ -107,7 +114,7 @@ public class PopulationStatisticsJobTest {
 
         // The DB docs should have the field "st"
         VariantStorageManager variantStorageManager = StorageManagerFactory.getVariantStorageManager();
-        VariantDBAdaptor variantDBAdaptor = variantStorageManager.getDBAdaptor(dbName, null);
+        VariantDBAdaptor variantDBAdaptor = variantStorageManager.getDBAdaptor(DATABASE_NAME, null);
         VariantDBIterator iterator = variantDBAdaptor.iterator(new QueryOptions());
         assertEquals(1, iterator.next().getSourceEntries().values().iterator().next().getCohortStats().size());
 
