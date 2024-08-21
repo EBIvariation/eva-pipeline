@@ -31,7 +31,7 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.ac.ebi.eva.pipeline.configuration.BeanNames;
 import uk.ac.ebi.eva.pipeline.configuration.MongoConfiguration;
-import uk.ac.ebi.eva.pipeline.configuration.jobs.CalculateAndLoadStatisticsJobConfiguration;
+import uk.ac.ebi.eva.pipeline.configuration.jobs.VariantStatsJobConfiguration;
 import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
 import uk.ac.ebi.eva.test.configuration.TemporaryRuleConfiguration;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
@@ -46,20 +46,20 @@ import static uk.ac.ebi.eva.test.utils.JobTestUtils.assertCompleted;
 import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResourceUrl;
 
 /**
- * Test for {@link CalculateAndLoadStatisticsStepConfiguration}
+ * Test for {@link VariantStatsStepConfiguration}
  */
 @RunWith(SpringRunner.class)
 @TestPropertySource({"classpath:test-stats.properties"})
-@ContextConfiguration(classes = {CalculateAndLoadStatisticsJobConfiguration.class, BatchTestConfiguration.class,
+@ContextConfiguration(classes = {VariantStatsJobConfiguration.class, BatchTestConfiguration.class,
         TemporaryRuleConfiguration.class, MongoConfiguration.class})
-public class CalculateAndLoadStatisticsStepTest {
+public class VariantStatsStepTest {
     private static final String MONGO_DUMP = "/dump/VariantStatsConfigurationTest_vl";
 
     private static final String COLLECTION_VARIANTS_NAME = "variants";
 
     private static final String COLLECTION_FILES_NAME = "files";
 
-    private static final String DATABASE_NAME = "calculate_load_stats_test_db";
+    private static final String DATABASE_NAME = "variant_stats_test_db";
 
     private static final String STUDY_ID = "1";
 
@@ -85,7 +85,7 @@ public class CalculateAndLoadStatisticsStepTest {
     }
 
     @Test
-    public void calculateAndLoadStatisticsStepShouldCalculateAndLoadStats() {
+    public void variantStatsStepShouldCalculateAndLoadStats() {
         JobParameters jobParameters = new EvaJobParameterBuilder()
                 .collectionFilesName(COLLECTION_FILES_NAME)
                 .collectionVariantsName(COLLECTION_VARIANTS_NAME)
@@ -94,7 +94,7 @@ public class CalculateAndLoadStatisticsStepTest {
                 .chunkSize("100")
                 .toJobParameters();
 
-        JobExecution jobExecution = jobLauncherTestUtils.launchStep(BeanNames.CALCULATE_AND_LOAD_STATISTICS_STEP, jobParameters);
+        JobExecution jobExecution = jobLauncherTestUtils.launchStep(BeanNames.VARIANT_STATS_STEP, jobParameters);
 
         // check job completed successfully
         assertCompleted(jobExecution);
