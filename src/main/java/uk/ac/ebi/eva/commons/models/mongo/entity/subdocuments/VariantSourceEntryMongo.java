@@ -189,4 +189,8 @@ public class VariantSourceEntryMongo {
     public String[] getAlternates() {
         return alternates;
     }
+
+    public BasicDBObject getAttrs() {
+        return attrs;
+    }
 }

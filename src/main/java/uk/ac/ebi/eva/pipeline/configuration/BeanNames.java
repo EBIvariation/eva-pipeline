@@ -64,6 +64,7 @@ public class BeanNames {
     public static final String LOAD_ANNOTATION_METADATA_STEP = "annotation-metadata-step";
     public static final String ACCESSION_IMPORT_STEP = "accession-import-step";
     public static final String VARIANT_STATS_STEP = "variant-stats-step";
+    public static final String FILE_STATS_STEP = "file-stats-step";
 
     public static final String AGGREGATED_VCF_JOB = "aggregated-vcf-job";
     public static final String ANNOTATE_VARIANTS_JOB = "annotate-variants-job";
@@ -74,4 +75,5 @@ public class BeanNames {
     public static final String DROP_STUDY_JOB = "drop-study-job";
     public static final String ACCESSION_IMPORT_JOB = "accession-import-job";
     public static final String VARIANT_STATS_JOB = "variant-stats-job";
+    public static final String FILE_STATS_JOB = "file-stats-job";
 }

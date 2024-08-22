@@ -22,6 +22,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static com.mongodb.client.model.Accumulators.sum;
+import static com.mongodb.client.model.Aggregates.group;
 import static com.mongodb.client.model.Aggregates.match;
 import static com.mongodb.client.model.Aggregates.project;
 import static com.mongodb.client.model.Projections.computed;
@@ -92,11 +94,13 @@ public class VariantStatsReader implements ItemStreamReader<VariantDocument> {
                 computed("fid", "$fid"),
                 computed("numOfSamples", new Document("$size", new Document("$objectToArray", "$samp")))
         ));
+        Bson groupStage = group("$fid", sum("totalNumOfSamples", "$numOfSamples"));
+
         filesIdNumberOfSamplesMap = mongoTemplate.getCollection(databaseParameters.getCollectionFilesName())
-                .aggregate(asList(matchStage, projectStage))
+                .aggregate(asList(matchStage, projectStage, groupStage))
                 .into(new ArrayList<>())
                 .stream()
-                .collect(Collectors.toMap(doc -> doc.getString("fid"), doc -> doc.getInteger("numOfSamples")));
+                .collect(Collectors.toMap(doc -> doc.getString("_id"), doc -> doc.getInteger("totalNumOfSamples")));
     }
 
     public static Map<String, Integer> getFilesIdAndNumberOfSamplesMap() {
