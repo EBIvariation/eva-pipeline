@@ -49,7 +49,9 @@ public class FileStatsTasklet implements Tasklet {
     private static final String KEY_NO_OF_PASS = "nPass";
     private static final String KEY_NO_OF_TRANSITION = "nTi";
     private static final String KEY_NO_OF_TRANSVERSION = "nTv";
-    private static final String KEY_NO_OF_MEANQ = "meanQ";
+    private static final String KEY_MEANQ = "meanQ";
+
+    private static final Set<String> transitions = new HashSet<>(Arrays.asList("AG", "GA", "CT", "TC"));
 
     // Store the map of files to number of sample from the file_2_0 collection
     private static Map<String, Integer> fileIdNumberOfSamplesMap;
@@ -116,7 +118,7 @@ public class FileStatsTasklet implements Tasklet {
             countsMap.put(KEY_NO_OF_PASS, 0);
             countsMap.put(KEY_NO_OF_TRANSITION, 0);
             countsMap.put(KEY_NO_OF_TRANSVERSION, 0);
-            countsMap.put(KEY_NO_OF_MEANQ, 0);
+            countsMap.put(KEY_MEANQ, 0);
 
             fileIdCountsMap.put(fileId, countsMap);
         }
@@ -153,7 +155,6 @@ public class FileStatsTasklet implements Tasklet {
         if (isSNV) {
             String ref = variantDocument.getReference();
             String alt = variantDocument.getAlternate();
-            Set<String> transitions = new HashSet<>(Arrays.asList("AG", "GA", "CT", "TC"));
             String refAlt = ref + alt;
             if (transitions.contains(refAlt)) {
                 isTransition = true;
