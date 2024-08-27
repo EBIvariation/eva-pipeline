@@ -114,6 +114,5 @@ public class FileStatsStepTest {
         assertEquals(300, fileStats.get("nPass"));
         assertEquals(178, fileStats.get("nTi"));
         assertEquals(103, fileStats.get("nTv"));
-        assertEquals(0, fileStats.get("meanQ"));
     }
 }

@@ -49,7 +49,6 @@ public class FileStatsTasklet implements Tasklet {
     private static final String KEY_NO_OF_PASS = "nPass";
     private static final String KEY_NO_OF_TRANSITION = "nTi";
     private static final String KEY_NO_OF_TRANSVERSION = "nTv";
-    private static final String KEY_MEANQ = "meanQ";
 
     private static final Set<String> transitions = new HashSet<>(Arrays.asList("AG", "GA", "CT", "TC"));
 
@@ -118,7 +117,6 @@ public class FileStatsTasklet implements Tasklet {
             countsMap.put(KEY_NO_OF_PASS, 0);
             countsMap.put(KEY_NO_OF_TRANSITION, 0);
             countsMap.put(KEY_NO_OF_TRANSVERSION, 0);
-            countsMap.put(KEY_MEANQ, 0);
 
             fileIdCountsMap.put(fileId, countsMap);
         }
