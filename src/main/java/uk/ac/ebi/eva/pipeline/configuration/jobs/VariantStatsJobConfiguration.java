@@ -27,37 +27,32 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
-import uk.ac.ebi.eva.pipeline.configuration.jobs.steps.CalculateAndLoadStatisticsStepConfiguration;
+import uk.ac.ebi.eva.pipeline.configuration.jobs.steps.VariantStatsStepConfiguration;
 import uk.ac.ebi.eva.pipeline.parameters.NewJobIncrementer;
 
-import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.CALCULATE_AND_LOAD_STATISTICS_JOB;
-import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.CALCULATE_AND_LOAD_STATISTICS_STEP;
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VARIANT_STATS_JOB;
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VARIANT_STATS_STEP;
 
-/**
- * Configuration to run a full Statistics job: variantStatsFlow: statsCreate --> statsLoad
- * <p>
- * TODO add a new PopulationStatisticsJobParametersValidator
- */
 @Configuration
 @EnableBatchProcessing
-@Import({CalculateAndLoadStatisticsStepConfiguration.class})
-public class CalculateAndLoadStatisticsJobConfiguration {
+@Import({VariantStatsStepConfiguration.class})
+public class VariantStatsJobConfiguration {
 
-    private static final Logger logger = LoggerFactory.getLogger(CalculateAndLoadStatisticsJobConfiguration.class);
+    private static final Logger logger = LoggerFactory.getLogger(VariantStatsJobConfiguration.class);
 
     @Autowired
-    @Qualifier(CALCULATE_AND_LOAD_STATISTICS_STEP)
-    private Step calculateAndLoadStatisticsStep;
+    @Qualifier(VARIANT_STATS_STEP)
+    private Step variantStatsStep;
 
-    @Bean(CALCULATE_AND_LOAD_STATISTICS_JOB)
+    @Bean(VARIANT_STATS_JOB)
     @Scope("prototype")
-    public Job calculateAndLoadStatisticsJob(JobBuilderFactory jobBuilderFactory) {
-        logger.debug("Building '" + CALCULATE_AND_LOAD_STATISTICS_JOB + "'");
+    public Job variantStatsJob(JobBuilderFactory jobBuilderFactory) {
+        logger.debug("Building '" + VARIANT_STATS_JOB + "'");
 
         return jobBuilderFactory
-                .get(CALCULATE_AND_LOAD_STATISTICS_JOB)
+                .get(VARIANT_STATS_JOB)
                 .incrementer(new NewJobIncrementer())
-                .start(calculateAndLoadStatisticsStep)
+                .start(variantStatsStep)
                 .build();
     }
 

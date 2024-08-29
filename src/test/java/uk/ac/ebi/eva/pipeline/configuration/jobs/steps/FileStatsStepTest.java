@@ -31,7 +31,7 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.ac.ebi.eva.pipeline.configuration.BeanNames;
 import uk.ac.ebi.eva.pipeline.configuration.MongoConfiguration;
-import uk.ac.ebi.eva.pipeline.configuration.jobs.CalculateAndLoadStatisticsJobConfiguration;
+import uk.ac.ebi.eva.pipeline.configuration.jobs.FileStatsJobConfiguration;
 import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
 import uk.ac.ebi.eva.test.configuration.TemporaryRuleConfiguration;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
@@ -46,20 +46,20 @@ import static uk.ac.ebi.eva.test.utils.JobTestUtils.assertCompleted;
 import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResourceUrl;
 
 /**
- * Test for {@link CalculateAndLoadStatisticsStepConfiguration}
+ * Test for {@link VariantStatsStepConfiguration}
  */
 @RunWith(SpringRunner.class)
 @TestPropertySource({"classpath:test-stats.properties"})
-@ContextConfiguration(classes = {CalculateAndLoadStatisticsJobConfiguration.class, BatchTestConfiguration.class,
+@ContextConfiguration(classes = {FileStatsJobConfiguration.class, BatchTestConfiguration.class,
         TemporaryRuleConfiguration.class, MongoConfiguration.class})
-public class CalculateAndLoadStatisticsStepTest {
+public class FileStatsStepTest {
     private static final String MONGO_DUMP = "/dump/VariantStatsConfigurationTest_vl";
 
     private static final String COLLECTION_VARIANTS_NAME = "variants";
 
     private static final String COLLECTION_FILES_NAME = "files";
 
-    private static final String DATABASE_NAME = "calculate_load_stats_test_db";
+    private static final String DATABASE_NAME = "file_stats_test_db";
 
     private static final String STUDY_ID = "1";
 
@@ -85,7 +85,7 @@ public class CalculateAndLoadStatisticsStepTest {
     }
 
     @Test
-    public void calculateAndLoadStatisticsStepShouldCalculateAndLoadStats() {
+    public void fileStatsStepShouldCalculateAndLoadStats() {
         JobParameters jobParameters = new EvaJobParameterBuilder()
                 .collectionFilesName(COLLECTION_FILES_NAME)
                 .collectionVariantsName(COLLECTION_VARIANTS_NAME)
@@ -94,32 +94,25 @@ public class CalculateAndLoadStatisticsStepTest {
                 .chunkSize("100")
                 .toJobParameters();
 
-        JobExecution jobExecution = jobLauncherTestUtils.launchStep(BeanNames.CALCULATE_AND_LOAD_STATISTICS_STEP, jobParameters);
+        JobExecution jobExecution = jobLauncherTestUtils.launchStep(BeanNames.FILE_STATS_STEP, jobParameters);
 
         // check job completed successfully
         assertCompleted(jobExecution);
-        List<Document> documents = mongoRule.getTemporaryDatabase(DATABASE_NAME).getCollection(COLLECTION_VARIANTS_NAME)
+        List<Document> documents = mongoRule.getTemporaryDatabase(DATABASE_NAME).getCollection(COLLECTION_FILES_NAME)
                 .find().into(new ArrayList<>());
-        Assert.assertTrue(documents.size() == 300);
+        assertEquals(1, documents.size());
         // assert all statistics are calculated for all documents
         Assert.assertTrue(documents.stream().allMatch(doc -> doc.containsKey("st")));
-
-        // assert statistics for the variant with 20_61098_C_T
-        ArrayList<Document> variantStatsList = documents.stream().filter(doc -> doc.get("_id").equals("20_61098_C_T"))
-                .findFirst().get().get("st", ArrayList.class);
-        assertEquals(1, variantStatsList.size());
-        Document variantStats = variantStatsList.get(0);
-        Document numOfGT = (Document) variantStats.get("numGt");
-        assertEquals(1290, numOfGT.get("0|0"));
-        assertEquals(417, numOfGT.get("1|0"));
-        assertEquals(573, numOfGT.get("0|1"));
-        assertEquals(224, numOfGT.get("1|1"));
-        assertEquals(0.2871405780315399, variantStats.get("maf"));
-        assertEquals(0.228833869099617, variantStats.get("mgf"));
-        assertEquals("T", variantStats.get("mafAl"));
-        assertEquals("0|1", variantStats.get("mgfGt"));
-        assertEquals(0, variantStats.get("missAl"));
-        assertEquals(0, variantStats.get("missGt"));
+        // assert statistics for the study id 1 and file id 1
+        Document fileStats = documents.stream()
+                .filter(doc -> doc.get("sid").equals("1") && doc.get("fid").equals("1"))
+                .findFirst().get().get("st", Document.class);
+        assertEquals(2504, fileStats.get("nSamp"));
+        assertEquals(300, fileStats.get("nVar"));
+        assertEquals(281, fileStats.get("nSnp"));
+        assertEquals(19, fileStats.get("nIndel"));
+        assertEquals(300, fileStats.get("nPass"));
+        assertEquals(178, fileStats.get("nTi"));
+        assertEquals(103, fileStats.get("nTv"));
     }
-
 }
