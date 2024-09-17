@@ -14,6 +14,7 @@ import uk.ac.ebi.eva.pipeline.io.readers.VariantStatsReader;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -44,9 +45,12 @@ public class VariantStatsProcessor implements ItemProcessor<VariantDocument, Var
         String variantAlt = variant.getAlternate();
 
         // copy the stats that should not be changed/updated and will be copied as it is
-        Set<VariantStatsMongo> variantStatsSet = variant.getVariantStatsMongo().stream()
-                .filter(st -> !st.getStudyId().equals(studyId) || !fidSet.contains(st.getFileId()))
-                .collect(Collectors.toSet());
+        Set<VariantStatsMongo> variantStatsSet = new HashSet<>();
+        if (variant.getVariantStatsMongo() != null) {
+            variantStatsSet = variant.getVariantStatsMongo().stream()
+                    .filter(st -> !st.getStudyId().equals(studyId) || !fidSet.contains(st.getFileId()))
+                    .collect(Collectors.toSet());
+        }
 
         // get only the ones for which we can calculate the stats
         Set<VariantSourceEntryMongo> variantSourceEntrySet = variant.getVariantSources().stream()

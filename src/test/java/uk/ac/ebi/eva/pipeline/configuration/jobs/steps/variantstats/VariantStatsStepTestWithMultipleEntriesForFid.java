@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.ac.ebi.eva.pipeline.configuration.jobs.steps;
+package uk.ac.ebi.eva.pipeline.configuration.jobs.steps.variantstats;
 
 import com.mongodb.client.MongoCollection;
 import org.bson.Document;
@@ -33,6 +33,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import uk.ac.ebi.eva.pipeline.configuration.BeanNames;
 import uk.ac.ebi.eva.pipeline.configuration.MongoConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.jobs.VariantStatsJobConfiguration;
+import uk.ac.ebi.eva.pipeline.configuration.jobs.steps.VariantStatsStepConfiguration;
 import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
 import uk.ac.ebi.eva.test.configuration.TemporaryRuleConfiguration;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
@@ -45,7 +46,6 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static uk.ac.ebi.eva.test.utils.JobTestUtils.assertCompleted;
-import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResourceUrl;
 
 /**
  * Test for {@link VariantStatsStepConfiguration}
@@ -54,16 +54,12 @@ import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResourceUrl;
 @TestPropertySource({"classpath:test-stats.properties"})
 @ContextConfiguration(classes = {VariantStatsJobConfiguration.class, BatchTestConfiguration.class,
         TemporaryRuleConfiguration.class, MongoConfiguration.class})
-public class VariantStatsStepTest {
-    private static final String MONGO_DUMP = "/dump/VariantStatsConfigurationTest_vl";
-
+public class VariantStatsStepTestWithMultipleEntriesForFid {
     private static final String COLLECTION_VARIANTS_NAME = "variants";
 
     private static final String COLLECTION_FILES_NAME = "files";
 
     private static final String DATABASE_NAME = "variant_stats_test_db";
-
-    private static final String STUDY_ID = "1";
 
     @Autowired
     @Rule
@@ -83,47 +79,6 @@ public class VariantStatsStepTest {
     @After
     public void cleanUp() {
         mongoRule.getTemporaryDatabase(DATABASE_NAME).drop();
-    }
-
-    @Test
-    public void variantStatsStepShouldCalculateAndLoadStats() throws Exception {
-        mongoRule.restoreDump(getResourceUrl(MONGO_DUMP), DATABASE_NAME);
-
-
-        JobParameters jobParameters = new EvaJobParameterBuilder()
-                .collectionFilesName(COLLECTION_FILES_NAME)
-                .collectionVariantsName(COLLECTION_VARIANTS_NAME)
-                .databaseName(DATABASE_NAME)
-                .inputStudyId(STUDY_ID)
-                .chunkSize("100")
-                .toJobParameters();
-
-        JobExecution jobExecution = jobLauncherTestUtils.launchStep(BeanNames.VARIANT_STATS_STEP, jobParameters);
-
-        // check job completed successfully
-        assertCompleted(jobExecution);
-        List<Document> documents = mongoRule.getTemporaryDatabase(DATABASE_NAME).getCollection(COLLECTION_VARIANTS_NAME)
-                .find().into(new ArrayList<>());
-        Assert.assertTrue(documents.size() == 300);
-        // assert all statistics are calculated for all documents
-        Assert.assertTrue(documents.stream().allMatch(doc -> doc.containsKey("st")));
-
-        // assert statistics for the variant with 20_61098_C_T
-        ArrayList<Document> variantStatsList = documents.stream().filter(doc -> doc.get("_id").equals("20_61098_C_T"))
-                .findFirst().get().get("st", ArrayList.class);
-        assertEquals(1, variantStatsList.size());
-        Document variantStats = variantStatsList.get(0);
-        Document numOfGT = (Document) variantStats.get("numGt");
-        assertEquals(1290, numOfGT.get("0|0"));
-        assertEquals(417, numOfGT.get("1|0"));
-        assertEquals(573, numOfGT.get("0|1"));
-        assertEquals(224, numOfGT.get("1|1"));
-        assertEquals(0.2871405780315399, variantStats.get("maf"));
-        assertEquals(0.228833869099617, variantStats.get("mgf"));
-        assertEquals("T", variantStats.get("mafAl"));
-        assertEquals("0|1", variantStats.get("mgfGt"));
-        assertEquals(0, variantStats.get("missAl"));
-        assertEquals(0, variantStats.get("missGt"));
     }
 
     @Test
