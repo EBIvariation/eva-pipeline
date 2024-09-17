@@ -14,7 +14,6 @@ import uk.ac.ebi.eva.pipeline.io.readers.VariantStatsReader;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -30,18 +29,30 @@ public class VariantStatsProcessor implements ItemProcessor<VariantDocument, Var
     private static final String DEFAULT_GENOTYPE = "def";
     private static final List<String> MISSING_GENOTYPE_ALLELE_REPRESENTATIONS = Arrays.asList(".", "-1");
 
-    public VariantStatsProcessor() {
+    private String studyId;
+
+    public VariantStatsProcessor(String studyId) {
+        this.studyId = studyId;
     }
 
     @Override
     public VariantDocument process(VariantDocument variant) {
         Map<String, Integer> filesIdNumberOfSamplesMap = VariantStatsReader.getFilesIdAndNumberOfSamplesMap();
+        Set<String> fidSet = filesIdNumberOfSamplesMap.keySet();
 
         String variantRef = variant.getReference();
         String variantAlt = variant.getAlternate();
-        Set<VariantStatsMongo> variantStatsSet = new HashSet<>();
 
-        Set<VariantSourceEntryMongo> variantSourceEntrySet = variant.getVariantSources();
+        // copy the stats that should not be changed/updated and will be copied as it is
+        Set<VariantStatsMongo> variantStatsSet = variant.getVariantStatsMongo().stream()
+                .filter(st -> !st.getStudyId().equals(studyId) || !fidSet.contains(st.getFileId()))
+                .collect(Collectors.toSet());
+
+        // get only the ones for which we can calculate the stats
+        Set<VariantSourceEntryMongo> variantSourceEntrySet = variant.getVariantSources().stream()
+                .filter(vse -> vse.getStudyId().equals(studyId) && fidSet.contains(vse.getFileId()))
+                .collect(Collectors.toSet());
+
         for (VariantSourceEntryMongo variantSourceEntry : variantSourceEntrySet) {
             String studyId = variantSourceEntry.getStudyId();
             String fileId = variantSourceEntry.getFileId();

@@ -94,10 +94,11 @@ public class VariantStatsReader implements ItemStreamReader<VariantDocument> {
                 computed("fid", "$fid"),
                 computed("numOfSamples", new Document("$size", new Document("$objectToArray", "$samp")))
         ));
-        Bson groupStage = group("$fid", sum("totalNumOfSamples", "$numOfSamples"));
+        Bson groupStage = group("$fid", sum("totalNumOfSamples", "$numOfSamples"), sum("count", 1));
+        Bson filterStage = match(Filters.eq("count", 1));
 
         filesIdNumberOfSamplesMap = mongoTemplate.getCollection(databaseParameters.getCollectionFilesName())
-                .aggregate(asList(matchStage, projectStage, groupStage))
+                .aggregate(asList(matchStage, projectStage, groupStage, filterStage))
                 .into(new ArrayList<>())
                 .stream()
                 .collect(Collectors.toMap(doc -> doc.getString("_id"), doc -> doc.getInteger("totalNumOfSamples")));
