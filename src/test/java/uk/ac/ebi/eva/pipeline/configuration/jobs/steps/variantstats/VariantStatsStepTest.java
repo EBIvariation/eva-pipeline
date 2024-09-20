@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.ac.ebi.eva.pipeline.configuration.jobs.steps;
+package uk.ac.ebi.eva.pipeline.configuration.jobs.steps.variantstats;
 
 import org.bson.Document;
 import org.junit.After;
@@ -32,6 +32,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import uk.ac.ebi.eva.pipeline.configuration.BeanNames;
 import uk.ac.ebi.eva.pipeline.configuration.MongoConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.jobs.VariantStatsJobConfiguration;
+import uk.ac.ebi.eva.pipeline.configuration.jobs.steps.VariantStatsStepConfiguration;
 import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
 import uk.ac.ebi.eva.test.configuration.TemporaryRuleConfiguration;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
@@ -76,7 +77,6 @@ public class VariantStatsStepTest {
     @Before
     public void setUp() throws Exception {
         mongoRule.getTemporaryDatabase(DATABASE_NAME).drop();
-        mongoRule.restoreDump(getResourceUrl(MONGO_DUMP), DATABASE_NAME);
     }
 
     @After
@@ -85,7 +85,10 @@ public class VariantStatsStepTest {
     }
 
     @Test
-    public void variantStatsStepShouldCalculateAndLoadStats() {
+    public void variantStatsStepShouldCalculateAndLoadStats() throws Exception {
+        mongoRule.restoreDump(getResourceUrl(MONGO_DUMP), DATABASE_NAME);
+
+
         JobParameters jobParameters = new EvaJobParameterBuilder()
                 .collectionFilesName(COLLECTION_FILES_NAME)
                 .collectionVariantsName(COLLECTION_VARIANTS_NAME)
