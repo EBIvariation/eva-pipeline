@@ -39,6 +39,10 @@ public class VariantStatsProcessor implements ItemProcessor<VariantDocument, Var
     @Override
     public VariantDocument process(VariantDocument variant) {
         Map<String, Integer> filesIdNumberOfSamplesMap = VariantStatsReader.getFilesIdAndNumberOfSamplesMap();
+        if (filesIdNumberOfSamplesMap.isEmpty()) {
+            // No new stats can be calculated, no processing required
+            return variant;
+        }
         Set<String> fidSet = filesIdNumberOfSamplesMap.keySet();
 
         String variantRef = variant.getReference();
