@@ -76,7 +76,7 @@ public class FileStatsTasklet implements Tasklet {
     public RepeatStatus execute(StepContribution stepContribution, ChunkContext chunkContext) throws Exception {
         populateFilesIdAndNumberOfSamplesMap();
 
-        if (!fileIdCountsMap.isEmpty()) {
+        if (!fileIdNumberOfSamplesMap.isEmpty()) {
             initializeFileIdCountsMap();
             cursor = initializeCursor();
             try {
