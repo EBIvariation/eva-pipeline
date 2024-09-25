@@ -9,9 +9,12 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import uk.ac.ebi.eva.commons.models.mongo.entity.VariantDocument;
+import uk.ac.ebi.eva.pipeline.io.readers.VariantStatsReader;
 import uk.ac.ebi.eva.pipeline.parameters.DatabaseParameters;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class VariantStatsWriter implements ItemWriter<VariantDocument> {
     private static final Logger logger = LoggerFactory.getLogger(VariantStatsWriter.class);
@@ -25,20 +28,30 @@ public class VariantStatsWriter implements ItemWriter<VariantDocument> {
 
     @Override
     public void write(List<? extends VariantDocument> variants) {
-        BulkOperations bulkOperations = mongoTemplate.bulkOps(BulkOperations.BulkMode.UNORDERED, VariantDocument.class,
-                databaseParameters.getCollectionVariantsName());
-        for (VariantDocument variant : variants) {
-            if (variant.getVariantStatsMongo() == null || variant.getVariantStatsMongo().isEmpty()) {
-                continue;
-            }
-            Query query = new Query(Criteria.where("_id").is(variant.getId()));
-            Update update = new Update();
-            update.set("st", variant.getVariantStatsMongo());
-
-            bulkOperations.updateOne(query, update);
+        Map<String, Integer> filesIdNumberOfSamplesMap = VariantStatsReader.getFilesIdAndNumberOfSamplesMap();
+        if (filesIdNumberOfSamplesMap.isEmpty()) {
+            // No new stats would have been calculated, no need to write anything
+            return;
         }
 
-        bulkOperations.execute();
+        variants = variants.stream()
+                .filter(v -> v.getVariantStatsMongo() != null && !v.getVariantStatsMongo().isEmpty())
+                .collect(Collectors.toList());
+
+        if (!variants.isEmpty()) {
+            BulkOperations bulkOperations = mongoTemplate.bulkOps(BulkOperations.BulkMode.UNORDERED, VariantDocument.class,
+                    databaseParameters.getCollectionVariantsName());
+
+            for (VariantDocument variant : variants) {
+                Query query = new Query(Criteria.where("_id").is(variant.getId()));
+                Update update = new Update();
+                update.set("st", variant.getVariantStatsMongo());
+
+                bulkOperations.updateOne(query, update);
+            }
+
+            bulkOperations.execute();
+        }
     }
 
 }

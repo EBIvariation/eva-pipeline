@@ -75,18 +75,21 @@ public class FileStatsTasklet implements Tasklet {
     @Override
     public RepeatStatus execute(StepContribution stepContribution, ChunkContext chunkContext) throws Exception {
         populateFilesIdAndNumberOfSamplesMap();
-        initializeFileIdCountsMap();
-        cursor = initializeCursor();
-        try {
-            while (cursor.hasNext()) {
-                VariantDocument variantDocument = getVariant(cursor.next());
-                processCounts(variantDocument);
-            }
-        } finally {
-            cursor.close();
-        }
 
-        writeStatsInTheDB();
+        if (!fileIdNumberOfSamplesMap.isEmpty()) {
+            initializeFileIdCountsMap();
+            cursor = initializeCursor();
+            try {
+                while (cursor.hasNext()) {
+                    VariantDocument variantDocument = getVariant(cursor.next());
+                    processCounts(variantDocument);
+                }
+            } finally {
+                cursor.close();
+            }
+
+            writeStatsInTheDB();
+        }
 
         return RepeatStatus.FINISHED;
     }
