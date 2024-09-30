@@ -81,6 +81,19 @@ public class VariantStatsMongo {
         //Empty constructor for spring
     }
 
+    public VariantStatsMongo(String studyId, String fileId, String cohortId, float maf, float mgf, String mafAllele, String mgfGenotype, int missingAlleles, int missingGenotypes, Map<String, Integer> numGt) {
+        this.studyId = studyId;
+        this.fileId = fileId;
+        this.cohortId = cohortId;
+        this.maf = maf;
+        this.mgf = mgf;
+        this.mafAllele = mafAllele;
+        this.mgfGenotype = mgfGenotype;
+        this.missingAlleles = missingAlleles;
+        this.missingGenotypes = missingGenotypes;
+        this.numGt = numGt;
+    }
+
     public VariantStatsMongo(String studyId, String fileId, String cohortId, VariantStats stats) {
         this.studyId = studyId;
         this.fileId = fileId;

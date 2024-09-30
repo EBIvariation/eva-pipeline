@@ -71,6 +71,20 @@ public class VariantSourceEntryMongo {
         // Spring empty constructor
     }
 
+    public VariantSourceEntryMongo(String fileId, String studyId, String[] alternates, BasicDBObject attrs, String format, BasicDBObject samp) {
+        this.fileId = fileId;
+        this.studyId = studyId;
+        if (alternates != null && alternates.length > 0) {
+            this.alternates = Arrays.stream(alternates)
+                    .map(a -> a.toUpperCase())
+                    .collect(Collectors.toList())
+                    .toArray(new String[0]);
+        }
+        this.attrs = attrs;
+        this.format = format;
+        this.samp = samp;
+    }
+
     public VariantSourceEntryMongo(String fileId, String studyId, String[] alternates, Map<String, String> attributes) {
         this.fileId = fileId;
         this.studyId = studyId;
@@ -192,5 +206,9 @@ public class VariantSourceEntryMongo {
 
     public BasicDBObject getAttrs() {
         return attrs;
+    }
+
+    public String getFormat() {
+        return format;
     }
 }
