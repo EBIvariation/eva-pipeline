@@ -40,4 +40,8 @@ public class HgvsMongo {
         this.type = type;
         this.name = name;
     }
+
+    public String getName() {
+        return name;
+    }
 }
