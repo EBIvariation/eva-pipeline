@@ -2,6 +2,7 @@ package uk.ac.ebi.eva.pipeline.configuration.jobs.steps;
 
 import com.mongodb.client.model.Filters;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -31,10 +32,9 @@ import static uk.ac.ebi.eva.utils.FileUtils.getResource;
 @TestPropertySource({"classpath:common-configuration.properties", "classpath:test-mongo.properties"})
 @ContextConfiguration(classes = {GenotypedVcfJobConfiguration.class, BatchTestConfiguration.class, TemporaryRuleConfiguration.class})
 public class GenotypedVcfTestSkipStructuralVariant {
+    private static final String SMALL_STRUCTURAL_VARIANTS_VCF_FILE = "/input-files/vcf/small_structural_variant.vcf.gz";
 
-    private static final int EXPECTED_VARIANTS = 1;
-
-    private static final String SMALL_VCF_FILE = "/input-files/vcf/small_structural_variant.vcf.gz";
+    private static final String SMALL_STRUCTURAL_VARIANTS_VCF_FILE_REF_ALT_STARTS_WITH_SAME_ALLELE = "/input-files/vcf/small_invalid_variant.vcf.gz";
 
     private static final String COLLECTION_VARIANTS_NAME = "variants";
 
@@ -47,22 +47,19 @@ public class GenotypedVcfTestSkipStructuralVariant {
     @Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
 
-    private String input;
-
     @Before
     public void setUp() throws Exception {
         mongoRule.getTemporaryDatabase(databaseName).drop();
-        input = getResource(SMALL_VCF_FILE).getAbsolutePath();
     }
 
     @Test
-    public void loaderStepShouldLoadAllVariants() throws Exception {
+    public void loaderStepShouldSkipStructuralVariants() throws Exception {
         // When the execute method in variantsLoad is executed
         JobParameters jobParameters = new EvaJobParameterBuilder()
                 .collectionVariantsName(COLLECTION_VARIANTS_NAME)
                 .databaseName(databaseName)
                 .inputStudyId("1")
-                .inputVcf(input)
+                .inputVcf(getResource(SMALL_STRUCTURAL_VARIANTS_VCF_FILE).getAbsolutePath())
                 .inputVcfAggregation("NONE")
                 .inputVcfId("1")
                 .toJobParameters();
@@ -73,8 +70,42 @@ public class GenotypedVcfTestSkipStructuralVariant {
         assertCompleted(jobExecution);
 
         // And the number of documents in the DB should be 1 as all other variants are invalid
-        assertEquals(EXPECTED_VARIANTS, mongoRule.getCollection(databaseName, COLLECTION_VARIANTS_NAME).count());
-
+        assertEquals(1, mongoRule.getCollection(databaseName, COLLECTION_VARIANTS_NAME).count());
         assertEquals(1, mongoRule.getCollection(databaseName, COLLECTION_VARIANTS_NAME).countDocuments(Filters.eq("_id", "1_152739_A_G")));
+    }
+
+    /*
+     * This test case represent a special case of structural variants that should be skipped, but due to a bug makes it's
+     * way into the DB.
+     *
+     * The variant has ref as "G" and alt as "G[2:421681[", which means it fits the definition of a structural variant
+     * and should be skipped by the variant processor that filters out structural variants.
+     *
+     * But instead what is currently happening is that after the variant is read, the normalization process in variant
+     * reader removes the prefix G and the variant is eventually reduced to ref "" and alt "[2:421681[", which does get
+     * parsed correctly by the regex in @ExcludeStructuralVariantsProcessor and makes it's way into the DB.
+     *
+     * Currently, the test case fails and that's why we are skipping it for now. It should start passing once we have fixed the
+     * problem with the normalization in the variant reader.
+     */
+    @Ignore
+    @Test
+    public void loaderStepShouldSkipStructuralVariantsWhereRefAndAltStartsWithSameAllele() throws Exception {
+        // When the execute method in variantsLoad is executed
+        JobParameters jobParameters = new EvaJobParameterBuilder()
+                .collectionVariantsName(COLLECTION_VARIANTS_NAME)
+                .databaseName(databaseName)
+                .inputStudyId("1")
+                .inputVcf(getResource(SMALL_STRUCTURAL_VARIANTS_VCF_FILE_REF_ALT_STARTS_WITH_SAME_ALLELE).getAbsolutePath())
+                .inputVcfAggregation("NONE")
+                .inputVcfId("1")
+                .toJobParameters();
+
+        JobExecution jobExecution = jobLauncherTestUtils.launchStep(BeanNames.LOAD_VARIANTS_STEP, jobParameters);
+
+        //Then variantsLoad step should complete correctly
+        assertCompleted(jobExecution);
+
+        assertEquals(0, mongoRule.getCollection(databaseName, COLLECTION_VARIANTS_NAME).count());
     }
 }
