@@ -75,17 +75,17 @@ public class GenotypedVcfTestSkipStructuralVariant {
     }
 
     /*
-     * This test case represent a special case of structural variants that should be skipped, but due to a bug makes it's
+     * This test case represents a special case of structural variants that should be skipped, but due to a bug makes its
      * way into the DB.
      *
      * The variant has ref as "G" and alt as "G[2:421681[", which means it fits the definition of a structural variant
      * and should be skipped by the variant processor that filters out structural variants.
      *
      * But instead what is currently happening is that after the variant is read, the normalization process in variant
-     * reader removes the prefix G and the variant is eventually reduced to ref "" and alt "[2:421681[", which does get
-     * parsed correctly by the regex in @ExcludeStructuralVariantsProcessor and makes it's way into the DB.
+     * reader removes the prefix G and the variant is eventually reduced to ref "" and alt "[2:421681[", which does not get
+     * parsed correctly by the regex in @ExcludeStructuralVariantsProcessor and makes its way into the DB.
      *
-     * Currently, the test case fails and that's why we are skipping it for now. It should start passing once we have fixed the
+     * Currently, the test case fails therefore we are skipping it for now. It should start passing once we have fixed the
      * problem with the normalization in the variant reader.
      */
     @Ignore
