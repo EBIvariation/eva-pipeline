@@ -37,7 +37,7 @@ public class ExcludeStructuralVariantsProcessorTest {
     private String ALT_WITH_EMPTY_ALLELE = "";
 
     private String[] ALTS_WITH_SYMBOLIC_INDEL = new String[]{"<DEL>", "<INS>", "<DUP>", "<INV>", "<CNV>",
-            "<DUP:TANDEM>", "<DEL:ME:C1#>", "<INS:ME:C1#>"};
+            "<DUP:TANDEM>", "<DEL:ME:C1#>", "<INS:ME:C1#>", "<CNV:0>"};
 
     private String ALT_WITH_SYMBOLIC_ALLELE = "<ID>";
 
