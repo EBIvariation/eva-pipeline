@@ -267,6 +267,10 @@ public class VariantDocument {
         return annotations;
     }
 
+    public void setSources(Set<VariantSourceEntryMongo> variantSources) {
+        this.variantSources = variantSources;
+    }
+
     public void setStats(Set<VariantStatsMongo> variantStats) {
         this.variantStatsMongo = variantStats;
     }
