@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
+import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemStreamReader;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.repeat.policy.SimpleCompletionPolicy;
@@ -33,14 +34,15 @@ import uk.ac.ebi.eva.commons.models.data.Variant;
 import uk.ac.ebi.eva.pipeline.configuration.ChunkSizeCompletionPolicyConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.io.readers.VcfReaderConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.io.writers.VariantWriterConfiguration;
+import uk.ac.ebi.eva.pipeline.configuration.jobs.steps.processors.VariantProcessorConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.policies.InvalidVariantSkipPolicyConfiguration;
-import uk.ac.ebi.eva.pipeline.jobs.steps.processors.VariantNoAlternateFilterProcessor;
 import uk.ac.ebi.eva.pipeline.listeners.SkippedItemListener;
 import uk.ac.ebi.eva.pipeline.listeners.StepProgressListener;
 import uk.ac.ebi.eva.pipeline.listeners.VariantLoaderStepStatisticsListener;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 import uk.ac.ebi.eva.pipeline.policies.InvalidVariantSkipPolicy;
 
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.COMPOSITE_VARIANT_PROCESSOR;
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.LOAD_VARIANTS_STEP;
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VARIANT_READER;
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VARIANT_WRITER;
@@ -53,8 +55,8 @@ import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VARIANT_WRITER;
  */
 @Configuration
 @EnableBatchProcessing
-@Import({VcfReaderConfiguration.class, VariantWriterConfiguration.class, ChunkSizeCompletionPolicyConfiguration.class
-        , InvalidVariantSkipPolicyConfiguration.class})
+@Import({VcfReaderConfiguration.class, VariantProcessorConfiguration.class, VariantWriterConfiguration.class,
+        ChunkSizeCompletionPolicyConfiguration.class, InvalidVariantSkipPolicyConfiguration.class})
 public class LoadVariantsStepConfiguration {
 
     private static final Logger logger = LoggerFactory.getLogger(LoadVariantsStepConfiguration.class);
@@ -68,6 +70,10 @@ public class LoadVariantsStepConfiguration {
     private ItemWriter<Variant> variantWriter;
 
     @Autowired
+    @Qualifier(COMPOSITE_VARIANT_PROCESSOR)
+    private ItemProcessor<Variant, Variant> variantProcessor;
+
+    @Autowired
     private InvalidVariantSkipPolicy invalidVariantSkipPolicy;
 
     @Bean(LOAD_VARIANTS_STEP)
@@ -78,7 +84,7 @@ public class LoadVariantsStepConfiguration {
         return stepBuilderFactory.get(LOAD_VARIANTS_STEP)
                                  .<Variant, Variant>chunk(chunkSizeCompletionPolicy)
                                  .reader(reader)
-                                 .processor(new VariantNoAlternateFilterProcessor())
+                                 .processor(variantProcessor)
                                  .writer(variantWriter)
                                  .faultTolerant()
                                  .skipPolicy(invalidVariantSkipPolicy)
