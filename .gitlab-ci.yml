@@ -4,7 +4,7 @@ stages:
     - deploy
 
 variables:
-    PIPELINE_ARTIFACT_PATH: target/eva-pipeline-*.jar
+    PIPELINE_ARTIFACT_PATH: target/eva-pipeline-*exec.jar
     PIPELINE_SYMLINK_NAME: "eva-pipeline.jar"
     MAVEN_SETTINGS: maven-settings.xml
     URL_MAVEN_SETTINGS: https://api.github.com/repos/EBIvariation/configuration/contents/eva-maven-settings.xml
