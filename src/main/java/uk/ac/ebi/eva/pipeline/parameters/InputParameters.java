@@ -63,6 +63,9 @@ public class InputParameters {
     @Value(PARAMETER + JobParametersNames.INPUT_ACCESSION_REPORT + END)
     private String accessionReport;
 
+    @Value(PARAMETER + JobParametersNames.INPUT_ASSEMBLY_REPORT + END)
+    private String assemblyReport;
+
     public String getVcf() {
         return vcf;
     }
@@ -101,5 +104,9 @@ public class InputParameters {
 
     public String getAccessionReport() {
         return accessionReport;
+    }
+
+    public String getAssemblyReport() {
+        return assemblyReport;
     }
 }

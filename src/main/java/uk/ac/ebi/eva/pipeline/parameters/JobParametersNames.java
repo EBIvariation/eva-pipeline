@@ -41,6 +41,8 @@ public class JobParametersNames {
 
     public static final String INPUT_FASTA = "input.fasta";
 
+    public static final String INPUT_ASSEMBLY_REPORT = "input.assembly.report";
+
     public static final String INPUT_VCF_AGGREGATION_MAPPING_PATH = "input.vcf.aggregation.mapping-path";
 
     public static final String INPUT_ACCESSION_REPORT = "input.accession.report";

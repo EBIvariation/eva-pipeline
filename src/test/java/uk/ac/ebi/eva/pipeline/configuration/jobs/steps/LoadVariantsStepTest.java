@@ -27,14 +27,12 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-
 import uk.ac.ebi.eva.pipeline.Application;
 import uk.ac.ebi.eva.pipeline.configuration.BeanNames;
 import uk.ac.ebi.eva.pipeline.configuration.jobs.GenotypedVcfJobConfiguration;
 import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
 import uk.ac.ebi.eva.test.configuration.TemporaryRuleConfiguration;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
-import uk.ac.ebi.eva.test.utils.GenotypedVcfJobTestUtils;
 import uk.ac.ebi.eva.utils.EvaJobParameterBuilder;
 
 import static org.junit.Assert.assertEquals;
@@ -54,6 +52,8 @@ public class LoadVariantsStepTest {
 
     private static final String SMALL_VCF_FILE = "/input-files/vcf/genotyped.vcf.gz";
 
+    private static final String ASSEMBLY_REPORT_PATH = "/input-files/assembly-report/assembly_report.txt";
+
     private static final String COLLECTION_VARIANTS_NAME = "variants";
 
     @Autowired
@@ -64,10 +64,12 @@ public class LoadVariantsStepTest {
     private JobLauncherTestUtils jobLauncherTestUtils;
 
     private String input;
+    private String assemblyReport;
 
     @Before
     public void setUp() throws Exception {
         input = getResource(SMALL_VCF_FILE).getAbsolutePath();
+        assemblyReport = "file://" + getResource(ASSEMBLY_REPORT_PATH).getAbsolutePath();
     }
 
     @Test
@@ -82,6 +84,7 @@ public class LoadVariantsStepTest {
                 .inputVcf(input)
                 .inputVcfAggregation("NONE")
                 .inputVcfId("1")
+                .inputAssemblyReport(assemblyReport)
                 .toJobParameters();
 
         JobExecution jobExecution = jobLauncherTestUtils.launchStep(BeanNames.LOAD_VARIANTS_STEP, jobParameters);
@@ -90,6 +93,6 @@ public class LoadVariantsStepTest {
         assertCompleted(jobExecution);
 
         // And the number of documents in the DB should be equals to the number of lines in the VCF file
-        assertEquals(EXPECTED_VARIANTS, mongoRule.getCollection(databaseName, COLLECTION_VARIANTS_NAME).count());
+        assertEquals(EXPECTED_VARIANTS, mongoRule.getCollection(databaseName, COLLECTION_VARIANTS_NAME).countDocuments());
     }
 }

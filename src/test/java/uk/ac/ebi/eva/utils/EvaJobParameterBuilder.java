@@ -17,7 +17,6 @@ package uk.ac.ebi.eva.utils;
 
 import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParametersBuilder;
-
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 
 import java.sql.Timestamp;
@@ -60,8 +59,13 @@ public class EvaJobParameterBuilder extends JobParametersBuilder {
         return this;
     }
 
-    public EvaJobParameterBuilder inputAccessionReport(String inputAccessionReport){
+    public EvaJobParameterBuilder inputAccessionReport(String inputAccessionReport) {
         addParameter(JobParametersNames.INPUT_ACCESSION_REPORT, new JobParameter(inputAccessionReport));
+        return this;
+    }
+
+    public EvaJobParameterBuilder inputAssemblyReport(String inputAssemblyReport) {
+        addParameter(JobParametersNames.INPUT_ASSEMBLY_REPORT, new JobParameter(inputAssemblyReport));
         return this;
     }
 
@@ -74,6 +78,7 @@ public class EvaJobParameterBuilder extends JobParametersBuilder {
         addParameter(JobParametersNames.DB_NAME, new JobParameter(databaseName));
         return this;
     }
+
     public EvaJobParameterBuilder collectionVariantsName(String collectionVariantsName) {
         addParameter(JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME, new JobParameter(collectionVariantsName));
         return this;
@@ -97,7 +102,7 @@ public class EvaJobParameterBuilder extends JobParametersBuilder {
 
     public EvaJobParameterBuilder collectionAnnotationsName(String collectionAnnotationsName) {
         addParameter(JobParametersNames.DB_COLLECTIONS_ANNOTATIONS_NAME,
-                     new JobParameter(collectionAnnotationsName));
+                new JobParameter(collectionAnnotationsName));
         return this;
     }
 
