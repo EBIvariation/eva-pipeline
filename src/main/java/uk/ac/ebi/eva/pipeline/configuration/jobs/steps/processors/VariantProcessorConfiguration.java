@@ -62,8 +62,10 @@ public class VariantProcessorConfiguration {
     }
 
     @Bean
-    public ContigToGenbankReplacerProcessor contigToGenbankReplacerProcessor(ContigMapping contigMapping) {
-        return new ContigToGenbankReplacerProcessor(contigMapping);
+    @StepScope
+    public ContigToGenbankReplacerProcessor contigToGenbankReplacerProcessor(ContigMapping contigMapping,
+                                                                             InputParameters parameters) {
+        return new ContigToGenbankReplacerProcessor(contigMapping, parameters.getContigNaming());
     }
 
     @Bean

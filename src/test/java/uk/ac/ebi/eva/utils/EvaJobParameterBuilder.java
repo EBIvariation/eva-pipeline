@@ -17,6 +17,7 @@ package uk.ac.ebi.eva.utils;
 
 import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParametersBuilder;
+import uk.ac.ebi.eva.pipeline.io.contig.ContigNaming;
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 
 import java.sql.Timestamp;
@@ -66,6 +67,11 @@ public class EvaJobParameterBuilder extends JobParametersBuilder {
 
     public EvaJobParameterBuilder inputAssemblyReport(String inputAssemblyReport) {
         addParameter(JobParametersNames.INPUT_ASSEMBLY_REPORT, new JobParameter(inputAssemblyReport));
+        return this;
+    }
+
+    public EvaJobParameterBuilder contigNaming(ContigNaming contigNaming) {
+        addParameter(JobParametersNames.CONTIG_NAMING, new JobParameter(contigNaming.toString()));
         return this;
     }
 

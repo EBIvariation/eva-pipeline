@@ -5,6 +5,7 @@ import org.junit.Test;
 import uk.ac.ebi.eva.commons.models.data.Variant;
 import uk.ac.ebi.eva.commons.models.data.VariantSourceEntry;
 import uk.ac.ebi.eva.pipeline.io.contig.ContigMapping;
+import uk.ac.ebi.eva.pipeline.io.contig.ContigNaming;
 
 import java.util.Collections;
 import java.util.Set;
@@ -23,7 +24,7 @@ public class ContigToGenbankReplacerProcessorTest {
                 "/input-files/assembly-report/assembly_report.txt").toString();
         ContigMapping contigMapping = new ContigMapping(fileString);
 
-        processor = new ContigToGenbankReplacerProcessor(contigMapping);
+        processor = new ContigToGenbankReplacerProcessor(contigMapping, ContigNaming.REFSEQ);
     }
 
     @Test

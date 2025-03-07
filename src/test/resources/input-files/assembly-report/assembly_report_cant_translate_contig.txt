@@ -7,4 +7,4 @@ chr4	assembled-molecule	4	Chromosome	na	=	NW_003763687.1	Primary Assembly	111302
 chr5	assembled-molecule	5	Chromosome	na	<>	NW_003763688.1	Primary Assembly	111302124	chr5
 chr6	assembled-molecule	6	Chromosome	CM000096.4	<>	na	Primary Assembly	111302125	chr6
 chr7	assembled-molecule	7	Chromosome	na	<>	na	Primary Assembly	111302126	chr7
-20	assembled-molecule	20	Chromosome	CM000095.5	=	CM000095.5	Primary	Assembly	111302126	20
+20	assembled-molecule	20	Chromosome	CM000095.5	<>	NW_003763686.1	Primary	Assembly	111302126	20

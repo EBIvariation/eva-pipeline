@@ -16,6 +16,7 @@
 package uk.ac.ebi.eva.utils;
 
 import org.springframework.util.Assert;
+import uk.ac.ebi.eva.pipeline.io.contig.ContigNaming;
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 
 import java.util.ArrayList;
@@ -95,6 +96,10 @@ public class EvaCommandLineBuilder {
 
     public EvaCommandLineBuilder inputAssemblyReport(String inputAssemblyReport) {
         return addString(JobParametersNames.INPUT_ASSEMBLY_REPORT, inputAssemblyReport);
+    }
+
+    public EvaCommandLineBuilder contigNaming(ContigNaming contigNaming) {
+        return addString(JobParametersNames.CONTIG_NAMING, contigNaming.toString());
     }
 
     public EvaCommandLineBuilder outputDirAnnotation(String outputDirAnnotation) {
