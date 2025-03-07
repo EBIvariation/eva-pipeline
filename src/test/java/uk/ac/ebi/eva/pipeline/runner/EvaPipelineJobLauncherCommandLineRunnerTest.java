@@ -123,6 +123,7 @@ public class EvaPipelineJobLauncherCommandLineRunnerTest {
             ClassNotFoundException, StorageManagerException, InstantiationException, IllegalAccessException {
         String databaseName = mongoRule.getRandomTemporaryDatabaseName();
         File inputFile = GenotypedVcfJobTestUtils.getInputFile();
+        String assemblyReport = GenotypedVcfJobTestUtils.getAssemblyReport();
         String outputDirStats = temporaryFolderRule.newFolder().getAbsolutePath();
         String outputDirAnnotation = temporaryFolderRule.newFolder().getAbsolutePath();
 
@@ -147,6 +148,7 @@ public class EvaPipelineJobLauncherCommandLineRunnerTest {
                 .dbCollectionsStatisticsName("populationStatistics")
                 .dbCollectionsVariantsName("variants")
                 .inputFasta(fasta.getAbsolutePath())
+                .inputAssemblyReport(assemblyReport)
                 .inputStudyId(GenotypedVcfJobTestUtils.INPUT_STUDY_ID)
                 .inputStudyName("small vcf")
                 .inputStudyType("COLLECTION")
@@ -189,10 +191,12 @@ public class EvaPipelineJobLauncherCommandLineRunnerTest {
             ClassNotFoundException, StorageManagerException, InstantiationException, IllegalAccessException {
         String databaseName = mongoRule.getRandomTemporaryDatabaseName();
         File inputFile = GenotypedVcfJobTestUtils.getInputFile();
+        String assemblyReport = GenotypedVcfJobTestUtils.getAssemblyReport();
 
         evaPipelineJobLauncherCommandLineRunner.setJobNames(GENOTYPED_VCF_JOB);
         EvaCommandLineBuilder evaCommandLineBuilderWithoutChunksize = new EvaCommandLineBuilder()
                 .inputVcf(inputFile.getAbsolutePath())
+                .inputAssemblyReport(assemblyReport)
                 .inputVcfAggregation("NONE")
                 .inputStudyName("small vcf")
                 .inputStudyId(GenotypedVcfJobTestUtils.INPUT_STUDY_ID)
@@ -241,6 +245,7 @@ public class EvaPipelineJobLauncherCommandLineRunnerTest {
 
         String databaseName = mongoRule.getRandomTemporaryDatabaseName();
         File inputFile = GenotypedVcfJobTestUtils.getInputFile();
+        String assemblyReport = GenotypedVcfJobTestUtils.getAssemblyReport();
         String outputDirStats = temporaryFolderRule.newFolder().getAbsolutePath();
         String outputDirAnnotation = temporaryFolderRule.newFolder().getAbsolutePath();
 
@@ -267,6 +272,7 @@ public class EvaPipelineJobLauncherCommandLineRunnerTest {
                 .appVepPath(GenotypedVcfJobTestUtils.getMockVep().getPath())
                 .appVepTimeout("60")
                 .inputFasta(fasta.getAbsolutePath())
+                .inputAssemblyReport(assemblyReport)
                 .build()
         );
 
@@ -304,6 +310,7 @@ public class EvaPipelineJobLauncherCommandLineRunnerTest {
     public void resumeFailingJobFromCorrectStep() throws Exception {
         String databaseName = mongoRule.getRandomTemporaryDatabaseName();
         File inputFile = GenotypedVcfJobTestUtils.getInputFile();
+        String assemblyReport = GenotypedVcfJobTestUtils.getAssemblyReport();
 
         String outputDirStats = temporaryFolderRule.newFolder().getAbsolutePath();
         String outputDirAnnotation = temporaryFolderRule.newFolder().getAbsolutePath();
@@ -328,6 +335,7 @@ public class EvaPipelineJobLauncherCommandLineRunnerTest {
                 .dbCollectionsStatisticsName("populationStatistics")
                 .dbCollectionsVariantsName("variants")
                 .inputFasta(fasta.getAbsolutePath())
+                .inputAssemblyReport(assemblyReport)
                 .inputStudyId(GenotypedVcfJobTestUtils.INPUT_STUDY_ID)
                 .inputStudyName("small vcf")
                 .inputStudyType("COLLECTION")

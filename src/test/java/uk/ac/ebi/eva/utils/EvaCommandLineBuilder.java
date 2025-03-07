@@ -16,7 +16,6 @@
 package uk.ac.ebi.eva.utils;
 
 import org.springframework.util.Assert;
-
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 
 import java.util.ArrayList;
@@ -92,6 +91,10 @@ public class EvaCommandLineBuilder {
 
     public EvaCommandLineBuilder inputFasta(String inputFasta) {
         return addString(JobParametersNames.INPUT_FASTA, inputFasta);
+    }
+
+    public EvaCommandLineBuilder inputAssemblyReport(String inputAssemblyReport) {
+        return addString(JobParametersNames.INPUT_ASSEMBLY_REPORT, inputAssemblyReport);
     }
 
     public EvaCommandLineBuilder outputDirAnnotation(String outputDirAnnotation) {

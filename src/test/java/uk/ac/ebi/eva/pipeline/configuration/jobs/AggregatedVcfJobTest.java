@@ -111,6 +111,7 @@ public class AggregatedVcfJobTest {
                 .inputStudyName("inputStudyName")
                 .inputStudyType("COLLECTION")
                 .inputVcf(getResource(INPUT).getAbsolutePath())
+                .inputAssemblyReport(GenotypedVcfJobTestUtils.getAssemblyReport())
                 .inputVcfAggregation("BASIC")
                 .inputVcfId("1")
                 .timestamp()

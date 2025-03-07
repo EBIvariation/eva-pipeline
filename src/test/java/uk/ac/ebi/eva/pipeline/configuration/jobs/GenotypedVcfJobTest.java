@@ -72,6 +72,7 @@ public class GenotypedVcfJobTest {
     @Test
     public void fullGenotypedVcfJob() throws Exception {
         File inputFile = GenotypedVcfJobTestUtils.getInputFile();
+        String assemblyReport = GenotypedVcfJobTestUtils.getAssemblyReport();
         File mockVep = GenotypedVcfJobTestUtils.getMockVep();
         String databaseName = mongoRule.getRandomTemporaryDatabaseName();
 
@@ -94,6 +95,7 @@ public class GenotypedVcfJobTest {
                 .collectionVariantsName(GenotypedVcfJobTestUtils.COLLECTION_VARIANTS_NAME)
                 .databaseName(databaseName)
                 .inputFasta(fasta.getAbsolutePath())
+                .inputAssemblyReport(assemblyReport)
                 .inputStudyId(GenotypedVcfJobTestUtils.INPUT_STUDY_ID)
                 .inputStudyName("inputStudyName")
                 .inputStudyType("COLLECTION")

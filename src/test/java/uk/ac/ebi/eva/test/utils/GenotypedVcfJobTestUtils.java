@@ -43,6 +43,8 @@ public class GenotypedVcfJobTestUtils {
 
     private static final String INPUT_FILE = "/input-files/vcf/genotyped.vcf.gz";
 
+    private static final String INPUT_ASSEMBLY_REPORT = "/input-files/assembly-report/assembly_report.txt";
+
     public static final String COLLECTION_FILES_NAME = "files";
 
     public static final String COLLECTION_VARIANTS_NAME = "variants";
@@ -153,6 +155,10 @@ public class GenotypedVcfJobTestUtils {
 
     public static File getInputFile() {
         return getResource(INPUT_FILE);
+    }
+
+    public static String getAssemblyReport() {
+        return "file://" + getResource(INPUT_ASSEMBLY_REPORT).getAbsolutePath();
     }
 
     public static File getMockVep() {
