@@ -38,6 +38,7 @@ import uk.ac.ebi.eva.test.configuration.TemporaryRuleConfiguration;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 import uk.ac.ebi.eva.utils.EvaJobParameterBuilder;
 
+import java.util.ArrayList;
 import java.util.Spliterators;
 import java.util.stream.StreamSupport;
 
@@ -141,8 +142,14 @@ public class LoadVariantsStepTest {
         // All the contigs should be translated
         MongoCursor<Document> mongoCursor = mongoRule.getCollection(databaseName, COLLECTION_VARIANTS_NAME).find().iterator();
         StreamSupport.stream(Spliterators.spliteratorUnknownSize(mongoCursor, 0), false)
-                .map(doc -> doc.get("chr"))
-                .allMatch(chr -> chr.equals("CM000095.5"));
+                .forEach(doc -> {
+                    assertEquals("CM000095.5", doc.get("chr"));
+                    assertTrue(doc.get("_id").toString().startsWith("CM000095.5"));
+                    ((Document) doc.get("_at")).get("chunkIds", ArrayList.class).stream()
+                            .forEach(chunk -> assertTrue(chunk.toString().startsWith("CM000095.5")));
+                    doc.get("hgvs", ArrayList.class).stream()
+                            .forEach(hgvs -> assertTrue(((Document) hgvs).get("name").toString().startsWith("CM000095.5")));
+                });
     }
 
 
