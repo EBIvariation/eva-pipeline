@@ -16,6 +16,7 @@ import java.net.MalformedURLException;
  *
  * @see <a href="ftp://ftp.ncbi.nih.gov/genomes/refseq/vertebrate_mammalian/Canis_lupus/all_assembly_versions/GCF_000002285.3_CanFam3.1/GCF_000002285.3_CanFam3.1_assembly_report.txt">RefSeq Assembly Report</a>
  */
+//TODO: This file is copied from eva-accession, we should refactor this to put it in variation-commons and refer from there
 public class AssemblyReportReader implements ItemReader<ContigSynonyms> {
 
     private static final int SEQNAME_COLUMN = 0;

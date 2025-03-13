@@ -1,5 +1,6 @@
 package uk.ac.ebi.eva.pipeline.io.contig;
 
+//TODO: This file is copied from eva-accession, we should refactor this to put it in variation-commons and refer from there
 public class ContigSynonyms {
 
     private String sequenceName;

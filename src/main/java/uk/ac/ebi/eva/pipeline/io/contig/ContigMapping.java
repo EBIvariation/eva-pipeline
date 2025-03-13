@@ -8,6 +8,7 @@ import java.util.Map;
 
 import static org.springframework.util.StringUtils.hasText;
 
+//TODO: This file is copied from eva-accession, we should refactor this to put it in variation-commons and refer from there
 public class ContigMapping {
 
     private static final String ASSEMBLED_MOLECULE = "assembled-molecule";
