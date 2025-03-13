@@ -210,6 +210,7 @@ public class GenotypedVcfJobWorkflowTest {
 
     private EvaJobParameterBuilder initVariantConfigurationJob() throws IOException {
         File inputFile = getResource(INPUT_FILE);
+        String assemblyReport = GenotypedVcfJobTestUtils.getAssemblyReport();
         String dbName = mongoRule.getRandomTemporaryDatabaseName();
         String outputDirStats = temporaryFolderRule.newFolder().getAbsolutePath();
         String outputDirAnnotation = temporaryFolderRule.newFolder().getAbsolutePath();
@@ -223,6 +224,7 @@ public class GenotypedVcfJobWorkflowTest {
                 .collectionVariantsName("variants")
                 .databaseName(dbName)
                 .inputFasta(fasta.getAbsolutePath())
+                .inputAssemblyReport(assemblyReport)
                 .inputStudyId("genotyped-job-workflow")
                 .inputStudyName("inputStudyName")
                 .inputStudyType("COLLECTION")

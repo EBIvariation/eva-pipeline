@@ -15,7 +15,10 @@
  */
 package uk.ac.ebi.eva.pipeline.configuration.jobs;
 
-import org.junit.*;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.opencb.biodata.models.variant.Variant;
 import org.opencb.datastore.core.QueryOptions;
@@ -45,15 +48,17 @@ import uk.ac.ebi.eva.utils.EvaJobParameterBuilder;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static uk.ac.ebi.eva.test.utils.GenotypedVcfJobTestUtils.COLLECTION_ANNOTATIONS_NAME;
 import static uk.ac.ebi.eva.test.utils.JobTestUtils.assertCompleted;
-import static uk.ac.ebi.eva.test.utils.JobTestUtils.assertFailed;
 import static uk.ac.ebi.eva.utils.FileUtils.getResource;
 
 /**
@@ -101,6 +106,7 @@ public class LoadVcfJobTest {
                 .inputStudyName("inputStudyName")
                 .inputStudyType("COLLECTION")
                 .inputVcf(getResource(INPUT).getAbsolutePath())
+                .inputAssemblyReport(GenotypedVcfJobTestUtils.getAssemblyReport())
                 .inputVcfAggregation("BASIC")
                 .inputVcfId("1")
                 .timestamp()
@@ -138,6 +144,7 @@ public class LoadVcfJobTest {
         File inputFile = GenotypedVcfJobTestUtils.getInputFile();
         String databaseName = mongoRule.getRandomTemporaryDatabaseName();
         File fasta = temporaryFolderRule.newFile();
+        String assemblyReport = GenotypedVcfJobTestUtils.getAssemblyReport();
 
         // Run the Job
         JobParameters jobParameters = new EvaJobParameterBuilder()
@@ -145,6 +152,7 @@ public class LoadVcfJobTest {
                 .collectionVariantsName(GenotypedVcfJobTestUtils.COLLECTION_VARIANTS_NAME)
                 .databaseName(databaseName)
                 .inputFasta(fasta.getAbsolutePath())
+                .inputAssemblyReport(assemblyReport)
                 .inputStudyId(GenotypedVcfJobTestUtils.INPUT_STUDY_ID)
                 .inputStudyName("inputStudyName")
                 .inputStudyType("COLLECTION")

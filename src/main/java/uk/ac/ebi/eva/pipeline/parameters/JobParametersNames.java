@@ -45,6 +45,10 @@ public class JobParametersNames {
 
     public static final String INPUT_ACCESSION_REPORT = "input.accession.report";
 
+    public static final String INPUT_ASSEMBLY_REPORT = "input.assembly.report";
+
+    public static final String CONTIG_NAMING = "contig.naming";
+
     /*
      * Output
      */

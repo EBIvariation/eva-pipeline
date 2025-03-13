@@ -20,6 +20,7 @@ import org.opencb.biodata.models.variant.VariantStudy;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import uk.ac.ebi.eva.pipeline.io.contig.ContigNaming;
 
 /**
  * Service that holds access to Job input parameters.
@@ -63,6 +64,12 @@ public class InputParameters {
     @Value(PARAMETER + JobParametersNames.INPUT_ACCESSION_REPORT + END)
     private String accessionReport;
 
+    @Value(PARAMETER + JobParametersNames.INPUT_ASSEMBLY_REPORT + END)
+    private String assemblyReport;
+
+    @Value(PARAMETER + JobParametersNames.CONTIG_NAMING + "']?:'NO_REPLACEMENT'}")
+    private ContigNaming contigNaming;
+
     public String getVcf() {
         return vcf;
     }
@@ -101,5 +108,13 @@ public class InputParameters {
 
     public String getAccessionReport() {
         return accessionReport;
+    }
+
+    public String getAssemblyReport() {
+        return assemblyReport;
+    }
+
+    public ContigNaming getContigNaming() {
+        return contigNaming;
     }
 }

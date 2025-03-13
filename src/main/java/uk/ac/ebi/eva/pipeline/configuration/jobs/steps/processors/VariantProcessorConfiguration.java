@@ -22,8 +22,11 @@ import org.springframework.batch.item.support.CompositeItemProcessor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import uk.ac.ebi.eva.commons.models.data.Variant;
+import uk.ac.ebi.eva.pipeline.io.contig.ContigMapping;
+import uk.ac.ebi.eva.pipeline.jobs.steps.processors.ContigToGenbankReplacerProcessor;
 import uk.ac.ebi.eva.pipeline.jobs.steps.processors.ExcludeStructuralVariantsProcessor;
 import uk.ac.ebi.eva.pipeline.jobs.steps.processors.VariantNoAlternateFilterProcessor;
+import uk.ac.ebi.eva.pipeline.parameters.InputParameters;
 
 import java.util.Arrays;
 
@@ -39,10 +42,11 @@ public class VariantProcessorConfiguration {
     @StepScope
     public ItemProcessor<Variant, Variant> compositeVariantProcessor(
             VariantNoAlternateFilterProcessor variantNoAlternateFilterProcessor,
-            ExcludeStructuralVariantsProcessor excludeStructuralVariantsProcessor) {
+            ExcludeStructuralVariantsProcessor excludeStructuralVariantsProcessor,
+            ContigToGenbankReplacerProcessor contigToGenbankReplacerProcessor) {
         CompositeItemProcessor<Variant, Variant> compositeProcessor = new CompositeItemProcessor<>();
         compositeProcessor.setDelegates(Arrays.asList(variantNoAlternateFilterProcessor,
-                excludeStructuralVariantsProcessor));
+                excludeStructuralVariantsProcessor, contigToGenbankReplacerProcessor));
 
         return compositeProcessor;
     }
@@ -55,5 +59,18 @@ public class VariantProcessorConfiguration {
     @Bean
     public VariantNoAlternateFilterProcessor variantNoAlternateFilterProcessor() {
         return new VariantNoAlternateFilterProcessor();
+    }
+
+    @Bean
+    @StepScope
+    public ContigToGenbankReplacerProcessor contigToGenbankReplacerProcessor(ContigMapping contigMapping,
+                                                                             InputParameters parameters) {
+        return new ContigToGenbankReplacerProcessor(contigMapping, parameters.getContigNaming());
+    }
+
+    @Bean
+    @StepScope
+    public ContigMapping contigMapping(InputParameters parameters) throws Exception {
+        return new ContigMapping(parameters.getAssemblyReport());
     }
 }
