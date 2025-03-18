@@ -38,8 +38,6 @@ public class VariantSourceEntityMongoWriter extends MongoItemWriter<VariantSourc
 
     private static final Logger logger = LoggerFactory.getLogger(VariantSourceEntityMongoWriter.class);
 
-    public static final String UNIQUE_FILE_INDEX_NAME = "unique_file";
-
     private MongoOperations mongoOperations;
 
     private String collection;
