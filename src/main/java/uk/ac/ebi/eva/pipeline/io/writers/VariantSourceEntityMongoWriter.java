@@ -80,7 +80,7 @@ public class VariantSourceEntityMongoWriter extends MongoItemWriter<VariantSourc
         mongoOperations.getCollection(collection).createIndex(
                 new Document(VariantSourceEntity.STUDYID_FIELD, 1).append(VariantSourceEntity.FILEID_FIELD, 1)
                         .append(VariantSourceEntity.FILENAME_FIELD, 1), new IndexOptions().background(true)
-                        .unique(true).name(UNIQUE_FILE_INDEX_NAME));
+                        .unique(true));
     }
 
     private Document convertToMongo(VariantSourceEntity variantSourceEntity) {
