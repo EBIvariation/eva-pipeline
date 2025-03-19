@@ -29,5 +29,8 @@ jobs:
           mkdir -p data/db
           mongod --dbpath=data/db &
           mongod --version
+          wget -q https://fastdl.mongodb.org/tools/db/mongodb-database-tools-ubuntu2404-x86_64-100.11.0.deb
+          sudo apt install ./mongodb-database-tools-ubuntu2404-x86_64-100.11.0.deb
+          mongorestore --version
       - name: Run Maven tests
         run: mvn test
