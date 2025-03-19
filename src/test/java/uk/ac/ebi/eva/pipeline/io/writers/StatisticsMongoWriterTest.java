@@ -124,7 +124,6 @@ public class StatisticsMongoWriterTest {
         indexes.add(new Document("v", 2)
                 .append("key", new Document("_id", 1))
                 .append("name", "_id_")
-                .append("ns", databaseName + ".populationStatistics")
         );
         indexes.add(new Document("v", 2)
                 .append("unique", true)
@@ -135,7 +134,6 @@ public class StatisticsMongoWriterTest {
                         .append("sid", 1)
                         .append("cid", 1))
                 .append("name", "vscid")
-                .append("ns", databaseName + ".populationStatistics")
         );
 
         List<Document> indexInfo = new ArrayList<>();
