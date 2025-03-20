@@ -45,6 +45,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -117,7 +118,7 @@ public class StatisticsMongoWriterTest {
         statisticsMongoWriter.write(populationStatisticsList);
 
         // do the checks
-        MongoCollection statsCollection = mongoRule.getCollection(databaseName, COLLECTION_STATS_NAME);
+        MongoCollection<Document> statsCollection = mongoRule.getCollection(databaseName, COLLECTION_STATS_NAME);
 
         // check there is an index in chr + start + ref + alt + sid + cid
         List<Document> indexes = new ArrayList<>();
@@ -136,8 +137,9 @@ public class StatisticsMongoWriterTest {
                 .append("name", "vscid")
         );
 
-        List<Document> indexInfo = new ArrayList<>();
-        statsCollection.listIndexes().forEach((Block<Document>) indexInfo::add);
+        List<Document> indexInfo = statsCollection.listIndexes().into(new ArrayList<>()).stream()
+                                                  .map(d -> (Document)(d.containsKey("ns") ? d.remove("ns") : d))
+                                                  .collect(Collectors.toList());
 
         assertEquals(indexes, indexInfo);
     }

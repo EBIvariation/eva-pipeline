@@ -81,7 +81,9 @@ public class CreateDatabaseIndexesStepTest {
                 .append("sparse", true);
         String expectedIndexes = Stream.of(idIndex, nameIndex).map(Object::toString).collect(Collectors.joining());
 
-        String actualIndexes = genesCollection.listIndexes().into(new ArrayList<>()).stream().map(Object::toString)
+        String actualIndexes = genesCollection.listIndexes().into(new ArrayList<>()).stream()
+                .map(d -> d.containsKey("ns") ? d.remove("ns") : d)
+                .map(Object::toString)
                 .collect(Collectors.joining());
         assertEquals(expectedIndexes, actualIndexes);
     }
