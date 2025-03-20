@@ -211,11 +211,11 @@ public class VariantSourceEntityMongoWriterTest {
         Set<String> createdIndexes = indexInfo.stream().map(index -> index.get("name").toString())
                 .collect(Collectors.toSet());
         Set<String> expectedIndexes = new HashSet<>();
-        expectedIndexes.addAll(Arrays.asList(VariantSourceEntityMongoWriter.UNIQUE_FILE_INDEX_NAME, "_id_"));
+        expectedIndexes.addAll(Arrays.asList("sid_1_fid_1_fname_1", "_id_"));
         assertEquals(expectedIndexes, createdIndexes);
 
         Document uniqueIndex = indexInfo.stream().filter(
-                index -> (VariantSourceEntityMongoWriter.UNIQUE_FILE_INDEX_NAME.equals(index.get("name").toString())))
+                index -> ("sid_1_fid_1_fname_1".equals(index.get("name").toString())))
                         .findFirst().get();
         assertNotNull(uniqueIndex);
         assertEquals("true", uniqueIndex.get(MongoDBHelper.UNIQUE_INDEX).toString());

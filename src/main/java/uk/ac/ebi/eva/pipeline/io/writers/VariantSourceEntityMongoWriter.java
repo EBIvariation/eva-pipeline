@@ -38,8 +38,6 @@ public class VariantSourceEntityMongoWriter extends MongoItemWriter<VariantSourc
 
     private static final Logger logger = LoggerFactory.getLogger(VariantSourceEntityMongoWriter.class);
 
-    public static final String UNIQUE_FILE_INDEX_NAME = "unique_file";
-
     private MongoOperations mongoOperations;
 
     private String collection;
@@ -80,7 +78,7 @@ public class VariantSourceEntityMongoWriter extends MongoItemWriter<VariantSourc
         mongoOperations.getCollection(collection).createIndex(
                 new Document(VariantSourceEntity.STUDYID_FIELD, 1).append(VariantSourceEntity.FILEID_FIELD, 1)
                         .append(VariantSourceEntity.FILENAME_FIELD, 1), new IndexOptions().background(true)
-                        .unique(true).name(UNIQUE_FILE_INDEX_NAME));
+                        .unique(true));
     }
 
     private Document convertToMongo(VariantSourceEntity variantSourceEntity) {
