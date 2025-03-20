@@ -138,7 +138,7 @@ public class StatisticsMongoWriterTest {
         );
 
         List<Document> indexInfo = statsCollection.listIndexes().into(new ArrayList<>()).stream()
-                                                  .map(d -> (Document)(d.containsKey("ns") ? d.remove("ns") : d))
+                                                  .peek(d -> d.remove("ns"))
                                                   .collect(Collectors.toList());
 
         assertEquals(indexes, indexInfo);

@@ -82,7 +82,7 @@ public class CreateDatabaseIndexesStepTest {
         String expectedIndexes = Stream.of(idIndex, nameIndex).map(Object::toString).collect(Collectors.joining());
 
         String actualIndexes = genesCollection.listIndexes().into(new ArrayList<>()).stream()
-                .map(d -> d.containsKey("ns") ? d.remove("ns") : d)
+                .peek(d -> d.remove("ns"))
                 .map(Object::toString)
                 .collect(Collectors.joining());
         assertEquals(expectedIndexes, actualIndexes);
