@@ -75,14 +75,15 @@ public class CreateDatabaseIndexesStepTest {
 
         MongoCollection<Document> genesCollection = mongoRule.getCollection(databaseName, COLLECTION_FEATURES_NAME);
 
-        Document idIndex = new Document("v", "2").append("key", new Document("_id", 1)).append("name", "_id_")
-                .append("ns", databaseName + "." + COLLECTION_FEATURES_NAME);
+        Document idIndex = new Document("v", "2").append("key", new Document("_id", 1)).append("name", "_id_");
         Document nameIndex = new Document("v", "2").append("key", new Document("name", 1)).append("name", "name_1")
-                .append("ns", databaseName + "." + COLLECTION_FEATURES_NAME).append("background", true)
+                .append("background", true)
                 .append("sparse", true);
         String expectedIndexes = Stream.of(idIndex, nameIndex).map(Object::toString).collect(Collectors.joining());
 
-        String actualIndexes = genesCollection.listIndexes().into(new ArrayList<>()).stream().map(Object::toString)
+        String actualIndexes = genesCollection.listIndexes().into(new ArrayList<>()).stream()
+                .peek(d -> d.remove("ns"))
+                .map(Object::toString)
                 .collect(Collectors.joining());
         assertEquals(expectedIndexes, actualIndexes);
     }
