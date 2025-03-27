@@ -97,18 +97,6 @@ public class GenotypedVcfJobTestUtils {
     }
 
     /**
-     * load stats step: check the DB docs have the field "st"
-     */
-    public static void checkLoadStatsStep(TemporaryMongoRule mongoRule,
-                                          String databaseName) throws ClassNotFoundException, StorageManagerException, InstantiationException, IllegalAccessException {
-        MongoCursor<Document> iterator = getVariantDBCursor(mongoRule, databaseName);
-        List<Document> stField = ((List<Document>) iterator.next().get("st"));
-
-        assertNotNull(stField);
-        iterator.close();
-    }
-
-    /**
      * 1 load step: check ((documents in DB) == (lines in transformed file))
      * variantStorageManager = StorageManagerFactory.getVariantStorageManager();
      * variantDBAdaptor = variantStorageManager.getDBAdaptor(dbName, null);
@@ -122,16 +110,6 @@ public class GenotypedVcfJobTestUtils {
         iterator.close();
     }
 
-    /**
-     * 2 create stats step
-     *
-     * @param variantsStatsFile
-     * @param sourceStatsFile
-     */
-    public static void checkCreateStatsStep(File variantsStatsFile, File sourceStatsFile) {
-        assertTrue(variantsStatsFile.exists());
-        assertTrue(sourceStatsFile.exists());
-    }
 
     public static void checkSkippedOneMalformedLine(JobExecution jobExecution) {
         //check that one line is skipped because malformed

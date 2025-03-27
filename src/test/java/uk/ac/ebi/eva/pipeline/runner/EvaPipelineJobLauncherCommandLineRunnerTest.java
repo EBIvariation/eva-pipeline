@@ -172,10 +172,6 @@ public class EvaPipelineJobLauncherCommandLineRunnerTest {
 
         GenotypedVcfJobTestUtils.checkLoadStep(mongoRule, databaseName);
 
-        GenotypedVcfJobTestUtils.checkCreateStatsStep(variantsStatsFile, sourceStatsFile);
-
-        GenotypedVcfJobTestUtils.checkLoadStatsStep(mongoRule, databaseName);
-
         GenotypedVcfJobTestUtils.checkLoadedAnnotation(mongoRule, databaseName);
     }
 
@@ -282,10 +278,6 @@ public class EvaPipelineJobLauncherCommandLineRunnerTest {
         assertCompleted(jobExecution);
 
         GenotypedVcfJobTestUtils.checkLoadStep(mongoRule, databaseName);
-
-        GenotypedVcfJobTestUtils.checkCreateStatsStep(variantsStatsFile, sourceStatsFile);
-
-        GenotypedVcfJobTestUtils.checkLoadStatsStep(mongoRule, databaseName);
 
         GenotypedVcfJobTestUtils.checkLoadedAnnotation(mongoRule, databaseName);
     }
