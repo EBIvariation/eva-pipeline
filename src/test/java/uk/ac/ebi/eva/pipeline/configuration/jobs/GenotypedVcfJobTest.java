@@ -119,10 +119,6 @@ public class GenotypedVcfJobTest {
 
         GenotypedVcfJobTestUtils.checkLoadStep(mongoRule, databaseName);
 
-        GenotypedVcfJobTestUtils.checkCreateStatsStep(variantsStatsFile, sourceStatsFile);
-
-        GenotypedVcfJobTestUtils.checkLoadStatsStep(mongoRule, databaseName);
-
         GenotypedVcfJobTestUtils.checkLoadedAnnotation(mongoRule, databaseName);
     }
 

@@ -88,9 +88,6 @@ public class GenotypedVcfJobWorkflowTest {
     public static final Set<String> EXPECTED_REQUIRED_STEP_NAMES = new TreeSet<>(
             Arrays.asList(BeanNames.LOAD_VARIANTS_STEP, BeanNames.LOAD_FILE_STEP));
 
-    public static final Set<String> EXPECTED_STATS_STEP_NAMES = new TreeSet<>(
-            Arrays.asList(BeanNames.CALCULATE_STATISTICS_STEP, BeanNames.LOAD_STATISTICS_STEP));
-
     public static final Set<String> EXPECTED_ANNOTATION_STEP_NAMES = new TreeSet<>(Arrays.asList(
             BeanNames.GENERATE_VEP_ANNOTATION_STEP,
             BeanNames.LOAD_ANNOTATION_METADATA_STEP));
@@ -116,7 +113,6 @@ public class GenotypedVcfJobWorkflowTest {
         Set<String> parallelStepNamesToCheck = new TreeSet<>();
         parallelStepNamesToCheck.addAll(EXPECTED_REQUIRED_STEP_NAMES);
         parallelStepNamesToCheck.addAll(EXPECTED_ANNOTATION_STEP_NAMES);
-        parallelStepNamesToCheck.addAll(EXPECTED_STATS_STEP_NAMES);
 
         assertEquals(parallelStepNamesToCheck, parallelStepNamesExecuted);
 
@@ -124,12 +120,8 @@ public class GenotypedVcfJobWorkflowTest {
         assertEquals(BeanNames.LOAD_FILE_STEP, lastRequiredStep.getStepName());
 
         assertTrue(lastRequiredStep.getEndTime()
-                .before(nameToStepExecution.get(BeanNames.CALCULATE_STATISTICS_STEP).getStartTime()));
-        assertTrue(lastRequiredStep.getEndTime()
                 .before(nameToStepExecution.get(BeanNames.GENERATE_VEP_ANNOTATION_STEP).getStartTime()));
 
-        assertTrue(nameToStepExecution.get(BeanNames.CALCULATE_STATISTICS_STEP).getEndTime()
-                .before(nameToStepExecution.get(BeanNames.LOAD_STATISTICS_STEP).getStartTime()));
         assertTrue(nameToStepExecution.get(BeanNames.GENERATE_VEP_ANNOTATION_STEP).getEndTime()
                 .before(nameToStepExecution.get(BeanNames.LOAD_ANNOTATION_METADATA_STEP).getStartTime()));
     }
@@ -149,35 +141,6 @@ public class GenotypedVcfJobWorkflowTest {
     }
 
     @Test
-    public void statsStepsShouldBeSkipped() throws Exception {
-        EvaJobParameterBuilder builder = initVariantConfigurationJob();
-        JobParameters jobParameters = builder.statisticsSkip(true).toJobParameters();
-
-        JobExecution execution = jobLauncherTestUtils.launchJob(jobParameters);
-        assertCompleted(execution);
-
-        Collection<StepExecution> stepExecutions = execution.getStepExecutions();
-        Map<String, StepExecution> nameToStepExecution = stepExecutions.stream().collect(
-                Collectors.toMap(StepExecution::getStepName, Function.identity()));
-
-        Set<String> parallelStepNamesExecuted = nameToStepExecution.keySet();
-        Set<String> parallelStepNamesToCheck = new TreeSet<>();
-        parallelStepNamesToCheck.addAll(EXPECTED_REQUIRED_STEP_NAMES);
-        parallelStepNamesToCheck.addAll(EXPECTED_ANNOTATION_STEP_NAMES);
-
-        assertEquals(parallelStepNamesToCheck, parallelStepNamesExecuted);
-
-        StepExecution lastRequiredStep = new ArrayList<>(stepExecutions).get(EXPECTED_REQUIRED_STEP_NAMES.size() - 1);
-        assertEquals(BeanNames.LOAD_FILE_STEP, lastRequiredStep.getStepName());
-
-        assertTrue(lastRequiredStep.getEndTime()
-                .before(nameToStepExecution.get(BeanNames.GENERATE_VEP_ANNOTATION_STEP).getStartTime()));
-
-        assertTrue(nameToStepExecution.get(BeanNames.GENERATE_VEP_ANNOTATION_STEP).getEndTime()
-                .before(nameToStepExecution.get(BeanNames.LOAD_ANNOTATION_METADATA_STEP).getStartTime()));
-    }
-
-    @Test
     public void annotationStepsShouldBeSkipped() throws Exception {
         EvaJobParameterBuilder builder = initVariantConfigurationJob();
         JobParameters jobParameters = builder.annotationSkip(true).toJobParameters();
@@ -192,7 +155,6 @@ public class GenotypedVcfJobWorkflowTest {
         Set<String> parallelStepNamesExecuted = nameToStepExecution.keySet();
         Set<String> parallelStepNamesToCheck = new TreeSet<>();
         parallelStepNamesToCheck.addAll(EXPECTED_REQUIRED_STEP_NAMES);
-        parallelStepNamesToCheck.addAll(EXPECTED_STATS_STEP_NAMES);
 
         assertEquals(parallelStepNamesToCheck, parallelStepNamesExecuted);
 
@@ -200,12 +162,6 @@ public class GenotypedVcfJobWorkflowTest {
         assertEquals(BeanNames.LOAD_FILE_STEP, lastRequiredStep.getStepName());
 
         assertEquals(parallelStepNamesToCheck, parallelStepNamesExecuted);
-
-        assertTrue(lastRequiredStep.getEndTime().before(nameToStepExecution.get(
-                BeanNames.CALCULATE_STATISTICS_STEP).getStartTime()));
-
-        assertTrue(nameToStepExecution.get(BeanNames.CALCULATE_STATISTICS_STEP).getEndTime()
-                .before(nameToStepExecution.get(BeanNames.LOAD_STATISTICS_STEP).getStartTime()));
     }
 
     private EvaJobParameterBuilder initVariantConfigurationJob() throws IOException {

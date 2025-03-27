@@ -64,6 +64,8 @@ public class JobParametersNames {
      * Database infrastructure (Spring Data)
      */
 
+    public static final String CONFIG_DB_URI = "spring.data.mongodb.uri";
+
     public static final String CONFIG_DB_HOSTS = "spring.data.mongodb.host";
 
     public static final String CONFIG_DB_AUTHENTICATIONDB = "spring.data.mongodb.authentication-database";

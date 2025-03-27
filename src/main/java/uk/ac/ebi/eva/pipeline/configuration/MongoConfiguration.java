@@ -18,11 +18,6 @@ package uk.ac.ebi.eva.pipeline.configuration;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
 import com.mongodb.WriteConcern;
-import org.opencb.datastore.core.config.DataStoreServerAddress;
-import org.opencb.opencga.lib.auth.IllegalOpenCGACredentialsException;
-import org.opencb.opencga.storage.core.variant.adaptors.VariantDBAdaptor;
-import org.opencb.opencga.storage.mongodb.utils.MongoCredentials;
-import org.opencb.opencga.storage.mongodb.variant.VariantMongoDBAdaptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.configuration.annotation.StepScope;
@@ -43,7 +38,6 @@ import uk.ac.ebi.eva.pipeline.parameters.MongoConnectionDetails;
 
 import java.io.UnsupportedEncodingException;
 import java.net.UnknownHostException;
-import java.util.List;
 
 /**
  * Utility class dealing with MongoDB connections using pipeline options
@@ -90,6 +84,18 @@ public class MongoConfiguration {
     public static MongoClientURI constructMongoClientURI(String databaseName,
                                                          MongoConnectionDetails mongoConnectionDetails)
             throws UnsupportedEncodingException {
+        if (mongoConnectionDetails.getUri() != null) {
+            // Modify URI to connect to the specific database
+            String uri = mongoConnectionDetails.getUri();
+            if (uri.contains("?")) {
+                int idx = uri.indexOf("?");
+                return new MongoClientURI(uri.substring(0, idx) + databaseName + uri.substring(idx));
+            } else if (uri.endsWith("/")) {
+                return new MongoClientURI(uri + databaseName);
+            } else {
+                return new MongoClientURI(uri + "/" + databaseName);
+            }
+        }
         return MongoUtils.constructMongoClientURI(mongoConnectionDetails.getHosts(),
                                                   null,
                                                   databaseName,
@@ -110,31 +116,6 @@ public class MongoConfiguration {
         mongoConverter.setMapKeyDotReplacement("£");
 
         return mongoConverter;
-    }
-
-    public static VariantDBAdaptor getDbAdaptor(DatabaseParameters dbParameters) throws UnknownHostException, IllegalOpenCGACredentialsException {
-        MongoCredentials credentials = getMongoCredentials(dbParameters);
-        String variantsCollectionName = dbParameters.getCollectionVariantsName();
-        String filesCollectionName = dbParameters.getCollectionFilesName();
-
-        logger.debug("Getting DBAdaptor to database '{}'", credentials.getMongoDbName());
-        return new VariantMongoDBAdaptor(credentials, variantsCollectionName, filesCollectionName);
-    }
-
-    private static MongoCredentials getMongoCredentials(DatabaseParameters dbParameters) throws IllegalOpenCGACredentialsException {
-        MongoConnectionDetails mongoConnection = dbParameters.getMongoConnectionDetails();
-        String hosts = mongoConnection.getHosts();
-        List<DataStoreServerAddress> dataStoreServerAddresses = MongoCredentials.parseDataStoreServerAddresses(hosts);
-
-        String dbName = dbParameters.getDatabaseName();
-        String user = mongoConnection.getUser();
-        String pass = mongoConnection.getPassword();
-        String authenticationMechanism = mongoConnection.getAuthenticationMechanism();
-
-        MongoCredentials mongoCredentials = new MongoCredentials(dataStoreServerAddresses, dbName, user, pass);
-        mongoCredentials.setAuthenticationDatabase(mongoConnection.getAuthenticationDatabase());
-        mongoCredentials.setAuthenticationMechanism(authenticationMechanism);
-        return mongoCredentials;
     }
 
 }

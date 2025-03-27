@@ -9,15 +9,21 @@ import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 @Configuration
 public class TemporaryRuleConfiguration {
 
-    @Value("${spring.data.mongodb.host}")
+    @Value("${spring.data.mongodb.host:#{null}}")
     String mongoHost;
 
-    @Value("${spring.data.mongodb.port}")
-    int mongoPort;
+    @Value("${spring.data.mongodb.port:#{null}}")
+    Integer mongoPort;
+
+    @Value("${spring.data.mongodb.uri:#{null}}")
+    String mongoUri;
 
     @Bean
     @Scope(value="prototype")
     public TemporaryMongoRule temporaryMongoRule(){
+        if (mongoUri != null && !mongoUri.isEmpty()) {
+            return new TemporaryMongoRule(mongoUri);
+        }
         return new TemporaryMongoRule(mongoHost, mongoPort);
     }
 }

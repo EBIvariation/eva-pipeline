@@ -47,16 +47,11 @@ public class BeanNames {
 
     public static final String VEP_ANNOTATION_FLOW = "vep-annotation-flow";
     public static final String VEP_ANNOTATION_OPTIONAL_FLOW = "vep-annotation-optional.flow";
-    public static final String PARALLEL_STATISTICS_AND_ANNOTATION = "parallel-statistics-and-annotation-flow";
-    public static final String CALCULATE_STATISTICS_FLOW = "calculate-statistics-flow";
-    public static final String CALCULATE_STATISTICS_OPTIONAL_FLOW = "calculate-statistics-optional-flow";
 
     public static final String LOAD_VEP_ANNOTATION_STEP = "load-vep-annotation-step";
-    public static final String CALCULATE_STATISTICS_STEP = "calculate-statistics-step";
     public static final String CREATE_DATABASE_INDEXES_STEP = "create-database-indexes-step";
     public static final String LOAD_FEATURE_COORDINATES_STEP = "load-feature-coordinates-step";
     public static final String GENERATE_VEP_ANNOTATION_STEP = "generate-vep-annotation";
-    public static final String LOAD_STATISTICS_STEP = "load-statistics-step";
     public static final String LOAD_VARIANTS_STEP = "load-variants-step";
     public static final String LOAD_FILE_STEP = "load-file-step";
     public static final String DROP_VARIANTS_BY_STUDY_STEP = "drop-variants-by-study-step";
@@ -72,7 +67,6 @@ public class BeanNames {
     public static final String INIT_DATABASE_JOB = "init-database-job";
     public static final String GENOTYPED_VCF_JOB = "genotyped-vcf-job";
     public static final String LOAD_VCF_JOB = "load-vcf-job";
-    public static final String CALCULATE_STATISTICS_JOB = "calculate-statistics-job";
     public static final String DROP_STUDY_JOB = "drop-study-job";
     public static final String ACCESSION_IMPORT_JOB = "accession-import-job";
     public static final String VARIANT_STATS_JOB = "variant-stats-job";
