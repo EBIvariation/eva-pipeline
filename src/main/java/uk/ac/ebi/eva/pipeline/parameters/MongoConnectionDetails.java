@@ -27,6 +27,9 @@ import org.springframework.stereotype.Service;
 @Service
 public class MongoConnectionDetails {
 
+    @Value("${" + JobParametersNames.CONFIG_DB_URI + ":#{null}}")
+    private String uri;
+
     @Value("${" + JobParametersNames.CONFIG_DB_HOSTS + ":#{null}}")
     private String hosts;
 
@@ -44,6 +47,10 @@ public class MongoConnectionDetails {
 
     @Value("${" + JobParametersNames.CONFIG_DB_READPREFERENCE + ":#{null}}")
     private String readPreference;
+
+    public String getUri() {
+        return uri;
+    }
 
     public String getHosts() {
         return hosts;

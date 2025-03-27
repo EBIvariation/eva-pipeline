@@ -90,6 +90,18 @@ public class MongoConfiguration {
     public static MongoClientURI constructMongoClientURI(String databaseName,
                                                          MongoConnectionDetails mongoConnectionDetails)
             throws UnsupportedEncodingException {
+        if (mongoConnectionDetails.getUri() != null) {
+            // Modify URI to connect to the specific database
+            String uri = mongoConnectionDetails.getUri();
+            if (uri.contains("?")) {
+                int idx = uri.indexOf("?");
+                return new MongoClientURI(uri.substring(0, idx) + databaseName + uri.substring(idx));
+            } else if (uri.endsWith("/")) {
+                return new MongoClientURI(uri + databaseName);
+            } else {
+                return new MongoClientURI(uri + "/" + databaseName);
+            }
+        }
         return MongoUtils.constructMongoClientURI(mongoConnectionDetails.getHosts(),
                                                   null,
                                                   databaseName,

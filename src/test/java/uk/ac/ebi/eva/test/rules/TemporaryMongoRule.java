@@ -17,6 +17,8 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class TemporaryMongoRule extends ExternalResource {
 
@@ -31,6 +33,18 @@ public class TemporaryMongoRule extends ExternalResource {
         databaseNames = new HashSet<>();
         this.mongoHost = mongoHost;
         this.mongoPort = mongoPort;
+    }
+
+    public TemporaryMongoRule(String mongoUri) {
+        databaseNames = new HashSet<>();
+        Pattern p = Pattern.compile("mongodb://(.*?):([0-9]+).*");
+        Matcher m = p.matcher(mongoUri);
+        if (m.find()) {
+            this.mongoHost = m.group(1);
+            this.mongoPort = Integer.parseInt(m.group(2));
+        } else {
+            throw new IllegalArgumentException("Invalid mongo URI: " + mongoUri);
+        }
     }
 
     @Override
