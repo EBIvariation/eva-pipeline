@@ -9,7 +9,7 @@ import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 @Configuration
 public class TemporaryRuleConfiguration {
 
-    @Value("${spring.data.mongodb.host}")
+    @Value("${spring.data.mongodb.host:#{null}}")
     String mongoHost;
 
     @Value("${spring.data.mongodb.port:#{null}}")
