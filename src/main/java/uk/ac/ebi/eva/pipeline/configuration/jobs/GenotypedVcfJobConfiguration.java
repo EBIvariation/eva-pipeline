@@ -32,7 +32,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
 
-import uk.ac.ebi.eva.pipeline.configuration.jobs.flows.ParallelStatisticsAndAnnotationFlowConfiguration;
+import uk.ac.ebi.eva.pipeline.configuration.jobs.flows.AnnotationFlowOptionalConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.jobs.steps.LoadFileStepConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.jobs.steps.LoadVariantsStepConfiguration;
 import uk.ac.ebi.eva.pipeline.parameters.NewJobIncrementer;
@@ -41,7 +41,7 @@ import uk.ac.ebi.eva.pipeline.parameters.validation.job.GenotypedVcfJobParameter
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.GENOTYPED_VCF_JOB;
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.LOAD_FILE_STEP;
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.LOAD_VARIANTS_STEP;
-import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.PARALLEL_STATISTICS_AND_ANNOTATION;
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VEP_ANNOTATION_OPTIONAL_FLOW;
 
 /**
  * Complete pipeline workflow:
@@ -54,14 +54,14 @@ import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.PARALLEL_STATISTICS
  */
 @Configuration
 @EnableBatchProcessing
-@Import({LoadVariantsStepConfiguration.class, LoadFileStepConfiguration.class, ParallelStatisticsAndAnnotationFlowConfiguration.class})
+@Import({LoadVariantsStepConfiguration.class, LoadFileStepConfiguration.class, AnnotationFlowOptionalConfiguration.class})
 public class GenotypedVcfJobConfiguration {
 
     private static final Logger logger = LoggerFactory.getLogger(GenotypedVcfJobConfiguration.class);
 
     @Autowired
-    @Qualifier(PARALLEL_STATISTICS_AND_ANNOTATION)
-    private Flow parallelStatisticsAndAnnotation;
+    @Qualifier(VEP_ANNOTATION_OPTIONAL_FLOW)
+    private Flow annotationFlowOptional;
 
     @Autowired
     @Qualifier(LOAD_VARIANTS_STEP)
@@ -83,7 +83,7 @@ public class GenotypedVcfJobConfiguration {
         FlowJobBuilder builder = jobBuilder
                 .flow(variantLoaderStep)
                 .next(loadFileStep)
-                .next(parallelStatisticsAndAnnotation)
+                .next(annotationFlowOptional)
                 .end();
 
         return builder.build();
