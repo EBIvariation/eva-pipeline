@@ -7,12 +7,7 @@ import uk.ac.ebi.eva.commons.models.data.VariantSourceEntry;
 import uk.ac.ebi.eva.pipeline.io.contig.ContigMapping;
 import uk.ac.ebi.eva.pipeline.io.contig.ContigNaming;
 
-import java.util.Collections;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import static org.junit.Assert.assertEquals;
-import static uk.ac.ebi.eva.pipeline.jobs.steps.processors.ContigToGenbankReplacerProcessor.ORIGINAL_CHROMOSOME;
 
 public class ContigToGenbankReplacerProcessorTest {
 
@@ -79,20 +74,6 @@ public class ContigToGenbankReplacerProcessorTest {
     public void NoGenbankDontConvert() throws Exception {
         Variant variant = buildMockVariant("chr4");
         processor.process(variant);
-    }
-
-    @Test
-    public void keepOriginalChromosomeInInfo() throws Exception {
-        String originalChromosome = "chr1";
-        Variant variant = buildMockVariant(originalChromosome);
-
-        Set<String> originalChromosomes = processor.process(variant)
-                .getSourceEntries().values()
-                .stream()
-                .map(e -> e.getAttributes().get(ORIGINAL_CHROMOSOME))
-                .collect(Collectors.toSet());
-
-        assertEquals(Collections.singleton(originalChromosome), originalChromosomes);
     }
 
     private Variant buildMockVariant(String originalChromosome) {

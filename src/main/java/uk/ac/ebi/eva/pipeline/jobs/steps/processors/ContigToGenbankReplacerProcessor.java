@@ -4,13 +4,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.item.ItemProcessor;
 import uk.ac.ebi.eva.commons.models.data.Variant;
-import uk.ac.ebi.eva.commons.models.data.VariantSourceEntry;
 import uk.ac.ebi.eva.pipeline.io.contig.ContigMapping;
 import uk.ac.ebi.eva.pipeline.io.contig.ContigNaming;
 import uk.ac.ebi.eva.pipeline.io.contig.ContigSynonyms;
-
-import java.util.Collection;
-import java.util.stream.Collectors;
 
 /**
  * Converts the contig to its GenBank synonym when possible. If the synonym can't be determined it keeps the contig as
@@ -18,8 +14,6 @@ import java.util.stream.Collectors;
  */
 public class ContigToGenbankReplacerProcessor implements ItemProcessor<Variant, Variant> {
     private static final Logger logger = LoggerFactory.getLogger(ContigToGenbankReplacerProcessor.class);
-
-    public static final String ORIGINAL_CHROMOSOME = "CHR";
 
     private ContigMapping contigMapping;
     private ContigNaming contigNaming;
@@ -49,17 +43,7 @@ public class ContigToGenbankReplacerProcessor implements ItemProcessor<Variant, 
     private Variant replaceContigWithGenbankAccession(Variant variant, ContigSynonyms contigSynonyms) {
         Variant newVariant = new Variant(contigSynonyms.getGenBank(), variant.getStart(), variant.getEnd(),
                 variant.getReference(), variant.getAlternate());
-
-        Collection<VariantSourceEntry> sourceEntries = variant.getSourceEntries().values().stream()
-                .peek(e -> e.addAttribute(ORIGINAL_CHROMOSOME, variant.getChromosome()))
-                .collect(Collectors.toList());
-
-        if (sourceEntries.isEmpty()) {
-            throw new IllegalArgumentException("This class can only process variants with at least 1 source entry. "
-                    + "Otherwise, the original (replaced) chromosome is lost.");
-        }
-
-        sourceEntries.forEach(sourceEntry -> newVariant.addSourceEntry(sourceEntry));
+        newVariant.setSourceEntries(variant.getSourceEntries());
         return newVariant;
     }
 }
