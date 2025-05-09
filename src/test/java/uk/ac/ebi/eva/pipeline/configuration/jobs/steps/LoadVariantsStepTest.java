@@ -32,7 +32,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import uk.ac.ebi.eva.pipeline.Application;
 import uk.ac.ebi.eva.pipeline.configuration.BeanNames;
 import uk.ac.ebi.eva.pipeline.configuration.jobs.GenotypedVcfJobConfiguration;
-import uk.ac.ebi.eva.pipeline.io.contig.ContigNaming;
 import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
 import uk.ac.ebi.eva.test.configuration.TemporaryRuleConfiguration;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
@@ -98,7 +97,6 @@ public class LoadVariantsStepTest {
                 .inputVcfAggregation("NONE")
                 .inputVcfId("1")
                 .inputAssemblyReport(assemblyReport)
-                .contigNaming(ContigNaming.NO_REPLACEMENT)
                 .toJobParameters();
 
         JobExecution jobExecution = jobLauncherTestUtils.launchStep(BeanNames.LOAD_VARIANTS_STEP, jobParameters);
@@ -128,7 +126,6 @@ public class LoadVariantsStepTest {
                 .inputVcfAggregation("NONE")
                 .inputVcfId("1")
                 .inputAssemblyReport(assemblyReport)
-                .contigNaming(ContigNaming.REFSEQ)
                 .toJobParameters();
 
         JobExecution jobExecution = jobLauncherTestUtils.launchStep(BeanNames.LOAD_VARIANTS_STEP, jobParameters);
@@ -165,7 +162,6 @@ public class LoadVariantsStepTest {
                 .inputVcfAggregation("NONE")
                 .inputVcfId("1")
                 .inputAssemblyReport(assemblyReportMissingContig)
-                .contigNaming(ContigNaming.REFSEQ)
                 .toJobParameters();
 
         JobExecution jobExecution = jobLauncherTestUtils.launchStep(BeanNames.LOAD_VARIANTS_STEP, jobParameters);
@@ -186,7 +182,6 @@ public class LoadVariantsStepTest {
                 .inputVcfAggregation("NONE")
                 .inputVcfId("1")
                 .inputAssemblyReport(assemblyReportCantTranslateContig)
-                .contigNaming(ContigNaming.REFSEQ)
                 .toJobParameters();
 
         JobExecution jobExecution = jobLauncherTestUtils.launchStep(BeanNames.LOAD_VARIANTS_STEP, jobParameters);
