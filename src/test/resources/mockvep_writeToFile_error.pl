@@ -1,7 +1,7 @@
 # mockvep_writeToFile_error.pl
 #
 # This file is a mock for VEP, just as mockvep_writeToFile.pl, with the difference that for a specific variant
-# (chromosome 20, position 65900), this script stops and returns 1.
+# (chromosome CM000095.5/20, position 65900), this script stops and returns 1.
 # This is used for testing that we handle properly the cases when VEP can not annotate and dies abruptly.
 
 use warnings;
@@ -40,9 +40,9 @@ while ($line = <STDIN>) {
     push (@buffer, annotate($line));
     $lines++;
 
-    if ($line =~ /^20\t65900/) {
-        exit 1;
-    }
+   if ($line =~ /^(?:CM000095\.5|20)\t65900/) {
+       exit 1;
+   }
 
     my $bufferSize = scalar (@buffer);
     if ($bufferSize == $batchSize) {
