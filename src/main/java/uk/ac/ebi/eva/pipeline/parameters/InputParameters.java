@@ -67,9 +67,6 @@ public class InputParameters {
     @Value(PARAMETER + JobParametersNames.INPUT_ASSEMBLY_REPORT + END)
     private String assemblyReport;
 
-    @Value(PARAMETER + JobParametersNames.CONTIG_NAMING + "']?:'NO_REPLACEMENT'}")
-    private ContigNaming contigNaming;
-
     public String getVcf() {
         return vcf;
     }
@@ -112,9 +109,5 @@ public class InputParameters {
 
     public String getAssemblyReport() {
         return assemblyReport;
-    }
-
-    public ContigNaming getContigNaming() {
-        return contigNaming;
     }
 }

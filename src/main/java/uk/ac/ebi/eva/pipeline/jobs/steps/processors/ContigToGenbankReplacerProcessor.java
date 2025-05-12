@@ -5,7 +5,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.batch.item.ItemProcessor;
 import uk.ac.ebi.eva.commons.models.data.Variant;
 import uk.ac.ebi.eva.pipeline.io.contig.ContigMapping;
-import uk.ac.ebi.eva.pipeline.io.contig.ContigNaming;
 import uk.ac.ebi.eva.pipeline.io.contig.ContigSynonyms;
 
 /**
@@ -16,19 +15,13 @@ public class ContigToGenbankReplacerProcessor implements ItemProcessor<Variant, 
     private static final Logger logger = LoggerFactory.getLogger(ContigToGenbankReplacerProcessor.class);
 
     private ContigMapping contigMapping;
-    private ContigNaming contigNaming;
 
-    public ContigToGenbankReplacerProcessor(ContigMapping contigMapping, ContigNaming contigNaming) {
+    public ContigToGenbankReplacerProcessor(ContigMapping contigMapping) {
         this.contigMapping = contigMapping;
-        this.contigNaming = contigNaming;
     }
 
     @Override
     public Variant process(Variant variant) throws Exception {
-        if (contigNaming.equals(ContigNaming.NO_REPLACEMENT)) {
-            return variant;
-        }
-
         String contigName = variant.getChromosome();
         ContigSynonyms contigSynonyms = contigMapping.getContigSynonyms(contigName);
 
