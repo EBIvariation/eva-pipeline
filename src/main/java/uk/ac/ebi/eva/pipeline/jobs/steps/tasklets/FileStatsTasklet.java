@@ -144,6 +144,7 @@ public class FileStatsTasklet implements Tasklet {
     private void processCounts(VariantDocument variantDocument) {
         // get all fileIds this variant belongs to
         Set<String> fileIds = variantDocument.getVariantSources().stream()
+                .filter(vse -> vse.getStudyId() != null && vse.getFileId() != null)
                 .filter(vse -> vse.getStudyId().equals(studyId))
                 .map(vse -> vse.getFileId())
                 .collect(Collectors.toSet());
@@ -181,6 +182,7 @@ public class FileStatsTasklet implements Tasklet {
             }
 
             boolean hasPass = variantDocument.getVariantSources().stream()
+                    .filter(vse -> vse.getStudyId() != null && vse.getFileId() != null)
                     .filter(vse -> vse.getStudyId().equals(studyId) && vse.getFileId().equals(fileId))
                     .map(vse -> (vse.getAttrs() != null) ? vse.getAttrs().getOrDefault("FILTER", "") : "")
                     .allMatch(f -> f.equals("PASS"));
