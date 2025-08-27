@@ -15,6 +15,9 @@
  */
 package uk.ac.ebi.eva.pipeline.configuration.jobs.steps.variantstats;
 
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.Updates;
 import org.bson.Document;
 import org.junit.After;
 import org.junit.Assert;
@@ -87,6 +90,11 @@ public class VariantStatsStepTest {
     @Test
     public void variantStatsStepShouldCalculateAndLoadStats() throws Exception {
         mongoRule.restoreDump(getResourceUrl(MONGO_DUMP), DATABASE_NAME);
+        // update one of the variant to have one object in the files field to have sid/fid null
+        MongoCollection<Document> collection = mongoRule.getTemporaryDatabase(DATABASE_NAME)
+                .getCollection(COLLECTION_VARIANTS_NAME);
+        collection.updateOne(Filters.eq("_id", "20_60343_G_A"),
+                Updates.push("files", new Document("sid", null).append("fid", null)));
 
 
         JobParameters jobParameters = new EvaJobParameterBuilder()
