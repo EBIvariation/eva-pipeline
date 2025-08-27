@@ -81,7 +81,7 @@ public class FileStatsStepTest {
         mongoRule.getTemporaryDatabase(DATABASE_NAME).drop();
         mongoRule.restoreDump(getResourceUrl(MONGO_DUMP), DATABASE_NAME);
 
-        // update one of the variant to have one object in the files field to have sid/fid null
+        // update one of the variant to have one object in the files field to have sid/fid null as this happens in the production database
         MongoCollection<Document> collection = mongoRule.getTemporaryDatabase(DATABASE_NAME)
                 .getCollection(COLLECTION_VARIANTS_NAME);
         collection.updateOne(Filters.eq("_id", "20_60343_G_A"),
