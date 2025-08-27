@@ -58,6 +58,7 @@ public class VariantStatsProcessor implements ItemProcessor<VariantDocument, Var
 
         // get only the ones for which we can calculate the stats
         Set<VariantSourceEntryMongo> variantSourceEntrySet = variant.getVariantSources().stream()
+                .filter(vse -> vse.getStudyId() != null && vse.getFileId() != null)
                 .filter(vse -> vse.getStudyId().equals(studyId) && fidSet.contains(vse.getFileId()))
                 .collect(Collectors.toSet());
 
