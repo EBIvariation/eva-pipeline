@@ -21,6 +21,8 @@ import org.opencb.biodata.models.feature.Genotype;
 import org.opencb.biodata.models.variant.VariantFactory;
 import org.opencb.biodata.models.variant.exceptions.NonStandardCompliantSampleField;
 import org.opencb.biodata.models.variant.exceptions.NotAVariantException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import uk.ac.ebi.eva.commons.models.data.Variant;
 import uk.ac.ebi.eva.commons.models.data.VariantSourceEntry;
@@ -35,8 +37,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import static java.lang.Math.max;
@@ -45,6 +45,8 @@ import static java.lang.Math.max;
  * Class that parses VCF lines to create Variants.
  */
 public class VariantVcfFactory {
+
+    protected final static Logger logger = LoggerFactory.getLogger(VariantVcfFactory.class);
 
     /**
      * Creates a list of Variant objects using the fields in a record of a VCF
@@ -96,16 +98,19 @@ public class VariantVcfFactory {
                 // Fill the rest of fields (after samples because INFO depends on them)
                 setOtherFields(variant, fileId, studyId, ids, quality, filter, info, format, keyFields.getNumAllele(),
                                alternateAlleles, line);
-                checkVariantInformation(variant, fileId, studyId);
-                variants.add(variant);
+                if (checkVariantInformation(variant, fileId, studyId)) {
+                    variants.add(variant);
+                }
             } catch (NonStandardCompliantSampleField ex) {
-                Logger.getLogger(VariantFactory.class.getName())
-                      .log(Level.SEVERE, String.format("Variant %s:%d:%s>%s will not be saved\n%s",
-                                                       chromosome, position, reference, alternateAlleles[altAlleleIdx],
-                                                       ex.getMessage()));
+                LoggerFactory.getLogger(VariantFactory.class.getName())
+                             .error("Variant {}:{}:{}>{} will not be saved\n{}", chromosome, position, reference,
+                                    alternateAlleles[altAlleleIdx], ex.getMessage());
             }
         }
 
+        if (variants.isEmpty()) {
+            logger.warn("No valid variants could be found");
+        }
         return variants;
     }
 
@@ -429,18 +434,26 @@ public class VariantVcfFactory {
         return correctedAllele;
     }
 
-    protected void checkVariantInformation(Variant variant, String fileId,
-                                           String studyId) throws NonVariantException, IncompleteInformationException {
+    protected boolean checkVariantInformation(Variant variant, String fileId,
+                                           String studyId) throws IncompleteInformationException {
         if (variant.getAlternate().equalsIgnoreCase(variant.getReference())) {
-            throw new NonVariantException("The variant " + variant + " reference and alternate alleles are the same");
+            logger.warn(
+                    "The variant {} reference and alternate alleles are the same and will be discarded as a " +
+                            "non-variant",
+                    variant);
+            return false;
         } else if (variant.getAlternate().equals(".")) {
-            throw new NonVariantException("The variant " + variant + " has no alternate allele");
+            logger.warn("The variant {} has no alternate allele and will be discarded as a non-variant", variant);
+            return false;
         }
 
         VariantSourceEntry variantSourceEntry = variant.getSourceEntry(fileId, studyId);
         if (!this.hasAlternateAlleleCalls(variantSourceEntry)) {
-            throw new NonVariantException("The variant " + variant + " has no alternate allele genotype calls");
+            logger.warn("The variant {} has no alternate allele genotype calls and will be discarded as a non-variant",
+                        variant);
+            return false;
         }
+        return true;
     }
 
     private boolean hasAlternateAlleleCalls(VariantSourceEntry variantSourceEntry) {

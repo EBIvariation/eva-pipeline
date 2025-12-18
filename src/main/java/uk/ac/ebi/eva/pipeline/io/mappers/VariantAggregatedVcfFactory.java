@@ -420,11 +420,17 @@ public class VariantAggregatedVcfFactory extends VariantVcfFactory {
         }
     }
 
-    protected void checkVariantInformation(Variant variant, String fileId, String studyId) throws NonVariantException, IncompleteInformationException {
+    protected boolean checkVariantInformation(Variant variant, String fileId, String studyId)
+            throws IncompleteInformationException {
         if (variant.getAlternate().equalsIgnoreCase(variant.getReference())) {
-            throw new NonVariantException("The variant " + variant + " reference and alternate alleles are the same");
+            logger.warn(
+                    "The variant {} reference and alternate alleles are the same and will be discarded as a " +
+                            "non-variant",
+                    variant);
+            return false;
         } else if (variant.getAlternate().equals(".")) {
-            throw new NonVariantException("The variant " + variant + " has no alternate allele");
+            logger.warn("The variant {} has no alternate allele and will be discarded as a non-variant", variant);
+            return false;
         }
 
         VariantSourceEntry variantSourceEntry = variant.getSourceEntry(fileId, studyId);
@@ -433,8 +439,11 @@ public class VariantAggregatedVcfFactory extends VariantVcfFactory {
         }
 
         if (this.variantFrequencyIsZero(variantSourceEntry)) {
-            throw new NonVariantException("The variant " + variant + " has allele frequency or counts '0'");
+            logger.warn("The variant {} has allele frequency or counts '0' and will be discarded as a non-variant",
+                        variant);
+            return false;
         }
+        return true;
     }
 
     protected boolean canAlleleFrequenciesBeCalculated(VariantSourceEntry variantSourceEntry) {

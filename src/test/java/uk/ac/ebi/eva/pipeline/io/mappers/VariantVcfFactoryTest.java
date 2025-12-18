@@ -19,7 +19,6 @@ import org.junit.Test;
 
 import uk.ac.ebi.eva.commons.models.data.Variant;
 import uk.ac.ebi.eva.commons.models.data.VariantSourceEntry;
-import uk.ac.ebi.eva.pipeline.exception.NonVariantException;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -31,6 +30,7 @@ import java.util.Set;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * {@link VariantVcfFactory}
@@ -193,10 +193,11 @@ public class VariantVcfFactoryTest {
         assertEquals(expResult, result);
     }
 
-    @Test(expected = NonVariantException.class)
+    @Test
     public void testNonVariantExceptionThrownForNonVariant() {
         String line = "1\t10040\trs123\tTGACGTAACGATT\tT\t.\t.\t.\tGT\t0/0"; // 4 samples
-        factory.create(FILE_ID, STUDY_ID, line);
+        List<Variant> result = factory.create(FILE_ID, STUDY_ID, line);
+        assertTrue(result.isEmpty());
     }
 
     @Test
