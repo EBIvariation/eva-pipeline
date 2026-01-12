@@ -21,15 +21,15 @@ import com.mongodb.client.MongoCollection;
 import org.bson.Document;
 
 import static org.junit.Assert.assertEquals;
-import static uk.ac.ebi.eva.commons.models.data.VariantSourceEntity.STUDYID_FIELD;
-import static uk.ac.ebi.eva.commons.models.mongo.entity.VariantDocument.FILES_FIELD;
-import static uk.ac.ebi.eva.commons.models.mongo.entity.VariantDocument.STATS_FIELD;
+import static uk.ac.ebi.eva.commons.mongodb.entities.VariantMongo.FILES_FIELD;
+import static uk.ac.ebi.eva.commons.mongodb.entities.VariantMongo.STATISTICS_FIELD;
+import static uk.ac.ebi.eva.commons.mongodb.entities.VariantSourceMongo.STUDYID_FIELD;
 
 public class DropStudyJobTestUtils {
 
     private static final String FILES_STUDY_ID_FIELD = String.format("%s.%s", FILES_FIELD, STUDYID_FIELD);
 
-    private static final String STATS_STUDY_ID_FIELD = String.format("%s.%s", STATS_FIELD, STUDYID_FIELD);
+    private static final String STATS_STUDY_ID_FIELD = String.format("%s.%s", STATISTICS_FIELD, STUDYID_FIELD);
 
     public static void assertDropVariantsByStudy(MongoCollection<Document> variantsCollection, String studyId,
                                                  long expectedVariantsAfterDropStudy) {

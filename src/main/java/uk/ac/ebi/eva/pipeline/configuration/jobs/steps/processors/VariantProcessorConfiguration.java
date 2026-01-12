@@ -21,7 +21,7 @@ import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.support.CompositeItemProcessor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import uk.ac.ebi.eva.commons.models.data.Variant;
+import uk.ac.ebi.eva.commons.core.models.pipeline.Variant;
 import uk.ac.ebi.eva.pipeline.io.contig.ContigMapping;
 import uk.ac.ebi.eva.pipeline.jobs.steps.processors.ContigToGenbankReplacerProcessor;
 import uk.ac.ebi.eva.pipeline.jobs.steps.processors.ExcludeStructuralVariantsProcessor;

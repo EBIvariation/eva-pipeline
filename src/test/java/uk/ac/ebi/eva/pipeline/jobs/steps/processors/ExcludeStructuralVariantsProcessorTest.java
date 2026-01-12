@@ -19,7 +19,7 @@ package uk.ac.ebi.eva.pipeline.jobs.steps.processors;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
-import uk.ac.ebi.eva.commons.models.data.Variant;
+import uk.ac.ebi.eva.commons.core.models.pipeline.Variant;
 
 import java.util.Arrays;
 import java.util.Objects;

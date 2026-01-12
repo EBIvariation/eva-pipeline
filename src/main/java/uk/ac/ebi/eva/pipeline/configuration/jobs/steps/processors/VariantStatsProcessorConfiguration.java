@@ -19,7 +19,7 @@ import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import uk.ac.ebi.eva.commons.models.mongo.entity.VariantDocument;
+import uk.ac.ebi.eva.commons.mongodb.entities.VariantMongo;
 import uk.ac.ebi.eva.pipeline.io.processors.VariantStatsProcessor;
 import uk.ac.ebi.eva.pipeline.parameters.InputParameters;
 
@@ -30,7 +30,7 @@ public class VariantStatsProcessorConfiguration {
 
     @Bean(VARIANT_STATS_PROCESSOR)
     @StepScope
-    public ItemProcessor<VariantDocument, VariantDocument> variantStatsProcessor(InputParameters inputParameters) {
+    public ItemProcessor<VariantMongo, VariantMongo> variantStatsProcessor(InputParameters inputParameters) {
         return new VariantStatsProcessor(inputParameters.getStudyId());
     }
 }

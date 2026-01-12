@@ -41,15 +41,15 @@ import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.stereotype.Component;
 import org.springframework.util.PatternMatchUtils;
 import org.springframework.util.StringUtils;
-
+import uk.ac.ebi.eva.commons.batch.exception.NoJobToExecuteException;
+import uk.ac.ebi.eva.commons.batch.exception.NoParametersHaveBeenPassedException;
+import uk.ac.ebi.eva.commons.batch.exception.NoPreviousJobExecutionException;
+import uk.ac.ebi.eva.commons.batch.exception.UnknownJobException;
+import uk.ac.ebi.eva.commons.batch.job.JobExecutionApplicationListener;
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
-import uk.ac.ebi.eva.pipeline.runner.exceptions.NoJobToExecuteException;
-import uk.ac.ebi.eva.pipeline.runner.exceptions.NoParametersHaveBeenPassedException;
-import uk.ac.ebi.eva.pipeline.runner.exceptions.NoPreviousJobExecutionException;
 import uk.ac.ebi.eva.pipeline.runner.exceptions.NotValidParameterFormatException;
 import uk.ac.ebi.eva.pipeline.runner.exceptions.UnexpectedErrorReadingFileException;
 import uk.ac.ebi.eva.pipeline.runner.exceptions.UnexpectedFileEncodingException;
-import uk.ac.ebi.eva.pipeline.runner.exceptions.UnknownJobException;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -172,8 +172,8 @@ public class EvaPipelineJobLauncherCommandLineRunner extends JobLauncherCommandL
             }
             launchJob(jobParameters);
         } catch (NoJobToExecuteException | NoParametersHaveBeenPassedException | UnexpectedFileEncodingException
-                | FileNotFoundException | UnexpectedErrorReadingFileException | NoPreviousJobExecutionException
-                | NotValidParameterFormatException | UnknownJobException | JobParametersInvalidException e) {
+                 | FileNotFoundException | UnexpectedErrorReadingFileException | NoPreviousJobExecutionException
+                 | NotValidParameterFormatException | UnknownJobException | JobParametersInvalidException e) {
             logger.error(e.getMessage());
             logger.debug("Error trace", e);
             abnormalExit = true;

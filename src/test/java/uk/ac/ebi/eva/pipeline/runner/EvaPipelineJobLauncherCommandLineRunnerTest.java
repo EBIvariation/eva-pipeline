@@ -35,6 +35,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
+import uk.ac.ebi.eva.test.configuration.MongoCollectionNameConfiguration;
 import uk.ac.ebi.eva.test.configuration.TemporaryRuleConfiguration;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
@@ -69,7 +70,7 @@ import static uk.ac.ebi.eva.utils.FileUtils.getResource;
 @SpringBootTest()
 @ActiveProfiles({"test,mongo"})
 @TestPropertySource(value = {"classpath:test-mongo.properties"}, properties = "debug=true")
-@Import(TemporaryRuleConfiguration.class)
+@Import({TemporaryRuleConfiguration.class, MongoCollectionNameConfiguration.class})
 public class EvaPipelineJobLauncherCommandLineRunnerTest {
 
     private static final String GENOTYPED_PROPERTIES_FILE = "/genotype-test.properties";

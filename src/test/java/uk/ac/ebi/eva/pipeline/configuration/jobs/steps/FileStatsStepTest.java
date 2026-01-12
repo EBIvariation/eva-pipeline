@@ -36,6 +36,7 @@ import uk.ac.ebi.eva.pipeline.configuration.BeanNames;
 import uk.ac.ebi.eva.pipeline.configuration.MongoConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.jobs.FileStatsJobConfiguration;
 import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
+import uk.ac.ebi.eva.test.configuration.MongoCollectionNameConfiguration;
 import uk.ac.ebi.eva.test.configuration.TemporaryRuleConfiguration;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
@@ -54,7 +55,7 @@ import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResourceUrl;
 @RunWith(SpringRunner.class)
 @TestPropertySource({"classpath:test-stats.properties"})
 @ContextConfiguration(classes = {FileStatsJobConfiguration.class, BatchTestConfiguration.class,
-        TemporaryRuleConfiguration.class, MongoConfiguration.class})
+        TemporaryRuleConfiguration.class, MongoConfiguration.class, MongoCollectionNameConfiguration.class})
 public class FileStatsStepTest {
     private static final String MONGO_DUMP = "/dump/VariantStatsConfigurationTest_vl";
 

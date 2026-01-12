@@ -13,8 +13,8 @@ import org.springframework.batch.item.ItemStreamException;
 import org.springframework.batch.item.ItemStreamReader;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.convert.MongoConverter;
-import uk.ac.ebi.eva.commons.models.mongo.entity.VariantDocument;
-import uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantSourceEntryMongo;
+import uk.ac.ebi.eva.commons.mongodb.entities.VariantMongo;
+import uk.ac.ebi.eva.commons.mongodb.entities.subdocuments.VariantSourceEntryMongo;
 import uk.ac.ebi.eva.pipeline.parameters.DatabaseParameters;
 
 import java.util.ArrayList;
@@ -30,7 +30,7 @@ import static com.mongodb.client.model.Projections.computed;
 import static com.mongodb.client.model.Projections.fields;
 import static java.util.Arrays.asList;
 
-public class VariantStatsReader implements ItemStreamReader<VariantDocument> {
+public class VariantStatsReader implements ItemStreamReader<VariantMongo> {
     private static final Logger logger = LoggerFactory.getLogger(VariantStatsReader.class);
 
     private DatabaseParameters databaseParameters;
@@ -51,13 +51,13 @@ public class VariantStatsReader implements ItemStreamReader<VariantDocument> {
     }
 
     @Override
-    public VariantDocument read() {
+    public VariantMongo read() {
         Document nextElement = cursor.tryNext();
         return (nextElement != null) ? getVariant(nextElement) : null;
     }
 
-    private VariantDocument getVariant(Document variantDocument) {
-        return converter.read(VariantDocument.class, new BasicDBObject(variantDocument));
+    private VariantMongo getVariant(Document variantDocument) {
+        return converter.read(VariantMongo.class, new BasicDBObject(variantDocument));
     }
 
     @Override
@@ -74,7 +74,7 @@ public class VariantStatsReader implements ItemStreamReader<VariantDocument> {
     }
 
     private MongoCursor<Document> initializeCursor() {
-        Bson query = Filters.elemMatch(VariantDocument.FILES_FIELD, Filters.eq(VariantSourceEntryMongo.STUDYID_FIELD, studyId));
+        Bson query = Filters.elemMatch(VariantMongo.FILES_FIELD, Filters.eq(VariantSourceEntryMongo.STUDYID_FIELD, studyId));
         logger.info("Issuing find: {}", query);
 
         FindIterable<Document> statsVariantDocuments = getVariants(query);

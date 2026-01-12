@@ -16,16 +16,15 @@
 
 package uk.ac.ebi.eva.pipeline.configuration.io.readers;
 
-import org.opencb.biodata.models.variant.VariantSource;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.item.ItemStreamReader;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import uk.ac.ebi.eva.commons.models.data.Variant;
-import uk.ac.ebi.eva.pipeline.io.readers.AggregatedVcfReader;
-import uk.ac.ebi.eva.pipeline.io.readers.UnwindingItemStreamReader;
-import uk.ac.ebi.eva.pipeline.io.readers.VcfReader;
+import uk.ac.ebi.eva.commons.batch.io.AggregatedVcfReader;
+import uk.ac.ebi.eva.commons.batch.io.UnwindingItemStreamReader;
+import uk.ac.ebi.eva.commons.batch.io.VcfReader;
+import uk.ac.ebi.eva.commons.core.models.Aggregation;
+import uk.ac.ebi.eva.commons.core.models.pipeline.Variant;
 import uk.ac.ebi.eva.pipeline.parameters.InputParameters;
 
 import java.io.File;
@@ -58,9 +57,9 @@ public class VcfReaderConfiguration {
         String fileId = parameters.getVcfId();
         String studyId = parameters.getStudyId();
         File vcfFile = new File(parameters.getVcf());
-        VariantSource.Aggregation vcfAggregation = parameters.getVcfAggregation();
+        Aggregation vcfAggregation = parameters.getVcfAggregation();
 
-        if (VariantSource.Aggregation.NONE.equals(vcfAggregation)) {
+        if (Aggregation.NONE.equals(vcfAggregation)) {
             return new VcfReader(fileId, studyId, vcfFile);
         } else {
             return new AggregatedVcfReader(fileId, studyId, vcfAggregation, parameters.getAggregatedMappingFile(),

@@ -18,9 +18,9 @@ import org.springframework.data.mongodb.core.convert.MongoConverter;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
-import uk.ac.ebi.eva.commons.models.data.Variant;
-import uk.ac.ebi.eva.commons.models.mongo.entity.VariantDocument;
-import uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantSourceEntryMongo;
+import uk.ac.ebi.eva.commons.core.models.VariantType;
+import uk.ac.ebi.eva.commons.mongodb.entities.VariantMongo;
+import uk.ac.ebi.eva.commons.mongodb.entities.subdocuments.VariantSourceEntryMongo;
 import uk.ac.ebi.eva.pipeline.parameters.DatabaseParameters;
 
 import java.util.ArrayList;
@@ -81,7 +81,7 @@ public class FileStatsTasklet implements Tasklet {
             cursor = initializeCursor();
             try {
                 while (cursor.hasNext()) {
-                    VariantDocument variantDocument = getVariant(cursor.next());
+                    VariantMongo variantDocument = getVariant(cursor.next());
                     processCounts(variantDocument);
                 }
             } finally {
@@ -126,7 +126,7 @@ public class FileStatsTasklet implements Tasklet {
     }
 
     private MongoCursor<Document> initializeCursor() {
-        Bson query = Filters.elemMatch(VariantDocument.FILES_FIELD, Filters.eq(VariantSourceEntryMongo.STUDYID_FIELD, studyId));
+        Bson query = Filters.elemMatch(VariantMongo.FILES_FIELD, Filters.eq(VariantSourceEntryMongo.STUDYID_FIELD, studyId));
         logger.info("Issuing find: {}", query);
 
         FindIterable<Document> statsVariantDocuments = mongoTemplate.getCollection(databaseParameters.getCollectionVariantsName())
@@ -137,20 +137,20 @@ public class FileStatsTasklet implements Tasklet {
         return statsVariantDocuments.iterator();
     }
 
-    private VariantDocument getVariant(Document variantDocument) {
-        return converter.read(VariantDocument.class, new BasicDBObject(variantDocument));
+    private VariantMongo getVariant(Document variantDocument) {
+        return converter.read(VariantMongo.class, new BasicDBObject(variantDocument));
     }
 
-    private void processCounts(VariantDocument variantDocument) {
+    private void processCounts(VariantMongo variantDocument) {
         // get all fileIds this variant belongs to
-        Set<String> fileIds = variantDocument.getVariantSources().stream()
+        Set<String> fileIds = variantDocument.getSourceEntries().stream()
                 .filter(vse -> vse.getStudyId() != null && vse.getFileId() != null)
                 .filter(vse -> vse.getStudyId().equals(studyId))
                 .map(vse -> vse.getFileId())
                 .collect(Collectors.toSet());
 
-        boolean isSNV = variantDocument.getVariantType().equals(Variant.VariantType.SNV);
-        boolean isINDEL = variantDocument.getVariantType().equals(Variant.VariantType.INDEL);
+        boolean isSNV = variantDocument.getType().equals(VariantType.SNV);
+        boolean isINDEL = variantDocument.getType().equals(VariantType.INDEL);
 
         boolean isTransition = false;
         boolean isTransversion = false;
@@ -181,10 +181,10 @@ public class FileStatsTasklet implements Tasklet {
                 countsMap.merge(KEY_NO_OF_TRANSVERSION, 1, Integer::sum);
             }
 
-            boolean hasPass = variantDocument.getVariantSources().stream()
+            boolean hasPass = variantDocument.getSourceEntries().stream()
                     .filter(vse -> vse.getStudyId() != null && vse.getFileId() != null)
                     .filter(vse -> vse.getStudyId().equals(studyId) && vse.getFileId().equals(fileId))
-                    .map(vse -> (vse.getAttrs() != null) ? vse.getAttrs().getOrDefault("FILTER", "") : "")
+                    .map(vse -> (vse.getAttributes() != null) ? vse.getAttributes().getOrDefault("FILTER", "") : "")
                     .allMatch(f -> f.equals("PASS"));
             if (hasPass) {
                 countsMap.merge(KEY_NO_OF_PASS, 1, Integer::sum);

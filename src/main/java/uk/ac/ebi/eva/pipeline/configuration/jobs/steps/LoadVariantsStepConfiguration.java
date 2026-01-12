@@ -29,8 +29,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-
-import uk.ac.ebi.eva.commons.models.data.Variant;
+import uk.ac.ebi.eva.commons.core.models.IVariant;
+import uk.ac.ebi.eva.commons.core.models.pipeline.Variant;
 import uk.ac.ebi.eva.pipeline.configuration.ChunkSizeCompletionPolicyConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.io.readers.VcfReaderConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.io.writers.VariantWriterConfiguration;
@@ -67,7 +67,7 @@ public class LoadVariantsStepConfiguration {
 
     @Autowired
     @Qualifier(VARIANT_WRITER)
-    private ItemWriter<Variant> variantWriter;
+    private ItemWriter<IVariant> variantWriter;
 
     @Autowired
     @Qualifier(COMPOSITE_VARIANT_PROCESSOR)
@@ -82,17 +82,17 @@ public class LoadVariantsStepConfiguration {
         logger.debug("Building '" + LOAD_VARIANTS_STEP + "'");
 
         return stepBuilderFactory.get(LOAD_VARIANTS_STEP)
-                                 .<Variant, Variant>chunk(chunkSizeCompletionPolicy)
-                                 .reader(reader)
-                                 .processor(variantProcessor)
-                                 .writer(variantWriter)
-                                 .faultTolerant()
-                                 .skipPolicy(invalidVariantSkipPolicy)
-                                 .allowStartIfComplete(jobOptions.isAllowStartIfComplete())
-                                 .listener(new SkippedItemListener())
-                                 .listener(new StepProgressListener())
-                                 .listener(new VariantLoaderStepStatisticsListener())
-                                 .build();
+                .<Variant, Variant>chunk(chunkSizeCompletionPolicy)
+                .reader(reader)
+                .processor(variantProcessor)
+                .writer(variantWriter)
+                .faultTolerant()
+                .skipPolicy(invalidVariantSkipPolicy)
+                .allowStartIfComplete(jobOptions.isAllowStartIfComplete())
+                .listener(new SkippedItemListener())
+                .listener(new StepProgressListener())
+                .listener(new VariantLoaderStepStatisticsListener())
+                .build();
     }
 
 }

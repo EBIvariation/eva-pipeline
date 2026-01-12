@@ -28,9 +28,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-
-import uk.ac.ebi.eva.commons.models.mongo.entity.Annotation;
-import uk.ac.ebi.eva.commons.models.mongo.entity.VariantDocument;
+import uk.ac.ebi.eva.commons.mongodb.entities.AnnotationMongo;
+import uk.ac.ebi.eva.commons.mongodb.entities.VariantMongo;
 import uk.ac.ebi.eva.pipeline.Application;
 import uk.ac.ebi.eva.pipeline.configuration.MongoConfiguration;
 import uk.ac.ebi.eva.pipeline.io.mappers.AnnotationLineMapper;
@@ -48,10 +47,10 @@ import java.util.TreeSet;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantAnnotation.POLYPHEN_FIELD;
-import static uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantAnnotation.SIFT_FIELD;
-import static uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantAnnotation.SO_ACCESSION_FIELD;
-import static uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantAnnotation.XREFS_FIELD;
+import static uk.ac.ebi.eva.commons.mongodb.entities.subdocuments.AnnotationIndexMongo.POLYPHEN_FIELD;
+import static uk.ac.ebi.eva.commons.mongodb.entities.subdocuments.AnnotationIndexMongo.SIFT_FIELD;
+import static uk.ac.ebi.eva.commons.mongodb.entities.subdocuments.AnnotationIndexMongo.SO_ACCESSION_FIELD;
+import static uk.ac.ebi.eva.commons.mongodb.entities.subdocuments.AnnotationIndexMongo.XREFS_FIELD;
 import static uk.ac.ebi.eva.test.data.VepOutputContent.vepOutputContentWithExtraFields;
 import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResourceUrl;
 
@@ -96,9 +95,9 @@ public class AnnotationInVariantMongoWriterTest {
         String databaseName = mongoRule.restoreDumpInTemporaryDatabase(getResourceUrl(MONGO_DUMP));
 
         //prepare annotation sets
-        List<Annotation> annotationSet1 = new ArrayList<>();
-        List<Annotation> annotationSet2 = new ArrayList<>();
-        List<Annotation> annotationSet3 = new ArrayList<>();
+        List<AnnotationMongo> annotationSet1 = new ArrayList<>();
+        List<AnnotationMongo> annotationSet2 = new ArrayList<>();
+        List<AnnotationMongo> annotationSet3 = new ArrayList<>();
 
         String[] vepOutputLines = vepOutputContentWithExtraFields.split("\n");
 
@@ -133,26 +132,26 @@ public class AnnotationInVariantMongoWriterTest {
 
             if (id.equals("20_63360_C_T_" + VEP_VERSION + "_" + VEP_CACHE_VERSION)) {
                 Document annotationField = ((List<Document>) variant.get(
-                        VariantDocument.ANNOTATION_FIELD)).get(0);
+                        VariantMongo.ANNOTATION_FIELD)).get(0);
 
                 checkAnnotationFields(annotationField,
-                                      Arrays.asList(0.1, 0.2),
-                                      Arrays.asList(0.1, 0.2),
-                                      new TreeSet<>(Arrays.asList(1631)),
-                                      new TreeSet<>(Arrays.asList("DEFB125", "ENSG00000178591", "ENST00000382410",
-                                                                  "ENST00000608838")));
+                        Arrays.asList(0.1, 0.2),
+                        Arrays.asList(0.1, 0.2),
+                        new TreeSet<>(Arrays.asList(1631)),
+                        new TreeSet<>(Arrays.asList("DEFB125", "ENSG00000178591", "ENST00000382410",
+                                "ENST00000608838")));
             }
 
             if (id.equals("20_63399_G_A_" + VEP_VERSION + "_" + VEP_CACHE_VERSION)) {
                 Document annotationField = ((List<Document>) variant.get(
-                        VariantDocument.ANNOTATION_FIELD)).get(0);
+                        VariantMongo.ANNOTATION_FIELD)).get(0);
 
                 checkAnnotationFields(annotationField,
-                                      Arrays.asList(0.07, 0.07),
-                                      Arrays.asList(0.859, 0.859),
-                                      new TreeSet<>(Arrays.asList(1631)),
-                                      new TreeSet<>(Arrays.asList("DEFB125", "ENSG00000178591", "ENST00000382410",
-                                                                  "ENST00000608838")));
+                        Arrays.asList(0.07, 0.07),
+                        Arrays.asList(0.859, 0.859),
+                        new TreeSet<>(Arrays.asList(1631)),
+                        new TreeSet<>(Arrays.asList("DEFB125", "ENSG00000178591", "ENST00000382410",
+                                "ENST00000608838")));
             }
         }
         cursor.close();
@@ -180,7 +179,7 @@ public class AnnotationInVariantMongoWriterTest {
 
         String[] vepOutputLines = vepOutputContentWithExtraFields.split("\n");
 
-        List<Annotation> annotations = new ArrayList<>();
+        List<AnnotationMongo> annotations = new ArrayList<>();
         annotations.add(annotationLineMapper.mapLine(vepOutputLines[1], 0));
         annotations.add(annotationLineMapper.mapLine(vepOutputLines[2], 0));
 
@@ -193,26 +192,26 @@ public class AnnotationInVariantMongoWriterTest {
         List<Document> annotationField = writeAndGetAnnotation(databaseName, annotations.get(0));
 
         checkAnnotationFields(annotationField.get(0),
-                              Arrays.asList(0.1, 0.1),
-                              Arrays.asList(0.1, 0.1),
-                              new TreeSet<>(Arrays.asList(1631)),
-                              new TreeSet<>(Arrays.asList("DEFB125", "ENSG00000178591", "ENST00000382410")));
+                Arrays.asList(0.1, 0.1),
+                Arrays.asList(0.1, 0.1),
+                new TreeSet<>(Arrays.asList(1631)),
+                new TreeSet<>(Arrays.asList("DEFB125", "ENSG00000178591", "ENST00000382410")));
 
         // load the second annotation and check the information is updated (not overwritten)
         List<Document> annotationFieldAfter = writeAndGetAnnotation(databaseName, annotations.get(1));
 
         checkAnnotationFields(annotationFieldAfter.get(0),
-                              Arrays.asList(0.1, 0.2),
-                              Arrays.asList(0.1, 0.2),
-                              new TreeSet<>(Arrays.asList(1631)),
-                              new TreeSet<>(Arrays.asList("DEFB125", "ENSG00000178591", "ENST00000382410",
-                                                        "ENST00000608838")));
+                Arrays.asList(0.1, 0.2),
+                Arrays.asList(0.1, 0.2),
+                new TreeSet<>(Arrays.asList(1631)),
+                new TreeSet<>(Arrays.asList("DEFB125", "ENSG00000178591", "ENST00000382410",
+                        "ENST00000608838")));
     }
 
-    private List<Document> writeAndGetAnnotation(String databaseName, Annotation annotation) throws Exception {
+    private List<Document> writeAndGetAnnotation(String databaseName, AnnotationMongo annotation) throws Exception {
         annotationInVariantMongoWriter.write(Collections.singletonList(Collections.singletonList(annotation)));
 
-        Document query = new Document(Annotation.START_FIELD, annotation.getStart());
+        Document query = new Document(AnnotationMongo.START_FIELD, annotation.getStart());
         MongoCursor<Document> cursor = mongoRule.getCollection(databaseName, COLLECTION_VARIANTS_NAME).find(query)
                 .iterator();
 
@@ -220,7 +219,7 @@ public class AnnotationInVariantMongoWriterTest {
         Document variant = cursor.next();
         assertFalse(cursor.hasNext());
 
-        return (List<Document>) variant.get(VariantDocument.ANNOTATION_FIELD);
+        return (List<Document>) variant.get(VariantMongo.ANNOTATION_FIELD);
     }
 
     @Test
@@ -234,42 +233,42 @@ public class AnnotationInVariantMongoWriterTest {
 
         String[] vepOutputLines = vepOutputContentWithExtraFields.split("\n");
 
-        Annotation firstAnnotation = annotationLineMapper.mapLine(vepOutputLines[1], 0);
-        Annotation differentVersionAnnotation = differentVersionAnnotationLineMapper.mapLine(vepOutputLines[2], 0);
+        AnnotationMongo firstAnnotation = annotationLineMapper.mapLine(vepOutputLines[1], 0);
+        AnnotationMongo differentVersionAnnotation = differentVersionAnnotationLineMapper.mapLine(vepOutputLines[2], 0);
 
         // load the first annotation
         MongoOperations operations = MongoConfiguration.getMongoTemplate(databaseName, mongoConnectionDetails,
-                                                                           mongoMappingContext);
+                mongoMappingContext);
         annotationInVariantMongoWriter = new AnnotationInVariantMongoWriter(operations, COLLECTION_VARIANTS_NAME,
-                                                                            VEP_VERSION, VEP_CACHE_VERSION);
+                VEP_VERSION, VEP_CACHE_VERSION);
 
         List<Document> annotationField = writeAndGetAnnotation(databaseName, firstAnnotation);
 
         assertEquals(1, annotationField.size());
         checkAnnotationFields(annotationField.get(0),
-                              Arrays.asList(0.1, 0.1),
-                              Arrays.asList(0.1, 0.1),
-                              new TreeSet<>(Arrays.asList(1631)),
-                              new TreeSet<>(Arrays.asList("DEFB125", "ENSG00000178591", "ENST00000382410")));
+                Arrays.asList(0.1, 0.1),
+                Arrays.asList(0.1, 0.1),
+                new TreeSet<>(Arrays.asList(1631)),
+                new TreeSet<>(Arrays.asList("DEFB125", "ENSG00000178591", "ENST00000382410")));
 
         // load the second annotation and check the information is added to the annotation array
         annotationInVariantMongoWriter = new AnnotationInVariantMongoWriter(operations, COLLECTION_VARIANTS_NAME,
-                                                                            differentVepVersion,
-                                                                            differentVepCacheVersion);
+                differentVepVersion,
+                differentVepCacheVersion);
         List<Document> annotationFieldAfter = writeAndGetAnnotation(databaseName, differentVersionAnnotation);
 
         assertEquals(2, annotationFieldAfter.size());
         checkAnnotationFields(annotationField.get(0),
-                              Arrays.asList(0.1, 0.1),
-                              Arrays.asList(0.1, 0.1),
-                              new TreeSet<>(Arrays.asList(1631)),
-                              new TreeSet<>(Arrays.asList("DEFB125", "ENSG00000178591", "ENST00000382410")));
+                Arrays.asList(0.1, 0.1),
+                Arrays.asList(0.1, 0.1),
+                new TreeSet<>(Arrays.asList(1631)),
+                new TreeSet<>(Arrays.asList("DEFB125", "ENSG00000178591", "ENST00000382410")));
 
         checkAnnotationFields(annotationFieldAfter.get(1),
-                              Arrays.asList(0.2, 0.2),
-                              Arrays.asList(0.2, 0.2),
-                              new TreeSet<>(Arrays.asList(1631)),
-                              new TreeSet<>(Arrays.asList("DEFB125", "ENSG00000178591", "ENST00000608838")));
+                Arrays.asList(0.2, 0.2),
+                Arrays.asList(0.2, 0.2),
+                new TreeSet<>(Arrays.asList(1631)),
+                new TreeSet<>(Arrays.asList("DEFB125", "ENSG00000178591", "ENST00000608838")));
     }
 }
 

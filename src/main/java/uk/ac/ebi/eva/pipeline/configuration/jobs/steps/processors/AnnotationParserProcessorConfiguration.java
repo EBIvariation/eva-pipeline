@@ -19,8 +19,7 @@ import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import uk.ac.ebi.eva.commons.models.mongo.entity.Annotation;
+import uk.ac.ebi.eva.commons.mongodb.entities.AnnotationMongo;
 import uk.ac.ebi.eva.pipeline.jobs.steps.processors.AnnotationParserProcessor;
 import uk.ac.ebi.eva.pipeline.parameters.AnnotationParameters;
 
@@ -39,7 +38,7 @@ public class AnnotationParserProcessorConfiguration {
 
     @Bean(ANNOTATION_PARSER_PROCESSOR)
     @StepScope
-    public ItemProcessor<List<String>, List<Annotation>> annotationParserProcessor(
+    public ItemProcessor<List<String>, List<AnnotationMongo>> annotationParserProcessor(
             AnnotationParameters annotationParameters) {
         return new AnnotationParserProcessor(annotationParameters);
     }
