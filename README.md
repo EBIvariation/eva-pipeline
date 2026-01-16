@@ -104,6 +104,7 @@ Other parameters are:
 * `input.vcf`: Path to the VCF to process. May be compressed.
 * `input.vcf.id`: Unique ID for the VCF to process. Could be an analysis in the SRA model (please ignore if you don't know what SRA is).
 * `input.vcf.aggregation`: Whether aggregated statistics are provided in the VCF instead of the genotypes. NONE, BASIC, EXAC and EVS supported. NONE for genotyped files, BASIC for aggregated files in general.
+* `input.vcf.aggregation.mapping-path`: To parse population statistics in aggregated VCFs. See [this tutorial](https://github.com/EBIvariation/eva-pipeline/wiki/Population-stats) to understand how to use this field.
 
 * `input.study.id`: Unique ID for the study the file is associated with.
 * `input.study.name`: Name of the study the file is associated with.
