@@ -27,10 +27,10 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Meta;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.util.ClassUtils;
-import uk.ac.ebi.eva.commons.models.mongo.entity.Annotation;
-import uk.ac.ebi.eva.commons.models.mongo.entity.VariantDocument;
-import uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantAnnotation;
-import uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantSourceEntryMongo;
+import uk.ac.ebi.eva.commons.mongodb.entities.AnnotationMongo;
+import uk.ac.ebi.eva.commons.mongodb.entities.VariantMongo;
+import uk.ac.ebi.eva.commons.mongodb.entities.subdocuments.AnnotationIndexMongo;
+import uk.ac.ebi.eva.commons.mongodb.entities.subdocuments.VariantSourceEntryMongo;
 import uk.ac.ebi.eva.commons.mongodb.readers.MongoDbCursorItemReader;
 import uk.ac.ebi.eva.pipeline.model.EnsemblVariant;
 
@@ -41,11 +41,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.springframework.data.mongodb.core.query.Criteria.where;
-import static uk.ac.ebi.eva.commons.models.mongo.entity.VariantDocument.ALTERNATE_FIELD;
-import static uk.ac.ebi.eva.commons.models.mongo.entity.VariantDocument.CHROMOSOME_FIELD;
-import static uk.ac.ebi.eva.commons.models.mongo.entity.VariantDocument.END_FIELD;
-import static uk.ac.ebi.eva.commons.models.mongo.entity.VariantDocument.REFERENCE_FIELD;
-import static uk.ac.ebi.eva.commons.models.mongo.entity.VariantDocument.START_FIELD;
+import static uk.ac.ebi.eva.commons.mongodb.entities.VariantMongo.ALTERNATE_FIELD;
+import static uk.ac.ebi.eva.commons.mongodb.entities.VariantMongo.CHROMOSOME_FIELD;
+import static uk.ac.ebi.eva.commons.mongodb.entities.VariantMongo.END_FIELD;
+import static uk.ac.ebi.eva.commons.mongodb.entities.VariantMongo.REFERENCE_FIELD;
+import static uk.ac.ebi.eva.commons.mongodb.entities.VariantMongo.START_FIELD;
 
 /**
  * Mongo variant reader using an ItemReader cursor based. This is speeding up
@@ -56,13 +56,13 @@ import static uk.ac.ebi.eva.commons.models.mongo.entity.VariantDocument.START_FI
 public class VariantsMongoReader
         extends AbstractItemStreamItemReader<List<EnsemblVariant>> implements InitializingBean {
 
-    private static final String STUDY_KEY = VariantDocument.FILES_FIELD + "." + VariantSourceEntryMongo.STUDYID_FIELD;
+    private static final String STUDY_KEY = VariantMongo.FILES_FIELD + "." + VariantSourceEntryMongo.STUDYID_FIELD;
 
-    private static final String FILE_KEY = VariantDocument.FILES_FIELD + "." + VariantSourceEntryMongo.FILEID_FIELD;
+    private static final String FILE_KEY = VariantMongo.FILES_FIELD + "." + VariantSourceEntryMongo.FILEID_FIELD;
 
     private static final String LAST_READ_TIMESTAMP_KEY = "last_read_timestamp";
 
-    private MongoDbCursorItemReader<VariantDocument> delegateReader;
+    private MongoDbCursorItemReader<VariantMongo> delegateReader;
 
     private MongoConverter converter;
 
@@ -72,19 +72,19 @@ public class VariantsMongoReader
 
     /**
      *
-     * @param vepVersion Only bring variants whose annotation does not contain this VEP version.
-     *                   This option is ignored if excludeAnnotated is false.
-     * @param vepCacheVersion Only bring variants whose annotation does not contain this cache version.
-     *                        This option is ignored if excludeAnnotated is false.
-     * @param studyId Can be the empty string or null, meaning to bring all non-annotated variants in the collection.
-     *                If the studyId string is not empty, bring only non-annotated variants from that study.
-     * @param fileId  File identifier that it is checked inside a study. If the study identifier is not defined, the
-     *                file is ignored. This is mainly due to performance reasons.
-     *                Can be the empty string or null, meaning to bring all non-annotated variants in a study.
-     *                If the studyId string is not empty, bring only non-annotated variants from that study and file.
+     * @param vepVersion       Only bring variants whose annotation does not contain this VEP version.
+     *                         This option is ignored if excludeAnnotated is false.
+     * @param vepCacheVersion  Only bring variants whose annotation does not contain this cache version.
+     *                         This option is ignored if excludeAnnotated is false.
+     * @param studyId          Can be the empty string or null, meaning to bring all non-annotated variants in the collection.
+     *                         If the studyId string is not empty, bring only non-annotated variants from that study.
+     * @param fileId           File identifier that it is checked inside a study. If the study identifier is not defined, the
+     *                         file is ignored. This is mainly due to performance reasons.
+     *                         Can be the empty string or null, meaning to bring all non-annotated variants in a study.
+     *                         If the studyId string is not empty, bring only non-annotated variants from that study and file.
      * @param excludeAnnotated If true, bring only non-annotated variants. If false, bring all variants (ignoring the
      *                         vepVersion and vepCacheVersion parameters)
-     * @param chunkSize size of the list returned by the "read" method.
+     * @param chunkSize        size of the list returned by the "read" method.
      */
     public VariantsMongoReader(MongoTemplate mongoTemplate, String collectionVariantsName, String vepVersion,
                                String vepCacheVersion, String studyId, String fileId, boolean excludeAnnotated,
@@ -92,9 +92,9 @@ public class VariantsMongoReader
         setName(ClassUtils.getShortName(VariantsMongoReader.class));
         delegateReader = new MongoDbCursorItemReader<>();
         delegateReader.setMongoTemplate(mongoTemplate);
-        delegateReader.setTargetType(VariantDocument.class);
+        delegateReader.setTargetType(VariantMongo.class);
         delegateReader.setCollection(collectionVariantsName);
-        
+
         // the query excludes processed variants automatically, so a new query has to start from the beginning
         delegateReader.setSaveState(false);
 
@@ -109,13 +109,13 @@ public class VariantsMongoReader
 
         if (excludeAnnotated) {
             Criteria annotationCriteria =
-                    where(VariantAnnotation.SO_ACCESSION_FIELD).exists(true)
-                            .and(Annotation.VEP_VERSION_FIELD).is(vepVersion)
-                            .and(Annotation.VEP_CACHE_VERSION_FIELD).is(vepCacheVersion);
-            query.addCriteria(where(VariantDocument.ANNOTATION_FIELD).not().elemMatch(annotationCriteria));
+                    where(AnnotationIndexMongo.SO_ACCESSION_FIELD).exists(true)
+                            .and(AnnotationMongo.VEP_VERSION_FIELD).is(vepVersion)
+                            .and(AnnotationMongo.VEP_CACHE_VERSION_FIELD).is(vepCacheVersion);
+            query.addCriteria(where(VariantMongo.ANNOTATION_FIELD).not().elemMatch(annotationCriteria));
         }
         String[] fields = {CHROMOSOME_FIELD, START_FIELD, END_FIELD, REFERENCE_FIELD, ALTERNATE_FIELD};
-        for (String field: fields) {
+        for (String field : fields) {
             query.fields().include(field);
         }
 
@@ -154,7 +154,7 @@ public class VariantsMongoReader
 
     private List<EnsemblVariant> readBatch(Integer chunkSize) throws Exception {
         List<EnsemblVariant> variants = new ArrayList<>();
-        VariantDocument variant;
+        VariantMongo variant;
         while ((variant = delegateDoRead()) != null) {
             variants.add(buildVariantWrapper(variant));
             if (variants.size() == chunkSize) {
@@ -164,17 +164,17 @@ public class VariantsMongoReader
         return variants;
     }
 
-    private VariantDocument delegateDoRead() throws Exception {
+    private VariantMongo delegateDoRead() throws Exception {
         lastRead = ZonedDateTime.now();
         return delegateReader.read();
     }
 
-    private EnsemblVariant buildVariantWrapper(VariantDocument variant) {
+    private EnsemblVariant buildVariantWrapper(VariantMongo variant) {
         return new EnsemblVariant(variant.getChromosome(),
-                                  variant.getStart(),
-                                  variant.getEnd(),
-                                  variant.getReference(),
-                                  variant.getAlternate());
+                variant.getStart(),
+                variant.getEnd(),
+                variant.getReference(),
+                variant.getAlternate());
     }
 
     @Override

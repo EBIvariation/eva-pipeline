@@ -1,14 +1,13 @@
 package uk.ac.ebi.eva.pipeline.io.processors;
 
-import com.mongodb.BasicDBObject;
-import org.opencb.biodata.models.feature.Genotype;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.item.ItemProcessor;
-import uk.ac.ebi.eva.commons.models.data.VariantStats;
-import uk.ac.ebi.eva.commons.models.mongo.entity.VariantDocument;
-import uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantSourceEntryMongo;
-import uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantStatsMongo;
+import uk.ac.ebi.eva.commons.core.models.VariantStatistics;
+import uk.ac.ebi.eva.commons.core.models.genotype.Genotype;
+import uk.ac.ebi.eva.commons.mongodb.entities.VariantMongo;
+import uk.ac.ebi.eva.commons.mongodb.entities.subdocuments.VariantSourceEntryMongo;
+import uk.ac.ebi.eva.commons.mongodb.entities.subdocuments.VariantStatisticsMongo;
 import uk.ac.ebi.eva.pipeline.io.readers.VariantStatsReader;
 
 import java.util.Arrays;
@@ -21,7 +20,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class VariantStatsProcessor implements ItemProcessor<VariantDocument, VariantDocument> {
+public class VariantStatsProcessor implements ItemProcessor<VariantMongo, VariantMongo> {
     private static final Logger logger = LoggerFactory.getLogger(VariantStatsProcessor.class);
     private static final String GENOTYPE_COUNTS_MAP = "genotypeCountsMap";
     private static final String ALLELE_COUNTS_MAP = "alleleCountsMap";
@@ -37,7 +36,7 @@ public class VariantStatsProcessor implements ItemProcessor<VariantDocument, Var
     }
 
     @Override
-    public VariantDocument process(VariantDocument variant) {
+    public VariantMongo process(VariantMongo variant) {
         Map<String, Integer> filesIdNumberOfSamplesMap = VariantStatsReader.getFilesIdAndNumberOfSamplesMap();
         if (filesIdNumberOfSamplesMap.isEmpty()) {
             // No new stats can be calculated, no processing required
@@ -49,7 +48,7 @@ public class VariantStatsProcessor implements ItemProcessor<VariantDocument, Var
         String variantAlt = variant.getAlternate();
 
         // copy the stats that should not be changed/updated and will be copied as it is
-        Set<VariantStatsMongo> variantStatsSet = new HashSet<>();
+        Set<VariantStatisticsMongo> variantStatsSet = new HashSet<>();
         if (variant.getVariantStatsMongo() != null) {
             variantStatsSet = variant.getVariantStatsMongo().stream()
                     .filter(st -> !st.getStudyId().equals(studyId) || !fidSet.contains(st.getFileId()))
@@ -57,7 +56,7 @@ public class VariantStatsProcessor implements ItemProcessor<VariantDocument, Var
         }
 
         // get only the ones for which we can calculate the stats
-        Set<VariantSourceEntryMongo> variantSourceEntrySet = variant.getVariantSources().stream()
+        Set<VariantSourceEntryMongo> variantSourceEntrySet = variant.getSourceEntries().stream()
                 .filter(vse -> vse.getStudyId() != null && vse.getFileId() != null)
                 .filter(vse -> vse.getStudyId().equals(studyId) && fidSet.contains(vse.getFileId()))
                 .collect(Collectors.toSet());
@@ -66,25 +65,25 @@ public class VariantStatsProcessor implements ItemProcessor<VariantDocument, Var
             String studyId = variantSourceEntry.getStudyId();
             String fileId = variantSourceEntry.getFileId();
 
-            BasicDBObject sampleData = variantSourceEntry.getSampleData();
+            Map<String, Object> sampleData = variantSourceEntry.getSamples();
             if (sampleData == null || sampleData.isEmpty()) {
                 continue;
             }
 
-            VariantStats variantStats = getVariantStats(variantRef, variantAlt, variantSourceEntry.getAlternates(), sampleData, filesIdNumberOfSamplesMap.get(fileId));
-            VariantStatsMongo variantStatsMongo = new VariantStatsMongo(studyId, fileId, "ALL", variantStats);
+            VariantStatistics variantStats = getVariantStats(variantRef, variantAlt, variantSourceEntry.getSecondaryAlternates(), sampleData, filesIdNumberOfSamplesMap.get(fileId));
+            VariantStatisticsMongo variantStatsMongo = new VariantStatisticsMongo(studyId, fileId, "ALL", variantStats);
 
             variantStatsSet.add(variantStatsMongo);
         }
 
         if (!variantStatsSet.isEmpty()) {
-            variant.setStats(variantStatsSet);
+            variant.setVariantStatsMongo(variantStatsSet);
         }
 
         return variant;
     }
 
-    public VariantStats getVariantStats(String variantRef, String variantAlt, String[] fileAlternates, BasicDBObject sampleData, int totalSamplesForFileId) {
+    public VariantStatistics getVariantStats(String variantRef, String variantAlt, String[] fileAlternates, Map<String, Object> sampleData, int totalSamplesForFileId) {
         Map<String, Map<String, Integer>> countsMap = getGenotypeAndAllelesCounts(sampleData, totalSamplesForFileId);
         Map<String, Integer> genotypeCountsMap = countsMap.get(GENOTYPE_COUNTS_MAP);
         Map<String, Integer> alleleCountsMap = countsMap.get(ALLELE_COUNTS_MAP);
@@ -133,7 +132,7 @@ public class VariantStatsProcessor implements ItemProcessor<VariantDocument, Var
             minorAllele = minorAlleleKey.equals("0") ? variantRef : minorAlleleKey.equals("1") ? variantAlt : fileAlternates[Integer.parseInt(minorAlleleKey) - 2];
         }
 
-        VariantStats variantStats = new VariantStats();
+        VariantStatistics variantStats = new VariantStatistics();
         variantStats.setRefAllele(variantRef);
         variantStats.setAltAllele(variantAlt);
         variantStats.setMissingGenotypes(missingGenotypes);
@@ -147,7 +146,7 @@ public class VariantStatsProcessor implements ItemProcessor<VariantDocument, Var
         return variantStats;
     }
 
-    private Map<String, Map<String, Integer>> getGenotypeAndAllelesCounts(BasicDBObject sampleData, int totalSamplesForFileId) {
+    private Map<String, Map<String, Integer>> getGenotypeAndAllelesCounts(Map<String, Object> sampleData, int totalSamplesForFileId) {
         Map<String, Map<String, Integer>> genotypeAndAllelesCountsMap = new HashMap<>();
         Map<String, Integer> genotypeCountsMap = new HashMap<>();
         Map<String, Integer> alleleCountsMap = new HashMap<>();

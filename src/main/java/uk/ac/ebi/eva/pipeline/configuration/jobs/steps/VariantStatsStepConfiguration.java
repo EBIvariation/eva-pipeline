@@ -27,7 +27,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import uk.ac.ebi.eva.commons.models.mongo.entity.VariantDocument;
+import uk.ac.ebi.eva.commons.mongodb.entities.VariantMongo;
 import uk.ac.ebi.eva.pipeline.configuration.ChunkSizeCompletionPolicyConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.io.readers.VariantStatsReaderConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.io.writers.VariantStatsWriterConfiguration;
@@ -47,13 +47,13 @@ public class VariantStatsStepConfiguration {
 
     @Bean(VARIANT_STATS_STEP)
     public Step variantStatsStep(
-            @Qualifier(VARIANT_STATS_READER) ItemStreamReader<VariantDocument> variantStatsReader,
-            @Qualifier(VARIANT_STATS_PROCESSOR) ItemProcessor<VariantDocument, VariantDocument> variantStatsProcessor,
-            @Qualifier(VARIANT_STATS_WRITER) ItemWriter<VariantDocument> variantStatsWriter,
+            @Qualifier(VARIANT_STATS_READER) ItemStreamReader<VariantMongo> variantStatsReader,
+            @Qualifier(VARIANT_STATS_PROCESSOR) ItemProcessor<VariantMongo, VariantMongo> variantStatsProcessor,
+            @Qualifier(VARIANT_STATS_WRITER) ItemWriter<VariantMongo> variantStatsWriter,
             StepBuilderFactory stepBuilderFactory,
             SimpleCompletionPolicy chunkSizeCompletionPolicy) {
         TaskletStep step = stepBuilderFactory.get(VARIANT_STATS_STEP)
-                .<VariantDocument, VariantDocument>chunk(chunkSizeCompletionPolicy)
+                .<VariantMongo, VariantMongo>chunk(chunkSizeCompletionPolicy)
                 .reader(variantStatsReader)
                 .processor(variantStatsProcessor)
                 .writer(variantStatsWriter)

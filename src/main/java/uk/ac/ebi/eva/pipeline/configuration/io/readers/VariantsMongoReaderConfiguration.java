@@ -19,8 +19,6 @@ import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.item.ItemStreamReader;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.mongodb.core.MongoOperations;
-
 import org.springframework.data.mongodb.core.MongoTemplate;
 import uk.ac.ebi.eva.pipeline.io.readers.VariantsMongoReader;
 import uk.ac.ebi.eva.pipeline.model.EnsemblVariant;

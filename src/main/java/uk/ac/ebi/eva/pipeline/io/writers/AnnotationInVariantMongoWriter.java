@@ -22,8 +22,8 @@ import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.data.mongodb.core.query.BasicQuery;
 import org.springframework.data.mongodb.core.query.BasicUpdate;
 import org.springframework.util.Assert;
-import uk.ac.ebi.eva.commons.models.mongo.entity.Annotation;
-import uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantAnnotation;
+import uk.ac.ebi.eva.commons.mongodb.entities.AnnotationMongo;
+import uk.ac.ebi.eva.commons.mongodb.entities.subdocuments.AnnotationIndexMongo;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -31,12 +31,12 @@ import java.util.List;
 import java.util.Map;
 
 import static java.util.stream.Collectors.toList;
-import static uk.ac.ebi.eva.commons.models.mongo.entity.VariantDocument.ANNOTATION_FIELD;
-import static uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantAnnotation.VEP_CACHE_VERSION_FIELD;
-import static uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantAnnotation.VEP_VERSION_FIELD;
+import static uk.ac.ebi.eva.commons.mongodb.entities.VariantMongo.ANNOTATION_FIELD;
+import static uk.ac.ebi.eva.commons.mongodb.entities.subdocuments.AnnotationIndexMongo.VEP_CACHE_VERSION_FIELD;
+import static uk.ac.ebi.eva.commons.mongodb.entities.subdocuments.AnnotationIndexMongo.VEP_VERSION_FIELD;
 
 /**
- * Update the {@link uk.ac.ebi.eva.commons.models.data.Variant} mongo document with {@link VariantAnnotation}
+ * Update the {@link AnnotationMongo} mongo document with {@link AnnotationIndexMongo}
  * <p>
  * The fields updated are:
  * - sifts
@@ -44,7 +44,7 @@ import static uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantAnno
  * - soAccessions
  * - Xref Ids
  */
-public class AnnotationInVariantMongoWriter implements ItemWriter<List<Annotation>> {
+public class AnnotationInVariantMongoWriter implements ItemWriter<List<AnnotationMongo>> {
 
     public static final String ID = "_id";
     public static final String SET = "$set";
@@ -77,9 +77,9 @@ public class AnnotationInVariantMongoWriter implements ItemWriter<List<Annotatio
     }
 
     @Override
-    public void write(List<? extends List<Annotation>> annotations) throws Exception {
-        for (List<Annotation> annotationList : annotations) {
-            Map<String, VariantAnnotation> variantAnnotations = generateVariantAnnotations(annotationList);
+    public void write(List<? extends List<AnnotationMongo>> annotations) throws Exception {
+        for (List<AnnotationMongo> annotationList : annotations) {
+            Map<String, AnnotationIndexMongo> variantAnnotations = generateVariantAnnotations(annotationList);
 
             BulkOperations bulkOperations = mongoOperations.bulkOps(BulkOperations.BulkMode.UNORDERED, collection);
             bulkPrepare(bulkOperations, variantAnnotations);
@@ -87,41 +87,41 @@ public class AnnotationInVariantMongoWriter implements ItemWriter<List<Annotatio
         }
     }
 
-    private Map<String, VariantAnnotation> generateVariantAnnotations(List<? extends Annotation> annotations) {
-        HashMap<String, VariantAnnotation> variantAnnotations = new HashMap<>();
+    private Map<String, AnnotationIndexMongo> generateVariantAnnotations(List<? extends AnnotationMongo> annotations) {
+        HashMap<String, AnnotationIndexMongo> variantAnnotations = new HashMap<>();
 
-        for (Annotation annotation : annotations) {
+        for (AnnotationMongo annotation : annotations) {
             String id = annotation.getId();
-            variantAnnotations.putIfAbsent(id, new VariantAnnotation(annotation));
+            variantAnnotations.putIfAbsent(id, new AnnotationIndexMongo(annotation));
             variantAnnotations.computeIfPresent(id, (key, oldVar) -> oldVar.concatenate(annotation));
         }
         return variantAnnotations;
     }
 
-    private void bulkPrepare(BulkOperations bulkOperations, Map<String, VariantAnnotation> variantAnnotations) {
-        Map<String, VariantAnnotation> storedVariantAnnotations = getStoredVariantAnnotations(variantAnnotations);
+    private void bulkPrepare(BulkOperations bulkOperations, Map<String, AnnotationIndexMongo> variantAnnotations) {
+        Map<String, AnnotationIndexMongo> storedVariantAnnotations = getStoredVariantAnnotations(variantAnnotations);
 
-        for (Map.Entry<String, VariantAnnotation> entry : variantAnnotations.entrySet()) {
+        for (Map.Entry<String, AnnotationIndexMongo> entry : variantAnnotations.entrySet()) {
             final String annotationId = entry.getKey();
             if (storedVariantAnnotations.containsKey(annotationId)) {
                 bulkUpdate(bulkOperations, annotationId,
-                           storedVariantAnnotations.get(annotationId).concatenate(entry.getValue()));
+                        storedVariantAnnotations.get(annotationId).concatenate(entry.getValue()));
             } else {
                 bulkAddToSet(bulkOperations, annotationId, entry.getValue());
             }
         }
     }
 
-    private Map<String, VariantAnnotation> getStoredVariantAnnotations(
-            Map<String, VariantAnnotation> variantAnnotations) {
-        Map<String, VariantAnnotation> storedVariantAnnotations = new HashMap<>();
+    private Map<String, AnnotationIndexMongo> getStoredVariantAnnotations(
+            Map<String, AnnotationIndexMongo> variantAnnotations) {
+        Map<String, AnnotationIndexMongo> storedVariantAnnotations = new HashMap<>();
         Document query = generateQueryForAnnotationInVariant(variantAnnotations.keySet().toArray(new String[]{}));
         Document projection = new Document(ANNOTATION_FIELD, 1);
         for (Document variantDocument : mongoOperations.getCollection(collection).find(query).projection(projection)) {
             final List<Document> dbAnnotations = (List<Document>) variantDocument.get(ANNOTATION_FIELD);
             if (dbAnnotations != null && !dbAnnotations.isEmpty()) {
                 for (Object storedAnnotationDocument : dbAnnotations) {
-                    VariantAnnotation storedAnnotation = convertToVariantAnnotation(
+                    AnnotationIndexMongo storedAnnotation = convertToVariantAnnotation(
                             (Document) storedAnnotationDocument);
                     final String annotationId = getAnnotationId(variantDocument, storedAnnotation);
                     storedVariantAnnotations.put(annotationId, storedAnnotation);
@@ -131,10 +131,10 @@ public class AnnotationInVariantMongoWriter implements ItemWriter<List<Annotatio
         return storedVariantAnnotations;
     }
 
-    private String getAnnotationId(Document object, VariantAnnotation storedAnnotation) {
+    private String getAnnotationId(Document object, AnnotationIndexMongo storedAnnotation) {
         return String.join("_", (String) object.get(ID),
-                           storedAnnotation.getVepVersion(),
-                           storedAnnotation.getVepCacheVersion());
+                storedAnnotation.getVepVersion(),
+                storedAnnotation.getVepCacheVersion());
     }
 
     private Document generateQueryForAnnotationInVariant(String... annotationIds) {
@@ -160,11 +160,11 @@ public class AnnotationInVariantMongoWriter implements ItemWriter<List<Annotatio
         return new Document(ELEM_MATCH, annotationQuery);
     }
 
-    private VariantAnnotation convertToVariantAnnotation(Document dbAnnotation) {
-        return mongoOperations.getConverter().read(VariantAnnotation.class, dbAnnotation);
+    private AnnotationIndexMongo convertToVariantAnnotation(Document dbAnnotation) {
+        return mongoOperations.getConverter().read(AnnotationIndexMongo.class, dbAnnotation);
     }
 
-    private void bulkUpdate(BulkOperations bulkOperations, String annotationId, VariantAnnotation value) {
+    private void bulkUpdate(BulkOperations bulkOperations, String annotationId, AnnotationIndexMongo value) {
         Document query = generateQueryForAnnotationInVariant(annotationId);
 
         Document variantAnnotation = convertToMongo(value);
@@ -174,14 +174,14 @@ public class AnnotationInVariantMongoWriter implements ItemWriter<List<Annotatio
         bulkOperations.updateOne(new BasicQuery(query), new BasicUpdate(setAnnotation));
     }
 
-    private void bulkAddToSet(BulkOperations bulkOperations, String annotationId, VariantAnnotation value) {
+    private void bulkAddToSet(BulkOperations bulkOperations, String annotationId, AnnotationIndexMongo value) {
         Document id = new Document(ID, getVariantId(annotationId));
         Document variantAnnotation = convertToMongo(value);
         Document addToSet = new Document(ADD_TO_SET, new Document(ANNOTATION_FIELD, variantAnnotation));
         bulkOperations.updateOne(new BasicQuery(id), new BasicUpdate(addToSet));
     }
 
-    private Document convertToMongo(VariantAnnotation value) {
+    private Document convertToMongo(AnnotationIndexMongo value) {
         return (Document) mongoOperations.getConverter().convertToMongoType(value);
     }
 }

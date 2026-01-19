@@ -22,18 +22,17 @@ import org.junit.runner.RunWith;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.test.MetaDataInstanceFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.mapping.MongoMappingContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-
 import uk.ac.ebi.eva.pipeline.Application;
 import uk.ac.ebi.eva.pipeline.configuration.MongoConfiguration;
 import uk.ac.ebi.eva.pipeline.model.EnsemblVariant;
 import uk.ac.ebi.eva.pipeline.parameters.MongoConnectionDetails;
+import uk.ac.ebi.eva.test.configuration.MongoCollectionNameConfiguration;
 import uk.ac.ebi.eva.test.configuration.TemporaryRuleConfiguration;
 import uk.ac.ebi.eva.test.data.VariantData;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
@@ -53,7 +52,7 @@ import static org.junit.Assert.assertNotEquals;
 @RunWith(SpringRunner.class)
 @ActiveProfiles(Application.VARIANT_ANNOTATION_MONGO_PROFILE)
 @TestPropertySource({"classpath:test-mongo.properties"})
-@ContextConfiguration(classes = {MongoConnectionDetails.class, MongoMappingContext.class, TemporaryRuleConfiguration.class})
+@ContextConfiguration(classes = {MongoConnectionDetails.class, MongoMappingContext.class, TemporaryRuleConfiguration.class, MongoCollectionNameConfiguration.class})
 public class VariantsMongoReaderTest {
 
     private static final String COLLECTION_VARIANTS_NAME = "variants";
@@ -126,8 +125,8 @@ public class VariantsMongoReaderTest {
                 mongoMappingContext);
 
         VariantsMongoReader mongoItemReader = new VariantsMongoReader(mongoTemplate, COLLECTION_VARIANTS_NAME,
-                                                                      VEP_VERSION, VEP_CACHE_VERSION, study, file,
-                                                                      excludeAnnotated, chunkSize);
+                VEP_VERSION, VEP_CACHE_VERSION, study, file,
+                excludeAnnotated, chunkSize);
         mongoItemReader.open(executionContext);
 
         int itemCount = 0;

@@ -21,8 +21,7 @@ import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoOperations;
-
-import uk.ac.ebi.eva.commons.models.metadata.AnnotationMetadata;
+import uk.ac.ebi.eva.commons.core.models.AnnotationMetadata;
 import uk.ac.ebi.eva.pipeline.parameters.AnnotationParameters;
 import uk.ac.ebi.eva.pipeline.parameters.DatabaseParameters;
 
@@ -59,10 +58,12 @@ public class AnnotationMetadataTasklet implements Tasklet {
     private void writeUnlessAlreadyPresent(AnnotationMetadata annotationMetadata) {
         String collection = databaseParameters.getCollectionAnnotationMetadataName();
         List<AnnotationMetadata> allMetadata = mongoOperations.findAll(AnnotationMetadata.class);
-        long countSameVersion = allMetadata.stream().filter(other -> other.sameVersions(annotationMetadata)).count();
+        long countSameVersion = allMetadata.stream()
+                .filter(other -> other.getVepVersion().equals(annotationMetadata.getVepVersion())
+                        && other.getCacheVersion().equals(annotationMetadata.getCacheVersion())).count();
         if (countSameVersion == 0) {
             if (allMetadata.isEmpty()) {
-                annotationMetadata.setIsDefault(true);
+                annotationMetadata.setDefaultVersion(true);
             }
             mongoOperations.save(annotationMetadata, collection);
         }

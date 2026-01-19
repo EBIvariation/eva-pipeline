@@ -24,15 +24,15 @@ import org.slf4j.LoggerFactory;
 import org.springframework.batch.item.data.MongoItemWriter;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.util.Assert;
-import uk.ac.ebi.eva.commons.models.data.Variant;
-import uk.ac.ebi.eva.commons.models.mongo.entity.VariantDocument;
+import uk.ac.ebi.eva.commons.core.models.IVariant;
+import uk.ac.ebi.eva.commons.mongodb.entities.VariantMongo;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static uk.ac.ebi.eva.commons.models.mongo.entity.VariantDocument.IDS_FIELD;
+import static uk.ac.ebi.eva.commons.mongodb.entities.VariantMongo.IDS_FIELD;
 
-public class AccessionImporter extends MongoItemWriter<Variant> {
+public class AccessionImporter extends MongoItemWriter<IVariant> {
     private static final Logger logger = LoggerFactory.getLogger(AccessionImporter.class);
     private final MongoOperations mongoOperations;
     private final String collection;
@@ -48,22 +48,22 @@ public class AccessionImporter extends MongoItemWriter<Variant> {
     }
 
     @Override
-    protected void doWrite(List<? extends Variant> variants) {
+    protected void doWrite(List<? extends IVariant> variants) {
         List<WriteModel<Document>> writes = new ArrayList<>();
-        for (Variant variant : variants) {
+        for (IVariant variant : variants) {
 
             Assert.notNull(variant, "Variant should not be null. Please provide a valid Variant object");
             logger.debug("Convert variant {} into mongo object", variant);
             Assert.notNull(variant.getIds());
             Assert.notEmpty(variant.getIds());
 
-            String id = VariantDocument.buildVariantId(variant.getChromosome(), variant.getStart(),
+            String id = VariantMongo.buildVariantId(variant.getChromosome(), variant.getStart(),
                     variant.getReference(), variant.getAlternate());
 
             // the chromosome and start appear just as shard keys, in an unsharded cluster they wouldn't be needed
             Document query = new Document("_id", id)
-                    .append(VariantDocument.CHROMOSOME_FIELD, variant.getChromosome())
-                    .append(VariantDocument.START_FIELD, variant.getStart());
+                    .append(VariantMongo.CHROMOSOME_FIELD, variant.getChromosome())
+                    .append(VariantMongo.START_FIELD, variant.getStart());
 
             writes.add(new UpdateOneModel<>(query, generateUpdate(variant), new UpdateOptions().upsert(false)));
         }
@@ -74,7 +74,7 @@ public class AccessionImporter extends MongoItemWriter<Variant> {
         }
     }
 
-    private Document generateUpdate(Variant variant) {
+    private Document generateUpdate(IVariant variant) {
         Document addToSet = new Document();
         addToSet.append(IDS_FIELD, new Document("$each", variant.getIds()));
 

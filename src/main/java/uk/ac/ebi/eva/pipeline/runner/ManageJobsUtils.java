@@ -20,8 +20,7 @@ import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.repository.JobRepository;
-
-import uk.ac.ebi.eva.pipeline.runner.exceptions.NoPreviousJobExecutionException;
+import uk.ac.ebi.eva.commons.batch.exception.NoPreviousJobExecutionException;
 
 import java.util.Date;
 

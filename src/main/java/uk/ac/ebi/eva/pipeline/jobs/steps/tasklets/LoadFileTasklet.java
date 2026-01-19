@@ -21,10 +21,9 @@ import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoOperations;
-
-import uk.ac.ebi.eva.commons.models.data.VariantSourceEntity;
+import uk.ac.ebi.eva.commons.mongodb.entities.VariantSourceMongo;
+import uk.ac.ebi.eva.commons.mongodb.writers.VariantSourceMongoWriter;
 import uk.ac.ebi.eva.pipeline.io.readers.VcfHeaderReader;
-import uk.ac.ebi.eva.pipeline.io.writers.VariantSourceEntityMongoWriter;
 import uk.ac.ebi.eva.pipeline.parameters.DatabaseParameters;
 import uk.ac.ebi.eva.pipeline.parameters.InputParameters;
 
@@ -33,7 +32,7 @@ import java.util.Collections;
 
 /**
  * Tasklet that writes the metadata of a file into mongo. Uses
- * {@link uk.ac.ebi.eva.commons.models.data.VariantSourceEntity} as the collection schema.
+ * {@link VariantSourceMongo} as the collection schema.
  * <p>
  * Input: VCF file
  * <p>
@@ -61,9 +60,9 @@ public class LoadFileTasklet implements Tasklet {
                 inputParameters.getStudyType(),
                 inputParameters.getVcfAggregation());
         vcfHeaderReader.open(null);
-        VariantSourceEntity variantSourceEntity = vcfHeaderReader.read();
+        VariantSourceMongo variantSourceEntity = vcfHeaderReader.read();
 
-        VariantSourceEntityMongoWriter variantSourceEntityMongoWriter = new VariantSourceEntityMongoWriter(
+        VariantSourceMongoWriter variantSourceEntityMongoWriter = new VariantSourceMongoWriter(
                 mongoOperations, dbParameters.getCollectionFilesName());
         variantSourceEntityMongoWriter.write(Collections.singletonList(variantSourceEntity));
 

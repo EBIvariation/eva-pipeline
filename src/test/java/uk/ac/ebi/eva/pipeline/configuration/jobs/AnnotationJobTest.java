@@ -33,6 +33,7 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.ac.ebi.eva.pipeline.configuration.BeanNames;
 import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
+import uk.ac.ebi.eva.test.configuration.MongoCollectionNameConfiguration;
 import uk.ac.ebi.eva.test.configuration.TemporaryRuleConfiguration;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
@@ -45,7 +46,7 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static uk.ac.ebi.eva.commons.models.mongo.entity.Annotation.CONSEQUENCE_TYPE_FIELD;
+import static uk.ac.ebi.eva.commons.mongodb.entities.AnnotationMongo.CONSEQUENCE_TYPE_FIELD;
 import static uk.ac.ebi.eva.test.utils.JobTestUtils.assertCompleted;
 import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResourceUrl;
 import static uk.ac.ebi.eva.utils.FileUtils.getResource;
@@ -58,7 +59,8 @@ import static uk.ac.ebi.eva.utils.FileUtils.getResource;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @TestPropertySource({"classpath:common-configuration.properties", "classpath:test-mongo.properties"})
-@ContextConfiguration(classes = {AnnotationJobConfiguration.class, BatchTestConfiguration.class, TemporaryRuleConfiguration.class})
+@ContextConfiguration(classes = {AnnotationJobConfiguration.class, BatchTestConfiguration.class,
+        TemporaryRuleConfiguration.class, MongoCollectionNameConfiguration.class})
 public class AnnotationJobTest {
     private static final String MOCK_VEP = "/mockvep.pl";
     private static final String MONGO_DUMP = "/dump/VariantStatsConfigurationTest_vl";
@@ -138,7 +140,8 @@ public class AnnotationJobTest {
     }
 
     @Test
-    @Ignore // TODO how can we skip the metadata write if there are no variants to annotate? make the decider make a query?
+    @Ignore
+    // TODO how can we skip the metadata write if there are no variants to annotate? make the decider make a query?
     public void noVariantsToAnnotateOnlyGenerateAnnotationStepShouldRun() throws Exception {
         String dbName = mongoRule.getRandomTemporaryDatabaseName();
         String outputDirAnnot = temporaryFolderRule.getRoot().getAbsolutePath();

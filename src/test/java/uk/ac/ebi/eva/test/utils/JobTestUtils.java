@@ -18,11 +18,7 @@ package uk.ac.ebi.eva.test.utils;
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
-import com.mongodb.client.MongoCursor;
 import com.mongodb.util.JSON;
-import org.bson.Document;
-import org.opencb.biodata.models.variant.Variant;
-import org.opencb.biodata.models.variant.stats.VariantStats;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.BatchStatus;
@@ -30,9 +26,6 @@ import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
-import org.springframework.data.mongodb.core.MongoOperations;
-import uk.ac.ebi.eva.commons.models.mongo.entity.VariantDocument;
-import uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantStatsMongo;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -43,19 +36,18 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.zip.GZIPInputStream;
 
-import static java.util.stream.Collectors.toList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static uk.ac.ebi.eva.commons.models.data.VariantSourceEntity.FILEID_FIELD;
-import static uk.ac.ebi.eva.commons.models.data.VariantSourceEntity.STUDYID_FIELD;
+import static uk.ac.ebi.eva.commons.mongodb.entities.VariantSourceMongo.FILEID_FIELD;
+import static uk.ac.ebi.eva.commons.mongodb.entities.VariantSourceMongo.STUDYID_FIELD;
 
 public abstract class JobTestUtils {
     private static final Logger logger = LoggerFactory.getLogger(JobTestUtils.class);
@@ -124,7 +116,7 @@ public abstract class JobTestUtils {
         Object objectList = metadataMongo.get(field);
         assertTrue(objectList instanceof BasicDBList);
         BasicDBList list = new BasicDBList();
-        list.addAll((ArrayList)objectList);
+        list.addAll((ArrayList) objectList);
         for (Object element : list) {
             assertTrue(element instanceof String);
             assertNotNull(element);
@@ -137,7 +129,7 @@ public abstract class JobTestUtils {
         Object objectList = metadataMongo.get(field);
         assertTrue(objectList instanceof BasicDBList);
         BasicDBList list = new BasicDBList();
-        list.addAll((ArrayList)objectList);
+        list.addAll((ArrayList) objectList);
         for (Object element : list) {
             assertTrue(element instanceof BasicDBObject);
             for (String innerField : innerFields) {
@@ -175,33 +167,5 @@ public abstract class JobTestUtils {
     public static void assertFailed(JobExecution jobExecution) {
         assertEquals(ExitStatus.FAILED.getExitCode(), jobExecution.getExitStatus().getExitCode());
         assertEquals(BatchStatus.FAILED, jobExecution.getStatus());
-    }
-
-    public static VariantStats buildVariantStats(VariantStatsMongo variantStatsMongo) {
-        return new VariantStats("",
-                                0,
-                                "",
-                                "",
-                                Variant.VariantType.SNV,
-                                variantStatsMongo.getMaf(),
-                                variantStatsMongo.getMgf(),
-                                variantStatsMongo.getMafAllele(),
-                                variantStatsMongo.getMgfGenotype(),
-                                variantStatsMongo.getMissingAlleles(),
-                                variantStatsMongo.getMissingGenotypes(),
-                                0,
-                                0,
-                                0,
-                                0,
-                                0);
-    }
-
-    public static List<VariantStats> getCohortStatsFromFirstVariant(MongoCursor<Document> cursor, MongoOperations mongoOperations) {
-        assertTrue(cursor.hasNext());
-        Document dbObject = cursor.next();
-        VariantDocument variantDocument = mongoOperations.getConverter().read(VariantDocument.class, dbObject);
-        return variantDocument.getVariantStatsMongo().stream()
-                .map(JobTestUtils::buildVariantStats)
-                .collect(toList());
     }
 }
