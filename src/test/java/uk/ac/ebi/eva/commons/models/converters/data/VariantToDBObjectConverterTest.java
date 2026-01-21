@@ -32,7 +32,7 @@ import uk.ac.ebi.eva.commons.mongodb.entities.VariantMongo;
 import uk.ac.ebi.eva.commons.mongodb.entities.subdocuments.HgvsMongo;
 import uk.ac.ebi.eva.commons.mongodb.entities.subdocuments.VariantAtMongo;
 import uk.ac.ebi.eva.commons.mongodb.entities.subdocuments.VariantSourceEntryMongo;
-import uk.ac.ebi.eva.test.configuration.MongoCollectionNameConfiguration;
+import uk.ac.ebi.eva.pipeline.configuration.MongoCollectionNameConfiguration;
 import uk.ac.ebi.eva.test.configuration.MongoOperationConfiguration;
 
 import java.util.ArrayList;
