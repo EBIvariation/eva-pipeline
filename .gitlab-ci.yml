@@ -1,3 +1,8 @@
+workflow:
+    rules:
+        - if: '$CI_COMMIT_BRANCH'
+        - if: '$CI_COMMIT_TAG'
+
 stages:
     - test
     - package
@@ -31,9 +36,9 @@ test:
         - mvn clean test -Deva.mongo.host.test=mongo
     environment:
         name: test-env
-    only:
-        - master
-        - tags
+    rules:
+        - if: '$CI_COMMIT_TAG'
+        - if: '$CI_COMMIT_BRANCH'
 
 # Not executed, parent job definition for package
 .package:
@@ -55,15 +60,17 @@ package-development:
     extends: .package
     variables:
         MAVEN_PROFILE: production_processing
-    only:
-        - master
+    rules:
+        - if: '$CI_COMMIT_TAG'
+          when: never
+        - if: '$CI_COMMIT_BRANCH'
 
 package-production:
     extends: .package
     variables:
         MAVEN_PROFILE: production
-    only:
-        - tags
+    rules:
+        - if: '$CI_COMMIT_TAG'
 
 # Not executed, parent job definition for deployments of jar files
 .deploy-jar:
@@ -91,8 +98,13 @@ deploy-pipeline-jar-development:
         SYMLINK_NAME: $PIPELINE_SYMLINK_NAME
     dependencies:
         - package-development
-    only:
-        - master
+    rules:
+        - if: '$CI_COMMIT_BRANCH == "master"'
+          when: on_success
+        - if: '$CI_COMMIT_BRANCH'
+          when: manual
+        - if: '$CI_COMMIT_TAG'
+          when: never
 
 deploy-pipeline-jar-production:
     extends: .deploy-jar
@@ -103,5 +115,5 @@ deploy-pipeline-jar-production:
         SYMLINK_NAME: $PIPELINE_SYMLINK_NAME
     dependencies:
         - package-production
-    only:
-        - tags
+    rules:
+        - if: '$CI_COMMIT_TAG'
