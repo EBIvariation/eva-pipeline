@@ -30,7 +30,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-
+import uk.ac.ebi.eva.commons.core.models.FeatureCoordinates;
 import uk.ac.ebi.eva.pipeline.configuration.ChunkSizeCompletionPolicyConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.io.readers.GeneReaderConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.io.writers.GeneWriterConfiguration;
@@ -39,12 +39,11 @@ import uk.ac.ebi.eva.pipeline.io.readers.GeneReader;
 import uk.ac.ebi.eva.pipeline.io.writers.GeneWriter;
 import uk.ac.ebi.eva.pipeline.jobs.steps.processors.GeneFilterProcessor;
 import uk.ac.ebi.eva.pipeline.listeners.SkippedItemListener;
-import uk.ac.ebi.eva.pipeline.model.FeatureCoordinates;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 
-import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.LOAD_FEATURE_COORDINATES_STEP;
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.GENE_READER;
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.GENE_WRITER;
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.LOAD_FEATURE_COORDINATES_STEP;
 
 /**
  * This step loads a list of genomic features from a species into a DB. This DB is intended to be used as a mapping
@@ -76,7 +75,7 @@ public class LoadFeatureCoordinatesStepConfiguration {
 
     @Bean(LOAD_FEATURE_COORDINATES_STEP)
     public Step LoadFeatureCoordinatesStep(StepBuilderFactory stepBuilderFactory, JobOptions jobOptions,
-                              SimpleCompletionPolicy chunkSizeCompletionPolicy) {
+                                           SimpleCompletionPolicy chunkSizeCompletionPolicy) {
         logger.debug("Building '" + LOAD_FEATURE_COORDINATES_STEP + "'");
 
         return stepBuilderFactory.get(LOAD_FEATURE_COORDINATES_STEP)

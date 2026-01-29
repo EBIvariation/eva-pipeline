@@ -15,6 +15,7 @@
  */
 package uk.ac.ebi.eva.pipeline.configuration.jobs;
 
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -28,8 +29,6 @@ import org.opencb.opencga.storage.core.StorageManagerFactory;
 import org.opencb.opencga.storage.core.variant.VariantStorageManager;
 import org.opencb.opencga.storage.core.variant.adaptors.VariantDBAdaptor;
 import org.opencb.opencga.storage.core.variant.adaptors.VariantDBIterator;
-import org.springframework.batch.core.BatchStatus;
-import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.StepExecution;
@@ -39,9 +38,9 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-
 import uk.ac.ebi.eva.pipeline.Application;
 import uk.ac.ebi.eva.pipeline.configuration.BeanNames;
+import uk.ac.ebi.eva.pipeline.configuration.MongoCollectionNameConfiguration;
 import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
 import uk.ac.ebi.eva.test.configuration.TemporaryRuleConfiguration;
 import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
@@ -73,13 +72,16 @@ import static uk.ac.ebi.eva.utils.FileUtils.getResource;
 @RunWith(SpringRunner.class)
 @ActiveProfiles({Application.VARIANT_WRITER_MONGO_PROFILE, Application.VARIANT_ANNOTATION_MONGO_PROFILE})
 @TestPropertySource({"classpath:variant-aggregated.properties", "classpath:test-mongo.properties"})
-@ContextConfiguration(classes = {AggregatedVcfJobConfiguration.class, BatchTestConfiguration.class, TemporaryRuleConfiguration.class})
+@ContextConfiguration(classes = {AggregatedVcfJobConfiguration.class, BatchTestConfiguration.class,
+        TemporaryRuleConfiguration.class, MongoCollectionNameConfiguration.class})
 public class AggregatedVcfJobTest {
     public static final String INPUT = "/input-files/vcf/aggregated.vcf.gz";
 
     private static final String COLLECTION_VARIANTS_NAME = "variants";
 
     private static final String COLLECTION_FILES_NAME = "files";
+
+    private static final String DATABASE_NAME = "aggregated_vcf_job_test_db";
 
     @Autowired
     @Rule
@@ -97,16 +99,21 @@ public class AggregatedVcfJobTest {
     @Before
     public void setUp() throws Exception {
         Config.setOpenCGAHome(GenotypedVcfJobTestUtils.getDefaultOpencgaHome());
+        mongoRule.getTemporaryDatabase(DATABASE_NAME).drop();
     }
+
+    @After
+    public void cleanUp() {
+        mongoRule.getTemporaryDatabase(DATABASE_NAME).drop();
+    }
+
 
     @Test
     public void aggregatedTransformAndLoadShouldBeExecuted() throws Exception {
-        String dbName = mongoRule.getRandomTemporaryDatabaseName();
-
         JobParameters jobParameters = new EvaJobParameterBuilder()
                 .collectionFilesName(COLLECTION_FILES_NAME)
                 .collectionVariantsName(COLLECTION_VARIANTS_NAME)
-                .databaseName(dbName)
+                .databaseName(DATABASE_NAME)
                 .inputStudyId("aggregated-job")
                 .inputStudyName("inputStudyName")
                 .inputStudyType("COLLECTION")
@@ -133,7 +140,7 @@ public class AggregatedVcfJobTest {
 
         // check ((documents in DB) == (lines in file))
         VariantStorageManager variantStorageManager = StorageManagerFactory.getVariantStorageManager();
-        VariantDBAdaptor variantDBAdaptor = variantStorageManager.getDBAdaptor(dbName, null);
+        VariantDBAdaptor variantDBAdaptor = variantStorageManager.getDBAdaptor(DATABASE_NAME, null);
         VariantDBIterator iterator = variantDBAdaptor.iterator(new QueryOptions());
 
         File file = getResource(INPUT);
@@ -145,7 +152,7 @@ public class AggregatedVcfJobTest {
         assertFalse(variant.getSourceEntries().values().iterator().next().getCohortStats().isEmpty());
     }
 
-// TODO This test needs to be refactored, as right the pipeline will handle the injection of the appropriate VcfReader
+    // TODO This test needs to be refactored, as right the pipeline will handle the injection of the appropriate VcfReader
 // even if the aggregated job has been selected. Maybe we should check this with jobParametersValidator?
     @Ignore
     @Test

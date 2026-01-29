@@ -16,14 +16,11 @@
 package uk.ac.ebi.eva.pipeline.io.mappers;
 
 import org.junit.Test;
-
-import uk.ac.ebi.eva.commons.models.mongo.entity.Annotation;
-import uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.ConsequenceType;
-import uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.Score;
+import uk.ac.ebi.eva.commons.mongodb.entities.AnnotationMongo;
+import uk.ac.ebi.eva.commons.mongodb.entities.subdocuments.ConsequenceTypeMongo;
+import uk.ac.ebi.eva.commons.mongodb.entities.subdocuments.ScoreMongo;
 import uk.ac.ebi.eva.test.data.VepOutputContent;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
 
 import static junit.framework.TestCase.assertNull;
@@ -45,7 +42,7 @@ public class AnnotationLineMapperTest {
     public void shouldParseAllDefaultFieldsInVepOutput() throws Exception {
         AnnotationLineMapper lineMapper = new AnnotationLineMapper(VEP_VERSION, VEP_CACHE_VERSION);
         for (String annotLine : VepOutputContent.vepOutputContent.split("\n")) {
-            Annotation annotation = lineMapper.mapLine(annotLine, 0);
+            AnnotationMongo annotation = lineMapper.mapLine(annotLine, 0);
             assertNotNull(annotation.getConsequenceTypes());
         }
     }
@@ -53,13 +50,13 @@ public class AnnotationLineMapperTest {
     @Test
     public void shouldParseAllTranscriptFieldsInVepOutput() {
         AnnotationLineMapper lineMapper = new AnnotationLineMapper(VEP_VERSION, VEP_CACHE_VERSION);
-        Annotation annotation = lineMapper.mapLine(VepOutputContent.vepOutputContentTranscriptFields, 0);
-        Set<ConsequenceType> consequenceTypes = annotation.getConsequenceTypes();
+        AnnotationMongo annotation = lineMapper.mapLine(VepOutputContent.vepOutputContentTranscriptFields, 0);
+        Set<ConsequenceTypeMongo> consequenceTypes = annotation.getConsequenceTypes();
 
         assertNotNull(consequenceTypes);
         assertEquals(1, consequenceTypes.size());
 
-        ConsequenceType consequenceType = consequenceTypes.iterator().next();
+        ConsequenceTypeMongo consequenceType = consequenceTypes.iterator().next();
 
         assertEquals(Integer.valueOf(1), consequenceType.getcDnaPosition());
         assertEquals(Integer.valueOf(4), consequenceType.getCdsPosition());
@@ -71,13 +68,13 @@ public class AnnotationLineMapperTest {
     @Test
     public void shouldParseVepOutputWithoutTranscript() {
         AnnotationLineMapper lineMapper = new AnnotationLineMapper(VEP_VERSION, VEP_CACHE_VERSION);
-        Annotation annotation = lineMapper.mapLine(VepOutputContent.vepOutputContentWithOutTranscript, 0);
-        Set<ConsequenceType> consequenceTypes = annotation.getConsequenceTypes();
+        AnnotationMongo annotation = lineMapper.mapLine(VepOutputContent.vepOutputContentWithOutTranscript, 0);
+        Set<ConsequenceTypeMongo> consequenceTypes = annotation.getConsequenceTypes();
 
         assertNotNull(consequenceTypes);
         assertEquals(1, consequenceTypes.size());
 
-        ConsequenceType consequenceType = consequenceTypes.iterator().next();
+        ConsequenceTypeMongo consequenceType = consequenceTypes.iterator().next();
 
         assertNotNull(consequenceType.getSoAccessions());
         assertNull(consequenceType.getcDnaPosition());
@@ -96,7 +93,7 @@ public class AnnotationLineMapperTest {
     @Test
     public void shouldParseVepOutputWithChromosomeIdWithUnderscore() {
         AnnotationLineMapper lineMapper = new AnnotationLineMapper(VEP_VERSION, VEP_CACHE_VERSION);
-        Annotation annotation = lineMapper
+        AnnotationMongo annotation = lineMapper
                 .mapLine(VepOutputContent.vepOutputContentChromosomeIdWithUnderscore, 0);
 
         assertEquals("20_1", annotation.getChromosome());
@@ -111,34 +108,34 @@ public class AnnotationLineMapperTest {
     @Test
     public void shouldParseVepOutputWithExtraFields() {
         AnnotationLineMapper lineMapper = new AnnotationLineMapper(VEP_VERSION, VEP_CACHE_VERSION);
-        Annotation annotation = lineMapper.mapLine(VepOutputContent.vepOutputContentWithExtraFieldsSingleAnnotation, 0);
+        AnnotationMongo annotation = lineMapper.mapLine(VepOutputContent.vepOutputContentWithExtraFieldsSingleAnnotation, 0);
 
-        Set<ConsequenceType> consequenceTypes = annotation.getConsequenceTypes();
+        Set<ConsequenceTypeMongo> consequenceTypes = annotation.getConsequenceTypes();
 
         assertNotNull(consequenceTypes);
         assertEquals(1, consequenceTypes.size());
 
-        ConsequenceType consequenceType = consequenceTypes.iterator().next();
+        ConsequenceTypeMongo consequenceType = consequenceTypes.iterator().next();
 
-        Score polyphen = consequenceType.getPolyphen();
-        Score sifts = consequenceType.getSift();
+        ScoreMongo polyphen = consequenceType.getPolyphen();
+        ScoreMongo sifts = consequenceType.getSift();
 
         assertNotNull(polyphen);
         assertNotNull(sifts);
 
-        Score expectedSift = new Score(0.07, "tolerated");
-        Score expectedPolyphen = new Score(0.859, "possibly_damaging");
+        ScoreMongo expectedSift = new ScoreMongo(0.07, "tolerated");
+        ScoreMongo expectedPolyphen = new ScoreMongo(0.859, "possibly_damaging");
 
         assertEquals(expectedSift, sifts);
         assertEquals(expectedPolyphen, polyphen);
     }
 
     @Test
-    public void testChangeRefAltToUpperCase(){
+    public void testChangeRefAltToUpperCase() {
         String vepOutputContent = "20_63351_a/g\t20:63351\tG\tENSG00000178591\tENST00000608838\tTranscript\tupstream_gene_variant\t-\t-\t-\t-\t-\trs181305519\tDISTANCE=4540;STRAND=1;SYMBOL=DEFB125;SYMBOL_SOURCE=HGNC;HGNC_ID=18105;BIOTYPE=processed_transcript;GMAF=G:0.0005;AFR_MAF=G:0.0020;polyphen=possibly_damaging(0.859);sift=tolerated(0.07)";
         AnnotationLineMapper lineMapper = new AnnotationLineMapper(VEP_VERSION, VEP_CACHE_VERSION);
         String annotLine = vepOutputContent.split("\n")[0];
-        Annotation annotation = lineMapper.mapLine(annotLine, 0);
+        AnnotationMongo annotation = lineMapper.mapLine(annotLine, 0);
         assertEquals("20_63351_A_G", annotation.buildVariantId());
     }
 }

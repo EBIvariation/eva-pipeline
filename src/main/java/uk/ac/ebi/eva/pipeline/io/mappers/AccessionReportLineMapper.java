@@ -16,15 +16,18 @@
 package uk.ac.ebi.eva.pipeline.io.mappers;
 
 import org.springframework.batch.item.file.LineMapper;
+import uk.ac.ebi.eva.commons.core.models.IVariant;
 import uk.ac.ebi.eva.commons.core.models.VariantCoreFields;
-import uk.ac.ebi.eva.commons.models.data.Variant;
+import uk.ac.ebi.eva.commons.core.models.factories.VariantVcfFactory;
+import uk.ac.ebi.eva.commons.core.models.pipeline.Variant;
+import uk.ac.ebi.eva.commons.core.models.pipeline.VariantSourceEntry;
 
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
-public class AccessionReportLineMapper extends VariantVcfFactory implements LineMapper<Variant> {
+public class AccessionReportLineMapper extends VariantVcfFactory implements LineMapper<IVariant> {
     public AccessionReportLineMapper() {
     }
 
@@ -38,7 +41,7 @@ public class AccessionReportLineMapper extends VariantVcfFactory implements Line
         String chromosome = fields[0];
         int position = Integer.parseInt(fields[1]);
         String reference = getReference(fields);
-        String alternateAllele = Objects.nonNull(fields[4]) ? fields[4].toUpperCase() : null ;
+        String alternateAllele = Objects.nonNull(fields[4]) ? fields[4].toUpperCase() : null;
 
         VariantCoreFields keyFields = getVariantCoreKeyFields(chromosome, position, reference, alternateAllele);
         Variant variant = new Variant(chromosome, (int) keyFields.getStart(), (int) keyFields.getEnd(), keyFields.getReference(), keyFields.getAlternate());
@@ -48,11 +51,11 @@ public class AccessionReportLineMapper extends VariantVcfFactory implements Line
         return variant;
     }
 
-    private String getReference(String[] fields) {
+    public String getReference(String[] fields) {
         return fields[3].equals(".") ? "" : fields[3].toUpperCase();
     }
 
-    private Set<String> getIds(String[] fields) {
+    public Set<String> getIds(String[] fields) {
         Set<String> ids = new HashSet<>();
         if (!fields[2].equals(".")) {
             ids.addAll(Arrays.asList(fields[2].split(";")));
@@ -69,14 +72,14 @@ public class AccessionReportLineMapper extends VariantVcfFactory implements Line
      * When reading variant from Accessioned VCF, this method checks if a context base has been added to the Variant.
      * If yes, we need to remove that first, in order to make the representation consistent and then give to VariantCoreFields
      * for other checks
-     *
+     * <p>
      * ex: Assume the following variant   ->     After right trimming    ->     stored in vcf
      * CHR POS  REF  ALT                         CHR POS REF ALT                CHR POS REF  ALT
      * 1   100  CAGT  T                          1  100 CAG                     1  99  GCAG  G
-     *
+     * <p>
      * Storing in VCF (as per normalition algorithm, VCF cannot store an empty REF or ALT. If after right trimming REF or ALT become empty,
      * a context base needs to be added)
-     *
+     * <p>
      * reading without context base adjustment (erroneous)                  reading with context base adjustment
      * CHR POS REF ALT                                                      CHR POS REF ALT
      * 1   99  GCA                                                          1   100 CAG
@@ -104,4 +107,9 @@ public class AccessionReportLineMapper extends VariantVcfFactory implements Line
             return false;
         }
     }
+
+    protected void parseSplitSampleData(VariantSourceEntry var1, String[] var2, int var3) {
+        throw new UnsupportedOperationException("This class doesn't support sample parsing");
+    }
+
 }

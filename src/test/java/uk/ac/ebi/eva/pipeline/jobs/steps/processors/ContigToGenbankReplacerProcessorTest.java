@@ -2,8 +2,8 @@ package uk.ac.ebi.eva.pipeline.jobs.steps.processors;
 
 import org.junit.Before;
 import org.junit.Test;
-import uk.ac.ebi.eva.commons.models.data.Variant;
-import uk.ac.ebi.eva.commons.models.data.VariantSourceEntry;
+import uk.ac.ebi.eva.commons.core.models.pipeline.Variant;
+import uk.ac.ebi.eva.commons.core.models.pipeline.VariantSourceEntry;
 import uk.ac.ebi.eva.pipeline.io.contig.ContigMapping;
 
 import static org.junit.Assert.assertEquals;

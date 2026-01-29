@@ -25,7 +25,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.test.context.junit4.SpringRunner;
-import uk.ac.ebi.eva.commons.models.metadata.AnnotationMetadata;
+import uk.ac.ebi.eva.commons.mongodb.entities.AnnotationMetadataMongo;
 
 import static org.mockito.Mockito.doThrow;
 
@@ -44,8 +44,10 @@ public class MongoTemplateTest {
 
     @Test(expected = DataAccessException.class)
     public void testMongoTemplateWriteResultChecking() {
-        AnnotationMetadata annotationMetadata = new AnnotationMetadata("vep_1", "vep_cache_1", true);
-        doThrow(new DataAccessException("Simulated exception") {})
+        AnnotationMetadataMongo annotationMetadata = new AnnotationMetadataMongo("vep_1", "vep_cache_1");
+        annotationMetadata.setDefaultVersion(true);
+        doThrow(new DataAccessException("Simulated exception") {
+        })
                 .when(mongoTemplate).save(annotationMetadata, "AnnotationMetadata");
 
         mongoTemplate.save(annotationMetadata, "AnnotationMetadata");

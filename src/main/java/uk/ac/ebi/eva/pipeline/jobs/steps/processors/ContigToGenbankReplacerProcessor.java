@@ -3,7 +3,7 @@ package uk.ac.ebi.eva.pipeline.jobs.steps.processors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.item.ItemProcessor;
-import uk.ac.ebi.eva.commons.models.data.Variant;
+import uk.ac.ebi.eva.commons.core.models.pipeline.Variant;
 import uk.ac.ebi.eva.pipeline.io.contig.ContigMapping;
 import uk.ac.ebi.eva.pipeline.io.contig.ContigSynonyms;
 
@@ -36,7 +36,7 @@ public class ContigToGenbankReplacerProcessor implements ItemProcessor<Variant, 
     private Variant replaceContigWithGenbankAccession(Variant variant, ContigSynonyms contigSynonyms) {
         Variant newVariant = new Variant(contigSynonyms.getGenBank(), variant.getStart(), variant.getEnd(),
                 variant.getReference(), variant.getAlternate());
-        newVariant.setSourceEntries(variant.getSourceEntries());
+        newVariant.addSourceEntries(variant.getSourceEntries());
         return newVariant;
     }
 }

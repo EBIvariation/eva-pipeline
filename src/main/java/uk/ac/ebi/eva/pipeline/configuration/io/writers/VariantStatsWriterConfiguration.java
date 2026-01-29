@@ -20,7 +20,7 @@ import org.springframework.batch.item.ItemWriter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import uk.ac.ebi.eva.commons.models.mongo.entity.VariantDocument;
+import uk.ac.ebi.eva.commons.mongodb.entities.VariantMongo;
 import uk.ac.ebi.eva.pipeline.io.writers.VariantStatsWriter;
 import uk.ac.ebi.eva.pipeline.parameters.DatabaseParameters;
 
@@ -31,7 +31,7 @@ public class VariantStatsWriterConfiguration {
 
     @Bean(VARIANT_STATS_WRITER)
     @StepScope
-    public ItemWriter<VariantDocument> variantStatsWriter(DatabaseParameters databaseParameters, MongoTemplate mongoTemplate) {
+    public ItemWriter<VariantMongo> variantStatsWriter(DatabaseParameters databaseParameters, MongoTemplate mongoTemplate) {
         return new VariantStatsWriter(databaseParameters, mongoTemplate);
     }
 }
