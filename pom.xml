@@ -6,7 +6,7 @@
 
     <groupId>uk.ac.ebi.eva</groupId>
     <artifactId>eva-pipeline</artifactId>
-    <version>3.0.5</version>
+    <version>3.0.6-SNAPSHOT</version>
 
     <packaging>jar</packaging>
 
