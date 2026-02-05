@@ -29,8 +29,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-
-import uk.ac.ebi.eva.commons.models.metadata.AnnotationMetadata;
+import uk.ac.ebi.eva.commons.core.models.AnnotationMetadata;
 import uk.ac.ebi.eva.pipeline.Application;
 import uk.ac.ebi.eva.pipeline.configuration.BeanNames;
 import uk.ac.ebi.eva.pipeline.configuration.MongoConfiguration;
@@ -89,7 +88,7 @@ public class AnnotationMetadataStepTest {
         assertEquals(1, annotationMetadataList.size());
         assertEquals(vepCacheVersion, annotationMetadataList.get(0).getCacheVersion());
         assertEquals(vepVersion, annotationMetadataList.get(0).getVepVersion());
-        assertTrue(annotationMetadataList.get(0).isDefault());
+        assertTrue(annotationMetadataList.get(0).isDefaultVersion());
     }
 
     private void assertStepIsComplete(String databaseName, String vepCacheVersion, String vepVersion) {
@@ -111,7 +110,8 @@ public class AnnotationMetadataStepTest {
         String databaseName = mongoRule.getRandomTemporaryDatabaseName();
         MongoOperations mongoOperations = MongoConfiguration.getMongoTemplate(databaseName, mongoConnectionDetails,
                 mongoMappingContext);
-        AnnotationMetadata defaultMetadata = new AnnotationMetadata("70", "72", true);
+        AnnotationMetadata defaultMetadata = new AnnotationMetadata("70", "72");
+        defaultMetadata.setDefaultVersion(true);
         mongoOperations.save(defaultMetadata);
 
         String vepCacheVersion = "87";
@@ -123,11 +123,12 @@ public class AnnotationMetadataStepTest {
         List<AnnotationMetadata> annotationMetadataList = mongoOperations.findAll(AnnotationMetadata.class);
 
         assertEquals(2, annotationMetadataList.size());
-        for (AnnotationMetadata metadata: annotationMetadataList) {
-            if (metadata.sameVersions(defaultMetadata)) {
-                assertTrue(metadata.isDefault());
+        for (AnnotationMetadata metadata : annotationMetadataList) {
+            if (metadata.getVepVersion().equals(defaultMetadata.getVepVersion())
+                    && metadata.getCacheVersion().equals(defaultMetadata.getCacheVersion())) {
+                assertTrue(metadata.isDefaultVersion());
             } else {
-                assertFalse(metadata.isDefault());
+                assertFalse(metadata.isDefaultVersion());
             }
         }
     }
@@ -139,7 +140,9 @@ public class AnnotationMetadataStepTest {
                 mongoMappingContext);
         String vepCacheVersion = "87";
         String vepVersion = "88";
-        mongoOperations.save(new AnnotationMetadata(vepVersion, vepCacheVersion, true));
+        AnnotationMetadata annotationMetadataMongo = new AnnotationMetadata(vepVersion, vepCacheVersion);
+        annotationMetadataMongo.setDefaultVersion(true);
+        mongoOperations.save(annotationMetadataMongo);
 
         assertStepIsComplete(databaseName, vepCacheVersion, vepVersion);
 
@@ -147,6 +150,6 @@ public class AnnotationMetadataStepTest {
         List<AnnotationMetadata> annotationMetadataList = mongoOperations.findAll(AnnotationMetadata.class);
 
         assertEquals(1, annotationMetadataList.size());
-        assertTrue(annotationMetadataList.get(0).isDefault());
+        assertTrue(annotationMetadataList.get(0).isDefaultVersion());
     }
 }

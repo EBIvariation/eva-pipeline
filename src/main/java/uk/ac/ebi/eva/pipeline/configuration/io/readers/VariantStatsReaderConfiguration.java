@@ -20,7 +20,7 @@ import org.springframework.batch.item.ItemStreamReader;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import uk.ac.ebi.eva.commons.models.mongo.entity.VariantDocument;
+import uk.ac.ebi.eva.commons.mongodb.entities.VariantMongo;
 import uk.ac.ebi.eva.pipeline.io.readers.VariantStatsReader;
 import uk.ac.ebi.eva.pipeline.parameters.ChunkSizeParameters;
 import uk.ac.ebi.eva.pipeline.parameters.DatabaseParameters;
@@ -33,10 +33,10 @@ public class VariantStatsReaderConfiguration {
 
     @Bean(VARIANT_STATS_READER)
     @StepScope
-    public ItemStreamReader<VariantDocument> variantStatsReader(DatabaseParameters databaseParameters,
-                                                                MongoTemplate mongoTemplate,
-                                                                InputParameters inputParameters,
-                                                                ChunkSizeParameters chunkSizeParameters) {
+    public ItemStreamReader<VariantMongo> variantStatsReader(DatabaseParameters databaseParameters,
+                                                             MongoTemplate mongoTemplate,
+                                                             InputParameters inputParameters,
+                                                             ChunkSizeParameters chunkSizeParameters) {
 
         return new VariantStatsReader(databaseParameters, mongoTemplate, inputParameters.getStudyId(), chunkSizeParameters.getChunkSize());
     }

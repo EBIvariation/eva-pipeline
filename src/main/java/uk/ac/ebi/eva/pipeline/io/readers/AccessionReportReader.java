@@ -17,14 +17,14 @@ package uk.ac.ebi.eva.pipeline.io.readers;
 
 import org.springframework.batch.item.file.FlatFileItemReader;
 import org.springframework.core.io.Resource;
-import uk.ac.ebi.eva.commons.models.data.Variant;
+import uk.ac.ebi.eva.commons.core.models.IVariant;
 import uk.ac.ebi.eva.pipeline.io.mappers.AccessionReportLineMapper;
 import uk.ac.ebi.eva.utils.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
 
-public class AccessionReportReader extends FlatFileItemReader<Variant> {
+public class AccessionReportReader extends FlatFileItemReader<IVariant> {
 
     public AccessionReportReader(File file) throws IOException {
         Resource resource = FileUtils.getResource(file);

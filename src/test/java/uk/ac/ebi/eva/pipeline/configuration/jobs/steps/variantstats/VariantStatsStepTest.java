@@ -33,7 +33,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.ac.ebi.eva.pipeline.configuration.BeanNames;
-import uk.ac.ebi.eva.pipeline.configuration.MongoConfiguration;
+import uk.ac.ebi.eva.pipeline.configuration.MongoCollectionNameConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.jobs.VariantStatsJobConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.jobs.steps.VariantStatsStepConfiguration;
 import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
@@ -55,7 +55,7 @@ import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResourceUrl;
 @RunWith(SpringRunner.class)
 @TestPropertySource({"classpath:test-stats.properties"})
 @ContextConfiguration(classes = {VariantStatsJobConfiguration.class, BatchTestConfiguration.class,
-        TemporaryRuleConfiguration.class, MongoConfiguration.class})
+        TemporaryRuleConfiguration.class, MongoCollectionNameConfiguration.class})
 public class VariantStatsStepTest {
     private static final String MONGO_DUMP = "/dump/VariantStatsConfigurationTest_vl";
 

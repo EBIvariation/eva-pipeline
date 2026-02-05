@@ -26,24 +26,24 @@ import org.springframework.data.mongodb.core.query.BasicUpdate;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.util.Assert;
-import uk.ac.ebi.eva.commons.models.mongo.entity.Annotation;
-import uk.ac.ebi.eva.commons.models.mongo.entity.projections.SimplifiedAnnotation;
-import uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.ConsequenceType;
-import uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.Xref;
+import uk.ac.ebi.eva.commons.mongodb.entities.AnnotationMongo;
+import uk.ac.ebi.eva.commons.mongodb.entities.projections.SimplifiedAnnotation;
+import uk.ac.ebi.eva.commons.mongodb.entities.subdocuments.ConsequenceTypeMongo;
+import uk.ac.ebi.eva.commons.mongodb.entities.subdocuments.XrefMongo;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static uk.ac.ebi.eva.commons.models.mongo.entity.Annotation.CONSEQUENCE_TYPE_FIELD;
-import static uk.ac.ebi.eva.commons.models.mongo.entity.Annotation.END_FIELD;
-import static uk.ac.ebi.eva.commons.models.mongo.entity.Annotation.VEP_CACHE_VERSION_FIELD;
-import static uk.ac.ebi.eva.commons.models.mongo.entity.Annotation.VEP_VERSION_FIELD;
-import static uk.ac.ebi.eva.commons.models.mongo.entity.Annotation.XREFS_FIELD;
+import static uk.ac.ebi.eva.commons.mongodb.entities.AnnotationMongo.CONSEQUENCE_TYPE_FIELD;
+import static uk.ac.ebi.eva.commons.mongodb.entities.AnnotationMongo.END_FIELD;
+import static uk.ac.ebi.eva.commons.mongodb.entities.AnnotationMongo.VEP_CACHE_VERSION_FIELD;
+import static uk.ac.ebi.eva.commons.mongodb.entities.AnnotationMongo.VEP_VERSION_FIELD;
+import static uk.ac.ebi.eva.commons.mongodb.entities.AnnotationMongo.XREFS_FIELD;
 
 /**
- * Write a list of {@link Annotation} into MongoDB
+ * Write a list of {@link AnnotationMongo} into MongoDB
  * <p>
  * A new annotation is added in the existing document.
  * In case of two annotations (or more) in the same variant the other annotations are appended:
@@ -64,12 +64,12 @@ import static uk.ac.ebi.eva.commons.models.mongo.entity.Annotation.XREFS_FIELD;
  * { "id" : "ENST00000608838", "src" : "ensemblTranscript" },
  * { "id" : "ENSG00000178591", "src" : "ensemblGene"
  */
-public class AnnotationMongoWriter implements ItemWriter<List<Annotation>> {
+public class AnnotationMongoWriter implements ItemWriter<List<AnnotationMongo>> {
 
-    private static final String ANNOTATION_XREF_ID_FIELD = Annotation.XREFS_FIELD + "." + Xref.XREF_ID_FIELD;
+    private static final String ANNOTATION_XREF_ID_FIELD = XREFS_FIELD + "." + XrefMongo.XREF_ID_FIELD;
 
-    private static final String ANNOTATION_CT_SO_FIELD = Annotation.CONSEQUENCE_TYPE_FIELD + "."
-            + ConsequenceType.SO_ACCESSION_FIELD;
+    private static final String ANNOTATION_CT_SO_FIELD = CONSEQUENCE_TYPE_FIELD + "."
+            + ConsequenceTypeMongo.SO_ACCESSION_FIELD;
 
     public static final String EACH = "$each";
     public static final String ADD_TO_SET = "$addToSet";
@@ -89,24 +89,24 @@ public class AnnotationMongoWriter implements ItemWriter<List<Annotation>> {
     }
 
     @Override
-    public void write(List<? extends List<Annotation>> annotations) throws Exception {
-        for (List<Annotation> annotationList : annotations) {
+    public void write(List<? extends List<AnnotationMongo>> annotations) throws Exception {
+        for (List<AnnotationMongo> annotationList : annotations) {
             BulkOperations bulk = mongoOperations.bulkOps(BulkOperations.BulkMode.UNORDERED, collection);
             prepareBulk(annotationList, bulk);
             bulk.execute();
         }
     }
 
-    private void prepareBulk(List<? extends Annotation> annotations, BulkOperations bulk) {
-        Map<String, Annotation> annotationsByStorageId = groupAnnotationById(annotations);
-        for (Annotation annotation : annotationsByStorageId.values()) {
+    private void prepareBulk(List<? extends AnnotationMongo> annotations, BulkOperations bulk) {
+        Map<String, AnnotationMongo> annotationsByStorageId = groupAnnotationById(annotations);
+        for (AnnotationMongo annotation : annotationsByStorageId.values()) {
             writeAnnotationInMongoDb(bulk, annotation);
         }
     }
 
-    private Map<String, Annotation> groupAnnotationById(List<? extends Annotation> annotations) {
-        Map<String, Annotation> groupedAnnotations = new HashMap<>();
-        for (Annotation annotation : annotations) {
+    private Map<String, AnnotationMongo> groupAnnotationById(List<? extends AnnotationMongo> annotations) {
+        Map<String, AnnotationMongo> groupedAnnotations = new HashMap<>();
+        for (AnnotationMongo annotation : annotations) {
             String id = annotation.getId();
             groupedAnnotations.computeIfPresent(id, (key, oldVar) -> oldVar.concatenate(annotation));
             groupedAnnotations.putIfAbsent(id, annotation);
@@ -114,13 +114,13 @@ public class AnnotationMongoWriter implements ItemWriter<List<Annotation>> {
         return groupedAnnotations;
     }
 
-    private void writeAnnotationInMongoDb(BulkOperations bulk, Annotation annotation) {
+    private void writeAnnotationInMongoDb(BulkOperations bulk, AnnotationMongo annotation) {
         Query upsertQuery = new BasicQuery(convertToMongo(new SimplifiedAnnotation(annotation)));
         Update update = buildUpdateQuery(annotation);
         bulk.upsert(upsertQuery, update);
     }
 
-    private BasicUpdate buildUpdateQuery(Annotation annotation) {
+    private BasicUpdate buildUpdateQuery(AnnotationMongo annotation) {
         final Document setOnInsertValue = new Document();
         setOnInsertValue.append(END_FIELD, annotation.getEnd());
         setOnInsertValue.append(VEP_VERSION_FIELD, annotation.getVepVersion());
@@ -135,11 +135,11 @@ public class AnnotationMongoWriter implements ItemWriter<List<Annotation>> {
         return new BasicUpdate(updateDoc);
     }
 
-    private Document buildInsertXrefsQuery(Annotation annotation) {
+    private Document buildInsertXrefsQuery(AnnotationMongo annotation) {
         return new Document(EACH, convertToMongo(annotation.getXrefs()));
     }
 
-    private Document buildInsertConsequenceTypeQuery(Annotation annotation) {
+    private Document buildInsertConsequenceTypeQuery(AnnotationMongo annotation) {
         return new Document(EACH, convertToMongo(annotation.getConsequenceTypes()));
     }
 

@@ -30,9 +30,10 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-import uk.ac.ebi.eva.commons.models.mongo.entity.VariantDocument;
+import uk.ac.ebi.eva.commons.mongodb.entities.VariantMongo;
 import uk.ac.ebi.eva.pipeline.Application;
 import uk.ac.ebi.eva.pipeline.configuration.BeanNames;
+import uk.ac.ebi.eva.pipeline.configuration.MongoCollectionNameConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.jobs.AnnotationJobConfiguration;
 import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
 import uk.ac.ebi.eva.test.configuration.TemporaryRuleConfiguration;
@@ -52,10 +53,10 @@ import java.util.stream.Collectors;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantAnnotation.POLYPHEN_FIELD;
-import static uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantAnnotation.SIFT_FIELD;
-import static uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantAnnotation.SO_ACCESSION_FIELD;
-import static uk.ac.ebi.eva.commons.models.mongo.entity.subdocuments.VariantAnnotation.XREFS_FIELD;
+import static uk.ac.ebi.eva.commons.mongodb.entities.subdocuments.AnnotationIndexMongo.POLYPHEN_FIELD;
+import static uk.ac.ebi.eva.commons.mongodb.entities.subdocuments.AnnotationIndexMongo.SIFT_FIELD;
+import static uk.ac.ebi.eva.commons.mongodb.entities.subdocuments.AnnotationIndexMongo.SO_ACCESSION_FIELD;
+import static uk.ac.ebi.eva.commons.mongodb.entities.subdocuments.AnnotationIndexMongo.XREFS_FIELD;
 import static uk.ac.ebi.eva.test.utils.GenotypedVcfJobTestUtils.COLLECTION_ANNOTATIONS_NAME;
 import static uk.ac.ebi.eva.test.utils.GenotypedVcfJobTestUtils.COLLECTION_VARIANTS_NAME;
 import static uk.ac.ebi.eva.test.utils.GenotypedVcfJobTestUtils.checkLoadedAnnotation;
@@ -70,7 +71,8 @@ import static uk.ac.ebi.eva.utils.FileUtils.getResource;
 @RunWith(SpringRunner.class)
 @ActiveProfiles(Application.VARIANT_ANNOTATION_MONGO_PROFILE)
 @TestPropertySource({"classpath:common-configuration.properties", "classpath:test-mongo.properties"})
-@ContextConfiguration(classes = {AnnotationJobConfiguration.class, BatchTestConfiguration.class, TemporaryRuleConfiguration.class})
+@ContextConfiguration(classes = {AnnotationJobConfiguration.class, BatchTestConfiguration.class,
+        TemporaryRuleConfiguration.class, MongoCollectionNameConfiguration.class})
 public class GenerateVepAnnotationStepTest {
     private static final String MONGO_DUMP = "/dump/VariantStatsConfigurationTest_vl";
 
@@ -134,7 +136,7 @@ public class GenerateVepAnnotationStepTest {
             Document variant = variantCursor.next();
             if (variant.get("_id").equals("20_68363_A_T")) {
                 Document annotationField = ((List<Document>) variant.get(
-                        VariantDocument.ANNOTATION_FIELD)).get(0);
+                        VariantMongo.ANNOTATION_FIELD)).get(0);
                 assertNotNull(annotationField.get(SIFT_FIELD));
                 assertNotNull(annotationField.get(SO_ACCESSION_FIELD));
                 assertNotNull(annotationField.get(POLYPHEN_FIELD));
@@ -221,8 +223,8 @@ public class GenerateVepAnnotationStepTest {
 
     private void assertVepErrorFilesExist(String outputDirAnnot) throws IOException {
         List<Path> files = Files.list(Paths.get(outputDirAnnot))
-                                .filter(path -> path.getFileName().toString().contains("error"))
-                                .collect(Collectors.toList());
+                .filter(path -> path.getFileName().toString().contains("error"))
+                .collect(Collectors.toList());
         assertTrue(files.size() > 0);
     }
 

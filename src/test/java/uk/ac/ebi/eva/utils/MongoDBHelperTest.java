@@ -2,7 +2,7 @@ package uk.ac.ebi.eva.utils;
 
 import org.junit.Test;
 import org.opencb.commons.utils.CryptoUtils;
-import uk.ac.ebi.eva.commons.models.mongo.entity.VariantDocument;
+import uk.ac.ebi.eva.commons.mongodb.entities.VariantMongo;
 
 import static org.junit.Assert.assertEquals;
 
@@ -10,7 +10,7 @@ public class MongoDBHelperTest {
 
     @Test
     public void testBuildStorageIdSnv() {
-        assertEquals("1_1000_A_C", VariantDocument.buildVariantId(
+        assertEquals("1_1000_A_C", VariantMongo.buildVariantId(
                 "1",
                 1000,
                 "A",
@@ -20,7 +20,7 @@ public class MongoDBHelperTest {
 
     @Test
     public void testBuildStorageIdIndel() {
-        assertEquals("1_1000__CA", VariantDocument.buildVariantId(
+        assertEquals("1_1000__CA", VariantMongo.buildVariantId(
                 "1",
                 1000,
                 "",
@@ -31,7 +31,7 @@ public class MongoDBHelperTest {
     @Test
     public void testBuildStorageIdStructural() {
         String alt = "ACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGT";
-        assertEquals("1_1000_TAG_" + new String(CryptoUtils.encryptSha1(alt)), VariantDocument.buildVariantId(
+        assertEquals("1_1000_TAG_" + new String(CryptoUtils.encryptSha1(alt)), VariantMongo.buildVariantId(
                 "1",
                 1000,
                 "TAG",

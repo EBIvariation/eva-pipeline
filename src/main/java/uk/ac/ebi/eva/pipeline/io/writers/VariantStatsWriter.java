@@ -8,7 +8,7 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
-import uk.ac.ebi.eva.commons.models.mongo.entity.VariantDocument;
+import uk.ac.ebi.eva.commons.mongodb.entities.VariantMongo;
 import uk.ac.ebi.eva.pipeline.io.readers.VariantStatsReader;
 import uk.ac.ebi.eva.pipeline.parameters.DatabaseParameters;
 
@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class VariantStatsWriter implements ItemWriter<VariantDocument> {
+public class VariantStatsWriter implements ItemWriter<VariantMongo> {
     private static final Logger logger = LoggerFactory.getLogger(VariantStatsWriter.class);
     private DatabaseParameters databaseParameters;
     private MongoTemplate mongoTemplate;
@@ -27,7 +27,7 @@ public class VariantStatsWriter implements ItemWriter<VariantDocument> {
     }
 
     @Override
-    public void write(List<? extends VariantDocument> variants) {
+    public void write(List<? extends VariantMongo> variants) {
         Map<String, Integer> filesIdNumberOfSamplesMap = VariantStatsReader.getFilesIdAndNumberOfSamplesMap();
         if (filesIdNumberOfSamplesMap.isEmpty()) {
             // No new stats would have been calculated, no need to write anything
@@ -39,10 +39,10 @@ public class VariantStatsWriter implements ItemWriter<VariantDocument> {
                 .collect(Collectors.toList());
 
         if (!variants.isEmpty()) {
-            BulkOperations bulkOperations = mongoTemplate.bulkOps(BulkOperations.BulkMode.UNORDERED, VariantDocument.class,
+            BulkOperations bulkOperations = mongoTemplate.bulkOps(BulkOperations.BulkMode.UNORDERED, VariantMongo.class,
                     databaseParameters.getCollectionVariantsName());
 
-            for (VariantDocument variant : variants) {
+            for (VariantMongo variant : variants) {
                 Query query = new Query(Criteria.where("_id").is(variant.getId()));
                 Update update = new Update();
                 update.set("st", variant.getVariantStatsMongo());

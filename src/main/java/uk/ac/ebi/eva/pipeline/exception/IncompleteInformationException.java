@@ -17,7 +17,7 @@
 package uk.ac.ebi.eva.pipeline.exception;
 
 
-import uk.ac.ebi.eva.commons.models.data.Variant;
+import uk.ac.ebi.eva.commons.core.models.pipeline.Variant;
 
 public class IncompleteInformationException extends RuntimeException {
 
