@@ -29,6 +29,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
+import uk.ac.ebi.eva.commons.mongodb.entities.VariantSourceMongo;
 import uk.ac.ebi.eva.pipeline.Application;
 import uk.ac.ebi.eva.pipeline.configuration.BeanNames;
 import uk.ac.ebi.eva.pipeline.configuration.MongoCollectionNameConfiguration;
@@ -38,6 +39,7 @@ import uk.ac.ebi.eva.test.configuration.TemporaryRuleConfiguration;
 import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 import uk.ac.ebi.eva.utils.EvaJobParameterBuilder;
 
+import java.io.File;
 import static org.junit.Assert.assertEquals;
 import static uk.ac.ebi.eva.test.utils.JobTestUtils.assertCompleted;
 import static uk.ac.ebi.eva.test.utils.JobTestUtils.count;
@@ -91,6 +93,44 @@ public class LoadFileStepTest {
         MongoCollection<Document> fileCollection = mongoRule.getCollection(databaseName, COLLECTION_FILES_NAME);
         MongoCursor<Document> cursor = fileCollection.find().iterator();
         assertEquals(EXPECTED_FILES, count(cursor));
+
+        mongoRule.getTemporaryDatabase(databaseName).drop();
+    }
+
+    @Test
+    public void loaderStepShouldLoadAllFiles_withExistingEntries() throws Exception {
+        File inputFile = getResource(SMALL_VCF_FILE);
+        String databaseName = "file-step-test-db";
+
+        // insert document with same file id, study id and filename as the one processed by the job
+        mongoRule.getTemporaryDatabase(databaseName).getCollection(COLLECTION_FILES_NAME)
+                .insertOne(new Document(VariantSourceMongo.FILEID_FIELD, "1")
+                        .append(VariantSourceMongo.STUDYID_FIELD, "1")
+                        .append(VariantSourceMongo.FILENAME_FIELD, inputFile.getName()));
+
+        // run the job
+        JobParameters jobParameters = new EvaJobParameterBuilder()
+                .collectionFilesName(COLLECTION_FILES_NAME)
+                .collectionVariantsName("variants")
+                .databaseName(databaseName)
+                .inputStudyId("1")
+                .inputVcf(inputFile.getAbsolutePath())
+                .inputVcfAggregation("NONE")
+                .inputVcfId("1")
+                .toJobParameters();
+
+        // When the execute method in variantsLoad is executed
+        JobExecution jobExecution = jobLauncherTestUtils.launchStep(BeanNames.LOAD_FILE_STEP, jobParameters);
+
+        //Then variantsLoad step should complete correctly
+        assertCompleted(jobExecution);
+
+        // And the number of documents in the DB should be equals to the number of VCF files loaded
+        MongoCollection<Document> fileCollection = mongoRule.getCollection(databaseName, COLLECTION_FILES_NAME);
+        MongoCursor<Document> cursor = fileCollection.find().iterator();
+        assertEquals(EXPECTED_FILES, count(cursor));
+
+        mongoRule.getTemporaryDatabase(databaseName).drop();
     }
 
 }
