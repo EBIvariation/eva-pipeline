@@ -151,6 +151,8 @@ public class FileStatsTasklet implements Tasklet {
 
         boolean isSNV = variantDocument.getType().equals(VariantType.SNV);
         boolean isINDEL = variantDocument.getType().equals(VariantType.INDEL);
+        boolean isINS = variantDocument.getType().equals(VariantType.INS);
+        boolean isDEL = variantDocument.getType().equals(VariantType.DEL);
 
         boolean isTransition = false;
         boolean isTransversion = false;
@@ -171,7 +173,7 @@ public class FileStatsTasklet implements Tasklet {
 
             if (isSNV) {
                 countsMap.merge(KEY_NO_OF_SNP, 1, Integer::sum);
-            } else if (isINDEL) {
+            } else if (isINDEL || isINS || isDEL) {
                 countsMap.merge(KEY_NO_OF_INDEL, 1, Integer::sum);
             }
 
