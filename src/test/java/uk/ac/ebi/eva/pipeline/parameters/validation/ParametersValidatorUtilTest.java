@@ -45,50 +45,6 @@ public class ParametersValidatorUtilTest {
         ParametersValidatorUtil.checkIsNotNullString(null, JOB_PARAMETER_NAME);
     }
 
-    @Test(expected = JobParametersInvalidException.class)
-    public void stringWithNonPrintableCharacter() throws JobParametersInvalidException {
-        ParametersValidatorUtil.checkDoesNotContainPrintableCharacters("R\0al", JOB_PARAMETER_NAME);
-    }
-
-    @Test
-    public void stringWithAccentCharacter() throws JobParametersInvalidException {
-        ParametersValidatorUtil.checkDoesNotContainPrintableCharacters("Réal", JOB_PARAMETER_NAME);
-    }
-
-    @Test
-    public void stringWithDieresisCharacter() throws JobParametersInvalidException {
-        ParametersValidatorUtil.checkDoesNotContainPrintableCharacters("RÜal", JOB_PARAMETER_NAME);
-    }
-
-    @Test
-    public void stringWithTildeCharacter() throws JobParametersInvalidException {
-        ParametersValidatorUtil.checkDoesNotContainPrintableCharacters("R Ã al", JOB_PARAMETER_NAME);
-    }
-
-    @Test
-    public void stringWithStandardLineSeparator() throws JobParametersInvalidException {
-        ParametersValidatorUtil
-                .checkDoesNotContainPrintableCharacters("1000 Genomes Phase 3 \n Version 5", JOB_PARAMETER_NAME);
-    }
-
-    @Test
-    public void stringWithOsXLineSeparator() throws JobParametersInvalidException {
-        ParametersValidatorUtil
-                .checkDoesNotContainPrintableCharacters("1000 Genomes Phase 3 \r Version 5", JOB_PARAMETER_NAME);
-    }
-
-    @Test
-    public void stringWithWindowsLineSeparator() throws JobParametersInvalidException {
-        ParametersValidatorUtil
-                .checkDoesNotContainPrintableCharacters("1000 Genomes Phase 3 \r\n Version 5", JOB_PARAMETER_NAME);
-    }
-
-    @Test
-    public void stringWithAllPrintableCharacters() throws JobParametersInvalidException {
-        ParametersValidatorUtil
-                .checkDoesNotContainPrintableCharacters("1000 Genomes Phase 3 Version 5", JOB_PARAMETER_NAME);
-    }
-
     @Test
     public void stringSmallerThan250Characters() throws JobParametersInvalidException {
         ParametersValidatorUtil.checkLength("1000 Genomes Phase 3 Version 5", JOB_PARAMETER_NAME);

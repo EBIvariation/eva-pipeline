@@ -83,7 +83,8 @@ public class InputParameters {
     }
 
     public String getStudyName() {
-        return studyName;
+        // Strip anything non-ASCII printable except newline and carriage return
+        return studyName == null ? null : studyName.replaceAll("[^\\x20-\\x7E\\n\\r]", "");
     }
 
     public StudyType getStudyType() {
