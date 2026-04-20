@@ -27,6 +27,9 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.data.mongodb.core.mapping.MongoMappingContext;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
@@ -132,6 +135,44 @@ public class AnnotationMongoWriterTest {
 
         assertTrue(count > 0);
         assertEquals(annotations.size(), consequenceTypeCount);
+    }
+
+
+    @Test
+    public void shouldDoUpsertWhenChromosomeMismatchBetweenIdAndChrField() throws Exception {
+        String databaseName = "vep-test";
+        List<String> vepOutputContentLines = Arrays.asList(vepOutputContent.split("\n"));
+        MongoOperations operations = MongoConfiguration.getMongoTemplate(databaseName, mongoConnectionDetails,
+                mongoMappingContext);
+        annotationWriter = new AnnotationMongoWriter(operations, COLLECTION_ANNOTATIONS_NAME);
+
+        AnnotationMongo annotationMongo = annotationLineMapper.mapLine(vepOutputContentLines.get(0), 0);
+
+        // write annotation
+        annotationWriter.write(Collections.singletonList(Arrays.asList(annotationMongo)));
+
+        // make a mismatch between chromosome in id (20) and chromosome in chr field (30)
+        operations.updateFirst(new Query(Criteria.where("_id").is(annotationMongo.getId())),
+                new Update().set(AnnotationMongo.CHROMOSOME_FIELD, "30"), COLLECTION_ANNOTATIONS_NAME);
+
+        // write annotation again (should do upsert)
+        annotationWriter.write(Collections.singletonList(Arrays.asList(annotationMongo)));
+
+        // and finally check that documents in annotation collection have annotations
+        MongoCursor<Document> cursor = mongoRule.getCollection(databaseName, COLLECTION_ANNOTATIONS_NAME).find().iterator();
+
+        int count = 0;
+        int consequenceTypeCount = 0;
+        while (cursor.hasNext()) {
+            count++;
+            Document annotation = cursor.next();
+            List<Document> consequenceTypes = (List<Document>) annotation.get(CONSEQUENCE_TYPE_FIELD);
+            assertNotNull(consequenceTypes);
+            consequenceTypeCount += consequenceTypes.size();
+        }
+
+        assertTrue(count > 0);
+        assertEquals(1, consequenceTypeCount);
     }
 
     /**
