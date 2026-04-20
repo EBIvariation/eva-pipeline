@@ -31,21 +31,7 @@ public class ParametersValidatorUtil {
     static void checkIsValidString(String stringToValidate,
                                    String jobParametersName) throws JobParametersInvalidException {
         checkIsNotNullString(stringToValidate, jobParametersName);
-        checkDoesNotContainPrintableCharacters(stringToValidate, jobParametersName);
         checkLength(stringToValidate, jobParametersName);
-    }
-
-    /**
-     * \n or \r are valid non-printable characters
-     */
-    static void checkDoesNotContainPrintableCharacters(String stringToValidate,
-                                                       String jobParametersName) throws JobParametersInvalidException {
-        Pattern regex = Pattern.compile("[\\p{C}&&[^\n]&&[^\r]]");
-
-        if (regex.matcher(stringToValidate).find()) {
-            throw new JobParametersInvalidException(
-                    String.format("%s in %s contains non printable characters", stringToValidate, jobParametersName));
-        }
     }
 
     static void checkIsNotNullString(String stringToValidate,
