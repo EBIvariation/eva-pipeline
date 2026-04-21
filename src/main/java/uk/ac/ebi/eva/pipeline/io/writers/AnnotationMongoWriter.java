@@ -21,8 +21,8 @@ import org.bson.Document;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.data.mongodb.core.BulkOperations;
 import org.springframework.data.mongodb.core.MongoOperations;
-import org.springframework.data.mongodb.core.query.BasicQuery;
 import org.springframework.data.mongodb.core.query.BasicUpdate;
+import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.util.Assert;
@@ -115,7 +115,7 @@ public class AnnotationMongoWriter implements ItemWriter<List<AnnotationMongo>> 
     }
 
     private void writeAnnotationInMongoDb(BulkOperations bulk, AnnotationMongo annotation) {
-        Query upsertQuery = new BasicQuery(convertToMongo(new SimplifiedAnnotation(annotation)));
+        Query upsertQuery = new Query(Criteria.where("_id").is(annotation.getId()));
         Update update = buildUpdateQuery(annotation);
         bulk.upsert(upsertQuery, update);
     }
