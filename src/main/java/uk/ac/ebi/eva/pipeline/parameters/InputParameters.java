@@ -83,8 +83,8 @@ public class InputParameters {
     }
 
     public String getStudyName() {
-        // Strip anything non-ASCII printable except newline and carriage return
-        return studyName == null ? null : studyName.replaceAll("[^\\x20-\\x7E\\n\\r]", "");
+        // allow all of Unicode characters except 31 control characters
+        return studyName == null ? null : studyName.replaceAll("[\\x00-\\x08\\x0B\\x0C\\x0E-\\x1F\\x7F]", "");
     }
 
     public StudyType getStudyType() {
