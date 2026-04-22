@@ -28,6 +28,8 @@ import uk.ac.ebi.eva.commons.core.models.StudyType;
 @StepScope
 public class InputParameters {
 
+    private static final String STUDY_NAME_SANITIZE_REGEX = "[\\x00-\\x08\\x0B\\x0C\\x0E-\\x1F\\x7F]";
+
     private static final String PARAMETER = "#{jobParameters['";
     private static final String END = "']}";
     private static final String OR_NULL = "']?:null}";
@@ -83,8 +85,8 @@ public class InputParameters {
     }
 
     public String getStudyName() {
-        // Strip anything non-ASCII printable except newline and carriage return
-        return studyName == null ? null : studyName.replaceAll("[^\\x20-\\x7E\\n\\r]", "");
+        // allow all of Unicode characters except 31 control characters
+        return studyName == null ? null : studyName.replaceAll(STUDY_NAME_SANITIZE_REGEX, "");
     }
 
     public StudyType getStudyType() {
