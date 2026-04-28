@@ -29,9 +29,10 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-import uk.ac.ebi.eva.commons.core.models.AnnotationMetadata;
+import uk.ac.ebi.eva.commons.mongodb.entities.AnnotationMetadataMongo;
 import uk.ac.ebi.eva.pipeline.Application;
 import uk.ac.ebi.eva.pipeline.configuration.BeanNames;
+import uk.ac.ebi.eva.pipeline.configuration.MongoCollectionNameConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.MongoConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.jobs.AnnotationJobConfiguration;
 import uk.ac.ebi.eva.pipeline.parameters.MongoConnectionDetails;
@@ -54,7 +55,8 @@ import static uk.ac.ebi.eva.test.utils.JobTestUtils.assertCompleted;
 @RunWith(SpringRunner.class)
 @ActiveProfiles(Application.VARIANT_ANNOTATION_MONGO_PROFILE)
 @TestPropertySource({"classpath:common-configuration.properties", "classpath:test-mongo.properties"})
-@ContextConfiguration(classes = {AnnotationJobConfiguration.class, BatchTestConfiguration.class, TemporaryRuleConfiguration.class})
+@ContextConfiguration(classes = {AnnotationJobConfiguration.class, BatchTestConfiguration.class,
+        TemporaryRuleConfiguration.class, MongoCollectionNameConfiguration.class})
 public class AnnotationMetadataStepTest {
     @Autowired
     @Rule
@@ -83,7 +85,7 @@ public class AnnotationMetadataStepTest {
         assertStepIsComplete(databaseName, vepCacheVersion, vepVersion);
 
         //check that the document was written in mongo
-        List<AnnotationMetadata> annotationMetadataList = mongoOperations.findAll(AnnotationMetadata.class);
+        List<AnnotationMetadataMongo> annotationMetadataList = mongoOperations.findAll(AnnotationMetadataMongo.class);
 
         assertEquals(1, annotationMetadataList.size());
         assertEquals(vepCacheVersion, annotationMetadataList.get(0).getCacheVersion());
@@ -110,7 +112,7 @@ public class AnnotationMetadataStepTest {
         String databaseName = mongoRule.getRandomTemporaryDatabaseName();
         MongoOperations mongoOperations = MongoConfiguration.getMongoTemplate(databaseName, mongoConnectionDetails,
                 mongoMappingContext);
-        AnnotationMetadata defaultMetadata = new AnnotationMetadata("70", "72");
+        AnnotationMetadataMongo defaultMetadata = new AnnotationMetadataMongo("70", "72");
         defaultMetadata.setDefaultVersion(true);
         mongoOperations.save(defaultMetadata);
 
@@ -120,10 +122,10 @@ public class AnnotationMetadataStepTest {
         assertStepIsComplete(databaseName, vepCacheVersion, vepVersion);
 
         //check that the document was written in mongo
-        List<AnnotationMetadata> annotationMetadataList = mongoOperations.findAll(AnnotationMetadata.class);
+        List<AnnotationMetadataMongo> annotationMetadataList = mongoOperations.findAll(AnnotationMetadataMongo.class);
 
         assertEquals(2, annotationMetadataList.size());
-        for (AnnotationMetadata metadata : annotationMetadataList) {
+        for (AnnotationMetadataMongo metadata : annotationMetadataList) {
             if (metadata.getVepVersion().equals(defaultMetadata.getVepVersion())
                     && metadata.getCacheVersion().equals(defaultMetadata.getCacheVersion())) {
                 assertTrue(metadata.isDefaultVersion());
@@ -140,14 +142,14 @@ public class AnnotationMetadataStepTest {
                 mongoMappingContext);
         String vepCacheVersion = "87";
         String vepVersion = "88";
-        AnnotationMetadata annotationMetadataMongo = new AnnotationMetadata(vepVersion, vepCacheVersion);
+        AnnotationMetadataMongo annotationMetadataMongo = new AnnotationMetadataMongo(vepVersion, vepCacheVersion);
         annotationMetadataMongo.setDefaultVersion(true);
         mongoOperations.save(annotationMetadataMongo);
 
         assertStepIsComplete(databaseName, vepCacheVersion, vepVersion);
 
         //check that the document was written in mongo
-        List<AnnotationMetadata> annotationMetadataList = mongoOperations.findAll(AnnotationMetadata.class);
+        List<AnnotationMetadataMongo> annotationMetadataList = mongoOperations.findAll(AnnotationMetadataMongo.class);
 
         assertEquals(1, annotationMetadataList.size());
         assertTrue(annotationMetadataList.get(0).isDefaultVersion());

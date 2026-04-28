@@ -21,7 +21,7 @@ import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoOperations;
-import uk.ac.ebi.eva.commons.core.models.AnnotationMetadata;
+import uk.ac.ebi.eva.commons.mongodb.entities.AnnotationMetadataMongo;
 import uk.ac.ebi.eva.pipeline.parameters.AnnotationParameters;
 import uk.ac.ebi.eva.pipeline.parameters.DatabaseParameters;
 
@@ -29,7 +29,7 @@ import java.util.List;
 
 /**
  * Tasklet that writes the annotation metadata into mongo. Uses
- * {@link AnnotationMetadata} as the collection schema.
+ * {@link AnnotationMetadataMongo} as the collection schema.
  * <p>
  * Input: VEP version and VEP cache version
  * <p>
@@ -50,22 +50,22 @@ public class AnnotationMetadataTasklet implements Tasklet {
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
         String vepCacheVersion = annotationParameters.getVepCacheVersion();
         String vepVersion = annotationParameters.getVepVersion();
-        AnnotationMetadata annotationMetadata = new AnnotationMetadata(vepVersion, vepCacheVersion);
-        writeUnlessAlreadyPresent(annotationMetadata);
+        AnnotationMetadataMongo annotationMetadataMongo = new AnnotationMetadataMongo(vepVersion, vepCacheVersion);
+        writeUnlessAlreadyPresent(annotationMetadataMongo);
         return RepeatStatus.FINISHED;
     }
 
-    private void writeUnlessAlreadyPresent(AnnotationMetadata annotationMetadata) {
+    private void writeUnlessAlreadyPresent(AnnotationMetadataMongo annotationMetadataMongo) {
         String collection = databaseParameters.getCollectionAnnotationMetadataName();
-        List<AnnotationMetadata> allMetadata = mongoOperations.findAll(AnnotationMetadata.class);
+        List<AnnotationMetadataMongo> allMetadata = mongoOperations.findAll(AnnotationMetadataMongo.class);
         long countSameVersion = allMetadata.stream()
-                .filter(other -> other.getVepVersion().equals(annotationMetadata.getVepVersion())
-                        && other.getCacheVersion().equals(annotationMetadata.getCacheVersion())).count();
+                .filter(other -> other.getVepVersion().equals(annotationMetadataMongo.getVepVersion())
+                        && other.getCacheVersion().equals(annotationMetadataMongo.getCacheVersion())).count();
         if (countSameVersion == 0) {
             if (allMetadata.isEmpty()) {
-                annotationMetadata.setDefaultVersion(true);
+                annotationMetadataMongo.setDefaultVersion(true);
             }
-            mongoOperations.save(annotationMetadata, collection);
+            mongoOperations.save(annotationMetadataMongo, collection);
         }
     }
 }
