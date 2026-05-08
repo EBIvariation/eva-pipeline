@@ -15,13 +15,14 @@
  */
 package uk.ac.ebi.eva.utils;
 
-import org.springframework.util.Assert;
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
  * Builder to generate the command line array that is accepted by the EvaPipelineCommandLineRunner.
@@ -35,7 +36,7 @@ public class EvaCommandLineBuilder {
     }
 
     protected EvaCommandLineBuilder addString(String key, String parameter) {
-        Assert.notNull(parameter);
+        assertNotNull(parameter);
         parameterMap.put(key, new String(parameter));
         return this;
     }

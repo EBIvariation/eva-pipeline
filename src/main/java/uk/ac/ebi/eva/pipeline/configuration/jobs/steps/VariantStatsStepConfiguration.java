@@ -17,7 +17,8 @@ package uk.ac.ebi.eva.pipeline.configuration.jobs.steps;
 
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
-import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
+import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.core.step.tasklet.TaskletStep;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemStreamReader;
@@ -27,6 +28,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.transaction.PlatformTransactionManager;
 import uk.ac.ebi.eva.commons.mongodb.entities.VariantMongo;
 import uk.ac.ebi.eva.pipeline.configuration.ChunkSizeCompletionPolicyConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.io.readers.VariantStatsReaderConfiguration;
@@ -50,10 +52,10 @@ public class VariantStatsStepConfiguration {
             @Qualifier(VARIANT_STATS_READER) ItemStreamReader<VariantMongo> variantStatsReader,
             @Qualifier(VARIANT_STATS_PROCESSOR) ItemProcessor<VariantMongo, VariantMongo> variantStatsProcessor,
             @Qualifier(VARIANT_STATS_WRITER) ItemWriter<VariantMongo> variantStatsWriter,
-            StepBuilderFactory stepBuilderFactory,
+            JobRepository jobRepository, PlatformTransactionManager transactionManager,
             SimpleCompletionPolicy chunkSizeCompletionPolicy) {
-        TaskletStep step = stepBuilderFactory.get(VARIANT_STATS_STEP)
-                .<VariantMongo, VariantMongo>chunk(chunkSizeCompletionPolicy)
+        TaskletStep step = new StepBuilder(VARIANT_STATS_STEP, jobRepository)
+                .<VariantMongo, VariantMongo>chunk(chunkSizeCompletionPolicy, transactionManager)
                 .reader(variantStatsReader)
                 .processor(variantStatsProcessor)
                 .writer(variantStatsWriter)

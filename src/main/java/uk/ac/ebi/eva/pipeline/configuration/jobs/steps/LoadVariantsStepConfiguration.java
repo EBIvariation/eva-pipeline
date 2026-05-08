@@ -19,7 +19,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
-import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
+import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemStreamReader;
 import org.springframework.batch.item.ItemWriter;
@@ -29,6 +30,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.transaction.PlatformTransactionManager;
 import uk.ac.ebi.eva.commons.core.models.IVariant;
 import uk.ac.ebi.eva.commons.core.models.pipeline.Variant;
 import uk.ac.ebi.eva.pipeline.configuration.ChunkSizeCompletionPolicyConfiguration;
@@ -77,12 +79,12 @@ public class LoadVariantsStepConfiguration {
     private InvalidVariantSkipPolicy invalidVariantSkipPolicy;
 
     @Bean(LOAD_VARIANTS_STEP)
-    public Step loadVariantsStep(StepBuilderFactory stepBuilderFactory, JobOptions jobOptions,
-                                 SimpleCompletionPolicy chunkSizeCompletionPolicy) {
+    public Step loadVariantsStep(JobRepository jobRepository, PlatformTransactionManager transactionManager,
+                                 JobOptions jobOptions, SimpleCompletionPolicy chunkSizeCompletionPolicy) {
         logger.debug("Building '" + LOAD_VARIANTS_STEP + "'");
 
-        return stepBuilderFactory.get(LOAD_VARIANTS_STEP)
-                .<Variant, Variant>chunk(chunkSizeCompletionPolicy)
+        return new StepBuilder(LOAD_VARIANTS_STEP, jobRepository)
+                .<Variant, Variant>chunk(chunkSizeCompletionPolicy, transactionManager)
                 .reader(reader)
                 .processor(variantProcessor)
                 .writer(variantWriter)

@@ -15,10 +15,11 @@
  */
 package uk.ac.ebi.eva.utils;
 
-import org.junit.Before;
-import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static uk.ac.ebi.eva.utils.FileUtils.getResource;
 
 /**
@@ -37,7 +38,7 @@ public class FileWithHeaderNumberOfLinesEstimatorTest {
 
     private FileWithHeaderNumberOfLinesEstimator numberOfLinesEstimator;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         numberOfLinesEstimator = new FileWithHeaderNumberOfLinesEstimator();
     }
@@ -49,7 +50,7 @@ public class FileWithHeaderNumberOfLinesEstimatorTest {
         int expectedNumberOfLines = 298;
 
         assertEquals(expectedNumberOfLines, estimatedNumberOfLines,
-                     (expectedNumberOfLines / 100) * PERCENTAGE_SIMILARITY);
+                (expectedNumberOfLines / 100) * PERCENTAGE_SIMILARITY);
     }
 
     @Test
@@ -59,7 +60,7 @@ public class FileWithHeaderNumberOfLinesEstimatorTest {
         int expectedNumberOfLines = 156;
 
         assertEquals(expectedNumberOfLines, estimatedNumberOfLines,
-                     (expectedNumberOfLines / 100) * PERCENTAGE_SIMILARITY);
+                (expectedNumberOfLines / 100) * PERCENTAGE_SIMILARITY);
     }
 
     @Test
@@ -77,7 +78,7 @@ public class FileWithHeaderNumberOfLinesEstimatorTest {
         int expectedNumberOfLines = 199948;
 
         assertEquals(expectedNumberOfLines, estimatedNumberOfLines,
-                     expectedNumberOfLines * (PERCENTAGE_SIMILARITY / 100.0));
+                expectedNumberOfLines * (PERCENTAGE_SIMILARITY / 100.0));
     }
 
 }

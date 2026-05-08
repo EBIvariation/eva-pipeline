@@ -15,9 +15,9 @@
  */
 package uk.ac.ebi.eva.runner;
 
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
@@ -26,16 +26,24 @@ import org.springframework.batch.core.repository.JobExecutionAlreadyRunningExcep
 import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import uk.ac.ebi.eva.pipeline.Application;
 import uk.ac.ebi.eva.test.configuration.AsynchronousBatchTestConfiguration;
+import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
 import uk.ac.ebi.eva.test.utils.AbstractJobRestartUtils;
+
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Test to check launcher behaviour in Asynchronous cases.
  */
-@RunWith(SpringRunner.class)
-@ContextConfiguration(classes = {AsynchronousBatchTestConfiguration.class})
+@ExtendWith(SpringExtension.class)
+@ActiveProfiles({Application.VARIANT_WRITER_MONGO_PROFILE, Application.VARIANT_ANNOTATION_MONGO_PROFILE})
+@ContextConfiguration(classes = {AsynchronousBatchTestConfiguration.class, BatchTestConfiguration.class})
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class JobRestartAsynchronousTest extends AbstractJobRestartUtils {
 
@@ -48,23 +56,23 @@ public class JobRestartAsynchronousTest extends AbstractJobRestartUtils {
     @Autowired
     private JobOperator jobOperator;
 
-    @Test(expected = JobExecutionAlreadyRunningException.class)
+    @Test
     public void runSameJobWhileExecutingThrowsException() throws Exception {
         JobLauncherTestUtils jobLauncherTestUtils = getJobLauncherTestUtils(getTestJob(
                 getWaitingStep(false, STEP_TIME_DURATION)));
         launchJob(jobLauncherTestUtils);
-        launchJob(jobLauncherTestUtils);
+        assertThrows(JobExecutionAlreadyRunningException.class, () -> launchJob(jobLauncherTestUtils));
         Thread.sleep(WAIT_FOR_JOB_TO_END);
     }
 
-    @Test(expected = JobExecutionAlreadyRunningException.class)
+    @Test
     public void cantRunSecondJobEvenIfFirstIsStopped() throws Exception {
         JobLauncherTestUtils jobLauncherTestUtils = getJobLauncherTestUtils(getTestJob(
                 getWaitingStep(false, STEP_TIME_DURATION)));
         JobExecution jobExecution = launchJob(jobLauncherTestUtils);
 
         jobOperator.stop(jobExecution.getJobId());
-        jobLauncherTestUtils.launchJob(new JobParameters());
+        assertThrows(JobExecutionAlreadyRunningException.class, () -> jobLauncherTestUtils.launchJob(new JobParameters()));
         Thread.sleep(WAIT_FOR_JOB_TO_END);
     }
 
@@ -91,7 +99,7 @@ public class JobRestartAsynchronousTest extends AbstractJobRestartUtils {
         Thread.sleep(WAIT_FOR_JOB_TO_END);
         jobExecution = launchJob(jobLauncherTestUtils);
         Thread.sleep(WAIT_FOR_JOB_TO_END);
-        Assert.assertTrue(jobExecution.getStepExecutions().isEmpty());
+        assertTrue(jobExecution.getStepExecutions().isEmpty());
     }
 
     @Test
@@ -105,7 +113,7 @@ public class JobRestartAsynchronousTest extends AbstractJobRestartUtils {
         Thread.sleep(WAIT_FOR_JOB_TO_END);
         jobExecution = launchJob(jobLauncherTestUtils);
         Thread.sleep(WAIT_FOR_JOB_TO_END);
-        Assert.assertFalse(jobExecution.getStepExecutions().isEmpty());
+        assertFalse(jobExecution.getStepExecutions().isEmpty());
     }
 
 }

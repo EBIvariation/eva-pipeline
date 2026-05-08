@@ -20,7 +20,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
-import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
+import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.item.ItemStreamReader;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.file.FlatFileParseException;
@@ -30,6 +31,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.transaction.PlatformTransactionManager;
 import uk.ac.ebi.eva.commons.core.models.FeatureCoordinates;
 import uk.ac.ebi.eva.pipeline.configuration.ChunkSizeCompletionPolicyConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.io.readers.GeneReaderConfiguration;
@@ -74,12 +76,12 @@ public class LoadFeatureCoordinatesStepConfiguration {
     private ItemWriter<FeatureCoordinates> writer;
 
     @Bean(LOAD_FEATURE_COORDINATES_STEP)
-    public Step LoadFeatureCoordinatesStep(StepBuilderFactory stepBuilderFactory, JobOptions jobOptions,
-                                           SimpleCompletionPolicy chunkSizeCompletionPolicy) {
+    public Step LoadFeatureCoordinatesStep(JobRepository jobRepository, PlatformTransactionManager transactionManager,
+                                           JobOptions jobOptions, SimpleCompletionPolicy chunkSizeCompletionPolicy) {
         logger.debug("Building '" + LOAD_FEATURE_COORDINATES_STEP + "'");
 
-        return stepBuilderFactory.get(LOAD_FEATURE_COORDINATES_STEP)
-                .<FeatureCoordinates, FeatureCoordinates>chunk(chunkSizeCompletionPolicy)
+        return new StepBuilder(LOAD_FEATURE_COORDINATES_STEP, jobRepository)
+                .<FeatureCoordinates, FeatureCoordinates>chunk(chunkSizeCompletionPolicy, transactionManager)
                 .reader(reader)
                 .processor(new GeneFilterProcessor())
                 .writer(writer)

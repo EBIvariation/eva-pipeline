@@ -16,38 +16,34 @@
 
 package uk.ac.ebi.eva.pipeline.configuration;
 
-import com.mongodb.ServerAddress;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.mapping.MongoMappingContext;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
-import uk.ac.ebi.eva.pipeline.Application;
-import uk.ac.ebi.eva.pipeline.parameters.MongoConnectionDetails;
-import uk.ac.ebi.eva.test.configuration.MongoOperationConfiguration;
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoClients;
+import com.mongodb.connection.ServerDescription;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import uk.ac.ebi.eva.test.utils.MongoTestContainerHelper;
 
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@RunWith(SpringRunner.class)
-@ActiveProfiles(Application.VARIANT_ANNOTATION_MONGO_PROFILE)
-@TestPropertySource({"classpath:test-multiple-mongo-hosts.properties"})
-@ContextConfiguration(classes = {MongoConnectionDetails.class, MongoMappingContext.class, MongoOperationConfiguration.class})
-public class MultipleMongosHostsSupportTest {
-    @Autowired
-    private MongoTemplate mongoTemplate;
-
+@ExtendWith(SpringExtension.class)
+public class MultipleMongosHostsSupportTest extends MongoTestContainerHelper {
     @Test
-    public void configShouldReadMultipleHosts() throws Exception {
-        Set<String> addresses = mongoTemplate.getMongoDbFactory().getLegacyDb()
-                .getMongo().getAllAddress().stream().map(ServerAddress::toString).collect(Collectors.toSet());        
-        assertTrue(addresses.contains("|eva.mongo.host.test|:27017"));
-        assertTrue(addresses.contains("localhost2:27017"));
+    public void configShouldReadMultipleHosts() {
+        String realHost = mongo.getHost() + ":" + mongo.getMappedPort(27017);
+        String uri = "mongodb://" + realHost + ",localhost2:27017/test";
+        MongoClient mongoClient = MongoClients.create(uri);
+        Set<String> addresses = mongoClient.getClusterDescription()
+                .getServerDescriptions()
+                .stream()
+                .map(ServerDescription::getAddress)
+                .map(Object::toString)
+                .collect(Collectors.toSet());
+
+        assertTrue(addresses.stream().anyMatch(a -> a.contains(mongo.getHost())));
+        assertTrue(addresses.stream().anyMatch(a -> a.contains("localhost2")));
     }
 }

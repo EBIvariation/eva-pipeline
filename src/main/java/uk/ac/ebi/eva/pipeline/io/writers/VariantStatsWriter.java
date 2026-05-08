@@ -2,6 +2,7 @@ package uk.ac.ebi.eva.pipeline.io.writers;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.batch.item.Chunk;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.data.mongodb.core.BulkOperations;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -27,22 +28,22 @@ public class VariantStatsWriter implements ItemWriter<VariantMongo> {
     }
 
     @Override
-    public void write(List<? extends VariantMongo> variants) {
+    public void write(Chunk<? extends VariantMongo> variants) {
         Map<String, Integer> filesIdNumberOfSamplesMap = VariantStatsReader.getFilesIdAndNumberOfSamplesMap();
         if (filesIdNumberOfSamplesMap.isEmpty()) {
             // No new stats would have been calculated, no need to write anything
             return;
         }
 
-        variants = variants.stream()
+        List<VariantMongo> variantsMongoList = variants.getItems().stream()
                 .filter(v -> v.getVariantStatsMongo() != null && !v.getVariantStatsMongo().isEmpty())
                 .collect(Collectors.toList());
 
-        if (!variants.isEmpty()) {
+        if (!variantsMongoList.isEmpty()) {
             BulkOperations bulkOperations = mongoTemplate.bulkOps(BulkOperations.BulkMode.UNORDERED, VariantMongo.class,
                     databaseParameters.getCollectionVariantsName());
 
-            for (VariantMongo variant : variants) {
+            for (VariantMongo variant : variantsMongoList) {
                 Query query = new Query(Criteria.where("_id").is(variant.getId()));
                 Update update = new Update();
                 update.set("st", variant.getVariantStatsMongo());

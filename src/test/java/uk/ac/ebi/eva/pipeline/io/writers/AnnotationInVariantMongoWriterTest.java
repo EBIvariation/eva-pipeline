@@ -17,25 +17,26 @@ package uk.ac.ebi.eva.pipeline.io.writers;
 
 import com.mongodb.client.MongoCursor;
 import org.bson.Document;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.batch.item.Chunk;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.core.MongoOperations;
+import org.springframework.core.io.ResourceLoader;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.mapping.MongoMappingContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.ac.ebi.eva.commons.mongodb.entities.AnnotationMongo;
 import uk.ac.ebi.eva.commons.mongodb.entities.VariantMongo;
 import uk.ac.ebi.eva.pipeline.Application;
-import uk.ac.ebi.eva.pipeline.configuration.MongoConfiguration;
 import uk.ac.ebi.eva.pipeline.io.mappers.AnnotationLineMapper;
 import uk.ac.ebi.eva.pipeline.parameters.MongoConnectionDetails;
-import uk.ac.ebi.eva.test.configuration.TemporaryRuleConfiguration;
-import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
+import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
+import uk.ac.ebi.eva.test.utils.MongoTestContainerHelper;
+import uk.ac.ebi.eva.test.utils.MongoTestDataLoader;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -44,24 +45,22 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static uk.ac.ebi.eva.commons.mongodb.entities.subdocuments.AnnotationIndexMongo.POLYPHEN_FIELD;
 import static uk.ac.ebi.eva.commons.mongodb.entities.subdocuments.AnnotationIndexMongo.SIFT_FIELD;
 import static uk.ac.ebi.eva.commons.mongodb.entities.subdocuments.AnnotationIndexMongo.SO_ACCESSION_FIELD;
 import static uk.ac.ebi.eva.commons.mongodb.entities.subdocuments.AnnotationIndexMongo.XREFS_FIELD;
 import static uk.ac.ebi.eva.test.data.VepOutputContent.vepOutputContentWithExtraFields;
-import static uk.ac.ebi.eva.test.utils.TestFileUtils.getResourceUrl;
 
 /**
  * {@link AnnotationInVariantMongoWriter}
  */
-@RunWith(SpringRunner.class)
-@ActiveProfiles(Application.VARIANT_ANNOTATION_MONGO_PROFILE)
-@TestPropertySource({"classpath:test-mongo.properties"})
-@ContextConfiguration(classes = {MongoConnectionDetails.class, MongoMappingContext.class, TemporaryRuleConfiguration.class})
-public class AnnotationInVariantMongoWriterTest {
+@ExtendWith(SpringExtension.class)
+@ActiveProfiles({Application.VARIANT_WRITER_MONGO_PROFILE, Application.VARIANT_ANNOTATION_MONGO_PROFILE})
+@ContextConfiguration(classes = {MongoConnectionDetails.class, MongoMappingContext.class, BatchTestConfiguration.class})
+public class AnnotationInVariantMongoWriterTest extends MongoTestContainerHelper {
 
     private static final String MONGO_DUMP = "/dump/VariantStatsConfigurationTest_vl";
 
@@ -71,28 +70,38 @@ public class AnnotationInVariantMongoWriterTest {
 
     private static final String VEP_CACHE_VERSION = "2";
 
+    private static final String DB_NAME = "annotation-metadata-test-db";
+
     @Autowired
-    private MongoConnectionDetails mongoConnectionDetails;
+    private ResourceLoader resourceLoader;
 
     @Autowired
     private MongoMappingContext mongoMappingContext;
 
     @Autowired
-    @Rule
-    public TemporaryMongoRule mongoRule;
+    private BatchTestConfiguration batchTestConfiguration;
+
+    private MongoTemplate mongoTemplate;
 
     private AnnotationInVariantMongoWriter annotationInVariantMongoWriter;
 
     private AnnotationLineMapper annotationLineMapper;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
+        mongoTemplate = batchTestConfiguration.getMongoTemplate(DB_NAME, mongoMappingContext);
+        mongoTemplate.getDb().drop();
         annotationLineMapper = new AnnotationLineMapper(VEP_VERSION, VEP_CACHE_VERSION);
+    }
+
+    @AfterEach
+    void cleanDb() {
+        mongoTemplate.getDb().drop();
     }
 
     @Test
     public void shouldWriteAllFieldsIntoMongoDb() throws Exception {
-        String databaseName = mongoRule.restoreDumpInTemporaryDatabase(getResourceUrl(MONGO_DUMP));
+        new MongoTestDataLoader(mongoTemplate, resourceLoader).restoreDumpFromFolder(MONGO_DUMP);
 
         //prepare annotation sets
         List<AnnotationMongo> annotationSet1 = new ArrayList<>();
@@ -114,17 +123,15 @@ public class AnnotationInVariantMongoWriterTest {
         }
 
         // load the annotation
-        MongoOperations operations = MongoConfiguration.getMongoTemplate(databaseName, mongoConnectionDetails,
-                mongoMappingContext);
-        annotationInVariantMongoWriter = new AnnotationInVariantMongoWriter(operations, COLLECTION_VARIANTS_NAME,
+        annotationInVariantMongoWriter = new AnnotationInVariantMongoWriter(mongoTemplate, COLLECTION_VARIANTS_NAME,
                 VEP_VERSION, VEP_CACHE_VERSION);
 
-        annotationInVariantMongoWriter.write(Collections.singletonList(annotationSet1));
-        annotationInVariantMongoWriter.write(Collections.singletonList(annotationSet2));
-        annotationInVariantMongoWriter.write(Collections.singletonList(annotationSet3));
+        annotationInVariantMongoWriter.write(new Chunk(Arrays.asList(annotationSet1)));
+        annotationInVariantMongoWriter.write(new Chunk(Arrays.asList(annotationSet2)));
+        annotationInVariantMongoWriter.write(new Chunk(Arrays.asList(annotationSet3)));
 
         // and finally check that variant documents have the annotations fields
-        MongoCursor<Document> cursor = mongoRule.getCollection(databaseName, COLLECTION_VARIANTS_NAME).find().iterator();
+        MongoCursor<Document> cursor = mongoTemplate.getDb().getCollection(COLLECTION_VARIANTS_NAME).find().iterator();
 
         while (cursor.hasNext()) {
             Document variant = cursor.next();
@@ -175,7 +182,7 @@ public class AnnotationInVariantMongoWriterTest {
 
     @Test
     public void shouldUpdateFieldsOfExistingAnnotationVersion() throws Exception {
-        String databaseName = mongoRule.restoreDumpInTemporaryDatabase(getResourceUrl(MONGO_DUMP));
+        new MongoTestDataLoader(mongoTemplate, resourceLoader).restoreDumpFromFolder(MONGO_DUMP);
 
         String[] vepOutputLines = vepOutputContentWithExtraFields.split("\n");
 
@@ -184,12 +191,10 @@ public class AnnotationInVariantMongoWriterTest {
         annotations.add(annotationLineMapper.mapLine(vepOutputLines[2], 0));
 
         // load the first annotation
-        MongoOperations operations = MongoConfiguration.getMongoTemplate(databaseName, mongoConnectionDetails,
-                mongoMappingContext);
-        annotationInVariantMongoWriter = new AnnotationInVariantMongoWriter(operations, COLLECTION_VARIANTS_NAME,
+        annotationInVariantMongoWriter = new AnnotationInVariantMongoWriter(mongoTemplate, COLLECTION_VARIANTS_NAME,
                 VEP_VERSION, VEP_CACHE_VERSION);
 
-        List<Document> annotationField = writeAndGetAnnotation(databaseName, annotations.get(0));
+        List<Document> annotationField = writeAndGetAnnotation(annotations.get(0));
 
         checkAnnotationFields(annotationField.get(0),
                 Arrays.asList(0.1, 0.1),
@@ -198,7 +203,7 @@ public class AnnotationInVariantMongoWriterTest {
                 new TreeSet<>(Arrays.asList("DEFB125", "ENSG00000178591", "ENST00000382410")));
 
         // load the second annotation and check the information is updated (not overwritten)
-        List<Document> annotationFieldAfter = writeAndGetAnnotation(databaseName, annotations.get(1));
+        List<Document> annotationFieldAfter = writeAndGetAnnotation(annotations.get(1));
 
         checkAnnotationFields(annotationFieldAfter.get(0),
                 Arrays.asList(0.1, 0.2),
@@ -208,11 +213,11 @@ public class AnnotationInVariantMongoWriterTest {
                         "ENST00000608838")));
     }
 
-    private List<Document> writeAndGetAnnotation(String databaseName, AnnotationMongo annotation) throws Exception {
-        annotationInVariantMongoWriter.write(Collections.singletonList(Collections.singletonList(annotation)));
+    private List<Document> writeAndGetAnnotation(AnnotationMongo annotation) throws Exception {
+        annotationInVariantMongoWriter.write(new Chunk(Arrays.asList(Collections.singletonList(annotation))));
 
         Document query = new Document(AnnotationMongo.START_FIELD, annotation.getStart());
-        MongoCursor<Document> cursor = mongoRule.getCollection(databaseName, COLLECTION_VARIANTS_NAME).find(query)
+        MongoCursor<Document> cursor = mongoTemplate.getDb().getCollection(COLLECTION_VARIANTS_NAME).find(query)
                 .iterator();
 
         assertTrue(cursor.hasNext());
@@ -229,7 +234,7 @@ public class AnnotationInVariantMongoWriterTest {
         AnnotationLineMapper differentVersionAnnotationLineMapper = new AnnotationLineMapper(
                 differentVepVersion, differentVepCacheVersion);
 
-        String databaseName = mongoRule.restoreDumpInTemporaryDatabase(getResourceUrl(MONGO_DUMP));
+        new MongoTestDataLoader(mongoTemplate, resourceLoader).restoreDumpFromFolder(MONGO_DUMP);
 
         String[] vepOutputLines = vepOutputContentWithExtraFields.split("\n");
 
@@ -237,12 +242,10 @@ public class AnnotationInVariantMongoWriterTest {
         AnnotationMongo differentVersionAnnotation = differentVersionAnnotationLineMapper.mapLine(vepOutputLines[2], 0);
 
         // load the first annotation
-        MongoOperations operations = MongoConfiguration.getMongoTemplate(databaseName, mongoConnectionDetails,
-                mongoMappingContext);
-        annotationInVariantMongoWriter = new AnnotationInVariantMongoWriter(operations, COLLECTION_VARIANTS_NAME,
+        annotationInVariantMongoWriter = new AnnotationInVariantMongoWriter(mongoTemplate, COLLECTION_VARIANTS_NAME,
                 VEP_VERSION, VEP_CACHE_VERSION);
 
-        List<Document> annotationField = writeAndGetAnnotation(databaseName, firstAnnotation);
+        List<Document> annotationField = writeAndGetAnnotation(firstAnnotation);
 
         assertEquals(1, annotationField.size());
         checkAnnotationFields(annotationField.get(0),
@@ -252,10 +255,10 @@ public class AnnotationInVariantMongoWriterTest {
                 new TreeSet<>(Arrays.asList("DEFB125", "ENSG00000178591", "ENST00000382410")));
 
         // load the second annotation and check the information is added to the annotation array
-        annotationInVariantMongoWriter = new AnnotationInVariantMongoWriter(operations, COLLECTION_VARIANTS_NAME,
+        annotationInVariantMongoWriter = new AnnotationInVariantMongoWriter(mongoTemplate, COLLECTION_VARIANTS_NAME,
                 differentVepVersion,
                 differentVepCacheVersion);
-        List<Document> annotationFieldAfter = writeAndGetAnnotation(databaseName, differentVersionAnnotation);
+        List<Document> annotationFieldAfter = writeAndGetAnnotation(differentVersionAnnotation);
 
         assertEquals(2, annotationFieldAfter.size());
         checkAnnotationFields(annotationField.get(0),

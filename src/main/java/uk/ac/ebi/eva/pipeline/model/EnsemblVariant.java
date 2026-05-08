@@ -46,9 +46,9 @@ public class EnsemblVariant {
     private String strand = "+";
 
     public EnsemblVariant(String chromosome, long start, long end, String reference, String alternate) {
-        Assert.hasText(chromosome);
-        Assert.notNull(reference);
-        Assert.notNull(alternate);
+        Assert.hasText(chromosome, "Chromosome must not be empty");
+        Assert.notNull(reference, "Reference allele must not be null");
+        Assert.notNull(alternate, "Alternate allele must not be null");
         this.chromosome = chromosome;
         this.start = start;
         this.end = end;

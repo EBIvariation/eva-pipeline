@@ -15,6 +15,7 @@
  */
 package uk.ac.ebi.eva.pipeline.io.readers;
 
+import jakarta.annotation.PostConstruct;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.item.NonTransientResourceException;
 import org.springframework.batch.item.ParseException;
@@ -34,7 +35,6 @@ import uk.ac.ebi.eva.commons.mongodb.entities.subdocuments.VariantSourceEntryMon
 import uk.ac.ebi.eva.commons.mongodb.readers.MongoDbCursorItemReader;
 import uk.ac.ebi.eva.pipeline.model.EnsemblVariant;
 
-import javax.annotation.PostConstruct;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;

@@ -16,14 +16,13 @@
 package uk.ac.ebi.eva.commons.models.converters.data;
 
 import org.bson.Document;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.ac.ebi.eva.commons.core.models.pipeline.VariantSourceEntry;
 import uk.ac.ebi.eva.commons.mongodb.entities.subdocuments.VariantSourceEntryMongo;
 import uk.ac.ebi.eva.test.configuration.MongoOperationConfiguration;
@@ -32,7 +31,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static uk.ac.ebi.eva.commons.mongodb.entities.subdocuments.VariantSourceEntryMongo.ATTRIBUTES_FIELD;
 import static uk.ac.ebi.eva.commons.mongodb.entities.subdocuments.VariantSourceEntryMongo.CHARACTER_TO_REPLACE_DOTS;
 import static uk.ac.ebi.eva.commons.mongodb.entities.subdocuments.VariantSourceEntryMongo.FILEID_FIELD;
@@ -41,8 +40,7 @@ import static uk.ac.ebi.eva.commons.mongodb.entities.subdocuments.VariantSourceE
 /**
  * Tests automatic conversion from {@link VariantSourceEntryMongo} to {@link Document}
  */
-@RunWith(SpringRunner.class)
-@TestPropertySource({"classpath:test-mongo.properties"})
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {MongoOperationConfiguration.class})
 public class VariantSourceEntryToDBObjectConverterTest {
 
@@ -55,7 +53,7 @@ public class VariantSourceEntryToDBObjectConverterTest {
 
     private Document mongoFileWithIds;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         // Java native class
         file = new VariantSourceEntry("f1", "s1");

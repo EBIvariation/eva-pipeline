@@ -15,164 +15,160 @@
  */
 package uk.ac.ebi.eva.utils;
 
-import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParametersBuilder;
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 
-import java.sql.Timestamp;
-import java.util.Date;
+import java.time.LocalDateTime;
 
 public class EvaJobParameterBuilder extends JobParametersBuilder {
 
     public EvaJobParameterBuilder annotationOverwrite(String outputDirAnnotation) {
-        addParameter(JobParametersNames.ANNOTATION_OVERWRITE, new JobParameter(outputDirAnnotation));
+        addString(JobParametersNames.ANNOTATION_OVERWRITE, outputDirAnnotation);
         return this;
     }
 
     public EvaJobParameterBuilder inputStudyId(String inputStudyId) {
-        addParameter(JobParametersNames.INPUT_STUDY_ID, new JobParameter(inputStudyId));
+        addString(JobParametersNames.INPUT_STUDY_ID, inputStudyId);
         return this;
     }
 
     public EvaJobParameterBuilder inputStudyType(String inputStudyType) {
-        addParameter(JobParametersNames.INPUT_STUDY_TYPE, new JobParameter(inputStudyType));
+        addString(JobParametersNames.INPUT_STUDY_TYPE, inputStudyType);
         return this;
     }
 
     public EvaJobParameterBuilder inputStudyName(String inputStudyName) {
-        addParameter(JobParametersNames.INPUT_STUDY_NAME, new JobParameter(inputStudyName));
+        addString(JobParametersNames.INPUT_STUDY_NAME, inputStudyName);
         return this;
     }
 
     public EvaJobParameterBuilder inputVcfId(String inputVcfId) {
-        addParameter(JobParametersNames.INPUT_VCF_ID, new JobParameter(inputVcfId));
+        addString(JobParametersNames.INPUT_VCF_ID, inputVcfId);
         return this;
     }
 
     public EvaJobParameterBuilder inputVcf(String inputVcf) {
-        addParameter(JobParametersNames.INPUT_VCF, new JobParameter(inputVcf));
+        addString(JobParametersNames.INPUT_VCF, inputVcf);
         return this;
     }
 
     public EvaJobParameterBuilder inputVcfAggregation(String inputVcfAggregation) {
-        addParameter(JobParametersNames.INPUT_VCF_AGGREGATION, new JobParameter(inputVcfAggregation));
+        addString(JobParametersNames.INPUT_VCF_AGGREGATION, inputVcfAggregation);
         return this;
     }
 
     public EvaJobParameterBuilder inputAccessionReport(String inputAccessionReport) {
-        addParameter(JobParametersNames.INPUT_ACCESSION_REPORT, new JobParameter(inputAccessionReport));
+        addString(JobParametersNames.INPUT_ACCESSION_REPORT, inputAccessionReport);
         return this;
     }
 
     public EvaJobParameterBuilder inputAssemblyReport(String inputAssemblyReport) {
-        addParameter(JobParametersNames.INPUT_ASSEMBLY_REPORT, new JobParameter(inputAssemblyReport));
+        addString(JobParametersNames.INPUT_ASSEMBLY_REPORT, inputAssemblyReport);
         return this;
     }
 
     public EvaJobParameterBuilder timestamp() {
-        addParameter("timestamp", new JobParameter(new Timestamp(new Date().getTime())));
+        addLocalDateTime("timestamp", LocalDateTime.now(), false);
         return this;
     }
 
     public EvaJobParameterBuilder databaseName(String databaseName) {
-        addParameter(JobParametersNames.DB_NAME, new JobParameter(databaseName));
+        addString(JobParametersNames.DB_NAME, databaseName);
         return this;
     }
 
     public EvaJobParameterBuilder collectionVariantsName(String collectionVariantsName) {
-        addParameter(JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME, new JobParameter(collectionVariantsName));
+        addString(JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME, collectionVariantsName);
         return this;
     }
 
     public EvaJobParameterBuilder collectionFilesName(String collectionFilesName) {
-        addParameter(JobParametersNames.DB_COLLECTIONS_FILES_NAME, new JobParameter(collectionFilesName));
+        addString(JobParametersNames.DB_COLLECTIONS_FILES_NAME, collectionFilesName);
         return this;
     }
 
     public EvaJobParameterBuilder collectionFeaturesName(String collectionFeaturesName) {
-        addParameter(JobParametersNames.DB_COLLECTIONS_FEATURES_NAME, new JobParameter(collectionFeaturesName));
+        addString(JobParametersNames.DB_COLLECTIONS_FEATURES_NAME, collectionFeaturesName);
         return this;
     }
 
     public EvaJobParameterBuilder collectionAnnotationMetadataName(String collectionAnnotationMetadataName) {
-        addParameter(JobParametersNames.DB_COLLECTIONS_ANNOTATION_METADATA_NAME,
-                new JobParameter(collectionAnnotationMetadataName));
+        addString(JobParametersNames.DB_COLLECTIONS_ANNOTATION_METADATA_NAME, collectionAnnotationMetadataName);
         return this;
     }
 
     public EvaJobParameterBuilder collectionAnnotationsName(String collectionAnnotationsName) {
-        addParameter(JobParametersNames.DB_COLLECTIONS_ANNOTATIONS_NAME,
-                new JobParameter(collectionAnnotationsName));
+        addString(JobParametersNames.DB_COLLECTIONS_ANNOTATIONS_NAME, collectionAnnotationsName);
         return this;
     }
 
     public EvaJobParameterBuilder vepPath(String vepPath) {
-        addParameter(JobParametersNames.APP_VEP_PATH, new JobParameter(vepPath));
+        addString(JobParametersNames.APP_VEP_PATH, vepPath);
         return this;
     }
 
     public EvaJobParameterBuilder vepVersion(String vepVersion) {
-        addParameter(JobParametersNames.APP_VEP_VERSION, new JobParameter(vepVersion));
+        addString(JobParametersNames.APP_VEP_VERSION, vepVersion);
         return this;
     }
 
     public EvaJobParameterBuilder vepCacheVersion(String vepCacheVersion) {
-        addParameter(JobParametersNames.APP_VEP_CACHE_VERSION, new JobParameter(vepCacheVersion));
+        addString(JobParametersNames.APP_VEP_CACHE_VERSION, vepCacheVersion);
         return this;
     }
 
     public EvaJobParameterBuilder vepCachePath(String vepCachePath) {
-        addParameter(JobParametersNames.APP_VEP_CACHE_PATH, new JobParameter(vepCachePath));
+        addString(JobParametersNames.APP_VEP_CACHE_PATH, vepCachePath);
         return this;
     }
 
     public EvaJobParameterBuilder vepCacheSpecies(String vepCacheSpecies) {
-        addParameter(JobParametersNames.APP_VEP_CACHE_SPECIES, new JobParameter(vepCacheSpecies));
+        addString(JobParametersNames.APP_VEP_CACHE_SPECIES, vepCacheSpecies);
         return this;
     }
 
     public EvaJobParameterBuilder vepNumForks(String vepNumForks) {
-        addParameter(JobParametersNames.APP_VEP_NUMFORKS, new JobParameter(vepNumForks));
+        addString(JobParametersNames.APP_VEP_NUMFORKS, vepNumForks);
         return this;
     }
 
     public EvaJobParameterBuilder vepTimeout(String vepTimeout) {
-        addParameter(JobParametersNames.APP_VEP_TIMEOUT, new JobParameter(vepTimeout));
+        addString(JobParametersNames.APP_VEP_TIMEOUT, vepTimeout);
         return this;
     }
 
     public EvaJobParameterBuilder inputFasta(String inputFasta) {
-        addParameter(JobParametersNames.INPUT_FASTA, new JobParameter(inputFasta));
+        addString(JobParametersNames.INPUT_FASTA, inputFasta);
         return this;
     }
 
     public EvaJobParameterBuilder outputDirAnnotation(String outputDirAnnotation) {
-        addParameter(JobParametersNames.OUTPUT_DIR_ANNOTATION, new JobParameter(outputDirAnnotation));
+        addString(JobParametersNames.OUTPUT_DIR_ANNOTATION, outputDirAnnotation);
         return this;
     }
 
     public EvaJobParameterBuilder outputDirStats(String outputDirStats) {
-        addParameter(JobParametersNames.OUTPUT_DIR_STATISTICS, new JobParameter(outputDirStats));
+        addString(JobParametersNames.OUTPUT_DIR_STATISTICS, outputDirStats);
         return this;
     }
 
     public EvaJobParameterBuilder annotationSkip(boolean annotationSkip) {
-        addParameter(JobParametersNames.ANNOTATION_SKIP, new JobParameter(Boolean.toString(annotationSkip)));
+        addString(JobParametersNames.ANNOTATION_SKIP, Boolean.toString(annotationSkip));
         return this;
     }
 
     public EvaJobParameterBuilder statisticsSkip(boolean statisticsSkip) {
-        addParameter(JobParametersNames.STATISTICS_SKIP, new JobParameter(Boolean.toString(statisticsSkip)));
+        addString(JobParametersNames.STATISTICS_SKIP, Boolean.toString(statisticsSkip));
         return this;
     }
 
     public EvaJobParameterBuilder chunkSize(String chunkSize) {
-        addParameter(JobParametersNames.CONFIG_CHUNK_SIZE, new JobParameter(chunkSize));
+        addString(JobParametersNames.CONFIG_CHUNK_SIZE, chunkSize);
         return this;
     }
 
     public EvaJobParameterBuilder inputGtf(String inputGtf) {
-        addParameter(JobParametersNames.INPUT_GTF, new JobParameter(inputGtf));
+        addString(JobParametersNames.INPUT_GTF, inputGtf);
         return this;
     }
 }

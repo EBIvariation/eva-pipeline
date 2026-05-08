@@ -18,14 +18,13 @@ package uk.ac.ebi.eva.commons.models.converters.data;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 import org.bson.Document;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.ac.ebi.eva.commons.core.models.VariantStatistics;
 import uk.ac.ebi.eva.commons.core.models.VariantType;
 import uk.ac.ebi.eva.commons.core.models.genotype.Genotype;
@@ -33,13 +32,12 @@ import uk.ac.ebi.eva.commons.core.models.pipeline.VariantSourceEntry;
 import uk.ac.ebi.eva.commons.mongodb.entities.subdocuments.VariantStatisticsMongo;
 import uk.ac.ebi.eva.test.configuration.MongoOperationConfiguration;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Tests automatic conversion of {@link VariantStatisticsMongo} to a {@link DBObject}
  */
-@RunWith(SpringRunner.class)
-@TestPropertySource({"classpath:test-mongo.properties"})
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {MongoOperationConfiguration.class})
 public class VariantStatsToDBObjectConverterTest {
 
@@ -50,7 +48,7 @@ public class VariantStatsToDBObjectConverterTest {
 
     private static VariantSourceEntry sourceEntry;
 
-    @BeforeClass
+    @BeforeAll
     public static void setUpClass() {
         mongoStats = new BasicDBObject(VariantStatisticsMongo.MAF_FIELD, 0.1);
         mongoStats.append(VariantStatisticsMongo.MGF_FIELD, 0.01);

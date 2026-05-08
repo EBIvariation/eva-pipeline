@@ -1,18 +1,19 @@
 package uk.ac.ebi.eva.pipeline.jobs.steps.processors;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import uk.ac.ebi.eva.commons.core.models.pipeline.Variant;
 import uk.ac.ebi.eva.commons.core.models.pipeline.VariantSourceEntry;
 import uk.ac.ebi.eva.pipeline.io.contig.ContigMapping;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class ContigToGenbankReplacerProcessorTest {
 
     private ContigToGenbankReplacerProcessor processor;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         String fileString = ContigToGenbankReplacerProcessorTest.class.getResource(
                 "/input-files/assembly-report/assembly_report.txt").toString();
@@ -39,10 +40,10 @@ public class ContigToGenbankReplacerProcessorTest {
         assertEquals("CM000093.4", processor.process(variant).getChromosome());
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void GenbankAndRefseqNotEquivalents() throws Exception {
         Variant variant = buildMockVariant("chr3");
-        processor.process(variant);
+        assertThrows(IllegalArgumentException.class, () -> processor.process(variant));
     }
 
     @Test
@@ -51,28 +52,28 @@ public class ContigToGenbankReplacerProcessorTest {
         assertEquals("CM000096.4", processor.process(variant).getChromosome());
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void GenbankAndRefseqNotEquivalentsGenbankNotPresent() throws Exception {
         Variant variant = buildMockVariant("chr5");
-        processor.process(variant);
+        assertThrows(IllegalArgumentException.class, () -> processor.process(variant));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void GenbankAndRefseqNotEquivalentsNonePresent() throws Exception {
         Variant variant = buildMockVariant("chr7");
-        processor.process(variant);
+        assertThrows(IllegalArgumentException.class, () -> processor.process(variant));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void ContigNotFoundInAssemblyReport() throws Exception {
         Variant variant = buildMockVariant("chr");
-        processor.process(variant);
+        assertThrows(IllegalArgumentException.class, () -> processor.process(variant));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void NoGenbankDontConvert() throws Exception {
         Variant variant = buildMockVariant("chr4");
-        processor.process(variant);
+        assertThrows(IllegalArgumentException.class, () -> processor.process(variant));
     }
 
     private Variant buildMockVariant(String originalChromosome) {

@@ -15,20 +15,21 @@
  */
 package uk.ac.ebi.eva.pipeline.parameters.validation.step;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersInvalidException;
 
 import uk.ac.ebi.eva.pipeline.configuration.jobs.steps.AnnotationMetadataStepConfiguration;
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
-import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 
 import java.io.IOException;
 import java.util.Map;
 import java.util.TreeMap;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * Tests that the arguments necessary to run a {@link AnnotationMetadataStepConfiguration} are
@@ -36,22 +37,18 @@ import java.util.TreeMap;
  */
 public class AnnotationMetadataStepParametersValidatorTest {
     private AnnotationMetadataStepParametersValidator validator;
+    private Map<String, JobParameter<?>> requiredParameters;
 
-    @Rule
-    public PipelineTemporaryFolderRule temporaryFolder = new PipelineTemporaryFolderRule();
-
-    private Map<String, JobParameter> requiredParameters;
-
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         validator = new AnnotationMetadataStepParametersValidator();
 
         requiredParameters = new TreeMap<>();
         requiredParameters.put(JobParametersNames.DB_COLLECTIONS_ANNOTATION_METADATA_NAME,
-                               new JobParameter("dbCollectionsVariantName"));
-        requiredParameters.put(JobParametersNames.DB_NAME, new JobParameter("eva_testing"));
-        requiredParameters.put(JobParametersNames.APP_VEP_VERSION, new JobParameter("80"));
-        requiredParameters.put(JobParametersNames.APP_VEP_CACHE_VERSION, new JobParameter("81"));
+                new JobParameter("dbCollectionsVariantName", String.class));
+        requiredParameters.put(JobParametersNames.DB_NAME, new JobParameter("eva_testing", String.class));
+        requiredParameters.put(JobParametersNames.APP_VEP_VERSION, new JobParameter("80", String.class));
+        requiredParameters.put(JobParametersNames.APP_VEP_CACHE_VERSION, new JobParameter("81", String.class));
     }
 
     @Test
@@ -59,27 +56,27 @@ public class AnnotationMetadataStepParametersValidatorTest {
         validator.validate(new JobParameters(requiredParameters));
     }
 
-    @Test(expected = JobParametersInvalidException.class)
+    @Test
     public void dbNameIsRequired() throws JobParametersInvalidException, IOException {
         requiredParameters.remove(JobParametersNames.DB_NAME);
-        validator.validate(new JobParameters(requiredParameters));
+        assertThrows(JobParametersInvalidException.class, () -> validator.validate(new JobParameters(requiredParameters)));
     }
 
-    @Test(expected = JobParametersInvalidException.class)
-    public void dbCollectionsAnnotationMetadataNameIsRequired() throws JobParametersInvalidException, IOException {
+    @Test
+    public void dbCollectionsAnnotationMetadataNameIsRequired() {
         requiredParameters.remove(JobParametersNames.DB_COLLECTIONS_ANNOTATION_METADATA_NAME);
-        validator.validate(new JobParameters(requiredParameters));
+        assertThrows(JobParametersInvalidException.class, () -> validator.validate(new JobParameters(requiredParameters)));
     }
 
-    @Test(expected = JobParametersInvalidException.class)
-    public void appVepVersionIsRequired() throws JobParametersInvalidException, IOException {
+    @Test
+    public void appVepVersionIsRequired() {
         requiredParameters.remove(JobParametersNames.APP_VEP_VERSION);
-        validator.validate(new JobParameters(requiredParameters));
+        assertThrows(JobParametersInvalidException.class, () -> validator.validate(new JobParameters(requiredParameters)));
     }
 
-    @Test(expected = JobParametersInvalidException.class)
-    public void appVepCacheVersionIsRequired() throws JobParametersInvalidException, IOException {
+    @Test
+    public void appVepCacheVersionIsRequired() {
         requiredParameters.remove(JobParametersNames.APP_VEP_CACHE_VERSION);
-        validator.validate(new JobParameters(requiredParameters));
+        assertThrows(JobParametersInvalidException.class, () -> validator.validate(new JobParameters(requiredParameters)));
     }
 }

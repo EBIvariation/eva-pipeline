@@ -6,9 +6,6 @@ import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.data.mongodb.core.mapping.MongoMappingContext;
 import uk.ac.ebi.eva.pipeline.parameters.MongoConnectionDetails;
 
-import java.io.UnsupportedEncodingException;
-import java.net.UnknownHostException;
-
 import static uk.ac.ebi.eva.pipeline.configuration.MongoConfiguration.getMongoTemplate;
 
 /**
@@ -30,8 +27,8 @@ public class MongoOperationConfiguration {
     }
 
     @Bean
-    public MongoOperations mongoTemplate(MongoConnectionDetails mongoConnectionDetails, MongoMappingContext mongoMappingContext)
-            throws UnknownHostException, UnsupportedEncodingException {
+    public MongoOperations mongoTemplate(MongoConnectionDetails mongoConnectionDetails,
+                                         MongoMappingContext mongoMappingContext) {
         return getMongoTemplate(DUMMY_STATIC, mongoConnectionDetails, mongoMappingContext);
     }
 

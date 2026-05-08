@@ -31,7 +31,7 @@ import uk.ac.ebi.eva.pipeline.exception.NonVariantException;
 public class InvalidVariantSkipPolicy implements SkipPolicy {
 
     @Override
-    public boolean shouldSkip(Throwable exception, int skipCount) throws SkipLimitExceededException {
+    public boolean shouldSkip(Throwable exception, long skipCount) throws SkipLimitExceededException {
         if (exception instanceof FlatFileParseException
                 && (exception.getCause() instanceof NonVariantException
                 || exception.getCause() instanceof IncompleteInformationException)) {
