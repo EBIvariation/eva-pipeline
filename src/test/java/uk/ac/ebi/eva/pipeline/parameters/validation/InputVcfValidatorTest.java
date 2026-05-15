@@ -15,27 +15,26 @@
  */
 package uk.ac.ebi.eva.pipeline.parameters.validation;
 
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.JobParametersInvalidException;
-
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
-import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
+import uk.ac.ebi.eva.test.utils.PipelineTemporaryFolderUtil;
 
 import java.io.File;
 import java.io.IOException;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class InputVcfValidatorTest {
 
     private InputVcfValidator validator;
 
-    @Rule
-    public PipelineTemporaryFolderRule temporaryFolder = new PipelineTemporaryFolderRule();
+    public PipelineTemporaryFolderUtil temporaryFolderUtil = new PipelineTemporaryFolderUtil();
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         validator = new InputVcfValidator();
     }
@@ -43,33 +42,33 @@ public class InputVcfValidatorTest {
     @Test
     public void inputVcfIsValid() throws JobParametersInvalidException, IOException {
         JobParametersBuilder jobParametersBuilder = new JobParametersBuilder();
-        jobParametersBuilder.addString(JobParametersNames.INPUT_VCF, temporaryFolder.newFile().getCanonicalPath());
+        jobParametersBuilder.addString(JobParametersNames.INPUT_VCF, temporaryFolderUtil.newFile().getCanonicalPath());
         validator.validate(jobParametersBuilder.toJobParameters());
     }
 
-    @Test(expected = JobParametersInvalidException.class)
-    public void inputVcfNotExist() throws JobParametersInvalidException {
+    @Test
+    public void inputVcfNotExist() {
         JobParametersBuilder jobParametersBuilder = new JobParametersBuilder();
         jobParametersBuilder.addString(JobParametersNames.INPUT_VCF, "file://path/to/file.vcf");
-        validator.validate(jobParametersBuilder.toJobParameters());
+        assertThrows(JobParametersInvalidException.class, () -> validator.validate(jobParametersBuilder.toJobParameters()));
     }
 
-    @Test(expected = JobParametersInvalidException.class)
-    @Ignore
-    public void inputVcfNotReadable() throws JobParametersInvalidException, IOException {
-        File file = temporaryFolder.newFile("not_readable.vcf");
+    @Test
+    @Disabled
+    public void inputVcfNotReadable() throws IOException {
+        File file = temporaryFolderUtil.newFile("not_readable.vcf");
         file.setReadable(false);
 
         JobParametersBuilder jobParametersBuilder = new JobParametersBuilder();
         jobParametersBuilder.addString(JobParametersNames.INPUT_VCF, file.getCanonicalPath());
 
-        validator.validate(jobParametersBuilder.toJobParameters());
+        assertThrows(JobParametersInvalidException.class, () -> validator.validate(jobParametersBuilder.toJobParameters()));
     }
 
-    @Test(expected = JobParametersInvalidException.class)
-    public void inputVcfIsADirectory() throws JobParametersInvalidException, IOException {
+    @Test
+    public void inputVcfIsADirectory() throws IOException {
         JobParametersBuilder jobParametersBuilder = new JobParametersBuilder();
-        jobParametersBuilder.addString(JobParametersNames.INPUT_VCF, temporaryFolder.getRoot().getCanonicalPath());
-        validator.validate(jobParametersBuilder.toJobParameters());
+        jobParametersBuilder.addString(JobParametersNames.INPUT_VCF, temporaryFolderUtil.getRoot().getCanonicalPath());
+        assertThrows(JobParametersInvalidException.class, () -> validator.validate(jobParametersBuilder.toJobParameters()));
     }
 }

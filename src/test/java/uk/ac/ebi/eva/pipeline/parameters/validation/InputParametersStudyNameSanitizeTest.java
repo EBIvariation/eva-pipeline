@@ -1,19 +1,19 @@
 package uk.ac.ebi.eva.pipeline.parameters.validation;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 import uk.ac.ebi.eva.pipeline.parameters.InputParameters;
 
 import java.util.stream.IntStream;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class InputParametersStudyNameSanitizeTest {
 
     private InputParameters inputParameters;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         inputParameters = new InputParameters();
     }

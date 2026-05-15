@@ -15,18 +15,18 @@
  */
 package uk.ac.ebi.eva.pipeline.parameters.validation;
 
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.JobParametersInvalidException;
-
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
-import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
+import uk.ac.ebi.eva.test.utils.PipelineTemporaryFolderUtil;
 
 import java.io.File;
 import java.io.IOException;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class InputVcfAggregationMappingPathValidatorTest {
 
@@ -34,10 +34,9 @@ public class InputVcfAggregationMappingPathValidatorTest {
 
     private JobParametersBuilder jobParametersBuilder;
 
-    @Rule
-    public PipelineTemporaryFolderRule temporaryFolder = new PipelineTemporaryFolderRule();
+    public PipelineTemporaryFolderUtil temporaryFolderUtil = new PipelineTemporaryFolderUtil();
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         validator = new InputVcfAggregationMappingPathValidator();
     }
@@ -46,34 +45,34 @@ public class InputVcfAggregationMappingPathValidatorTest {
     public void inputVcfAggregationMappingPathIsValid() throws JobParametersInvalidException, IOException {
         jobParametersBuilder = new JobParametersBuilder();
         jobParametersBuilder.addString(JobParametersNames.INPUT_VCF_AGGREGATION_MAPPING_PATH,
-                temporaryFolder.newFile().getCanonicalPath());
+                temporaryFolderUtil.newFile().getCanonicalPath());
         validator.validate(jobParametersBuilder.toJobParameters());
     }
 
-    @Test(expected = JobParametersInvalidException.class)
-    public void inputVcfAggregationMappingPathNotExist() throws JobParametersInvalidException {
+    @Test
+    public void inputVcfAggregationMappingPathNotExist() {
         jobParametersBuilder = new JobParametersBuilder();
         jobParametersBuilder.addString(JobParametersNames.INPUT_VCF_AGGREGATION_MAPPING_PATH, "file://path/to/file");
-        validator.validate(jobParametersBuilder.toJobParameters());
+        assertThrows(JobParametersInvalidException.class, () -> validator.validate(jobParametersBuilder.toJobParameters()));
     }
 
-    @Test(expected = JobParametersInvalidException.class)
-    @Ignore
-    public void inputVcfAggregationMappingPathNotReadable() throws JobParametersInvalidException, IOException {
-        File file = temporaryFolder.newFile("not_readable");
+    @Test
+    @Disabled
+    public void inputVcfAggregationMappingPathNotReadable() throws IOException {
+        File file = temporaryFolderUtil.newFile("not_readable");
         file.setReadable(false);
 
         jobParametersBuilder = new JobParametersBuilder();
         jobParametersBuilder.addString(JobParametersNames.INPUT_VCF_AGGREGATION_MAPPING_PATH, file.getCanonicalPath());
-        validator.validate(jobParametersBuilder.toJobParameters());
+        assertThrows(JobParametersInvalidException.class, () -> validator.validate(jobParametersBuilder.toJobParameters()));
     }
 
-    @Test(expected = JobParametersInvalidException.class)
-    public void inputVcfAggregationMappingPathIsADirectory() throws JobParametersInvalidException, IOException {
+    @Test
+    public void inputVcfAggregationMappingPathIsADirectory() throws IOException {
         jobParametersBuilder = new JobParametersBuilder();
         jobParametersBuilder.addString(JobParametersNames.INPUT_VCF_AGGREGATION_MAPPING_PATH,
-                temporaryFolder.getRoot().getCanonicalPath());
-        validator.validate(jobParametersBuilder.toJobParameters());
+                temporaryFolderUtil.getRoot().getCanonicalPath());
+        assertThrows(JobParametersInvalidException.class, () -> validator.validate(jobParametersBuilder.toJobParameters()));
     }
 
 }

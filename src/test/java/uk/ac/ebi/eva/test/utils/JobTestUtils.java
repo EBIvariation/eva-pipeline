@@ -15,12 +15,7 @@
  */
 package uk.ac.ebi.eva.test.utils;
 
-import com.mongodb.BasicDBList;
-import com.mongodb.BasicDBObject;
-import com.mongodb.DBObject;
-import com.mongodb.util.JSON;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.bson.Document;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.JobExecution;
@@ -35,23 +30,22 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.zip.GZIPInputStream;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static uk.ac.ebi.eva.commons.mongodb.entities.VariantSourceMongo.FILEID_FIELD;
 import static uk.ac.ebi.eva.commons.mongodb.entities.VariantSourceMongo.STUDYID_FIELD;
 
 public abstract class JobTestUtils {
-    private static final Logger logger = LoggerFactory.getLogger(JobTestUtils.class);
-
     /**
      * reads the file and sorts it in memory to return the first ordered line. Don't use for big files!
      *
@@ -101,40 +95,39 @@ public abstract class JobTestUtils {
                 .addLong("time", System.currentTimeMillis()).toJobParameters();
     }
 
-    /**
-     * Returns a DBObject obtained by parsing a given string
-     *
-     * @param variant string in JSON format
-     * @return DBObject
-     */
-    public static DBObject constructDbo(String variant) {
-        return (DBObject) JSON.parse(variant);
-    }
-
-    public static void checkStringInsideList(BasicDBObject metadataMongo, String field) {
-        assertTrue(metadataMongo.containsField(field));
+    public static void checkStringInsideList(Document metadataMongo, String field) {
+        assertTrue(metadataMongo.containsKey(field));
         Object objectList = metadataMongo.get(field);
-        assertTrue(objectList instanceof BasicDBList);
-        BasicDBList list = new BasicDBList();
-        list.addAll((ArrayList) objectList);
-        for (Object element : list) {
+        assertTrue(objectList instanceof List<?>);
+
+        for (Object element : (List<?>) objectList) {
             assertTrue(element instanceof String);
             assertNotNull(element);
             assertFalse(element.toString().isEmpty());
         }
     }
 
-    public static void checkFieldsInsideList(BasicDBObject metadataMongo, String field, List<String> innerFields) {
-        assertTrue(metadataMongo.containsField(field));
+    public static void checkFieldsInsideList(Document metadataMongo, String field, List<String> innerFields) {
+        assertTrue(metadataMongo.containsKey(field));
         Object objectList = metadataMongo.get(field);
-        assertTrue(objectList instanceof BasicDBList);
-        BasicDBList list = new BasicDBList();
-        list.addAll((ArrayList) objectList);
-        for (Object element : list) {
-            assertTrue(element instanceof BasicDBObject);
+        assertTrue(objectList instanceof List<?>);
+
+        for (Object element : (List<?>) objectList) {
+            Map<String, Object> elementMap;
+
+            if (element instanceof Document) {
+                elementMap = (Document) element;
+            } else if (element instanceof Map<?, ?>) {
+                elementMap = (Map<String, Object>) element;
+            } else {
+                fail("Unexpected element type: " + element.getClass().getName());
+                return;
+            }
+
             for (String innerField : innerFields) {
-                assertNotNull(((BasicDBObject) element).get(innerField));
-                assertFalse(((BasicDBObject) element).get(innerField).toString().isEmpty());
+                Object value = elementMap.get(innerField);
+                assertNotNull(value);
+                assertFalse(value.toString().isEmpty());
             }
         }
     }
@@ -154,9 +147,8 @@ public abstract class JobTestUtils {
         fileOutputStream.close();
     }
 
-    public static String buildFilesDocumentString(String studyId, String fileId) {
-        return "{\"" + STUDYID_FIELD + "\":\"" + studyId
-                + "\", \"" + FILEID_FIELD + "\":\"" + fileId + "\"}";
+    public static Document buildFilesDocument(String studyId, String fileId) {
+        return new Document(STUDYID_FIELD, studyId).append(FILEID_FIELD, fileId);
     }
 
     public static void assertCompleted(JobExecution jobExecution) {

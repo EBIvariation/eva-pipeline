@@ -15,9 +15,8 @@
  */
 package uk.ac.ebi.eva.runner;
 
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
@@ -25,18 +24,23 @@ import org.springframework.batch.core.launch.JobOperator;
 import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
-
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import uk.ac.ebi.eva.pipeline.Application;
 import uk.ac.ebi.eva.pipeline.runner.ManageJobsUtils;
 import uk.ac.ebi.eva.test.configuration.AsynchronousBatchTestConfiguration;
+import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
 import uk.ac.ebi.eva.test.utils.AbstractJobRestartUtils;
+
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 /**
  * Test to check if the ManageJobUtils.markLastJobAsFailed let us restart a job redoing all the steps.
  */
-@RunWith(SpringRunner.class)
-@ContextConfiguration(classes = {AsynchronousBatchTestConfiguration.class})
+@ExtendWith(SpringExtension.class)
+@ActiveProfiles({Application.VARIANT_WRITER_MONGO_PROFILE, Application.VARIANT_ANNOTATION_MONGO_PROFILE})
+@ContextConfiguration(classes = {AsynchronousBatchTestConfiguration.class, BatchTestConfiguration.class})
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class JobRestartForceTest extends AbstractJobRestartUtils {
 
@@ -60,7 +64,7 @@ public class JobRestartForceTest extends AbstractJobRestartUtils {
         ManageJobsUtils.markLastJobAsFailed(getJobRepository(), job.getName(), new JobParameters());
         jobExecution = launchJob(jobLauncherTestUtils);
         Thread.sleep(WAIT_FOR_JOB_TO_END);
-        Assert.assertFalse(jobExecution.getStepExecutions().isEmpty());
+        assertFalse(jobExecution.getStepExecutions().isEmpty());
     }
 
 }

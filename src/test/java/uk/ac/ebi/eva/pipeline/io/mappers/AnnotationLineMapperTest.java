@@ -15,7 +15,7 @@
  */
 package uk.ac.ebi.eva.pipeline.io.mappers;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import uk.ac.ebi.eva.commons.mongodb.entities.AnnotationMongo;
 import uk.ac.ebi.eva.commons.mongodb.entities.subdocuments.ConsequenceTypeMongo;
 import uk.ac.ebi.eva.commons.mongodb.entities.subdocuments.ScoreMongo;
@@ -23,9 +23,11 @@ import uk.ac.ebi.eva.test.data.VepOutputContent;
 
 import java.util.Set;
 
-import static junit.framework.TestCase.assertNull;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 
 /**
  * {@link AnnotationLineMapper}
@@ -84,10 +86,10 @@ public class AnnotationLineMapperTest {
         assertNull(consequenceType.getCodon());
     }
 
-    @Test(expected = ArrayIndexOutOfBoundsException.class)
+    @Test
     public void shouldNotParseVepOutputWithMalformedCoordinates() {
         AnnotationLineMapper lineMapper = new AnnotationLineMapper(VEP_VERSION, VEP_CACHE_VERSION);
-        lineMapper.mapLine(VepOutputContent.vepOutputContentMalformedCoordinates, 0);
+        assertThrows(ArrayIndexOutOfBoundsException.class, () -> lineMapper.mapLine(VepOutputContent.vepOutputContentMalformedCoordinates, 0));
     }
 
     @Test
@@ -99,10 +101,10 @@ public class AnnotationLineMapperTest {
         assertEquals("20_1", annotation.getChromosome());
     }
 
-    @Test(expected = ArrayIndexOutOfBoundsException.class)
+    @Test
     public void shouldNotParseVepOutputWithMalformedVariantFields() {
         AnnotationLineMapper lineMapper = new AnnotationLineMapper(VEP_VERSION, VEP_CACHE_VERSION);
-        lineMapper.mapLine(VepOutputContent.vepOutputContentMalformedVariantFields, 0);
+        assertThrows(ArrayIndexOutOfBoundsException.class, () -> lineMapper.mapLine(VepOutputContent.vepOutputContentMalformedVariantFields, 0));
     }
 
     @Test

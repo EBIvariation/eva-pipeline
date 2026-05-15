@@ -15,19 +15,21 @@
  */
 package uk.ac.ebi.eva.pipeline.parameters.validation;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.JobParametersInvalidException;
 
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class VepTimeoutValidatorTest {
     private VepTimeoutValidator validator;
 
     private JobParametersBuilder jobParametersBuilder;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         validator = new VepTimeoutValidator();
     }
@@ -39,38 +41,37 @@ public class VepTimeoutValidatorTest {
         validator.validate(jobParametersBuilder.toJobParameters());
     }
 
-    @Test(expected = JobParametersInvalidException.class)
-    public void vepTimeoutIsZero() throws JobParametersInvalidException {
+    @Test
+    public void vepTimeoutIsZero() {
         jobParametersBuilder = new JobParametersBuilder();
         jobParametersBuilder.addString(JobParametersNames.APP_VEP_TIMEOUT, "0");
-        validator.validate(jobParametersBuilder.toJobParameters());
+        assertThrows(JobParametersInvalidException.class, () -> validator.validate(jobParametersBuilder.toJobParameters()));
     }
 
-    @Test(expected = JobParametersInvalidException.class)
-    public void vepTimeoutIsNegative() throws JobParametersInvalidException {
+    @Test
+    public void vepTimeoutIsNegative() {
         jobParametersBuilder = new JobParametersBuilder();
         jobParametersBuilder.addString(JobParametersNames.APP_VEP_TIMEOUT, "-1");
-        validator.validate(jobParametersBuilder.toJobParameters());
+        assertThrows(JobParametersInvalidException.class, () -> validator.validate(jobParametersBuilder.toJobParameters()));
     }
 
-    @Test(expected = JobParametersInvalidException.class)
-    public void vepTimeoutIsNotValid() throws JobParametersInvalidException {
+    @Test
+    public void vepTimeoutIsNotValid() {
         jobParametersBuilder = new JobParametersBuilder();
         jobParametersBuilder.addString(JobParametersNames.APP_VEP_TIMEOUT, "hello");
-        validator.validate(jobParametersBuilder.toJobParameters());
+        assertThrows(JobParametersInvalidException.class, () -> validator.validate(jobParametersBuilder.toJobParameters()));
     }
 
-    @Test(expected = JobParametersInvalidException.class)
-    public void vepTimeoutIsEmpty() throws JobParametersInvalidException {
+    @Test
+    public void vepTimeoutIsEmpty() {
         jobParametersBuilder = new JobParametersBuilder();
         jobParametersBuilder.addString(JobParametersNames.APP_VEP_TIMEOUT, "");
-        validator.validate(jobParametersBuilder.toJobParameters());
+        assertThrows(JobParametersInvalidException.class, () -> validator.validate(jobParametersBuilder.toJobParameters()));
     }
 
-    @Test(expected = JobParametersInvalidException.class)
-    public void vepTimeoutIsNull() throws JobParametersInvalidException {
+    @Test
+    public void vepTimeoutIsNull() {
         jobParametersBuilder = new JobParametersBuilder();
-        jobParametersBuilder.addString(JobParametersNames.APP_VEP_TIMEOUT, null);
-        validator.validate(jobParametersBuilder.toJobParameters());
+        assertThrows(JobParametersInvalidException.class, () -> validator.validate(jobParametersBuilder.toJobParameters()));
     }
 }

@@ -18,6 +18,7 @@ package uk.ac.ebi.eva.pipeline.io.writers;
 
 import com.mongodb.client.model.IndexOptions;
 import org.bson.Document;
+import org.springframework.batch.item.Chunk;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.data.mongodb.core.BulkOperations;
 import org.springframework.data.mongodb.core.MongoOperations;
@@ -80,8 +81,8 @@ public class AnnotationMongoWriter implements ItemWriter<List<AnnotationMongo>> 
     private final String collection;
 
     public AnnotationMongoWriter(MongoOperations mongoOperations, String collection) {
-        Assert.notNull(mongoOperations);
-        Assert.hasText(collection);
+        Assert.notNull(mongoOperations, "A Mongo instance is required");
+        Assert.hasText(collection, "A collection name is required");
         this.mongoOperations = mongoOperations;
         this.collection = collection;
 
@@ -89,7 +90,7 @@ public class AnnotationMongoWriter implements ItemWriter<List<AnnotationMongo>> 
     }
 
     @Override
-    public void write(List<? extends List<AnnotationMongo>> annotations) throws Exception {
+    public void write(Chunk<? extends List<AnnotationMongo>> annotations) throws Exception {
         for (List<AnnotationMongo> annotationList : annotations) {
             BulkOperations bulk = mongoOperations.bulkOps(BulkOperations.BulkMode.UNORDERED, collection);
             prepareBulk(annotationList, bulk);

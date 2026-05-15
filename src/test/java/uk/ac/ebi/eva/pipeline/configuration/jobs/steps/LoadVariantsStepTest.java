@@ -17,32 +17,35 @@ package uk.ac.ebi.eva.pipeline.configuration.jobs.steps;
 
 import com.mongodb.client.MongoCursor;
 import org.bson.Document;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.mapping.MongoMappingContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.ac.ebi.eva.pipeline.Application;
 import uk.ac.ebi.eva.pipeline.configuration.BeanNames;
 import uk.ac.ebi.eva.pipeline.configuration.jobs.GenotypedVcfJobConfiguration;
 import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
-import uk.ac.ebi.eva.test.configuration.TemporaryRuleConfiguration;
-import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
+import uk.ac.ebi.eva.test.utils.MongoTestContainerHelper;
 import uk.ac.ebi.eva.utils.EvaJobParameterBuilder;
 
 import java.util.ArrayList;
 import java.util.Spliterators;
+import java.util.UUID;
 import java.util.stream.StreamSupport;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static uk.ac.ebi.eva.test.configuration.BatchTestConfiguration.JOB_LOAD_VCF_JOB;
 import static uk.ac.ebi.eva.test.utils.JobTestUtils.assertCompleted;
 import static uk.ac.ebi.eva.test.utils.JobTestUtils.assertFailed;
 import static uk.ac.ebi.eva.utils.FileUtils.getResource;
@@ -50,11 +53,10 @@ import static uk.ac.ebi.eva.utils.FileUtils.getResource;
 /**
  * Test for {@link LoadVariantsStepConfiguration}
  */
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @ActiveProfiles({Application.VARIANT_WRITER_MONGO_PROFILE, Application.VARIANT_ANNOTATION_MONGO_PROFILE})
-@TestPropertySource({"classpath:common-configuration.properties", "classpath:test-mongo.properties"})
-@ContextConfiguration(classes = {GenotypedVcfJobConfiguration.class, BatchTestConfiguration.class, TemporaryRuleConfiguration.class})
-public class LoadVariantsStepTest {
+@ContextConfiguration(classes = {GenotypedVcfJobConfiguration.class, BatchTestConfiguration.class})
+public class LoadVariantsStepTest extends MongoTestContainerHelper {
 
     private static final int EXPECTED_VARIANTS = 300;
     private static final String SMALL_VCF_FILE = "/input-files/vcf/genotyped.vcf.gz";
@@ -64,39 +66,52 @@ public class LoadVariantsStepTest {
 
     private static final String COLLECTION_VARIANTS_NAME = "variants";
 
-    @Autowired
-    @Rule
-    public TemporaryMongoRule mongoRule;
+    private static final String DB_NAME = "load-variant-step-test-db";
+
+    @Autowired()
+    @Qualifier(JOB_LOAD_VCF_JOB)
+    private JobLauncherTestUtils jobLauncherTestUtils;
 
     @Autowired
-    private JobLauncherTestUtils jobLauncherTestUtils;
+    private MongoMappingContext mongoMappingContext;
+
+    @Autowired
+    private BatchTestConfiguration batchTestConfiguration;
+
+    private MongoTemplate mongoTemplate;
 
     private String input;
     private String assemblyReport;
     private String assemblyReportMissingContig;
     private String assemblyReportCantTranslateContig;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
+        mongoTemplate = batchTestConfiguration.getMongoTemplate(DB_NAME, mongoMappingContext);
+        mongoTemplate.getDb().drop();
         input = getResource(SMALL_VCF_FILE).getAbsolutePath();
         assemblyReport = "file://" + getResource(ASSEMBLY_REPORT).getAbsolutePath();
         assemblyReportMissingContig = "file://" + getResource(ASSEMBLY_REPORT_MISSING_CONTIG).getAbsolutePath();
         assemblyReportCantTranslateContig = "file://" + getResource(ASSEMBLY_REPORT_CANT_TRANSLATE_CONTIG).getAbsolutePath();
     }
 
-    @Test
-    public void loaderStepShouldLoadAllVariants() throws Exception {
-        String databaseName = mongoRule.getRandomTemporaryDatabaseName();
+    @AfterEach
+    void cleanDb() {
+        mongoTemplate.getDb().drop();
+    }
 
+    @Test
+    public void loaderStepShouldLoadAllVariants() {
         // When the execute method in variantsLoad is executed
         JobParameters jobParameters = new EvaJobParameterBuilder()
                 .collectionVariantsName(COLLECTION_VARIANTS_NAME)
-                .databaseName(databaseName)
+                .databaseName(DB_NAME)
                 .inputStudyId("1")
                 .inputVcf(input)
                 .inputVcfAggregation("NONE")
                 .inputVcfId("1")
                 .inputAssemblyReport(assemblyReport)
+                .addString("run.id", UUID.randomUUID().toString())
                 .toJobParameters();
 
         JobExecution jobExecution = jobLauncherTestUtils.launchStep(BeanNames.LOAD_VARIANTS_STEP, jobParameters);
@@ -105,27 +120,26 @@ public class LoadVariantsStepTest {
         assertCompleted(jobExecution);
 
         // And the number of documents in the DB should be equals to the number of lines in the VCF file
-        assertEquals(EXPECTED_VARIANTS, mongoRule.getCollection(databaseName, COLLECTION_VARIANTS_NAME).countDocuments());
+        assertEquals(EXPECTED_VARIANTS, mongoTemplate.getDb().getCollection(COLLECTION_VARIANTS_NAME).countDocuments());
 
         // Contigs should not be translated
-        MongoCursor<Document> mongoCursor = mongoRule.getCollection(databaseName, COLLECTION_VARIANTS_NAME).find().iterator();
+        MongoCursor<Document> mongoCursor = mongoTemplate.getCollection(COLLECTION_VARIANTS_NAME).find().iterator();
         StreamSupport.stream(Spliterators.spliteratorUnknownSize(mongoCursor, 0), false)
                 .map(doc -> doc.get("chr"))
                 .allMatch(chr -> chr.equals("20"));
     }
 
     @Test
-    public void loaderStepShouldLoadAllVariantsWithTranslatedContig() throws Exception {
-        String databaseName = mongoRule.getRandomTemporaryDatabaseName();
-
+    public void loaderStepShouldLoadAllVariantsWithTranslatedContig() {
         JobParameters jobParameters = new EvaJobParameterBuilder()
                 .collectionVariantsName(COLLECTION_VARIANTS_NAME)
-                .databaseName(databaseName)
+                .databaseName(DB_NAME)
                 .inputStudyId("1")
                 .inputVcf(input)
                 .inputVcfAggregation("NONE")
                 .inputVcfId("1")
                 .inputAssemblyReport(assemblyReport)
+                .addString("run.id", UUID.randomUUID().toString())
                 .toJobParameters();
 
         JobExecution jobExecution = jobLauncherTestUtils.launchStep(BeanNames.LOAD_VARIANTS_STEP, jobParameters);
@@ -134,10 +148,10 @@ public class LoadVariantsStepTest {
         assertCompleted(jobExecution);
 
         // And the number of documents in the DB should be equals to the number of lines in the VCF file
-        assertEquals(EXPECTED_VARIANTS, mongoRule.getCollection(databaseName, COLLECTION_VARIANTS_NAME).countDocuments());
+        assertEquals(EXPECTED_VARIANTS, mongoTemplate.getDb().getCollection(COLLECTION_VARIANTS_NAME).countDocuments());
 
         // All the contigs should be translated
-        MongoCursor<Document> mongoCursor = mongoRule.getCollection(databaseName, COLLECTION_VARIANTS_NAME).find().iterator();
+        MongoCursor<Document> mongoCursor = mongoTemplate.getDb().getCollection(COLLECTION_VARIANTS_NAME).find().iterator();
         StreamSupport.stream(Spliterators.spliteratorUnknownSize(mongoCursor, 0), false)
                 .forEach(doc -> {
                     assertEquals("CM000095.5", doc.get("chr"));
@@ -151,17 +165,16 @@ public class LoadVariantsStepTest {
 
 
     @Test
-    public void loaderStepShouldFailWithContigNotFound() throws Exception {
-        String databaseName = mongoRule.getRandomTemporaryDatabaseName();
-
+    public void loaderStepShouldFailWithContigNotFound() {
         JobParameters jobParameters = new EvaJobParameterBuilder()
                 .collectionVariantsName(COLLECTION_VARIANTS_NAME)
-                .databaseName(databaseName)
+                .databaseName(DB_NAME)
                 .inputStudyId("1")
                 .inputVcf(input)
                 .inputVcfAggregation("NONE")
                 .inputVcfId("1")
                 .inputAssemblyReport(assemblyReportMissingContig)
+                .addString("run.id", UUID.randomUUID().toString())
                 .toJobParameters();
 
         JobExecution jobExecution = jobLauncherTestUtils.launchStep(BeanNames.LOAD_VARIANTS_STEP, jobParameters);
@@ -171,17 +184,16 @@ public class LoadVariantsStepTest {
 
 
     @Test
-    public void loaderStepShouldFailWithContigCouldNotBeTranslated() throws Exception {
-        String databaseName = mongoRule.getRandomTemporaryDatabaseName();
-
+    public void loaderStepShouldFailWithContigCouldNotBeTranslated() {
         JobParameters jobParameters = new EvaJobParameterBuilder()
                 .collectionVariantsName(COLLECTION_VARIANTS_NAME)
-                .databaseName(databaseName)
+                .databaseName(DB_NAME)
                 .inputStudyId("1")
                 .inputVcf(input)
                 .inputVcfAggregation("NONE")
                 .inputVcfId("1")
                 .inputAssemblyReport(assemblyReportCantTranslateContig)
+                .addString("run.id", UUID.randomUUID().toString())
                 .toJobParameters();
 
         JobExecution jobExecution = jobLauncherTestUtils.launchStep(BeanNames.LOAD_VARIANTS_STEP, jobParameters);

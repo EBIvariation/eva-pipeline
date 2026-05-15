@@ -1,29 +1,26 @@
 package uk.ac.ebi.eva.pipeline.io.readers;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
-import com.mongodb.BasicDBObject;
-import com.mongodb.util.JSON;
-import org.junit.Rule;
-import org.junit.Test;
+import org.bson.Document;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.ac.ebi.eva.commons.core.models.Aggregation;
 import uk.ac.ebi.eva.commons.core.models.StudyType;
 import uk.ac.ebi.eva.commons.mongodb.entities.VariantSourceMongo;
 import uk.ac.ebi.eva.pipeline.runner.exceptions.DuplicateSamplesFoundException;
-import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
+import uk.ac.ebi.eva.test.utils.PipelineTemporaryFolderUtil;
 
 import java.io.File;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static uk.ac.ebi.eva.test.utils.JobTestUtils.checkFieldsInsideList;
 import static uk.ac.ebi.eva.test.utils.JobTestUtils.checkStringInsideList;
 import static uk.ac.ebi.eva.utils.FileUtils.getResource;
@@ -50,11 +47,10 @@ public class VcfHeaderReaderTest {
 
     private static final String INPUT_AGGREGATED_FILE_PATH = "/input-files/vcf/aggregated.vcf.gz";
 
-    @Rule
-    public PipelineTemporaryFolderRule temporaryFolderRule = new PipelineTemporaryFolderRule();
+    public PipelineTemporaryFolderUtil temporaryFolderUtil = new PipelineTemporaryFolderUtil();
 
-    @Test(expected = DuplicateSamplesFoundException.class)
-    public void testDuplicateSamples() throws Exception {
+    @Test
+    public void testDuplicateSamples() {
         File input = getResource(INPUT_FILE_PATH_DUPLICATES);
         logger.info("File to be read: " + input.getAbsolutePath());
         StudyType studyType = StudyType.COLLECTION;
@@ -63,7 +59,7 @@ public class VcfHeaderReaderTest {
         VcfHeaderReader headerReader = new VcfHeaderReader(input, FILE_ID, STUDY_ID, STUDY_NAME,
                 studyType, aggregation);
         headerReader.open(null);
-        VariantSourceMongo source = headerReader.read();
+        assertThrows(DuplicateSamplesFoundException.class, () -> headerReader.read());
     }
 
     @Test
@@ -113,7 +109,7 @@ public class VcfHeaderReaderTest {
         VariantSourceMongo source = headerReader.read();
 
         Map<String, Object> meta = source.getMetadata();
-        BasicDBObject metadataMongo = mapMetadataToDBObject(meta);
+        Document metadataMongo = mapMetadataToDocument(meta);
 
         checkFieldsInsideList(metadataMongo, "INFO", Arrays.asList("id", "description", "number", "type"));
         checkFieldsInsideList(metadataMongo, "FORMAT", Arrays.asList("id", "description", "number", "type"));
@@ -126,7 +122,7 @@ public class VcfHeaderReaderTest {
     public void testConversionAggregated() throws Exception {
         // uncompress the input VCF into a temporal file
         File input = getResource(INPUT_AGGREGATED_FILE_PATH);
-        File tempFile = temporaryFolderRule.newFile();
+        File tempFile = temporaryFolderUtil.newFile();
         JobTestUtils.uncompress(input.getAbsolutePath(), tempFile);
 
         VcfHeaderReader headerReader = new VcfHeaderReader(input, FILE_ID, STUDY_ID, STUDY_NAME, StudyType.COLLECTION,
@@ -135,23 +131,23 @@ public class VcfHeaderReaderTest {
         VariantSourceMongo source = headerReader.read();
 
         Map<String, Object> meta = source.getMetadata();
-        BasicDBObject metadataMongo = mapMetadataToDBObject(meta);
+        Document metadataMongo = mapMetadataToDocument(meta);
 
         checkFieldsInsideList(metadataMongo, "INFO", Arrays.asList("id", "description", "number", "type"));
         checkStringInsideList(metadataMongo, "contig");
     }
 
-    private BasicDBObject mapMetadataToDBObject(Map<String, Object> meta) throws JsonProcessingException {
+    private Document mapMetadataToDocument(Map<String, Object> meta) {
         char CHARACTER_TO_REPLACE_DOTS = (char) 163;
-        BasicDBObject metadataMongo = new BasicDBObject();
+        Document metadataMongo = new Document();
+        ObjectMapper mapper = new ObjectMapper();
+
         for (Map.Entry<String, Object> metaEntry : meta.entrySet()) {
-            ObjectMapper mapper = new ObjectMapper();
-            ObjectWriter writer = mapper.writer();
             String key = metaEntry.getKey().replace('.', CHARACTER_TO_REPLACE_DOTS);
             Object value = metaEntry.getValue();
-            String jsonString = writer.writeValueAsString(value);
-            metadataMongo.append(key, JSON.parse(jsonString));
+            metadataMongo.append(key, mapper.convertValue(value, Object.class));
         }
+
         return metadataMongo;
     }
 

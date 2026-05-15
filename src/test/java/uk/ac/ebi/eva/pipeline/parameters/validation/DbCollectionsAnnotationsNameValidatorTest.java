@@ -15,12 +15,15 @@
  */
 package uk.ac.ebi.eva.pipeline.parameters.validation;
 
-import org.junit.Before;
-import org.junit.Test;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.JobParametersInvalidException;
 
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class DbCollectionsAnnotationsNameValidatorTest {
 
@@ -28,7 +31,7 @@ public class DbCollectionsAnnotationsNameValidatorTest {
 
     private JobParametersBuilder jobParametersBuilder;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         validator = new DbCollectionsAnnotationsNameValidator();
     }
@@ -37,29 +40,28 @@ public class DbCollectionsAnnotationsNameValidatorTest {
     public void collectionsAnnotationsNameIsValid() throws JobParametersInvalidException {
         jobParametersBuilder = new JobParametersBuilder();
         jobParametersBuilder.addString(JobParametersNames.DB_COLLECTIONS_ANNOTATIONS_NAME,
-                                       "collectionsAnnotationsName");
+                "collectionsAnnotationsName");
         validator.validate(jobParametersBuilder.toJobParameters());
     }
 
-    @Test(expected = JobParametersInvalidException.class)
-    public void collectionsAnnotationsNameIsEmpty() throws JobParametersInvalidException {
+    @Test
+    public void collectionsAnnotationsNameIsEmpty() {
         jobParametersBuilder = new JobParametersBuilder();
         jobParametersBuilder.addString(JobParametersNames.DB_COLLECTIONS_ANNOTATIONS_NAME, "");
-        validator.validate(jobParametersBuilder.toJobParameters());
+        assertThrows(JobParametersInvalidException.class, () -> validator.validate(jobParametersBuilder.toJobParameters()));
     }
 
-    @Test(expected = JobParametersInvalidException.class)
-    public void collectionsAnnotationsNameIsWhitespace() throws JobParametersInvalidException {
+    @Test
+    public void collectionsAnnotationsNameIsWhitespace() {
         jobParametersBuilder = new JobParametersBuilder();
         jobParametersBuilder.addString(JobParametersNames.DB_COLLECTIONS_ANNOTATIONS_NAME, " ");
-        validator.validate(jobParametersBuilder.toJobParameters());
+        assertThrows(JobParametersInvalidException.class, () -> validator.validate(jobParametersBuilder.toJobParameters()));
     }
 
-    @Test(expected = JobParametersInvalidException.class)
-    public void collectionsAnnotationsNameIsNull() throws JobParametersInvalidException {
+    @Test
+    public void collectionsAnnotationsNameIsNull() {
         jobParametersBuilder = new JobParametersBuilder();
-        jobParametersBuilder.addString(JobParametersNames.DB_COLLECTIONS_ANNOTATIONS_NAME, null);
-        validator.validate(jobParametersBuilder.toJobParameters());
+        assertThrows(JobParametersInvalidException.class, () -> validator.validate(jobParametersBuilder.toJobParameters()));
     }
 
 }

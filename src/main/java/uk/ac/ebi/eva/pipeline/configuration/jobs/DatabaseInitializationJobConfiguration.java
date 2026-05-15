@@ -20,15 +20,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
-import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.job.builder.JobBuilder;
+import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
-
 import uk.ac.ebi.eva.pipeline.configuration.jobs.steps.CreateDatabaseIndexesStepConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.jobs.steps.LoadFeatureCoordinatesStepConfiguration;
 import uk.ac.ebi.eva.pipeline.parameters.NewJobIncrementer;
@@ -63,11 +62,10 @@ public class DatabaseInitializationJobConfiguration {
 
     @Bean(INIT_DATABASE_JOB)
     @Scope("prototype")
-    public Job initDatabaseJob(JobBuilderFactory jobBuilderFactory) {
+    public Job initDatabaseJob(JobRepository jobRepository) {
         logger.debug("Building '" + INIT_DATABASE_JOB + "'");
 
-        JobBuilder jobBuilder = jobBuilderFactory
-                .get(INIT_DATABASE_JOB)
+        JobBuilder jobBuilder = new JobBuilder(INIT_DATABASE_JOB, jobRepository)
                 .incrementer(new NewJobIncrementer())
                 .validator(new DatabaseInitializationJobParametersValidator());
 

@@ -16,19 +16,21 @@
 
 package uk.ac.ebi.eva.pipeline.parameters.validation;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.JobParametersInvalidException;
 
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class ConfigChunkSizeValidatorTest {
     private ConfigChunkSizeValidator validator;
 
     private JobParametersBuilder jobParametersBuilder;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         validator = new ConfigChunkSizeValidator();
     }
@@ -40,38 +42,37 @@ public class ConfigChunkSizeValidatorTest {
         validator.validate(jobParametersBuilder.toJobParameters());
     }
 
-    @Test(expected = JobParametersInvalidException.class)
-    public void chunkSizeIsZero() throws JobParametersInvalidException {
+    @Test
+    public void chunkSizeIsZero() {
         jobParametersBuilder = new JobParametersBuilder();
         jobParametersBuilder.addString(JobParametersNames.CONFIG_CHUNK_SIZE, "0");
-        validator.validate(jobParametersBuilder.toJobParameters());
+        assertThrows(JobParametersInvalidException.class, () -> validator.validate(jobParametersBuilder.toJobParameters()));
     }
 
-    @Test(expected = JobParametersInvalidException.class)
+    @Test
     public void chunkSizeIsNegative() throws JobParametersInvalidException {
         jobParametersBuilder = new JobParametersBuilder();
         jobParametersBuilder.addString(JobParametersNames.CONFIG_CHUNK_SIZE, "-1");
-        validator.validate(jobParametersBuilder.toJobParameters());
+        assertThrows(JobParametersInvalidException.class, () -> validator.validate(jobParametersBuilder.toJobParameters()));
     }
 
-    @Test(expected = JobParametersInvalidException.class)
-    public void chunkSizeIsNotValid() throws JobParametersInvalidException {
+    @Test
+    public void chunkSizeIsNotValid() {
         jobParametersBuilder = new JobParametersBuilder();
         jobParametersBuilder.addString(JobParametersNames.CONFIG_CHUNK_SIZE, "hello");
-        validator.validate(jobParametersBuilder.toJobParameters());
+        assertThrows(JobParametersInvalidException.class, () -> validator.validate(jobParametersBuilder.toJobParameters()));
     }
 
-    @Test(expected = JobParametersInvalidException.class)
-    public void chunkSizeIsEmpty() throws JobParametersInvalidException {
+    @Test
+    public void chunkSizeIsEmpty() {
         jobParametersBuilder = new JobParametersBuilder();
         jobParametersBuilder.addString(JobParametersNames.CONFIG_CHUNK_SIZE, "");
-        validator.validate(jobParametersBuilder.toJobParameters());
+        assertThrows(JobParametersInvalidException.class, () -> validator.validate(jobParametersBuilder.toJobParameters()));
     }
 
-    @Test(expected = JobParametersInvalidException.class)
-    public void chunkSizeIsNull() throws JobParametersInvalidException {
+    @Test
+    public void chunkSizeIsNull() {
         jobParametersBuilder = new JobParametersBuilder();
-        jobParametersBuilder.addString(JobParametersNames.CONFIG_CHUNK_SIZE, null);
-        validator.validate(jobParametersBuilder.toJobParameters());
+        assertThrows(JobParametersInvalidException.class, () -> validator.validate(jobParametersBuilder.toJobParameters()));
     }
 }

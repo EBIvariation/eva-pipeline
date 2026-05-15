@@ -21,6 +21,7 @@ import com.mongodb.client.model.WriteModel;
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.batch.item.Chunk;
 import org.springframework.batch.item.data.MongoItemWriter;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.util.Assert;
@@ -48,14 +49,14 @@ public class AccessionImporter extends MongoItemWriter<IVariant> {
     }
 
     @Override
-    protected void doWrite(List<? extends IVariant> variants) {
+    protected void doWrite(Chunk<? extends IVariant> variants) {
         List<WriteModel<Document>> writes = new ArrayList<>();
         for (IVariant variant : variants) {
 
             Assert.notNull(variant, "Variant should not be null. Please provide a valid Variant object");
             logger.debug("Convert variant {} into mongo object", variant);
-            Assert.notNull(variant.getIds());
-            Assert.notEmpty(variant.getIds());
+            Assert.notNull(variant.getIds(), "Variant ids should not be null");
+            Assert.notEmpty(variant.getIds(), "Variant ids should not be empty");
 
             String id = VariantMongo.buildVariantId(variant.getChromosome(), variant.getStart(),
                     variant.getReference(), variant.getAlternate());

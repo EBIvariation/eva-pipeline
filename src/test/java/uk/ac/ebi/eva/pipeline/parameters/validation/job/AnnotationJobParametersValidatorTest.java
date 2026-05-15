@@ -15,19 +15,19 @@
  */
 package uk.ac.ebi.eva.pipeline.parameters.validation.job;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersInvalidException;
-
 import uk.ac.ebi.eva.pipeline.configuration.jobs.AnnotationJobConfiguration;
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
-import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
+import uk.ac.ebi.eva.test.utils.PipelineTemporaryFolderUtil;
 
 import java.util.Map;
 import java.util.TreeMap;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * Tests that the arguments necessary to run a {@link AnnotationJobConfiguration} are
@@ -37,50 +37,49 @@ public class AnnotationJobParametersValidatorTest {
 
     private AnnotationJobParametersValidator validator;
 
-    @Rule
-    public PipelineTemporaryFolderRule temporaryFolder = new PipelineTemporaryFolderRule();
+    public PipelineTemporaryFolderUtil temporaryFolderUtil = new PipelineTemporaryFolderUtil();
 
-    private Map<String, JobParameter> requiredParameters;
+    private Map<String, JobParameter<?>> requiredParameters;
 
-    private Map<String, JobParameter> optionalParameters;
+    private Map<String, JobParameter<?>> optionalParameters;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         validator = new AnnotationJobParametersValidator();
-        final String dir = temporaryFolder.getRoot().getCanonicalPath();
+        final String dir = temporaryFolderUtil.getRoot().getCanonicalPath();
 
         requiredParameters = new TreeMap<>();
 
-        requiredParameters.put(JobParametersNames.DB_NAME, new JobParameter("eva_testing"));
-        requiredParameters.put(JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME, new JobParameter("variants"));
-        requiredParameters.put(JobParametersNames.OUTPUT_DIR_ANNOTATION, new JobParameter(dir));
-        requiredParameters.put(JobParametersNames.APP_VEP_CACHE_SPECIES, new JobParameter("Human"));
-        requiredParameters.put(JobParametersNames.APP_VEP_CACHE_VERSION, new JobParameter("100_A"));
-        requiredParameters.put(JobParametersNames.APP_VEP_VERSION, new JobParameter("80"));
-        requiredParameters.put(JobParametersNames.APP_VEP_NUMFORKS, new JobParameter("6"));
-        requiredParameters.put(JobParametersNames.APP_VEP_TIMEOUT, new JobParameter("600"));
-        requiredParameters.put(JobParametersNames.ANNOTATION_OVERWRITE, new JobParameter("false"));
-        requiredParameters.put(JobParametersNames.DB_COLLECTIONS_ANNOTATIONS_NAME, new JobParameter("annotations"));
+        requiredParameters.put(JobParametersNames.DB_NAME, new JobParameter("eva_testing", String.class));
+        requiredParameters.put(JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME, new JobParameter("variants", String.class));
+        requiredParameters.put(JobParametersNames.OUTPUT_DIR_ANNOTATION, new JobParameter(dir, String.class));
+        requiredParameters.put(JobParametersNames.APP_VEP_CACHE_SPECIES, new JobParameter("Human", String.class));
+        requiredParameters.put(JobParametersNames.APP_VEP_CACHE_VERSION, new JobParameter("100_A", String.class));
+        requiredParameters.put(JobParametersNames.APP_VEP_VERSION, new JobParameter("80", String.class));
+        requiredParameters.put(JobParametersNames.APP_VEP_NUMFORKS, new JobParameter("6", String.class));
+        requiredParameters.put(JobParametersNames.APP_VEP_TIMEOUT, new JobParameter("600", String.class));
+        requiredParameters.put(JobParametersNames.ANNOTATION_OVERWRITE, new JobParameter("false", String.class));
+        requiredParameters.put(JobParametersNames.DB_COLLECTIONS_ANNOTATIONS_NAME, new JobParameter("annotations", String.class));
         requiredParameters.put(JobParametersNames.DB_COLLECTIONS_ANNOTATION_METADATA_NAME,
-                new JobParameter("annotationMetadata"));
+                new JobParameter("annotationMetadata", String.class));
         requiredParameters.put(JobParametersNames.APP_VEP_CACHE_PATH,
-                new JobParameter(temporaryFolder.getRoot().getCanonicalPath()));
+                new JobParameter(temporaryFolderUtil.getRoot().getCanonicalPath(), String.class));
         requiredParameters.put(JobParametersNames.APP_VEP_PATH,
-                new JobParameter(temporaryFolder.newFile().getCanonicalPath()));
+                new JobParameter(temporaryFolderUtil.newFile().getCanonicalPath(), String.class));
         requiredParameters.put(JobParametersNames.INPUT_FASTA,
-                new JobParameter(temporaryFolder.newFile().getCanonicalPath()));
+                new JobParameter(temporaryFolderUtil.newFile().getCanonicalPath(), String.class));
 
         // optionals
         optionalParameters = new TreeMap<>();
-        optionalParameters.put(JobParametersNames.CONFIG_CHUNK_SIZE, new JobParameter("100"));
-        optionalParameters.put(JobParametersNames.CONFIG_RESTARTABILITY_ALLOW, new JobParameter("true"));
+        optionalParameters.put(JobParametersNames.CONFIG_CHUNK_SIZE, new JobParameter("100", String.class));
+        optionalParameters.put(JobParametersNames.CONFIG_RESTARTABILITY_ALLOW, new JobParameter("true", String.class));
     }
 
     // The next tests show behaviour about the required parameters
 
     @Test
     public void allJobParametersAreValid() throws JobParametersInvalidException {
-        Map<String, JobParameter> parameters = new TreeMap<>();
+        Map<String, JobParameter<?>> parameters = new TreeMap<>();
         parameters.putAll(requiredParameters);
         parameters.putAll(optionalParameters);
         validator.validate(new JobParameters(parameters));
@@ -88,48 +87,48 @@ public class AnnotationJobParametersValidatorTest {
 
     @Test
     public void allRequiredJobParametersAreValid() throws JobParametersInvalidException {
-        Map<String, JobParameter> parameters = new TreeMap<>();
+        Map<String, JobParameter<?>> parameters = new TreeMap<>();
         parameters.putAll(requiredParameters);
         validator.validate(new JobParameters(parameters));
     }
 
-    @Test(expected = JobParametersInvalidException.class)
-    public void dbNameIsRequiredSkippingAnnotationAndStats() throws JobParametersInvalidException {
-        Map<String, JobParameter> parameters = new TreeMap<>();
+    @Test
+    public void dbNameIsRequiredSkippingAnnotationAndStats() {
+        Map<String, JobParameter<?>> parameters = new TreeMap<>();
         parameters.putAll(requiredParameters);
         parameters.putAll(optionalParameters);
         parameters.remove(JobParametersNames.DB_NAME);
-        parameters.put(JobParametersNames.ANNOTATION_SKIP, new JobParameter("true"));
-        parameters.put(JobParametersNames.STATISTICS_SKIP, new JobParameter("true"));
-        validator.validate(new JobParameters(parameters));
+        parameters.put(JobParametersNames.ANNOTATION_SKIP, new JobParameter("true", String.class));
+        parameters.put(JobParametersNames.STATISTICS_SKIP, new JobParameter("true", String.class));
+        assertThrows(JobParametersInvalidException.class, () -> validator.validate(new JobParameters(parameters)));
     }
 
-    @Test(expected = JobParametersInvalidException.class)
-    public void dbNameIsRequiredWithoutSkippingAnnotation() throws JobParametersInvalidException {
-        Map<String, JobParameter> parameters = new TreeMap<>();
+    @Test
+    public void dbNameIsRequiredWithoutSkippingAnnotation() {
+        Map<String, JobParameter<?>> parameters = new TreeMap<>();
         parameters.putAll(requiredParameters);
         parameters.putAll(optionalParameters);
         parameters.remove(JobParametersNames.DB_NAME);
-        parameters.put(JobParametersNames.STATISTICS_SKIP, new JobParameter("true"));
-        validator.validate(new JobParameters(parameters));
+        parameters.put(JobParametersNames.STATISTICS_SKIP, new JobParameter("true", String.class));
+        assertThrows(JobParametersInvalidException.class, () -> validator.validate(new JobParameters(parameters)));
     }
 
-    @Test(expected = JobParametersInvalidException.class)
-    public void dbNameIsRequiredWithoutSkippingStats() throws JobParametersInvalidException {
-        Map<String, JobParameter> parameters = new TreeMap<>();
+    @Test
+    public void dbNameIsRequiredWithoutSkippingStats() {
+        Map<String, JobParameter<?>> parameters = new TreeMap<>();
         parameters.putAll(requiredParameters);
         parameters.putAll(optionalParameters);
-        parameters.put(JobParametersNames.ANNOTATION_SKIP, new JobParameter("true"));
+        parameters.put(JobParametersNames.ANNOTATION_SKIP, new JobParameter("true", String.class));
         parameters.remove(JobParametersNames.DB_NAME);
-        validator.validate(new JobParameters(parameters));
+        assertThrows(JobParametersInvalidException.class, () -> validator.validate(new JobParameters(parameters)));
     }
 
-    @Test(expected = JobParametersInvalidException.class)
-    public void dbNameIsRequiredWithoutSkippingAnnotationAndStats() throws JobParametersInvalidException {
-        Map<String, JobParameter> parameters = new TreeMap<>();
+    @Test
+    public void dbNameIsRequiredWithoutSkippingAnnotationAndStats() {
+        Map<String, JobParameter<?>> parameters = new TreeMap<>();
         parameters.putAll(requiredParameters);
         parameters.putAll(optionalParameters);
         parameters.remove(JobParametersNames.DB_NAME);
-        validator.validate(new JobParameters(parameters));
+        assertThrows(JobParametersInvalidException.class, () -> validator.validate(new JobParameters(parameters)));
     }
 }

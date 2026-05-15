@@ -17,74 +17,82 @@ package uk.ac.ebi.eva.pipeline.configuration.jobs.steps.variantstats;
 
 import com.mongodb.client.MongoCollection;
 import org.bson.Document;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.mapping.MongoMappingContext;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import uk.ac.ebi.eva.pipeline.Application;
 import uk.ac.ebi.eva.pipeline.configuration.BeanNames;
 import uk.ac.ebi.eva.pipeline.configuration.MongoConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.jobs.VariantStatsJobConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.jobs.steps.VariantStatsStepConfiguration;
 import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
-import uk.ac.ebi.eva.test.configuration.TemporaryRuleConfiguration;
-import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
-import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
+import uk.ac.ebi.eva.test.utils.MongoTestContainerHelper;
+import uk.ac.ebi.eva.test.utils.PipelineTemporaryFolderUtil;
 import uk.ac.ebi.eva.utils.EvaJobParameterBuilder;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static uk.ac.ebi.eva.test.configuration.BatchTestConfiguration.JOB_VARIANT_STATS_JOB;
 import static uk.ac.ebi.eva.test.utils.JobTestUtils.assertCompleted;
 
 /**
  * Test for {@link VariantStatsStepConfiguration}
  */
-@RunWith(SpringRunner.class)
-@TestPropertySource({"classpath:test-stats.properties"})
+@ExtendWith(SpringExtension.class)
+@ActiveProfiles({Application.VARIANT_WRITER_MONGO_PROFILE, Application.VARIANT_ANNOTATION_MONGO_PROFILE})
 @ContextConfiguration(classes = {VariantStatsJobConfiguration.class, BatchTestConfiguration.class,
-        TemporaryRuleConfiguration.class, MongoConfiguration.class})
-public class VariantStatsStepTestNoNewStatsCalculated {
+        MongoConfiguration.class})
+public class VariantStatsStepTestNoNewStatsCalculated extends MongoTestContainerHelper {
     private static final String COLLECTION_VARIANTS_NAME = "variants";
 
     private static final String COLLECTION_FILES_NAME = "files";
 
-    private static final String DATABASE_NAME = "variant_stats_test_db";
+    private static final String DB_NAME = "variant-stats-test-db";
+
+    public PipelineTemporaryFolderUtil temporaryFolderUtil = new PipelineTemporaryFolderUtil();
 
     @Autowired
-    @Rule
-    public TemporaryMongoRule mongoRule;
-
-    @Rule
-    public PipelineTemporaryFolderRule temporaryFolderRule = new PipelineTemporaryFolderRule();
-
-    @Autowired
+    @Qualifier(JOB_VARIANT_STATS_JOB)
     private JobLauncherTestUtils jobLauncherTestUtils;
 
-    @Before
+    @Autowired
+    private MongoMappingContext mongoMappingContext;
+
+    @Autowired
+    private BatchTestConfiguration batchTestConfiguration;
+
+    private MongoTemplate mongoTemplate;
+
+    @BeforeEach
     public void setUp() throws Exception {
-        mongoRule.getTemporaryDatabase(DATABASE_NAME).drop();
+        mongoTemplate = batchTestConfiguration.getMongoTemplate(DB_NAME, mongoMappingContext);
+        mongoTemplate.getDb().drop();
     }
 
-    @After
+    @AfterEach
     public void cleanUp() {
-        mongoRule.getTemporaryDatabase(DATABASE_NAME).drop();
+        mongoTemplate.getDb().drop();
     }
 
     @Test
     public void variantStatsStepShouldCalculateAndLoadStats_NoNewStatsCanbeCalculated() throws Exception {
-        MongoCollection<Document> filesCollection = mongoRule.getCollection(DATABASE_NAME, COLLECTION_FILES_NAME);
-        MongoCollection<Document> variantsCollection = mongoRule.getCollection(DATABASE_NAME, COLLECTION_VARIANTS_NAME);
+        MongoCollection<Document> filesCollection = mongoTemplate.getDb().getCollection(COLLECTION_FILES_NAME);
+        MongoCollection<Document> variantsCollection = mongoTemplate.getDb().getCollection(COLLECTION_VARIANTS_NAME);
 
         filesCollection.insertMany(Arrays.asList(
                 // multiple entries for fid2 in the files collection
@@ -125,7 +133,7 @@ public class VariantStatsStepTestNoNewStatsCalculated {
         JobParameters jobParameters = new EvaJobParameterBuilder()
                 .collectionFilesName(COLLECTION_FILES_NAME)
                 .collectionVariantsName(COLLECTION_VARIANTS_NAME)
-                .databaseName(DATABASE_NAME)
+                .databaseName(DB_NAME)
                 .inputStudyId("sid1")
                 .chunkSize("100")
                 .toJobParameters();
@@ -134,9 +142,9 @@ public class VariantStatsStepTestNoNewStatsCalculated {
 
         // check job completed successfully
         assertCompleted(jobExecution);
-        List<Document> documents = mongoRule.getTemporaryDatabase(DATABASE_NAME).getCollection(COLLECTION_VARIANTS_NAME)
+        List<Document> documents = mongoTemplate.getDb().getCollection(COLLECTION_VARIANTS_NAME)
                 .find().into(new ArrayList<>());
-        Assert.assertTrue(documents.size() == 1);
+        assertTrue(documents.size() == 1);
 
         // assert data
         ArrayList<Document> variantStatsList = documents.stream().filter(doc -> doc.get("_id").equals("chr1_11111111_A_G"))

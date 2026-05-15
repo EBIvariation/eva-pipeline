@@ -20,7 +20,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
-import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
+import org.springframework.batch.core.job.builder.JobBuilder;
+import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -46,11 +47,10 @@ public class VariantStatsJobConfiguration {
 
     @Bean(VARIANT_STATS_JOB)
     @Scope("prototype")
-    public Job variantStatsJob(JobBuilderFactory jobBuilderFactory) {
+    public Job variantStatsJob(JobRepository jobRepository) {
         logger.debug("Building '" + VARIANT_STATS_JOB + "'");
 
-        return jobBuilderFactory
-                .get(VARIANT_STATS_JOB)
+        return new JobBuilder(VARIANT_STATS_JOB, jobRepository)
                 .incrementer(new NewJobIncrementer())
                 .start(variantStatsStep)
                 .build();

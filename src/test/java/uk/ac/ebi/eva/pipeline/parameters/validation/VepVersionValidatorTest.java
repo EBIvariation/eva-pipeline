@@ -15,19 +15,21 @@
  */
 package uk.ac.ebi.eva.pipeline.parameters.validation;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.JobParametersInvalidException;
 
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class VepVersionValidatorTest {
     private VepVersionValidator validator;
 
     private JobParametersBuilder jobParametersBuilder;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         validator = new VepVersionValidator();
     }
@@ -39,24 +41,23 @@ public class VepVersionValidatorTest {
         validator.validate(jobParametersBuilder.toJobParameters());
     }
 
-    @Test(expected = JobParametersInvalidException.class)
-    public void vepVersionIsEmpty() throws JobParametersInvalidException {
+    @Test
+    public void vepVersionIsEmpty() {
         jobParametersBuilder = new JobParametersBuilder();
         jobParametersBuilder.addString(JobParametersNames.APP_VEP_VERSION, "");
-        validator.validate(jobParametersBuilder.toJobParameters());
+        assertThrows(JobParametersInvalidException.class, () -> validator.validate(jobParametersBuilder.toJobParameters()));
     }
 
-    @Test(expected = JobParametersInvalidException.class)
-    public void vepVersionIsWhitespace() throws JobParametersInvalidException {
+    @Test
+    public void vepVersionIsWhitespace() {
         jobParametersBuilder = new JobParametersBuilder();
         jobParametersBuilder.addString(JobParametersNames.APP_VEP_VERSION, " ");
-        validator.validate(jobParametersBuilder.toJobParameters());
+        assertThrows(JobParametersInvalidException.class, () -> validator.validate(jobParametersBuilder.toJobParameters()));
     }
 
-    @Test(expected = JobParametersInvalidException.class)
-    public void vepVersionIsNull() throws JobParametersInvalidException {
+    @Test
+    public void vepVersionIsNull() {
         jobParametersBuilder = new JobParametersBuilder();
-        jobParametersBuilder.addString(JobParametersNames.APP_VEP_VERSION, null);
-        validator.validate(jobParametersBuilder.toJobParameters());
+        assertThrows(JobParametersInvalidException.class, () -> validator.validate(jobParametersBuilder.toJobParameters()));
     }
 }

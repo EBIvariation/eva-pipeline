@@ -19,7 +19,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
-import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
+import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemStreamReader;
 import org.springframework.batch.item.ItemWriter;
@@ -28,6 +29,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.transaction.PlatformTransactionManager;
 import uk.ac.ebi.eva.commons.mongodb.entities.AnnotationMongo;
 import uk.ac.ebi.eva.pipeline.configuration.ChunkSizeCompletionPolicyConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.io.readers.VariantsMongoReaderConfiguration;
@@ -74,11 +76,12 @@ public class GenerateVepAnnotationStepConfiguration {
     private ItemWriter<List<AnnotationMongo>> annotationWriter;
 
     @Bean(GENERATE_VEP_ANNOTATION_STEP)
-    public Step generateVepAnnotationStep(StepBuilderFactory stepBuilderFactory, JobOptions jobOptions) {
+    public Step generateVepAnnotationStep(JobRepository jobRepository, PlatformTransactionManager transactionManager,
+                                          JobOptions jobOptions) {
         logger.debug("Building '" + GENERATE_VEP_ANNOTATION_STEP + "'");
 
-        return stepBuilderFactory.get(GENERATE_VEP_ANNOTATION_STEP)
-                .<List<EnsemblVariant>, List<AnnotationMongo>>chunk(1)
+        return new StepBuilder(GENERATE_VEP_ANNOTATION_STEP, jobRepository)
+                .<List<EnsemblVariant>, List<AnnotationMongo>>chunk(1, transactionManager)
                 .reader(nonAnnotatedVariantsReader)
                 .processor(annotationCompositeProcessor)
                 .writer(annotationWriter)

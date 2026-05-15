@@ -18,6 +18,7 @@ package uk.ac.ebi.eva.pipeline.jobs.steps.tasklets;
 import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
+import org.springframework.batch.item.Chunk;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoOperations;
@@ -28,7 +29,6 @@ import uk.ac.ebi.eva.pipeline.parameters.DatabaseParameters;
 import uk.ac.ebi.eva.pipeline.parameters.InputParameters;
 
 import java.io.File;
-import java.util.Collections;
 
 /**
  * Tasklet that writes the metadata of a file into mongo. Uses
@@ -64,7 +64,7 @@ public class LoadFileTasklet implements Tasklet {
 
         VariantSourceMongoWriter variantSourceEntityMongoWriter = new VariantSourceMongoWriter(
                 mongoOperations, dbParameters.getCollectionFilesName());
-        variantSourceEntityMongoWriter.write(Collections.singletonList(variantSourceEntity));
+        variantSourceEntityMongoWriter.write(Chunk.of(variantSourceEntity));
 
         return RepeatStatus.FINISHED;
     }

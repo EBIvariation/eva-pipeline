@@ -18,13 +18,13 @@ package uk.ac.ebi.eva.commons.models.converters.data;
 import com.mongodb.BasicDBList;
 import com.mongodb.DBObject;
 import org.bson.Document;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.ac.ebi.eva.commons.core.models.VariantType;
 import uk.ac.ebi.eva.commons.core.models.pipeline.Variant;
 import uk.ac.ebi.eva.commons.core.models.pipeline.VariantSourceEntry;
@@ -42,13 +42,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Tests the automatic conversion of {@link VariantMongo} to {@link DBObject}
  */
-@RunWith(SpringRunner.class)
-@TestPropertySource({"classpath:test-mongo.properties"})
+@ExtendWith(SpringExtension.class)
+@TestPropertySource({"classpath:application.properties"})
 @ContextConfiguration(classes = {MongoOperationConfiguration.class, MongoCollectionNameConfiguration.class})
 public class VariantToDBObjectConverterTest {
 

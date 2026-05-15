@@ -15,13 +15,10 @@
  */
 package uk.ac.ebi.eva.pipeline.parameters;
 
-import org.opencb.opencga.lib.common.Config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-
-import javax.annotation.PostConstruct;
 
 /**
  * Class to extract configuration from properties files and from command line.
@@ -34,20 +31,9 @@ import javax.annotation.PostConstruct;
 public class JobOptions {
     private static final Logger logger = LoggerFactory.getLogger(JobOptions.class);
 
-    @Value("${" + JobParametersNames.APP_OPENCGA_PATH + ":#{null}}") private String opencgaAppHome;
-
     // Pipeline application options.
-    @Value("${" + JobParametersNames.CONFIG_RESTARTABILITY_ALLOW + ":false}") private boolean allowStartIfComplete;
-
-    @PostConstruct
-    public void loadArgs() {
-        logger.info("Loading job arguments");
-
-        if (opencgaAppHome == null || opencgaAppHome.isEmpty()) {
-            opencgaAppHome = System.getenv("OPENCGA_HOME") != null ? System.getenv("OPENCGA_HOME") : "/opt/opencga";
-        }
-        Config.setOpenCGAHome(opencgaAppHome);
-    }
+    @Value("${" + JobParametersNames.CONFIG_RESTARTABILITY_ALLOW + ":false}")
+    private boolean allowStartIfComplete;
 
     public boolean isAllowStartIfComplete() {
         return allowStartIfComplete;
