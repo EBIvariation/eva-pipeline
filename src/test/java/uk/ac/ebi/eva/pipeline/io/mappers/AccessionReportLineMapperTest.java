@@ -1,9 +1,9 @@
 package uk.ac.ebi.eva.pipeline.io.mappers;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import uk.ac.ebi.eva.commons.core.models.IVariant;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class AccessionReportLineMapperTest {
 

@@ -18,40 +18,43 @@ package uk.ac.ebi.eva.pipeline.configuration.jobs.steps;
 
 import com.mongodb.client.MongoCollection;
 import org.bson.Document;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.mapping.MongoMappingContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.ac.ebi.eva.pipeline.Application;
 import uk.ac.ebi.eva.pipeline.configuration.BeanNames;
 import uk.ac.ebi.eva.pipeline.configuration.jobs.DropStudyJobConfiguration;
 import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
-import uk.ac.ebi.eva.test.configuration.TemporaryRuleConfiguration;
-import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
+import uk.ac.ebi.eva.test.utils.MongoTestContainerHelper;
 import uk.ac.ebi.eva.utils.EvaJobParameterBuilder;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.UUID;
 
+import static uk.ac.ebi.eva.test.configuration.BatchTestConfiguration.JOB_DROP_STUDY_JOB;
 import static uk.ac.ebi.eva.test.utils.DropStudyJobTestUtils.assertDropFiles;
 import static uk.ac.ebi.eva.test.utils.JobTestUtils.assertCompleted;
 
 /**
  * Test for {@link DropFilesByStudyStepConfiguration}
  */
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @ActiveProfiles({Application.VARIANT_WRITER_MONGO_PROFILE, Application.VARIANT_ANNOTATION_MONGO_PROFILE})
-@TestPropertySource({"classpath:common-configuration.properties", "classpath:test-mongo.properties"})
-@ContextConfiguration(classes = {DropStudyJobConfiguration.class, BatchTestConfiguration.class, TemporaryRuleConfiguration.class})
-public class DropFilesByStudyStepTest {
+@ContextConfiguration(classes = {DropStudyJobConfiguration.class, BatchTestConfiguration.class})
+public class DropFilesByStudyStepTest extends MongoTestContainerHelper {
 
     private static final String COLLECTION_FILES_NAME = "files";
 
@@ -61,50 +64,69 @@ public class DropFilesByStudyStepTest {
 
     private static final String OTHER_STUDY_ID = "otherStudy";
 
-    private static final String FILES_DOCUMENT = JobTestUtils.buildFilesDocumentString(STUDY_ID_TO_DROP, "fileOne");
+    private static final Document FILES_DOCUMENT = JobTestUtils.buildFilesDocument(STUDY_ID_TO_DROP, "fileOne");
 
-    private static final String OTHER_FILES_DOCUMENT = JobTestUtils.buildFilesDocumentString(STUDY_ID_TO_DROP,
+    private static final Document OTHER_FILES_DOCUMENT = JobTestUtils.buildFilesDocument(STUDY_ID_TO_DROP,
             "fileTwo");
 
-    private static final String OTHER_STUDY_FILES_DOCUMENT = JobTestUtils.buildFilesDocumentString(OTHER_STUDY_ID,
+    private static final Document OTHER_STUDY_FILES_DOCUMENT = JobTestUtils.buildFilesDocument(OTHER_STUDY_ID,
             "fileThree");
 
-    @Autowired
-    @Rule
-    public TemporaryMongoRule mongoRule;
+    private static final String DB_NAME = "drop-files-by-study-test-db";
 
     @Autowired
+    @Qualifier(JOB_DROP_STUDY_JOB)
     private JobLauncherTestUtils jobLauncherTestUtils;
 
+    @Autowired
+    private MongoMappingContext mongoMappingContext;
+
+    @Autowired
+    private BatchTestConfiguration batchTestConfiguration;
+
+    private MongoTemplate mongoTemplate;
+
+    @BeforeEach
+    public void setUp() throws Exception {
+        mongoTemplate = batchTestConfiguration.getMongoTemplate(DB_NAME, mongoMappingContext);
+        mongoTemplate.getDb().drop();
+    }
+
+    @AfterEach
+    void cleanDb() {
+        mongoTemplate.getDb().drop();
+    }
+
     @Test
-    public void testNoFilesToDrop() throws Exception {
-        String databaseName = mongoRule.createDBAndInsertDocuments(COLLECTION_FILES_NAME,
+    public void testNoFilesToDrop() {
+        mongoTemplate.getDb().getCollection(COLLECTION_FILES_NAME).insertMany(
                 Collections.singletonList(OTHER_STUDY_FILES_DOCUMENT));
 
-        checkDrop(databaseName, EXPECTED_FILES_AFTER_DROP_STUDY);
+        checkDrop(EXPECTED_FILES_AFTER_DROP_STUDY);
     }
 
     @Test
-    public void testOneFileToDrop() throws Exception {
-        String databaseName = mongoRule.createDBAndInsertDocuments(COLLECTION_FILES_NAME,
+    public void testOneFileToDrop() {
+        mongoTemplate.getDb().getCollection(COLLECTION_FILES_NAME).insertMany(
                 Arrays.asList(FILES_DOCUMENT, OTHER_STUDY_FILES_DOCUMENT));
 
-        checkDrop(databaseName, EXPECTED_FILES_AFTER_DROP_STUDY);
+        checkDrop(EXPECTED_FILES_AFTER_DROP_STUDY);
     }
 
     @Test
-    public void testSeveralFilesToDrop() throws Exception {
-        String databaseName = mongoRule.createDBAndInsertDocuments(COLLECTION_FILES_NAME,
+    public void testSeveralFilesToDrop() {
+        mongoTemplate.getDb().getCollection(COLLECTION_FILES_NAME).insertMany(
                 Arrays.asList(FILES_DOCUMENT, OTHER_FILES_DOCUMENT, OTHER_STUDY_FILES_DOCUMENT));
 
-        checkDrop(databaseName, EXPECTED_FILES_AFTER_DROP_STUDY);
+        checkDrop(EXPECTED_FILES_AFTER_DROP_STUDY);
     }
 
-    private void checkDrop(String databaseName, long expectedFilesAfterDropStudy) {
+    private void checkDrop(long expectedFilesAfterDropStudy) {
         JobParameters jobParameters = new EvaJobParameterBuilder()
                 .collectionFilesName(COLLECTION_FILES_NAME)
-                .databaseName(databaseName)
+                .databaseName(DB_NAME)
                 .inputStudyId(STUDY_ID_TO_DROP)
+                .addString("run.id", UUID.randomUUID().toString())
                 .toJobParameters();
 
         JobExecution jobExecution = jobLauncherTestUtils.launchStep(BeanNames.DROP_FILES_BY_STUDY_STEP,
@@ -112,7 +134,7 @@ public class DropFilesByStudyStepTest {
 
         assertCompleted(jobExecution);
 
-        MongoCollection<Document> filesCollection = mongoRule.getCollection(databaseName, COLLECTION_FILES_NAME);
+        MongoCollection<Document> filesCollection = mongoTemplate.getDb().getCollection(COLLECTION_FILES_NAME);
         assertDropFiles(filesCollection, STUDY_ID_TO_DROP, expectedFilesAfterDropStudy);
     }
 

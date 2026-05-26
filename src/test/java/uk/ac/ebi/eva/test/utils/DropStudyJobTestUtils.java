@@ -20,7 +20,7 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.client.MongoCollection;
 import org.bson.Document;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static uk.ac.ebi.eva.commons.mongodb.entities.VariantMongo.FILES_FIELD;
 import static uk.ac.ebi.eva.commons.mongodb.entities.VariantMongo.STATISTICS_FIELD;
 import static uk.ac.ebi.eva.commons.mongodb.entities.VariantSourceMongo.STUDYID_FIELD;
@@ -34,11 +34,11 @@ public class DropStudyJobTestUtils {
     public static void assertDropVariantsByStudy(MongoCollection<Document> variantsCollection, String studyId,
                                                  long expectedVariantsAfterDropStudy) {
 
-        assertEquals(expectedVariantsAfterDropStudy, variantsCollection.count());
+        assertEquals(expectedVariantsAfterDropStudy, variantsCollection.countDocuments());
 
         BasicDBObject singleStudyVariants = new BasicDBObject(FILES_STUDY_ID_FIELD, studyId)
                 .append(FILES_FIELD, new BasicDBObject("$size", 1));
-        assertEquals(0, variantsCollection.count(singleStudyVariants));
+        assertEquals(0, variantsCollection.countDocuments(singleStudyVariants));
     }
 
     public static void assertPullStudy(MongoCollection<Document> variantsCollection, String studyId,
@@ -46,15 +46,15 @@ public class DropStudyJobTestUtils {
         BasicDBObject variantFiles = new BasicDBObject(FILES_STUDY_ID_FIELD, studyId);
         BasicDBObject variantStats = new BasicDBObject(STATS_STUDY_ID_FIELD, studyId);
 
-        assertEquals(expectedFileCount, variantsCollection.count(variantFiles));
-        assertEquals(expectedStatsCount, variantsCollection.count(variantStats));
+        assertEquals(expectedFileCount, variantsCollection.countDocuments(variantFiles));
+        assertEquals(expectedStatsCount, variantsCollection.countDocuments(variantStats));
     }
 
     public static void assertDropFiles(MongoCollection<Document> filesCollection, String studyId, long expectedFilesAfterDropStudy) {
-        assertEquals(expectedFilesAfterDropStudy, filesCollection.count());
+        assertEquals(expectedFilesAfterDropStudy, filesCollection.countDocuments());
 
         BasicDBObject remainingFilesThatShouldHaveBeenDropped = new BasicDBObject(STUDYID_FIELD, studyId);
-        assertEquals(0, filesCollection.count(remainingFilesThatShouldHaveBeenDropped));
+        assertEquals(0, filesCollection.countDocuments(remainingFilesThatShouldHaveBeenDropped));
     }
 
 }

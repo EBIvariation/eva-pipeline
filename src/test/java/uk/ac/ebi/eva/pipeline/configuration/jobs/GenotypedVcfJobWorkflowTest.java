@@ -16,29 +16,30 @@
 
 package uk.ac.ebi.eva.pipeline.configuration.jobs;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.opencb.opencga.lib.common.Config;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.mapping.MongoMappingContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.ac.ebi.eva.pipeline.Application;
 import uk.ac.ebi.eva.pipeline.configuration.BeanNames;
 import uk.ac.ebi.eva.pipeline.configuration.MongoCollectionNameConfiguration;
 import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
-import uk.ac.ebi.eva.test.configuration.TemporaryRuleConfiguration;
-import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
-import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 import uk.ac.ebi.eva.test.utils.GenotypedVcfJobTestUtils;
+import uk.ac.ebi.eva.test.utils.MongoTestContainerHelper;
+import uk.ac.ebi.eva.test.utils.PipelineTemporaryFolderUtil;
 import uk.ac.ebi.eva.utils.EvaJobParameterBuilder;
 
 import java.io.File;
@@ -52,8 +53,9 @@ import java.util.TreeSet;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static uk.ac.ebi.eva.test.configuration.BatchTestConfiguration.JOB_GENOTYPE_VCF_JOB;
 import static uk.ac.ebi.eva.test.utils.GenotypedVcfJobTestUtils.COLLECTION_ANNOTATIONS_NAME;
 import static uk.ac.ebi.eva.test.utils.JobTestUtils.assertCompleted;
 import static uk.ac.ebi.eva.utils.FileUtils.getResource;
@@ -63,26 +65,29 @@ import static uk.ac.ebi.eva.utils.FileUtils.getResource;
  * <p>
  * TODO The test should fail when we will integrate the JobParameter validation since there are empty parameters for VEP
  */
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @ActiveProfiles({Application.VARIANT_WRITER_MONGO_PROFILE, Application.VARIANT_ANNOTATION_MONGO_PROFILE})
-@TestPropertySource({"classpath:common-configuration.properties", "classpath:test-mongo.properties"})
+@TestPropertySource({"classpath:application.properties"})
 @ContextConfiguration(classes = {GenotypedVcfJobConfiguration.class, BatchTestConfiguration.class,
-        TemporaryRuleConfiguration.class, MongoCollectionNameConfiguration.class})
-public class GenotypedVcfJobWorkflowTest {
-
+        MongoCollectionNameConfiguration.class})
+public class GenotypedVcfJobWorkflowTest extends MongoTestContainerHelper {
     private static final String MOCK_VEP = "/mockvep.pl";
-
     private static final String INPUT_FILE = "/input-files/vcf/genotyped.vcf.gz";
+    private static final String DB_NAME = "genotype-workflow-test-db";
+
+    public PipelineTemporaryFolderUtil temporaryFolderUtil = new PipelineTemporaryFolderUtil();
 
     @Autowired
-    @Rule
-    public TemporaryMongoRule mongoRule;
-
-    @Rule
-    public PipelineTemporaryFolderRule temporaryFolderRule = new PipelineTemporaryFolderRule();
-
-    @Autowired
+    @Qualifier(JOB_GENOTYPE_VCF_JOB)
     private JobLauncherTestUtils jobLauncherTestUtils;
+
+    @Autowired
+    private MongoMappingContext mongoMappingContext;
+
+    @Autowired
+    private BatchTestConfiguration batchTestConfiguration;
+
+    private MongoTemplate mongoTemplate;
 
     @Autowired
     private JobOptions jobOptions;  // we need this for stats.skip and annot.skip
@@ -94,9 +99,15 @@ public class GenotypedVcfJobWorkflowTest {
             BeanNames.GENERATE_VEP_ANNOTATION_STEP,
             BeanNames.LOAD_ANNOTATION_METADATA_STEP));
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
-        Config.setOpenCGAHome(GenotypedVcfJobTestUtils.getDefaultOpencgaHome());
+        mongoTemplate = batchTestConfiguration.getMongoTemplate(DB_NAME, mongoMappingContext);
+        mongoTemplate.getDb().drop();
+    }
+
+    @AfterEach
+    void cleanDb() {
+        mongoTemplate.getDb().drop();
     }
 
     @Test
@@ -122,10 +133,10 @@ public class GenotypedVcfJobWorkflowTest {
         assertEquals(BeanNames.LOAD_FILE_STEP, lastRequiredStep.getStepName());
 
         assertTrue(lastRequiredStep.getEndTime()
-                .before(nameToStepExecution.get(BeanNames.GENERATE_VEP_ANNOTATION_STEP).getStartTime()));
+                .isBefore(nameToStepExecution.get(BeanNames.GENERATE_VEP_ANNOTATION_STEP).getStartTime()));
 
         assertTrue(nameToStepExecution.get(BeanNames.GENERATE_VEP_ANNOTATION_STEP).getEndTime()
-                .before(nameToStepExecution.get(BeanNames.LOAD_ANNOTATION_METADATA_STEP).getStartTime()));
+                .isBefore(nameToStepExecution.get(BeanNames.LOAD_ANNOTATION_METADATA_STEP).getStartTime()));
     }
 
     @Test
@@ -169,10 +180,9 @@ public class GenotypedVcfJobWorkflowTest {
     private EvaJobParameterBuilder initVariantConfigurationJob() throws IOException {
         File inputFile = getResource(INPUT_FILE);
         String assemblyReport = GenotypedVcfJobTestUtils.getAssemblyReport();
-        String dbName = mongoRule.getRandomTemporaryDatabaseName();
-        String outputDirStats = temporaryFolderRule.newFolder().getAbsolutePath();
-        String outputDirAnnotation = temporaryFolderRule.newFolder().getAbsolutePath();
-        File fasta = temporaryFolderRule.newFile();
+        String outputDirStats = temporaryFolderUtil.newFolder().getAbsolutePath();
+        String outputDirAnnotation = temporaryFolderUtil.newFolder().getAbsolutePath();
+        File fasta = temporaryFolderUtil.newFile();
 
         EvaJobParameterBuilder evaJobParameterBuilder = new EvaJobParameterBuilder()
                 .annotationOverwrite("false")
@@ -180,7 +190,7 @@ public class GenotypedVcfJobWorkflowTest {
                 .collectionAnnotationsName(COLLECTION_ANNOTATIONS_NAME)
                 .collectionFilesName("files")
                 .collectionVariantsName("variants")
-                .databaseName(dbName)
+                .databaseName(DB_NAME)
                 .inputFasta(fasta.getAbsolutePath())
                 .inputAssemblyReport(assemblyReport)
                 .inputStudyId("genotyped-job-workflow")

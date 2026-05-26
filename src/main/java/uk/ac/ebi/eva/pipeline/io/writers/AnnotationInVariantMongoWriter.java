@@ -16,6 +16,7 @@
 package uk.ac.ebi.eva.pipeline.io.writers;
 
 import org.bson.Document;
+import org.springframework.batch.item.Chunk;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.data.mongodb.core.BulkOperations;
 import org.springframework.data.mongodb.core.MongoOperations;
@@ -65,10 +66,10 @@ public class AnnotationInVariantMongoWriter implements ItemWriter<List<Annotatio
                                           String collection,
                                           String vepVersion,
                                           String vepCacheVersion) {
-        Assert.notNull(mongoOperations);
-        Assert.hasText(collection);
-        Assert.hasText(vepVersion);
-        Assert.hasText(vepCacheVersion);
+        Assert.notNull(mongoOperations, "A Mongo instance is required");
+        Assert.hasText(collection, "A collection name is required");
+        Assert.hasText(vepVersion, "A VEP version is required");
+        Assert.hasText(vepCacheVersion, "A VEP cache version is required");
 
         this.mongoOperations = mongoOperations;
         this.collection = collection;
@@ -77,7 +78,7 @@ public class AnnotationInVariantMongoWriter implements ItemWriter<List<Annotatio
     }
 
     @Override
-    public void write(List<? extends List<AnnotationMongo>> annotations) throws Exception {
+    public void write(Chunk<? extends List<AnnotationMongo>> annotations) throws Exception {
         for (List<AnnotationMongo> annotationList : annotations) {
             Map<String, AnnotationIndexMongo> variantAnnotations = generateVariantAnnotations(annotationList);
 

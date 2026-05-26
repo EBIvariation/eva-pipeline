@@ -27,7 +27,6 @@ import org.springframework.batch.core.converter.DefaultJobParametersConverter;
 import org.springframework.batch.core.converter.JobParametersConverter;
 import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.core.launch.JobLauncher;
-import org.springframework.batch.core.launch.JobParametersNotFoundException;
 import org.springframework.batch.core.launch.NoSuchJobException;
 import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
 import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
@@ -36,7 +35,7 @@ import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ExitCodeGenerator;
-import org.springframework.boot.autoconfigure.batch.JobLauncherCommandLineRunner;
+import org.springframework.boot.autoconfigure.batch.JobLauncherApplicationRunner;
 import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.stereotype.Component;
 import org.springframework.util.PatternMatchUtils;
@@ -63,7 +62,7 @@ import java.util.Optional;
 import java.util.Properties;
 
 /**
- * This class is a modified version of the default JobLauncherCommandLineRunner.
+ * This class is a modified version of the default JobLauncherApplicationRunner.
  * Its main differences are:
  * -If no job is specified then the execution stops.
  * -Job parameters can be passed from command line as normal parameters.
@@ -71,7 +70,7 @@ import java.util.Properties;
  * -The user can restart a job that has been run previously marking the previous execution as failed.
  */
 @Component
-public class EvaPipelineJobLauncherCommandLineRunner extends JobLauncherCommandLineRunner implements
+public class EvaPipelineJobLauncherCommandLineRunner extends JobLauncherApplicationRunner implements
         ApplicationEventPublisherAware, ExitCodeGenerator {
 
     private static final Logger logger = LoggerFactory.getLogger(EvaPipelineJobLauncherCommandLineRunner.class);
@@ -108,12 +107,12 @@ public class EvaPipelineJobLauncherCommandLineRunner extends JobLauncherCommandL
 
     public EvaPipelineJobLauncherCommandLineRunner(JobLauncher jobLauncher, JobExplorer jobExplorer,
                                                    JobRepository jobRepository) {
-        super(jobLauncher, jobExplorer);
-        jobs = Collections.emptySet();
+        super(jobLauncher, jobExplorer, jobRepository);
+        this.jobs = Collections.emptySet();
         this.jobRepository = jobRepository;
         this.jobExplorer = jobExplorer;
-        abnormalExit = false;
-        converter = new DefaultJobParametersConverter();
+        this.abnormalExit = false;
+        this.converter = new DefaultJobParametersConverter();
 
     }
 
@@ -133,9 +132,9 @@ public class EvaPipelineJobLauncherCommandLineRunner extends JobLauncherCommandL
     }
 
     @Override
-    public void setJobNames(String jobName) {
+    public void setJobName(String jobName) {
         this.jobName = jobName;
-        super.setJobNames(jobName);
+        super.setJobName(jobName);
     }
 
     public void setPropertyFilePath(String propertyFilePath) {
@@ -197,20 +196,20 @@ public class EvaPipelineJobLauncherCommandLineRunner extends JobLauncherCommandL
     }
 
     private void configureLauncherPropertiesFromFileProperties(Properties fileProperties) {
-        if (StringUtils.isEmpty(jobName)) {
+        if (!StringUtils.hasText(jobName)) {
             jobName = (String) fileProperties.get(SPRING_BATCH_JOB_NAME_PROPERTY);
-        } else {
-            if (!Objects.equals(jobName, fileProperties.get(SPRING_BATCH_JOB_NAME_PROPERTY))) {
-                logger.info("You have passed a job name in your parameter file and in the command line, '" + jobName
-                        + "' will be executed.");
-            }
+        } else if (!Objects.equals(jobName, fileProperties.get(SPRING_BATCH_JOB_NAME_PROPERTY))) {
+            logger.info("You have passed a job name in your parameter file and in the command line, '" + jobName
+                    + "' will be executed.");
         }
     }
 
     private Optional<Properties> getJobParametersFromCommandLine(String[] args)
             throws NotValidParameterFormatException {
-        checkAllParametersStartByDoubleDash(args);
-        String[] processedArgs = removeStartingHypens(args);
+        String[] processedArgs = Arrays.stream(args)
+                .map(arg -> arg.startsWith("--") ? arg.substring(2) : arg)
+                .toArray(String[]::new);
+
         return Optional.ofNullable(StringUtils.splitArrayElementsIntoProperties(processedArgs, "="));
     }
 
@@ -235,8 +234,7 @@ public class EvaPipelineJobLauncherCommandLineRunner extends JobLauncherCommandL
 
     @Override
     protected void execute(Job job, JobParameters jobParameters) throws JobExecutionAlreadyRunningException,
-            JobRestartException, JobInstanceAlreadyCompleteException, JobParametersInvalidException,
-            JobParametersNotFoundException {
+            JobRestartException, JobInstanceAlreadyCompleteException, JobParametersInvalidException {
         logger.info("Running job '" + jobName + "' with parameters: " + jobParameters);
         super.execute(job, jobParameters);
     }
@@ -245,18 +243,6 @@ public class EvaPipelineJobLauncherCommandLineRunner extends JobLauncherCommandL
             NoPreviousJobExecutionException {
         logger.info("Force restartPreviousExecution of job '" + jobName + "' with parameters: " + jobParameters);
         ManageJobsUtils.markLastJobAsFailed(jobRepository, jobName, jobParameters);
-    }
-
-    private void checkAllParametersStartByDoubleDash(String[] args) throws NotValidParameterFormatException {
-        for (String arg : args) {
-            if (!arg.startsWith("--")) {
-                throw new NotValidParameterFormatException(arg);
-            }
-        }
-    }
-
-    private String[] removeStartingHypens(String[] args) {
-        return Arrays.stream(args).map(arg -> arg.substring(2)).toArray(String[]::new);
     }
 
     private Properties getJobParametersFromPropertiesFile() throws FileNotFoundException,
@@ -290,10 +276,11 @@ public class EvaPipelineJobLauncherCommandLineRunner extends JobLauncherCommandL
         }
     }
 
-    private Properties readPropertiesFromFile(String propertyFilePath) throws IOException, IllegalArgumentException {
-        InputStream input = new FileInputStream(propertyFilePath);
+    private Properties readPropertiesFromFile(String propertyFilePath) throws IOException {
         Properties properties = new Properties();
-        properties.load(input);
+        try (InputStream input = new FileInputStream(propertyFilePath)) {
+            properties.load(input);
+        }
         return properties;
     }
 

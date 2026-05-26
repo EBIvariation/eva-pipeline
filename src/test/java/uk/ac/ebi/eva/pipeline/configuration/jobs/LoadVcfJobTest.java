@@ -15,36 +15,32 @@
  */
 package uk.ac.ebi.eva.pipeline.configuration.jobs;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.opencb.biodata.models.variant.Variant;
-import org.opencb.datastore.core.QueryOptions;
-import org.opencb.opencga.lib.common.Config;
-import org.opencb.opencga.storage.core.StorageManagerFactory;
-import org.opencb.opencga.storage.core.variant.VariantStorageManager;
-import org.opencb.opencga.storage.core.variant.adaptors.VariantDBAdaptor;
-import org.opencb.opencga.storage.core.variant.adaptors.VariantDBIterator;
+import com.mongodb.client.MongoCursor;
+import org.bson.Document;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.mapping.MongoMappingContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.ac.ebi.eva.pipeline.Application;
 import uk.ac.ebi.eva.pipeline.configuration.BeanNames;
 import uk.ac.ebi.eva.pipeline.configuration.MongoCollectionNameConfiguration;
 import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
-import uk.ac.ebi.eva.test.configuration.TemporaryRuleConfiguration;
-import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
-import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 import uk.ac.ebi.eva.test.utils.GenotypedVcfJobTestUtils;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
+import uk.ac.ebi.eva.test.utils.MongoTestContainerHelper;
+import uk.ac.ebi.eva.test.utils.PipelineTemporaryFolderUtil;
 import uk.ac.ebi.eva.utils.EvaJobParameterBuilder;
 
 import java.io.File;
@@ -52,13 +48,16 @@ import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static uk.ac.ebi.eva.test.configuration.BatchTestConfiguration.JOB_LOAD_VCF_JOB;
 import static uk.ac.ebi.eva.test.utils.JobTestUtils.assertCompleted;
 import static uk.ac.ebi.eva.utils.FileUtils.getResource;
 
@@ -66,44 +65,54 @@ import static uk.ac.ebi.eva.utils.FileUtils.getResource;
  * Test for {@link LoadVcfJobConfiguration}
  */
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @ActiveProfiles({Application.VARIANT_WRITER_MONGO_PROFILE, Application.VARIANT_ANNOTATION_MONGO_PROFILE})
-@TestPropertySource({"classpath:variant-aggregated.properties", "classpath:test-mongo.properties"})
+@TestPropertySource({"classpath:application.properties"})
 @ContextConfiguration(classes = {LoadVcfJobConfiguration.class, BatchTestConfiguration.class,
-        TemporaryRuleConfiguration.class, MongoCollectionNameConfiguration.class})
-public class LoadVcfJobTest {
+        MongoCollectionNameConfiguration.class})
+public class LoadVcfJobTest extends MongoTestContainerHelper {
     public static final String INPUT = "/input-files/vcf/aggregated.vcf.gz";
 
     private static final String COLLECTION_VARIANTS_NAME = "variants";
 
     private static final String COLLECTION_FILES_NAME = "files";
 
-    @Autowired
-    @Rule
-    public TemporaryMongoRule mongoRule;
+    private static final String DB_NAME = "load-vcf-test-db";
 
-    @Rule
-    public PipelineTemporaryFolderRule temporaryFolderRule = new PipelineTemporaryFolderRule();
+    public PipelineTemporaryFolderUtil temporaryFolderUtil = new PipelineTemporaryFolderUtil();
 
     @Autowired
+    @Qualifier(JOB_LOAD_VCF_JOB)
     private JobLauncherTestUtils jobLauncherTestUtils;
+
+    @Autowired
+    private MongoMappingContext mongoMappingContext;
+
+    @Autowired
+    private BatchTestConfiguration batchTestConfiguration;
+
+    private MongoTemplate mongoTemplate;
 
     public static final Set<String> EXPECTED_REQUIRED_STEP_NAMES = new TreeSet<>(
             Arrays.asList(BeanNames.LOAD_VARIANTS_STEP, BeanNames.LOAD_FILE_STEP));
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
-        Config.setOpenCGAHome(GenotypedVcfJobTestUtils.getDefaultOpencgaHome());
+        mongoTemplate = batchTestConfiguration.getMongoTemplate(DB_NAME, mongoMappingContext);
+        mongoTemplate.getDb().drop();
+    }
+
+    @AfterEach
+    void cleanDb() {
+        mongoTemplate.getDb().drop();
     }
 
     @Test
     public void aggregatedLoadVcf() throws Exception {
-        String dbName = mongoRule.getRandomTemporaryDatabaseName();
-
         JobParameters jobParameters = new EvaJobParameterBuilder()
                 .collectionFilesName(COLLECTION_FILES_NAME)
                 .collectionVariantsName(COLLECTION_VARIANTS_NAME)
-                .databaseName(dbName)
+                .databaseName(DB_NAME)
                 .inputStudyId("aggregated-job")
                 .inputStudyName("Test study name with non printable characters \u00e2\u0080\u0093in the name")
                 .inputStudyType("COLLECTION")
@@ -128,31 +137,30 @@ public class LoadVcfJobTest {
         assertEquals(BeanNames.LOAD_FILE_STEP, lastRequiredStep.getStepName());
 
         // check ((documents in DB) == (lines in file))
-        VariantStorageManager variantStorageManager = StorageManagerFactory.getVariantStorageManager();
-        VariantDBAdaptor variantDBAdaptor = variantStorageManager.getDBAdaptor(dbName, null);
-        VariantDBIterator iterator = variantDBAdaptor.iterator(new QueryOptions());
+        MongoCursor<Document> iterator = mongoTemplate.getCollection(COLLECTION_VARIANTS_NAME).find().iterator();
 
         File file = getResource(INPUT);
         long lines = JobTestUtils.getLines(new GZIPInputStream(new FileInputStream(file)));
-        Assert.assertEquals(lines, JobTestUtils.count(iterator));
+        assertEquals(lines, JobTestUtils.count(iterator));
 
         // check that stats are loaded properly
-        Variant variant = variantDBAdaptor.iterator(new QueryOptions()).next();
-        assertFalse(variant.getSourceEntries().values().iterator().next().getCohortStats().isEmpty());
+        Document variant = mongoTemplate.getCollection(COLLECTION_VARIANTS_NAME).find().iterator().next();
+        List<Document> st = variant.getList("st", Document.class);
+        assertNotNull(st);
+        assertFalse(st.isEmpty());
     }
 
     @Test
     public void GenotypedLoadVcfJob() throws Exception {
         File inputFile = GenotypedVcfJobTestUtils.getInputFile();
-        String databaseName = mongoRule.getRandomTemporaryDatabaseName();
-        File fasta = temporaryFolderRule.newFile();
+        File fasta = temporaryFolderUtil.newFile();
         String assemblyReport = GenotypedVcfJobTestUtils.getAssemblyReport();
 
         // Run the Job
         JobParameters jobParameters = new EvaJobParameterBuilder()
                 .collectionFilesName(GenotypedVcfJobTestUtils.COLLECTION_FILES_NAME)
                 .collectionVariantsName(GenotypedVcfJobTestUtils.COLLECTION_VARIANTS_NAME)
-                .databaseName(databaseName)
+                .databaseName(DB_NAME)
                 .inputFasta(fasta.getAbsolutePath())
                 .inputAssemblyReport(assemblyReport)
                 .inputStudyId(GenotypedVcfJobTestUtils.INPUT_STUDY_ID)
@@ -167,7 +175,7 @@ public class LoadVcfJobTest {
 
         assertCompleted(jobExecution);
 
-        GenotypedVcfJobTestUtils.checkLoadStep(mongoRule, databaseName);
+        GenotypedVcfJobTestUtils.checkLoadStep(mongoTemplate);
 
     }
 

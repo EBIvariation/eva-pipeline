@@ -15,29 +15,35 @@
  */
 package uk.ac.ebi.eva.runner;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.Step;
-import org.springframework.batch.core.StepContribution;
-import org.springframework.batch.core.scope.context.ChunkContext;
-import org.springframework.batch.core.step.tasklet.Tasklet;
-import org.springframework.batch.repeat.RepeatStatus;
+import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.test.JobLauncherTestUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
-
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.transaction.PlatformTransactionManager;
+import uk.ac.ebi.eva.pipeline.Application;
+import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
 import uk.ac.ebi.eva.test.configuration.SynchronousBatchTestConfiguration;
 import uk.ac.ebi.eva.test.utils.AbstractJobRestartUtils;
 
 import java.util.UUID;
 
-/**
- * Test to check launcher behaviour in synchronous cases.
- */
-@RunWith(SpringRunner.class)
-@ContextConfiguration(classes = {SynchronousBatchTestConfiguration.class})
+@ExtendWith(SpringExtension.class)
+@ActiveProfiles({Application.VARIANT_WRITER_MONGO_PROFILE, Application.VARIANT_ANNOTATION_MONGO_PROFILE})
+@ContextConfiguration(classes = {SynchronousBatchTestConfiguration.class, BatchTestConfiguration.class})
 public class JobRestartSynchronousTest extends AbstractJobRestartUtils {
+
+    @Autowired
+    private JobRepository jobRepository;
+
+    @Autowired
+    private PlatformTransactionManager transactionManager;
 
     @Test
     public void runCompleteJobTwiceWithSameParameters() throws Exception {
@@ -54,12 +60,9 @@ public class JobRestartSynchronousTest extends AbstractJobRestartUtils {
     }
 
     private Step getTestExceptionStep() {
-        return getStepBuilderFactory().get(UUID.randomUUID().toString()).tasklet(new Tasklet() {
-            @Override
-            public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
-                throw new RuntimeException("THIS IS A TEST EXCEPTION");
-            }
-        }).build();
+        return new StepBuilder(UUID.randomUUID().toString(), jobRepository).tasklet((contribution, chunkContext) -> {
+            throw new RuntimeException("THIS IS A TEST EXCEPTION");
+        }, transactionManager).build();
     }
 
 }

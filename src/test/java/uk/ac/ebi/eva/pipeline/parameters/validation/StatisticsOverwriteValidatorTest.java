@@ -15,12 +15,14 @@
  */
 package uk.ac.ebi.eva.pipeline.parameters.validation;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.JobParametersInvalidException;
 
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class StatisticsOverwriteValidatorTest {
 
@@ -28,7 +30,7 @@ public class StatisticsOverwriteValidatorTest {
 
     private JobParametersBuilder jobParametersBuilder;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         validator = new StatisticsOverwriteValidator();
     }
@@ -61,31 +63,30 @@ public class StatisticsOverwriteValidatorTest {
         validator.validate(jobParametersBuilder.toJobParameters());
     }
 
-    @Test(expected = JobParametersInvalidException.class)
-    public void statisticsOverwriteIsNotValid() throws JobParametersInvalidException {
+    @Test
+    public void statisticsOverwriteIsNotValid() {
         jobParametersBuilder = new JobParametersBuilder();
         jobParametersBuilder.addString(JobParametersNames.STATISTICS_OVERWRITE, "blabla");
-        validator.validate(jobParametersBuilder.toJobParameters());
+        assertThrows(JobParametersInvalidException.class, () -> validator.validate(jobParametersBuilder.toJobParameters()));
     }
 
-    @Test(expected = JobParametersInvalidException.class)
-    public void statisticsOverwriteIsEmpty() throws JobParametersInvalidException {
+    @Test
+    public void statisticsOverwriteIsEmpty() {
         jobParametersBuilder = new JobParametersBuilder();
         jobParametersBuilder.addString(JobParametersNames.STATISTICS_OVERWRITE, "");
-        validator.validate(jobParametersBuilder.toJobParameters());
+        assertThrows(JobParametersInvalidException.class, () -> validator.validate(jobParametersBuilder.toJobParameters()));
     }
 
-    @Test(expected = JobParametersInvalidException.class)
-    public void statisticsOverwriteIsWhitespace() throws JobParametersInvalidException {
+    @Test
+    public void statisticsOverwriteIsWhitespace() {
         jobParametersBuilder = new JobParametersBuilder();
         jobParametersBuilder.addString(JobParametersNames.STATISTICS_OVERWRITE, " ");
-        validator.validate(jobParametersBuilder.toJobParameters());
+        assertThrows(JobParametersInvalidException.class, () -> validator.validate(jobParametersBuilder.toJobParameters()));
     }
 
-    @Test(expected = JobParametersInvalidException.class)
-    public void statisticsOverwriteIsNull() throws JobParametersInvalidException {
+    @Test
+    public void statisticsOverwriteIsNull() {
         jobParametersBuilder = new JobParametersBuilder();
-        jobParametersBuilder.addString(JobParametersNames.STATISTICS_OVERWRITE, null);
-        validator.validate(jobParametersBuilder.toJobParameters());
+        assertThrows(JobParametersInvalidException.class, () -> validator.validate(jobParametersBuilder.toJobParameters()));
     }
 }

@@ -15,17 +15,17 @@
  */
 package uk.ac.ebi.eva.pipeline.parameters.validation;
 
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.JobParametersInvalidException;
-
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
-import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
+import uk.ac.ebi.eva.test.utils.PipelineTemporaryFolderUtil;
 
 import java.io.IOException;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class OutputDirStatisticsValidatorTest {
 
@@ -33,47 +33,46 @@ public class OutputDirStatisticsValidatorTest {
 
     private JobParametersBuilder jobParametersBuilder;
 
-    @Rule
-    public PipelineTemporaryFolderRule temporaryFolder = new PipelineTemporaryFolderRule();
+    public PipelineTemporaryFolderUtil temporaryFolderUtil = new PipelineTemporaryFolderUtil();
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         validator = new OutputDirStatisticsValidator();
     }
 
     @Test
     public void outputDirStatisticsIsValid() throws JobParametersInvalidException, IOException {
-        temporaryFolder.getRoot().setWritable(true);
+        temporaryFolderUtil.getRoot().setWritable(true);
 
         jobParametersBuilder = new JobParametersBuilder();
         jobParametersBuilder.addString(JobParametersNames.OUTPUT_DIR_STATISTICS,
-                                       temporaryFolder.getRoot().getCanonicalPath());
+                temporaryFolderUtil.getRoot().getCanonicalPath());
         validator.validate(jobParametersBuilder.toJobParameters());
     }
 
-    @Test(expected = JobParametersInvalidException.class)
-    public void outputDirStatisticsDoesNotExist() throws JobParametersInvalidException {
+    @Test
+    public void outputDirStatisticsDoesNotExist() {
         jobParametersBuilder = new JobParametersBuilder();
         jobParametersBuilder.addString(JobParametersNames.OUTPUT_DIR_STATISTICS, "file://path/to/");
-        validator.validate(jobParametersBuilder.toJobParameters());
+        assertThrows(JobParametersInvalidException.class, () -> validator.validate(jobParametersBuilder.toJobParameters()));
     }
 
-    @Test(expected = JobParametersInvalidException.class)
-    @Ignore
-    public void outputDirStatisticsIsNotWritable() throws JobParametersInvalidException, IOException {
-        temporaryFolder.getRoot().setWritable(false);
+    @Test
+    @Disabled
+    public void outputDirStatisticsIsNotWritable() throws IOException {
+        temporaryFolderUtil.getRoot().setWritable(false);
 
         jobParametersBuilder = new JobParametersBuilder();
         jobParametersBuilder.addString(JobParametersNames.OUTPUT_DIR_STATISTICS,
-                                       temporaryFolder.getRoot().getCanonicalPath());
-        validator.validate(jobParametersBuilder.toJobParameters());
+                temporaryFolderUtil.getRoot().getCanonicalPath());
+        assertThrows(JobParametersInvalidException.class, () -> validator.validate(jobParametersBuilder.toJobParameters()));
     }
 
-    @Test(expected = JobParametersInvalidException.class)
-    public void outputDirStatisticsIsNotADirectory() throws JobParametersInvalidException, IOException {
+    @Test
+    public void outputDirStatisticsIsNotADirectory() throws IOException {
         jobParametersBuilder = new JobParametersBuilder();
         jobParametersBuilder.addString(JobParametersNames.OUTPUT_DIR_STATISTICS,
-                                       temporaryFolder.newFile().getCanonicalPath());
-        validator.validate(jobParametersBuilder.toJobParameters());
+                temporaryFolderUtil.newFile().getCanonicalPath());
+        assertThrows(JobParametersInvalidException.class, () -> validator.validate(jobParametersBuilder.toJobParameters()));
     }
 }

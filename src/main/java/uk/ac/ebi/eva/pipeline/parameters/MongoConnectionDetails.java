@@ -79,4 +79,8 @@ public class MongoConnectionDetails {
     public ReadPreference getReadPreference() {
         return ReadPreference.valueOf(readPreference);
     }
+
+    public void setUri(String uri) {
+        this.uri = uri;
+    }
 }

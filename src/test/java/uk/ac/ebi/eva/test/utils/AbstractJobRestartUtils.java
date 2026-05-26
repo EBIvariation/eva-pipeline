@@ -19,27 +19,26 @@ import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.Step;
-import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.configuration.DuplicateJobException;
 import org.springframework.batch.core.configuration.JobRegistry;
 import org.springframework.batch.core.configuration.StepRegistry;
-import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
-import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.configuration.support.ReferenceJobFactory;
 import org.springframework.batch.core.job.builder.FlowBuilder;
+import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.job.flow.Flow;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.repository.JobRepository;
-import org.springframework.batch.core.scope.context.ChunkContext;
-import org.springframework.batch.core.step.tasklet.Tasklet;
+import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-
+import org.springframework.transaction.PlatformTransactionManager;
 import uk.ac.ebi.eva.runner.JobRestartAsynchronousTest;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -58,25 +57,17 @@ public abstract class AbstractJobRestartUtils {
     private JobRepository jobRepository;
 
     @Autowired
+    private PlatformTransactionManager transactionManager;
+
+    @Autowired
     private JobLauncher jobLauncher;
-
-    @Autowired
-    private StepBuilderFactory stepBuilderFactory;
-
-    @Autowired
-    private JobBuilderFactory jobBuilderFactory;
 
     public JobRepository getJobRepository() {
         return jobRepository;
     }
 
-    public StepBuilderFactory getStepBuilderFactory() {
-        return stepBuilderFactory;
-    }
-
     protected JobExecution launchJob(JobLauncherTestUtils jobLauncherTestUtils) throws Exception {
-        JobExecution jobExecution;
-        jobExecution = jobLauncherTestUtils.launchJob(new JobParameters());
+        JobExecution jobExecution = jobLauncherTestUtils.launchJob(new JobParameters());
         Thread.sleep(JobRestartAsynchronousTest.INITIALIZE_JOB_SLEEP);
         return jobExecution;
     }
@@ -90,9 +81,10 @@ public abstract class AbstractJobRestartUtils {
     }
 
     protected Job getTestJob(Step step, Step... steps) throws DuplicateJobException {
+        String jobName = UUID.randomUUID().toString();
         Job job;
-        if (steps == null) {
-            job = jobBuilderFactory.get(UUID.randomUUID().toString()).incrementer(new RunIdIncrementer()).start(step)
+        if (steps == null || steps.length == 0) {
+            job = new JobBuilder(jobName, jobRepository).incrementer(new RunIdIncrementer()).start(step)
                     .build();
         } else {
             FlowBuilder<Flow> builder = new FlowBuilder<Flow>(UUID.randomUUID().toString()).start(step);
@@ -100,11 +92,16 @@ public abstract class AbstractJobRestartUtils {
                 builder = builder.next(arrayStep);
             }
             Flow flow = builder.build();
-            job = jobBuilderFactory.get(UUID.randomUUID().toString()).incrementer(new RunIdIncrementer()).start(flow)
+            job = new JobBuilder(jobName, jobRepository).incrementer(new RunIdIncrementer()).start(flow)
                     .build().build();
         }
         jobRegistry.register(new ReferenceJobFactory(job));
-        stepRegistry.register(job.getName(), Arrays.asList(step));
+        List<Step> registeredSteps = new ArrayList<>();
+        registeredSteps.add(step);
+        if (steps != null && steps.length > 0) {
+            registeredSteps.addAll(Arrays.asList(steps));
+        }
+        stepRegistry.register(job.getName(), registeredSteps);
         return job;
     }
 
@@ -113,18 +110,15 @@ public abstract class AbstractJobRestartUtils {
     }
 
     protected Step getWaitingStep(boolean restartable, final long waitTime) {
-        return stepBuilderFactory.get(UUID.randomUUID().toString()).tasklet(new Tasklet() {
-            @Override
-            public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
-                if (waitTime > 0) {
-                    try {
-                        Thread.sleep(waitTime);
-                    } catch (Exception e) {
-                        //Do nothing
+        return new StepBuilder(UUID.randomUUID().toString(), jobRepository).tasklet((contribution, chunkContext) -> {
+                    if (waitTime > 0) {
+                        try {
+                            Thread.sleep(waitTime);
+                        } catch (Exception e) {
+                            // Do nothing
+                        }
                     }
-                }
-                return RepeatStatus.FINISHED;
-            }
-        }).allowStartIfComplete(restartable).build();
+                    return RepeatStatus.FINISHED;
+                }, transactionManager).allowStartIfComplete(restartable).build();
     }
 }

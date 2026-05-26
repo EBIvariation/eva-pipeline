@@ -16,39 +16,38 @@
 
 package uk.ac.ebi.eva.pipeline.io.writers;
 
-
-import com.mongodb.Block;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import org.bson.Document;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.batch.item.Chunk;
 import org.springframework.batch.item.file.mapping.JsonLineMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.core.MongoOperations;
+import org.springframework.boot.autoconfigure.data.mongo.MongoRepositoriesAutoConfiguration;
+import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
+import org.springframework.data.mongodb.BulkOperationException;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.index.CompoundIndexDefinition;
+import org.springframework.data.mongodb.core.index.IndexOperations;
 import org.springframework.data.mongodb.core.mapping.MongoMappingContext;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
-
-import uk.ac.ebi.eva.pipeline.configuration.MongoConfiguration;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.ac.ebi.eva.pipeline.model.PopulationStatistics;
 import uk.ac.ebi.eva.pipeline.parameters.MongoConnectionDetails;
-import uk.ac.ebi.eva.test.configuration.TemporaryRuleConfiguration;
 import uk.ac.ebi.eva.test.data.VariantData;
-import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
+import uk.ac.ebi.eva.test.utils.MongoTestContainerHelper;
 
-import java.io.UnsupportedEncodingException;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 
 /**
@@ -58,37 +57,53 @@ import static org.junit.Assert.assertNotNull;
  * <p>
  * TODO Replace MongoDBHelper with StatisticsMongoWriterConfiguration in ContextConfiguration when the class exists
  */
-@RunWith(SpringRunner.class)
-@TestPropertySource({"classpath:test-mongo.properties"})
-@ContextConfiguration(classes = {MongoConnectionDetails.class, MongoMappingContext.class, TemporaryRuleConfiguration.class})
-public class StatisticsMongoWriterTest {
+@DataMongoTest(excludeAutoConfiguration = MongoRepositoriesAutoConfiguration.class)
+@ExtendWith(SpringExtension.class)
+@ContextConfiguration(classes = {MongoConnectionDetails.class, MongoMappingContext.class})
+public class StatisticsMongoWriterTest extends MongoTestContainerHelper {
 
     private static final String COLLECTION_STATS_NAME = "populationStatistics";
 
     @Autowired
-    private MongoConnectionDetails mongoConnectionDetails;
+    private MongoTemplate mongoTemplate;
 
-    @Autowired
-    private MongoMappingContext mongoMappingContext;
+    @BeforeEach
+    public void setUp() throws Exception {
+        mongoTemplate.getDb().drop();
 
-    @Autowired
-    @Rule
-    public TemporaryMongoRule mongoRule;
+        // mongodb no longer creates index by default, it needs to created explicitly or enabled to be created
+        // without the compound index mongodb will consider these as 2 separate documents and insert both
+        IndexOperations indexOps = mongoTemplate.indexOps(COLLECTION_STATS_NAME);
+        indexOps.ensureIndex(
+                new CompoundIndexDefinition(
+                        new Document("chr", 1)
+                                .append("start", 1)
+                                .append("ref", 1)
+                                .append("alt", 1)
+                                .append("sid", 1)
+                                .append("cid", 1)
+                ).unique().named("vscid")
+        );
+    }
+
+    @AfterEach
+    void cleanDb() {
+        mongoTemplate.getDb().drop();
+    }
 
     @Test
     public void shouldWriteAllFieldsIntoMongoDb() throws Exception {
-        List<PopulationStatistics> populationStatisticsList = buildPopulationStatsList();
+        PopulationStatistics populationStatisticsList = buildPopulationStatsList();
 
-        String databaseName = mongoRule.getRandomTemporaryDatabaseName();
-        StatisticsMongoWriter statisticsMongoWriter = getStatisticsMongoWriter(databaseName);
+        StatisticsMongoWriter statisticsMongoWriter = getStatisticsMongoWriter();
 
         int expectedDocumentsCount = 1;
         for (int i = 0; i < expectedDocumentsCount; i++) {
-            statisticsMongoWriter.write(populationStatisticsList);
+            statisticsMongoWriter.write(Chunk.of(populationStatisticsList));
         }
 
         // do the checks
-        MongoCollection<Document> statsCollection = mongoRule.getCollection(databaseName, COLLECTION_STATS_NAME);
+        MongoCollection<Document> statsCollection = mongoTemplate.getDb().getCollection(COLLECTION_STATS_NAME);
         // count documents in DB and check they have at least the index fields (vid, sid, cid) and maf and genotypeCount
         MongoCursor<Document> cursor = statsCollection.find().iterator();
 
@@ -111,14 +126,13 @@ public class StatisticsMongoWriterTest {
 
     @Test
     public void shouldCreateIndexesInCollection() throws Exception {
-        List<PopulationStatistics> populationStatisticsList = buildPopulationStatsList();
+        PopulationStatistics populationStatisticsList = buildPopulationStatsList();
 
-        String databaseName = mongoRule.getRandomTemporaryDatabaseName();
-        StatisticsMongoWriter statisticsMongoWriter = getStatisticsMongoWriter(databaseName);
-        statisticsMongoWriter.write(populationStatisticsList);
+        StatisticsMongoWriter statisticsMongoWriter = getStatisticsMongoWriter();
+        statisticsMongoWriter.write(Chunk.of(populationStatisticsList));
 
         // do the checks
-        MongoCollection<Document> statsCollection = mongoRule.getCollection(databaseName, COLLECTION_STATS_NAME);
+        MongoCollection<Document> statsCollection = mongoTemplate.getDb().getCollection(COLLECTION_STATS_NAME);
 
         // check there is an index in chr + start + ref + alt + sid + cid
         List<Document> indexes = new ArrayList<>();
@@ -138,23 +152,23 @@ public class StatisticsMongoWriterTest {
         );
 
         List<Document> indexInfo = statsCollection.listIndexes().into(new ArrayList<>()).stream()
-                                                  .peek(d -> d.remove("ns"))
-                                                  .collect(Collectors.toList());
+                .peek(d -> d.remove("ns"))
+                .collect(Collectors.toList());
 
         assertEquals(indexes, indexInfo);
     }
 
-    @Test(expected = org.springframework.dao.DuplicateKeyException.class)
+    @Test
     public void shouldFailIfduplicatedVidSidCid() throws Exception {
-        List<PopulationStatistics> populationStatisticsList = buildPopulationStatsList();
+        PopulationStatistics populationStatisticsList = buildPopulationStatsList();
 
-        String databaseName = mongoRule.getRandomTemporaryDatabaseName();
-        StatisticsMongoWriter statisticsMongoWriter = getStatisticsMongoWriter(databaseName);
-        statisticsMongoWriter.write(populationStatisticsList);
-        statisticsMongoWriter.write(populationStatisticsList);   // should throw
+        StatisticsMongoWriter statisticsMongoWriter = getStatisticsMongoWriter();
+        statisticsMongoWriter.write(Chunk.of(populationStatisticsList));
+        // should throw exception when inserting the same document again
+        assertThrows(BulkOperationException.class, () -> statisticsMongoWriter.write(Chunk.of(populationStatisticsList)));
     }
 
-    private List<PopulationStatistics> buildPopulationStatsList() throws Exception {
+    private PopulationStatistics buildPopulationStatsList() throws Exception {
         String statsPath = VariantData.getPopulationStatistics();
         JsonLineMapper mapper = new JsonLineMapper();
         Map<String, Object> map = mapper.mapLine(statsPath, 0);
@@ -173,14 +187,11 @@ public class StatisticsMongoWriterTest {
                 (Integer) map.get("missAl"),
                 (Integer) map.get("missGt"),
                 (Map<String, Integer>) map.get("numGt"));
-        return Arrays.asList(populationStatistics);
+
+        return populationStatistics;
     }
 
-    public StatisticsMongoWriter getStatisticsMongoWriter(String databaseName) throws
-            UnknownHostException, UnsupportedEncodingException {
-        MongoOperations operations = MongoConfiguration.getMongoTemplate(databaseName, mongoConnectionDetails,
-                mongoMappingContext);
-        StatisticsMongoWriter statisticsMongoWriter = new StatisticsMongoWriter(operations, COLLECTION_STATS_NAME);
-        return statisticsMongoWriter;
+    public StatisticsMongoWriter getStatisticsMongoWriter() {
+        return new StatisticsMongoWriter(mongoTemplate, COLLECTION_STATS_NAME);
     }
 }

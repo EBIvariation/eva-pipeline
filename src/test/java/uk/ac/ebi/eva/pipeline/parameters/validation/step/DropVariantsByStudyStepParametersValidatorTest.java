@@ -15,20 +15,19 @@
  */
 package uk.ac.ebi.eva.pipeline.parameters.validation.step;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersInvalidException;
-
 import uk.ac.ebi.eva.pipeline.configuration.jobs.steps.DropVariantsByStudyStepConfiguration;
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
-import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 
 import java.io.IOException;
 import java.util.Map;
 import java.util.TreeMap;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * Tests that the arguments necessary to run a {@link DropVariantsByStudyStepConfiguration}
@@ -38,24 +37,21 @@ public class DropVariantsByStudyStepParametersValidatorTest {
 
     private DropVariantsByStudyStepParametersValidator validator;
 
-    @Rule
-    public PipelineTemporaryFolderRule temporaryFolderRule = new PipelineTemporaryFolderRule();
+    private Map<String, JobParameter<?>> requiredParameters;
 
-    private Map<String, JobParameter> requiredParameters;
+    private Map<String, JobParameter<?>> optionalParameters;
 
-    private Map<String, JobParameter> optionalParameters;
-
-    @Before
+    @BeforeEach
     public void setUp() throws IOException {
         validator = new DropVariantsByStudyStepParametersValidator();
 
         requiredParameters = new TreeMap<>();
-        requiredParameters.put(JobParametersNames.DB_NAME, new JobParameter("database"));
-        requiredParameters.put(JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME, new JobParameter("variants"));
-        requiredParameters.put(JobParametersNames.INPUT_STUDY_ID, new JobParameter("inputStudyId"));
+        requiredParameters.put(JobParametersNames.DB_NAME, new JobParameter("database", String.class));
+        requiredParameters.put(JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME, new JobParameter("variants", String.class));
+        requiredParameters.put(JobParametersNames.INPUT_STUDY_ID, new JobParameter("inputStudyId", String.class));
 
         optionalParameters = new TreeMap<>();
-        optionalParameters.put(JobParametersNames.CONFIG_RESTARTABILITY_ALLOW, new JobParameter("true"));
+        optionalParameters.put(JobParametersNames.CONFIG_RESTARTABILITY_ALLOW, new JobParameter("true", String.class));
     }
 
     @Test
@@ -64,29 +60,29 @@ public class DropVariantsByStudyStepParametersValidatorTest {
     }
 
     @Test
-    public void allJobParametersIncludingOptionalAreValid() throws JobParametersInvalidException, IOException {
-        Map<String, JobParameter> parameters = new TreeMap<>();
+    public void allJobParametersIncludingOptionalAreValid() throws JobParametersInvalidException {
+        Map<String, JobParameter<?>> parameters = new TreeMap<>();
         parameters.putAll(requiredParameters);
         parameters.putAll(optionalParameters);
         validator.validate(new JobParameters(parameters));
     }
 
-    @Test(expected = JobParametersInvalidException.class)
+    @Test
     public void dbNameIsRequired() throws Exception {
         requiredParameters.remove(JobParametersNames.DB_NAME);
-        validator.validate(new JobParameters(requiredParameters));
+        assertThrows(JobParametersInvalidException.class, () -> validator.validate(new JobParameters(requiredParameters)));
     }
 
-    @Test(expected = JobParametersInvalidException.class)
-    public void dbCollectionsVariantsNameIsRequired() throws Exception {
+    @Test
+    public void dbCollectionsVariantsNameIsRequired() {
         requiredParameters.remove(JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME);
-        validator.validate(new JobParameters(requiredParameters));
+        assertThrows(JobParametersInvalidException.class, () -> validator.validate(new JobParameters(requiredParameters)));
     }
 
-    @Test(expected = JobParametersInvalidException.class)
-    public void inputStudyIdIsRequired() throws Exception {
+    @Test
+    public void inputStudyIdIsRequired() {
         requiredParameters.remove(JobParametersNames.INPUT_STUDY_ID);
-        validator.validate(new JobParameters(requiredParameters));
+        assertThrows(JobParametersInvalidException.class, () -> validator.validate(new JobParameters(requiredParameters)));
     }
 
 }

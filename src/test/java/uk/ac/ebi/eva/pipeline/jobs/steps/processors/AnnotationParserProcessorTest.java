@@ -16,7 +16,8 @@
 
 package uk.ac.ebi.eva.pipeline.jobs.steps.processors;
 
-import org.junit.Test;
+
+import org.junit.jupiter.api.Test;
 import uk.ac.ebi.eva.commons.mongodb.entities.AnnotationMongo;
 import uk.ac.ebi.eva.pipeline.parameters.AnnotationParameters;
 import uk.ac.ebi.eva.test.data.VepOutputContent;
@@ -24,7 +25,7 @@ import uk.ac.ebi.eva.test.data.VepOutputContent;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class AnnotationParserProcessorTest {
 

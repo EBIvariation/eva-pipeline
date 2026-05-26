@@ -16,14 +16,14 @@
 
 package uk.ac.ebi.eva.pipeline.model;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import uk.ac.ebi.eva.commons.core.models.factories.VariantGenotypedVcfFactory;
 import uk.ac.ebi.eva.commons.core.models.factories.VariantVcfFactory;
 import uk.ac.ebi.eva.commons.core.models.pipeline.Variant;
 
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * VEP input format uses a different end than we. These tests check that we comply with the examples in the VEP
@@ -38,7 +38,7 @@ public class EnsemblVariantTest {
     private VariantVcfFactory factory = new VariantGenotypedVcfFactory();
 
     @Test
-    public void transformInsertionsToEnsembleCoordinates() throws Exception {
+    public void transformInsertionsToEnsembleCoordinates() {
         EnsemblVariant insertion;
         insertion = new EnsemblVariant("1", 12601, 12601, "", "C");
         assertEquals(12601, insertion.getStart());
@@ -52,7 +52,7 @@ public class EnsemblVariantTest {
     }
 
     @Test
-    public void transformDeletionToEnsembleCoordinates() throws Exception {
+    public void transformDeletionToEnsembleCoordinates() {
         EnsemblVariant deletion;
         deletion = new EnsemblVariant("1", 12600, 12602, "CGT", "");
         assertEquals(12600, deletion.getStart());
@@ -66,7 +66,7 @@ public class EnsemblVariantTest {
     }
 
     @Test
-    public void transformSnvToEnsembleCoordinates() throws Exception {
+    public void transformSnvToEnsembleCoordinates() {
         EnsemblVariant insertion = new EnsemblVariant("20", 3, 3, "C", "G");
         assertEquals(3, insertion.getStart());
         assertEquals(3, insertion.getEnd());
@@ -74,7 +74,7 @@ public class EnsemblVariantTest {
     }
 
     @Test
-    public void transformInsertionFromVcfToEnsemblCoordinates() throws Exception {
+    public void transformInsertionFromVcfToEnsemblCoordinates() {
         String line = "20\t3\t.\tC\tCA\t.\t.\t.\tGT\t0/1";
         List<Variant> result = factory.create(FILE_ID, STUDY_ID, line);
         assertEquals(1, result.size());
@@ -95,7 +95,7 @@ public class EnsemblVariantTest {
     }
 
     @Test
-    public void transformDeletionFromVcfToEnsemblCoordinates() throws Exception {
+    public void transformDeletionFromVcfToEnsemblCoordinates() {
         String line = "20\t2\t.\tTC\tT\t.\t.\t.\tGT\t0/1";
         List<Variant> result = factory.create(FILE_ID, STUDY_ID, line);
         assertEquals(1, result.size());
