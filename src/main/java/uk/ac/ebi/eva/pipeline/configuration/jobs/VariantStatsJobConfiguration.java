@@ -19,7 +19,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
-import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +34,6 @@ import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VARIANT_STATS_JOB;
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VARIANT_STATS_STEP;
 
 @Configuration
-@EnableBatchProcessing
 @Import({VariantStatsStepConfiguration.class})
 public class VariantStatsJobConfiguration {
 

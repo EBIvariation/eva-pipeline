@@ -16,7 +16,6 @@
 package uk.ac.ebi.eva.pipeline.configuration.jobs.steps;
 
 import org.springframework.batch.core.Step;
-import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.core.step.tasklet.TaskletStep;
@@ -42,7 +41,6 @@ import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VARIANT_STATS_WRITE
 
 
 @Configuration
-@EnableBatchProcessing
 @Import({VariantStatsReaderConfiguration.class, VariantStatsWriterConfiguration.class,
         VariantStatsProcessorConfiguration.class, ChunkSizeCompletionPolicyConfiguration.class})
 public class VariantStatsStepConfiguration {

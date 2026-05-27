@@ -16,7 +16,6 @@
 package uk.ac.ebi.eva.test.configuration;
 
 import org.springframework.batch.core.configuration.StepRegistry;
-import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.support.MapStepRegistry;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -26,7 +25,6 @@ import org.springframework.context.annotation.Configuration;
  * manually.
  */
 @Configuration
-@EnableBatchProcessing
 public class SynchronousBatchTestConfiguration {
 
     @Bean

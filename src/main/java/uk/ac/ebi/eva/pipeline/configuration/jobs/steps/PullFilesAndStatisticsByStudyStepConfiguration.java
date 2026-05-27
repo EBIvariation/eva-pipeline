@@ -18,7 +18,6 @@ package uk.ac.ebi.eva.pipeline.configuration.jobs.steps;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.tasklet.TaskletStep;
@@ -35,7 +34,6 @@ import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.PULL_FILES_AND_STAT
  * Step that pulls the file and statistics in a variant based on their study id.
  */
 @Configuration
-@EnableBatchProcessing
 public class PullFilesAndStatisticsByStudyStepConfiguration {
 
     private static final Logger logger = LoggerFactory.getLogger(PullFilesAndStatisticsByStudyStepConfiguration.class);

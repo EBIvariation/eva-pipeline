@@ -20,7 +20,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
-import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.job.builder.FlowJobBuilder;
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.repository.JobRepository;
@@ -49,7 +48,6 @@ import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.LOAD_VCF_JOB;
  *
  */
 @Configuration
-@EnableBatchProcessing
 @Import({LoadVariantsStepConfiguration.class, LoadFileStepConfiguration.class})
 public class LoadVcfJobConfiguration {
 

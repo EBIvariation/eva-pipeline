@@ -49,7 +49,6 @@ import static uk.ac.ebi.eva.test.configuration.BatchTestConfiguration.JOB_ACCESS
 
 @ExtendWith(SpringExtension.class)
 @ActiveProfiles({Application.VARIANT_WRITER_MONGO_PROFILE, Application.VARIANT_ANNOTATION_MONGO_PROFILE})
-
 @ContextConfiguration(classes = {AccessionImportJobConfiguration.class, BatchTestConfiguration.class})
 public class AccessionImportJobTest extends MongoTestContainerHelper {
     private static final String DB_NAME = "accession-import-test-db";

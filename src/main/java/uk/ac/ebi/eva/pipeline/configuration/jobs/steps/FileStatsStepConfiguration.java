@@ -17,7 +17,6 @@ package uk.ac.ebi.eva.pipeline.configuration.jobs.steps;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.tasklet.TaskletStep;
@@ -36,7 +35,6 @@ import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.FILE_STATS_STEP;
 
 
 @Configuration
-@EnableBatchProcessing
 public class FileStatsStepConfiguration {
     private static final Logger logger = LoggerFactory.getLogger(FileStatsStepConfiguration.class);
 

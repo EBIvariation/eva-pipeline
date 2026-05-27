@@ -16,8 +16,6 @@
 package uk.ac.ebi.eva.test.utils;
 
 import org.springframework.batch.core.Job;
-import org.springframework.batch.core.JobExecution;
-import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.DuplicateJobException;
 import org.springframework.batch.core.configuration.JobRegistry;
@@ -34,7 +32,6 @@ import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.PlatformTransactionManager;
-import uk.ac.ebi.eva.runner.JobRestartAsynchronousTest;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -61,16 +58,6 @@ public abstract class AbstractJobRestartUtils {
 
     @Autowired
     private JobLauncher jobLauncher;
-
-    public JobRepository getJobRepository() {
-        return jobRepository;
-    }
-
-    protected JobExecution launchJob(JobLauncherTestUtils jobLauncherTestUtils) throws Exception {
-        JobExecution jobExecution = jobLauncherTestUtils.launchJob(new JobParameters());
-        Thread.sleep(JobRestartAsynchronousTest.INITIALIZE_JOB_SLEEP);
-        return jobExecution;
-    }
 
     protected JobLauncherTestUtils getJobLauncherTestUtils(Job job) {
         JobLauncherTestUtils jobLauncherTestUtils = new JobLauncherTestUtils();
@@ -111,14 +98,14 @@ public abstract class AbstractJobRestartUtils {
 
     protected Step getWaitingStep(boolean restartable, final long waitTime) {
         return new StepBuilder(UUID.randomUUID().toString(), jobRepository).tasklet((contribution, chunkContext) -> {
-                    if (waitTime > 0) {
-                        try {
-                            Thread.sleep(waitTime);
-                        } catch (Exception e) {
-                            // Do nothing
-                        }
-                    }
-                    return RepeatStatus.FINISHED;
-                }, transactionManager).allowStartIfComplete(restartable).build();
+            if (waitTime > 0) {
+                try {
+                    Thread.sleep(waitTime);
+                } catch (Exception e) {
+                    // Do nothing
+                }
+            }
+            return RepeatStatus.FINISHED;
+        }, transactionManager).allowStartIfComplete(restartable).build();
     }
 }

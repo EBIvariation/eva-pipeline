@@ -137,6 +137,4 @@ public class JobParametersNames {
 
     public static final String PROPERTY_FILE_PROPERTY = "parameters.path";
 
-    public static final String RESTART_PROPERTY = "force.restart";
-
 }

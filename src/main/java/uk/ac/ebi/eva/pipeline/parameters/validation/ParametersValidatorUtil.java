@@ -21,7 +21,6 @@ import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.regex.Pattern;
 
 /**
  * Utility class to hold the low level checks on strings, dirs, files... parameters

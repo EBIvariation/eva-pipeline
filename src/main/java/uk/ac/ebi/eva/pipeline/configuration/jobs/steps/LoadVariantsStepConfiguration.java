@@ -18,7 +18,6 @@ package uk.ac.ebi.eva.pipeline.configuration.jobs.steps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.Step;
-import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.item.ItemProcessor;
@@ -56,7 +55,6 @@ import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VARIANT_WRITER;
  * Output: variants loaded into mongodb
  */
 @Configuration
-@EnableBatchProcessing
 @Import({VcfReaderConfiguration.class, VariantProcessorConfiguration.class, VariantWriterConfiguration.class,
         ChunkSizeCompletionPolicyConfiguration.class, InvalidVariantSkipPolicyConfiguration.class})
 public class LoadVariantsStepConfiguration {

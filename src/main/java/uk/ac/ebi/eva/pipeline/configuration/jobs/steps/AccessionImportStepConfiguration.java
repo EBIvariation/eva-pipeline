@@ -3,7 +3,6 @@ package uk.ac.ebi.eva.pipeline.configuration.jobs.steps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.Step;
-import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.item.ItemStreamReader;
@@ -27,7 +26,6 @@ import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.ACCESSION_IMPORT_ST
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.ACCESSION_REPORT_READER;
 
 @Configuration
-@EnableBatchProcessing
 @Import({AccessionReportReaderConfiguration.class, AccessionImporterConfiguration.class, ChunkSizeCompletionPolicyConfiguration.class})
 public class AccessionImportStepConfiguration {
     private static final Logger logger = LoggerFactory.getLogger(AccessionImportStepConfiguration.class);

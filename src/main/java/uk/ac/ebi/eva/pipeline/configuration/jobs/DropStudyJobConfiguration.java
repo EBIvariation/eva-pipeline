@@ -20,7 +20,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
-import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.job.builder.SimpleJobBuilder;
 import org.springframework.batch.core.repository.JobRepository;
@@ -47,7 +46,6 @@ import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.PULL_FILES_AND_STAT
  * remove variants in single study --> pull study entries from the rest of variants --> remove file entry in files collection
  */
 @Configuration
-@EnableBatchProcessing
 @Import({DropVariantsByStudyStepConfiguration.class, PullFilesAndStatisticsByStudyStepConfiguration.class, DropFilesByStudyStepConfiguration.class})
 public class DropStudyJobConfiguration {
 

@@ -1,7 +1,6 @@
 package uk.ac.ebi.eva.test.configuration;
 
 import org.springframework.batch.core.Job;
-import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.test.JobLauncherTestUtils;
@@ -14,10 +13,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.mapping.MongoMappingContext;
-import org.springframework.jdbc.datasource.DataSourceTransactionManager;
-import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
-import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
-import org.springframework.transaction.PlatformTransactionManager;
+import uk.ac.ebi.eva.pipeline.configuration.InMemoryBatchConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.MongoConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.jobs.AccessionImportJobConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.jobs.AggregatedVcfJobConfiguration;
@@ -29,8 +25,6 @@ import uk.ac.ebi.eva.pipeline.configuration.jobs.GenotypedVcfJobConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.jobs.LoadVcfJobConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.jobs.VariantStatsJobConfiguration;
 import uk.ac.ebi.eva.pipeline.parameters.MongoConnectionDetails;
-
-import javax.sql.DataSource;
 
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.ACCESSION_IMPORT_JOB;
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.AGGREGATED_VCF_JOB;
@@ -44,10 +38,9 @@ import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VARIANT_STATS_JOB;
 
 
 @Configuration
-@EnableBatchProcessing
 @ComponentScan(basePackages = {"uk.ac.ebi.eva.pipeline.parameters"})
-@Import({MongoConfiguration.class, LoadVcfJobConfiguration.class, GenotypedVcfJobConfiguration.class,
-        AggregatedVcfJobConfiguration.class, AccessionImportJobConfiguration.class,
+@Import({InMemoryBatchConfiguration.class, MongoConfiguration.class, LoadVcfJobConfiguration.class,
+        GenotypedVcfJobConfiguration.class, AggregatedVcfJobConfiguration.class, AccessionImportJobConfiguration.class,
         DatabaseInitializationJobConfiguration.class, AnnotationJobConfiguration.class,
         DropStudyJobConfiguration.class, VariantStatsJobConfiguration.class, FileStatsJobConfiguration.class})
 public class BatchTestConfiguration extends BaseTestConfiguration {
@@ -63,24 +56,6 @@ public class BatchTestConfiguration extends BaseTestConfiguration {
 
     @Value("${spring.data.mongodb.uri}")
     private String mongoDBUri;
-
-    public String getMongoDBUri() {
-        return mongoDBUri;
-    }
-
-    @Bean(name = "dataSource")
-    public DataSource dataSource() {
-        return new EmbeddedDatabaseBuilder()
-                .generateUniqueName(true)
-                .setType(EmbeddedDatabaseType.HSQL)
-                .addScript("org/springframework/batch/core/schema-hsqldb.sql")
-                .build();
-    }
-
-    @Bean(name = "transactionManager")
-    public PlatformTransactionManager transactionManager(DataSource dataSource) {
-        return new DataSourceTransactionManager(dataSource);
-    }
 
     @Bean
     @Primary
