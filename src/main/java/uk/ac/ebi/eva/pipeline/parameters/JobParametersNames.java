@@ -130,8 +130,6 @@ public class JobParametersNames {
      * Other configuration
      */
 
-    public static final String CONFIG_RESTARTABILITY_ALLOW = "config.restartability.allow";
-
     public static final String CONFIG_CHUNK_SIZE = "config.chunk.size";
 
 

@@ -25,7 +25,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.PlatformTransactionManager;
 import uk.ac.ebi.eva.pipeline.jobs.steps.tasklets.DropFilesByStudyTasklet;
-import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 import uk.ac.ebi.eva.utils.TaskletUtils;
 
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.DROP_FILES_BY_STUDY_STEP;
@@ -45,11 +44,10 @@ public class DropFilesByStudyStepConfiguration {
     }
 
     @Bean(DROP_FILES_BY_STUDY_STEP)
-    public TaskletStep dropFilesByStudyStep(JobRepository jobRepository, PlatformTransactionManager transactionManager,
-                                            JobOptions jobOptions) {
+    public TaskletStep dropFilesByStudyStep(JobRepository jobRepository, PlatformTransactionManager transactionManager) {
         logger.debug("Building '" + DROP_FILES_BY_STUDY_STEP + "'");
         return TaskletUtils.generateStep(jobRepository, transactionManager, DROP_FILES_BY_STUDY_STEP,
-                dropFilesByStudyTasklet(), jobOptions.isAllowStartIfComplete());
+                dropFilesByStudyTasklet());
     }
 
 }

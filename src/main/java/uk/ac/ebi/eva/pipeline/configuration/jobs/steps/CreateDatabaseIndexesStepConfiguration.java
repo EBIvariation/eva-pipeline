@@ -24,7 +24,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.PlatformTransactionManager;
 import uk.ac.ebi.eva.pipeline.jobs.steps.tasklets.CreateDatabaseIndexesTasklet;
-import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 import uk.ac.ebi.eva.utils.TaskletUtils;
 
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.CREATE_DATABASE_INDEXES_STEP;
@@ -44,11 +43,10 @@ public class CreateDatabaseIndexesStepConfiguration {
     }
 
     @Bean(CREATE_DATABASE_INDEXES_STEP)
-    public TaskletStep createDatabaseIndexesStep(JobRepository jobRepository, PlatformTransactionManager transactionManager,
-                                                 JobOptions jobOptions) {
+    public TaskletStep createDatabaseIndexesStep(JobRepository jobRepository, PlatformTransactionManager transactionManager) {
         logger.debug("Building '" + CREATE_DATABASE_INDEXES_STEP + "'");
         return TaskletUtils.generateStep(jobRepository, transactionManager, CREATE_DATABASE_INDEXES_STEP,
-                createDatabaseIndexesTasklet(), jobOptions.isAllowStartIfComplete());
+                createDatabaseIndexesTasklet());
     }
 
 }

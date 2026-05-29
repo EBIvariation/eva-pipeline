@@ -25,7 +25,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.PlatformTransactionManager;
 import uk.ac.ebi.eva.pipeline.jobs.steps.tasklets.PullFilesAndStatisticsByStudyTasklet;
-import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 import uk.ac.ebi.eva.utils.TaskletUtils;
 
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.PULL_FILES_AND_STATISTICS_BY_STUDY_STEP;
@@ -46,10 +45,9 @@ public class PullFilesAndStatisticsByStudyStepConfiguration {
 
     @Bean(PULL_FILES_AND_STATISTICS_BY_STUDY_STEP)
     public TaskletStep pullFilesAndStatisticsByStudyStep(JobRepository jobRepository,
-                                                         PlatformTransactionManager transactionManager,
-                                                         JobOptions jobOptions) {
+                                                         PlatformTransactionManager transactionManager) {
         return TaskletUtils.generateStep(jobRepository, transactionManager, PULL_FILES_AND_STATISTICS_BY_STUDY_STEP,
-                pullFilesAndStatisticsByStudyTasklet(), jobOptions.isAllowStartIfComplete());
+                pullFilesAndStatisticsByStudyTasklet());
     }
 
 }

@@ -19,10 +19,8 @@ import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
 import org.springframework.data.mongodb.core.MongoOperations;
 import uk.ac.ebi.eva.commons.mongodb.entities.AnnotationMongo;
-import uk.ac.ebi.eva.pipeline.Application;
 import uk.ac.ebi.eva.pipeline.io.writers.AnnotationInVariantMongoWriter;
 import uk.ac.ebi.eva.pipeline.parameters.AnnotationParameters;
 import uk.ac.ebi.eva.pipeline.parameters.DatabaseParameters;
@@ -36,7 +34,6 @@ public class AnnotationInVariantWriterConfiguration {
 
     @Bean(ANNOTATION_IN_VARIANT_WRITER)
     @StepScope
-    @Profile(Application.VARIANT_ANNOTATION_MONGO_PROFILE)
     public ItemWriter<List<AnnotationMongo>> variantAnnotationItemWriter(MongoOperations mongoOperations,
                                                                          DatabaseParameters databaseParameters,
                                                                          AnnotationParameters annotationParameters) {

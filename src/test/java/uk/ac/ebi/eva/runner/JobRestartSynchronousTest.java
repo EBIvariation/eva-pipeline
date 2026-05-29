@@ -23,11 +23,9 @@ import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.PlatformTransactionManager;
-import uk.ac.ebi.eva.pipeline.Application;
 import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
 import uk.ac.ebi.eva.test.configuration.SynchronousBatchTestConfiguration;
 import uk.ac.ebi.eva.test.utils.AbstractJobRestartUtils;
@@ -35,7 +33,6 @@ import uk.ac.ebi.eva.test.utils.AbstractJobRestartUtils;
 import java.util.UUID;
 
 @ExtendWith(SpringExtension.class)
-@ActiveProfiles({Application.VARIANT_WRITER_MONGO_PROFILE, Application.VARIANT_ANNOTATION_MONGO_PROFILE})
 @ContextConfiguration(classes = {SynchronousBatchTestConfiguration.class, BatchTestConfiguration.class})
 public class JobRestartSynchronousTest extends AbstractJobRestartUtils {
 

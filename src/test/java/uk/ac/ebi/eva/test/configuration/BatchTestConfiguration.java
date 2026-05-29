@@ -24,7 +24,7 @@ import uk.ac.ebi.eva.pipeline.configuration.jobs.FileStatsJobConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.jobs.GenotypedVcfJobConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.jobs.LoadVcfJobConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.jobs.VariantStatsJobConfiguration;
-import uk.ac.ebi.eva.pipeline.parameters.MongoConnectionDetails;
+import uk.ac.ebi.eva.pipeline.parameters.EVAMongoConnectionDetails;
 
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.ACCESSION_IMPORT_JOB;
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.AGGREGATED_VCF_JOB;
@@ -43,7 +43,7 @@ import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VARIANT_STATS_JOB;
         GenotypedVcfJobConfiguration.class, AggregatedVcfJobConfiguration.class, AccessionImportJobConfiguration.class,
         DatabaseInitializationJobConfiguration.class, AnnotationJobConfiguration.class,
         DropStudyJobConfiguration.class, VariantStatsJobConfiguration.class, FileStatsJobConfiguration.class})
-public class BatchTestConfiguration extends BaseTestConfiguration {
+public class BatchTestConfiguration {
     public static final String JOB_LOAD_VCF_JOB = "JOB_LOAD_VCF_JOB";
     public static final String JOB_GENOTYPE_VCF_JOB = "JOB_GENOTYPE_VCF_JOB";
     public static final String JOB_AGGREGATED_VCF_JOB = "JOB_AGGREGATED_VCF_JOB";
@@ -59,16 +59,16 @@ public class BatchTestConfiguration extends BaseTestConfiguration {
 
     @Bean
     @Primary
-    public MongoConnectionDetails mongoConnectionDetails() {
-        MongoConnectionDetails details = new MongoConnectionDetails();
+    public EVAMongoConnectionDetails mongoConnectionDetails() {
+        EVAMongoConnectionDetails details = new EVAMongoConnectionDetails();
         details.setUri(mongoDBUri);
         return details;
     }
 
     public MongoTemplate getMongoTemplate(String dbName, MongoMappingContext mongoMappingContext) {
-        MongoConnectionDetails mongoConnectionDetails = new MongoConnectionDetails();
-        mongoConnectionDetails.setUri(mongoDBUri);
-        return MongoConfiguration.getMongoTemplate(dbName, mongoConnectionDetails, mongoMappingContext);
+        EVAMongoConnectionDetails EVAMongoConnectionDetails = new EVAMongoConnectionDetails();
+        EVAMongoConnectionDetails.setUri(mongoDBUri);
+        return MongoConfiguration.getMongoTemplate(dbName, EVAMongoConnectionDetails, mongoMappingContext);
     }
 
     @Bean(JOB_LOAD_VCF_JOB)

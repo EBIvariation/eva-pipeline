@@ -19,7 +19,6 @@ import uk.ac.ebi.eva.pipeline.configuration.ChunkSizeCompletionPolicyConfigurati
 import uk.ac.ebi.eva.pipeline.configuration.io.readers.AccessionReportReaderConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.io.writers.AccessionImporterConfiguration;
 import uk.ac.ebi.eva.pipeline.listeners.StepProgressListener;
-import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.ACCESSION_IMPORTER;
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.ACCESSION_IMPORT_STEP;
@@ -38,7 +37,7 @@ public class AccessionImportStepConfiguration {
 
     @Bean(ACCESSION_IMPORT_STEP)
     public Step accessionImportStep(JobRepository jobRepository, PlatformTransactionManager transactionManager,
-                                    JobOptions jobOptions, SimpleCompletionPolicy chunkSizeCompletionPolicy) {
+                                    SimpleCompletionPolicy chunkSizeCompletionPolicy) {
         logger.debug("Building '" + ACCESSION_IMPORT_STEP + "'");
 
         return new StepBuilder(ACCESSION_IMPORT_STEP, jobRepository)
@@ -46,7 +45,6 @@ public class AccessionImportStepConfiguration {
                 .reader(reader)
                 .writer(writer)
                 .faultTolerant()
-                .allowStartIfComplete(jobOptions.isAllowStartIfComplete())
                 .listener(new StepProgressListener())
                 .build();
     }

@@ -40,7 +40,6 @@ import uk.ac.ebi.eva.pipeline.configuration.policies.InvalidVariantSkipPolicyCon
 import uk.ac.ebi.eva.pipeline.listeners.SkippedItemListener;
 import uk.ac.ebi.eva.pipeline.listeners.StepProgressListener;
 import uk.ac.ebi.eva.pipeline.listeners.VariantLoaderStepStatisticsListener;
-import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 import uk.ac.ebi.eva.pipeline.policies.InvalidVariantSkipPolicy;
 
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.COMPOSITE_VARIANT_PROCESSOR;
@@ -78,7 +77,7 @@ public class LoadVariantsStepConfiguration {
 
     @Bean(LOAD_VARIANTS_STEP)
     public Step loadVariantsStep(JobRepository jobRepository, PlatformTransactionManager transactionManager,
-                                 JobOptions jobOptions, SimpleCompletionPolicy chunkSizeCompletionPolicy) {
+                                 SimpleCompletionPolicy chunkSizeCompletionPolicy) {
         logger.debug("Building '" + LOAD_VARIANTS_STEP + "'");
 
         return new StepBuilder(LOAD_VARIANTS_STEP, jobRepository)
@@ -86,12 +85,11 @@ public class LoadVariantsStepConfiguration {
                 .reader(reader)
                 .processor(variantProcessor)
                 .writer(variantWriter)
-                .faultTolerant()
-                .skipPolicy(invalidVariantSkipPolicy)
-                .allowStartIfComplete(jobOptions.isAllowStartIfComplete())
                 .listener(new SkippedItemListener())
                 .listener(new StepProgressListener())
                 .listener(new VariantLoaderStepStatisticsListener())
+                .faultTolerant()
+                .skipPolicy(invalidVariantSkipPolicy)
                 .build();
     }
 

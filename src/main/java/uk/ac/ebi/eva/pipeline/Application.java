@@ -41,19 +41,6 @@ import org.springframework.context.ConfigurableApplicationContext;
 })
 public class Application {
 
-    public static final String VARIANT_WRITER_MONGO_PROFILE = "variant-writer-mongo";
-    public static final String VARIANT_ANNOTATION_MONGO_PROFILE = "variant-annotation-mongo";
-
-    /**
-     * Profile for features that shall run in production only, such as a persistent job repository.
-     */
-    public static final String PRODUCTION_PROFILE = "production";
-
-    /**
-     * Profile for experimental features that shall not be active unless explicitly requested.
-     */
-    public static final String MONGO_EXPERIMENTAL_PROFILE = "experimental";
-
     public static void main(String[] args) {
         ConfigurableApplicationContext context = SpringApplication.run(Application.class, args);
         System.exit(SpringApplication.exit(context));

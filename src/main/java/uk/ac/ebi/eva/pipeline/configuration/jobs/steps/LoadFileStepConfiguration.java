@@ -24,7 +24,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.PlatformTransactionManager;
 import uk.ac.ebi.eva.pipeline.jobs.steps.tasklets.LoadFileTasklet;
-import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 import uk.ac.ebi.eva.utils.TaskletUtils;
 
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.LOAD_FILE_STEP;
@@ -44,11 +43,9 @@ public class LoadFileStepConfiguration {
     }
 
     @Bean(LOAD_FILE_STEP)
-    public TaskletStep loadFileStep(JobRepository jobRepository, PlatformTransactionManager transactionManager,
-                                    JobOptions jobOptions) {
+    public TaskletStep loadFileStep(JobRepository jobRepository, PlatformTransactionManager transactionManager) {
         logger.debug("Building '" + LOAD_FILE_STEP + "'");
-        return TaskletUtils.generateStep(jobRepository, transactionManager, LOAD_FILE_STEP, loadFileTasklet(),
-                jobOptions.isAllowStartIfComplete());
+        return TaskletUtils.generateStep(jobRepository, transactionManager, LOAD_FILE_STEP, loadFileTasklet());
     }
 
 }

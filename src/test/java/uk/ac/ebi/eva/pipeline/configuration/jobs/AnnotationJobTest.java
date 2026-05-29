@@ -32,10 +32,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.mapping.MongoMappingContext;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import uk.ac.ebi.eva.pipeline.Application;
 import uk.ac.ebi.eva.pipeline.configuration.BeanNames;
 import uk.ac.ebi.eva.pipeline.configuration.MongoCollectionNameConfiguration;
 import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
@@ -63,8 +61,6 @@ import static uk.ac.ebi.eva.utils.FileUtils.getResource;
  */
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
-@ActiveProfiles({Application.VARIANT_WRITER_MONGO_PROFILE, Application.VARIANT_ANNOTATION_MONGO_PROFILE})
-
 @ContextConfiguration(classes = {AnnotationJobConfiguration.class, BatchTestConfiguration.class,
         MongoCollectionNameConfiguration.class})
 public class AnnotationJobTest extends MongoTestContainerHelper {

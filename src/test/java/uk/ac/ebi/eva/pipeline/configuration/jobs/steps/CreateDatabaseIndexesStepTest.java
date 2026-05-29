@@ -29,10 +29,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.mapping.MongoMappingContext;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import uk.ac.ebi.eva.pipeline.Application;
 import uk.ac.ebi.eva.pipeline.configuration.BeanNames;
 import uk.ac.ebi.eva.pipeline.configuration.jobs.DatabaseInitializationJobConfiguration;
 import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
@@ -54,7 +52,6 @@ import static uk.ac.ebi.eva.test.utils.JobTestUtils.assertCompleted;
  * Test {@link CreateDatabaseIndexesStepConfiguration}
  */
 @ExtendWith(SpringExtension.class)
-@ActiveProfiles({Application.VARIANT_WRITER_MONGO_PROFILE, Application.VARIANT_ANNOTATION_MONGO_PROFILE})
 @ContextConfiguration(classes = {DatabaseInitializationJobConfiguration.class, BatchTestConfiguration.class})
 public class CreateDatabaseIndexesStepTest extends MongoTestContainerHelper {
     private static final String DB_NAME = "create-db-index-test-db";

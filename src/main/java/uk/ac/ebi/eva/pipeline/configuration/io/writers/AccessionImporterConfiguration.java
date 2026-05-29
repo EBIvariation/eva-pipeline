@@ -20,10 +20,8 @@ import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
 import org.springframework.data.mongodb.core.MongoOperations;
 import uk.ac.ebi.eva.commons.core.models.IVariant;
-import uk.ac.ebi.eva.pipeline.Application;
 import uk.ac.ebi.eva.pipeline.io.writers.AccessionImporter;
 import uk.ac.ebi.eva.pipeline.parameters.DatabaseParameters;
 
@@ -34,7 +32,6 @@ public class AccessionImporterConfiguration {
 
     @Bean(ACCESSION_IMPORTER)
     @StepScope
-    @Profile(Application.VARIANT_WRITER_MONGO_PROFILE)
     public ItemWriter<IVariant> accessionImporter(DatabaseParameters databaseParameters, MongoOperations mongoOperations) {
         return new AccessionImporter(databaseParameters.getCollectionVariantsName(), mongoOperations);
     }

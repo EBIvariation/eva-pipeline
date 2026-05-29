@@ -37,7 +37,6 @@ import uk.ac.ebi.eva.pipeline.configuration.jobs.steps.processors.AnnotationComp
 import uk.ac.ebi.eva.pipeline.io.readers.AnnotationFlatFileReader;
 import uk.ac.ebi.eva.pipeline.listeners.StepProgressListener;
 import uk.ac.ebi.eva.pipeline.model.EnsemblVariant;
-import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 
 import java.util.List;
 
@@ -74,8 +73,7 @@ public class GenerateVepAnnotationStepConfiguration {
     private ItemWriter<List<AnnotationMongo>> annotationWriter;
 
     @Bean(GENERATE_VEP_ANNOTATION_STEP)
-    public Step generateVepAnnotationStep(JobRepository jobRepository, PlatformTransactionManager transactionManager,
-                                          JobOptions jobOptions) {
+    public Step generateVepAnnotationStep(JobRepository jobRepository, PlatformTransactionManager transactionManager) {
         logger.debug("Building '" + GENERATE_VEP_ANNOTATION_STEP + "'");
 
         return new StepBuilder(GENERATE_VEP_ANNOTATION_STEP, jobRepository)
@@ -83,7 +81,6 @@ public class GenerateVepAnnotationStepConfiguration {
                 .reader(nonAnnotatedVariantsReader)
                 .processor(annotationCompositeProcessor)
                 .writer(annotationWriter)
-                .allowStartIfComplete(jobOptions.isAllowStartIfComplete())
                 .listener(new StepProgressListener())
                 .build();
     }

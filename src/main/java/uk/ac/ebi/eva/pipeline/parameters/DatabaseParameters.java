@@ -50,10 +50,10 @@ public class DatabaseParameters {
     private String collectionAnnotationsName;
 
     @Autowired
-    private MongoConnectionDetails mongoConnectionDetails;
+    private EVAMongoConnectionDetails EVAMongoConnectionDetails;
 
-    public MongoConnectionDetails getMongoConnectionDetails() {
-        return mongoConnectionDetails;
+    public EVAMongoConnectionDetails getMongoConnectionDetails() {
+        return EVAMongoConnectionDetails;
     }
 
     public String getDatabaseName() {

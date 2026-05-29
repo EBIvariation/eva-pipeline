@@ -28,7 +28,6 @@ import uk.ac.ebi.eva.pipeline.jobs.steps.tasklets.FileStatsTasklet;
 import uk.ac.ebi.eva.pipeline.parameters.ChunkSizeParameters;
 import uk.ac.ebi.eva.pipeline.parameters.DatabaseParameters;
 import uk.ac.ebi.eva.pipeline.parameters.InputParameters;
-import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 import uk.ac.ebi.eva.utils.TaskletUtils;
 
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.FILE_STATS_STEP;
@@ -54,12 +53,10 @@ public class FileStatsStepConfiguration {
                                      InputParameters inputParameters,
                                      ChunkSizeParameters chunkSizeParameters,
                                      JobRepository jobRepository,
-                                     PlatformTransactionManager transactionManager,
-                                     JobOptions jobOptions) {
+                                     PlatformTransactionManager transactionManager) {
         logger.debug("Building '" + FILE_STATS_STEP + "'");
 
         return TaskletUtils.generateStep(jobRepository, transactionManager, FILE_STATS_STEP,
-                fileStatsTasklet(databaseParameters, mongoTemplate, inputParameters, chunkSizeParameters),
-                jobOptions.isAllowStartIfComplete());
+                fileStatsTasklet(databaseParameters, mongoTemplate, inputParameters, chunkSizeParameters));
     }
 }
