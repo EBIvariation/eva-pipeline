@@ -17,7 +17,6 @@ package uk.ac.ebi.eva.test.configuration;
 
 import org.springframework.batch.core.configuration.JobRegistry;
 import org.springframework.batch.core.configuration.StepRegistry;
-import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.support.MapStepRegistry;
 import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.core.launch.JobLauncher;
@@ -35,7 +34,6 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
  * batch configuration injects a synchronous task executor.
  */
 @Configuration
-@EnableBatchProcessing
 public class AsynchronousBatchTestConfiguration {
 
     @Autowired

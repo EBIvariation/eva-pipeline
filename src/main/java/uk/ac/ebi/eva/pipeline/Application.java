@@ -18,6 +18,9 @@ package uk.ac.ebi.eva.pipeline;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.data.mongo.MongoDataAutoConfiguration;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerAutoConfiguration;
+import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
 import org.springframework.context.ConfigurableApplicationContext;
 
 
@@ -30,23 +33,15 @@ import org.springframework.context.ConfigurableApplicationContext;
  * Append any parameter as needed.
  * TODO document all parameters
  */
-@SpringBootApplication(exclude = {MongoDataAutoConfiguration.class})
+@SpringBootApplication(exclude = {
+        MongoDataAutoConfiguration.class,
+        DataSourceAutoConfiguration.class,
+        DataSourceTransactionManagerAutoConfiguration.class,
+        HibernateJpaAutoConfiguration.class
+})
 public class Application {
 
-    public static final String VARIANT_WRITER_MONGO_PROFILE = "variant-writer-mongo";
-    public static final String VARIANT_ANNOTATION_MONGO_PROFILE = "variant-annotation-mongo";
-
-    /**
-     * Profile for features that shall run in production only, such as a persistent job repository.
-     */
-    public static final String PRODUCTION_PROFILE = "production";
-
-    /**
-     * Profile for experimental features that shall not be active unless explicitly requested.
-     */
-    public static final String MONGO_EXPERIMENTAL_PROFILE = "experimental";
-
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
         ConfigurableApplicationContext context = SpringApplication.run(Application.class, args);
         System.exit(SpringApplication.exit(context));
     }

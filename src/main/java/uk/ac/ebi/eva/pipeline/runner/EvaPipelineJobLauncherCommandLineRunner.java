@@ -42,7 +42,6 @@ import org.springframework.util.PatternMatchUtils;
 import org.springframework.util.StringUtils;
 import uk.ac.ebi.eva.commons.batch.exception.NoJobToExecuteException;
 import uk.ac.ebi.eva.commons.batch.exception.NoParametersHaveBeenPassedException;
-import uk.ac.ebi.eva.commons.batch.exception.NoPreviousJobExecutionException;
 import uk.ac.ebi.eva.commons.batch.exception.UnknownJobException;
 import uk.ac.ebi.eva.commons.batch.job.JobExecutionApplicationListener;
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
@@ -86,9 +85,6 @@ public class EvaPipelineJobLauncherCommandLineRunner extends JobLauncherApplicat
 
     @Value("${" + JobParametersNames.PROPERTY_FILE_PROPERTY + ":#{null}}")
     private String propertyFilePath;
-
-    @Value("${" + JobParametersNames.RESTART_PROPERTY + ":false}")
-    private boolean restartPreviousExecution;
 
     private Collection<Job> jobs;
 
@@ -164,15 +160,10 @@ public class EvaPipelineJobLauncherCommandLineRunner extends JobLauncherApplicat
 
             checkIfJobNameHasBeenDefined();
             checkIfPropertiesHaveBeenProvided(jobParameters);
-            if (restartPreviousExecution) {
-                restartPreviousJobExecution(jobParameters);
-            } else {
-                jobParameters = CommandLineRunnerUtils.addRunIDToJobParameters(jobName, jobExplorer, jobParameters);
-            }
             launchJob(jobParameters);
         } catch (NoJobToExecuteException | NoParametersHaveBeenPassedException | UnexpectedFileEncodingException
-                 | FileNotFoundException | UnexpectedErrorReadingFileException | NoPreviousJobExecutionException
-                 | NotValidParameterFormatException | UnknownJobException | JobParametersInvalidException e) {
+                 | FileNotFoundException | UnexpectedErrorReadingFileException | NotValidParameterFormatException
+                 | UnknownJobException | JobParametersInvalidException e) {
             logger.error(e.getMessage());
             logger.debug("Error trace", e);
             abnormalExit = true;
@@ -189,7 +180,6 @@ public class EvaPipelineJobLauncherCommandLineRunner extends JobLauncherApplicat
         // Filter all runner specific parameters
         properties.remove(SPRING_BATCH_JOB_NAME_PROPERTY);
         properties.remove(JobParametersNames.PROPERTY_FILE_PROPERTY);
-        properties.remove(JobParametersNames.RESTART_PROPERTY);
 
         return converter.getJobParameters(properties);
 
@@ -237,12 +227,6 @@ public class EvaPipelineJobLauncherCommandLineRunner extends JobLauncherApplicat
             JobRestartException, JobInstanceAlreadyCompleteException, JobParametersInvalidException {
         logger.info("Running job '" + jobName + "' with parameters: " + jobParameters);
         super.execute(job, jobParameters);
-    }
-
-    private void restartPreviousJobExecution(JobParameters jobParameters) throws
-            NoPreviousJobExecutionException {
-        logger.info("Force restartPreviousExecution of job '" + jobName + "' with parameters: " + jobParameters);
-        ManageJobsUtils.markLastJobAsFailed(jobRepository, jobName, jobParameters);
     }
 
     private Properties getJobParametersFromPropertiesFile() throws FileNotFoundException,

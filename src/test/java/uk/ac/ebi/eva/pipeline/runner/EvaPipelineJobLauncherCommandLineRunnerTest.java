@@ -20,10 +20,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobExecutionException;
-import org.springframework.batch.core.JobInstance;
-import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.system.CapturedOutput;
@@ -31,10 +28,7 @@ import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.mapping.MongoMappingContext;
-import org.springframework.test.context.ActiveProfiles;
-import uk.ac.ebi.eva.pipeline.Application;
 import uk.ac.ebi.eva.pipeline.configuration.MongoCollectionNameConfiguration;
-import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
 import uk.ac.ebi.eva.test.utils.GenotypedVcfJobTestUtils;
 import uk.ac.ebi.eva.test.utils.MongoTestContainerHelper;
@@ -43,21 +37,13 @@ import uk.ac.ebi.eva.utils.EvaCommandLineBuilder;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Comparator;
-import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.StringContains.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.GENOTYPED_VCF_JOB;
 import static uk.ac.ebi.eva.pipeline.runner.EvaPipelineJobLauncherCommandLineRunner.EXIT_WITHOUT_ERRORS;
-import static uk.ac.ebi.eva.pipeline.runner.EvaPipelineJobLauncherCommandLineRunner.EXIT_WITH_ERRORS;
 import static uk.ac.ebi.eva.pipeline.runner.EvaPipelineJobLauncherCommandLineRunner.SPRING_BATCH_JOB_NAME_PROPERTY;
-import static uk.ac.ebi.eva.test.utils.JobTestUtils.assertCompleted;
-import static uk.ac.ebi.eva.test.utils.JobTestUtils.assertFailed;
 import static uk.ac.ebi.eva.utils.FileUtils.getResource;
 
 /**
@@ -66,7 +52,6 @@ import static uk.ac.ebi.eva.utils.FileUtils.getResource;
  */
 @ExtendWith(OutputCaptureExtension.class)
 @SpringBootTest
-@ActiveProfiles({Application.VARIANT_WRITER_MONGO_PROFILE, Application.VARIANT_ANNOTATION_MONGO_PROFILE})
 @Import({MongoCollectionNameConfiguration.class, BatchTestConfiguration.class})
 public class EvaPipelineJobLauncherCommandLineRunnerTest extends MongoTestContainerHelper {
 
@@ -77,9 +62,6 @@ public class EvaPipelineJobLauncherCommandLineRunnerTest extends MongoTestContai
     private static final String NO_JOB_PARAMETERS_HAVE_BEEN_PROVIDED = "No job parameters have been provided";
 
     private static final String DB_NAME = "test-db";
-
-    @Autowired
-    private JobExplorer jobExplorer;
 
     @Autowired
     private EvaPipelineJobLauncherCommandLineRunner evaPipelineJobLauncherCommandLineRunner;
@@ -166,69 +148,9 @@ public class EvaPipelineJobLauncherCommandLineRunnerTest extends MongoTestContai
 
         assertEquals(EXIT_WITHOUT_ERRORS, evaPipelineJobLauncherCommandLineRunner.getExitCode());
 
-        JobExecution jobExecution = getLastJobExecution(GENOTYPED_VCF_JOB);
-        assertCompleted(jobExecution);
-
         GenotypedVcfJobTestUtils.checkLoadStep(mongoTemplate);
 
         GenotypedVcfJobTestUtils.checkLoadedAnnotation(mongoTemplate);
-    }
-
-    private JobExecution getLastJobExecution(String jobName) {
-        List<JobInstance> jobInstances = jobExplorer.getJobInstances(jobName, 0, 1);
-        assertFalse(jobInstances.isEmpty());
-        List<JobExecution> jobExecutions = jobExplorer.getJobExecutions(jobInstances.get(0));
-        return jobExecutions.stream().max(Comparator.comparingLong(jobExecution -> jobExecution.getId())).get();
-    }
-
-    @Test
-    public void doNotReuseParametersFromPreviousCompletedJobs() throws JobExecutionException {
-        File inputFile = GenotypedVcfJobTestUtils.getInputFile();
-        String assemblyReport = GenotypedVcfJobTestUtils.getAssemblyReport();
-
-        evaPipelineJobLauncherCommandLineRunner.setJobName(GENOTYPED_VCF_JOB);
-        EvaCommandLineBuilder evaCommandLineBuilderWithoutChunksize = new EvaCommandLineBuilder()
-                .inputVcf(inputFile.getAbsolutePath())
-                .inputAssemblyReport(assemblyReport)
-                .inputVcfAggregation("NONE")
-                .inputStudyName("small vcf")
-                .inputStudyId(GenotypedVcfJobTestUtils.INPUT_STUDY_ID)
-                .inputStudyType("COLLECTION")
-                .databaseName(DB_NAME)
-                .configDbReadPreference("secondary")
-                .dbCollectionsVariantsName("variants")
-                .dbCollectionsFilesName("files")
-                .dbCollectionsFeaturesName("features")
-                .annotationSkip(true)
-                .statisticsSkip(true);
-
-        String[] commandLineWithoutChunksize = evaCommandLineBuilderWithoutChunksize
-                .inputVcfId("without_chunksize_" + GenotypedVcfJobTestUtils.INPUT_VCF_ID)
-                .build();
-
-        String[] completeCommandLine = evaCommandLineBuilderWithoutChunksize
-                .inputVcfId(GenotypedVcfJobTestUtils.INPUT_VCF_ID)
-                .chunksize("100")
-                .build();
-
-        evaPipelineJobLauncherCommandLineRunner.run(completeCommandLine);
-        assertEquals(EXIT_WITHOUT_ERRORS, evaPipelineJobLauncherCommandLineRunner.getExitCode());
-
-        JobExecution firstJobExecution = getLastJobExecution(GENOTYPED_VCF_JOB);
-        assertCompleted(firstJobExecution);
-
-        assertNotNull(firstJobExecution.getJobParameters().getString(JobParametersNames.DB_NAME));
-        assertNotNull(firstJobExecution.getJobParameters().getString(JobParametersNames.CONFIG_CHUNK_SIZE));
-
-        // check second run doesn't include the chunksize parameter
-        evaPipelineJobLauncherCommandLineRunner.run(commandLineWithoutChunksize);
-        assertEquals(EXIT_WITHOUT_ERRORS, evaPipelineJobLauncherCommandLineRunner.getExitCode());
-
-        JobExecution secondJobExecution = getLastJobExecution(GENOTYPED_VCF_JOB);
-        assertCompleted(secondJobExecution);
-
-        assertNotNull(secondJobExecution.getJobParameters().getString(JobParametersNames.DB_NAME));
-        assertNull(secondJobExecution.getJobParameters().getString(JobParametersNames.CONFIG_CHUNK_SIZE));
     }
 
     @Test
@@ -264,9 +186,6 @@ public class EvaPipelineJobLauncherCommandLineRunnerTest extends MongoTestContai
 
         assertEquals(EXIT_WITHOUT_ERRORS, evaPipelineJobLauncherCommandLineRunner.getExitCode());
 
-        JobExecution jobExecution = getLastJobExecution(GENOTYPED_VCF_JOB);
-        assertCompleted(jobExecution);
-
         GenotypedVcfJobTestUtils.checkLoadStep(mongoTemplate);
 
         GenotypedVcfJobTestUtils.checkLoadedAnnotation(mongoTemplate);
@@ -284,73 +203,5 @@ public class EvaPipelineJobLauncherCommandLineRunnerTest extends MongoTestContai
 
         assertEquals(EvaPipelineJobLauncherCommandLineRunner.EXIT_WITH_ERRORS,
                 evaPipelineJobLauncherCommandLineRunner.getExitCode());
-    }
-
-    @Test
-    public void resumeFailingJobFromCorrectStep() throws Exception {
-        File inputFile = GenotypedVcfJobTestUtils.getInputFile();
-        String assemblyReport = GenotypedVcfJobTestUtils.getAssemblyReport();
-
-        String outputDirStats = temporaryFolderUtil.newFolder().getAbsolutePath();
-        String outputDirAnnotation = temporaryFolderUtil.newFolder().getAbsolutePath();
-
-        File fasta = temporaryFolderUtil.newFile();
-
-        // To test job resumption with an identical parameter set, we use a single path to VEP symlinked to first a
-        // failing mock VEP, then to a successful one.
-        String mockVepPath = temporaryFolderUtil.newFolder().getAbsolutePath() + "/mockvep_link.pl";
-        GenotypedVcfJobTestUtils.createLinkToFailingMockVep(mockVepPath);
-
-        String[] commandLine = new EvaCommandLineBuilder()
-                .annotationOverwrite("false")
-                .appVepPath(mockVepPath)
-                .appVepTimeout("60")
-                .configDbReadPreference("secondary")
-                .databaseName(DB_NAME)
-                .dbCollectionsAnnotationMetadataName("annotationMetadata")
-                .dbCollectionsAnnotationsName(GenotypedVcfJobTestUtils.COLLECTION_ANNOTATIONS_NAME)
-                .dbCollectionsFeaturesName("features")
-                .dbCollectionsFilesName("files")
-                .dbCollectionsStatisticsName("populationStatistics")
-                .dbCollectionsVariantsName("variants")
-                .inputFasta(fasta.getAbsolutePath())
-                .inputAssemblyReport(assemblyReport)
-                .inputStudyId(GenotypedVcfJobTestUtils.INPUT_STUDY_ID)
-                .inputStudyName("small vcf")
-                .inputStudyType("COLLECTION")
-                .inputVcf(inputFile.getAbsolutePath())
-                .inputVcfAggregation("NONE")
-                .inputVcfId(GenotypedVcfJobTestUtils.INPUT_VCF_ID)
-                .outputDirAnnotation(outputDirAnnotation)
-                .outputDirStatistics(outputDirStats)
-                .vepCachePath("")
-                .vepCacheSpecies("human")
-                .vepCacheVersion("1")
-                .vepNumForks("1")
-                .vepVersion("1")
-                .build();
-
-        evaPipelineJobLauncherCommandLineRunner.setJobName(GENOTYPED_VCF_JOB);
-        evaPipelineJobLauncherCommandLineRunner.run(commandLine);
-
-        assertEquals(EXIT_WITH_ERRORS, evaPipelineJobLauncherCommandLineRunner.getExitCode());
-
-        JobExecution firstJobExecution = getLastJobExecution(GENOTYPED_VCF_JOB);
-        assertFailed(firstJobExecution);
-        long firstJobId = firstJobExecution.getJobId();
-
-        // Re-link to a working mock VEP to check resumption
-        GenotypedVcfJobTestUtils.createLinkToWorkingMockVep(mockVepPath);
-
-        evaPipelineJobLauncherCommandLineRunner.run(commandLine);
-        assertEquals(EXIT_WITHOUT_ERRORS, evaPipelineJobLauncherCommandLineRunner.getExitCode());
-
-        JobExecution secondJobExecution = getLastJobExecution(GENOTYPED_VCF_JOB);
-        assertCompleted(secondJobExecution);
-        long secondJobId = secondJobExecution.getJobId();
-        assertEquals(firstJobId, secondJobId);
-
-        // Second job execution should only execute the steps for VEP annotation
-        assertEquals(2, secondJobExecution.getStepExecutions().size());
     }
 }

@@ -21,7 +21,8 @@ import org.springframework.batch.core.JobParametersValidator;
 import org.springframework.batch.core.job.CompositeJobParametersValidator;
 import org.springframework.batch.core.job.DefaultJobParametersValidator;
 import uk.ac.ebi.eva.pipeline.configuration.jobs.LoadVcfJobConfiguration;
-import uk.ac.ebi.eva.pipeline.parameters.validation.step.*;
+import uk.ac.ebi.eva.pipeline.parameters.validation.step.LoadFileStepParametersValidator;
+import uk.ac.ebi.eva.pipeline.parameters.validation.step.LoadVariantsStepParametersValidator;
 
 import java.util.ArrayList;
 import java.util.List;

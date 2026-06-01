@@ -30,10 +30,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.mapping.MongoMappingContext;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import uk.ac.ebi.eva.pipeline.Application;
 import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
 import uk.ac.ebi.eva.test.utils.MongoTestContainerHelper;
@@ -56,7 +54,6 @@ import static uk.ac.ebi.eva.test.utils.JobTestUtils.assertCompleted;
  * Test for {@link DropStudyJobConfiguration}
  */
 @ExtendWith(SpringExtension.class)
-@ActiveProfiles({Application.VARIANT_WRITER_MONGO_PROFILE, Application.VARIANT_ANNOTATION_MONGO_PROFILE})
 @ContextConfiguration(classes = {DropStudyJobConfiguration.class, BatchTestConfiguration.class})
 public class DropStudyJobTest extends MongoTestContainerHelper {
 

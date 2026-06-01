@@ -20,14 +20,11 @@ import org.springframework.batch.core.JobParametersInvalidException;
 import org.springframework.batch.core.JobParametersValidator;
 import org.springframework.batch.core.job.CompositeJobParametersValidator;
 import org.springframework.batch.core.job.DefaultJobParametersValidator;
-
 import uk.ac.ebi.eva.pipeline.configuration.jobs.steps.PullFilesAndStatisticsByStudyStepConfiguration;
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
-import uk.ac.ebi.eva.pipeline.parameters.validation.ConfigRestartabilityAllowValidator;
 import uk.ac.ebi.eva.pipeline.parameters.validation.DbCollectionsVariantsNameValidator;
 import uk.ac.ebi.eva.pipeline.parameters.validation.DbNameValidator;
 import uk.ac.ebi.eva.pipeline.parameters.validation.InputStudyIdValidator;
-import uk.ac.ebi.eva.pipeline.parameters.validation.OptionalValidator;
 
 import java.util.Arrays;
 import java.util.List;
@@ -40,9 +37,9 @@ public class PullFilesAndStatisticsByStudyStepParametersValidator extends Defaul
 
     public PullFilesAndStatisticsByStudyStepParametersValidator() {
         super(new String[]{JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME,
-                           JobParametersNames.DB_NAME,
-                           JobParametersNames.INPUT_STUDY_ID},
-              new String[]{});
+                        JobParametersNames.DB_NAME,
+                        JobParametersNames.INPUT_STUDY_ID},
+                new String[]{});
     }
 
     @Override
@@ -55,8 +52,7 @@ public class PullFilesAndStatisticsByStudyStepParametersValidator extends Defaul
         final List<JobParametersValidator> jobParametersValidators = Arrays.asList(
                 new DbCollectionsVariantsNameValidator(),
                 new DbNameValidator(),
-                new InputStudyIdValidator(),
-                new OptionalValidator(new ConfigRestartabilityAllowValidator(), JobParametersNames.CONFIG_RESTARTABILITY_ALLOW)
+                new InputStudyIdValidator()
         );
 
         CompositeJobParametersValidator compositeJobParametersValidator = new CompositeJobParametersValidator();

@@ -19,7 +19,6 @@ package uk.ac.ebi.eva.pipeline.configuration.jobs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.Job;
-import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.job.flow.Flow;
 import org.springframework.batch.core.repository.JobRepository;
@@ -49,7 +48,6 @@ import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VEP_ANNOTATION_FLOW
  */
 
 @Configuration
-@EnableBatchProcessing
 @Import({AnnotationFlowConfiguration.class})
 public class AnnotationJobConfiguration {
 

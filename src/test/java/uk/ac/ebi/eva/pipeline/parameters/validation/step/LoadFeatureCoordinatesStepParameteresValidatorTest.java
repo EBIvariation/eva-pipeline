@@ -56,7 +56,6 @@ public class LoadFeatureCoordinatesStepParameteresValidatorTest {
 
         optionalParameters = new TreeMap<>();
         optionalParameters.put(JobParametersNames.CONFIG_CHUNK_SIZE, new JobParameter("100", String.class));
-        optionalParameters.put(JobParametersNames.CONFIG_RESTARTABILITY_ALLOW, new JobParameter("true", String.class));
     }
 
     @Test

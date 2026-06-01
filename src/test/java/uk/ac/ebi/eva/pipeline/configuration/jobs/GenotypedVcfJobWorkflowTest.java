@@ -28,14 +28,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.mapping.MongoMappingContext;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import uk.ac.ebi.eva.pipeline.Application;
 import uk.ac.ebi.eva.pipeline.configuration.BeanNames;
 import uk.ac.ebi.eva.pipeline.configuration.MongoCollectionNameConfiguration;
-import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
 import uk.ac.ebi.eva.test.utils.GenotypedVcfJobTestUtils;
 import uk.ac.ebi.eva.test.utils.MongoTestContainerHelper;
@@ -66,7 +63,6 @@ import static uk.ac.ebi.eva.utils.FileUtils.getResource;
  * TODO The test should fail when we will integrate the JobParameter validation since there are empty parameters for VEP
  */
 @ExtendWith(SpringExtension.class)
-@ActiveProfiles({Application.VARIANT_WRITER_MONGO_PROFILE, Application.VARIANT_ANNOTATION_MONGO_PROFILE})
 @TestPropertySource({"classpath:application.properties"})
 @ContextConfiguration(classes = {GenotypedVcfJobConfiguration.class, BatchTestConfiguration.class,
         MongoCollectionNameConfiguration.class})
@@ -88,9 +84,6 @@ public class GenotypedVcfJobWorkflowTest extends MongoTestContainerHelper {
     private BatchTestConfiguration batchTestConfiguration;
 
     private MongoTemplate mongoTemplate;
-
-    @Autowired
-    private JobOptions jobOptions;  // we need this for stats.skip and annot.skip
 
     public static final Set<String> EXPECTED_REQUIRED_STEP_NAMES = new TreeSet<>(
             Arrays.asList(BeanNames.LOAD_VARIANTS_STEP, BeanNames.LOAD_FILE_STEP));

@@ -9,10 +9,9 @@ import org.springframework.transaction.PlatformTransactionManager;
 public class TaskletUtils {
 
     public static TaskletStep generateStep(JobRepository jobRepository, PlatformTransactionManager transactionManager,
-                                           String stepName, Tasklet tasklet, boolean allowStartIfComplete) {
+                                           String stepName, Tasklet tasklet) {
         return new StepBuilder(stepName, jobRepository)
                 .tasklet(tasklet, transactionManager)
-                .allowStartIfComplete(allowStartIfComplete)
                 .build();
     }
 

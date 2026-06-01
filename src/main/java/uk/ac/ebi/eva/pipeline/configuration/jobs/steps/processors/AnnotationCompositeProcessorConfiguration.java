@@ -23,9 +23,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.Profile;
 import uk.ac.ebi.eva.commons.mongodb.entities.AnnotationMongo;
-import uk.ac.ebi.eva.pipeline.Application;
 import uk.ac.ebi.eva.pipeline.model.EnsemblVariant;
 
 import java.util.Arrays;
@@ -49,7 +47,6 @@ public class AnnotationCompositeProcessorConfiguration {
 
     @Bean(ANNOTATION_COMPOSITE_PROCESSOR)
     @StepScope
-    @Profile(Application.VARIANT_ANNOTATION_MONGO_PROFILE)
     public CompositeItemProcessor<List<EnsemblVariant>, List<AnnotationMongo>> compositeAnnotationItemWriter() {
         CompositeItemProcessor<List<EnsemblVariant>, List<AnnotationMongo>> processor = new CompositeItemProcessor<>();
         processor.setDelegates(Arrays.asList(vepAnnotationProcessor, annotationParserProcessor));

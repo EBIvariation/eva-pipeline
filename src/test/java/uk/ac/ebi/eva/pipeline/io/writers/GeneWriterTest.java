@@ -34,7 +34,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.ac.ebi.eva.commons.core.models.FeatureCoordinates;
 import uk.ac.ebi.eva.pipeline.io.mappers.GeneLineMapper;
-import uk.ac.ebi.eva.pipeline.parameters.MongoConnectionDetails;
+import uk.ac.ebi.eva.pipeline.parameters.EVAMongoConnectionDetails;
 import uk.ac.ebi.eva.test.data.GtfStaticTestData;
 import uk.ac.ebi.eva.test.utils.MongoTestContainerHelper;
 
@@ -51,7 +51,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
  */
 @DataMongoTest(excludeAutoConfiguration = MongoRepositoriesAutoConfiguration.class)
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {MongoConnectionDetails.class, MongoMappingContext.class})
+@ContextConfiguration(classes = {EVAMongoConnectionDetails.class, MongoMappingContext.class})
 public class GeneWriterTest extends MongoTestContainerHelper {
 
     private static final String COLLECTION_FEATURES_NAME = "features";

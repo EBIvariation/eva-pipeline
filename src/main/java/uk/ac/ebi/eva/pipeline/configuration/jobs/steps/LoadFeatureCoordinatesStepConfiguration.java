@@ -19,7 +19,6 @@ package uk.ac.ebi.eva.pipeline.configuration.jobs.steps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.Step;
-import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.item.ItemStreamReader;
@@ -41,7 +40,6 @@ import uk.ac.ebi.eva.pipeline.io.readers.GeneReader;
 import uk.ac.ebi.eva.pipeline.io.writers.GeneWriter;
 import uk.ac.ebi.eva.pipeline.jobs.steps.processors.GeneFilterProcessor;
 import uk.ac.ebi.eva.pipeline.listeners.SkippedItemListener;
-import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.GENE_READER;
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.GENE_WRITER;
@@ -61,7 +59,6 @@ import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.LOAD_FEATURE_COORDI
  */
 
 @Configuration
-@EnableBatchProcessing
 @Import({GeneReaderConfiguration.class, GeneWriterConfiguration.class, ChunkSizeCompletionPolicyConfiguration.class})
 public class LoadFeatureCoordinatesStepConfiguration {
 
@@ -77,7 +74,7 @@ public class LoadFeatureCoordinatesStepConfiguration {
 
     @Bean(LOAD_FEATURE_COORDINATES_STEP)
     public Step LoadFeatureCoordinatesStep(JobRepository jobRepository, PlatformTransactionManager transactionManager,
-                                           JobOptions jobOptions, SimpleCompletionPolicy chunkSizeCompletionPolicy) {
+                                           SimpleCompletionPolicy chunkSizeCompletionPolicy) {
         logger.debug("Building '" + LOAD_FEATURE_COORDINATES_STEP + "'");
 
         return new StepBuilder(LOAD_FEATURE_COORDINATES_STEP, jobRepository)
@@ -86,7 +83,6 @@ public class LoadFeatureCoordinatesStepConfiguration {
                 .processor(new GeneFilterProcessor())
                 .writer(writer)
                 .faultTolerant().skipLimit(50).skip(FlatFileParseException.class)
-                .allowStartIfComplete(jobOptions.isAllowStartIfComplete())
                 .listener(new SkippedItemListener())
                 .build();
     }

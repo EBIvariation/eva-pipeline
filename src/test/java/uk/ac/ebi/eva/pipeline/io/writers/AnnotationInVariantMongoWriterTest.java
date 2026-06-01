@@ -26,14 +26,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.mapping.MongoMappingContext;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.ac.ebi.eva.commons.mongodb.entities.AnnotationMongo;
 import uk.ac.ebi.eva.commons.mongodb.entities.VariantMongo;
-import uk.ac.ebi.eva.pipeline.Application;
 import uk.ac.ebi.eva.pipeline.io.mappers.AnnotationLineMapper;
-import uk.ac.ebi.eva.pipeline.parameters.MongoConnectionDetails;
+import uk.ac.ebi.eva.pipeline.parameters.EVAMongoConnectionDetails;
 import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
 import uk.ac.ebi.eva.test.utils.MongoTestContainerHelper;
 import uk.ac.ebi.eva.test.utils.MongoTestDataLoader;
@@ -58,8 +56,7 @@ import static uk.ac.ebi.eva.test.data.VepOutputContent.vepOutputContentWithExtra
  * {@link AnnotationInVariantMongoWriter}
  */
 @ExtendWith(SpringExtension.class)
-@ActiveProfiles({Application.VARIANT_WRITER_MONGO_PROFILE, Application.VARIANT_ANNOTATION_MONGO_PROFILE})
-@ContextConfiguration(classes = {MongoConnectionDetails.class, MongoMappingContext.class, BatchTestConfiguration.class})
+@ContextConfiguration(classes = {EVAMongoConnectionDetails.class, MongoMappingContext.class, BatchTestConfiguration.class})
 public class AnnotationInVariantMongoWriterTest extends MongoTestContainerHelper {
 
     private static final String MONGO_DUMP = "/dump/VariantStatsConfigurationTest_vl";

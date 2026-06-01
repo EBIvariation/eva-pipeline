@@ -34,7 +34,7 @@ import org.springframework.data.mongodb.core.convert.MappingMongoConverter;
 import org.springframework.data.mongodb.core.mapping.MongoMappingContext;
 import uk.ac.ebi.eva.commons.mongodb.utils.MongoUtils;
 import uk.ac.ebi.eva.pipeline.parameters.DatabaseParameters;
-import uk.ac.ebi.eva.pipeline.parameters.MongoConnectionDetails;
+import uk.ac.ebi.eva.pipeline.parameters.EVAMongoConnectionDetails;
 
 /**
  * Utility class dealing with MongoDB connections using pipeline options
@@ -66,9 +66,9 @@ public class MongoConfiguration {
                 .build());
     }
 
-    public static MongoTemplate getMongoTemplate(String databaseName, MongoConnectionDetails mongoConnectionDetails,
+    public static MongoTemplate getMongoTemplate(String databaseName, EVAMongoConnectionDetails EVAMongoConnectionDetails,
                                                  MongoMappingContext mongoMappingContext) {
-        ConnectionString connectionString = constructMongoConnectionString(databaseName, mongoConnectionDetails);
+        ConnectionString connectionString = constructMongoConnectionString(databaseName, EVAMongoConnectionDetails);
         MongoDatabaseFactory mongoFactory = new SimpleMongoClientDatabaseFactory(connectionString);
         MappingMongoConverter mappingMongoConverter = getMappingMongoConverter(mongoFactory, mongoMappingContext);
         MongoTemplate mongoTemplate = new MongoTemplate(mongoFactory, mappingMongoConverter);
@@ -78,10 +78,10 @@ public class MongoConfiguration {
     }
 
     public static ConnectionString constructMongoConnectionString(String databaseName,
-                                                                  MongoConnectionDetails mongoConnectionDetails) {
-        if (mongoConnectionDetails.getUri() != null) {
+                                                                  EVAMongoConnectionDetails EVAMongoConnectionDetails) {
+        if (EVAMongoConnectionDetails.getUri() != null) {
             // Modify URI to connect to the specific database
-            String uri = mongoConnectionDetails.getUri();
+            String uri = EVAMongoConnectionDetails.getUri();
             if (uri.contains("?")) {
                 int idx = uri.indexOf("?");
                 return new ConnectionString(uri.substring(0, idx) + databaseName + uri.substring(idx));
@@ -91,14 +91,14 @@ public class MongoConfiguration {
                 return new ConnectionString(uri + "/" + databaseName);
             }
         }
-        return MongoUtils.constructMongoConnectionString(mongoConnectionDetails.getHosts(),
+        return MongoUtils.constructMongoConnectionString(EVAMongoConnectionDetails.getHosts(),
                 null,
                 databaseName,
-                mongoConnectionDetails.getUser(),
-                mongoConnectionDetails.getPassword(),
-                mongoConnectionDetails.getAuthenticationDatabase(),
-                mongoConnectionDetails.getAuthenticationMechanism(),
-                mongoConnectionDetails.getReadPreferenceName());
+                EVAMongoConnectionDetails.getUser(),
+                EVAMongoConnectionDetails.getPassword(),
+                EVAMongoConnectionDetails.getAuthenticationDatabase(),
+                EVAMongoConnectionDetails.getAuthenticationMechanism(),
+                EVAMongoConnectionDetails.getReadPreferenceName());
     }
 
     private static MappingMongoConverter getMappingMongoConverter(MongoDatabaseFactory mongoFactory,

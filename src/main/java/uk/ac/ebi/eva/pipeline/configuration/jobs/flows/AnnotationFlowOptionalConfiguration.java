@@ -16,7 +16,6 @@
 package uk.ac.ebi.eva.pipeline.configuration.jobs.flows;
 
 import org.springframework.batch.core.BatchStatus;
-import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.job.builder.FlowBuilder;
 import org.springframework.batch.core.job.flow.Flow;
 import org.springframework.batch.core.job.flow.JobExecutionDecider;
@@ -24,7 +23,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-
 import uk.ac.ebi.eva.pipeline.configuration.JobExecutionDeciderConfiguration;
 import uk.ac.ebi.eva.pipeline.jobs.deciders.SkipStepDecider;
 
@@ -39,7 +37,6 @@ import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VEP_ANNOTATION_OPTI
  * that the annotation flag is enabled, then the annotation flow proceeds as described in {@link AnnotationFlowConfiguration}
  */
 @Configuration
-@EnableBatchProcessing
 @Import({AnnotationFlowConfiguration.class, JobExecutionDeciderConfiguration.class})
 public class AnnotationFlowOptionalConfiguration {
 

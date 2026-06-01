@@ -39,8 +39,6 @@ public class CreateDatabaseIndexesStepParametersValidatorTest {
 
     private Map<String, JobParameter<?>> requiredParameters;
 
-    private Map<String, JobParameter<?>> optionalParameters;
-
     @BeforeEach
     public void setUp() throws Exception {
         validator = new CreateDatabaseIndexesStepParametersValidator();
@@ -49,9 +47,6 @@ public class CreateDatabaseIndexesStepParametersValidatorTest {
         requiredParameters.put(JobParametersNames.DB_NAME, new JobParameter("dbName", String.class));
         requiredParameters.put(JobParametersNames.DB_COLLECTIONS_FEATURES_NAME,
                 new JobParameter("dbCollectionsFeaturesName", String.class));
-
-        optionalParameters = new TreeMap<>();
-        optionalParameters.put(JobParametersNames.CONFIG_RESTARTABILITY_ALLOW, new JobParameter("true", String.class));
     }
 
     @Test
@@ -63,7 +58,6 @@ public class CreateDatabaseIndexesStepParametersValidatorTest {
     public void allJobParametersIncludingOptionalAreValid() throws JobParametersInvalidException {
         Map<String, JobParameter<?>> parameters = new TreeMap<>();
         parameters.putAll(requiredParameters);
-        parameters.putAll(optionalParameters);
         validator.validate(new JobParameters(parameters));
     }
 

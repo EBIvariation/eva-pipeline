@@ -29,15 +29,13 @@ import org.springframework.boot.autoconfigure.data.mongo.MongoRepositoriesAutoCo
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.mapping.MongoMappingContext;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.ac.ebi.eva.commons.mongodb.entities.AnnotationMongo;
 import uk.ac.ebi.eva.commons.mongodb.entities.subdocuments.ConsequenceTypeMongo;
 import uk.ac.ebi.eva.commons.mongodb.entities.subdocuments.ScoreMongo;
-import uk.ac.ebi.eva.pipeline.Application;
 import uk.ac.ebi.eva.pipeline.io.mappers.AnnotationLineMapper;
-import uk.ac.ebi.eva.pipeline.parameters.MongoConnectionDetails;
+import uk.ac.ebi.eva.pipeline.parameters.EVAMongoConnectionDetails;
 import uk.ac.ebi.eva.test.utils.MongoTestContainerHelper;
 import uk.ac.ebi.eva.utils.MongoDBHelper;
 
@@ -70,8 +68,7 @@ import static uk.ac.ebi.eva.test.utils.JobTestUtils.count;
  */
 @DataMongoTest(excludeAutoConfiguration = MongoRepositoriesAutoConfiguration.class)
 @ExtendWith(SpringExtension.class)
-@ActiveProfiles(Application.VARIANT_ANNOTATION_MONGO_PROFILE)
-@ContextConfiguration(classes = {MongoConnectionDetails.class, MongoMappingContext.class})
+@ContextConfiguration(classes = {EVAMongoConnectionDetails.class, MongoMappingContext.class})
 public class AnnotationMongoWriterTest extends MongoTestContainerHelper {
 
     private static final String COLLECTION_ANNOTATIONS_NAME = "annotations";
@@ -79,12 +76,6 @@ public class AnnotationMongoWriterTest extends MongoTestContainerHelper {
     private static final String VEP_VERSION = "1";
 
     private static final String VEP_CACHE_VERSION = "2";
-
-    @Autowired
-    private MongoConnectionDetails mongoConnectionDetails;
-
-    @Autowired
-    private MongoMappingContext mongoMappingContext;
 
     @Autowired
     private MongoTemplate mongoTemplate;

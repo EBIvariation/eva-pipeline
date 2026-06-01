@@ -15,11 +15,9 @@
  */
 package uk.ac.ebi.eva.pipeline.configuration;
 
-import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.job.flow.JobExecutionDecider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
 import uk.ac.ebi.eva.pipeline.jobs.deciders.SkipStepDecider;
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 
@@ -30,7 +28,6 @@ import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.STATISTICS_SKIP_STE
  * This class defines the beans for the deciders to skip annotation and statistics step.
  */
 @Configuration
-@EnableBatchProcessing
 public class JobExecutionDeciderConfiguration {
 
     @Bean(ANNOTATION_SKIP_STEP_DECIDER)

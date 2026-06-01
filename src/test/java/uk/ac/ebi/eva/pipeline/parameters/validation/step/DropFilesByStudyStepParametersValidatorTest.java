@@ -41,8 +41,6 @@ public class DropFilesByStudyStepParametersValidatorTest {
 
     private Map<String, JobParameter<?>> requiredParameters;
 
-    private Map<String, JobParameter<?>> optionalParameters;
-
     @BeforeEach
     public void setUp() throws IOException {
         validator = new DropFilesByStudyStepParametersValidator();
@@ -51,9 +49,6 @@ public class DropFilesByStudyStepParametersValidatorTest {
         requiredParameters.put(JobParametersNames.DB_NAME, new JobParameter("database", String.class));
         requiredParameters.put(JobParametersNames.DB_COLLECTIONS_FILES_NAME, new JobParameter("files", String.class));
         requiredParameters.put(JobParametersNames.INPUT_STUDY_ID, new JobParameter("inputStudyId", String.class));
-
-        optionalParameters = new TreeMap<>();
-        optionalParameters.put(JobParametersNames.CONFIG_RESTARTABILITY_ALLOW, new JobParameter("true", String.class));
     }
 
     @Test
@@ -65,7 +60,6 @@ public class DropFilesByStudyStepParametersValidatorTest {
     public void allJobParametersIncludingOptionalAreValid() throws JobParametersInvalidException {
         Map<String, JobParameter<?>> parameters = new TreeMap<>();
         parameters.putAll(requiredParameters);
-        parameters.putAll(optionalParameters);
         validator.validate(new JobParameters(parameters));
     }
 
