@@ -19,6 +19,12 @@ variables:
 test:
     stage: test
     image: maven:3.9-eclipse-temurin-21
+    services:
+        - docker:dind
+    variables:
+        DOCKER_HOST: tcp://docker:2375
+        DOCKER_TLS_CERTDIR: ""
+        DOCKER_DRIVER: overlay2
     script:
         - mvn -B clean test
     environment:
