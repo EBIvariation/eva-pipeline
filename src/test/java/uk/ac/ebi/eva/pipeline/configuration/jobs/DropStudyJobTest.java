@@ -18,26 +18,33 @@ package uk.ac.ebi.eva.pipeline.configuration.jobs;
 
 import com.mongodb.client.MongoCollection;
 import org.bson.Document;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.io.ResourceLoader;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.mapping.MongoMappingContext;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
-import uk.ac.ebi.eva.test.configuration.TemporaryRuleConfiguration;
-import uk.ac.ebi.eva.test.data.VariantData;
-import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
-import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
+import uk.ac.ebi.eva.test.utils.MongoTestContainerHelper;
+import uk.ac.ebi.eva.test.utils.MongoTestDataLoader;
 import uk.ac.ebi.eva.utils.EvaJobParameterBuilder;
 
 import java.util.Arrays;
 
+import static uk.ac.ebi.eva.test.configuration.BatchTestConfiguration.JOB_DROP_STUDY_JOB;
+import static uk.ac.ebi.eva.test.data.VariantData.OTHER_VARIANT_WITH_ONE_STUDY_TO_DROP_PATH;
+import static uk.ac.ebi.eva.test.data.VariantData.VARIANT_WITH_ONE_STUDY_PATH;
+import static uk.ac.ebi.eva.test.data.VariantData.VARIANT_WITH_ONE_STUDY_TO_DROP_PATH;
+import static uk.ac.ebi.eva.test.data.VariantData.VARIANT_WITH_TWO_STUDIES_PATH;
 import static uk.ac.ebi.eva.test.utils.DropStudyJobTestUtils.assertDropFiles;
 import static uk.ac.ebi.eva.test.utils.DropStudyJobTestUtils.assertDropVariantsByStudy;
 import static uk.ac.ebi.eva.test.utils.DropStudyJobTestUtils.assertPullStudy;
@@ -46,10 +53,9 @@ import static uk.ac.ebi.eva.test.utils.JobTestUtils.assertCompleted;
 /**
  * Test for {@link DropStudyJobConfiguration}
  */
-@RunWith(SpringRunner.class)
-@TestPropertySource({"classpath:common-configuration.properties", "classpath:test-mongo.properties"})
-@ContextConfiguration(classes = {DropStudyJobConfiguration.class, BatchTestConfiguration.class, TemporaryRuleConfiguration.class})
-public class DropStudyJobTest {
+@ExtendWith(SpringExtension.class)
+@ContextConfiguration(classes = {DropStudyJobConfiguration.class, BatchTestConfiguration.class})
+public class DropStudyJobTest extends MongoTestContainerHelper {
 
     private static final String COLLECTION_VARIANTS_NAME = "variants";
 
@@ -63,38 +69,56 @@ public class DropStudyJobTest {
 
     private static final long EXPECTED_STATS_COUNT = 0;
 
-    @Rule
-    public PipelineTemporaryFolderRule temporaryFolderRule = new PipelineTemporaryFolderRule();
+    private static final String STUDY_ID_TO_DROP = "studyIdToDrop";
+
+    private static final String DB_NAME = "drop-study-test-db";
 
     @Autowired
-    @Rule
-    public TemporaryMongoRule mongoRule;
-
-    @Autowired
+    @Qualifier(JOB_DROP_STUDY_JOB)
     private JobLauncherTestUtils jobLauncherTestUtils;
 
-    private static final String STUDY_ID_TO_DROP = "studyIdToDrop";
+    @Autowired
+    private ResourceLoader resourceLoader;
+
+    @Autowired
+    private MongoMappingContext mongoMappingContext;
+
+    @Autowired
+    private BatchTestConfiguration batchTestConfiguration;
+
+    private MongoTemplate mongoTemplate;
+
+    @BeforeEach
+    public void setUp() throws Exception {
+        mongoTemplate = batchTestConfiguration.getMongoTemplate(DB_NAME, mongoMappingContext);
+        mongoTemplate.getDb().drop();
+    }
+
+    @AfterEach
+    void cleanDb() {
+        mongoTemplate.getDb().drop();
+    }
 
     @Test
     public void fullDropStudyJob() throws Exception {
-        String dbName = mongoRule.createDBAndInsertDocuments(COLLECTION_VARIANTS_NAME, Arrays.asList(
-                VariantData.getVariantWithOneStudyToDrop(),
-                VariantData.getOtherVariantWithOneStudyToDrop(),
-                VariantData.getVariantWithOneStudy(),
-                VariantData.getVariantWithTwoStudies()));
+        MongoTestDataLoader mongoTestDataLoader = new MongoTestDataLoader(mongoTemplate, resourceLoader);
+        mongoTestDataLoader.load(VARIANT_WITH_ONE_STUDY_TO_DROP_PATH, COLLECTION_VARIANTS_NAME);
+        mongoTestDataLoader.load(OTHER_VARIANT_WITH_ONE_STUDY_TO_DROP_PATH, COLLECTION_VARIANTS_NAME);
+        mongoTestDataLoader.load(VARIANT_WITH_ONE_STUDY_PATH, COLLECTION_VARIANTS_NAME);
+        mongoTestDataLoader.load(VARIANT_WITH_TWO_STUDIES_PATH, COLLECTION_VARIANTS_NAME);
 
-        mongoRule.insertDocuments(dbName, COLLECTION_FILES_NAME, Arrays.asList(
-                JobTestUtils.buildFilesDocumentString(STUDY_ID_TO_DROP, "fileIdOne"),
-                JobTestUtils.buildFilesDocumentString(STUDY_ID_TO_DROP, "fileIdTwo"),
-                JobTestUtils.buildFilesDocumentString("otherStudyId", "fileIdThree")));
+        mongoTemplate.getDb().getCollection(COLLECTION_FILES_NAME).insertMany(Arrays.asList(
+                JobTestUtils.buildFilesDocument(STUDY_ID_TO_DROP, "fileIdOne"),
+                JobTestUtils.buildFilesDocument(STUDY_ID_TO_DROP, "fileIdTwo"),
+                JobTestUtils.buildFilesDocument("otherStudyId", "fileIdThree")));
 
-        MongoCollection<Document> variantsCollection = mongoRule.getCollection(dbName, COLLECTION_VARIANTS_NAME);
-        MongoCollection<Document> filesCollection = mongoRule.getCollection(dbName, COLLECTION_FILES_NAME);
+        MongoCollection<Document> variantsCollection = mongoTemplate.getDb().getCollection(COLLECTION_VARIANTS_NAME);
+        MongoCollection<Document> filesCollection = mongoTemplate.getDb().getCollection(COLLECTION_FILES_NAME);
 
         JobParameters jobParameters = new EvaJobParameterBuilder()
                 .collectionFilesName(COLLECTION_FILES_NAME)
                 .collectionVariantsName(COLLECTION_VARIANTS_NAME)
-                .databaseName(dbName)
+                .databaseName(DB_NAME)
                 .inputStudyId(STUDY_ID_TO_DROP)
                 .timestamp()
                 .toJobParameters();

@@ -24,7 +24,6 @@ import org.springframework.batch.core.job.DefaultJobParametersValidator;
 import uk.ac.ebi.eva.pipeline.configuration.jobs.steps.LoadVariantsStepConfiguration;
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 import uk.ac.ebi.eva.pipeline.parameters.validation.ConfigChunkSizeValidator;
-import uk.ac.ebi.eva.pipeline.parameters.validation.ConfigRestartabilityAllowValidator;
 import uk.ac.ebi.eva.pipeline.parameters.validation.DbCollectionsVariantsNameValidator;
 import uk.ac.ebi.eva.pipeline.parameters.validation.DbNameValidator;
 import uk.ac.ebi.eva.pipeline.parameters.validation.InputStudyIdValidator;
@@ -45,12 +44,12 @@ public class LoadVariantsStepParametersValidator extends DefaultJobParametersVal
 
     public LoadVariantsStepParametersValidator() {
         super(new String[]{JobParametersNames.DB_NAME,
-                           JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME,
-                           JobParametersNames.INPUT_STUDY_ID,
-                           JobParametersNames.INPUT_VCF_ID,
-                           JobParametersNames.INPUT_VCF,
-                           JobParametersNames.INPUT_VCF_AGGREGATION},
-              new String[]{});
+                        JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME,
+                        JobParametersNames.INPUT_STUDY_ID,
+                        JobParametersNames.INPUT_VCF_ID,
+                        JobParametersNames.INPUT_VCF,
+                        JobParametersNames.INPUT_VCF_AGGREGATION},
+                new String[]{});
 
     }
 
@@ -70,9 +69,7 @@ public class LoadVariantsStepParametersValidator extends DefaultJobParametersVal
                 new InputVcfAggregationValidator(),
                 new OptionalValidator(new InputVcfAggregationMappingPathValidator(),
                         JobParametersNames.INPUT_VCF_AGGREGATION_MAPPING_PATH),
-                new OptionalValidator(new ConfigChunkSizeValidator(), JobParametersNames.CONFIG_CHUNK_SIZE),
-                new OptionalValidator(new ConfigRestartabilityAllowValidator(),
-                        JobParametersNames.CONFIG_RESTARTABILITY_ALLOW)
+                new OptionalValidator(new ConfigChunkSizeValidator(), JobParametersNames.CONFIG_CHUNK_SIZE)
         );
 
         CompositeJobParametersValidator compositeJobParametersValidator = new CompositeJobParametersValidator();

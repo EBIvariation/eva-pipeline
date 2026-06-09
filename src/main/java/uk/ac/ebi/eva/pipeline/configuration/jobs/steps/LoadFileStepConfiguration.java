@@ -17,15 +17,13 @@ package uk.ac.ebi.eva.pipeline.configuration.jobs.steps;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
-import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepScope;
+import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.tasklet.TaskletStep;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
+import org.springframework.transaction.PlatformTransactionManager;
 import uk.ac.ebi.eva.pipeline.jobs.steps.tasklets.LoadFileTasklet;
-import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 import uk.ac.ebi.eva.utils.TaskletUtils;
 
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.LOAD_FILE_STEP;
@@ -34,7 +32,6 @@ import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.LOAD_FILE_STEP;
  * Configuration class that inject a step created with the tasklet {@link LoadFileTasklet}
  */
 @Configuration
-@EnableBatchProcessing
 public class LoadFileStepConfiguration {
 
     private static final Logger logger = LoggerFactory.getLogger(LoadFileStepConfiguration.class);
@@ -46,10 +43,9 @@ public class LoadFileStepConfiguration {
     }
 
     @Bean(LOAD_FILE_STEP)
-    public TaskletStep loadFileStep(StepBuilderFactory stepBuilderFactory, JobOptions jobOptions) {
+    public TaskletStep loadFileStep(JobRepository jobRepository, PlatformTransactionManager transactionManager) {
         logger.debug("Building '" + LOAD_FILE_STEP + "'");
-        return TaskletUtils.generateStep(stepBuilderFactory, LOAD_FILE_STEP, loadFileTasklet(),
-                jobOptions.isAllowStartIfComplete());
+        return TaskletUtils.generateStep(jobRepository, transactionManager, LOAD_FILE_STEP, loadFileTasklet());
     }
 
 }

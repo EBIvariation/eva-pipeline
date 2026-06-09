@@ -15,17 +15,17 @@
  */
 package uk.ac.ebi.eva.pipeline.configuration;
 
-import com.mongodb.MongoClient;
-import com.mongodb.MongoClientURI;
+import com.mongodb.ConnectionString;
+import com.mongodb.MongoClientSettings;
 import com.mongodb.WriteConcern;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoClients;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.mongodb.MongoDbFactory;
+import org.springframework.data.mongodb.MongoDatabaseFactory;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.SimpleMongoDbFactory;
+import org.springframework.data.mongodb.core.SimpleMongoClientDatabaseFactory;
 import org.springframework.data.mongodb.core.WriteResultChecking;
 import org.springframework.data.mongodb.core.convert.DbRefResolver;
 import org.springframework.data.mongodb.core.convert.DefaultDbRefResolver;
@@ -34,18 +34,13 @@ import org.springframework.data.mongodb.core.convert.MappingMongoConverter;
 import org.springframework.data.mongodb.core.mapping.MongoMappingContext;
 import uk.ac.ebi.eva.commons.mongodb.utils.MongoUtils;
 import uk.ac.ebi.eva.pipeline.parameters.DatabaseParameters;
-import uk.ac.ebi.eva.pipeline.parameters.MongoConnectionDetails;
-
-import java.io.UnsupportedEncodingException;
-import java.net.UnknownHostException;
+import uk.ac.ebi.eva.pipeline.parameters.EVAMongoConnectionDetails;
 
 /**
  * Utility class dealing with MongoDB connections using pipeline options
  */
 @Configuration
 public class MongoConfiguration {
-
-    private static final Logger logger = LoggerFactory.getLogger(MongoConfiguration.class);
 
     @Bean
     public MongoMappingContext mongoMappingContext() {
@@ -54,26 +49,27 @@ public class MongoConfiguration {
 
     @Bean
     @StepScope
-    public MongoTemplate mongoTemplate(DatabaseParameters databaseParameters, MongoMappingContext mongoMappingContext)
-            throws UnknownHostException, UnsupportedEncodingException {
+    public MongoTemplate mongoTemplate(DatabaseParameters databaseParameters, MongoMappingContext mongoMappingContext) {
         return getMongoTemplate(databaseParameters.getDatabaseName(), databaseParameters.getMongoConnectionDetails(),
                 mongoMappingContext);
     }
 
     @Bean
     @StepScope
-    public MongoClient mongoClient(DatabaseParameters databaseParameters) throws UnsupportedEncodingException{
-        MongoClient client = new MongoClient(constructMongoClientURI(databaseParameters.getDatabaseName(),
-                databaseParameters.getMongoConnectionDetails()));
-        client.setWriteConcern(WriteConcern.MAJORITY);
-        return client;
+    public MongoClient mongoClient(DatabaseParameters databaseParameters) {
+        ConnectionString connectionString = constructMongoConnectionString(databaseParameters.getDatabaseName(),
+                databaseParameters.getMongoConnectionDetails()
+        );
+        return MongoClients.create(MongoClientSettings.builder()
+                .applyConnectionString(connectionString)
+                .writeConcern(WriteConcern.MAJORITY)
+                .build());
     }
 
-    public static MongoTemplate getMongoTemplate(String databaseName, MongoConnectionDetails mongoConnectionDetails,
-                                                 MongoMappingContext mongoMappingContext)
-            throws UnknownHostException, UnsupportedEncodingException {
-        MongoClientURI uri = constructMongoClientURI(databaseName, mongoConnectionDetails);
-        MongoDbFactory mongoFactory = new SimpleMongoDbFactory(uri);
+    public static MongoTemplate getMongoTemplate(String databaseName, EVAMongoConnectionDetails EVAMongoConnectionDetails,
+                                                 MongoMappingContext mongoMappingContext) {
+        ConnectionString connectionString = constructMongoConnectionString(databaseName, EVAMongoConnectionDetails);
+        MongoDatabaseFactory mongoFactory = new SimpleMongoClientDatabaseFactory(connectionString);
         MappingMongoConverter mappingMongoConverter = getMappingMongoConverter(mongoFactory, mongoMappingContext);
         MongoTemplate mongoTemplate = new MongoTemplate(mongoFactory, mappingMongoConverter);
         mongoTemplate.setWriteConcern(WriteConcern.MAJORITY);
@@ -81,32 +77,31 @@ public class MongoConfiguration {
         return mongoTemplate;
     }
 
-    public static MongoClientURI constructMongoClientURI(String databaseName,
-                                                         MongoConnectionDetails mongoConnectionDetails)
-            throws UnsupportedEncodingException {
-        if (mongoConnectionDetails.getUri() != null) {
+    public static ConnectionString constructMongoConnectionString(String databaseName,
+                                                                  EVAMongoConnectionDetails EVAMongoConnectionDetails) {
+        if (EVAMongoConnectionDetails.getUri() != null) {
             // Modify URI to connect to the specific database
-            String uri = mongoConnectionDetails.getUri();
+            String uri = EVAMongoConnectionDetails.getUri();
             if (uri.contains("?")) {
                 int idx = uri.indexOf("?");
-                return new MongoClientURI(uri.substring(0, idx) + databaseName + uri.substring(idx));
+                return new ConnectionString(uri.substring(0, idx) + databaseName + uri.substring(idx));
             } else if (uri.endsWith("/")) {
-                return new MongoClientURI(uri + databaseName);
+                return new ConnectionString(uri + databaseName);
             } else {
-                return new MongoClientURI(uri + "/" + databaseName);
+                return new ConnectionString(uri + "/" + databaseName);
             }
         }
-        return MongoUtils.constructMongoClientURI(mongoConnectionDetails.getHosts(),
-                                                  null,
-                                                  databaseName,
-                                                  mongoConnectionDetails.getUser(),
-                                                  mongoConnectionDetails.getPassword(),
-                                                  mongoConnectionDetails.getAuthenticationDatabase(),
-                                                  mongoConnectionDetails.getAuthenticationMechanism(),
-                                                  mongoConnectionDetails.getReadPreferenceName());
+        return MongoUtils.constructMongoConnectionString(EVAMongoConnectionDetails.getHosts(),
+                null,
+                databaseName,
+                EVAMongoConnectionDetails.getUser(),
+                EVAMongoConnectionDetails.getPassword(),
+                EVAMongoConnectionDetails.getAuthenticationDatabase(),
+                EVAMongoConnectionDetails.getAuthenticationMechanism(),
+                EVAMongoConnectionDetails.getReadPreferenceName());
     }
 
-    private static MappingMongoConverter getMappingMongoConverter(MongoDbFactory mongoFactory,
+    private static MappingMongoConverter getMappingMongoConverter(MongoDatabaseFactory mongoFactory,
                                                                   MongoMappingContext mongoMappingContext) {
         DbRefResolver dbRefResolver = new DefaultDbRefResolver(mongoFactory);
         MappingMongoConverter mongoConverter = new MappingMongoConverter(dbRefResolver, mongoMappingContext);

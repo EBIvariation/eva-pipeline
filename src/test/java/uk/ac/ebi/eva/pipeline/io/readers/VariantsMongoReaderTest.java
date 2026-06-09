@@ -16,45 +16,45 @@
 
 package uk.ac.ebi.eva.pipeline.io.readers;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.test.MetaDataInstanceFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.data.mongo.MongoRepositoriesAutoConfiguration;
+import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.mapping.MongoMappingContext;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
-import uk.ac.ebi.eva.pipeline.Application;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.ac.ebi.eva.pipeline.configuration.MongoCollectionNameConfiguration;
-import uk.ac.ebi.eva.pipeline.configuration.MongoConfiguration;
 import uk.ac.ebi.eva.pipeline.model.EnsemblVariant;
-import uk.ac.ebi.eva.pipeline.parameters.MongoConnectionDetails;
-import uk.ac.ebi.eva.test.configuration.TemporaryRuleConfiguration;
-import uk.ac.ebi.eva.test.data.VariantData;
-import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
+import uk.ac.ebi.eva.pipeline.parameters.EVAMongoConnectionDetails;
+import uk.ac.ebi.eva.test.utils.MongoTestContainerHelper;
+import uk.ac.ebi.eva.test.utils.MongoTestDataLoader;
 
-import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static uk.ac.ebi.eva.test.data.VariantData.VARIANT_WITHOUT_ANNOTATION_OTHER_STUDY_PATH;
+import static uk.ac.ebi.eva.test.data.VariantData.VARIANT_WITHOUT_ANNOTATION_PATH;
+import static uk.ac.ebi.eva.test.data.VariantData.VARIANT_WITH_ANNOTATION_PATH;
 
 /**
  * {@link VariantsMongoReader}
  * input: a variants collection address
  * output: a DBObject each time `.read()` is called, with at least: chr, start, annot
  */
-@RunWith(SpringRunner.class)
-@ActiveProfiles(Application.VARIANT_ANNOTATION_MONGO_PROFILE)
-@TestPropertySource({"classpath:test-mongo.properties"})
-@ContextConfiguration(classes = {MongoConnectionDetails.class, MongoMappingContext.class,
-        TemporaryRuleConfiguration.class, MongoCollectionNameConfiguration.class})
-public class VariantsMongoReaderTest {
+@DataMongoTest(excludeAutoConfiguration = MongoRepositoriesAutoConfiguration.class)
+@ExtendWith(SpringExtension.class)
+@ContextConfiguration(classes = {EVAMongoConnectionDetails.class, MongoMappingContext.class,
+        MongoCollectionNameConfiguration.class})
+public class VariantsMongoReaderTest extends MongoTestContainerHelper {
 
     private static final String COLLECTION_VARIANTS_NAME = "variants";
 
@@ -79,14 +79,21 @@ public class VariantsMongoReaderTest {
     private static final String VEP_CACHE_VERSION = "78";
 
     @Autowired
-    private MongoConnectionDetails mongoConnectionDetails;
+    private MongoTemplate mongoTemplate;
 
     @Autowired
-    private MongoMappingContext mongoMappingContext;
+    private ResourceLoader resourceLoader;
 
-    @Autowired
-    @Rule
-    public TemporaryMongoRule mongoRule;
+    @BeforeEach
+    public void setUp() throws Exception {
+        mongoTemplate.getDb().drop();
+    }
+
+    @AfterEach
+    void cleanDb() {
+        mongoTemplate.getDb().drop();
+    }
+
 
     @Test
     public void shouldReadVariantsWithoutAnnotationFieldInAStudy() throws Exception {
@@ -117,13 +124,10 @@ public class VariantsMongoReaderTest {
     private void checkVariantsRead(int expectedNonAnnotatedVariants, String study, String file,
                                    boolean excludeAnnotated, int chunkSize) throws Exception {
         ExecutionContext executionContext = MetaDataInstanceFactory.createStepExecution().getExecutionContext();
-        String databaseName = mongoRule.createDBAndInsertDocuments(COLLECTION_VARIANTS_NAME, Arrays.asList(
-                VariantData.getVariantWithAnnotation(),
-                VariantData.getVariantWithoutAnnotation(),
-                VariantData.getVariantWithoutAnnotationOtherStudy()));
-
-        MongoTemplate mongoTemplate = MongoConfiguration.getMongoTemplate(databaseName, mongoConnectionDetails,
-                mongoMappingContext);
+        MongoTestDataLoader mongoTestDataLoader = new MongoTestDataLoader(mongoTemplate, resourceLoader);
+        mongoTestDataLoader.load(VARIANT_WITH_ANNOTATION_PATH, COLLECTION_VARIANTS_NAME);
+        mongoTestDataLoader.load(VARIANT_WITHOUT_ANNOTATION_PATH, COLLECTION_VARIANTS_NAME);
+        mongoTestDataLoader.load(VARIANT_WITHOUT_ANNOTATION_OTHER_STUDY_PATH, COLLECTION_VARIANTS_NAME);
 
         VariantsMongoReader mongoItemReader = new VariantsMongoReader(mongoTemplate, COLLECTION_VARIANTS_NAME,
                 VEP_VERSION, VEP_CACHE_VERSION, study, file,
@@ -154,8 +158,12 @@ public class VariantsMongoReaderTest {
     }
 
     @Test
-    public void shouldReadVariantsInAllStudiesWhenNoStudySpecified() throws Exception {
+    public void shouldReadVariantsInAllStudiesWhenNoStudyNoFileSpecified() throws Exception {
         checkAllVariantsRead(EXPECTED_VARIANTS_IN_DB, null, null);
+    }
+
+    @Test
+    public void shouldReadVariantsInAllStudiesWhenNoStudyButFileIsSpecified() throws Exception {
         checkAllVariantsRead(EXPECTED_VARIANTS_IN_DB, null, FILE_ID);
     }
 

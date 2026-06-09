@@ -15,20 +15,20 @@
  */
 package uk.ac.ebi.eva.pipeline.parameters.validation.step;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersInvalidException;
-
 import uk.ac.ebi.eva.pipeline.configuration.jobs.steps.LoadFeatureCoordinatesStepConfiguration;
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
-import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
+import uk.ac.ebi.eva.test.utils.PipelineTemporaryFolderUtil;
 
 import java.io.IOException;
 import java.util.Map;
 import java.util.TreeMap;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * Tests that the arguments necessary to run a {@link LoadFeatureCoordinatesStepConfiguration} are
@@ -37,27 +37,25 @@ import java.util.TreeMap;
 public class LoadFeatureCoordinatesStepParameteresValidatorTest {
     private LoadFeatureCoordinatesStepParameteresValidator validator;
 
-    @Rule
-    public PipelineTemporaryFolderRule temporaryFolderRule = new PipelineTemporaryFolderRule();
+    public PipelineTemporaryFolderUtil temporaryFolderUtil = new PipelineTemporaryFolderUtil();
 
-    private Map<String, JobParameter> requiredParameters;
+    private Map<String, JobParameter<?>> requiredParameters;
 
-    private Map<String, JobParameter> optionalParameters;
+    private Map<String, JobParameter<?>> optionalParameters;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         validator = new LoadFeatureCoordinatesStepParameteresValidator();
 
         requiredParameters = new TreeMap<>();
-        requiredParameters.put(JobParametersNames.DB_NAME, new JobParameter("dbName"));
+        requiredParameters.put(JobParametersNames.DB_NAME, new JobParameter("dbName", String.class));
         requiredParameters.put(JobParametersNames.DB_COLLECTIONS_FEATURES_NAME,
-                               new JobParameter("dbCollectionsFeaturesName"));
+                new JobParameter("dbCollectionsFeaturesName", String.class));
         requiredParameters.put(JobParametersNames.INPUT_GTF,
-                               new JobParameter(temporaryFolderRule.newFile().getCanonicalPath()));
+                new JobParameter(temporaryFolderUtil.newFile().getCanonicalPath(), String.class));
 
         optionalParameters = new TreeMap<>();
-        optionalParameters.put(JobParametersNames.CONFIG_CHUNK_SIZE, new JobParameter("100"));
-        optionalParameters.put(JobParametersNames.CONFIG_RESTARTABILITY_ALLOW, new JobParameter("true"));
+        optionalParameters.put(JobParametersNames.CONFIG_CHUNK_SIZE, new JobParameter("100", String.class));
     }
 
     @Test
@@ -66,29 +64,29 @@ public class LoadFeatureCoordinatesStepParameteresValidatorTest {
     }
 
     @Test
-    public void allJobParametersIncludingOptionalAreValid() throws JobParametersInvalidException, IOException {
-        Map<String, JobParameter> parameters = new TreeMap<>();
+    public void allJobParametersIncludingOptionalAreValid() throws JobParametersInvalidException {
+        Map<String, JobParameter<?>> parameters = new TreeMap<>();
         parameters.putAll(requiredParameters);
         parameters.putAll(optionalParameters);
         validator.validate(new JobParameters(parameters));
     }
 
-    @Test(expected = JobParametersInvalidException.class)
-    public void dbCollectionsFeaturesNameIsRequired() throws JobParametersInvalidException, IOException {
+    @Test
+    public void dbCollectionsFeaturesNameIsRequired() {
         requiredParameters.remove(JobParametersNames.DB_COLLECTIONS_FEATURES_NAME);
-        validator.validate(new JobParameters(requiredParameters));
+        assertThrows(JobParametersInvalidException.class, () -> validator.validate(new JobParameters(requiredParameters)));
     }
 
-    @Test(expected = JobParametersInvalidException.class)
+    @Test
     public void dbNameIsRequired() throws JobParametersInvalidException, IOException {
         requiredParameters.remove(JobParametersNames.DB_NAME);
-        validator.validate(new JobParameters(requiredParameters));
+        assertThrows(JobParametersInvalidException.class, () -> validator.validate(new JobParameters(requiredParameters)));
     }
 
-    @Test(expected = JobParametersInvalidException.class)
-    public void inputGtfIsRequired() throws JobParametersInvalidException, IOException {
+    @Test
+    public void inputGtfIsRequired() {
         requiredParameters.remove(JobParametersNames.INPUT_GTF);
-        validator.validate(new JobParameters(requiredParameters));
+        assertThrows(JobParametersInvalidException.class, () -> validator.validate(new JobParameters(requiredParameters)));
     }
 
 }

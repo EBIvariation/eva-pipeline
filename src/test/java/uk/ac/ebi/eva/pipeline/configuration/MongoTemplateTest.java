@@ -16,33 +16,30 @@
 
 package uk.ac.ebi.eva.pipeline.configuration;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.ac.ebi.eva.commons.mongodb.entities.AnnotationMetadataMongo;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doThrow;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 public class MongoTemplateTest {
     @MockBean
     private MongoTemplate mongoTemplate;
 
-    @Rule
-    public ExpectedException exceptionRule = ExpectedException.none();
-
-    @Before
+    @BeforeEach
     public void setUp() {
 
     }
 
-    @Test(expected = DataAccessException.class)
+    @Test
     public void testMongoTemplateWriteResultChecking() {
         AnnotationMetadataMongo annotationMetadata = new AnnotationMetadataMongo("vep_1", "vep_cache_1");
         annotationMetadata.setDefaultVersion(true);
@@ -50,6 +47,6 @@ public class MongoTemplateTest {
         })
                 .when(mongoTemplate).save(annotationMetadata, "AnnotationMetadata");
 
-        mongoTemplate.save(annotationMetadata, "AnnotationMetadata");
+        assertThrows(DataAccessException.class, () -> mongoTemplate.save(annotationMetadata, "AnnotationMetadata"));
     }
 }

@@ -20,13 +20,10 @@ import org.springframework.batch.core.JobParametersInvalidException;
 import org.springframework.batch.core.JobParametersValidator;
 import org.springframework.batch.core.job.CompositeJobParametersValidator;
 import org.springframework.batch.core.job.DefaultJobParametersValidator;
-
 import uk.ac.ebi.eva.pipeline.configuration.jobs.steps.LoadFeatureCoordinatesStepConfiguration;
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
-import uk.ac.ebi.eva.pipeline.parameters.validation.ConfigRestartabilityAllowValidator;
 import uk.ac.ebi.eva.pipeline.parameters.validation.DbCollectionsFeaturesNameValidator;
 import uk.ac.ebi.eva.pipeline.parameters.validation.DbNameValidator;
-import uk.ac.ebi.eva.pipeline.parameters.validation.OptionalValidator;
 
 import java.util.Arrays;
 import java.util.List;
@@ -38,7 +35,7 @@ public class CreateDatabaseIndexesStepParametersValidator extends DefaultJobPara
 
     public CreateDatabaseIndexesStepParametersValidator() {
         super(new String[]{JobParametersNames.DB_COLLECTIONS_FEATURES_NAME,
-                           JobParametersNames.DB_NAME},
+                        JobParametersNames.DB_NAME},
                 new String[]{});
     }
 
@@ -51,9 +48,7 @@ public class CreateDatabaseIndexesStepParametersValidator extends DefaultJobPara
     private CompositeJobParametersValidator compositeJobParametersValidator() {
         final List<JobParametersValidator> jobParametersValidators = Arrays.asList(
                 new DbCollectionsFeaturesNameValidator(),
-                new DbNameValidator(),
-                new OptionalValidator(new ConfigRestartabilityAllowValidator(),
-                                      JobParametersNames.CONFIG_RESTARTABILITY_ALLOW)
+                new DbNameValidator()
         );
 
         CompositeJobParametersValidator compositeJobParametersValidator = new CompositeJobParametersValidator();

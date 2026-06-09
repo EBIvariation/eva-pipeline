@@ -16,20 +16,15 @@
 package uk.ac.ebi.eva.test.configuration;
 
 import org.springframework.batch.core.configuration.StepRegistry;
-import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
-import org.springframework.batch.core.configuration.annotation.SimpleBatchConfiguration;
 import org.springframework.batch.core.configuration.support.MapStepRegistry;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 
 /**
  * Configuration for simple spring batch tests without any database that also require a step registry to inject steps
  * manually.
  */
 @Configuration
-@EnableBatchProcessing
-@Import({SimpleBatchConfiguration.class})
 public class SynchronousBatchTestConfiguration {
 
     @Bean

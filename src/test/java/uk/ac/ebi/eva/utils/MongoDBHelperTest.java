@@ -1,10 +1,10 @@
 package uk.ac.ebi.eva.utils;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.opencb.commons.utils.CryptoUtils;
 import uk.ac.ebi.eva.commons.mongodb.entities.VariantMongo;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class MongoDBHelperTest {
 

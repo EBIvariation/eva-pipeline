@@ -20,18 +20,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
-import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
-import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.job.builder.FlowJobBuilder;
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.job.flow.Flow;
+import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
-
 import uk.ac.ebi.eva.pipeline.configuration.jobs.flows.AnnotationFlowOptionalConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.jobs.steps.LoadFileStepConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.jobs.steps.LoadVariantsStepConfiguration;
@@ -52,7 +50,6 @@ import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VEP_ANNOTATION_OPTI
  * Steps in () are optional
  */
 @Configuration
-@EnableBatchProcessing
 @Import({LoadVariantsStepConfiguration.class, LoadFileStepConfiguration.class, AnnotationFlowOptionalConfiguration.class})
 public class AggregatedVcfJobConfiguration {
 
@@ -72,11 +69,10 @@ public class AggregatedVcfJobConfiguration {
 
     @Bean(AGGREGATED_VCF_JOB)
     @Scope("prototype")
-    public Job aggregatedVcfJob(JobBuilderFactory jobBuilderFactory) {
+    public Job aggregatedVcfJob(JobRepository jobRepository) {
         logger.debug("Building '" + AGGREGATED_VCF_JOB + "'");
 
-        JobBuilder jobBuilder = jobBuilderFactory
-                .get(AGGREGATED_VCF_JOB)
+        JobBuilder jobBuilder = new JobBuilder(AGGREGATED_VCF_JOB, jobRepository)
                 .incrementer(new NewJobIncrementer())
                 .validator(new AggregatedVcfJobParametersValidator());
         FlowJobBuilder builder = jobBuilder

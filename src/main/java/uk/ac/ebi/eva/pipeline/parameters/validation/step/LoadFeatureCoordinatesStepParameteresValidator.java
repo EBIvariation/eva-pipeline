@@ -24,7 +24,6 @@ import org.springframework.batch.core.job.DefaultJobParametersValidator;
 import uk.ac.ebi.eva.pipeline.configuration.jobs.steps.LoadFeatureCoordinatesStepConfiguration;
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 import uk.ac.ebi.eva.pipeline.parameters.validation.ConfigChunkSizeValidator;
-import uk.ac.ebi.eva.pipeline.parameters.validation.ConfigRestartabilityAllowValidator;
 import uk.ac.ebi.eva.pipeline.parameters.validation.DbCollectionsFeaturesNameValidator;
 import uk.ac.ebi.eva.pipeline.parameters.validation.DbNameValidator;
 import uk.ac.ebi.eva.pipeline.parameters.validation.InputGtfValidator;
@@ -40,8 +39,8 @@ public class LoadFeatureCoordinatesStepParameteresValidator extends DefaultJobPa
 
     public LoadFeatureCoordinatesStepParameteresValidator() {
         super(new String[]{JobParametersNames.DB_COLLECTIONS_FEATURES_NAME,
-                           JobParametersNames.DB_NAME,
-                           JobParametersNames.INPUT_GTF},
+                        JobParametersNames.DB_NAME,
+                        JobParametersNames.INPUT_GTF},
                 new String[]{});
     }
 
@@ -56,8 +55,6 @@ public class LoadFeatureCoordinatesStepParameteresValidator extends DefaultJobPa
                 new DbCollectionsFeaturesNameValidator(),
                 new DbNameValidator(),
                 new InputGtfValidator(),
-                new OptionalValidator(new ConfigRestartabilityAllowValidator(),
-                                      JobParametersNames.CONFIG_RESTARTABILITY_ALLOW),
                 new OptionalValidator(new ConfigChunkSizeValidator(), JobParametersNames.CONFIG_CHUNK_SIZE)
         );
 

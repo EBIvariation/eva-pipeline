@@ -15,8 +15,6 @@
  */
 package uk.ac.ebi.eva.pipeline.parameters;
 
-import org.opencb.opencga.storage.mongodb.variant.MongoDBVariantStorageManager;
-
 public class JobParametersNames {
 
     /*
@@ -110,27 +108,6 @@ public class JobParametersNames {
 
 
     /*
-     * OpenCGA (parameters read from OpenCGA "conf" folder)
-     */
-
-    public static final String APP_OPENCGA_PATH = "app.opencga.path";
-
-    public static final String OPENCGA_DB_NAME = MongoDBVariantStorageManager.OPENCGA_STORAGE_MONGODB_VARIANT_DB_NAME;
-
-    public static final String OPENCGA_DB_HOSTS = MongoDBVariantStorageManager.OPENCGA_STORAGE_MONGODB_VARIANT_DB_HOSTS;
-
-    public static final String OPENCGA_DB_AUTHENTICATIONDB = MongoDBVariantStorageManager.OPENCGA_STORAGE_MONGODB_VARIANT_DB_AUTHENTICATION_DB;
-
-    public static final String OPENCGA_DB_USER = MongoDBVariantStorageManager.OPENCGA_STORAGE_MONGODB_VARIANT_DB_USER;
-
-    public static final String OPENCGA_DB_PASSWORD = MongoDBVariantStorageManager.OPENCGA_STORAGE_MONGODB_VARIANT_DB_PASS;
-
-    public static final String OPENCGA_DB_COLLECTIONS_VARIANTS_NAME = MongoDBVariantStorageManager.OPENCGA_STORAGE_MONGODB_VARIANT_DB_COLLECTION_VARIANTS;
-
-    public static final String OPENCGA_DB_COLLECTIONS_FILES_NAME = MongoDBVariantStorageManager.OPENCGA_STORAGE_MONGODB_VARIANT_DB_COLLECTION_FILES;
-
-
-    /*
      * Variant Effect Predictor (VEP)
      */
 
@@ -153,13 +130,9 @@ public class JobParametersNames {
      * Other configuration
      */
 
-    public static final String CONFIG_RESTARTABILITY_ALLOW = "config.restartability.allow";
-
     public static final String CONFIG_CHUNK_SIZE = "config.chunk.size";
 
 
     public static final String PROPERTY_FILE_PROPERTY = "parameters.path";
-
-    public static final String RESTART_PROPERTY = "force.restart";
 
 }

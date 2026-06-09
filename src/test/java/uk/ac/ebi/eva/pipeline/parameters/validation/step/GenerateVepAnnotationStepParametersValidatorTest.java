@@ -15,20 +15,20 @@
  */
 package uk.ac.ebi.eva.pipeline.parameters.validation.step;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersInvalidException;
-
 import uk.ac.ebi.eva.pipeline.configuration.jobs.steps.GenerateVepAnnotationStepConfiguration;
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
-import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
+import uk.ac.ebi.eva.test.utils.PipelineTemporaryFolderUtil;
 
 import java.io.IOException;
 import java.util.Map;
 import java.util.TreeMap;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * Tests that the arguments necessary to run a {@link GenerateVepAnnotationStepConfiguration} are
@@ -38,40 +38,39 @@ public class GenerateVepAnnotationStepParametersValidatorTest {
 
     private GenerateVepAnnotationStepParametersValidator validator;
 
-    private Map<String, JobParameter> requiredParameters;
+    private Map<String, JobParameter<?>> requiredParameters;
 
-    private Map<String, JobParameter> optionalParameters;
+    private Map<String, JobParameter<?>> optionalParameters;
 
-    @Rule
-    public PipelineTemporaryFolderRule temporaryFolderRule = new PipelineTemporaryFolderRule();
+    public PipelineTemporaryFolderUtil temporaryFolderUtil = new PipelineTemporaryFolderUtil();
 
-    @Before
+    @BeforeEach
     public void setUp() throws IOException {
         boolean studyIdRequired = true;
         validator = new GenerateVepAnnotationStepParametersValidator(studyIdRequired);
 
         requiredParameters = new TreeMap<>();
 
-        requiredParameters.put(JobParametersNames.DB_NAME, new JobParameter("eva_testing"));
-        requiredParameters.put(JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME, new JobParameter("variants"));
+        requiredParameters.put(JobParametersNames.DB_NAME, new JobParameter("eva_testing", String.class));
+        requiredParameters.put(JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME, new JobParameter("variants", String.class));
         requiredParameters.put(JobParametersNames.APP_VEP_CACHE_PATH,
-                               new JobParameter(temporaryFolderRule.getRoot().getCanonicalPath()));
-        requiredParameters.put(JobParametersNames.APP_VEP_CACHE_SPECIES, new JobParameter("Human"));
-        requiredParameters.put(JobParametersNames.APP_VEP_CACHE_VERSION, new JobParameter("100_A"));
-        requiredParameters.put(JobParametersNames.APP_VEP_NUMFORKS, new JobParameter("6"));
+                new JobParameter(temporaryFolderUtil.getRoot().getCanonicalPath(), String.class));
+        requiredParameters.put(JobParametersNames.APP_VEP_CACHE_SPECIES, new JobParameter("Human", String.class));
+        requiredParameters.put(JobParametersNames.APP_VEP_CACHE_VERSION, new JobParameter("100_A", String.class));
+        requiredParameters.put(JobParametersNames.APP_VEP_NUMFORKS, new JobParameter("6", String.class));
         requiredParameters.put(JobParametersNames.APP_VEP_PATH,
-                               new JobParameter(temporaryFolderRule.newFile().getCanonicalPath()));
+                new JobParameter(temporaryFolderUtil.newFile().getCanonicalPath(), String.class));
         requiredParameters.put(JobParametersNames.INPUT_FASTA,
-                               new JobParameter(temporaryFolderRule.newFile().getCanonicalPath()));
-        requiredParameters.put(JobParametersNames.INPUT_STUDY_ID, new JobParameter("inputStudyId"));
-        requiredParameters.put(JobParametersNames.INPUT_VCF_ID, new JobParameter("inputVcfId"));
+                new JobParameter(temporaryFolderUtil.newFile().getCanonicalPath(), String.class));
+        requiredParameters.put(JobParametersNames.INPUT_STUDY_ID, new JobParameter("inputStudyId", String.class));
+        requiredParameters.put(JobParametersNames.INPUT_VCF_ID, new JobParameter("inputVcfId", String.class));
         requiredParameters.put(JobParametersNames.OUTPUT_DIR_ANNOTATION,
-                               new JobParameter(temporaryFolderRule.getRoot().getCanonicalPath()));
-        requiredParameters.put(JobParametersNames.APP_VEP_TIMEOUT, new JobParameter("600"));
-        requiredParameters.put(JobParametersNames.ANNOTATION_OVERWRITE, new JobParameter("false"));
+                new JobParameter(temporaryFolderUtil.getRoot().getCanonicalPath(), String.class));
+        requiredParameters.put(JobParametersNames.APP_VEP_TIMEOUT, new JobParameter("600", String.class));
+        requiredParameters.put(JobParametersNames.ANNOTATION_OVERWRITE, new JobParameter("false", String.class));
 
         optionalParameters = new TreeMap<>();
-        optionalParameters.put(JobParametersNames.CONFIG_CHUNK_SIZE, new JobParameter("100"));
+        optionalParameters.put(JobParametersNames.CONFIG_CHUNK_SIZE, new JobParameter("100", String.class));
     }
 
     @Test
@@ -80,69 +79,69 @@ public class GenerateVepAnnotationStepParametersValidatorTest {
     }
 
     @Test
-    public void allJobParametersIncludingOptionalAreValid() throws JobParametersInvalidException, IOException {
-        Map<String, JobParameter> parameters = new TreeMap<>();
+    public void allJobParametersIncludingOptionalAreValid() throws JobParametersInvalidException {
+        Map<String, JobParameter<?>> parameters = new TreeMap<>();
         parameters.putAll(requiredParameters);
         parameters.putAll(optionalParameters);
         validator.validate(new JobParameters(parameters));
     }
 
-    @Test(expected = JobParametersInvalidException.class)
+    @Test
     public void dbNameIsRequired() throws JobParametersInvalidException, IOException {
         requiredParameters.remove(JobParametersNames.DB_NAME);
-        validator.validate(new JobParameters(requiredParameters));
+        assertThrows(JobParametersInvalidException.class, () -> validator.validate(new JobParameters(requiredParameters)));
     }
 
-    @Test(expected = JobParametersInvalidException.class)
-    public void dbCollectionsVariantsNameIsRequired() throws JobParametersInvalidException, IOException {
+    @Test
+    public void dbCollectionsVariantsNameIsRequired() {
         requiredParameters.remove(JobParametersNames.DB_COLLECTIONS_VARIANTS_NAME);
-        validator.validate(new JobParameters(requiredParameters));
+        assertThrows(JobParametersInvalidException.class, () -> validator.validate(new JobParameters(requiredParameters)));
     }
 
-    @Test(expected = JobParametersInvalidException.class)
-    public void appVepCachePathIsRequired() throws JobParametersInvalidException, IOException {
+    @Test
+    public void appVepCachePathIsRequired() {
         requiredParameters.remove(JobParametersNames.APP_VEP_CACHE_PATH);
-        validator.validate(new JobParameters(requiredParameters));
+        assertThrows(JobParametersInvalidException.class, () -> validator.validate(new JobParameters(requiredParameters)));
     }
 
-    @Test(expected = JobParametersInvalidException.class)
-    public void appVepCacheSpeciesIsRequired() throws JobParametersInvalidException, IOException {
+    @Test
+    public void appVepCacheSpeciesIsRequired() {
         requiredParameters.remove(JobParametersNames.APP_VEP_CACHE_SPECIES);
-        validator.validate(new JobParameters(requiredParameters));
+        assertThrows(JobParametersInvalidException.class, () -> validator.validate(new JobParameters(requiredParameters)));
     }
 
-    @Test(expected = JobParametersInvalidException.class)
-    public void appVepCacheVersionIsRequired() throws JobParametersInvalidException, IOException {
+    @Test
+    public void appVepCacheVersionIsRequired() {
         requiredParameters.remove(JobParametersNames.APP_VEP_CACHE_VERSION);
-        validator.validate(new JobParameters(requiredParameters));
+        assertThrows(JobParametersInvalidException.class, () -> validator.validate(new JobParameters(requiredParameters)));
     }
 
-    @Test(expected = JobParametersInvalidException.class)
-    public void appVepNumForksIsRequired() throws JobParametersInvalidException, IOException {
+    @Test
+    public void appVepNumForksIsRequired() {
         requiredParameters.remove(JobParametersNames.APP_VEP_NUMFORKS);
-        validator.validate(new JobParameters(requiredParameters));
+        assertThrows(JobParametersInvalidException.class, () -> validator.validate(new JobParameters(requiredParameters)));
     }
 
-    @Test(expected = JobParametersInvalidException.class)
-    public void appVepPathIsRequired() throws JobParametersInvalidException, IOException {
+    @Test
+    public void appVepPathIsRequired() {
         requiredParameters.remove(JobParametersNames.APP_VEP_PATH);
-        validator.validate(new JobParameters(requiredParameters));
+        assertThrows(JobParametersInvalidException.class, () -> validator.validate(new JobParameters(requiredParameters)));
     }
 
-    @Test(expected = JobParametersInvalidException.class)
-    public void inputFastaIsRequired() throws JobParametersInvalidException, IOException {
+    @Test
+    public void inputFastaIsRequired() {
         requiredParameters.remove(JobParametersNames.INPUT_FASTA);
-        validator.validate(new JobParameters(requiredParameters));
-    }
-
-    @Test(expected = JobParametersInvalidException.class)
-    public void inputStudyIdIsRequired() throws JobParametersInvalidException, IOException {
-        requiredParameters.remove(JobParametersNames.INPUT_STUDY_ID);
-        validator.validate(new JobParameters(requiredParameters));
+        assertThrows(JobParametersInvalidException.class, () -> validator.validate(new JobParameters(requiredParameters)));
     }
 
     @Test
-    public void inputStudyIdIsNotRequired() throws JobParametersInvalidException, IOException {
+    public void inputStudyIdIsRequired() {
+        requiredParameters.remove(JobParametersNames.INPUT_STUDY_ID);
+        assertThrows(JobParametersInvalidException.class, () -> validator.validate(new JobParameters(requiredParameters)));
+    }
+
+    @Test
+    public void inputStudyIdIsNotRequired() throws JobParametersInvalidException {
         requiredParameters.remove(JobParametersNames.INPUT_STUDY_ID);
 
         boolean studyIdNotRequired = false;
@@ -150,14 +149,14 @@ public class GenerateVepAnnotationStepParametersValidatorTest {
         validator.validate(new JobParameters(requiredParameters));
     }
 
-    @Test(expected = JobParametersInvalidException.class)
-    public void inputVcfIdIsRequired() throws JobParametersInvalidException, IOException {
+    @Test
+    public void inputVcfIdIsRequired() {
         requiredParameters.remove(JobParametersNames.INPUT_VCF_ID);
-        validator.validate(new JobParameters(requiredParameters));
+        assertThrows(JobParametersInvalidException.class, () -> validator.validate(new JobParameters(requiredParameters)));
     }
 
     @Test
-    public void inputVcfIdIsNotRequired() throws JobParametersInvalidException, IOException {
+    public void inputVcfIdIsNotRequired() throws JobParametersInvalidException {
         requiredParameters.remove(JobParametersNames.INPUT_VCF_ID);
 
         boolean studyIdNotRequired = false;
@@ -165,21 +164,21 @@ public class GenerateVepAnnotationStepParametersValidatorTest {
         validator.validate(new JobParameters(requiredParameters));
     }
 
-    @Test(expected = JobParametersInvalidException.class)
-    public void outputDirAnnotationIsRequired() throws JobParametersInvalidException, IOException {
+    @Test
+    public void outputDirAnnotationIsRequired() {
         requiredParameters.remove(JobParametersNames.OUTPUT_DIR_ANNOTATION);
-        validator.validate(new JobParameters(requiredParameters));
+        assertThrows(JobParametersInvalidException.class, () -> validator.validate(new JobParameters(requiredParameters)));
     }
 
-    @Test(expected = JobParametersInvalidException.class)
-    public void appVepTimeoutIsRequired() throws JobParametersInvalidException, IOException {
+    @Test
+    public void appVepTimeoutIsRequired() {
         requiredParameters.remove(JobParametersNames.APP_VEP_TIMEOUT);
-        validator.validate(new JobParameters(requiredParameters));
+        assertThrows(JobParametersInvalidException.class, () -> validator.validate(new JobParameters(requiredParameters)));
     }
 
-    @Test(expected = JobParametersInvalidException.class)
-    public void annotationOverwriteIsRequired() throws JobParametersInvalidException, IOException {
+    @Test
+    public void annotationOverwriteIsRequired() {
         requiredParameters.remove(JobParametersNames.ANNOTATION_OVERWRITE);
-        validator.validate(new JobParameters(requiredParameters));
+        assertThrows(JobParametersInvalidException.class, () -> validator.validate(new JobParameters(requiredParameters)));
     }
 }

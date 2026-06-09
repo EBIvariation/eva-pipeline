@@ -18,8 +18,8 @@ package uk.ac.ebi.eva.pipeline.configuration.jobs.steps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.Step;
-import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
-import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
+import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemStreamReader;
 import org.springframework.batch.item.ItemWriter;
@@ -29,6 +29,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.transaction.PlatformTransactionManager;
 import uk.ac.ebi.eva.commons.core.models.IVariant;
 import uk.ac.ebi.eva.commons.core.models.pipeline.Variant;
 import uk.ac.ebi.eva.pipeline.configuration.ChunkSizeCompletionPolicyConfiguration;
@@ -39,7 +40,6 @@ import uk.ac.ebi.eva.pipeline.configuration.policies.InvalidVariantSkipPolicyCon
 import uk.ac.ebi.eva.pipeline.listeners.SkippedItemListener;
 import uk.ac.ebi.eva.pipeline.listeners.StepProgressListener;
 import uk.ac.ebi.eva.pipeline.listeners.VariantLoaderStepStatisticsListener;
-import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 import uk.ac.ebi.eva.pipeline.policies.InvalidVariantSkipPolicy;
 
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.COMPOSITE_VARIANT_PROCESSOR;
@@ -54,7 +54,6 @@ import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.VARIANT_WRITER;
  * Output: variants loaded into mongodb
  */
 @Configuration
-@EnableBatchProcessing
 @Import({VcfReaderConfiguration.class, VariantProcessorConfiguration.class, VariantWriterConfiguration.class,
         ChunkSizeCompletionPolicyConfiguration.class, InvalidVariantSkipPolicyConfiguration.class})
 public class LoadVariantsStepConfiguration {
@@ -77,21 +76,20 @@ public class LoadVariantsStepConfiguration {
     private InvalidVariantSkipPolicy invalidVariantSkipPolicy;
 
     @Bean(LOAD_VARIANTS_STEP)
-    public Step loadVariantsStep(StepBuilderFactory stepBuilderFactory, JobOptions jobOptions,
+    public Step loadVariantsStep(JobRepository jobRepository, PlatformTransactionManager transactionManager,
                                  SimpleCompletionPolicy chunkSizeCompletionPolicy) {
         logger.debug("Building '" + LOAD_VARIANTS_STEP + "'");
 
-        return stepBuilderFactory.get(LOAD_VARIANTS_STEP)
-                .<Variant, Variant>chunk(chunkSizeCompletionPolicy)
+        return new StepBuilder(LOAD_VARIANTS_STEP, jobRepository)
+                .<Variant, Variant>chunk(chunkSizeCompletionPolicy, transactionManager)
                 .reader(reader)
                 .processor(variantProcessor)
                 .writer(variantWriter)
-                .faultTolerant()
-                .skipPolicy(invalidVariantSkipPolicy)
-                .allowStartIfComplete(jobOptions.isAllowStartIfComplete())
                 .listener(new SkippedItemListener())
                 .listener(new StepProgressListener())
                 .listener(new VariantLoaderStepStatisticsListener())
+                .faultTolerant()
+                .skipPolicy(invalidVariantSkipPolicy)
                 .build();
     }
 

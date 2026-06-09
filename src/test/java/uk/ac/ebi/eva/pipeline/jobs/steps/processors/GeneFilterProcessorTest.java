@@ -15,18 +15,17 @@
  */
 package uk.ac.ebi.eva.pipeline.jobs.steps.processors;
 
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.test.MetaDataInstanceFactory;
 import uk.ac.ebi.eva.commons.core.models.FeatureCoordinates;
 import uk.ac.ebi.eva.pipeline.io.readers.GeneReader;
 import uk.ac.ebi.eva.test.data.GtfStaticTestData;
-import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
+import uk.ac.ebi.eva.test.utils.PipelineTemporaryFolderUtil;
 
 import java.io.File;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * {@link GeneFilterProcessor}
@@ -35,15 +34,14 @@ import static org.junit.Assert.assertEquals;
  */
 public class GeneFilterProcessorTest {
 
-    @Rule
-    public PipelineTemporaryFolderRule temporaryFolderRule = new PipelineTemporaryFolderRule();
+    public PipelineTemporaryFolderUtil temporaryFolderUtil = new PipelineTemporaryFolderUtil();
 
     @Test
     public void shouldKeepGenesAndTranscripts() throws Exception {
         ExecutionContext executionContext = MetaDataInstanceFactory.createStepExecution().getExecutionContext();
         GeneFilterProcessor geneFilterProcessor = new GeneFilterProcessor();
 
-        File file = temporaryFolderRule.newGzipFile(GtfStaticTestData.GTF_CONTENT);
+        File file = temporaryFolderUtil.newGzipFile(GtfStaticTestData.GTF_CONTENT);
 
         GeneReader geneReader = new GeneReader(file);
         geneReader.setSaveState(false);

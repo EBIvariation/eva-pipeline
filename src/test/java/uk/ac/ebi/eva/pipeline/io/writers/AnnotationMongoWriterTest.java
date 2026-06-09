@@ -16,37 +16,29 @@
 package uk.ac.ebi.eva.pipeline.io.writers;
 
 import com.mongodb.BasicDBList;
-import com.mongodb.Block;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import org.bson.Document;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.batch.item.Chunk;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.core.MongoOperations;
+import org.springframework.boot.autoconfigure.data.mongo.MongoRepositoriesAutoConfiguration;
+import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.mapping.MongoMappingContext;
-import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
-import org.springframework.data.mongodb.core.query.Update;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.ac.ebi.eva.commons.mongodb.entities.AnnotationMongo;
 import uk.ac.ebi.eva.commons.mongodb.entities.subdocuments.ConsequenceTypeMongo;
 import uk.ac.ebi.eva.commons.mongodb.entities.subdocuments.ScoreMongo;
-import uk.ac.ebi.eva.pipeline.Application;
-import uk.ac.ebi.eva.pipeline.configuration.MongoConfiguration;
 import uk.ac.ebi.eva.pipeline.io.mappers.AnnotationLineMapper;
-import uk.ac.ebi.eva.pipeline.parameters.MongoConnectionDetails;
-import uk.ac.ebi.eva.test.configuration.TemporaryRuleConfiguration;
-import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
+import uk.ac.ebi.eva.pipeline.parameters.EVAMongoConnectionDetails;
+import uk.ac.ebi.eva.test.utils.MongoTestContainerHelper;
 import uk.ac.ebi.eva.utils.MongoDBHelper;
 
-import java.io.UnsupportedEncodingException;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -56,9 +48,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static uk.ac.ebi.eva.commons.mongodb.entities.AnnotationMongo.CONSEQUENCE_TYPE_FIELD;
 import static uk.ac.ebi.eva.commons.mongodb.entities.AnnotationMongo.XREFS_FIELD;
 import static uk.ac.ebi.eva.commons.mongodb.entities.subdocuments.ConsequenceTypeMongo.POLYPHEN_FIELD;
@@ -74,11 +66,10 @@ import static uk.ac.ebi.eva.test.utils.JobTestUtils.count;
  * output: all the Annotations get written in mongo, with at least the
  * "consequence types" annotations set
  */
-@RunWith(SpringRunner.class)
-@ActiveProfiles(Application.VARIANT_ANNOTATION_MONGO_PROFILE)
-@TestPropertySource({"classpath:test-mongo.properties"})
-@ContextConfiguration(classes = {MongoConnectionDetails.class, MongoMappingContext.class, TemporaryRuleConfiguration.class})
-public class AnnotationMongoWriterTest {
+@DataMongoTest(excludeAutoConfiguration = MongoRepositoriesAutoConfiguration.class)
+@ExtendWith(SpringExtension.class)
+@ContextConfiguration(classes = {EVAMongoConnectionDetails.class, MongoMappingContext.class})
+public class AnnotationMongoWriterTest extends MongoTestContainerHelper {
 
     private static final String COLLECTION_ANNOTATIONS_NAME = "annotations";
 
@@ -87,41 +78,36 @@ public class AnnotationMongoWriterTest {
     private static final String VEP_CACHE_VERSION = "2";
 
     @Autowired
-    private MongoConnectionDetails mongoConnectionDetails;
-
-    @Autowired
-    private MongoMappingContext mongoMappingContext;
-
-    @Autowired
-    @Rule
-    public TemporaryMongoRule mongoRule;
+    private MongoTemplate mongoTemplate;
 
     private AnnotationMongoWriter annotationWriter;
 
     private AnnotationLineMapper annotationLineMapper;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
+        mongoTemplate.getDb().drop();
         annotationLineMapper = new AnnotationLineMapper(VEP_VERSION, VEP_CACHE_VERSION);
+    }
+
+    @AfterEach
+    void cleanDb() {
+        mongoTemplate.getDb().drop();
     }
 
     @Test
     public void shouldWriteAllFieldsIntoMongoDb() throws Exception {
-        String databaseName = mongoRule.getRandomTemporaryDatabaseName();
-
         List<AnnotationMongo> annotations = new ArrayList<>();
         for (String annotLine : vepOutputContent.split("\n")) {
             annotations.add(annotationLineMapper.mapLine(annotLine, 0));
         }
 
         // load the annotation
-        MongoOperations operations = MongoConfiguration.getMongoTemplate(databaseName, mongoConnectionDetails,
-                mongoMappingContext);
-        annotationWriter = new AnnotationMongoWriter(operations, COLLECTION_ANNOTATIONS_NAME);
-        annotationWriter.write(Collections.singletonList(annotations));
+        annotationWriter = new AnnotationMongoWriter(mongoTemplate, COLLECTION_ANNOTATIONS_NAME);
+        annotationWriter.write(new Chunk(Arrays.asList(annotations)));
 
         // and finally check that documents in annotation collection have annotations
-        MongoCursor<Document> cursor = mongoRule.getCollection(databaseName, COLLECTION_ANNOTATIONS_NAME).find().iterator();
+        MongoCursor<Document> cursor = mongoTemplate.getDb().getCollection(COLLECTION_ANNOTATIONS_NAME).find().iterator();
 
         int count = 0;
         int consequenceTypeCount = 0;
@@ -145,8 +131,6 @@ public class AnnotationMongoWriterTest {
      */
     @Test
     public void shouldWriteAllFieldsIntoMongoDbMultipleSetsAnnotations() throws Exception {
-        String databaseName = mongoRule.getRandomTemporaryDatabaseName();
-
         //prepare annotation sets
         List<AnnotationMongo> annotationSet1 = new ArrayList<>();
         List<AnnotationMongo> annotationSet2 = new ArrayList<>();
@@ -167,16 +151,14 @@ public class AnnotationMongoWriterTest {
         }
 
         // load the annotation
-        MongoOperations operations = MongoConfiguration.getMongoTemplate(databaseName, mongoConnectionDetails,
-                mongoMappingContext);
-        annotationWriter = new AnnotationMongoWriter(operations, COLLECTION_ANNOTATIONS_NAME);
+        annotationWriter = new AnnotationMongoWriter(mongoTemplate, COLLECTION_ANNOTATIONS_NAME);
 
-        annotationWriter.write(Collections.singletonList(annotationSet1));
-        annotationWriter.write(Collections.singletonList(annotationSet2));
-        annotationWriter.write(Collections.singletonList(annotationSet3));
+        annotationWriter.write(new Chunk(Arrays.asList(annotationSet1)));
+        annotationWriter.write(new Chunk(Arrays.asList(annotationSet2)));
+        annotationWriter.write(new Chunk(Arrays.asList(annotationSet3)));
 
         // and finally check that documents in DB have the correct number of annotation
-        MongoCursor<Document> cursor = mongoRule.getCollection(databaseName, COLLECTION_ANNOTATIONS_NAME).find()
+        MongoCursor<Document> cursor = mongoTemplate.getDb().getCollection(COLLECTION_ANNOTATIONS_NAME).find()
                 .iterator();
 
         while (cursor.hasNext()) {
@@ -192,8 +174,6 @@ public class AnnotationMongoWriterTest {
 
     @Test
     public void shouldWriteSubstitutionScoresIntoMongoDb() throws Exception {
-        String databaseName = mongoRule.getRandomTemporaryDatabaseName();
-
         AnnotationMongo annotation = new AnnotationMongo("X", 1, 10, "A", "T",
                 VEP_VERSION, VEP_CACHE_VERSION);
 
@@ -206,13 +186,11 @@ public class AnnotationMongoWriterTest {
 
         annotation.addConsequenceType(consequenceType);
 
-        MongoOperations operations = MongoConfiguration.getMongoTemplate(databaseName, mongoConnectionDetails,
-                mongoMappingContext);
-        annotationWriter = new AnnotationMongoWriter(operations, COLLECTION_ANNOTATIONS_NAME);
+        annotationWriter = new AnnotationMongoWriter(mongoTemplate, COLLECTION_ANNOTATIONS_NAME);
 
-        annotationWriter.write(Collections.singletonList(Collections.singletonList(annotation)));
+        annotationWriter.write(new Chunk(Arrays.asList(Collections.singletonList(annotation))));
 
-        MongoCursor<Document> cursor = mongoRule.getCollection(databaseName, COLLECTION_ANNOTATIONS_NAME).find()
+        MongoCursor<Document> cursor = mongoTemplate.getDb().getCollection(COLLECTION_ANNOTATIONS_NAME).find()
                 .iterator();
         while (cursor.hasNext()) {
             Document annotationField = cursor.next();
@@ -236,15 +214,13 @@ public class AnnotationMongoWriterTest {
     }
 
     @Test
-    public void indexesShouldBeCreatedInBackground() throws UnknownHostException, UnsupportedEncodingException {
-        String dbName = mongoRule.getRandomTemporaryDatabaseName();
-        MongoOperations mongoOperations = MongoConfiguration.getMongoTemplate(dbName, mongoConnectionDetails, mongoMappingContext);
-        MongoCollection<Document> dbCollection = mongoOperations.getCollection(COLLECTION_ANNOTATIONS_NAME);
+    public void indexesShouldBeCreatedInBackground() {
+        MongoCollection<Document> dbCollection = mongoTemplate.getDb().getCollection(COLLECTION_ANNOTATIONS_NAME);
 
-        AnnotationMongoWriter writer = new AnnotationMongoWriter(mongoOperations, COLLECTION_ANNOTATIONS_NAME);
+        AnnotationMongoWriter writer = new AnnotationMongoWriter(mongoTemplate, COLLECTION_ANNOTATIONS_NAME);
 
         List<Document> indexInfo = new ArrayList<>();
-        dbCollection.listIndexes().forEach((Block<Document>) indexInfo::add);
+        dbCollection.listIndexes().forEach(indexInfo::add);
 
         Set<String> createdIndexes = indexInfo.stream().map(index -> index.get("name").toString()).collect(Collectors.toSet());
         Set<String> expectedIndexes = new HashSet<>();
@@ -257,27 +233,23 @@ public class AnnotationMongoWriterTest {
 
     @Test
     public void shouldUpdateFieldsOfExistingAnnotationVersion() throws Exception {
-        String databaseName = mongoRule.getRandomTemporaryDatabaseName();
-
         List<AnnotationMongo> annotations = new ArrayList<>();
         for (String annotLine : vepOutputContent.split("\n")) {
             annotations.add(annotationLineMapper.mapLine(annotLine, 0));
         }
 
         // load the annotation
-        MongoOperations operations = MongoConfiguration.getMongoTemplate(databaseName, mongoConnectionDetails,
-                mongoMappingContext);
-        annotationWriter = new AnnotationMongoWriter(operations, COLLECTION_ANNOTATIONS_NAME);
-        annotationWriter.write(Collections.singletonList(annotations.subList(1, 2)));
+        annotationWriter = new AnnotationMongoWriter(mongoTemplate, COLLECTION_ANNOTATIONS_NAME);
+        annotationWriter.write(new Chunk(Arrays.asList(annotations.subList(1, 2))));
 
         // check that consequence type was written in the annotation document
-        MongoCollection<Document> annotCollection = mongoRule.getCollection(databaseName, COLLECTION_ANNOTATIONS_NAME);
+        MongoCollection<Document> annotCollection = mongoTemplate.getDb().getCollection(COLLECTION_ANNOTATIONS_NAME);
         assertEquals(1, count(annotCollection.find().iterator()));
         assertEquals(1, countConsequenceType(annotCollection.find().iterator()));
         assertEquals(3, countXref(annotCollection.find().iterator()));
 
         // check that consequence types were added to that document
-        annotationWriter.write(Collections.singletonList(annotations.subList(2, 3)));
+        annotationWriter.write(new Chunk(Arrays.asList(annotations.subList(2, 3))));
         assertEquals(1, count(annotCollection.find().iterator()));
         assertEquals(2, countConsequenceType(annotCollection.find().iterator()));
         assertEquals(4, countXref(annotCollection.find().iterator()));
@@ -289,8 +261,6 @@ public class AnnotationMongoWriterTest {
         String differentVepCacheVersion = "different_" + VEP_CACHE_VERSION;
         AnnotationLineMapper differentVersionAnnotationLineMapper = new AnnotationLineMapper(differentVepVersion,
                 differentVepCacheVersion);
-        String databaseName = mongoRule.getRandomTemporaryDatabaseName();
-
         String annotLine = vepOutputContent.split("\n")[1];
         List<List<AnnotationMongo>> firstVersionAnnotation = Collections.singletonList(Collections.singletonList(
                 annotationLineMapper.mapLine(annotLine, 0)));
@@ -298,19 +268,17 @@ public class AnnotationMongoWriterTest {
                 differentVersionAnnotationLineMapper.mapLine(annotLine, 0))));
 
         // load the annotation
-        MongoOperations operations = MongoConfiguration.getMongoTemplate(databaseName, mongoConnectionDetails,
-                mongoMappingContext);
-        annotationWriter = new AnnotationMongoWriter(operations, COLLECTION_ANNOTATIONS_NAME);
-        annotationWriter.write(firstVersionAnnotation);
+        annotationWriter = new AnnotationMongoWriter(mongoTemplate, COLLECTION_ANNOTATIONS_NAME);
+        annotationWriter.write(new Chunk(firstVersionAnnotation));
 
         // check that consequence type was written in the annotation document
-        MongoCollection<Document> annotCollection = mongoRule.getCollection(databaseName, COLLECTION_ANNOTATIONS_NAME);
+        MongoCollection<Document> annotCollection = mongoTemplate.getDb().getCollection(COLLECTION_ANNOTATIONS_NAME);
         assertEquals(1, annotCollection.countDocuments());
         assertEquals(1, countConsequenceType(annotCollection.find().iterator()));
         assertEquals(3, countXref(annotCollection.find().iterator()));
 
         // check that consequence types were added to that document
-        annotationWriter.write(secondVersionAnnotation);
+        annotationWriter.write(new Chunk(secondVersionAnnotation));
         assertEquals(2, annotCollection.countDocuments());
         assertEquals(2, countConsequenceType(annotCollection.find().iterator()));
         assertEquals(6, countXref(annotCollection.find().iterator()));

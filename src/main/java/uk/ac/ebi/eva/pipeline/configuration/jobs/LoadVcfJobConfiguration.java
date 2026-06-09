@@ -20,10 +20,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
-import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
-import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.job.builder.FlowJobBuilder;
 import org.springframework.batch.core.job.builder.JobBuilder;
+import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -35,7 +34,9 @@ import uk.ac.ebi.eva.pipeline.configuration.jobs.steps.LoadVariantsStepConfigura
 import uk.ac.ebi.eva.pipeline.parameters.NewJobIncrementer;
 import uk.ac.ebi.eva.pipeline.parameters.validation.job.LoadVcfJobParametersValidator;
 
-import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.*;
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.LOAD_FILE_STEP;
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.LOAD_VARIANTS_STEP;
+import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.LOAD_VCF_JOB;
 
 /**
  * Variant load pipeline workflow:
@@ -47,7 +48,6 @@ import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.*;
  *
  */
 @Configuration
-@EnableBatchProcessing
 @Import({LoadVariantsStepConfiguration.class, LoadFileStepConfiguration.class})
 public class LoadVcfJobConfiguration {
 
@@ -63,11 +63,10 @@ public class LoadVcfJobConfiguration {
 
     @Bean(LOAD_VCF_JOB)
     @Scope("prototype")
-    public Job genotypedVcfJob(JobBuilderFactory jobBuilderFactory) {
+    public Job genotypedVcfJob(JobRepository jobRepository) {
         logger.debug("Building '" + LOAD_VCF_JOB + "'");
 
-        JobBuilder jobBuilder = jobBuilderFactory
-                .get(LOAD_VCF_JOB)
+        JobBuilder jobBuilder = new JobBuilder(LOAD_VCF_JOB, jobRepository)
                 .incrementer(new NewJobIncrementer())
                 .validator(new LoadVcfJobParametersValidator());
         FlowJobBuilder builder = jobBuilder

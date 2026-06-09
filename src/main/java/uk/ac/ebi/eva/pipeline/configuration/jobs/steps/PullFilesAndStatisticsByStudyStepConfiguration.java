@@ -18,15 +18,13 @@ package uk.ac.ebi.eva.pipeline.configuration.jobs.steps;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
-import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepScope;
+import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.tasklet.TaskletStep;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
+import org.springframework.transaction.PlatformTransactionManager;
 import uk.ac.ebi.eva.pipeline.jobs.steps.tasklets.PullFilesAndStatisticsByStudyTasklet;
-import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 import uk.ac.ebi.eva.utils.TaskletUtils;
 
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.PULL_FILES_AND_STATISTICS_BY_STUDY_STEP;
@@ -35,7 +33,6 @@ import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.PULL_FILES_AND_STAT
  * Step that pulls the file and statistics in a variant based on their study id.
  */
 @Configuration
-@EnableBatchProcessing
 public class PullFilesAndStatisticsByStudyStepConfiguration {
 
     private static final Logger logger = LoggerFactory.getLogger(PullFilesAndStatisticsByStudyStepConfiguration.class);
@@ -47,10 +44,10 @@ public class PullFilesAndStatisticsByStudyStepConfiguration {
     }
 
     @Bean(PULL_FILES_AND_STATISTICS_BY_STUDY_STEP)
-    public TaskletStep pullFilesAndStatisticsByStudyStep(StepBuilderFactory stepBuilderFactory,
-                                                             JobOptions jobOptions) {
-        return TaskletUtils.generateStep(stepBuilderFactory, PULL_FILES_AND_STATISTICS_BY_STUDY_STEP,
-                pullFilesAndStatisticsByStudyTasklet(), jobOptions.isAllowStartIfComplete());
+    public TaskletStep pullFilesAndStatisticsByStudyStep(JobRepository jobRepository,
+                                                         PlatformTransactionManager transactionManager) {
+        return TaskletUtils.generateStep(jobRepository, transactionManager, PULL_FILES_AND_STATISTICS_BY_STUDY_STEP,
+                pullFilesAndStatisticsByStudyTasklet());
     }
 
 }

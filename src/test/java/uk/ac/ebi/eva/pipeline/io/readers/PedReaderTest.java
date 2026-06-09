@@ -16,7 +16,7 @@
 package uk.ac.ebi.eva.pipeline.io.readers;
 
 import com.google.common.collect.Sets;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.opencb.biodata.models.pedigree.Condition;
 import org.opencb.biodata.models.pedigree.Individual;
 import org.opencb.biodata.models.pedigree.Pedigree;
@@ -24,8 +24,9 @@ import org.opencb.biodata.models.pedigree.Sex;
 
 import java.util.stream.Collectors;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static uk.ac.ebi.eva.utils.FileUtils.getResource;
 
 /**
@@ -64,12 +65,12 @@ public class PedReaderTest {
         assertEquals(4, pedigree.getFamilies().get("FAM").size());
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void missingLastColumnInPedFileShouldThrowsException() throws Exception {
+    @Test
+    public void missingLastColumnInPedFileShouldThrowsException() {
         String pedigreePath = getResource(MALFORMED_PEDIGREE).getAbsolutePath();
         PedReader pedReader = new PedReader(pedigreePath);
         pedReader.open(null);
-        pedReader.read();
+        assertThrows(IllegalArgumentException.class, () -> pedReader.read());
     }
 
 }

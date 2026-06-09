@@ -25,7 +25,7 @@ import org.springframework.stereotype.Service;
  * The values are injected directly from environment, not from JobParameters.
  */
 @Service
-public class MongoConnectionDetails {
+public class EVAMongoConnectionDetails {
 
     @Value("${" + JobParametersNames.CONFIG_DB_URI + ":#{null}}")
     private String uri;
@@ -78,5 +78,9 @@ public class MongoConnectionDetails {
 
     public ReadPreference getReadPreference() {
         return ReadPreference.valueOf(readPreference);
+    }
+
+    public void setUri(String uri) {
+        this.uri = uri;
     }
 }

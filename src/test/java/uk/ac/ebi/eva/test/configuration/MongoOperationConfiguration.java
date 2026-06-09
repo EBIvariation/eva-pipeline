@@ -4,10 +4,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.data.mongodb.core.mapping.MongoMappingContext;
-import uk.ac.ebi.eva.pipeline.parameters.MongoConnectionDetails;
-
-import java.io.UnsupportedEncodingException;
-import java.net.UnknownHostException;
+import uk.ac.ebi.eva.pipeline.parameters.EVAMongoConnectionDetails;
 
 import static uk.ac.ebi.eva.pipeline.configuration.MongoConfiguration.getMongoTemplate;
 
@@ -20,8 +17,8 @@ public class MongoOperationConfiguration {
     private static final String DUMMY_STATIC = "dummy_test";
 
     @Bean
-    public MongoConnectionDetails mongoConnection() {
-        return new MongoConnectionDetails();
+    public EVAMongoConnectionDetails mongoConnection() {
+        return new EVAMongoConnectionDetails();
     }
 
     @Bean
@@ -30,9 +27,9 @@ public class MongoOperationConfiguration {
     }
 
     @Bean
-    public MongoOperations mongoTemplate(MongoConnectionDetails mongoConnectionDetails, MongoMappingContext mongoMappingContext)
-            throws UnknownHostException, UnsupportedEncodingException {
-        return getMongoTemplate(DUMMY_STATIC, mongoConnectionDetails, mongoMappingContext);
+    public MongoOperations mongoTemplate(EVAMongoConnectionDetails EVAMongoConnectionDetails,
+                                         MongoMappingContext mongoMappingContext) {
+        return getMongoTemplate(DUMMY_STATIC, EVAMongoConnectionDetails, mongoMappingContext);
     }
 
 }

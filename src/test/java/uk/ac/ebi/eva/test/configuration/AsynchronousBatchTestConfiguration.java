@@ -17,13 +17,12 @@ package uk.ac.ebi.eva.test.configuration;
 
 import org.springframework.batch.core.configuration.JobRegistry;
 import org.springframework.batch.core.configuration.StepRegistry;
-import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.support.MapStepRegistry;
 import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.launch.JobOperator;
-import org.springframework.batch.core.launch.support.SimpleJobLauncher;
 import org.springframework.batch.core.launch.support.SimpleJobOperator;
+import org.springframework.batch.core.launch.support.TaskExecutorJobLauncher;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -35,7 +34,6 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
  * batch configuration injects a synchronous task executor.
  */
 @Configuration
-@EnableBatchProcessing
 public class AsynchronousBatchTestConfiguration {
 
     @Autowired
@@ -64,7 +62,7 @@ public class AsynchronousBatchTestConfiguration {
 
     @Bean
     public JobLauncher jobLauncher() {
-        SimpleJobLauncher jobLauncher = new SimpleJobLauncher();
+        TaskExecutorJobLauncher jobLauncher = new TaskExecutorJobLauncher();
         jobLauncher.setTaskExecutor(threadPoolTaskExecutor());
         jobLauncher.setJobRepository(jobRepository);
         return jobLauncher;

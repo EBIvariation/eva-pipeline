@@ -15,21 +15,21 @@
  */
 package uk.ac.ebi.eva.pipeline.io.readers;
 
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.item.file.FlatFileParseException;
 import org.springframework.batch.test.MetaDataInstanceFactory;
 import uk.ac.ebi.eva.commons.mongodb.entities.AnnotationMongo;
 import uk.ac.ebi.eva.test.data.VepOutputContent;
-import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
 import uk.ac.ebi.eva.test.utils.JobTestUtils;
+import uk.ac.ebi.eva.test.utils.PipelineTemporaryFolderUtil;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.zip.GZIPInputStream;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * {@link AnnotationFlatFileReader}
@@ -44,15 +44,14 @@ public class AnnotationFlatFileReaderTest {
 
     private static final String VEP_CACHE_VERSION = "1";
 
-    @Rule
-    public PipelineTemporaryFolderRule temporaryFolderRule = new PipelineTemporaryFolderRule();
+    public PipelineTemporaryFolderUtil temporaryFolderUtil = new PipelineTemporaryFolderUtil();
 
     @Test
     public void shouldReadAllLinesInVepOutput() throws Exception {
         ExecutionContext executionContext = MetaDataInstanceFactory.createStepExecution().getExecutionContext();
 
         //simulate VEP output file
-        File file = temporaryFolderRule.newGzipFile(VepOutputContent.vepOutputContent);
+        File file = temporaryFolderUtil.newGzipFile(VepOutputContent.vepOutputContent);
 
         AnnotationFlatFileReader annotationFlatFileReader = new AnnotationFlatFileReader(file, VEP_VERSION,
                 VEP_CACHE_VERSION);
@@ -77,27 +76,27 @@ public class AnnotationFlatFileReaderTest {
     }
 
     // Missing ':' in 20_63351 (should be 20:63351)
-    @Test(expected = FlatFileParseException.class)
+    @Test
     public void malformedCoordinatesAnnotationLinesShouldBeSkipped() throws Exception {
         ExecutionContext executionContext = MetaDataInstanceFactory.createStepExecution().getExecutionContext();
 
-        File file = temporaryFolderRule.newGzipFile(VepOutputContent.vepOutputContentMalformedCoordinates);
+        File file = temporaryFolderUtil.newGzipFile(VepOutputContent.vepOutputContentMalformedCoordinates);
         AnnotationFlatFileReader annotationFlatFileReader = new AnnotationFlatFileReader(file, VEP_VERSION,
                 VEP_CACHE_VERSION);
         annotationFlatFileReader.open(executionContext);
-        annotationFlatFileReader.read();
+        assertThrows(FlatFileParseException.class, () -> annotationFlatFileReader.read());
     }
 
     // Missing '/' in 20_63351_AG (should be 20_63351_A/G)
-    @Test(expected = FlatFileParseException.class)
+    @Test
     public void malformedVariantFieldsAnnotationLinesShouldBeSkipped() throws Exception {
         ExecutionContext executionContext = MetaDataInstanceFactory.createStepExecution().getExecutionContext();
 
-        File file = temporaryFolderRule.newGzipFile(VepOutputContent.vepOutputContentMalformedVariantFields);
+        File file = temporaryFolderUtil.newGzipFile(VepOutputContent.vepOutputContentMalformedVariantFields);
         AnnotationFlatFileReader annotationFlatFileReader = new AnnotationFlatFileReader(file, VEP_VERSION,
                 VEP_CACHE_VERSION);
         annotationFlatFileReader.open(executionContext);
-        annotationFlatFileReader.read();
+        assertThrows(FlatFileParseException.class, () -> annotationFlatFileReader.read());
     }
 
 }

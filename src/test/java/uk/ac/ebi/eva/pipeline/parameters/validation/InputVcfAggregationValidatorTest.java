@@ -15,34 +15,36 @@
  */
 package uk.ac.ebi.eva.pipeline.parameters.validation;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.JobParametersInvalidException;
 
 import uk.ac.ebi.eva.pipeline.parameters.JobParametersNames;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 public class InputVcfAggregationValidatorTest {
 
     private InputVcfAggregationValidator validator;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         validator = new InputVcfAggregationValidator();
     }
 
-    @Test(expected = JobParametersInvalidException.class)
-    public void invalidAggregationShouldThrow() throws Exception {
+    @Test
+    public void invalidAggregationShouldThrow() {
         JobParametersBuilder jobParametersBuilder = new JobParametersBuilder();
         jobParametersBuilder.addString(JobParametersNames.INPUT_VCF_AGGREGATION, "invalid");
-        validator.validate(jobParametersBuilder.toJobParameters());
+        assertThrows(JobParametersInvalidException.class, () -> validator.validate(jobParametersBuilder.toJobParameters()));
     }
 
-    @Test(expected = JobParametersInvalidException.class)
-    public void emptyAggregationShouldThrow() throws Exception {
+    @Test
+    public void emptyAggregationShouldThrow() {
         JobParametersBuilder jobParametersBuilder = new JobParametersBuilder();
         jobParametersBuilder.addString(JobParametersNames.INPUT_VCF_AGGREGATION, "");
-        validator.validate(jobParametersBuilder.toJobParameters());
+        assertThrows(JobParametersInvalidException.class, () -> validator.validate(jobParametersBuilder.toJobParameters()));
     }
 
     @Test

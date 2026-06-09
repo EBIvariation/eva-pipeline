@@ -16,23 +16,21 @@
 
 package uk.ac.ebi.eva.pipeline.jobs.steps.processors;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.batch.item.ItemStreamException;
-
 import uk.ac.ebi.eva.pipeline.model.EnsemblVariant;
 import uk.ac.ebi.eva.pipeline.parameters.AnnotationParameters;
-import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
+import uk.ac.ebi.eva.test.utils.PipelineTemporaryFolderUtil;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static uk.ac.ebi.eva.utils.FileUtils.getResource;
 
 public class VepAnnotationProcessorTest {
@@ -51,14 +49,9 @@ public class VepAnnotationProcessorTest {
 
     private AnnotationParameters annotationParameters;
 
-    @Rule
-    public PipelineTemporaryFolderRule temporaryFolder = new PipelineTemporaryFolderRule();
+    public PipelineTemporaryFolderUtil temporaryFolderUtil = new PipelineTemporaryFolderUtil();
 
-    @Rule
-    public ExpectedException exception = ExpectedException.none();
-
-
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         annotationParameters = new AnnotationParameters();
         annotationParameters.setFileId("fid");
@@ -70,7 +63,7 @@ public class VepAnnotationProcessorTest {
         annotationParameters.setInputFasta("fasta");
         annotationParameters.setVepNumForks(4);
 
-        File annotationFolder = temporaryFolder.newFolder();
+        File annotationFolder = temporaryFolderUtil.newFolder();
         annotationParameters.setOutputDirAnnotation(annotationFolder.getAbsolutePath());
     }
 
@@ -80,7 +73,7 @@ public class VepAnnotationProcessorTest {
         int chunkSize = ensemblVariants.size();
 
         VepAnnotationProcessor vepAnnotationProcessor = new VepAnnotationProcessor(annotationParameters, chunkSize,
-                                                                                   TIMEOUT_IN_SECONDS);
+                TIMEOUT_IN_SECONDS);
 
         List<String> annotations = vepAnnotationProcessor.process(ensemblVariants);
         assertEquals(ensemblVariants.size() + EXTRA_ANNOTATIONS, annotations.size());
@@ -95,7 +88,7 @@ public class VepAnnotationProcessorTest {
         int chunkSize = 5;
 
         VepAnnotationProcessor vepAnnotationProcessor = new VepAnnotationProcessor(annotationParameters, chunkSize,
-                                                                                   TIMEOUT_IN_SECONDS);
+                TIMEOUT_IN_SECONDS);
 
         List<String> annotations = vepAnnotationProcessor.process(ensemblVariants);
         assertEquals(ensemblVariants.size() + EXTRA_ANNOTATIONS, annotations.size());
@@ -107,8 +100,8 @@ public class VepAnnotationProcessorTest {
         int chunkSizeGreaterThanActualVariants = ensemblVariants.size() * 10;
 
         VepAnnotationProcessor vepAnnotationProcessor = new VepAnnotationProcessor(annotationParameters,
-                                                                                   chunkSizeGreaterThanActualVariants,
-                                                                                   TIMEOUT_IN_SECONDS);
+                chunkSizeGreaterThanActualVariants,
+                TIMEOUT_IN_SECONDS);
 
         List<String> annotations = vepAnnotationProcessor.process(ensemblVariants);
         assertEquals(ensemblVariants.size() + EXTRA_ANNOTATIONS, annotations.size());
@@ -120,7 +113,7 @@ public class VepAnnotationProcessorTest {
         int chunkSize = ensemblVariants.size();
 
         VepAnnotationProcessor vepAnnotationProcessor = new VepAnnotationProcessor(annotationParameters,
-                                                                                   chunkSize, TIMEOUT_IN_SECONDS);
+                chunkSize, TIMEOUT_IN_SECONDS);
 
         long chunks = 3;
         List<String> annotations = new ArrayList<>();
@@ -128,7 +121,7 @@ public class VepAnnotationProcessorTest {
             annotations.addAll(vepAnnotationProcessor.process(ensemblVariants));
         }
 
-        assertEquals((ensemblVariants.size() + EXTRA_ANNOTATIONS)*chunks, annotations.size());
+        assertEquals((ensemblVariants.size() + EXTRA_ANNOTATIONS) * chunks, annotations.size());
         assertTrue(annotations.stream().noneMatch(line -> line.startsWith("#")));
     }
 
@@ -140,11 +133,10 @@ public class VepAnnotationProcessorTest {
 
         long vepTimeouts = 1;
         VepAnnotationProcessor vepAnnotationProcessor = new VepAnnotationProcessor(annotationParameters,
-                                                                                   chunkSizeGreaterThanActualVariants,
-                                                                                   vepTimeouts);
+                chunkSizeGreaterThanActualVariants,
+                vepTimeouts);
 
-        exception.expect(ItemStreamException.class);
-        vepAnnotationProcessor.process(ensemblVariants);
+        assertThrows(ItemStreamException.class, () -> vepAnnotationProcessor.process(ensemblVariants));
     }
 
     @Test
@@ -155,8 +147,8 @@ public class VepAnnotationProcessorTest {
 
         long vepTimeouts = 1;
         VepAnnotationProcessor vepAnnotationProcessor = new VepAnnotationProcessor(annotationParameters,
-                                                                                   chunkSize,
-                                                                                   vepTimeouts);
+                chunkSize,
+                vepTimeouts);
 
         // Should still generate annotations after writing a lot of non-fatal error messages.
         List<String> annotations = vepAnnotationProcessor.process(ensemblVariants);

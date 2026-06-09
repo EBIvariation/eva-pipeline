@@ -18,29 +18,32 @@ package uk.ac.ebi.eva.pipeline.configuration.jobs.steps;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import org.bson.Document;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ActiveProfiles;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.mapping.MongoMappingContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.ac.ebi.eva.commons.mongodb.entities.VariantSourceMongo;
-import uk.ac.ebi.eva.pipeline.Application;
 import uk.ac.ebi.eva.pipeline.configuration.BeanNames;
 import uk.ac.ebi.eva.pipeline.configuration.MongoCollectionNameConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.jobs.GenotypedVcfJobConfiguration;
 import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
-import uk.ac.ebi.eva.test.configuration.TemporaryRuleConfiguration;
-import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
+import uk.ac.ebi.eva.test.utils.MongoTestContainerHelper;
 import uk.ac.ebi.eva.utils.EvaJobParameterBuilder;
 
 import java.io.File;
-import static org.junit.Assert.assertEquals;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static uk.ac.ebi.eva.test.configuration.BatchTestConfiguration.JOB_LOAD_VCF_JOB;
 import static uk.ac.ebi.eva.test.utils.JobTestUtils.assertCompleted;
 import static uk.ac.ebi.eva.test.utils.JobTestUtils.count;
 import static uk.ac.ebi.eva.utils.FileUtils.getResource;
@@ -48,12 +51,11 @@ import static uk.ac.ebi.eva.utils.FileUtils.getResource;
 /**
  * Test for {@link LoadFileStepConfiguration}
  */
-@RunWith(SpringRunner.class)
-@ActiveProfiles({Application.VARIANT_WRITER_MONGO_PROFILE, Application.VARIANT_ANNOTATION_MONGO_PROFILE})
-@TestPropertySource({"classpath:common-configuration.properties", "classpath:test-mongo.properties"})
+@ExtendWith(SpringExtension.class)
+@TestPropertySource({"classpath:application.properties"})
 @ContextConfiguration(classes = {GenotypedVcfJobConfiguration.class, BatchTestConfiguration.class,
-        TemporaryRuleConfiguration.class, MongoCollectionNameConfiguration.class})
-public class LoadFileStepTest {
+        MongoCollectionNameConfiguration.class})
+public class LoadFileStepTest extends MongoTestContainerHelper {
 
     private static final int EXPECTED_FILES = 1;
 
@@ -61,22 +63,39 @@ public class LoadFileStepTest {
 
     private static final String COLLECTION_FILES_NAME = "files";
 
-    @Autowired
-    @Rule
-    public TemporaryMongoRule mongoRule;
+    private static final String DB_NAME = "load-file-step-test-db";
 
     @Autowired
+    @Qualifier(JOB_LOAD_VCF_JOB)
     private JobLauncherTestUtils jobLauncherTestUtils;
 
+    @Autowired
+    private MongoMappingContext mongoMappingContext;
+
+    @Autowired
+    private BatchTestConfiguration batchTestConfiguration;
+
+    private MongoTemplate mongoTemplate;
+
+    @BeforeEach
+    public void setUp() throws Exception {
+        mongoTemplate = batchTestConfiguration.getMongoTemplate(DB_NAME, mongoMappingContext);
+        mongoTemplate.getDb().drop();
+    }
+
+    @AfterEach
+    void cleanDb() {
+        mongoTemplate.getDb().drop();
+    }
+
     @Test
-    public void loaderStepShouldLoadAllFiles() throws Exception {
+    public void loaderStepShouldLoadAllFiles() {
         String input = getResource(SMALL_VCF_FILE).getAbsolutePath();
 
-        String databaseName = mongoRule.getRandomTemporaryDatabaseName();
         JobParameters jobParameters = new EvaJobParameterBuilder()
                 .collectionFilesName(COLLECTION_FILES_NAME)
                 .collectionVariantsName("variants")
-                .databaseName(databaseName)
+                .databaseName(DB_NAME)
                 .inputStudyId("1")
                 .inputVcf(input)
                 .inputVcfAggregation("NONE")
@@ -90,20 +109,18 @@ public class LoadFileStepTest {
         assertCompleted(jobExecution);
 
         // And the number of documents in the DB should be equals to the number of VCF files loaded
-        MongoCollection<Document> fileCollection = mongoRule.getCollection(databaseName, COLLECTION_FILES_NAME);
+        MongoCollection<Document> fileCollection = mongoTemplate.getDb().getCollection(COLLECTION_FILES_NAME);
         MongoCursor<Document> cursor = fileCollection.find().iterator();
         assertEquals(EXPECTED_FILES, count(cursor));
-
-        mongoRule.getTemporaryDatabase(databaseName).drop();
     }
 
     @Test
-    public void loaderStepShouldLoadAllFiles_withExistingEntries() throws Exception {
+    public void loaderStepShouldLoadAllFiles_withExistingEntries() {
         File inputFile = getResource(SMALL_VCF_FILE);
         String databaseName = "file-step-test-db";
 
         // insert document with same file id, study id and filename as the one processed by the job
-        mongoRule.getTemporaryDatabase(databaseName).getCollection(COLLECTION_FILES_NAME)
+        mongoTemplate.getDb().getCollection(COLLECTION_FILES_NAME)
                 .insertOne(new Document(VariantSourceMongo.FILEID_FIELD, "1")
                         .append(VariantSourceMongo.STUDYID_FIELD, "1")
                         .append(VariantSourceMongo.FILENAME_FIELD, inputFile.getName()));
@@ -126,11 +143,9 @@ public class LoadFileStepTest {
         assertCompleted(jobExecution);
 
         // And the number of documents in the DB should be equals to the number of VCF files loaded
-        MongoCollection<Document> fileCollection = mongoRule.getCollection(databaseName, COLLECTION_FILES_NAME);
+        MongoCollection<Document> fileCollection = mongoTemplate.getDb().getCollection(COLLECTION_FILES_NAME);
         MongoCursor<Document> cursor = fileCollection.find().iterator();
         assertEquals(EXPECTED_FILES, count(cursor));
-
-        mongoRule.getTemporaryDatabase(databaseName).drop();
     }
 
 }

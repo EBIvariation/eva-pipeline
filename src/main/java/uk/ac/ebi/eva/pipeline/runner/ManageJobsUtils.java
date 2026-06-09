@@ -22,7 +22,7 @@ import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.repository.JobRepository;
 import uk.ac.ebi.eva.commons.batch.exception.NoPreviousJobExecutionException;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 /**
  * Utility class to change job / step status
@@ -36,7 +36,7 @@ public class ManageJobsUtils {
             throw new NoPreviousJobExecutionException(jobName, jobParameters);
         }
 
-        Date currentTime = new Date();
+        LocalDateTime currentTime = LocalDateTime.now();
         lastJobExecution.setEndTime(currentTime);
         lastJobExecution.setStatus(BatchStatus.FAILED);
         lastJobExecution.setExitStatus(

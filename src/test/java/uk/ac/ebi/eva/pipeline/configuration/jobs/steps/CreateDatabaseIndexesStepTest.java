@@ -18,54 +18,75 @@ package uk.ac.ebi.eva.pipeline.configuration.jobs.steps;
 import com.mongodb.MongoWriteException;
 import com.mongodb.client.MongoCollection;
 import org.bson.Document;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.mapping.MongoMappingContext;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.ac.ebi.eva.pipeline.configuration.BeanNames;
 import uk.ac.ebi.eva.pipeline.configuration.jobs.DatabaseInitializationJobConfiguration;
 import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
-import uk.ac.ebi.eva.test.configuration.TemporaryRuleConfiguration;
-import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
+import uk.ac.ebi.eva.test.utils.MongoTestContainerHelper;
 import uk.ac.ebi.eva.utils.EvaJobParameterBuilder;
 
 import java.util.ArrayList;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static uk.ac.ebi.eva.test.configuration.BatchTestConfiguration.JOB_INIT_DATABASE_JOB;
 import static uk.ac.ebi.eva.test.utils.JobTestUtils.assertCompleted;
 
 
 /**
  * Test {@link CreateDatabaseIndexesStepConfiguration}
  */
-@RunWith(SpringRunner.class)
-@TestPropertySource({"classpath:common-configuration.properties", "classpath:test-mongo.properties"})
-@ContextConfiguration(classes = {DatabaseInitializationJobConfiguration.class, BatchTestConfiguration.class, TemporaryRuleConfiguration.class})
-public class CreateDatabaseIndexesStepTest {
+@ExtendWith(SpringExtension.class)
+@ContextConfiguration(classes = {DatabaseInitializationJobConfiguration.class, BatchTestConfiguration.class})
+public class CreateDatabaseIndexesStepTest extends MongoTestContainerHelper {
+    private static final String DB_NAME = "create-db-index-test-db";
 
     private static final String COLLECTION_FEATURES_NAME = "features";
 
     @Autowired
-    @Rule
-    public TemporaryMongoRule mongoRule;
-
-    @Autowired
+    @Qualifier(JOB_INIT_DATABASE_JOB)
     private JobLauncherTestUtils jobLauncherTestUtils;
 
+    @Autowired
+    private MongoMappingContext mongoMappingContext;
+
+    @Autowired
+    private BatchTestConfiguration batchTestConfiguration;
+
+    private MongoTemplate mongoTemplate;
+
+    @BeforeEach
+    public void setUp() throws Exception {
+        mongoTemplate = batchTestConfiguration.getMongoTemplate(DB_NAME, mongoMappingContext);
+        mongoTemplate.getDb().drop();
+    }
+
+    @AfterEach
+    void cleanDb() {
+        mongoTemplate.getDb().drop();
+    }
+
     @Test
-    public void testIndexesAreCreated() throws Exception {
-        String databaseName = mongoRule.getRandomTemporaryDatabaseName();
+    public void testIndexesAreCreated() {
         JobParameters jobParameters = new EvaJobParameterBuilder()
-                .databaseName(databaseName)
+                .databaseName(DB_NAME)
                 .collectionFeaturesName(COLLECTION_FEATURES_NAME)
+                .addString("run.id", UUID.randomUUID().toString())
                 .toJobParameters();
 
         JobExecution jobExecution = jobLauncherTestUtils.launchStep(BeanNames.CREATE_DATABASE_INDEXES_STEP,
@@ -73,7 +94,7 @@ public class CreateDatabaseIndexesStepTest {
 
         assertCompleted(jobExecution);
 
-        MongoCollection<Document> genesCollection = mongoRule.getCollection(databaseName, COLLECTION_FEATURES_NAME);
+        MongoCollection<Document> genesCollection = mongoTemplate.getDb().getCollection(COLLECTION_FEATURES_NAME);
 
         Document idIndex = new Document("v", "2").append("key", new Document("_id", 1)).append("name", "_id_");
         Document nameIndex = new Document("v", "2").append("key", new Document("name", 1)).append("name", "name_1")
@@ -88,12 +109,12 @@ public class CreateDatabaseIndexesStepTest {
         assertEquals(expectedIndexes, actualIndexes);
     }
 
-    @Test(expected = MongoWriteException.class)
-    public void testNoDuplicatesCanBeInserted() throws Exception {
-        String databaseName = mongoRule.getRandomTemporaryDatabaseName();
+    @Test
+    public void testNoDuplicatesCanBeInserted() {
         JobParameters jobParameters = new EvaJobParameterBuilder()
-                .databaseName(databaseName)
+                .databaseName(DB_NAME)
                 .collectionFeaturesName(COLLECTION_FEATURES_NAME)
+                .addString("run.id", UUID.randomUUID().toString())
                 .toJobParameters();
 
         JobExecution jobExecution = jobLauncherTestUtils.launchStep(BeanNames.CREATE_DATABASE_INDEXES_STEP,
@@ -101,8 +122,8 @@ public class CreateDatabaseIndexesStepTest {
 
         assertCompleted(jobExecution);
 
-        MongoCollection<Document> genesCollection = mongoRule.getCollection(databaseName, COLLECTION_FEATURES_NAME);
+        MongoCollection<Document> genesCollection = mongoTemplate.getDb().getCollection(COLLECTION_FEATURES_NAME);
         genesCollection.insertOne(new Document("_id", "example_id"));
-        genesCollection.insertOne(new Document("_id", "example_id"));
+        assertThrows(MongoWriteException.class, () -> genesCollection.insertOne(new Document("_id", "example_id")));
     }
 }

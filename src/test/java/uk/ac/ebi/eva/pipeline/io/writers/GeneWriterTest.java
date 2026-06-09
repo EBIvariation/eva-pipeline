@@ -20,58 +20,59 @@ package uk.ac.ebi.eva.pipeline.io.writers;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import org.bson.Document;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.batch.item.Chunk;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.core.MongoOperations;
+import org.springframework.boot.autoconfigure.data.mongo.MongoRepositoriesAutoConfiguration;
+import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.mapping.MongoMappingContext;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.ac.ebi.eva.commons.core.models.FeatureCoordinates;
-import uk.ac.ebi.eva.pipeline.configuration.MongoConfiguration;
 import uk.ac.ebi.eva.pipeline.io.mappers.GeneLineMapper;
-import uk.ac.ebi.eva.pipeline.parameters.MongoConnectionDetails;
-import uk.ac.ebi.eva.test.configuration.TemporaryRuleConfiguration;
+import uk.ac.ebi.eva.pipeline.parameters.EVAMongoConnectionDetails;
 import uk.ac.ebi.eva.test.data.GtfStaticTestData;
-import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
+import uk.ac.ebi.eva.test.utils.MongoTestContainerHelper;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
  * {@link GeneWriter}
  * input: a List of FeatureCoordinates to each call of `.write()`
  * output: the FeatureCoordinates get written in mongo, with at least: chromosome, start and end.
  */
-@RunWith(SpringRunner.class)
-@TestPropertySource({"classpath:test-mongo.properties"})
-@ContextConfiguration(classes = {MongoConnectionDetails.class, MongoMappingContext.class, TemporaryRuleConfiguration.class})
-public class GeneWriterTest {
+@DataMongoTest(excludeAutoConfiguration = MongoRepositoriesAutoConfiguration.class)
+@ExtendWith(SpringExtension.class)
+@ContextConfiguration(classes = {EVAMongoConnectionDetails.class, MongoMappingContext.class})
+public class GeneWriterTest extends MongoTestContainerHelper {
 
     private static final String COLLECTION_FEATURES_NAME = "features";
 
     @Autowired
-    private MongoConnectionDetails mongoConnectionDetails;
+    private MongoTemplate mongoTemplate;
 
-    @Autowired
-    private MongoMappingContext mongoMappingContext;
+    @BeforeEach
+    public void setUp() throws Exception {
+        mongoTemplate.getDb().drop();
+    }
 
-    @Autowired
-    @Rule
-    public TemporaryMongoRule mongoRule;
+    @AfterEach
+    void cleanDb() {
+        mongoTemplate.getDb().drop();
+    }
+
 
     @Test
     public void shouldWriteAllFieldsIntoMongoDb() throws Exception {
-        String databaseName = mongoRule.getRandomTemporaryDatabaseName();
-
-        MongoOperations mongoOperations = MongoConfiguration.getMongoTemplate(databaseName, mongoConnectionDetails, mongoMappingContext);
-
-        GeneWriter geneWriter = new GeneWriter(mongoOperations, COLLECTION_FEATURES_NAME);
+        GeneWriter geneWriter = new GeneWriter(mongoTemplate, COLLECTION_FEATURES_NAME);
 
         GeneLineMapper lineMapper = new GeneLineMapper();
         List<FeatureCoordinates> genes = new ArrayList<>();
@@ -80,9 +81,9 @@ public class GeneWriterTest {
                 genes.add(lineMapper.mapLine(gtfLine, 0));
             }
         }
-        geneWriter.write(genes);
+        geneWriter.write(new Chunk(genes));
 
-        MongoCollection<Document> genesCollection = mongoRule.getCollection(databaseName, COLLECTION_FEATURES_NAME);
+        MongoCollection<Document> genesCollection = mongoTemplate.getDb().getCollection(COLLECTION_FEATURES_NAME);
 
         // count documents in DB and check they have region (chr + start + end)
         MongoCursor<Document> cursor = genesCollection.find().iterator();

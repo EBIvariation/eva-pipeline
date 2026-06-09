@@ -16,76 +16,81 @@
 
 package uk.ac.ebi.eva.pipeline.configuration.jobs.steps;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.core.MongoOperations;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.mapping.MongoMappingContext;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.ac.ebi.eva.commons.mongodb.entities.AnnotationMetadataMongo;
-import uk.ac.ebi.eva.pipeline.Application;
 import uk.ac.ebi.eva.pipeline.configuration.BeanNames;
 import uk.ac.ebi.eva.pipeline.configuration.MongoCollectionNameConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.MongoConfiguration;
 import uk.ac.ebi.eva.pipeline.configuration.jobs.AnnotationJobConfiguration;
-import uk.ac.ebi.eva.pipeline.parameters.MongoConnectionDetails;
 import uk.ac.ebi.eva.test.configuration.BatchTestConfiguration;
-import uk.ac.ebi.eva.test.configuration.TemporaryRuleConfiguration;
-import uk.ac.ebi.eva.test.rules.PipelineTemporaryFolderRule;
-import uk.ac.ebi.eva.test.rules.TemporaryMongoRule;
+import uk.ac.ebi.eva.test.utils.MongoTestContainerHelper;
 import uk.ac.ebi.eva.utils.EvaJobParameterBuilder;
 
 import java.util.List;
+import java.util.UUID;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static uk.ac.ebi.eva.test.configuration.BatchTestConfiguration.JOB_ANNOTATE_VARIANTS_JOB;
 import static uk.ac.ebi.eva.test.utils.JobTestUtils.assertCompleted;
 
 /**
  * Test for {@link AnnotationMetadataStepConfiguration}
  */
-@RunWith(SpringRunner.class)
-@ActiveProfiles(Application.VARIANT_ANNOTATION_MONGO_PROFILE)
-@TestPropertySource({"classpath:common-configuration.properties", "classpath:test-mongo.properties"})
+@ExtendWith(SpringExtension.class)
+@TestPropertySource({"classpath:application.properties"})
 @ContextConfiguration(classes = {AnnotationJobConfiguration.class, BatchTestConfiguration.class,
-        TemporaryRuleConfiguration.class, MongoCollectionNameConfiguration.class})
-public class AnnotationMetadataStepTest {
-    @Autowired
-    @Rule
-    public TemporaryMongoRule mongoRule;
+        MongoCollectionNameConfiguration.class, MongoConfiguration.class})
+public class AnnotationMetadataStepTest extends MongoTestContainerHelper {
 
-    @Rule
-    public PipelineTemporaryFolderRule temporaryFolderRule = new PipelineTemporaryFolderRule();
+    private static final String DB_NAME = "annotation-metadata-test-db";
 
     @Autowired
+    @Qualifier(JOB_ANNOTATE_VARIANTS_JOB)
     private JobLauncherTestUtils jobLauncherTestUtils;
-
-    @Autowired
-    private MongoConnectionDetails mongoConnectionDetails;
 
     @Autowired
     private MongoMappingContext mongoMappingContext;
 
+    @Autowired
+    private BatchTestConfiguration batchTestConfiguration;
+
+    private MongoTemplate mongoTemplate;
+
+    @BeforeEach
+    public void setUp() throws Exception {
+        mongoTemplate = batchTestConfiguration.getMongoTemplate(DB_NAME, mongoMappingContext);
+        mongoTemplate.getDb().drop();
+    }
+
+    @AfterEach
+    public void cleanUp() {
+        mongoTemplate.getDb().drop();
+    }
+
     @Test
-    public void shouldWriteVersions() throws Exception {
-        String databaseName = mongoRule.getRandomTemporaryDatabaseName();
-        MongoOperations mongoOperations = MongoConfiguration.getMongoTemplate(databaseName, mongoConnectionDetails,
-                mongoMappingContext);
+    public void shouldWriteVersions() {
         String vepCacheVersion = "87";
         String vepVersion = "88";
 
-        assertStepIsComplete(databaseName, vepCacheVersion, vepVersion);
+        assertStepIsComplete(vepCacheVersion, vepVersion);
 
         //check that the document was written in mongo
-        List<AnnotationMetadataMongo> annotationMetadataList = mongoOperations.findAll(AnnotationMetadataMongo.class);
+        List<AnnotationMetadataMongo> annotationMetadataList = mongoTemplate.findAll(AnnotationMetadataMongo.class);
 
         assertEquals(1, annotationMetadataList.size());
         assertEquals(vepCacheVersion, annotationMetadataList.get(0).getCacheVersion());
@@ -93,13 +98,14 @@ public class AnnotationMetadataStepTest {
         assertTrue(annotationMetadataList.get(0).isDefaultVersion());
     }
 
-    private void assertStepIsComplete(String databaseName, String vepCacheVersion, String vepVersion) {
+    private void assertStepIsComplete(String vepCacheVersion, String vepVersion) {
         String collectionAnnotationMetadataName = "annotationMetadata";
         JobParameters jobParameters = new EvaJobParameterBuilder()
                 .collectionAnnotationMetadataName(collectionAnnotationMetadataName)
-                .databaseName(databaseName)
+                .databaseName(DB_NAME)
                 .vepCacheVersion(vepCacheVersion)
                 .vepVersion(vepVersion)
+                .addString("run.id", UUID.randomUUID().toString())
                 .toJobParameters();
 
         JobExecution jobExecution = jobLauncherTestUtils.launchStep(BeanNames.LOAD_ANNOTATION_METADATA_STEP, jobParameters);
@@ -108,21 +114,18 @@ public class AnnotationMetadataStepTest {
     }
 
     @Test
-    public void shouldKeepOtherVersions() throws Exception {
-        String databaseName = mongoRule.getRandomTemporaryDatabaseName();
-        MongoOperations mongoOperations = MongoConfiguration.getMongoTemplate(databaseName, mongoConnectionDetails,
-                mongoMappingContext);
+    public void shouldKeepOtherVersions() {
         AnnotationMetadataMongo defaultMetadata = new AnnotationMetadataMongo("70", "72");
         defaultMetadata.setDefaultVersion(true);
-        mongoOperations.save(defaultMetadata);
+        mongoTemplate.save(defaultMetadata);
 
         String vepCacheVersion = "87";
         String vepVersion = "88";
 
-        assertStepIsComplete(databaseName, vepCacheVersion, vepVersion);
+        assertStepIsComplete(vepCacheVersion, vepVersion);
 
         //check that the document was written in mongo
-        List<AnnotationMetadataMongo> annotationMetadataList = mongoOperations.findAll(AnnotationMetadataMongo.class);
+        List<AnnotationMetadataMongo> annotationMetadataList = mongoTemplate.findAll(AnnotationMetadataMongo.class);
 
         assertEquals(2, annotationMetadataList.size());
         for (AnnotationMetadataMongo metadata : annotationMetadataList) {
@@ -136,20 +139,17 @@ public class AnnotationMetadataStepTest {
     }
 
     @Test
-    public void shouldNotAddRedundantVersions() throws Exception {
-        String databaseName = mongoRule.getRandomTemporaryDatabaseName();
-        MongoOperations mongoOperations = MongoConfiguration.getMongoTemplate(databaseName, mongoConnectionDetails,
-                mongoMappingContext);
+    public void shouldNotAddRedundantVersions() {
         String vepCacheVersion = "87";
         String vepVersion = "88";
         AnnotationMetadataMongo annotationMetadataMongo = new AnnotationMetadataMongo(vepVersion, vepCacheVersion);
         annotationMetadataMongo.setDefaultVersion(true);
-        mongoOperations.save(annotationMetadataMongo);
+        mongoTemplate.save(annotationMetadataMongo);
 
-        assertStepIsComplete(databaseName, vepCacheVersion, vepVersion);
+        assertStepIsComplete(vepCacheVersion, vepVersion);
 
         //check that the document was written in mongo
-        List<AnnotationMetadataMongo> annotationMetadataList = mongoOperations.findAll(AnnotationMetadataMongo.class);
+        List<AnnotationMetadataMongo> annotationMetadataList = mongoTemplate.findAll(AnnotationMetadataMongo.class);
 
         assertEquals(1, annotationMetadataList.size());
         assertTrue(annotationMetadataList.get(0).isDefaultVersion());

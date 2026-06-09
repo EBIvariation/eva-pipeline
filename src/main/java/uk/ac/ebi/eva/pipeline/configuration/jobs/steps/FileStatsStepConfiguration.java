@@ -17,25 +17,23 @@ package uk.ac.ebi.eva.pipeline.configuration.jobs.steps;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
-import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepScope;
+import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.tasklet.TaskletStep;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.transaction.PlatformTransactionManager;
 import uk.ac.ebi.eva.pipeline.jobs.steps.tasklets.FileStatsTasklet;
 import uk.ac.ebi.eva.pipeline.parameters.ChunkSizeParameters;
 import uk.ac.ebi.eva.pipeline.parameters.DatabaseParameters;
 import uk.ac.ebi.eva.pipeline.parameters.InputParameters;
-import uk.ac.ebi.eva.pipeline.parameters.JobOptions;
 import uk.ac.ebi.eva.utils.TaskletUtils;
 
 import static uk.ac.ebi.eva.pipeline.configuration.BeanNames.FILE_STATS_STEP;
 
 
 @Configuration
-@EnableBatchProcessing
 public class FileStatsStepConfiguration {
     private static final Logger logger = LoggerFactory.getLogger(FileStatsStepConfiguration.class);
 
@@ -54,12 +52,11 @@ public class FileStatsStepConfiguration {
                                      MongoTemplate mongoTemplate,
                                      InputParameters inputParameters,
                                      ChunkSizeParameters chunkSizeParameters,
-                                     StepBuilderFactory stepBuilderFactory,
-                                     JobOptions jobOptions) {
+                                     JobRepository jobRepository,
+                                     PlatformTransactionManager transactionManager) {
         logger.debug("Building '" + FILE_STATS_STEP + "'");
 
-        return TaskletUtils.generateStep(stepBuilderFactory, FILE_STATS_STEP,
-                fileStatsTasklet(databaseParameters, mongoTemplate, inputParameters, chunkSizeParameters),
-                jobOptions.isAllowStartIfComplete());
+        return TaskletUtils.generateStep(jobRepository, transactionManager, FILE_STATS_STEP,
+                fileStatsTasklet(databaseParameters, mongoTemplate, inputParameters, chunkSizeParameters));
     }
 }
