@@ -34,6 +34,7 @@ import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ExitCodeGenerator;
 import org.springframework.boot.autoconfigure.batch.JobLauncherApplicationRunner;
 import org.springframework.context.ApplicationEventPublisherAware;
@@ -144,6 +145,12 @@ public class EvaPipelineJobLauncherCommandLineRunner extends JobLauncherApplicat
         } else {
             return EXIT_WITH_ERRORS;
         }
+    }
+
+    @Override
+    public void run(ApplicationArguments applicationArguments) throws JobExecutionException {
+        // getSourceArgs() gives you the raw original args including -- prefixed ones
+        run(applicationArguments.getSourceArgs());
     }
 
     @Override
