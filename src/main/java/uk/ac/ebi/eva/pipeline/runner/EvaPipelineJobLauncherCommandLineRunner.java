@@ -20,10 +20,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecutionException;
+import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParameters;
+import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.JobParametersInvalidException;
 import org.springframework.batch.core.configuration.JobRegistry;
-import org.springframework.batch.core.converter.DefaultJobParametersConverter;
 import org.springframework.batch.core.converter.JobParametersConverter;
 import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.core.launch.JobLauncher;
@@ -109,7 +110,26 @@ public class EvaPipelineJobLauncherCommandLineRunner extends JobLauncherApplicat
         this.jobRepository = jobRepository;
         this.jobExplorer = jobExplorer;
         this.abnormalExit = false;
-        this.converter = new DefaultJobParametersConverter();
+        this.converter = new JobParametersConverter() {
+            @Override
+            public JobParameters getJobParameters(Properties properties) {
+                if (properties == null) {
+                    return new JobParameters();
+                }
+                JobParametersBuilder builder = new JobParametersBuilder();
+                properties.forEach((k, v) -> builder.addString(k.toString(), v.toString()));
+                return builder.toJobParameters();
+            }
+
+            @Override
+            public Properties getProperties(JobParameters params) {
+                Properties props = new Properties();
+                if (params != null) {
+                    params.getParameters().forEach((k, p) -> props.setProperty(k, p.getValue().toString()));
+                }
+                return props;
+            }
+        };
 
     }
 

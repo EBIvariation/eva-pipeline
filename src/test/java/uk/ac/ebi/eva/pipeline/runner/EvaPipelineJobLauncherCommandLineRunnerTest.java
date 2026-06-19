@@ -21,6 +21,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.batch.core.JobExecutionException;
+import org.springframework.batch.core.JobParameters;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.system.CapturedOutput;
@@ -203,5 +204,19 @@ public class EvaPipelineJobLauncherCommandLineRunnerTest extends MongoTestContai
 
         assertEquals(EvaPipelineJobLauncherCommandLineRunner.EXIT_WITH_ERRORS,
                 evaPipelineJobLauncherCommandLineRunner.getExitCode());
+    }
+
+    @Test
+    public void jobParametersWithCommasArePreservedFromCommandLine(CapturedOutput output) throws JobExecutionException {
+        String mongoUri = "mongodb://user:pass@mongos002:27017,mongos001:27017/?retryWrites=true&authSource=admin";
+
+        evaPipelineJobLauncherCommandLineRunner.setJobName(GENOTYPED_VCF_JOB);
+        evaPipelineJobLauncherCommandLineRunner.run(
+                "--" + SPRING_BATCH_JOB_NAME_PROPERTY + "=" + GENOTYPED_VCF_JOB,
+                "--spring.data.mongodb.uri=" + mongoUri);
+
+        String errorOutput = output.getOut() + output.getErr();
+        assertThat("Job should not throw JobParametersConversionException for parameter values containing commas",
+                errorOutput, org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("JobParametersConversionException")));
     }
 }
