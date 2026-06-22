@@ -212,7 +212,6 @@ public class EvaPipelineJobLauncherCommandLineRunnerTest extends MongoTestContai
 
         evaPipelineJobLauncherCommandLineRunner.setJobName(GENOTYPED_VCF_JOB);
         evaPipelineJobLauncherCommandLineRunner.run(
-                "--" + SPRING_BATCH_JOB_NAME_PROPERTY + "=" + GENOTYPED_VCF_JOB,
                 "--spring.data.mongodb.uri=" + mongoUri);
 
         String errorOutput = output.getOut() + output.getErr();
