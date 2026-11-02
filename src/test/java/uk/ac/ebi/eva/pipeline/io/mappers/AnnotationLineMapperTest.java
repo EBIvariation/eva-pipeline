@@ -21,12 +21,16 @@ import uk.ac.ebi.eva.commons.mongodb.entities.subdocuments.ConsequenceTypeMongo;
 import uk.ac.ebi.eva.commons.mongodb.entities.subdocuments.ScoreMongo;
 import uk.ac.ebi.eva.test.data.VepOutputContent;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
 /**
@@ -139,5 +143,46 @@ public class AnnotationLineMapperTest {
         String annotLine = vepOutputContent.split("\n")[0];
         AnnotationMongo annotation = lineMapper.mapLine(annotLine, 0);
         assertEquals("20_63351_A_G", annotation.buildVariantId());
+    }
+
+    @Test
+    public void shouldFailOnUnknownSoTermInTranscriptLine() {
+        AnnotationLineMapper lineMapper = new AnnotationLineMapper(VEP_VERSION, VEP_CACHE_VERSION);
+        String line = "20_63351_A/G\t20:63351\tG\tENSG00000178591\tENST00000608838\tTranscript\tnot_a_real_so_term\t-\t-\t-\t-\t-\t-";
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> lineMapper.mapLine(line, 0));
+        assertTrue(exception.getMessage().contains("not_a_real_so_term"));
+    }
+
+    @Test
+    public void shouldFailOnUnknownSoTermInNonTranscriptLine() {
+        AnnotationLineMapper lineMapper = new AnnotationLineMapper(VEP_VERSION, VEP_CACHE_VERSION);
+        String line = "20_60343_G/A\t20:60343\tA\t-\t-\t-\tnot_a_real_so_term\t-\t-\t-\t-\t-\t-";
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> lineMapper.mapLine(line, 0));
+        assertTrue(exception.getMessage().contains("not_a_real_so_term"));
+    }
+
+    @Test
+    public void shouldFailWhenOnlyOneOfSeveralSoTermsIsUnknown() {
+        AnnotationLineMapper lineMapper = new AnnotationLineMapper(VEP_VERSION, VEP_CACHE_VERSION);
+        String line = "20_63351_A/G\t20:63351\tG\tENSG00000178591\tENST00000608838\tTranscript\tintron_variant,not_a_real_so_term,splice_region_variant\t-\t-\t-\t-\t-\t-";
+
+        assertThrows(IllegalArgumentException.class, () -> lineMapper.mapLine(line, 0));
+    }
+
+    @Test
+    public void shouldMapMultipleKnownSoTermsWithoutNulls() {
+        AnnotationLineMapper lineMapper = new AnnotationLineMapper(VEP_VERSION, VEP_CACHE_VERSION);
+        String line = "20_63351_A/G\t20:63351\tG\tENSG00000178591\tENST00000608838\tTranscript\tintron_variant,splice_region_variant\t-\t-\t-\t-\t-\t-";
+
+        AnnotationMongo annotation = lineMapper.mapLine(line, 0);
+        ConsequenceTypeMongo consequenceType = annotation.getConsequenceTypes().iterator().next();
+
+        Set<Integer> soAccessions = consequenceType.getSoAccessions();
+        assertEquals(new HashSet<>(Arrays.asList(1627, 1630)), soAccessions);
+        assertFalse(soAccessions.contains(null));
     }
 }

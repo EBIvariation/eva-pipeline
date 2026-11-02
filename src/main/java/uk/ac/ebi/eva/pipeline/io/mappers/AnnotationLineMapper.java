@@ -133,7 +133,15 @@ public class AnnotationLineMapper implements LineMapper<AnnotationMongo> {
     }
 
     private Set<Integer> mapSoTermsToSoAccessions(String[] soTerms) {
-        return Arrays.stream(soTerms).map(ConsequenceTypeMappings.termToAccession::get).collect(Collectors.toSet());
+        return Arrays.stream(soTerms)
+                .map(term -> {
+                    Integer accession = ConsequenceTypeMappings.termToAccession.get(term);
+                    if (accession == null) {
+                        throw new IllegalArgumentException("Unknown SO term in VEP output: '" + term + "'");
+                    }
+                    return accession;
+                })
+                .collect(Collectors.toSet());
     }
 
     /**
